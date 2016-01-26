@@ -31,6 +31,8 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
   realpath(data_path.c_str(), resolved_path);
   data_path_ = resolved_path;
 
+  BenchmarkConnection cx("localhost", 11002);
+
   if (mode == 0) {
     /** Load the data
      *  =============
@@ -45,7 +47,6 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
     int64_t cur_key = 0;
 
     std::ifstream in(data_path);
-    BenchmarkConnection cx("localhost", 11002);
 
     fprintf(stderr, "Loading...\n");
 
@@ -77,15 +78,15 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
     auto elapsed_us = end - start;
     double avg_latency = (double) elapsed_us / (double) load_keys_;
 
-    fprintf(stderr,
+    fprintf(
+        stderr,
         "\033[A\033[2KLoaded %ld key-value pairs (%lld B). Avg latency: %lf us\n",
         load_keys_, load_end_offset_, avg_latency);
 
     fprintf(stderr, "Dumping data structures to disk...");
     cx.client->Dump(data_path + ".logstore");
-    fprintf(stderr, "Done.");
+    fprintf(stderr, "Done.\n");
   } else if (mode == 1) {
-    BenchmarkConnection cx("localhost", 11002);
     fprintf(stderr, "Loading...\n");
     cx.client->Load(data_path + ".logstore");
     load_keys_ = cx.client->GetNumKeys();
@@ -95,6 +96,12 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
     fprintf(stderr, "Invalid mode: %d\n", mode);
     exit(-1);
   }
+
+  if (cx.client->GetSize() != load_end_offset_) {
+    fprintf(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
+            load_end_offset_, cx.client->GetSize());
+  }
+
 }
 
 void LogStoreBenchmark::BenchmarkGetLatency() {
