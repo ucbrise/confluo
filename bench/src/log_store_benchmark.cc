@@ -11,15 +11,14 @@
 #include <sstream>
 
 #define QUERY(i) {\
-  double r = ((double) rand() / (RAND_MAX)) + 1;\
   std::string get_res;\
   std::set<int64_t> search_res;\
-  if (r <= get_m) {\
-    client->Get(get_res, keys[i % keys.size()]);\
-  } else if (r <= search_m) {\
-    client->Search(search_res, queries[i % queries.size()]);\
+  if (query_types[i % kThreadQueryCount] == 0) {\
+    client->Get(get_res, keys[i % kThreadQueryCount]);\
+  } else if (query_types[i % kThreadQueryCount] == 1) {\
+    client->Search(search_res, terms[i % kThreadQueryCount]);\
   } else {\
-    if (client->Append(cur_key, values[i % values.size()]) != 0) {\
+    if (client->Append(cur_key, values[i % kThreadQueryCount]) != 0) {\
       fprintf(stderr, "Log is full\n");\
       exit(-1);\
     }\
@@ -239,21 +238,33 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(std::move(std::thread([&] {
       std::vector<int64_t> keys;
-      std::vector<std::string> values, queries;
+      std::vector<std::string> values, terms;
 
       std::ifstream in_s(data_path_ + ".queries");
       std::ifstream in_a(data_path_);
       int64_t cur_key = load_keys_;
-      std::string query, value;
+      std::string term, value;
+      std::vector<uint32_t> query_types;
+      fprintf(stderr, "Generating queries...\n");
       for (int64_t i = 0; i < kThreadQueryCount; i++) {
         int64_t key = rand() % load_keys_;
-        std::getline(in_s, query);
+        std::getline(in_s, term);
         std::getline(in_a, value);
 
         keys.push_back(key);
-        queries.push_back(query);
+        terms.push_back(term);
         values.push_back(value);
+
+        double r = ((double) rand() / (RAND_MAX));
+        if (r <= get_m) {
+          query_types.push_back(0);
+        } else if (r <= search_m) {
+          query_types.push_back(1);
+        } else if (r <= append_m) {
+          query_types.push_back(2);
+        }
       }
+      fprintf(stderr, "Done.\n");
 
       std::unique_lock<std::mutex> lck(mtx);
       num_ready++;
