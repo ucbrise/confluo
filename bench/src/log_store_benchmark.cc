@@ -14,11 +14,11 @@
   std::string get_res;\
   std::set<int64_t> search_res;\
   if (query_types[i % kThreadQueryCount] == 0) {\
-    client->Get(get_res, keys[i % kThreadQueryCount]);\
+    client->Get(get_res, keys[i % keys.size()]);\
   } else if (query_types[i % kThreadQueryCount] == 1) {\
-    client->Search(search_res, terms[i % kThreadQueryCount]);\
+    client->Search(search_res, terms[i % terms.size()]);\
   } else {\
-    if (client->Append(cur_key, values[i % kThreadQueryCount]) != 0) {\
+    if (client->Append(cur_key, values[i % values.size()]) != 0) {\
       fprintf(stderr, "Log is full\n");\
       break;\
     }\
