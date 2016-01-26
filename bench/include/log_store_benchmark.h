@@ -50,8 +50,6 @@ class LogStoreBenchmark {
 
   static const uint64_t kThreadQueryCount = 100000;
 
-  static const uint64_t kMaxSum = 2 * 1024 * 1024 * 1024;
-
   LogStoreBenchmark(std::string& data_path, int mode = 0);  // Mode: 0 = Load from scratch, 1 = Load from dump
 
   // Latency benchmarks

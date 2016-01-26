@@ -26,7 +26,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   value_offsets_.push_back(tail_);
 
   // Update secondary index
-  for (int64_t i = std::max(0LL, static_cast<int64_t>(tail_ - ngram_n_));
+  for (int64_t i = std::max(static_cast<int64_t>(0), static_cast<int64_t>(tail_ - ngram_n_));
       i < tail_ + value.length() - ngram_n_; i++) {
     std::string ngram;
     for (uint32_t off = 0; off < ngram_n_; off++) {
