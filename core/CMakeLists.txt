@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 2.8)
+project(log-store-core CXX)
+
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+else()
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    if(COMPILER_SUPPORTS_CXX0X)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    else()
+        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    endif()
+endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g")
+
+find_package(Threads)
+
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+file(MAKE_DIRECTORY ${LIBRARY_OUTPUT_PATH})
+
+set(INCLUDE include)
+file(GLOB_RECURSE SOURCE_FILES src/*.cc)
+include_directories(${INCLUDE})
+add_library(logstore STATIC ${SOURCE_FILES})
+target_link_libraries(logstore ${CMAKE_THREAD_LIBS_INIT})
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   # Mac OS X specific code: has to have -mt
+  target_link_libraries(logstore boost_thread-mt boost_system-mt)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  # On EC2, can't have -mt
+  target_link_libraries(logstore boost_thread boost_system)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+set_target_properties(logstore PROPERTIES LINKER_LANGUAGE CXX)
