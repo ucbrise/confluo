@@ -14,12 +14,16 @@
   double r = ((double) rand() / (RAND_MAX)) + 1;\
   std::string get_res;\
   std::set<int64_t> search_res;\
-  if (r <= get_m)\
+  if (r <= get_m) {\
     client->Get(get_res, keys[i % keys.size()]);\
-  else if (r <= search_m)\
+  } else if (r <= search_m) {\
     client->Search(search_res, queries[i % queries.size()]);\
-  else\
-    client->Append(cur_key, values[i % values.size()]);\
+  } else {\
+    if (client->Append(cur_key, values[i % values.size()]) != 0) {\
+      fprintf(stderr, "Log is full\n");\
+      exit(-1);\
+    }\
+  }\
 }
 
 LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {

@@ -44,8 +44,8 @@ class LogStoreBenchmark {
   static const uint64_t kMeasureCount = 100000;
   static const uint64_t kCooldownCount = 1000;
 
-  static const uint64_t kWarmupTime = 120000000;
-  static const uint64_t kMeasureTime = 300000000;
+  static const uint64_t kWarmupTime = 15000000;
+  static const uint64_t kMeasureTime = 60000000;
   static const uint64_t kCooldownTime = 5000000;
 
   static const uint64_t kThreadQueryCount = 100000;
