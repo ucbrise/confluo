@@ -78,8 +78,8 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
     double avg_latency = (double) elapsed_us / (double) load_keys_;
 
     fprintf(stderr,
-            "\033[A\033[2KLoaded %ld key-value pairs. Avg latency: %lf us\n",
-            load_keys_, avg_latency);
+        "\033[A\033[2KLoaded %ld key-value pairs (%lld B). Avg latency: %lf us\n",
+        load_keys_, load_end_offset_, avg_latency);
 
     fprintf(stderr, "Dumping data structures to disk...");
     cx.client->Dump(data_path + ".logstore");
@@ -201,7 +201,11 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string cur_value = values[i];
-    client->Append(cur_key++, cur_value);
+    int ret = client->Append(cur_key++, cur_value);
+    if (ret != 0) {
+      fprintf(stderr, "Log store is full.\n");
+      return;
+    }
   }
   fprintf(stderr, "Warmup complete.\n");
 
@@ -210,9 +214,13 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value = values[i];
     t0 = GetTimestamp();
-    client->Append(cur_key++, cur_value);
+    int ret = client->Append(cur_key++, cur_value);
     t1 = GetTimestamp();
     tdiff = t1 - t0;
+    if (ret != 0) {
+      fprintf(stderr, "Log store is full.\n");
+      return;
+    }
     result_stream << (cur_key - 1) << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
@@ -236,88 +244,90 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
   uint32_t num_ready = 0;
 
   for (uint32_t i = 0; i < num_clients; i++) {
-    threads.push_back(std::move(std::thread([&] {
-      std::vector<int64_t> keys;
-      std::vector<std::string> values, terms;
+    threads.push_back(
+        std::move(
+            std::thread([&] {
+              std::vector<int64_t> keys;
+              std::vector<std::string> values, terms;
 
-      std::ifstream in_s(data_path_ + ".queries");
-      std::ifstream in_a(data_path_);
-      int64_t cur_key = load_keys_;
-      std::string term, value;
-      std::vector<uint32_t> query_types;
-      fprintf(stderr, "Generating queries...\n");
-      for (int64_t i = 0; i < kThreadQueryCount; i++) {
-        int64_t key = rand() % load_keys_;
-        std::getline(in_s, term);
-        std::getline(in_a, value);
+              std::ifstream in_s(data_path_ + ".queries");
+              std::ifstream in_a(data_path_);
+              int64_t cur_key = load_keys_;
+              std::string term, value;
+              std::vector<uint32_t> query_types;
+              fprintf(stderr, "Generating queries...\n");
+              for (int64_t i = 0; i < kThreadQueryCount; i++) {
+                int64_t key = rand() % load_keys_;
+                std::getline(in_s, term);
+                std::getline(in_a, value);
 
-        keys.push_back(key);
-        terms.push_back(term);
-        values.push_back(value);
+                keys.push_back(key);
+                terms.push_back(term);
+                values.push_back(value);
 
-        double r = ((double) rand() / (RAND_MAX));
-        if (r <= get_m) {
-          query_types.push_back(0);
-        } else if (r <= search_m) {
-          query_types.push_back(1);
-        } else if (r <= append_m) {
-          query_types.push_back(2);
-        }
-      }
-      fprintf(stderr, "Done.\n");
+                double r = ((double) rand() / (RAND_MAX));
+                if (r <= get_m) {
+                  query_types.push_back(0);
+                } else if (r <= search_m) {
+                  query_types.push_back(1);
+                } else if (r <= append_m) {
+                  query_types.push_back(2);
+                }
+              }
+              fprintf(stderr, "Done.\n");
 
-      std::unique_lock<std::mutex> lck(mtx);
-      num_ready++;
-      while (num_ready < num_clients) {
-        cvar.wait(lck);
-      }
+              std::unique_lock<std::mutex> lck(mtx);
+              num_ready++;
+              while (num_ready < num_clients) {
+                cvar.wait(lck);
+              }
 
-      double thput = 0;
-      BenchmarkConnection cx("localhost", 11002);
-      auto client = cx.client;
+              double thput = 0;
+              BenchmarkConnection cx("localhost", 11002);
+              auto client = cx.client;
 
-      try {
-        // Warmup phase
-        long i = 0;
-        TimeStamp warmup_start = GetTimestamp();
-        while (GetTimestamp() - warmup_start < kWarmupTime) {
-          QUERY(i);
-          i++;
-        }
+              try {
+                // Warmup phase
+                long i = 0;
+                TimeStamp warmup_start = GetTimestamp();
+                while (GetTimestamp() - warmup_start < kWarmupTime) {
+                  QUERY(i);
+                  i++;
+                }
 
-        // Measure phase
-        i = 0;
-        TimeStamp start = GetTimestamp();
-        while (GetTimestamp() - start < kMeasureTime) {
-          QUERY(i);
-          i++;
-        }
-        TimeStamp end = GetTimestamp();
-        double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-        thput = ((double) i / totsecs);
+                // Measure phase
+                i = 0;
+                TimeStamp start = GetTimestamp();
+                while (GetTimestamp() - start < kMeasureTime) {
+                  QUERY(i);
+                  i++;
+                }
+                TimeStamp end = GetTimestamp();
+                double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+                thput = ((double) i / totsecs);
 
-        // Cooldown phase
-        i = 0;
-        TimeStamp cooldown_start = GetTimestamp();
-        while (GetTimestamp() - cooldown_start < kCooldownTime) {
-          QUERY(i);
-          i++;
-        }
+                // Cooldown phase
+                i = 0;
+                TimeStamp cooldown_start = GetTimestamp();
+                while (GetTimestamp() - cooldown_start < kCooldownTime) {
+                  QUERY(i);
+                  i++;
+                }
 
-      } catch (std::exception &e) {
-        fprintf(stderr, "Throughput thread ended prematurely.\n");
-      }
+              } catch (std::exception &e) {
+                fprintf(stderr, "Throughput thread ended prematurely.\n");
+              }
 
-      fprintf(stderr, "Throughput: %lf\n", thput);
+              fprintf(stderr, "Throughput: %lf\n", thput);
 
-      std::ofstream ofs;
-      char output_file[100];
-      sprintf(output_file, "throughput_%.2f_%.2f_%.2f", get_f, search_f, append_f);
-      ofs.open(output_file, std::ofstream::out | std::ofstream::app);
-      ofs << thput << "\n";
-      ofs.close();
+              std::ofstream ofs;
+              char output_file[100];
+              sprintf(output_file, "throughput_%.2f_%.2f_%.2f", get_f, search_f, append_f);
+              ofs.open(output_file, std::ofstream::out | std::ofstream::app);
+              ofs << thput << "\n";
+              ofs.close();
 
-    })));
+            })));
   }
 
   for (auto& th : threads) {
@@ -390,8 +400,8 @@ int main(int argc, char** argv) {
     double get_f = atof(tokens[1].c_str());
     double search_f = atof(tokens[2].c_str());
     double append_f = atof(tokens[3].c_str());
-    fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf\n", get_f,
-            search_f, append_f);
+    fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf\n",
+            get_f, search_f, append_f);
     ls_bench.BenchmarkThroughput(get_f, search_f, append_f);
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
