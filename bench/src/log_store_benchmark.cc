@@ -179,7 +179,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
     client->Search(results, query);
     t1 = GetTimestamp();
     tdiff = t1 - t0;
-    result_stream << query << "\t" << results.size() << "\t" << tdiff << "\n";
+    result_stream << results.size() << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
   result_stream.close();
