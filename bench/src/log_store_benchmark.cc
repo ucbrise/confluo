@@ -20,7 +20,7 @@
   } else {\
     if (client->Append(cur_key, values[i % kThreadQueryCount]) != 0) {\
       fprintf(stderr, "Log is full\n");\
-      exit(-1);\
+      break;\
     }\
   }\
 }
@@ -133,6 +133,7 @@ void LogStoreBenchmark::BenchmarkGetLatency() {
     result_stream << keys[i] << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
+  result_stream.close();
 }
 
 void LogStoreBenchmark::BenchmarkSearchLatency() {
@@ -174,6 +175,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
     result_stream << query << "\t" << results.size() << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
+  result_stream.close();
 }
 
 void LogStoreBenchmark::BenchmarkAppendLatency() {
@@ -204,7 +206,7 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
     int ret = client->Append(cur_key++, cur_value);
     if (ret != 0) {
       fprintf(stderr, "Log store is full.\n");
-      return;
+      break;
     }
   }
   fprintf(stderr, "Warmup complete.\n");
@@ -219,11 +221,12 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
     tdiff = t1 - t0;
     if (ret != 0) {
       fprintf(stderr, "Log store is full.\n");
-      return;
+      break;
     }
     result_stream << (cur_key - 1) << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
+  result_stream.close();
 }
 
 void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
