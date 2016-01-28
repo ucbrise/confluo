@@ -28,11 +28,15 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   // Update secondary index
   for (int64_t i = std::max(static_cast<int64_t>(0), static_cast<int64_t>(tail_ - ngram_n_));
       i < tail_ + value.length() - ngram_n_; i++) {
+#ifdef USE_INT_HASH
+    uint32_t ngram = Hash::simple_hash3(data_ + i);
+#else
     std::string ngram;
     for (uint32_t off = 0; off < ngram_n_; off++) {
       ngram += data_[i + off];
     }
-    idx_[ngram].push_back(i);
+#endif
+    ngram_idx_[ngram].push_back(i);
   }
   tail_ += value.length();
 
@@ -57,15 +61,20 @@ void LogStore::Get(std::string& value, const int64_t key) {
 }
 
 void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
-  std::string substring_ngram = query.substr(0, ngram_n_);
 
   char *substr = (char *) query.c_str();
   char *suffix = substr + ngram_n_;
   bool skip_filter = (query.length() <= ngram_n_);
   size_t suffix_len = skip_filter ? 0 : query.length() - ngram_n_;
 
+#ifdef USE_INT_HASH
+  uint32_t prefix_ngram = Hash::simple_hash3(substr);
+#else
+  std::string prefix_ngram = query.substr(0, ngram_n_);
+#endif
+
   boost::shared_lock<boost::shared_mutex> lk(mutex_);
-  std::vector<uint32_t> idx_off = idx_[substring_ngram];
+  std::vector<uint32_t> idx_off = ngram_idx_[prefix_ngram];
   for (uint32_t i = 0; i < idx_off.size(); i++) {
     if (skip_filter
         || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0) {
@@ -95,10 +104,10 @@ int64_t LogStore::Dump(const std::string& path) {
   // Write n-gram index
   out.write(reinterpret_cast<const char *>(&(ngram_n_)), sizeof(uint32_t));
   out_size += sizeof(uint32_t);
-  size_t ngram_idx_size = idx_.size();
+  size_t ngram_idx_size = ngram_idx_.size();
   out.write(reinterpret_cast<const char *>(&(ngram_idx_size)), sizeof(size_t));
   out_size += sizeof(size_t);
-  for (auto entry : idx_) {
+  for (auto entry : ngram_idx_) {
     out.write(reinterpret_cast<const char *>(entry.first.c_str()),
               ngram_n_ * sizeof(char));
     out_size += (ngram_n_ * sizeof(char));
@@ -139,7 +148,7 @@ int64_t LogStore::Load(const std::string& path) {
     in_size += (ngram_n_ * sizeof(char));
     in_size += ReadVectorFromFile(in, second);
     typedef std::pair<const std::string, std::vector<uint32_t>> IdxEntry;
-    idx_.insert(IdxEntry(first, second));
+    ngram_idx_.insert(IdxEntry(first, second));
   }
 
   return in_size;

@@ -9,13 +9,42 @@
 
 #include <boost/thread.hpp>
 
+// #define USE_INT_HASH
+
 namespace succinct {
+
+#ifdef USE_INT_HASH
+class Hash {
+ public:
+  static const uint32_t K1 = 256;
+  static const uint32_t K2 = 65536;
+  static const uint32_t K3 = 16777216;
+
+  static uint32_t simple_hash2(const char* buf) {
+    return buf[0] * K1 + buf[1];
+  }
+
+  static uint32_t simple_hash3(const char* buf) {
+    return buf[0] * K2 + buf[1] * K1 + buf[2];
+  }
+
+  static uint32_t simple_hash4(const char* buf) {
+    return buf[0] * K3 + buf[1] * K2 + buf[2] * K1 + buf[3];
+  }
+};
+#endif
+
 class LogStore {
  public:
   static const uint32_t kLogStoreSize = 1024 * 1024 * 1024;
   static const char kValueDelim = '\n';
 
+#ifdef USE_INT_HASH
+  typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
+#else
   typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
+#endif
+
   LogStore(uint32_t ngram_n);
 
   int Append(const int64_t key, const std::string& value);
@@ -84,10 +113,10 @@ class LogStore {
   char *data_;
   uint32_t tail_;
 
-  std::vector<int64_t> keys_;
-  std::vector<int64_t> value_offsets_;
+  std::vector<int32_t> keys_;
+  std::vector<int32_t> value_offsets_;
 
-  NGramIdx idx_;
+  NGramIdx ngram_idx_;
   uint32_t ngram_n_;
 
   boost::shared_mutex mutex_;
