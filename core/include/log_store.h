@@ -113,7 +113,7 @@ class LogStore {
   char *data_;
   uint32_t tail_;
 
-  std::vector<int32_t> keys_;
+  std::vector<int64_t> keys_;
   std::vector<int32_t> value_offsets_;
 
   NGramIdx ngram_idx_;
