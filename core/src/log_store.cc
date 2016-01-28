@@ -128,9 +128,11 @@ int64_t LogStore::Load(const std::string& path) {
   in_size += (tail_ * sizeof(char));
 
   // Read keys
+  keys_.clear();
   in_size += ReadVectorFromFile(in, keys_);
 
   // Read value offsets
+  value_offsets_.clear();
   in_size += ReadVectorFromFile(in, value_offsets_);
 
   // Read n-gram index
@@ -140,6 +142,7 @@ int64_t LogStore::Load(const std::string& path) {
   in.read(reinterpret_cast<char *>(&ngram_idx_size), sizeof(size_t));
   in_size += sizeof(size_t);
   char *ngram_buf = new char[ngram_n_];
+  ngram_idx_.clear();
   for (size_t i = 0; i < ngram_idx_size; i++) {
     std::string first;
     std::vector<uint32_t> second;
