@@ -19,7 +19,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   }
 
   // Append value to log
-  strncpy(data_ + tail_, value.c_str(), value.length());
+  memcpy(data_ + tail_, value.c_str(), value.length());
 
   // Update primary index
   keys_.push_back(key);
@@ -109,8 +109,8 @@ int64_t LogStore::Dump(const std::string& path) {
   out.write(reinterpret_cast<const char *>(&(ngram_idx_size)), sizeof(size_t));
   out_size += sizeof(size_t);
   for (auto entry : ngram_idx_) {
-#if USE_INT_HASH
-    out.write(reinterpret_cast<const char *>(entry.first), sizeof(uint32_t));
+#ifdef USE_INT_HASH
+    out.write(reinterpret_cast<const char *>(&(entry.first)), sizeof(uint32_t));
     out_size += (sizeof(uint32_t));
 #else
     out.write(reinterpret_cast<const char *>(entry.first.c_str()),
@@ -158,7 +158,7 @@ int64_t LogStore::Load(const std::string& path) {
     typedef std::pair<uint32_t, std::vector<uint32_t>> IdxEntry;
     uint32_t first;
 
-    in.read(reinterpret_cast<char *>(first), sizeof(uint32_t));
+    in.read(reinterpret_cast<char *>(&first), sizeof(uint32_t));
     in_size += sizeof(uint32_t);
 #else
     typedef std::pair<const std::string, std::vector<uint32_t>> IdxEntry;

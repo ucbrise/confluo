@@ -9,7 +9,7 @@
 
 #include <boost/thread.hpp>
 
-// #define USE_INT_HASH
+#define USE_INT_HASH
 
 namespace succinct {
 
