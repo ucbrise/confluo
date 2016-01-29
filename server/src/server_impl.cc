@@ -14,7 +14,11 @@
 #include <thrift/transport/TSocket.h>
 #include <thrift/concurrency/PosixThreadFactory.h>
 
+#ifdef MICA_SERVER
+#include "mica_store.h"
+#else
 #include "log_store.h"
+#endif
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -46,15 +50,17 @@ class ServerImpl : virtual public ServerIf {
  public:
   ServerImpl() {
     shard_ = NULL;
-    num_keys_ = 0;
     Initialize();
   }
 
   int32_t Initialize() {
     // Initialize data structures
     Info("Initializing data structures...");
+#ifdef MICA_SERVER
+    shard_ = new mica::MicaStore(2048);
+#else
     shard_ = new LogStore(3);
-    num_keys_ = shard_->GetNumKeys();
+#endif
     Info("Initialized Log Store.");
 
     return 0;
@@ -89,8 +95,11 @@ class ServerImpl : virtual public ServerIf {
   }
 
  private:
+#ifdef MICA_SERVER
+  mica::MicaStore *shard_;
+#else
   LogStore *shard_;
-  int64_t num_keys_;
+#endif
 };
 
 }
