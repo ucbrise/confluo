@@ -16,6 +16,7 @@
 #define ALLOC_H_
 
 #include "common.h"
+#include <stdlib.h>
 
 MEHCACHED_BEGIN
 
