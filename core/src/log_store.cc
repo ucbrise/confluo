@@ -26,7 +26,8 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   value_offsets_.push_back(tail_);
 
   // Update secondary index
-  for (int64_t i = std::max(static_cast<int64_t>(0), static_cast<int64_t>(tail_ - ngram_n_));
+  for (int64_t i = std::max(static_cast<int64_t>(0),
+                            static_cast<int64_t>(tail_ - ngram_n_));
       i < tail_ + value.length() - ngram_n_; i++) {
 #ifdef USE_INT_HASH
     uint32_t ngram = Hash::simple_hash3(data_ + i);
@@ -108,9 +109,15 @@ int64_t LogStore::Dump(const std::string& path) {
   out.write(reinterpret_cast<const char *>(&(ngram_idx_size)), sizeof(size_t));
   out_size += sizeof(size_t);
   for (auto entry : ngram_idx_) {
+#if USE_INT_HASH
+    out.write(reinterpret_cast<const char *>(entry.first), sizeof(uint32_t));
+    out_size += (sizeof(uint32_t));
+#else
     out.write(reinterpret_cast<const char *>(entry.first.c_str()),
               ngram_n_ * sizeof(char));
     out_size += (ngram_n_ * sizeof(char));
+#endif
+
     out_size += WriteVectorToFile(out, entry.second);
   }
 
@@ -141,16 +148,30 @@ int64_t LogStore::Load(const std::string& path) {
   size_t ngram_idx_size;
   in.read(reinterpret_cast<char *>(&ngram_idx_size), sizeof(size_t));
   in_size += sizeof(size_t);
+#ifndef USE_INT_HASH
   char *ngram_buf = new char[ngram_n_];
+#endif
   ngram_idx_.clear();
   for (size_t i = 0; i < ngram_idx_size; i++) {
+
+#ifdef USE_INT_HASH
+    typedef std::pair<uint32_t, std::vector<uint32_t>> IdxEntry;
+    uint32_t first;
+
+    in.read(reinterpret_cast<char *>(first), sizeof(uint32_t));
+    in_size += sizeof(uint32_t);
+#else
+    typedef std::pair<const std::string, std::vector<uint32_t>> IdxEntry;
+
     std::string first;
-    std::vector<uint32_t> second;
     in.read(reinterpret_cast<char *>(ngram_buf), ngram_n_ * sizeof(char));
     first = std::string(ngram_buf);
     in_size += (ngram_n_ * sizeof(char));
+#endif
+
+    std::vector<uint32_t> second;
     in_size += ReadVectorFromFile(in, second);
-    typedef std::pair<const std::string, std::vector<uint32_t>> IdxEntry;
+
     ngram_idx_.insert(IdxEntry(first, second));
   }
 
