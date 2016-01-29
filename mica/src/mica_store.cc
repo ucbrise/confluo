@@ -1,11 +1,22 @@
 #include "mica_store.h"
 
 #include "hash.h"
+#include "shm.h"
+
 #include <cassert>
 
 namespace mica {
 
 MicaStore::MicaStore(const uint32_t value_size, const uint32_t key_size) {
+
+  // Setup shm
+  const size_t page_size = 1048576 * 2;
+  const size_t num_numa_nodes = 2;
+  const size_t num_pages_to_try = 16384;
+  const size_t num_pages_to_reserve = 16384 - 2048;
+
+  mehcached_shm_init(page_size, num_numa_nodes, num_pages_to_try,
+                     num_pages_to_reserve);
 
   // Store key/value sizes
   key_size_ = key_size;

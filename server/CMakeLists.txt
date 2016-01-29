@@ -19,6 +19,13 @@ set(SERVER_CLIENT_SOURCES ${SOURCES_DIR}/Server.cc)
 include_directories(${INCLUDE_DIR} ${CORE_INCLUDE_DIR} ${MICA_INCLUDE_DIR})
 
 add_executable(server ${SERVER_SOURCES})
-add_library(serverclient ${SERVER_CLIENT_SOURCES})
+add_executable(mica_server ${SERVER_SOURCES})
 
-target_link_libraries(server logstore mica ${THRIFT_LIBRARIES})
+add_library(serverclient ${SERVER_CLIENT_SOURCES})
+add_library(micaclient ${SERVER_CLIENT_SOURCES})
+
+target_link_libraries(server logstore ${THRIFT_LIBRARIES})
+target_link_libraries(mica_server mica ${THRIFT_LIBRARIES})
+
+set_target_properties(mica_server PROPERTIES COMPILE_FLAGS "-DMICA_SERVER")
+set_target_properties(micaclient PROPERTIES COMPILE_FLAGS "-DMICA_SERVER")
