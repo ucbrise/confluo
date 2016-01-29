@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(mica-store-core CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -DNDEBUG")
 
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
