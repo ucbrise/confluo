@@ -67,8 +67,8 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
         double completion = 100.0 * (double) (load_end_offset_)
             / (double) (target_data_size);
         fprintf(stderr,
-                "\033[A\033[2KLoading: %2.02lf%%. Avg latency: %.2lf us\n",
-                completion, avg_latency);
+                "\033[A\033[2KLoading: %2.02lf%% (%9ld B). Avg latency: %.2lf us\n",
+                completion, load_end_offset_, avg_latency);
         batch_start = GetTimestamp();
       }
     }
