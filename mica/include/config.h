@@ -25,7 +25,7 @@
 
 
 // support for concurrent access
-#define MEHCACHED_CONCURRENT
+// #define MEHCACHED_CONCURRENT
 
 
 // store mode
