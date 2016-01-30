@@ -56,35 +56,27 @@ struct mehcached_dynamic
     uint8_t *free_head[MEHCACHED_DYNAMIC_NUM_CLASSES];	// the head free pointer of each class
 };
 
-static
 void
 mehcached_dynamic_init(struct mehcached_dynamic *alloc, uint64_t size, bool concurrent_alloc_read, bool concurrent_alloc_write, size_t numa_node);
 
-static
 void
 mehcached_dynamic_free(struct mehcached_dynamic *alloc);
 
-static
 void
 mehcached_dynamic_reset(struct mehcached_dynamic *alloc);
 
-static
 void
 mehcached_dynamic_lock(struct mehcached_dynamic *alloc);
 
-static
 void
 mehcached_dynamic_unlock(struct mehcached_dynamic *alloc);
 
-static
 struct mehcached_alloc_item *
 mehcached_dynamic_item(const struct mehcached_dynamic *alloc, uint64_t dynamic_offset);
 
-static
 uint64_t
 mehcached_dynamic_allocate(struct mehcached_dynamic *alloc, uint32_t item_size);
 
-static
 void
 mehcached_dynamic_deallocate(struct mehcached_dynamic *alloc, uint64_t dynamic_offset);
 
