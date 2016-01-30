@@ -45,7 +45,7 @@ class LogStore {
   typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
 #endif
 
-  LogStore(uint32_t ngram_n);
+  LogStore(uint32_t ngram_n = 3);
 
   int Append(const int64_t key, const std::string& value);
   void Get(std::string& value, const int64_t key);
