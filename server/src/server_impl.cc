@@ -91,7 +91,7 @@ class ServerImpl : virtual public ServerIf {
   }
 
   int64_t GetSize() {
-    return shard_->GetCurrentSize();
+    return shard_->GetSize();
   }
 
  private:

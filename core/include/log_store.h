@@ -57,7 +57,7 @@ class LogStore {
     return keys_.size();
   }
 
-  int64_t GetCurrentSize() {
+  int64_t GetSize() {
     return tail_;
   }
 

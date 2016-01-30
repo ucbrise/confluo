@@ -37,7 +37,7 @@ class MicaStore {
     return num_keys_;
   }
 
-  size_t GetCurrentSize() {
+  size_t GetSize() {
     return current_size_;
   }
 
