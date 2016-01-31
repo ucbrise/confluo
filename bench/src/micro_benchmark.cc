@@ -2,10 +2,12 @@
 
 #include <chrono>
 #include <ctime>
+#include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
 #include <thread>
+#include <vector>
 #include <condition_variable>
 #include <unistd.h>
 #include <sstream>
@@ -27,7 +29,7 @@
 
 MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
 
-#ifdef MICA_SERVER
+#ifdef MICA_BENCHMARK
   shard_ = new MicaStore(2048);
 #else
   shard_ = new LogStore();

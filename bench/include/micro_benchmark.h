@@ -2,14 +2,15 @@
 #define MICRO_BENCHMARK_H_
 
 #include <chrono>
+#include <sys/time.h>
 
-#ifdef MICA_SERVER
+#ifdef MICA_BENCHMARK
 #include "mica_store.h"
 #else
 #include "log_store.h"
 #endif
 
-#ifdef MICA_SERVER
+#ifdef MICA_BENCHMARK
 using namespace ::mica;
 #else
 using namespace ::succinct;
@@ -55,7 +56,7 @@ class MicroBenchmark {
   int64_t load_end_offset_;
   int64_t load_keys_;
 
-#ifdef MICA_SERVER
+#ifdef MICA_BENCHMARK
   MicaStore *shard_;
 #else
   LogStore *shard_;
