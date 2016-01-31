@@ -46,6 +46,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
     const int64_t target_data_size = 250 * 1024 * 1024;
     load_end_offset_ = 0;
     load_keys_ = 0;
+    uint64_t b_size = 1000;
 
     int64_t cur_key = 0;
 
@@ -53,8 +54,8 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
 
     fprintf(stderr, "Loading...\n");
 
-    TimeStamp start = GetTimestamp();
-    TimeStamp batch_start = start;
+    auto start = high_resolution_clock::now();
+    auto b_start = start;
     while (load_end_offset_ < target_data_size) {
       std::string cur_value;
       std::getline(in, cur_value);
@@ -63,27 +64,23 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
       load_keys_++;
 
       // Periodically print out statistics
-      if (load_keys_ % 1000 == 0) {
-        TimeStamp batch_end = GetTimestamp();
-        auto elapsed_us = batch_end - batch_start;
-        double avg_latency = (double) elapsed_us / 1000.0;
-        double completion = 100.0 * (double) (load_end_offset_)
-            / (double) (target_data_size);
-        fprintf(stderr,
-                "\033[A\033[2KLoading: %2.02lf%% (%9ld B). Avg latency: %.2lf us\n",
+      if (load_keys_ % b_size == 0) {
+        auto b_end = high_resolution_clock::now();
+        auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
+        double avg_latency = (double) elapsed_us / (double) b_size;
+        double completion = 100.0 * (double) (load_end_offset_) / (double) (target_data_size);
+        fprintf(stderr, "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
                 completion, load_end_offset_, avg_latency);
-        batch_start = GetTimestamp();
+        b_start = high_resolution_clock::now();
       }
     }
 
     // Print end of load statistics
-    TimeStamp end = GetTimestamp();
-    auto elapsed_us = end - start;
+    auto end = high_resolution_clock::now();
+    auto elapsed_us = duration_cast<nanoseconds>(end - start).count();
     double avg_latency = (double) elapsed_us / (double) load_keys_;
 
-    fprintf(
-        stderr,
-        "\033[A\033[2KLoaded %ld key-value pairs (%lld B). Avg latency: %lf us\n",
+    fprintf(stderr, "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
         load_keys_, load_end_offset_, avg_latency);
 
     fprintf(stderr, "Dumping data structures to disk...");
@@ -94,7 +91,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
     shard_->Load(data_path + ".logstore");
     load_keys_ = shard_->GetNumKeys();
     load_end_offset_ = shard_->GetSize();
-    fprintf(stderr, "Loaded %ld key-value pairs.\n", load_keys_);
+    fprintf(stderr, "Loaded %lld key-value pairs.\n", load_keys_);
   } else {
     fprintf(stderr, "Invalid mode: %d\n", mode);
     exit(-1);
@@ -119,7 +116,7 @@ void MicroBenchmark::BenchmarkGetLatency() {
 
   fprintf(stderr, "Done.\n");
 
-  TimeStamp t0, t1, tdiff;
+
   std::ofstream result_stream("latency_get");
 
   // Warmup
@@ -134,10 +131,10 @@ void MicroBenchmark::BenchmarkGetLatency() {
   fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string result;
-    t0 = GetTimestamp();
+    auto t0 = high_resolution_clock::now();
     shard_->Get(result, keys[i]);
-    t1 = GetTimestamp();
-    tdiff = t1 - t0;
+    auto t1 = high_resolution_clock::now();
+    auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     result_stream << keys[i] << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
@@ -157,7 +154,6 @@ void MicroBenchmark::BenchmarkSearchLatency() {
 
   fprintf(stderr, "Done.\n");
 
-  TimeStamp t0, t1, tdiff;
   std::ofstream result_stream("latency_search");
 
   // Warmup
@@ -174,10 +170,10 @@ void MicroBenchmark::BenchmarkSearchLatency() {
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string query = queries[i % queries.size()];
     std::set<int64_t> results;
-    t0 = GetTimestamp();
+    auto t0 = high_resolution_clock::now();
     shard_->Search(results, query);
-    t1 = GetTimestamp();
-    tdiff = t1 - t0;
+    auto t1 = high_resolution_clock::now();
+    auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     result_stream << results.size() << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
@@ -200,7 +196,6 @@ void MicroBenchmark::BenchmarkAppendLatency() {
 
   fprintf(stderr, "Done.\n");
 
-  TimeStamp t0, t1, tdiff;
   std::ofstream result_stream("latency_append");
 
   // Warmup
@@ -210,7 +205,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
     int ret = shard_->Append(cur_key++, cur_value);
     if (ret != 0) {
       fprintf(stderr, "Log store is full.\n");
-      break;
+      return;
     }
   }
   fprintf(stderr, "Warmup complete.\n");
@@ -219,10 +214,10 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value = values[i];
-    t0 = GetTimestamp();
+    auto t0 = high_resolution_clock::now();
     int ret = shard_->Append(cur_key++, cur_value);
-    t1 = GetTimestamp();
-    tdiff = t1 - t0;
+    auto t1 = high_resolution_clock::now();
+    auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     if (ret != 0) {
       fprintf(stderr, "Log store is full.\n");
       break;

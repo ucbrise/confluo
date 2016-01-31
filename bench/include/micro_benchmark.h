@@ -1,6 +1,7 @@
 #ifndef MICRO_BENCHMARK_H_
 #define MICRO_BENCHMARK_H_
 
+#include <chrono>
 
 #ifdef MICA_SERVER
 #include "mica_store.h"
@@ -14,8 +15,7 @@ using namespace ::mica;
 using namespace ::succinct;
 #endif
 
-
-using boost::shared_ptr;
+using namespace ::std::chrono;
 
 class MicroBenchmark {
  public:
