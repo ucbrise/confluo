@@ -30,7 +30,7 @@
 MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
 
 #ifdef MICA_BENCHMARK
-  shard_ = new MicaStore(2048);
+  shard_ = new MicaStore();
 #else
   shard_ = new LogStore();
 #endif

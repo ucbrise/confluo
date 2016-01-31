@@ -7,20 +7,16 @@
 
 namespace mica {
 
-MicaStore::MicaStore(const uint32_t value_size, const uint32_t key_size) {
+MicaStore::MicaStore() {
 
   // Setup shm
   const size_t page_size = 1048576 * 2;
   const size_t num_numa_nodes = 2;
   const size_t num_pages_to_try = 16384;
-  const size_t num_pages_to_reserve = 16384 - 2048;
+  const size_t num_pages_to_reserve = 16384;
 
   mehcached_shm_init(page_size, num_numa_nodes, num_pages_to_try,
                      num_pages_to_reserve);
-
-  // Store key/value sizes
-  key_size_ = key_size;
-  value_size_ = value_size;
 
   // Initial state
   num_keys_ = 0;
@@ -33,7 +29,7 @@ MicaStore::MicaStore(const uint32_t value_size, const uint32_t key_size) {
   assert(value_buf_);
 
   // Compute num buckets
-  size_t num_items = kStoreSize / value_size;
+  size_t num_items = kMaxNumItems;
   size_t n_buckets = (num_items + MEHCACHED_ITEMS_PER_BUCKET - 1)
       / MEHCACHED_ITEMS_PER_BUCKET;
 
@@ -42,7 +38,7 @@ MicaStore::MicaStore(const uint32_t value_size, const uint32_t key_size) {
 #ifdef MEHCACHED_ALLOC_DYNAMIC
   alloc_overhead += MEHCAHCED_DYNAMIC_OVERHEAD;
 #endif
-  size_t pool_size = num_items * (alloc_overhead + key_size + value_size);
+  size_t pool_size = kPoolSize;
 
   // Set table numa nodes
   size_t numa_nodes[] = { (size_t) -1 };

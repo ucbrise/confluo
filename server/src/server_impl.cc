@@ -57,7 +57,7 @@ class ServerImpl : virtual public ServerIf {
     // Initialize data structures
     Info("Initializing data structures...");
 #ifdef MICA_SERVER
-    shard_ = new mica::MicaStore(2048);
+    shard_ = new mica::MicaStore();
 #else
     shard_ = new LogStore(3);
 #endif

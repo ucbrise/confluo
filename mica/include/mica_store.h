@@ -15,14 +15,16 @@ namespace mica {
 
 class MicaStore {
  public:
-  static const size_t kStoreSize = 1024 * 1024 * 1024;
+  static const size_t kMaxNumItems = 1024 * 1024 * 1024;
+  static const size_t kPoolSize = 8 * 1024 * 1024 * 1024;
 
-  MicaStore(const uint32_t value_length, const uint32_t key_length = 8);
+  MicaStore();
 
   int Append(const int64_t key, const std::string& value);
   void Get(std::string& value, const int64_t key);
 
   void Search(std::set<int64_t>& _return, const std::string& query) {
+    return;
   }
 
   int64_t Dump(const std::string& path) {
