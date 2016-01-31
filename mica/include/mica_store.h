@@ -15,8 +15,8 @@ namespace mica {
 
 class MicaStore {
  public:
-  static const size_t kMaxNumItems = 1024 * 1024 * 1024;
-  static const size_t kPoolSize = 8 * 1024 * 1024 * 1024;
+  static const uint64_t kMaxNumItems = 1024 * 1024 * 1024;
+  static const uint64_t kPoolSize = 8 * 1024 * 1024 * 1024;
 
   MicaStore();
 
