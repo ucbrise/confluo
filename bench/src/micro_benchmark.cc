@@ -99,6 +99,8 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
     exit(-1);
   }
 
+  load_keys_++;
+
   if (shard_->GetSize() != load_end_offset_) {
     fprintf(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
             load_end_offset_, shard_->GetSize());
