@@ -52,15 +52,16 @@ MicaStore::MicaStore() {
 
 int MicaStore::Append(const int64_t key, const std::string& value) {
   uint64_t key_hash = hash((const uint8_t *) &key, sizeof(key));
-  int ret = mehcached_set(0, table_, key_hash, (const uint8_t *) &key,
+  bool ret = mehcached_set(0, table_, key_hash, (const uint8_t *) &key,
                           sizeof(key), (const uint8_t *) value.c_str(),
                           value.size(), 0, false);
   if (ret) {
     num_keys_++;
     current_size_ += value.size();
+    return 0;
   }
 
-  return ret;
+  return -1;
 }
 
 void MicaStore::Get(std::string& value, const int64_t key) {
