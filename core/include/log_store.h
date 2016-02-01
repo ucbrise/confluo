@@ -5,11 +5,13 @@
 #include <string>
 #include <set>
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/thread.hpp>
 
 #define USE_INT_HASH
+#define USE_STL_HASHMAP
 
 namespace succinct {
 
@@ -40,7 +42,13 @@ class LogStore {
   static const char kValueDelim = '\n';
 
 #ifdef USE_INT_HASH
+#ifdef USE_STL_HASHMAP
+  typedef std::unordered_map<uint32_t,
+      std::unordered_map<int64_t, std::vector<uint32_t>>>NGramIdx;
+  typedef std::unordered_map<int64_t, uint64_t> KeyIdx;
+#else
   typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
+#endif
 #else
   typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
 #endif
@@ -54,27 +62,42 @@ class LogStore {
   int64_t Load(const std::string& path);
 
   size_t GetNumKeys() {
+#ifdef USE_STL_HASHMAP
+    return key_map_.size();
+#else
     return keys_.size();
+#endif
   }
 
   int64_t GetSize() {
     return tail_;
   }
 
- private:
+private:
 
+#ifdef USE_STL_HASHMAP
+  bool MatchFirst(const std::vector<uint32_t>& offsets, const char* suffix, const size_t len) {
+    for (auto off: offsets) {
+      if (strncmp(data_ + off + ngram_n_, suffix, len)) {
+        return true;
+      }
+    }
+    return false;
+  }
+#else
   int64_t GetValueOffsetPos(const int64_t key) {
     size_t pos = std::lower_bound(keys_.begin(), keys_.end(), key)
-        - keys_.begin();
+    - keys_.begin();
     return (pos >= keys_.size() || keys_[pos] != key) ? -1 : pos;
   }
 
   int64_t GetKeyPos(const int64_t value_offset) {
     int64_t pos = std::prev(
         std::upper_bound(value_offsets_.begin(), value_offsets_.end(),
-                         value_offset)) - value_offsets_.begin();
+            value_offset)) - value_offsets_.begin();
     return (pos >= (int64_t) value_offsets_.size()) ? -1 : pos;
   }
+#endif
 
   template<typename T>
   size_t WriteVectorToFile(std::ostream& out, std::vector<T>& data) {
@@ -113,8 +136,12 @@ class LogStore {
   char *data_;
   uint32_t tail_;
 
+#ifdef USE_STL_HASHMAP
+  KeyIdx key_map_;
+#else
   std::vector<int64_t> keys_;
   std::vector<int32_t> value_offsets_;
+#endif
 
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;

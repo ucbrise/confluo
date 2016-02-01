@@ -19,16 +19,21 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   }
 
   // Append value to log
-  memcpy(data_ + tail_, value.c_str(), value.length());
+  uint64_t end = tail_;
+  memcpy(data_ + end, value.c_str(), value.length());
 
   // Update primary index
+#ifdef USE_STL_HASHMAP
+  key_map_[key] = (end << 32 | value.length());
+#else
   keys_.push_back(key);
   value_offsets_.push_back(tail_);
+#endif
 
   // Update secondary index
   for (int64_t i = std::max(static_cast<int64_t>(0),
-                            static_cast<int64_t>(tail_ - ngram_n_));
-      i < tail_ + value.length() - ngram_n_; i++) {
+                            static_cast<int64_t>(end - ngram_n_));
+      i < end + value.length() - ngram_n_; i++) {
 #ifdef USE_INT_HASH
     uint32_t ngram = Hash::simple_hash3(data_ + i);
 #else
@@ -37,7 +42,12 @@ int LogStore::Append(const int64_t key, const std::string& value) {
       ngram += data_[i + off];
     }
 #endif
+
+#ifdef USE_STL_HASHMAP
+    ngram_idx_[ngram][key].push_back(i);
+#else
     ngram_idx_[ngram].push_back(i);
+#endif
   }
   tail_ += value.length();
 
@@ -46,19 +56,30 @@ int LogStore::Append(const int64_t key, const std::string& value) {
 
 void LogStore::Get(std::string& value, const int64_t key) {
   boost::shared_lock<boost::shared_mutex> lk(mutex_);
+
+#ifdef USE_STL_HASHMAP
+  try {
+    uint64_t val_info = key_map_.at(key);
+    value.assign(data_ + (val_info >> 32), val_info & 0xFFFFFFFF);
+  } catch (std::exception& e) {
+    value = "INVALID";
+    return;
+  }
+#else
   int64_t pos = GetValueOffsetPos(key);
+
   if (pos < 0) {
     value = "INVALID";
     return;
   }
   int64_t start = value_offsets_[pos];
   int64_t end =
-      (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
+  (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
   size_t len = end - start;
-  value.resize(len);
-  for (size_t i = 0; i < len; ++i) {
-    value[i] = data_[start + i];
-  }
+
+  value.assign(data_ + start, len);
+#endif
+
 }
 
 void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
@@ -75,20 +96,35 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
 #endif
 
   boost::shared_lock<boost::shared_mutex> lk(mutex_);
+#ifdef USE_STL_HASHMAP
+  auto idx_map = ngram_idx_[prefix_ngram];
+  for (auto idx_entry : idx_map) {
+    auto offsets = idx_entry.second;
+    if (skip_filter || MatchFirst(offsets, suffix, suffix_len)) {
+      // TODO: Take care of query.length() < ngram_n_ case
+      results.insert(idx_entry.first);
+    }
+  }
+#else
   std::vector<uint32_t> idx_off = ngram_idx_[prefix_ngram];
   for (uint32_t i = 0; i < idx_off.size(); i++) {
     if (skip_filter
         || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0) {
+      // TODO: Take care of query.length() < ngram_n_ case
       int64_t pos = GetKeyPos(idx_off[i]);
       if (pos >= 0)
-        results.insert(keys_[pos]);
+      results.insert(keys_[pos]);
     }
   }
+#endif
 }
 
 int64_t LogStore::Dump(const std::string& path) {
+  int64_t out_size = 0;
+#ifdef USE_STL_HASHMAP
+  fprintf(stderr, "Dump not supported yet.\n");
+#else
   std::ofstream out(path);
-  int64_t out_size;
 
   // Write data
   out.write(reinterpret_cast<const char *>(&(tail_)), sizeof(uint32_t));
@@ -114,19 +150,22 @@ int64_t LogStore::Dump(const std::string& path) {
     out_size += (sizeof(uint32_t));
 #else
     out.write(reinterpret_cast<const char *>(entry.first.c_str()),
-              ngram_n_ * sizeof(char));
+        ngram_n_ * sizeof(char));
     out_size += (ngram_n_ * sizeof(char));
 #endif
 
     out_size += WriteVectorToFile(out, entry.second);
   }
-
+#endif
   return out_size;
 }
 
 int64_t LogStore::Load(const std::string& path) {
+  int64_t in_size = 0;
+#ifdef USE_STL_HASHMAP
+  fprintf(stderr, "Dump not supported yet.\n");
+#else
   std::ifstream in(path);
-  int64_t in_size;
 
   // Read data
   in.read(reinterpret_cast<char *>(&tail_), sizeof(uint32_t));
@@ -174,6 +213,7 @@ int64_t LogStore::Load(const std::string& path) {
 
     ngram_idx_.insert(IdxEntry(first, second));
   }
+#endif
 
   return in_size;
 }
