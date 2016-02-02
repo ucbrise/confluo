@@ -11,7 +11,6 @@
 #include <boost/thread.hpp>
 
 #define USE_INT_HASH
-#define USE_STL_HASHMAP
 
 namespace succinct {
 
@@ -44,10 +43,10 @@ class LogStore {
 #ifdef USE_INT_HASH
 #ifdef USE_STL_HASHMAP
   typedef std::unordered_map<uint32_t,
-      std::unordered_map<int64_t, std::vector<uint32_t>>>NGramIdx;
+      std::unordered_map<int64_t, std::vector<uint32_t>>> NGramIdx;
   typedef std::unordered_map<int64_t, uint64_t> KeyIdx;
 #else
-  typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
+  typedef std::unordered_map<uint32_t, std::vector<uint32_t>> NGramIdx;
 #endif
 #else
   typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
