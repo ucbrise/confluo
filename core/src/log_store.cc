@@ -23,7 +23,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   memcpy(data_ + end, value.c_str(), value.length());
 
   // Update primary index
-#ifdef USE_STL_HASHMAP
+#ifdef USE_STL_HASHMAP_KV
   key_map_[key] = (end << 32 | value.length());
 #else
   keys_.push_back(key);
@@ -43,7 +43,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
     }
 #endif
 
-#ifdef USE_STL_HASHMAP
+#ifdef USE_STL_HASHMAP_KV
     ngram_idx_[ngram][key].push_back(i);
 #else
     ngram_idx_[ngram].push_back(i);
@@ -57,7 +57,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
 void LogStore::Get(std::string& value, const int64_t key) {
   boost::shared_lock<boost::shared_mutex> lk(mutex_);
 
-#ifdef USE_STL_HASHMAP
+#ifdef USE_STL_HASHMAP_KV
   try {
     uint64_t val_info = key_map_.at(key);
     value.assign(data_ + (val_info >> 32), val_info & 0xFFFFFFFF);
@@ -96,7 +96,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
 #endif
 
   boost::shared_lock<boost::shared_mutex> lk(mutex_);
-#ifdef USE_STL_HASHMAP
+#ifdef USE_STL_HASHMAP_KV
   auto idx_map = ngram_idx_[prefix_ngram];
   for (auto idx_entry : idx_map) {
     auto offsets = idx_entry.second;
@@ -121,7 +121,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
 
 int64_t LogStore::Dump(const std::string& path) {
   int64_t out_size = 0;
-#ifdef USE_STL_HASHMAP
+#ifdef USE_STL_HASHMAP_KV
   fprintf(stderr, "Dump not supported yet.\n");
 #else
   std::ofstream out(path);
@@ -162,7 +162,7 @@ int64_t LogStore::Dump(const std::string& path) {
 
 int64_t LogStore::Load(const std::string& path) {
   int64_t in_size = 0;
-#ifdef USE_STL_HASHMAP
+#ifdef USE_STL_HASHMAP_KV
   fprintf(stderr, "Dump not supported yet.\n");
 #else
   std::ifstream in(path);
