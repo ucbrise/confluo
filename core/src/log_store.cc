@@ -109,7 +109,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   auto idx_off = ngram_idx_[prefix_ngram];
   for (auto off : idx_off) {
     if (skip_filter
-        || strncmp(data_ + off + ngram_n_, suffix, suffix_len) == 0) {
+        || memcmp(data_ + off + ngram_n_, suffix, suffix_len) == 0) {
       // TODO: Take care of query.length() < ngram_n_ case
       int64_t pos = GetKeyPos(off);
       if (pos >= 0)
