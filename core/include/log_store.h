@@ -7,11 +7,14 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <iterator>
+#include "linked_list.h"
 
 #include <boost/thread.hpp>
 
 #define USE_INT_HASH
 #define USE_STL_HASHMAP_NGRAM
+#define USE_BLOCK_LIST
 
 namespace succinct {
 
@@ -44,11 +47,15 @@ class LogStore {
 #ifdef USE_INT_HASH
 #ifdef USE_STL_HASHMAP_KV
   typedef std::unordered_map<uint32_t,
-      std::unordered_map<int64_t, std::vector<uint32_t>>> NGramIdx;
+  std::unordered_map<int64_t, std::vector<uint32_t>>> NGramIdx;
   typedef std::unordered_map<int64_t, uint64_t> KeyIdx;
 #else
 #ifdef USE_STL_HASHMAP_NGRAM
+#ifdef USE_BLOCK_LIST
+  typedef std::unordered_map<uint32_t, LinkedList> NGramIdx;
+#else
   typedef std::unordered_map<uint32_t, std::vector<uint32_t>> NGramIdx;
+#endif
 #else
   typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
 #endif
@@ -77,7 +84,7 @@ class LogStore {
     return tail_;
   }
 
-private:
+ private:
 
 #ifdef USE_STL_HASHMAP_KV
   bool MatchFirst(const std::vector<uint32_t>& offsets, const char* suffix, const size_t len) {
@@ -91,14 +98,14 @@ private:
 #else
   int64_t GetValueOffsetPos(const int64_t key) {
     size_t pos = std::lower_bound(keys_.begin(), keys_.end(), key)
-    - keys_.begin();
+        - keys_.begin();
     return (pos >= keys_.size() || keys_[pos] != key) ? -1 : pos;
   }
 
   int64_t GetKeyPos(const int64_t value_offset) {
     int64_t pos = std::prev(
         std::upper_bound(value_offsets_.begin(), value_offsets_.end(),
-            value_offset)) - value_offsets_.begin();
+                         value_offset)) - value_offsets_.begin();
     return (pos >= (int64_t) value_offsets_.size()) ? -1 : pos;
   }
 #endif
@@ -136,6 +143,39 @@ private:
 
     return in_size;
   }
+
+#ifdef USE_BLOCK_LIST
+  size_t WriteListToFile(std::ostream& out, LinkedList& data) {
+    size_t out_size = 0;
+
+    size_t size = data.size();
+    out.write(reinterpret_cast<const char *>(&size), sizeof(size_t));
+    out_size += sizeof(size_t);
+    for (auto val : data) {
+      out.write(reinterpret_cast<const char *>(&val), sizeof(uint32_t));
+      out_size += sizeof(uint32_t);
+    }
+
+    return out_size;
+  }
+
+  size_t ReadListFromFile(std::istream& in, LinkedList& data) {
+    // Read keys
+    size_t in_size = 0;
+
+    size_t size;
+    in.read(reinterpret_cast<char *>(&size), sizeof(size_t));
+    in_size += sizeof(size_t);
+    for (size_t i = 0; i < size; i++) {
+      uint64_t val;
+      in.read(reinterpret_cast<char *>(&val), sizeof(uint32_t));
+      data.push_back(val);
+      in_size += sizeof(uint32_t);
+    }
+
+    return in_size;
+  }
+#endif
 
   char *data_;
   uint32_t tail_;

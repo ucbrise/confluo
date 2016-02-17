@@ -7,6 +7,7 @@
 #ifdef MICA_BENCHMARK
 #include "mica_store.h"
 #else
+#define COLLECT_LIST_STATS
 #include "log_store.h"
 #endif
 

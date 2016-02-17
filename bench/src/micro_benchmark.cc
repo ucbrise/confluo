@@ -104,6 +104,11 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
             load_end_offset_, shard_->GetSize());
   }
 
+#ifdef COLLECT_LIST_STATS
+  PRINT_STATS;
+  FLUSH_STATS;
+#endif
+
 }
 
 void MicroBenchmark::BenchmarkGetLatency() {
@@ -248,88 +253,88 @@ void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
   uint32_t num_ready = 0;
 
   for (uint32_t i = 0; i < num_clients; i++) {
-    threads.push_back(
-        std::move(
-            std::thread([&] {
-              std::vector<int64_t> keys;
-              std::vector<std::string> values, terms;
+    threads.push_back(std::move(
+      std::thread([&] {
+        std::vector<int64_t> keys;
+        std::vector<std::string> values, terms;
 
-              std::ifstream in_s(data_path_ + ".queries");
-              std::ifstream in_a(data_path_);
-              int64_t cur_key = load_keys_;
-              std::string term, value;
-              std::vector<uint32_t> query_types;
-              fprintf(stderr, "Generating queries...\n");
-              for (int64_t i = 0; i < kThreadQueryCount; i++) {
-                int64_t key = rand() % load_keys_;
-                std::getline(in_s, term);
-                std::getline(in_a, value);
+        std::ifstream in_s(data_path_ + ".queries");
+        std::ifstream in_a(data_path_);
+        int64_t cur_key = load_keys_;
+        std::string term, value;
+        std::vector<uint32_t> query_types;
+        fprintf(stderr, "Generating queries...\n");
+        for (int64_t i = 0; i < kThreadQueryCount; i++) {
+          int64_t key = rand() % load_keys_;
+          std::getline(in_s, term);
+          std::getline(in_a, value);
 
-                keys.push_back(key);
-                terms.push_back(term);
-                values.push_back(value);
+          keys.push_back(key);
+          terms.push_back(term);
+          values.push_back(value);
 
-                double r = ((double) rand() / (RAND_MAX));
-                if (r <= get_m) {
-                  query_types.push_back(0);
-                } else if (r <= search_m) {
-                  query_types.push_back(1);
-                } else if (r <= append_m) {
-                  query_types.push_back(2);
-                }
-              }
-              fprintf(stderr, "Done.\n");
+          double r = ((double) rand() / (RAND_MAX));
+          if (r <= get_m) {
+            query_types.push_back(0);
+          } else if (r <= search_m) {
+            query_types.push_back(1);
+          } else if (r <= append_m) {
+            query_types.push_back(2);
+          }
+        }
+        fprintf(stderr, "Done.\n");
 
-              std::unique_lock<std::mutex> lck(mtx);
-              num_ready++;
-              while (num_ready < num_clients) {
-                cvar.wait(lck);
-              }
+        std::unique_lock<std::mutex> lck(mtx);
+        num_ready++;
+        while (num_ready < num_clients) {
+          cvar.wait(lck);
+        }
 
-              double thput = 0;
+        double thput = 0;
 
-              try {
-                // Warmup phase
-                long i = 0;
-                TimeStamp warmup_start = GetTimestamp();
-                while (GetTimestamp() - warmup_start < kWarmupTime) {
-                  QUERY(i);
-                  i++;
-                }
+        try {
+          // Warmup phase
+          long i = 0;
+          TimeStamp warmup_start = GetTimestamp();
+          while (GetTimestamp() - warmup_start < kWarmupTime) {
+            QUERY(i);
+            i++;
+          }
 
-                // Measure phase
-                i = 0;
-                TimeStamp start = GetTimestamp();
-                while (GetTimestamp() - start < kMeasureTime) {
-                  QUERY(i);
-                  i++;
-                }
-                TimeStamp end = GetTimestamp();
-                double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                thput = ((double) i / totsecs);
+          // Measure phase
+          i = 0;
+          TimeStamp start = GetTimestamp();
+          while (GetTimestamp() - start < kMeasureTime) {
+            QUERY(i);
+            i++;
+          }
+          TimeStamp end = GetTimestamp();
+          double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+          thput = ((double) i / totsecs);
 
-                // Cooldown phase
-                i = 0;
-                TimeStamp cooldown_start = GetTimestamp();
-                while (GetTimestamp() - cooldown_start < kCooldownTime) {
-                  QUERY(i);
-                  i++;
-                }
+          // Cooldown phase
+          i = 0;
+          TimeStamp cooldown_start = GetTimestamp();
+          while (GetTimestamp() - cooldown_start < kCooldownTime) {
+            QUERY(i);
+            i++;
+          }
 
-              } catch (std::exception &e) {
-                fprintf(stderr, "Throughput thread ended prematurely.\n");
-              }
+        } catch (std::exception &e) {
+          fprintf(stderr, "Throughput thread ended prematurely.\n");
+        }
 
-              fprintf(stderr, "Throughput: %lf\n", thput);
+        fprintf(stderr, "Throughput: %lf\n", thput);
 
-              std::ofstream ofs;
-              char output_file[100];
-              sprintf(output_file, "throughput_%.2f_%.2f_%.2f", get_f, search_f, append_f);
-              ofs.open(output_file, std::ofstream::out | std::ofstream::app);
-              ofs << thput << "\n";
-              ofs.close();
+        std::ofstream ofs;
+        char output_file[100];
+        sprintf(output_file, "throughput_%.2f_%.2f_%.2f", get_f, search_f, append_f);
+        ofs.open(output_file, std::ofstream::out | std::ofstream::app);
+        ofs << thput << "\n";
+        ofs.close();
 
-            })));
+      }))
+    );
   }
 
   for (auto& th : threads) {
@@ -408,6 +413,11 @@ int main(int argc, char** argv) {
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }
+
+#ifdef COLLECT_LIST_STATS
+  PRINT_STATS;
+  FLUSH_STATS;
+#endif
 
   return 0;
 }

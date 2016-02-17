@@ -74,7 +74,7 @@ void LogStore::Get(std::string& value, const int64_t key) {
   }
   int64_t start = value_offsets_[pos];
   int64_t end =
-  (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
+      (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
   size_t len = end - start;
 
   value.assign(data_ + start, len);
@@ -106,14 +106,14 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
     }
   }
 #else
-  std::vector<uint32_t> idx_off = ngram_idx_[prefix_ngram];
-  for (uint32_t i = 0; i < idx_off.size(); i++) {
+  auto idx_off = ngram_idx_[prefix_ngram];
+  for (auto off : idx_off) {
     if (skip_filter
-        || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0) {
+        || strncmp(data_ + off + ngram_n_, suffix, suffix_len) == 0) {
       // TODO: Take care of query.length() < ngram_n_ case
-      int64_t pos = GetKeyPos(idx_off[i]);
+      int64_t pos = GetKeyPos(off);
       if (pos >= 0)
-      results.insert(keys_[pos]);
+        results.insert(keys_[pos]);
     }
   }
 #endif
@@ -154,7 +154,11 @@ int64_t LogStore::Dump(const std::string& path) {
     out_size += (ngram_n_ * sizeof(char));
 #endif
 
+#ifdef USE_BLOCK_LIST
+    out_size += WriteListToFile(out, entry.second);
+#else
     out_size += WriteVectorToFile(out, entry.second);
+#endif
   }
 #endif
   return out_size;
@@ -194,7 +198,11 @@ int64_t LogStore::Load(const std::string& path) {
   for (size_t i = 0; i < ngram_idx_size; i++) {
 
 #ifdef USE_INT_HASH
+#ifdef USE_BLOCK_LIST
+    typedef std::pair<uint32_t, LinkedList> IdxEntry;
+#else
     typedef std::pair<uint32_t, std::vector<uint32_t>> IdxEntry;
+#endif
     uint32_t first;
 
     in.read(reinterpret_cast<char *>(&first), sizeof(uint32_t));
@@ -208,8 +216,12 @@ int64_t LogStore::Load(const std::string& path) {
     in_size += (ngram_n_ * sizeof(char));
 #endif
 
-    std::vector<uint32_t> second;
+    LinkedList second;
+#ifdef USE_BLOCK_LIST
+    in_size += ReadListFromFile(in, second);
+#else
     in_size += ReadVectorFromFile(in, second);
+#endif
 
     ngram_idx_.insert(IdxEntry(first, second));
   }

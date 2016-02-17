@@ -24,3 +24,13 @@ add_subdirectory(mica)
 add_subdirectory(server)
 add_subdirectory(shell)
 add_subdirectory(bench)
+
+# Testing framework
+# Build google testing framework
+add_subdirectory(external/gtest-1.7.0)
+
+# Build and run all tests for succinct
+add_subdirectory(test)
+
+enable_testing()
+add_test(LSTest ${TESTS_PATH}/ls_test)
