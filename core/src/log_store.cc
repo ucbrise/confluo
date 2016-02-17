@@ -216,10 +216,12 @@ int64_t LogStore::Load(const std::string& path) {
     in_size += (ngram_n_ * sizeof(char));
 #endif
 
-    LinkedList second;
+
 #ifdef USE_BLOCK_LIST
+    LinkedList second;
     in_size += ReadListFromFile(in, second);
 #else
+    std::vector<uint32_t> second;
     in_size += ReadVectorFromFile(in, second);
 #endif
 
