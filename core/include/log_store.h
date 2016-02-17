@@ -80,6 +80,10 @@ class LogStore {
 #endif
   }
 
+  size_t GetNumNGrams() {
+    return ngram_idx_.size();
+  }
+
   int64_t GetSize() {
     return tail_;
   }
