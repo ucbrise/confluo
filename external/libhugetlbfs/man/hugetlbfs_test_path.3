@@ -1,0 +1,53 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" Copyright 2012 Cray Inc.
+.\" All rights reserved.
+.\" Licensed under LGPL 2.1 by Cray Inc.
+.\"
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH HUGETLBFS_TEST_PATH 3 "March 7, 2012"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+hugetlbfs_test_path - Determine whether a mount point is hugetlbfs
+.SH SYNOPSIS
+.B #include <hugetlbfs.h>
+
+.br
+int hugetlbfs_test_path(const char *mount);
+
+.SH DESCRIPTION
+
+The hugetlbfs_test_path() function determines whether a given pathname
+is in a hugetlbfs filesystem.
+
+.SH RETURN VALUE
+
+On success, 1 is returned for a hugetlbfs filesystem, or 0 for a
+non-hugetlbfs filesystem.  On failure, -1 is returned and errno is set
+appropriately.
+
+.SH ERRORS
+
+.PP
+Please see statfs(3) for possible values for errno.
+
+
+.SH SEE ALSO
+.I statfs(3),
+.I libhugetlbfs(7)
+
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.

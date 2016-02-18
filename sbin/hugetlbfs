@@ -1,0 +1,96 @@
+#!/bin/bash
+
+#
+# Prints usage.
+#
+function print_usage()
+{
+  echo "Usage: hugetlbfs [command] [args]"
+}
+
+#
+# Creates hugepage filesystem.
+#
+function create_mnt_huge()
+{
+	echo "Creating /mnt/hugetlbfs and mounting as hugetlbfs"
+	sudo mkdir -p /mnt/hugetlbfs
+
+	grep -s '/mnt/hugetlbfs' /proc/mounts > /dev/null
+	if [ $? -ne 0 ] ; then
+		sudo mount -t hugetlbfs nodev /mnt/hugetlbfs
+	fi
+}
+
+#
+# Removes hugepage filesystem.
+#
+function remove_mnt_huge()
+{
+	echo "Unmounting /mnt/hugetlbfs and removing directory"
+	grep -s '/mnt/hugetlbfs' /proc/mounts > /dev/null
+	if [ $? -eq 0 ] ; then
+		sudo umount /mnt/hugetlbfs
+	fi
+
+	if [ -d /mnt/hugetlbfs ] ; then
+		sudo rm -R /mnt/hugetlbfs
+	fi
+}
+
+#
+# Removes all reserved hugepages.
+#
+function clear_huge_pages()
+{
+	echo > .echo_tmp
+	for d in /sys/devices/system/node/node? ; do
+		echo "echo 0 > $d/hugepages/hugepages-2048kB/nr_hugepages" >> .echo_tmp
+	done
+	echo "Removing currently reserved hugepages"
+	sudo sh .echo_tmp
+	rm -f .echo_tmp
+
+	remove_mnt_huge
+}
+
+#
+# Creates hugepages.
+#
+create_huge_pages()
+{
+
+	Pages=$1
+        if [ "$Pages" == "" ]; then
+          echo "Number of pages not set."
+          print_usage
+          exit
+        fi
+
+	clear_huge_pages
+
+	echo "echo $Pages > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages" > .echo_tmp
+
+	echo "Reserving $Pages hugepages"
+	sudo sh .echo_tmp
+	rm -f .echo_tmp
+
+	create_mnt_huge
+	sudo sysctl -w vm.overcommit_memory=1
+	sudo sysctl -w kernel.shmmax=12884901888
+	sudo sysctl -w kernel.shmall=12884901888
+}
+
+export cmd="$1"
+
+if [ "$cmd" == "" ]; then
+  print_usage
+  exit
+fi
+
+echo "Command: $cmd"
+if [ "$cmd" == "create" ]; then
+  create_huge_pages $2
+elif [ "$cmd" == "destroy" ]; then
+  clear_huge_pages  
+fi

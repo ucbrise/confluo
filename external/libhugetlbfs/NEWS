@@ -1,0 +1,452 @@
+libhugetlbfs 2.20 "View Across the Charles"
+======================================================================
+Bug Fixes
+* Fix keyword collisions and warnings from GCC 5
+* hugeadm output is parsed for default size in huge_page_setup_helper
+
+Test Suite
+* fallocate tests
+
+libhugetlbfs 2.19 "Missing Longfellow Lanes"
+======================================================================
+Bug Fixes
+* Fixed hugeadm behavior when mtab is a symlink
+* fix plt_extrasz() on ppc64le
+* ARM: fix page size and text offset setup
+* Fix hugeadm handling of negative pool resize amounts
+
+Test Suite
+* remove duplicate mremap-* tests
+
+libhugetlbfs 2.18 "Infinite Corridor"
+======================================================================
+New Features
+* Add support for ppc64le
+* ARM 64 big endian support
+
+Bug Fixes
+* Reverted 3bdd9924 which broke building on PPC64
+* Fix parsing of kernel version string
+* ARM: mark direct_syscall as a FUNC
+
+Test Suite
+* mmap of huge page files with misaligned offset success treated as PASS
+
+libhugetlbfs 2.17 "Fowl and Fetus"
+======================================================================
+New Features
+* PPC segement alignment restrictions can be disabled
+* Added Aarch64 support
+
+Bug Fixes
+* Allow compiler overrides for 64 and 32 bit builds
+* hugeadm now handles /etc/mtab being a simlink properly
+
+Test Suite
+* Add corrupt-by-cow-opt test
+* Add noresv-preserve-resv-page test
+* Add noresv-regarded-as-resv test
+
+libhugetlbfs 2.16 "Joe E. Parker"
+======================================================================
+New Features
+* ARM Support
+* s390x Dynamic TASK_SIZE support
+
+Bug Fixes
+* find_mounts() now properly NULL terminates mount point names
+
+Test Suite
+* ARM Support
+* mremap-fixed-huge-near-normal no longer calls munmap with 0 length
+
+libhugetlbfs 2.15 "Minature Panda"
+======================================================================
+New Features
+* Add variable in Makefile to disable using deprecated linker scripts
+* s390 support
+
+Bug Fixes
+* Disable Unable to verify address range warning when offset < page_size
+* Remove sscanf in library setup to avoid heap allocation before _morecore
+  override
+* Revert heap exhaustion patch
+* hugectl no longer clips LD_LIBRARY_PATH variable
+
+
+Test Suite
+* Fix mremap-expand-slice-collision expanding anon shm
+* mremap-expand-slice-collision now asks kernel for availble slices
+* Make 4GB boundary tests only fail when allocation fails on free slice
+* Link 4GB test cases with --static so libraries are not placed in the way
+
+libhugetlbfs 2.14 "The White Album"
+======================================================================
+New Features
+* Updated man pages
+* Added basic events for core_i7 to oprofile_map_events
+
+Bug Fixes
+* Fix clean on failure code to avoid closing stdout
+
+Test Suite
+* Fixed readahead, malloc, and hugepagesizes tests
+* Avoid core dumps on stack_grow_into_huge test
+
+libhugetlbfs 2.13 "Insert Clever Title Here"
+======================================================================
+New Features
+* hugeadm can now be used to control Transparent Huge Page tunables
+* New morecore mode to better support THP
+
+Bug Fixes
+* Check permissions on hugetlbfs mount point before marking it as available
+
+Test Suite
+* Fix shm tests to use random address instead of fixed, old address failed
+  on ARM
+
+libhugetlbfs 2.12 "Serrano"
+======================================================================
+New Features
+* libhugetlbfs usage can now be restricted to certain binary names
+* lihugetlbfs now supports static linking
+* hugeadm uses more human readable directory names for mount points
+
+Bug Fixes
+* hugeadm would segfault if specified user was not in passwd, failure in
+  getpwuid() is now checked
+
+Test Suite
+* Added missing tests to driver script
+* Added tests for static linking
+
+libhugetlbfs 2.11 "Ghost Pepper"
+======================================================================
+New Features
+* cpupcstat reports time servicing tlb misses when requested
+* When supported by the kernel and glibc, MAP_HUGETLB is used
+  for the heap and to back memory returned by get_huge_pages.
+  These features can now be used without mounting hugetlbfs
+
+Bug Fixes
+* tlbmiss_cost.sh supresses oprofile errors
+* numerous fixes to setup_helper.py
+* Corrected usage of hugetlbfs_test_feature return value
+* find_mounts now correctly ignores non-hugetlbfs mount points
+* When prefaulting pages for get_huge_pages readv was using the fd
+  for the mapping, this caused the prefault to fail on older libc.
+  Now /dev/zero is used for all prefaulting
+
+libhugetlbfs 2.10 "Another Hottie"
+======================================================================
+Bug Fixes
+* hugeadm now handles pool size deltas properly
+* Makefile uses ?= to assign PREFIX and EXEDIR to allow for easier build
+  modification
+
+libhugetlbfs 2.9 "Something Spicy"
+======================================================================
+New Features
+* Add --no-reseve to hugectl to request mmap'd pages are not reserved
+  for kernels newer than 2.6.34
+* POWER6 now supported by TLB miss cost estimator
+* Add --obey-numa-mempol to hugeadm to request static pool pages are
+  allocated following the process NUMA memory policy
+
+Test Suite
+* Fix gethugepagesizes test case
+
+libhugetlbfs 2.8 "Scotch Bonnet"
+======================================================================
+New Features
+* Add switch to let administrator limit new mount points by size or inodes
+* cpupcstat now caches the value returned by tlmiss_cost.sh to avoid
+  rerunning the script
+
+Bug Fixes
+* errno values are saved in get_huge_pages
+* tlbmiss_cost.sh patches calibrator to fix round naming collision
+* Fixed ALIGN_UP macro for aligning huge page segments
+* Fix --create-mounts switch in hugeadm
+* Library and helpers are all linked with -z noexecstack
+
+Test Suite
+* run_tests.py detects valid word sizes
+
+libhugetlbfs 2.7 "Adobo"
+======================================================================
+New Features
+* When specifying huge page pool sizes with hugeadm, memory sizes can
+  be used as well as the number of huge pages
+* DEFAULT is now a valid huge page pool for resizing, it will adjust
+  the pool for the default huge page size
+* tlbmiss_cost.sh in the contrib/ sub directory will estimate the cost
+  in CPU cycles of a TLB miss on the arch where it is run
+* Add python script which automates huge page pool setup with minimal
+  input required from user
+
+Bug Fixes
+* The --dry-run switch in hugeadm is now obeyed
+* hugeadm now uses unsigned long long for page resizes to avoid
+  overflow errors
+* --set-recommended-shmmax no longer overflows if the number of
+  available huge pages is bigger than the address space
+
+Test Suite
+* Updated linkhuge_nofd to override proper functions when testing
+* run_tests.py can now monitor the pool sizes between tests to help
+  identify accounting errors
+* Add test for mremap bug on architectures with holes in address space
+
+libhugetlbfs 2.6 "Adovada"
+======================================================================
+New Features
+* cpupcstat now supports data collection using the perf tool as well as
+  oprofile
+* --explain reports if min_free_kbytes is too small
+* add --set-min_free_kbytes to hugeadm
+
+Bug Fixes
+* Admin utils (hugeadm, hugectl, etc) are now built as 64 bit binaries
+  if possible to support adminstration of larger huge page sizes
+
+Test Suite
+* Suppress ld.hugetlbfs warnings during test suite build
+* Make SPECIAL keyword test cross-compile safe
+* Test script sets proper rlimits for mlock and stack_grow_into_huge
+  tests
+* Ensure that all elflink tests are run with both HUGETLB_SHARE=0 and
+  HUGETLB_SHARE=1
+
+libhugetlbfs 2.5 "Self Titled"
+======================================================================
+New Features
+* added --add-ramdisk-swap option to hugeadm to use ramdisks as
+  temporary swap space for diskless systems
+* added --persist option to hugeadm to be used with either --add-*-swap
+  option.  Makes swap added stay until removed or the machine is rebooted
+* added cpupcstat script which uses oprofile to monitor tlb miss rate
+  of a target program
+
+Bug Fixes
+* --add-temp-swap option now takes an optional integer argument that is
+  the size in number of hugepages to make the swap space
+
+libhugetlbfs 2.4 "Birdseye"
+======================================================================
+New Features
+* added --add-temp-swap option to hugeadm to add a swap file for a pool
+  resize
+* added --[enable|disable]-zone-moveable options to hugeadm to control
+  /proc/sys/vm/hugepages_treat_as_movable
+
+Bug Fixes
+* Fix pool-pages-max processing by using the proper array for its
+  requests
+* Move private reservation check out of morecore setup
+
+Test Suite
+* Added regression tests for leaking reserve count due to madvise and
+  fadvise and readahead
+* Add test for mixed permissions on shm segments
+* Wrap tests that can hang the machine to fail is kernel is too old
+* Add -f option to run_tests.py to force running of tests that can hang
+  the machine
+
+libhugetlbfs 2.3 "NuMex Sunglo"
+======================================================================
+New Features
+* added --force-preload option to hugectl for backing segments with
+  64kb pages on ppc64 when app was not linked with libhugetlbfs
+* added --explain swtich to hugadm to give a quick overview of the
+  system wrt huge pages
+* hugeadm warns if min pool size is being adjusted without sufficient
+  swap space configured
+* added --hard switch to ask hugeadm to try multiple times to resize
+  a huge page pool
+* added --create-*-mounts switches to create mount points for hugetlbfs
+  usable by specific users, groups, or globally
+
+Bug Fixes
+* hugeadm will no longer mount a directory multiple times
+* hugeadm adds all new mount points to /etc/mtab
+
+libhugetlbfs 2.2 "Barkers Extra Hot"
+======================================================================
+New Features
+* Refactored environment variable parsing to read once and store values
+* Add --list-mounts and --list-all-mounts options to hugeadm
+* Rework test suite to run for all avaialbe page sizes
+* Add --create-mounts for root only, --create-user-mounts,
+  --create-group-mounts, and --create-global-mounts options to hugeadm
+* Add --share-text option to hugectl
+
+Test Suite Fixes
+* Added wrapper to shm-fork and shm-getraw tests that makes runs on
+  hpage sizes different from default expected failures
+* Reworked shmoverride tests to handle new env parsing
+
+libhugetlbfs 2.1 "NM 64"
+======================================================================
+New Features
+* Multiple page size support
+* Add a more user friendly allocator that handles cache coloring
+* Add pagesize utility to display supported page sizes
+* Add hugeadm utility for managing hugepage pools
+* Add hugectl utility for running programs using hugepages
+* Add hugeedit utility for marking segments in aligned binaries for
+  huge page backing by default
+* Deprecated linker linker scripts
+* gethugepagesize() and getpagesizes() API added to programatically
+  discover supported hugepages
+* Manual pages for all API functions and utilities
+* Allow automatic backing of shared memory segments with hugepages
+* huge page regions will no longer prefault for kernels >= 2.6.27
+  improving mmap() performance and NUMA layout
+
+Bug Fixes
+* Add missing segment to interp section in linker scripts
+* Fix free_hugepage_region to handle segments that fell back to small
+  pages
+* Fix install when lib32 and lib64 resolve to the same place
+* Install header files so APIs can be used
+* Fix installation paths to make life easier for package maintainers
+* Do not export internal symbols unnecessarily
+* Prefault regions allocated by direct allocation API on kernels older
+  than 2.6.27
+* Gracefully fallback to using base pages for text/data when the
+  hugepage pool is too small
+* Fix handling of HUGETLB_SHARE_PATH environment variable
+* Relax remapping requirements
+
+Test suite Fixes
+* Added expected failure support
+* gethugepagesizes override for getting meminfo
+* Increase debug output for tests that fail
+* Summarise pass and failure counts
+
+libhugetlbfs 2.0 "Sandia Red"
+======================================================================
+
+New Features
+* New scriptless relinking for binutils >= 2.17
+* Added direct allocator API for huge pages
+
+Bug Fixes
+* /proc/mounts is parsed line at a time to handle file larger than 4kb
+* Read-only mappings use MAP_NORESERVE
+
+Test suite fixes
+* Add test for /proc/mounts file larger than 4kb
+* Fix quota test with private reservations
+* Output strerror on failure
+* linkhuge tests are skipped when known to be broken
+
+libhugetlbfs 1.3 "Big Jim"
+======================================================================
+
+New features
+* Add HUGETLB_NO_PREFAULT to control prefaulting of huge pages via mlock
+* Add "[hostname:pid]" to output messages
+* Setup for handling larger huge page sizes e.g. 16G huge pages
+* Update for new upstream sysctl
+* Add support for hugetlbfs_morecore to shrink the heap
+
+Bug fixes
+* Disable heap shrinking by default to avoid bug in glibc malloc
+* Skip elflink calls in setup_libhugetlbfs for IA64 and sparc64
+* Replace gethugepagesize with check_hugepagesize for error checking
+* Make morecore argument a long to handle larger page sizes
+
+Test suite fixes
+* Check uid/gid in tests where it matters
+* tests: verify there are enough huge pages
+* Change tests to read /proc/meminfo
+* tests: verify that huge page size isn't too big for the test
+
+libhugetlbfs 1.2 "Mango Habanero"
+======================================================================
+
+New features
+
+* Partial segment remapping. This allows non-relinked binaries to try
+  to take advantage of libhugetlbfs' segment remapping code. Large
+  segments are required, especially on Power. This feature is useful
+  for estimating huge page performance, however full relinking will
+  still perform better.
+* Add extra debugging for binaries that may run out of address space.
+* Log library version when HUGETLB_VERBOSE is enabled.
+* Beginning support for ia64 and sparc64.
+* New test to check handling of misaligned mmap() parameters.
+
+Bug fixes
+
+* Fix EH_FRAME segment. Fixes some C++ applications.
+* Rework PLT detection to work better on Power.
+* Add per-target-arch syscall stubs to the library. These provide
+  reliable error messages from elflink.c if they occur while the
+  program segments are unmapped.
+* Add proper SONAME to shared libs.
+* Makefile respects CFLAGS/LDFLAGS/CPPFLAGS environment variables.
+* Make mlock() failure non-fatal.
+
+Test suite fixes
+
+* Fix zero_filesize_segment test.
+* Fix the icache-hygeine testcase for i386 and x86_64.
+* Fix SEGVs in task-size-overrun test.
+* Enable stack_grow_into_huge test, previously skipped.
+* Fix test_addr_huge() for anon pages.
+
+libhugetlbfs 1.1 "Carribbean Jerk"
+======================================================================
+
+This large release brings several performance improvements
+
+Security
+
+* Remove the sharing daemon completely and rework the segment sharing
+  code. Permissions on the hugetlbfs mountpoint are used to enforce
+  segment sharing.
+
+Bug fixes
+
+* Sharing of writable segments is no longer possible, due to address
+  space randomization on x86_64 (although similar issues could happen on
+  any architecture).
+* minimal_copy detection should work better in this release.
+
+Trivial but notable changes
+
+* Testcase updates
+
+libhugetlbfs 1.0.1 "Spicy Garlic"
+======================================================================
+
+This small maintenance release brings a security fix, a few minor bug
+fixes, plus some documentation and error message updates.
+
+Security
+
+* A section on security has been added to the README file
+* The hugetlbd daemon socket has been moved from /tmp to /var/run.
+  This will require the daemon to be run as root, which was previously
+  just a recommendation.
+
+Bug fixes
+
+* Reduce reserved huge pages needed for application start-up
+* PPC linker script fixes
+
+Trivial but notable changes
+
+* Always install linker scripts for all targets
+* Error message updates
+* Add documentation on HUGETLB_DEBUG
+* Testcase updates
+
+libhugetlbfs 1.0
+======================================================================
+
+* First stable release

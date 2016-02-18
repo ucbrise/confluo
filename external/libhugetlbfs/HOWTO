@@ -1,0 +1,766 @@
+libhugetlbfs HOWTO
+==================
+
+Author: David Gibson <dwg@au1.ibm.com>, Adam Litke <agl@us.ibm.com>, and others
+Last updated: December 07, 2011
+
+Introduction
+============
+
+In Linux(TM), access to hugepages is provided through a virtual file
+system, "hugetlbfs".  The libhugetlbfs library interface works with
+hugetlbfs to provide more convenient specific application-level
+services.  In particular libhugetlbfs has three main functions:
+
+	* library functions
+libhugetlbfs provides functions that allow an applications to
+explicitly allocate and use hugepages more easily they could by
+directly accessing the hugetblfs filesystem
+
+	* hugepage malloc()
+libhugetlbfs can be used to make an existing application use hugepages
+for all its malloc() calls.  This works on an existing (dynamically
+linked) application binary without modification.
+
+	* hugepage text/data/BSS
+libhugetlbfs, in conjunction with included special linker scripts can
+be used to make an application which will store its executable text,
+its initialized data or BSS, or all of the above in hugepages.  This
+requires relinking an application, but does not require source-level
+modifications.
+
+This HOWTO explains how to use the libhugetlbfs library.  It is for
+application developers or system administrators who wish to use any of
+the above functions.
+
+The libhugetlbfs library is a focal point to simplify and standardise
+the use of the kernel API.
+
+Prerequisites
+=============
+
+Hardware prerequisites
+----------------------
+
+You will need a CPU with some sort of hugepage support, which is
+handled by your kernel.  This covers recent x86, AMD64, 64-bit
+PowerPC(R) (POWER4, PPC970 and later), and IBM System z CPUs.
+
+Currently, only x86, AMD64 and PowerPC are fully supported by
+libhugetlbfs. IA64 and Sparc64 have a working malloc, and SH64
+should also but it has not been tested. IA64, Sparc64, and SH64
+do not support segment remapping at this time. IBM System z supports
+malloc and also segment remapping with --hugetlbfs-align.
+
+Kernel prerequisites
+--------------------
+
+To use all the features of libhugetlbfs you will need a 2.6.16 or
+later kernel.  Many things will work with earlier kernels, but they
+have important bugs and missing features.  The later sections of the
+HOWTO assume a 2.6.16 or later kernel.  The kernel must also have
+hugepages enabled, that is to say the CONFIG_HUGETLB_PAGE and
+CONFIG_HUGETLBFS options must be switched on.
+
+To check if hugetlbfs is enabled, use one of the following methods:
+
+  * (Preferred) Use "grep hugetlbfs /proc/filesystems" to see if
+    hugetlbfs is a supported file system.
+  * On kernels which support /proc/config.gz (for example SLES10
+    kernels), you can search for the CONFIG_HUGETLB_PAGE and
+    CONFIG_HUGETLBFS options in /proc/config.gz
+  * Finally, attempt to mount hugetlbfs. If it works, the required
+    hugepage support is enabled.
+
+Any kernel which meets the above test (even old ones) should support
+at least basic libhugetlbfs functions, although old kernels may have
+serious bugs.
+
+The MAP_PRIVATE flag instructs the kernel to return a memory area that
+is private to the requesting process.  To use MAP_PRIVATE mappings,
+libhugetlbfs's automatic malloc() (morecore) feature, or the hugepage
+text, data, or BSS features, you will need a kernel with hugepage
+Copy-on-Write (CoW) support.  The 2.6.16 kernel has this.
+
+PowerPC note: The malloc()/morecore features will generate warnings if
+used on PowerPC chips with a kernel where hugepage mappings don't
+respect the mmap() hint address (the "hint address" is the first
+parameter to mmap(), when MAP_FIXED is not specified; the kernel is
+not required to mmap() at this address, but should do so when
+possible).  2.6.16 and later kernels do honor the hint address.
+Hugepage malloc()/morecore should still work without this patch, but
+the size of the hugepage heap will be limited (to around 256M for
+32-bit and 1TB for 64-bit).
+
+The 2.6.27 kernel introduced support for multiple huge page sizes for
+systems with the appropriate hardware support.  Unless specifically
+requested, libhugetlbfs will continue to use the default huge page size.
+
+Toolchain prerequisites
+-----------------------
+
+The library uses a number of GNU specific features, so you will need to use
+both gcc and GNU binutils.  For PowerPC and AMD64 systems you will need a
+"biarch" compiler, which can build both 32-bit and 64-bit binaries.  To use
+hugepage text and data segments, GNU binutils version 2.17 (or later) is
+recommended.  Older versions will work with restricted functionality.
+
+Configuration prerequisites
+---------------------------
+
+Direct access to hugepage pool has been deprecated in favor of the
+hugeadm utility.  This utility can be used for finding the available
+hugepage pools and adjusting their minimum and maximum sizes depending
+on kernel support.
+
+To list all availabe hugepage pools and their current min and max values:
+	hugeadm --pool-list
+
+To set the 2MB pool minimum to 10 pages:
+	hugeadm --pool-pages-min 2MB:10
+
+Note: that the max pool size will be adjusted to keep the same number of
+overcommit pages available if the kernel support is available when min
+pages are adjusted
+
+To add 15 pages to the maximum for 2MB pages:
+	hugeadm --pool-pages-min 2MB:-5
+
+For more information see man 8 hugeadm
+
+The raw kernel interfaces (as described below) are still available.
+
+In kernels before 2.6.24, hugepages must be allocated at boot-time via
+the hugepages= command-line parameter or at run-time via the
+/proc/sys/vm/nr_hugepages sysctl. If memory is restricted on the system,
+boot-time allocation is recommended. Hugepages so allocated will be in
+the static hugepage pool.
+
+In kernels starting with 2.6.24, the hugepage pool can grown on-demand.
+If this feature should be used, /proc/sys/vm/nr_overcommit_hugepages
+should be set to the maximum size of the hugepage pool. No hugepages
+need to be allocated via /proc/sys/vm/nr_hugepages or hugepages= in this
+case. Hugepages so allocated will be in the dynamic hugepage pool.
+
+For the running of the libhugetlbfs testsuite (see below), allocating 25
+static hugepages is recommended. Due to memory restrictions, the number
+of hugepages requested may not be allocated if the allocation is
+attempted at run-time. Users should verify the actual number of
+hugepages allocated by:
+
+       hugeadm --pool-list
+
+or
+
+       grep HugePages_Total /proc/meminfo
+
+With 25 hugepages allocated, most tests should succeed. However, with
+smaller hugepages sizes, many more hugepages may be necessary.
+
+To use libhugetlbfs features, as well as to run the testsuite, hugetlbfs
+must be mounted.  Each hugetlbfs mount point is associated with a page
+size.  To choose the size, use the pagesize mount option.  If this option
+is omitted, the default huge page size will be used.
+
+To mount the default huge page size:
+
+       mkdir -p /mnt/hugetlbfs
+       mount -t hugetlbfs none /mnt/hugetlbfs
+
+To mount 64KB pages (assuming hardware support):
+
+       mkdir -p /mnt/hugetlbfs-64K
+       mount -t hugetlbfs none -opagesize=64k /mnt/hugetlbfs-64K
+
+If hugepages should be available to non-root users, the permissions on
+the mountpoint need to be set appropriately.
+
+Installation
+============
+
+1. Type "make" to build the library
+
+This will create "obj32" and/or "obj64" under the top level
+libhugetlbfs directory, and build, respectively, 32-bit and 64-bit
+shared and static versions (as applicable) of the library into each
+directory.  This will also build (but not run) the testsuite.
+
+On i386 systems, only the 32-bit library will be built.  On PowerPC
+and AMD64 systems, both 32-bit and 64-bit versions will be built (the
+32-bit AMD64 version is identical to the i386 version).
+
+2. Run the testsuite with "make check"
+
+Running the testsuite is a good idea to ensure that the library is
+working properly, and is quite quick (under 3 minutes on a 2GHz Apple
+G5).  "make func" will run the just the functionality tests, rather
+than stress tests (a subset of "make check") which is much quicker.
+The testsuite contains tests both for the library's features and for
+the underlying kernel hugepage functionality.
+
+NOTE: The testsuite must be run as the root user.
+
+WARNING: The testsuite contains testcases explicitly designed to test
+for a number of hugepage related kernel bugs uncovered during the
+library's development.  Some of these testcases WILL CRASH HARD a
+kernel without the relevant fixes.  2.6.16 contains all such fixes for
+all testcases included as of this writing.
+
+3. (Optional) Install to system paths with "make install"
+
+This will install the library images to the system lib/lib32/lib64 as
+appropriate, the helper utilities and the manual pages.  By default
+it will install under /usr/local.  To put it somewhere else use
+PREFIX=/path/to/install on the make command line.  For example:
+
+	make install PREFIX=/opt/hugetlbfs
+Will install under /opt/hugetlbfs.
+
+"make install" will also install the linker scripts and wrapper for ld
+used for hugepage test/data/BSS (see below for details).
+
+Alternatively, you can use the library from the directory in which it
+was built, using the LD_LIBRARY_PATH environment variable.
+
+To only install library with linker scripts, the manual pages or the helper
+utilities separetly, use the install-libs, install-man and install-bin targets
+respectively. This can be useful when you with to install the utilities but
+not override the distribution-supported version of libhugetlbfs for example.
+
+Usage
+=====
+
+Using hugepages for malloc() (morecore)
+---------------------------------------
+
+This feature allows an existing (dynamically linked) binary executable
+to use hugepages for all its malloc() calls.  To run a program using
+the automatic hugepage malloc() feature, you must set several
+environment variables:
+
+1. Set LD_PRELOAD=libhugetlbfs.so
+  This tells the dynamic linker to load the libhugetlbfs shared
+  library, even though the program wasn't originally linked against it.
+
+  Note: If the program is linked against libhugetlbfs, preloading the
+        library may lead to application crashes. You should skip this
+        step in that case.
+
+2. Set LD_LIBRARY_PATH to the directory containing libhugetlbfs.so
+  This is only necessary if you haven't installed libhugetlbfs.so to a
+  system default path.  If you set LD_LIBRARY_PATH, make sure the
+  directory referenced contains the right version of the library
+  (32-bit or 64-bit) as appropriate to the binary you want to run.
+
+3. Set HUGETLB_MORECORE
+  This enables the hugepage malloc() feature, instructing libhugetlbfs
+  to override libc's normal morecore() function with a hugepage
+  version and use it for malloc().  From this point all malloc()s
+  should come from hugepage memory until it runs out.  This option can
+  be specified in two ways:
+
+  To use the default huge page size:
+       HUGETLB_MORECORE=yes
+
+  To use a specific huge page size:
+       HUGETLB_MORECORE=<pagesize>
+
+  To use Transparent Huge Pages (THP):
+       HUGETLB_MORECORE=thp
+
+Note: This option requires a kernel that supports Transparent Huge Pages
+
+Usually it's preferable to set these environment variables on the
+command line of the program you wish to run, rather than using
+"export", because you'll only want to enable the hugepage malloc() for
+particular programs, not everything.
+
+Examples:
+
+If you've installed libhugetlbfs in the default place (under
+/usr/local) which is in the system library search path use:
+  $ LD_PRELOAD=libhugetlbfs.so HUGETLB_MORECORE=yes <your app command line>
+
+If you have built libhugetlbfs in ~/libhugetlbfs and haven't installed
+it yet, the following would work for a 64-bit program:
+
+  $ LD_PRELOAD=libhugetlbfs.so LD_LIBRARY_PATH=~/libhugetlbfs/obj64 \
+	HUGETLB_MORECORE=yes <your app command line>
+
+Under some circumstances, you might want to specify the address where
+the hugepage heap is located.  You can do this by setting the
+HUGETLB_MORECORE_HEAPBASE environment variable to the heap address in
+hexadecimal.  NOTE: this will not work on PowerPC systems with old kernels
+which don't respect the hugepage hint address; see Kernel Prerequisites
+above.  Also note that this option is ignored for THP morecore.
+
+By default, the hugepage heap begins at roughly the same place a
+normal page heap would, rounded up by an amount determined by your
+platform.  For 32-bit PowerPC binaries the normal page heap address is
+rounded-up to a multiple of 256MB (that is, putting it in the next MMU
+segment); for 64-bit PowerPC binaries the address is rounded-up to a
+multiple of 1TB.  On all other platforms the address is rounded-up to
+the size of a hugepage.
+
+By default, the hugepage heap will be prefaulted by libhugetlbfs to
+guarantee enough hugepages exist and are reserved for the application
+(if this was not done, applications could receive a SIGKILL signal if
+hugepages needed for the heap are used by another application before
+they are faulted in). This leads to local-node allocations when no
+memory policy is in place for hugepages. Therefore, it is recommended to
+use
+
+  $ numactl --interleave=all <your app command line>
+
+to regain some of the performance impact of local-node allocations on
+large NUMA systems. This can still result in poor performance for those
+applications which carefully place their threads on particular nodes
+(such as by using OpenMP). In that case, thread-local allocation is
+preferred so users should select a memory policy that corresponds to
+the run-time behavior of the process' CPU usage. Users can specify
+HUGETLB_NO_PREFAULT to prevent the prefaulting of hugepages and instead
+rely on run-time faulting of hugepages.  NOTE: specifying
+HUGETLB_NO_PREFAULT on a system where hugepages are available to and
+used by many process can result in some applications receving SIGKILL,
+so its use is not recommended in high-availability or production
+environments.
+
+By default, the hugepage heap does not shrink.  To enable hugepage heap
+shrinking, set HUGETLB_MORECORE_SHRINK=yes.  NB: We have been seeing some
+unexpected behavior from glibc's malloc when this is enabled.
+
+Using hugepage shared memory
+----------------------------
+
+Hugepages are used for shared memory segments if the SHM_HUGETLB flag is
+set when calling shmget() and the pool is large enough. For hugepage-unaware
+applications, libhugetlbfs overrides shmget and adds the SHM_HUGETLB if the
+environment variable HUGETLB_SHM is set to "yes". The steps to use hugepages
+with applications not linked to libhugetlbfs are similar to morecore except
+for step 3.
+
+1. Set LD_PRELOAD=libhugetlbfs.so
+  This tells the dynamic linker to load the libhugetlbfs shared
+  library, even though the program wasn't originally linked against it.
+
+  Note: If the program is linked against libhugetlbfs, preloading the
+        library may lead to application crashes. You should skip this
+        step in that case.
+
+2. Set LD_LIBRARY_PATH to the directory containing libhugetlbfs.so
+  This is only necessary if you haven't installed libhugetlbfs.so to a
+  system default path.  If you set LD_LIBRARY_PATH, make sure the
+  directory referenced contains the right version of the library
+  (32-bit or 64-bit) as appropriate to the binary you want to run.
+
+3. Set HUGETLB_SHM=yes
+   The shmget() call is overridden whether the application is linked or the
+   libhugetlbfs library is preloaded. When this environment variable is set,
+   the SHM_HUGETLB flag is added to the call and the size parameter is aligned
+   to back the shared memory segment with huge pages. In the event hugepages
+   cannot be used, small pages will be used instead and a warning will be
+   printed to explain the failure.
+
+   Note: It is not possible to select any huge page size other than the
+         system default for this option.  If the kernel supports multiple
+         huge page sizes, the size used for shared memory can be changed by
+         altering the default huge page size via the default_hugepagesz
+         kernel boot parameter.
+
+Using hugepage text, data, or BSS
+---------------------------------
+
+To use the hugepage text, data, or BSS segments feature, you need to specially
+link your application.  How this is done depends on the version of GNU ld.  To
+support ld versions older than 2.17, libhugetlbfs provides custom linker
+scripts that must be used to achieve the required binary layout.  With version
+2.17 or later, the system default linker scripts should be used.
+
+To link an application for hugepages, you should use the the ld.hugetlbfs
+script included with libhugetlbfs in place of your normal linker.  Without any
+special options this will simply invoke GNU ld with the same parameters.  When
+it is invoked with options detailed in the following sections, ld.hugetlbfs
+will call the system linker with all of the options necessary to link for
+hugepages.  If a custom linker script is required, it will also be selected.
+
+If you installed ld.hugetlbfs using "make install", or if you run it
+from the place where you built libhugetlbfs, it should automatically
+be able to find the libhugetlbfs linker scripts.  Otherwise you may
+need to explicitly instruct it where to find the scripts with the
+option:
+	--hugetlbfs-script-path=/path/to/scripts
+(The linker scripts are in the ldscripts/ subdirectory of the
+libhugetlbfs source tree).
+
+	Linking the application with binutils-2.17 or later:
+	----------------------------------------------------
+
+This method will use the system default linker scripts.  Only one linker option
+is required to prepare the application for hugepages:
+
+	--hugetlbfs-align
+
+will instruct ld.hugetlbfs to call GNU ld with two options that increase the
+alignment of the resulting binary.  For reference, the options passed to ld are:
+
+	-z common-page-size=<value>	and
+	-z max-page-size=<value>
+
+	Linking the application with binutils-2.16 or older:
+	----------------------------------------------------
+
+To link a program with a custom linker script, one of the following linker
+options should be specified:
+
+	--hugetlbfs-link=B
+
+will link the application to store BSS data (only) into hugepages
+
+	--hugetlbfs-link=BDT
+
+will link the application to store text, initialized data and BSS data
+into hugepages.
+
+These are the only two available options when using custom linker scripts.
+
+	A note about the custom libhugetlbfs linker scripts:
+	----------------------------------------------------
+
+Linker scripts are usually distributed with GNU binutils and they may contain a
+partial implementation of new linker features.  As binutils evolves, the linker
+scripts supplied with previous versions become obsolete and are upgraded.
+
+Libhugetlbfs distributes one set of linker scripts that must work across
+several Linux distributions and binutils versions.  This has worked well for
+some time but binutils-2.17 (including some late 2.16 builds) have made changes
+that are impossible to accomodate without breaking the libhugetlbfs linker
+scripts for older versions of binutils.  This is why the linker scripts (and
+the --hugetlbfs-link ld.hugetlbfs option) have been deprecated for binutils >=
+2.17 configurations.
+
+If you are using a late 2.16 binutils version (such as 2.16.91) and are
+experiencing problems with huge page text, data, and bss, you can check
+binutils for the incompatibility with the following command:
+
+	ld --verbose | grep SPECIAL
+
+If any matches are returned, then the libhugetlbfs linker scripts may not work
+correctly.  In this case you should upgrade to binutils >= 2.17 and use the
+--hugetlbfs-align linking method.
+
+	Linking via gcc:
+	----------------
+
+In many cases it's normal to link an application by invoking gcc,
+which will then invoke the linker with appropriate options, rather
+than invoking ld directly.  In such cases it's usually best to
+convince gcc to invoke the ld.hugetlbfs script instead of the system
+linker, rather than modifying your build procedure to invoke the
+ld.hugetlbfs directly; the compilers may often add special libraries
+or other linker options which can be fiddly to reproduce by hand.
+To make this easier, 'make install' will install ld.hugetlbfs into
+$PREFIX/share/libhugetlbfs and create an 'ld' symlink to it.
+
+Then with gcc, you invoke it as a linker with two options:
+
+	-B $PREFIX/share/libhugetlbfs
+
+This option tells gcc to look in a non-standard location for the
+linker, thus finding our script rather than the normal linker. This
+can optionally be set in the CFLAGS environment variable.
+
+	-Wl,--hugetlbfs-align
+OR	-Wl,--hugetlbfs-link=B
+OR	-Wl,--hugetlbfs-link=BDT
+
+This option instructs gcc to pass the option after the comma down to the
+linker, thus invoking the special behaviour of the ld.hugetblfs script. This
+can optionally be set in the LDFLAGS environment variable.
+
+If you use a compiler other than gcc, you will need to consult its
+documentation to see how to convince it to invoke ld.hugetlbfs in
+place of the system linker.
+
+	Running the application:
+	------------------------
+
+The specially-linked application needs the libhugetlbfs library, so
+you might need to set the LD_LIBRARY_PATH environment variable so the
+application can locate libhugetlbfs.so.  Depending on the method used to link
+the application, the HUGETLB_ELFMAP environment variable can be used to control
+how hugepages will be used.
+
+	When using --hugetlbfs-link:
+	----------------------------
+
+The custom linker script determines which segments may be remapped into
+hugepages and this remapping will occur by default.  The following setting will
+disable remapping entirely:
+
+	HUGETLB_ELFMAP=no
+
+	When using --hugetlbfs-align:
+	-----------------------------
+
+This method of linking an application permits greater flexibility at runtime.
+Using HUGETLB_ELFMAP, it is possible to control which program segments are
+placed in hugepages.  The following four settings will cause the indicated
+segments to be placed in hugepages:
+
+	HUGETLB_ELFMAP=R	Read-only segments (text)
+	HUGETLB_ELFMAP=W	Writable segments (data/BSS)
+	HUGETLB_ELFMAP=RW	All segments (text/data/BSS)
+	HUGETLB_ELFMAP=no	No segments
+
+It is possible to select specific huge page sizes for read-only and writable
+segments by using the following advanced syntax:
+
+	HUGETLB_ELFMAP=[R[=<pagesize>]:[W[=<pagesize>]]
+
+For example:
+
+	Place read-only segments into 64k pages and writable into 16M pages
+	HUGETLB_ELFMAP=R=64k:W=16M
+
+	Use the default for read-only segments, 1G pages for writable segments
+	HUGETLB_ELFMAP=R:W=1G
+
+	Use 16M pages for writable segments only
+	HUGETLB_ELFMAP=W=16M
+
+	Default remapping behavior:
+	---------------------------
+
+If --hugetlbfs-link was used to link an application, the chosen remapping mode
+is saved in the binary and becomes the default behavior.  Setting
+HUGETLB_ELFMAP=no will disable all remapping and is the only way to modify the
+default behavior.
+
+For applications linked with --hugetlbfs-align, the default behavior is to not
+remap any segments into huge pages.  To set or display the default remapping
+mode for a binary, the included hugeedit command can be used:
+
+hugeedit [options] target-executable
+   options:
+   --text,--data	Remap the specified segment into huge pages by default
+   --disable		Do not remap any segments by default
+
+When target-executable is the only argument, hugeedit will display the default
+remapping mode without making any modifications.
+
+When a binary is remapped according to its default remapping policy, the
+system default huge page size will be used.
+
+	Environment variables:
+	----------------------
+
+There are a number of private environment variables which can affect
+libhugetlbfs:
+	HUGETLB_DEFAULT_PAGE_SIZE
+		Override the system default huge page size for all uses
+		except hugetlb-backed shared memory
+
+	HUGETLB_RESTRICT_EXE
+		By default, libhugetlbfs will act on any program that it
+		is loaded with, either via LD_PRELOAD or by explicitly
+		linking with -lhugetlbfs.
+
+		There are situations in which it is desirable to restrict
+		libhugetlbfs' actions to specific programs.  For example,
+		some ISV applications are wrapped in a series of scripts
+		that invoke bash, python, and/or perl.	It is more
+		convenient to set the environment variables related
+		to libhugetlbfs before invoking the wrapper scripts,
+		yet this has the unintended and undesirable consequence
+		of causing the script interpreters to use and consume
+		hugepages.  There is no obvious benefit to causing the
+		script interpreters to use hugepages, and there is a
+		clear disadvantage: fewer hugepages are available to
+		the actual application.
+
+		To address this scenario, set HUGETLB_RESTRICT_EXE to a
+		colon-separated list of programs to which the other
+		libhugetlbfs environment variables should apply.  (If
+		not set, libhugetlbfs will attempt to apply the requested
+		actions to all programs.)  For example,
+
+		    HUGETLB_RESTRICT_EXE="hpcc:long_hpcc"
+
+		will restrict libhugetlbfs' actions to programs named
+		/home/fred/hpcc and /bench/long_hpcc but not /usr/hpcc_no.
+
+	HUGETLB_ELFMAP
+		Control or disable segment remapping (see above)
+
+	HUGETLB_MINIMAL_COPY
+		If equal to "no", the entire segment will be copied;
+		otherwise, only the necessary parts will be, which can
+		be much more efficient (default)
+
+	HUGETLB_FORCE_ELFMAP
+		Explained in "Partial segment remapping"
+
+	HUGETLB_MORECORE
+	HUGETLB_MORECORE_HEAPBASE
+	HUGETLB_NO_PREFAULT
+		Explained in "Using hugepages for malloc()
+		(morecore)"
+
+	HUGETLB_VERBOSE
+		Specify the verbosity level of debugging output from 1
+		to 99 (default is 1)
+	HUGETLB_PATH
+		Specify the path to the hugetlbfs mount point
+	HUGETLB_SHARE
+		Explained in "Sharing remapped segments"
+	HUGETLB_DEBUG
+		Set to 1 if an application segfaults. Gives very detailed output
+		and runs extra diagnostics.
+
+	Sharing remapped segments:
+	--------------------------
+
+By default, when libhugetlbfs uses anonymous, unlinked hugetlbfs files
+to store remapped program segment data.  This means that if the same
+program is started multiple times using hugepage segments, multiple
+huge pages will be used to store the same program data.
+
+The reduce this wastage, libugetlbfs can be instructed to allow
+sharing segments between multiple invocations of a program.  To do
+this, you must set the HUGETLB_SHARE variable must be set for all the
+processes in question.  This variable has two possible values:
+	anything but 1: the default, indicates no segments should be shared
+	1: indicates that read-only segments (i.e. the program text,
+in most cases) should be shared, read-write segments (data and bss)
+will not be shared.
+
+If the HUGETLB_MINIMAL_COPY variable is set for any program using
+shared segments, it must be set to the same value for all invocations
+of that program.
+
+Segment sharing is implemented by creating persistent files in a
+hugetlbfs containing the necessary segment data.  By default, these
+files are stored in a subdirectory of the first located hugetlbfs
+filesystem, named 'elflink-uid-XXX' where XXX is the uid of the
+process using sharing.  This directory must be owned by the uid in
+question, and have mode 0700.  If it doesn't exist, libhugetlbfs will
+create it automatically.  This means that (by default) separate
+invocations of the same program by different users will not share huge
+pages.
+
+The location for storing the hugetlbfs page files can be changed by
+setting the HUGETLB_SHARE_PATH environment variable.  If set, this
+variable must contain the path of an accessible, already created
+directory located in a hugetlbfs filesystem.  The owner and mode of
+this directory are not checked, so this method can be used to allow
+processes of multiple uids to share huge pages.  IMPORTANT SECURITY
+NOTE: any process sharing hugepages can insert arbitrary executable
+code into any other process sharing hugepages in the same directory.
+Therefore, when using HUGETLB_SHARE_PATH, the directory created *must*
+allow access only to a set of uids who are mutually trusted.
+
+The files created in hugetlbfs for sharing are persistent, and must be
+manually deleted to free the hugepages in question.  Future versions
+of libhugetlbfs should include tools and scripts to automate this
+cleanup.
+
+	Partial segment remapping
+	-------------------------
+
+libhugetlbfs has limited support for remapping a normal, non-relinked
+binary's data, text and BSS into hugepages. To enable this feature,
+HUGETLB_FORCE_ELFMAP must be set to "yes".
+
+Partial segment remapping is not guaranteed to work. Most importantly, a
+binary's segments must be large enough even when not relinked by
+libhugetlbfs:
+
+	architecture	address		minimum segment size
+	------------	-------		--------------------
+	i386, x86_64	all		hugepage size
+	ppc32		all		256M
+	ppc64		0-4G		256M
+	ppc64		4G-1T		1020G
+	ppc64		1T+		1T
+
+The raw size, though, is not sufficient to indicate if the code will
+succeed, due to alignment. Since the binary is not relinked, however,
+this is relatively straightforward to 'test and see'.
+
+NOTE: You must use LD_PRELOAD to load libhugetlbfs.so when using
+partial remapping.
+
+
+Examples
+========
+
+Example 1:  Application Developer
+---------------------------------
+
+To have a program use hugepages, complete the following steps:
+
+1. Make sure you are working with kernel 2.6.16 or greater.
+
+2. Modify the build procedure so your application is linked against
+libhugetlbfs.
+
+For the remapping, you link against the library with the appropriate
+linker script (if necessary or desired).  Linking against the library
+should result in transparent usage of hugepages.
+
+Example 2:  End Users and System Administrators
+-----------------------------------------------
+
+To have an application use libhugetlbfs, complete the following steps:
+
+1. Make sure you are using kernel 2.6.16.
+
+2. Make sure the library is in the path, which you can set with the
+LD_LIBRARY_PATH environment variable. You might need to set other
+environment variables, including LD_PRELOAD as described above.
+
+
+Troubleshooting
+===============
+
+The library has a certain amount of debugging code built in, which can
+be controlled with the environment variable HUGETLB_VERBOSE.  By
+default the debug level is "1" which means the library will only print
+relatively serious error messages.  Setting HUGETLB_VERBOSE=2 or
+higher will enable more debug messages (at present 2 is the highest
+debug level, but that may change).  Setting HUGETLB_VERBOSE=0 will
+silence the library completely, even in the case of errors - the only
+exception is in cases where the library has to abort(), which can
+happen if something goes wrong in the middle of unmapping and
+remapping segments for the text/data/bss feature.
+
+If an application fails to run, set the environment variable HUGETLB_DEBUG
+to 1. This causes additional diagnostics to be run. This information should
+be included when sending bug reports to the libhugetlbfs team.
+
+Specific Scenarios:
+-------------------
+
+ISSUE:	When using the --hugetlbfs-align or -zmax-page-size link options, the
+	linker complains about truncated relocations and the build fails.
+
+TRY:	Compile the program with the --relax linker option.  Either add
+	-Wl,--relax to CFLAGS or --relax to LDFLAGS.
+
+ISSUE:  When using the xB linker script with a 32 bit binary on an x86 host with
+        NX support enabled, the binary segfaults.
+
+TRY:    Recompiling with the --hugetlbfs-align options and use the new relinking
+        method or booting your kernel with noexec32=off.
+
+
+Trademarks
+==========
+
+This work represents the view of the author and does not necessarily
+represent the view of IBM.
+
+PowerPC is a registered trademark of International Business Machines
+Corporation in the United States, other countries, or both.  Linux is
+a trademark of Linus Torvalds in the United States, other countries,
+or both.

@@ -1,0 +1,66 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH GETHUGEPAGESIZES 3 "October 10, 2008"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+gethugepagesizes - Get the system supported huge page sizes
+.SH SYNOPSIS
+.B #include <hugetlbfs.h>
+
+.br
+int gethugepagesizes(long pagesizes[], int n_elem);
+
+.SH DESCRIPTION
+
+The gethugepagesizes() function returns either the number of system supported
+huge page sizes or the sizes  themselves. If \fBpagesizes\fP is NULL and
+\fBn_elem\fP is 0, then the number of huge pages the system supports is
+returned. Otherwise, \fBpagesizes\fP is filled with at most \fBn_elem\fP
+page sizes.
+
+.SH RETURN VALUE
+
+On success, either the number of huge page sizes supported by the system or
+the number of huge page sizes stored in pagesizes is returned. On failure,
+-1 is returned and errno is set appropriately.
+
+.SH ERRORS
+
+.TP
+.B EINVAL
+\fBn_elem\fP is less than zero or \fBn_elem\fP is greater than zero and
+\fBpagesizes\fP is NULL.
+.PP
+Also see opendir(3) for other possible values for errno. This error occurs
+when the sysfs directory exists but cannot be opened.
+
+.SH NOTES
+
+This call will return all huge page sizes as reported by the kernel.
+Not all of these sizes may be usable by the programmer since mount points
+may not be available for all sizes.  To test whether a size will be usable
+by \fBlibhugetlbfs\fP, hugetlbfs_find_path_for_size() can be called on a
+specific size to see if a mount point is configured.
+
+.SH SEE ALSO
+.I oprofile(1),
+.I opendir(3),
+.I hugetlbfs_find_path_for_size(3),
+.I libhugetlbfs(7)
+
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.

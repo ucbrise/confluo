@@ -1,0 +1,31 @@
+The libhugetlbfs project uses a number of code submission rules from the
+Linux kernel.  For instance, we follow the coding style document very
+closely.  Please see:
+
+http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/CodingStyle?id=HEAD
+
+For a very indepth look at coding style.
+
+Also like the Linux kernel, we transact in patches over a mailing list.
+The libhugetlbfs mailing is at:
+
+libhugetlbfs@googlegroups.com
+
+You do not need to be subscribed to send mail to that list.
+
+I know that Github provides a nifty pull request tool, please do not use
+it.  At best your request will be closed with reference to this document
+or the mailing list, and at worst it will simply be ignored.
+
+Libhugetlbfs does not require Copyright assignment to any particular
+organization.  You (or the organization paying your wages) keep the
+copyright for code you write.  We do require a Signed-off-by: line at
+the end of the changelog.  For more on the how and why of this please
+see:
+
+http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/SubmittingPatches?id=HEAD
+
+And finally, if you have any questions send them to the list.  It is low
+traffic and it might take you some time to get a response, but messages
+sent there will be read eventually.
+

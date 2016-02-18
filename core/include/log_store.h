@@ -14,7 +14,7 @@
 
 #define USE_INT_HASH
 #define USE_STL_HASHMAP_NGRAM
-// #define USE_BLOCK_LIST
+#define USE_BLOCK_LIST
 
 namespace succinct {
 

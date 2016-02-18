@@ -1,0 +1,54 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" Copyright 2012 Cray Inc.
+.\" All rights reserved.
+.\" Licensed under LGPL 2.1 by Cray Inc.
+.\"
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH GETHUGEPAGESIZE 3 "March 7, 2012"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+gethugepagesize - Get the default huge page size
+.SH SYNOPSIS
+.B #include <hugetlbfs.h>
+.br
+
+.B long gethugepagesize(void)
+
+.SH DESCRIPTION
+
+The gethugepagesize() function returns the default huge page size used by
+libhugetlbfs.  This will be either the system default, or a valid value set
+by the environment variable \fBHUGETLB_DEFAULT_PAGE_SIZE\fP.
+
+If the system does not support any huge page sizes an error is returned.
+
+.SH RETURN VALUE
+
+On success, the default huge page size is returned.  On failure,
+-1 is returned and errno is set appropriately.
+
+.SH ERRORS
+
+.TP
+.B ENOSYS
+The system does not support huge pages.
+
+.SH SEE ALSO
+.I libhugetlbfs(7)
+
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.

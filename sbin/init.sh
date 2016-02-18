@@ -112,7 +112,7 @@ ls_mnt_huge()
 	ls -lh /mnt/huge
 }
 
-set_numa_pages 512
+set_numa_pages 8192 8192
 grep_meminfo
 
 # disable OOM kills

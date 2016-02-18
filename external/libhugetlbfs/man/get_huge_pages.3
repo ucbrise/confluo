@@ -1,0 +1,73 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH GET_HUGE_PAGES 3 "October 8, 2008"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+get_huge_pages, free_huge_pages \- Allocate and free hugepages
+.SH SYNOPSIS
+.B #include <hugetlbfs.h>
+.br
+
+.br
+.B void *get_huge_pages(size_t len, ghp_t flags);
+.br
+.B void free_huge_pages(void *ptr);
+.SH DESCRIPTION
+
+\fBget_huge_pages()\fP allocates a memory region \fBlen\fP bytes in size
+backed by hugepages. Hugepages may be of benefit to applications that use
+large amounts of address space and suffer a  performance hit  due to  TLB
+misses.  Wall-clock  time or oprofile can be used to determine if there is
+a performance benefit from using hugepages or not.
+
+The \fBlen\fP parameter must be hugepage-aligned. In the current
+implementation, only the default hugepage size may be allocated via this
+function. Use \fBgethugepagesize\fP to discover what the alignment should
+be.
+
+The \fBflags\fP argument changes the behaviour
+of the function. Flags may be or'd together.
+
+.TP
+.B GHP_DEFAULT
+
+Allocate a region of memory of the requested length backed by hugepages of
+the default hugepage size. Return NULL if sufficient pages are not available
+
+.PP
+
+\fBfree_huge_pages()\fP frees a region of memory allocated by
+\fBget_huge_pages()\fP. The behaviour of the function if another pointer
+is used, valid or otherwise, is undefined.
+
+.SH RETURN VALUE
+
+On success, a pointer is returned to the allocated memory. On
+error, NULL is returned. errno will be set based on what the failure of
+mmap() was due to.
+
+.SH SEE ALSO
+.I oprofile(1)
+,
+.I gethugepagesize(3)
+,
+.I get_hugepage_region(3)
+,
+.I libhugetlbfs(7)
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.
+

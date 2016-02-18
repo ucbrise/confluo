@@ -19,5 +19,5 @@ add_executable(mmbench src/micro_benchmark.cc)
 set_target_properties(mmbench PROPERTIES COMPILE_FLAGS "-DMICA_BENCHMARK")
 
 target_link_libraries(lsbench serverclient ${THRIFT_LIBRARIES})
-target_link_libraries(mbench logstore)
+target_link_libraries(mbench logstore ${THRIFT_LIBRARIES})
 target_link_libraries(mmbench mica)

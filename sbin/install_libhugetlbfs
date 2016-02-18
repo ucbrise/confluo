@@ -1,0 +1,10 @@
+sudo yum install glibc-devel glibc-static
+
+sbin="`dirname "$0"`"
+sbin="`cd "$sbin"; pwd`"
+
+cd "$sbin/../external/libhugetlbfs"
+make && sudo obj/hugeadm --pool-pages-min 2MB:4096 &&\
+  sudo mkdir -p /mnt/hugetlbfs &&\
+  sudo mount -t hugetlbfs none /mnt/hugetlbfs &&\
+  sudo make check && sudo make install

@@ -1,0 +1,57 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH HUGEEDIT 7 "October 8, 2008"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+hugeedit \- Set default policy for backing text and data with hugepages
+.SH SYNOPSIS
+.B hugeedit binary
+.br
+.B hugeedit [options] binary
+.SH DESCRIPTION
+
+\fBhugectl\fP runs processes with a specific policy for backing memory
+regions with hugepages. Ordinarily when processes are relinked with
+\fBlibhugetlbfs\fP using the recommended linking method, either \fBhugectl\fP
+is required on each execution or environment variables must be set for
+each execution. \fBhugeedit\fP can be used to set bits in the ELF header
+that determine if the text or data segments are backed by default without
+further intervention.
+
+If no arguments are specified, \fBhugeedit\fP will display what the current
+defaults for each segment in a binary are. The available options are
+
+.TP
+.B --text
+Back the text segments of the binary by default.
+
+.TP
+.B --data
+Back the data segments of the binary by default
+
+.TP
+.B --disable
+Back all segments using small pages by default
+
+.SH SEE ALSO
+.I oprofile(1),
+.I libhugetlbfs(7),
+.I hugectl(8)
+.br
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.
+

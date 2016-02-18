@@ -1,0 +1,52 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" Copyright 2012 Cray Inc.
+.\" All rights reserved.
+.\" Licensed under LGPL 2.1 by Cray Inc.
+.\"
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH HUGETLBFS_FIND_PATH 3 "March 7, 2012"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+hugetlbfs_find_path, hugetlbfs_find_path_for_size - Locate an appropriate hugetlbfs mount point
+.SH SYNOPSIS
+.B #include <hugetlbfs.h>
+
+.br
+const char *hugetlbfs_find_path(void);
+.br
+const char *hugetlbfs_find_path_for_size(long page_size);
+
+.SH DESCRIPTION
+
+These functions return a pathname for a mounted hugetlbfs filesystem for
+the appropriate huge page size.  For hugetlbfs_find_path, the default
+huge page size is used (see gethugepagesize(3)).  For
+hugetlbfs_find_path_for_size, a valid huge page size must be specified
+(see gethugepagesizes(3)).
+
+.SH RETURN VALUE
+
+On success, a non-NULL value is returned.
+On failure, NULL is returned.
+
+.SH SEE ALSO
+.I libhugetlbfs(7),
+.I gethugepagesize(3),
+.I gethugepagesizes(3)
+
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.

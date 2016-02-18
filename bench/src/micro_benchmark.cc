@@ -85,9 +85,11 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
     fprintf(stderr, "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
         load_keys_, load_end_offset_, avg_latency);
 
-    fprintf(stderr, "Dumping data structures to disk...");
-    shard_->Dump(data_path + ".logstore");
-    fprintf(stderr, "Done.\n");
+    //fprintf(stderr, "Dumping data structures to disk...");
+    //shard_->Dump(data_path + ".logstore");
+#ifndef MICA_BENCHMARK
+    fprintf(stderr, "Done. Num n-grams = %zu\n", shard_->GetNumNGrams());
+#endif
   } else if (mode == 1) {
     fprintf(stderr, "Loading...\n");
     shard_->Load(data_path + ".logstore");

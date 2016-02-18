@@ -1,0 +1,90 @@
+#!/bin/sh
+#
+# libhugetlbfs - Easy use of Linux hugepages
+# Copyright (C) 2006 Andy Whitcroft, IBM Corporation
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public License
+# as published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+if [ "$#" -lt 1 ]; then
+	echo "Usage: localversion <version file> <source> ..." 1>&2
+	exit 1
+fi
+file="$1"
+
+if [ -f "$file" ]; then
+	read current_version <"$file"
+fi
+version="$current_version"
+
+modified=0
+
+# GIT: check for a git tree.
+mod=`git diff-index HEAD 2>/dev/null`
+if [ "$?" -eq 0 ]; then
+	# This is a GIT repo, see if it was modified.
+	if [ "$mod" != "" ]; then
+		modified=1
+	else
+		# Subtle, if we are in a git archive and the repository
+		# is clean then update the time on the version file
+		# thus ensuring it will be correct in any tarball.
+		touch "$file"
+	fi
+
+	# Try and get a real "tag relative" version name for it.
+	version=`git describe --tags HEAD 2>&1`
+	if [ "$?" -ne 0 ]; then
+		# ok, desperation just take the commit id.
+		version=`git log | awk '{ print $2; exit }'`
+		version="commit<$version>"
+	fi
+
+else
+	if [ ! -f "$file" ]; then
+		echo 1>&2 "$0: ERROR: unversioned tarball"
+		echo "#error UNVERSIONED tarball" >"$file.h"
+		exit 1
+	fi
+
+	# No version control, use the modification times
+	# of the source.
+	for s in "$@"
+	do
+		if [ "$s" -nt "$file" ]; then
+			modified=1
+		fi
+	done
+fi
+
+if [ "$current_version" != "$version" ]; then
+	echo "version update: $version"
+	echo "$version" >"$file"
+fi
+
+# Update the c-define for this version, take the modification
+# flags into account.
+version_modified="$version"
+[ "$modified" -eq 1 ] && version_modified="$version_modified (modified)"
+
+if [ -f "$file.h" ]; then
+	read d1 current_version_modified <"$file.h"
+fi
+if [ "$current_version_modified" != "$version_modified" ]; then
+	echo "version string: $version_modified"
+	echo "// $version_modified" >"$file.h"
+	echo "#define VERSION \"$version_modified\"" >>"$file.h"
+fi
+
+exit 0

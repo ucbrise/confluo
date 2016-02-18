@@ -1,0 +1,6 @@
+sbin="`dirname "$0"`"
+sbin="`cd "$sbin"; pwd`"
+
+bin="$sbin/../build/bench/bin"
+
+LD_PRELOAD="/usr/local/lib64/libhugetlbfs.so" HUGETLB_MORECORE="yes" sudo $bin/mbench $@

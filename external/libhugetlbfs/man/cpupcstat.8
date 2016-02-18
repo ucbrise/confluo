@@ -1,0 +1,117 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH CPUCPSTAT 8 "9 June, 2009"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+cpupcstat \- Measure the DTLB miss rate
+.SH SYNOPSIS
+.B cpupcstat [options] [target]
+.SH DESCRIPTION
+\fBcpupcstat\fP uses oprofile to measure the DTLB miss rate of a
+specified application or the kernel.  It configures oprofile to count the
+number of DTLB misses, optionally starts the \fBtarget\fP, and reports on the
+miss rate over a specified interval as \fBtarget\fP executes.
+
+The following options can be used to configure how \fBcpupcstat\fP works:
+
+.TP
+.B --vmlinux </path/to/vmlinux>
+
+This allows the user to specify where the appropriate vmlinux file is for their
+kernel.  If this is not specified, /boot/vmlinux\-\`uname \-r\` will be used.
+
+.TP
+.B --delay <seconds>
+
+This allows the user to specify the reporting interval.  The default is 10
+seconds.
+
+.TP
+.B --target-global
+
+Gather statistics for all processes and the kernel running in the system.
+
+.TP
+.B --target-pid <pid>
+
+This allows the user to specify the pid of a process already that is already
+running.  If this option is specified, \fBtarget\fP will be ignored.
+
+.TP
+.B --real-target <real-target>
+
+Use this to specify the real name of the program to monitor if the \fBtarget\fP
+is a launcher script.  When this is specified, \fBtarget\fP is executed but the
+report will be for \fBreal-target\fP.
+
+.TP
+.B --time-limit <sec>
+
+This option sets the time limit for monitoring.  If this is specified the
+\fBtarget\fP or \fBpid\fP will only be monitored for \fBsec\fP seconds.  The
+default continues monitoring while \fBtarget\fP or \fBpid\fP are still alive.
+
+.TP
+.B --kernel
+
+This allows the user to request DTLB miss rate data be collected for the kernel
+as well as the \fBtarget\fP.
+
+.TP
+.B --misses-per-instruction
+
+This option requests that the ratio of instructions retired per TLB miss.
+
+.TP
+.B --misses-per-cycle
+
+This option requests that the ratio of CPU cycles per TLB miss.
+
+.TP
+.B --time-servicing
+
+This option requests that the percentage of CPU cycles spent servicing TLB
+misses is displayed when \fBcpupcstat\fB exits.  To use this option the cost
+in CPU cycles for a single TLB miss must be specified using either the
+\fB--cost-config\fB option or the \fBtlbmiss_cost.sh\fB script.
+
+.TP
+.B --cost-config </path/to/config>
+
+This option tells \fBcpupcstat\fB that the cost in CPU cycles of a TLB miss
+can be found in the specified file, it should be specified as:
+
+TLB_MISS_COST=XX
+
+Where XX is the cost in cycles.  This option is only used with the
+\fB--time-servicing\fB option.
+
+.TP
+.B --force-oprofile
+
+\fBcpupcstat\fP prefers the perf tool for data collection, only using oprofile
+if perf is not present or supported.  This option will force \fBcpupcstat\fP to
+use oprofile for data collection.
+
+.SH SEE ALSO
+.I oprofile(1)
+.I perf(1)
+.I tlbmiss_cost.sh(8)
+.br
+.SH AUTHORS
+Eric B Munson <ebmunson@us.ibm.com> is the primary author. See the documentation
+for other contributors.
+

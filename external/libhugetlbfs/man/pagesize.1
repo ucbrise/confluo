@@ -1,0 +1,57 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH PAGESIZE 1 "October 10, 2008"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+pagesize \- Print supported system page sizes
+.SH SYNOPSIS
+.B pagesize [options]
+.SH DESCRIPTION
+
+The pagesize utility prints the page sizes of a page of memory in bytes,
+as returned by getpagesizes(3). This is useful when creating portable shell
+scripts, configuring huge page pools with hugeadm or launching applications
+to use huge pages with hugectl.
+
+If no parameters are specified, \fBpagesize\fP prints the system base page
+size as returned by \fBgetpagesize()\fP. The following parameters affect
+what other pagesizes are displayed.
+
+.TP
+.B --huge-only, -H
+
+Display all huge pages supported by the system as returned by
+\fBgethugepagesizes()\fP.
+
+.TP
+.B --all, -a
+
+Display all page sizes supported by the system.
+
+.SH SEE ALSO
+.I oprofile(1),
+.I getpagesize(2),
+.I getpagesizes(3),
+.I gethugepagesizes(3),
+.I hugectl(7),
+.I hugeadm(7),
+.I libhugetlbfs(7)
+
+.br
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.
+

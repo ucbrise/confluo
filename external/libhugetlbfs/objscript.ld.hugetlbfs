@@ -1,0 +1,105 @@
+#! /bin/bash
+
+# Paranoid check to make sure we don't reinvoke ourselves, effectively
+# making a fork()bomb
+if [ -n "$LD_HUGETLBFS_RECURSION" ]; then
+    exit 99
+fi
+export LD_HUGETLBFS_RECURSION=1
+
+HUGETLB_LDSCRIPT_PATH=/usr/local/share/libhugetlbfs/ldscripts
+if [ -z "$HUGETLB_LDSCRIPT_PATH" ]; then
+    # Assume this script is running from the libhugetlbfs source tree,
+    # and look for the ldscripts accordingly
+    HUGETLB_LDSCRIPT_PATH=$(dirname $(readlink $0))/ldscripts
+fi
+
+CUSTOM_LDSCRIPTS="yes"
+if [ -z "$CUSTOM_LDSCRIPTS" ]; then
+    # Assume this script is running from the libhugetlbfs source tree,
+    # and set CUSTOM_LDSCRIPTS to default "yes"
+    CUSTOM_LDSCRIPTS="yes"
+fi
+
+# Try to figure out what's the underlying linker to invoke
+if [ -z "$LD" ]; then
+    for x in $(which -a ld); do
+	if [ "$x" != "$0" ]; then
+	    LD="$x"
+	    break
+	fi
+    done
+fi
+
+i=0
+while [ -n "$1" ]; do
+    arg="$1"
+    case "$arg" in
+	-m*)
+	    EMU="${arg#-m}"
+	    args[$i]="$arg"
+	    i=$[i+1]
+	    if [ -z "$EMU" ]; then
+		shift
+		EMU="$1"
+		args[$i]="$1"
+		i=$[i+1]
+	    fi
+	    ;;
+	--hugetlbfs-link=*)
+	    if [ -z "$HUGETLB_DEPRECATED_LINK" ]; then
+		echo -n "ld.hugetlbfs: --hugetlbfs-link is deprecated. " 1>&2
+		echo "Migrate to --hugetlbfs-align." 1>&2
+	    fi
+	    HTLB_LINK="${arg#--hugetlbfs-link=}"
+	    ;;
+	--hugetlbfs-script-path=*)
+	    HUGETLB_LDSCRIPT_PATH="${arg#--hugetlbfs-script-path=}"
+	    ;;
+	--hugetlbfs-align)
+	    HTLB_ALIGN="slice"
+	    ;;
+	--)
+	    args=("${args[@]}" "$@")
+	    break
+	    ;;
+	*)
+	    args[$i]="$arg"
+	    i=$[i+1]
+	    ;;
+    esac
+    shift
+done
+
+if [ -n "$HTLB_LINK" ]; then
+    if [ "$CUSTOM_LDSCRIPTS" == "no" ]; then
+        echo -n "ld.hugetlbfs: --hugetlbfs-link is not supported on this " 1>&2
+        echo "platform. Use --hugetlbfs-align instead." 1>&2
+    fi
+    HTLB_ALIGN="" # --hugetlbfs-link overrides --hugetlbfs-align
+    LDSCRIPT="$EMU.x$HTLB_LINK"
+    HTLBOPTS="-T${HUGETLB_LDSCRIPT_PATH}/${LDSCRIPT}"
+fi
+
+MB=$((1024*1024))
+case "$EMU" in
+elf32ppclinux|elf64ppc)	HPAGE_SIZE=$((16*$MB)) SLICE_SIZE=$((256*$MB)) ;;
+elf64lppc)		HPAGE_SIZE=$((16*$MB)) SLICE_SIZE=$((256*$MB)) ;;
+elf_i386|elf_x86_64)	HPAGE_SIZE=$((4*$MB)) SLICE_SIZE=$HPAGE_SIZE ;;
+elf_s390|elf64_s390)	HPAGE_SIZE=$((1*$MB)) SLICE_SIZE=$HPAGE_SIZE ;;
+armelf*_linux_eabi|aarch64elf*|aarch64linux*)	HPAGE_SIZE=$((2*$MB)) SLICE_SIZE=$HPAGE_SIZE ;;
+esac
+
+if [ "$HTLB_ALIGN" == "slice" ]; then
+	HTLBOPTS="-zcommon-page-size=$SLICE_SIZE -zmax-page-size=$SLICE_SIZE"
+	HTLBOPTS="$HTLBOPTS -lhugetlbfs"
+
+	# targeting the ARM platform one needs to explicitly set the text segment offset
+	# otherwise it will be NULL.
+	case "$EMU" in
+	armelf*_linux_eabi)	HTLBOPTS="$HTLBOPTS -Ttext-segment=$SLICE_SIZE" ;;
+	elf_i386)		HTLBOPTS="$HTLBOPTS -Ttext-segment=0x08000000" ;;
+	esac
+fi
+
+${LD} "${args[@]}" ${HTLBOPTS}

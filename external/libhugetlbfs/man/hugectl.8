@@ -1,0 +1,141 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH HUGECTL 8 "October 10, 2008"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+hugectl \- Control policy for backing text, data and malloc() with hugepages
+.SH SYNOPSIS
+.B hugectl [options] command {arguments}
+.SH DESCRIPTION
+
+\fBhugectl\fP runs processes with a specific policy for backing memory regions
+with hugepages. The use of hugepages benefit applications that use large
+amounts of address space and suffer a performance hit due to TLB misses.
+Policy is enforced by \fBlibhugetlbfs\fP and \fBhugectl\fP configures the
+environment based on the options provided.  Wall-clock time or oprofile can
+be used to determine if there is a performance benefit from using hugepages
+or not.
+
+To effectively back text/data, the target process must be relinked to align
+the ELF segments on a hugepage boundary. The library also supports more options
+for the control of memory regions than are exposed by the \fBhugectl\fP
+utility. See the \fBlibhugetlbfs\fP manual page for more details.
+
+The following options affect what memory regions are backed by hugepages.
+
+.TP
+.B --text[=<size>],--data[=<size>],--bss[=<size>]
+Back the text, data or BSS segments with hugepages, optionally with pages
+of the specified size.  To be effective, the process must be relinked
+as described in the HOWTO to align the ELF segments.  It is possible to
+partially back segments using the HUGETLB_FORCE_ELMAP environment variable
+as described in the \fBlibhugetlbfs\fP manual page.
+
+.TP
+.B --heap[=<size>]
+Use the glibc morecore hook to back malloc() with hugepages, optionally
+with pages of the specified size.  Note that this does not affect brk()
+segments and applications that use custom allocators potentially do not
+use hugepages for their heap even with this option specified.
+
+.TP
+.B --shm
+This option overrides shmget() to back shared memory regions with hugepages
+if possible. Segment size requests will be aligned to fit to the default
+hugepage size region.
+
+.TP
+.B --share-text
+Request that multiple application instances share text segments that are
+backed with huge pages.  This option sets the environment variable
+HUGETLB_SHARE to 1.
+
+.TP
+.B --thp
+Align heap regions to huge page size for promotion by khugepaged.  For more
+information on transparent huge pages see linux-2.6/Documentation/transhuge.txt
+
+.PP
+The following options affect how \fBhugectl\fP behaves.
+
+.TP
+.B --no-preload
+Disable any pre-loading of the \fBlibhugetlbfs\fP library. This may be necessary
+if only the heap is being backed by hugepages and the application is already
+linked against the library. \fBhugectl\fP may pre-load the library by mistake
+and this option prevents that.
+
+.TP
+.B --force-preload
+Force pre-loading of the \fBlibhugetlbfs\fP library. This option is used when
+the segments of the binary are aligned to the hugepage boundary of interest
+but the binary is not linked against libhugetlbfs. This is useful on PPC64
+where binaries are aligned to 64K as required by the ABI and the kernel is
+using a 4K base pagesize.
+
+.TP
+.B --no-reserve
+By default, huge pages are reserved at mmap() time so future faults will
+succeed. This avoids unexpected application but some applications depend
+on memory overcommit to create large sparse mappings. For this type of
+application, this switch will create huge page backed mappings without a
+reservation if the kernel is recent enough to make this operation safe.
+Use this option with extreme care as in the event huge pages are not
+available when the mapping is faulted, the application will be killed.
+
+.TP
+.B --dry-run
+Instead of running the process, the \fBhugectl\fP utility will describe what
+environment variables it set for \fBlibhugetlbfs\fP. This is useful if
+additional environment variables are to be set and a launcher shell script is
+being developed.
+
+.TP
+.B --library-use-path
+By default, \fBhugectl\fP will use the version of \fBlibhugetlbfs\fP it was
+installed with, even if this is not in the LD_LIBRARY_PATH environment. Using
+this option forces \fBhugectl\fP to use the version of \fBlibhugetlbfs\fP
+installed in the library system path.
+
+.TP
+.B --library-path <path>
+This option forces \fBhugectl\fP to use the \fBlibhugetlbfs\fP libraries within
+the given prefix.
+
+.PP
+The following options affect the verbosity of libhugetlbfs.
+
+.TP
+.B --verbose <level>, -v
+The default value for the verbosity level is 1 and the range of the value can
+be set with --verbose from 0 to 99. The higher the value, the more verbose the
+library will be. 0 is quiet and 3 will output much debugging information. The
+verbosity level is increased by one each time -v is specified.
+
+.TP
+.B -q
+The -q option will drecease the verbosity level by 1 each time it is specified
+to a minimum of 0.
+
+.SH SEE ALSO
+.I oprofile(1),
+.I hugeadm(7),
+.I libhugetlbfs(7)
+.br
+.SH AUTHORS
+libhugetlbfs was written by various people on the libhugetlbfs-devel
+mailing list.
+

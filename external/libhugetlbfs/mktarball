@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+#
+P='mktarball'
+
+if [ "$#" -ne 1 ]; then
+	echo 1>&2 "Usage: $P <commitish>"
+	exit 1
+fi
+commit="$1"
+
+if [ ! .git ]; then
+	echo 1>&2 "$P: not in the source tree"
+	exit 1
+fi
+
+# Get the official name for this commit.
+name=`git describe --tags "$commit"`
+
+# Build a version file to add to the tarball, we know it is not
+# modified as we just took a commit which is unmodified by definition.
+tmp="/tmp/tarball-$$"
+mkdir -p "$tmp/libhugetlbfs-$name"
+echo "$name" >"$tmp/libhugetlbfs-$name/version"
+
+git archive --format=tar --prefix="libhugetlbfs-$name/" "$commit" \
+						>"libhugetlbfs-$name.tar"
+tar -C "$tmp" -rf "libhugetlbfs-$name.tar" "libhugetlbfs-$name/version"
+gzip -9 "libhugetlbfs-$name.tar"
+
+# Clean up the version.
+[ -d "$tmp/libhugetlbfs-$name" ] && rm -rf "$tmp"
