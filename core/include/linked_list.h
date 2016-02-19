@@ -85,7 +85,7 @@ class LinkedList {
   typedef ll_iterator iterator;
 
   LinkedList() {
-    head_ = new Block;
+    head_ = (Block*) malloc(sizeof(Block));
 #ifdef COLLECT_LIST_STATS
     ls_stats.num_allocs++;
 #endif
@@ -104,7 +104,7 @@ class LinkedList {
     uint32_t block_offset = size_ % NUM_VALS;
     if (size_ && block_offset == 0) {
       // Allocate a new block
-      Block *new_block = new Block;
+      Block *new_block = (Block*) malloc(sizeof(Block));
 #ifdef COLLECT_LIST_STATS
       ls_stats.num_allocs++;
 #endif

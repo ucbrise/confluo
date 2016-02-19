@@ -5,7 +5,7 @@
 namespace succinct {
 
 LogStore::LogStore(uint32_t ngram_n) {
-  data_ = new char[LogStore::kLogStoreSize];
+  data_ = (char*) malloc(sizeof(char) * LogStore::kLogStoreSize);
   tail_ = 0;
 
   ngram_n_ = ngram_n;

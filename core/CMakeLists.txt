@@ -3,6 +3,8 @@ project(log-store-core CXX)
 
 find_package(Threads)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -B /usr/local/share/libhugetlbfs")
+
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 file(MAKE_DIRECTORY ${LIBRARY_OUTPUT_PATH})
 
