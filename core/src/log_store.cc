@@ -35,7 +35,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
                             static_cast<int64_t>(end - ngram_n_));
       i < end + value.length() - ngram_n_; i++) {
 #ifdef USE_INT_HASH
-    uint32_t ngram = Hash::simple_hash3(data_ + i);
+    uint32_t ngram = Hash::simple_hash4(data_ + i);
 #else
     std::string ngram;
     for (uint32_t off = 0; off < ngram_n_; off++) {
@@ -90,7 +90,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   size_t suffix_len = skip_filter ? 0 : query.length() - ngram_n_;
 
 #ifdef USE_INT_HASH
-  uint32_t prefix_ngram = Hash::simple_hash3(substr);
+  uint32_t prefix_ngram = Hash::simple_hash4(substr);
 #else
   std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
