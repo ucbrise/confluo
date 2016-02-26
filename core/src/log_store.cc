@@ -4,8 +4,28 @@
 
 namespace succinct {
 
-LogStore::LogStore(uint32_t ngram_n) {
-  data_ = new char[LogStore::kLogStoreSize];
+LogStore::LogStore(uint32_t ngram_n, const char* path) {
+//  int page_size;
+//  if ((page_size = sysconf(_SC_PAGE_SIZE)) < 0) {
+//    fprintf(stderr, "Could not obtain page size.\n");
+//    throw -1;
+//  }
+
+  int fd = open(path, (O_CREAT | O_TRUNC | O_RDWR),
+                (S_IRWXU | S_IRWXG | S_IRWXO));
+
+  if (fd < 0) {
+    fprintf(stderr, "Could not obtain file descriptor.\n");
+    throw -1;
+  }
+
+  data_ = (char *) mmap(NULL, kLogStoreSize, PROT_READ | PROT_WRITE, MAP_SHARED,
+                        fd, 0);
+  if (data_ == MAP_FAILED) {
+    fprintf(stderr, "Could not mmap file.\n");
+    throw -1;
+  }
+
   tail_ = 0;
 
   ngram_n_ = ngram_n;
@@ -74,7 +94,7 @@ void LogStore::Get(std::string& value, const int64_t key) {
   }
   int64_t start = value_offsets_[pos];
   int64_t end =
-  (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
+      (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
   size_t len = end - start;
 
   value.assign(data_ + start, len);
@@ -113,7 +133,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
       // TODO: Take care of query.length() < ngram_n_ case
       int64_t pos = GetKeyPos(idx_off[i]);
       if (pos >= 0)
-      results.insert(keys_[pos]);
+        results.insert(keys_[pos]);
     }
   }
 #endif

@@ -1,7 +1,15 @@
 #ifndef LOG_STORE_H_
 #define LOG_STORE_H_
 
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/mman.h>
+
 #include <string>
 #include <set>
 #include <map>
@@ -57,7 +65,7 @@ class LogStore {
   typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
 #endif
 
-  LogStore(uint32_t ngram_n = 3);
+  LogStore(uint32_t ngram_n = 3, const char* path = "log");
 
   int Append(const int64_t key, const std::string& value);
   void Get(std::string& value, const int64_t key);
