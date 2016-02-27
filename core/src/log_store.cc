@@ -5,17 +5,25 @@
 namespace succinct {
 
 LogStore::LogStore(uint32_t ngram_n, const char* path) {
-//  int page_size;
-//  if ((page_size = sysconf(_SC_PAGE_SIZE)) < 0) {
-//    fprintf(stderr, "Could not obtain page size.\n");
-//    throw -1;
-//  }
+  if ((page_size_ = sysconf(_SC_PAGE_SIZE)) < 0) {
+    fprintf(stderr, "Could not obtain page size.\n");
+    throw -1;
+  }
 
   int fd = open(path, (O_CREAT | O_TRUNC | O_RDWR),
                 (S_IRWXU | S_IRWXG | S_IRWXO));
 
   if (fd < 0) {
     fprintf(stderr, "Could not obtain file descriptor.\n");
+    throw -1;
+  }
+
+  off_t lastoffset = lseek( fd, kLogStoreSize, SEEK_SET);
+  const char eof[1] = {0};
+  size_t bytes_written = write(fd, eof, 1);
+
+  if (bytes_written != 1) {
+    fprintf(stderr, "Could not write to file.\n");
     throw -1;
   }
 
@@ -41,6 +49,11 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   // Append value to log
   uint64_t end = tail_;
   memcpy(data_ + end, value.c_str(), value.length());
+
+#ifdef PERSIST_AFTER_EVERY_WRITE
+
+  msync(data_ + tail_ - tail_ % page_size_, value.length(), MS_SYNC);
+#endif
 
   // Update primary index
 #ifdef USE_STL_HASHMAP_KV

@@ -20,6 +20,7 @@
 
 #define USE_INT_HASH
 #define USE_STL_HASHMAP_NGRAM
+#define PERSIST_AFTER_EVERY_WRITE
 
 namespace succinct {
 
@@ -147,6 +148,7 @@ private:
 
   char *data_;
   uint32_t tail_;
+  int page_size_;
 
 #ifdef USE_STL_HASHMAP_KV
   KeyIdx key_map_;
