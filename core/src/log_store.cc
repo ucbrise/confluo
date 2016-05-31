@@ -51,7 +51,6 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   memcpy(data_ + end, value.c_str(), value.length());
 
 #ifdef PERSIST_AFTER_EVERY_WRITE
-
   msync(data_ + tail_ - tail_ % page_size_, value.length(), MS_SYNC);
 #endif
 

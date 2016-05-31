@@ -20,7 +20,7 @@
 
 #define USE_INT_HASH
 #define USE_STL_HASHMAP_NGRAM
-#define PERSIST_AFTER_EVERY_WRITE
+//#define PERSIST_AFTER_EVERY_WRITE
 
 namespace succinct {
 
