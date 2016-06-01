@@ -70,9 +70,12 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
         auto b_end = high_resolution_clock::now();
         auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
         double avg_latency = (double) elapsed_us / (double) b_size;
-        double completion = 100.0 * (double) (load_end_offset_) / (double) (target_data_size);
-        fprintf(stderr, "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
-                completion, load_end_offset_, avg_latency);
+        double completion = 100.0 * (double) (load_end_offset_)
+            / (double) (target_data_size);
+        fprintf(
+            stderr,
+            "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
+            completion, load_end_offset_, avg_latency);
         b_start = high_resolution_clock::now();
       }
     }
@@ -82,7 +85,9 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
     auto elapsed_us = duration_cast<nanoseconds>(end - start).count();
     double avg_latency = (double) elapsed_us / (double) load_keys_;
 
-    fprintf(stderr, "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
+    fprintf(
+        stderr,
+        "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
         load_keys_, load_end_offset_, avg_latency);
 
     fprintf(stderr, "Dumping data structures to disk...");
@@ -117,7 +122,6 @@ void MicroBenchmark::BenchmarkGetLatency() {
   }
 
   fprintf(stderr, "Done.\n");
-
 
   std::ofstream result_stream("latency_get");
 
@@ -231,8 +235,8 @@ void MicroBenchmark::BenchmarkAppendLatency() {
 }
 
 void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
-                                            double append_f,
-                                            uint32_t num_clients) {
+                                         double append_f,
+                                         uint32_t num_clients) {
 
   if (get_f + search_f + append_f != 1.0) {
     fprintf(stderr, "Query fractions must add up to 1.0. Sum = %lf\n",
@@ -339,7 +343,9 @@ void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
 }
 
 void PrintUsage(char *exec) {
-  fprintf(stderr, "Usage: %s [-b bench-type] [-m mode] data-path\n", exec);
+  fprintf(stderr,
+          "Usage: %s [-b bench-type] [-m mode] [-n num-clients] data-path\n",
+          exec);
 }
 
 std::vector<std::string> &Split(const std::string &s, char delim,
@@ -359,21 +365,24 @@ std::vector<std::string> Split(const std::string &s, char delim) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 2 || argc > 6) {
+  if (argc < 2 || argc > 8) {
     PrintUsage(argv[0]);
     return -1;
   }
 
   int c;
   std::string bench_type = "latency-get";
-  int mode = 0;
-  while ((c = getopt(argc, argv, "b:m:")) != -1) {
+  int mode = 0, num_clients = 1;
+  while ((c = getopt(argc, argv, "b:m:n:")) != -1) {
     switch (c) {
       case 'b':
         bench_type = std::string(optarg);
         break;
       case 'm':
         mode = atoi(optarg);
+        break;
+      case 'n':
+        num_clients = atoi(optarg);
         break;
       default:
         fprintf(stderr, "Could not parse command line arguments.\n");
@@ -403,7 +412,7 @@ int main(int argc, char** argv) {
     double search_f = atof(tokens[2].c_str());
     double append_f = atof(tokens[3].c_str());
     fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf\n",
-            get_f, search_f, append_f);
+            get_f, search_f, append_f, num_clients);
     ls_bench.BenchmarkThroughput(get_f, search_f, append_f);
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
