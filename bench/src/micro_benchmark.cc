@@ -411,9 +411,9 @@ int main(int argc, char** argv) {
     double get_f = atof(tokens[1].c_str());
     double search_f = atof(tokens[2].c_str());
     double append_f = atof(tokens[3].c_str());
-    fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf\n",
+    fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, num_clients = %d\n",
             get_f, search_f, append_f, num_clients);
-    ls_bench.BenchmarkThroughput(get_f, search_f, append_f);
+    ls_bench.BenchmarkThroughput(get_f, search_f, append_f, num_clients);
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }
