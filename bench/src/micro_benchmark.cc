@@ -246,7 +246,6 @@ void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
 
   const double get_m = get_f, search_m = get_f + search_f, append_m = 1.0;
 
-  std::mutex mtx;
   std::condition_variable cvar;
   std::vector<std::thread> threads;
   uint32_t num_ready = 0;
@@ -283,12 +282,6 @@ void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
                 }
               }
               fprintf(stderr, "Done.\n");
-
-              std::unique_lock<std::mutex> lck(mtx);
-              num_ready++;
-              while (num_ready < num_clients) {
-                cvar.wait(lck);
-              }
 
               double thput = 0;
 
