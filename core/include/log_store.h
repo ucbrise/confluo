@@ -15,6 +15,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 #include <fstream>
 
 #include "task_manager.h"
