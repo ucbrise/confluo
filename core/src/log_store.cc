@@ -4,7 +4,10 @@
 
 namespace succinct {
 
-LogStore::LogStore(uint32_t ngram_n, const char* path) {
+LogStore::LogStore(uint32_t ngram_n, const char* path)
+    : tail_(0),
+      ngram_n_(ngram_n) {
+
   if ((page_size_ = sysconf(_SC_PAGE_SIZE)) < 0) {
     fprintf(stderr, "Could not obtain page size.\n");
     throw -1;
@@ -18,8 +21,8 @@ LogStore::LogStore(uint32_t ngram_n, const char* path) {
     throw -1;
   }
 
-  off_t lastoffset = lseek( fd, kLogStoreSize, SEEK_SET);
-  const char eof[1] = {0};
+  off_t lastoffset = lseek(fd, kLogStoreSize, SEEK_SET);
+  const char eof[1] = { 0 };
   size_t bytes_written = write(fd, eof, 1);
 
   if (bytes_written != 1) {
@@ -34,14 +37,18 @@ LogStore::LogStore(uint32_t ngram_n, const char* path) {
     throw -1;
   }
 
-  tail_ = 0;
-
-  ngram_n_ = ngram_n;
+  append_manager_ = new TaskManager(1);
 }
 
 int LogStore::Append(const int64_t key, const std::string& value) {
-  boost::unique_lock<boost::shared_mutex> lk(mutex_);
+  std::future<int> result = append_manager_->enqueue([&] {
+    return InternalAppend(key, value);
+  });
 
+  return result.get();
+}
+
+int LogStore::InternalAppend(const int64_t key, const std::string& value) {
   if (tail_ + value.length() > kLogStoreSize) {
     return -1;   // Data exceeds max chunk size
   }
@@ -87,8 +94,6 @@ int LogStore::Append(const int64_t key, const std::string& value) {
 }
 
 void LogStore::Get(std::string& value, const int64_t key) {
-  boost::shared_lock<boost::shared_mutex> lk(mutex_);
-
 #ifdef USE_STL_HASHMAP_KV
   try {
     uint64_t val_info = key_map_.at(key);
@@ -127,7 +132,6 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
-  boost::shared_lock<boost::shared_mutex> lk(mutex_);
 #ifdef USE_STL_HASHMAP_KV
   auto idx_map = ngram_idx_[prefix_ngram];
   for (auto idx_entry : idx_map) {

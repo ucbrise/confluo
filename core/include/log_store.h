@@ -15,8 +15,9 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <fstream>
 
-#include <boost/thread.hpp>
+#include "task_manager.h"
 
 #define USE_INT_HASH
 #define USE_STL_HASHMAP_NGRAM
@@ -51,22 +52,19 @@ class LogStore {
   static const char kValueDelim = '\n';
 
 #ifdef USE_INT_HASH
-#ifdef USE_STL_HASHMAP_KV
-  typedef std::unordered_map<uint32_t,
-      std::unordered_map<int64_t, std::vector<uint32_t>>> NGramIdx;
-  typedef std::unordered_map<int64_t, uint64_t> KeyIdx;
-#else
 #ifdef USE_STL_HASHMAP_NGRAM
   typedef std::unordered_map<uint32_t, std::vector<uint32_t>> NGramIdx;
 #else
   typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
-#endif
 #endif
 #else
   typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
 #endif
 
   LogStore(uint32_t ngram_n = 3, const char* path = "log");
+  ~LogStore() {
+    delete append_manager_;
+  }
 
   int Append(const int64_t key, const std::string& value);
   void Get(std::string& value, const int64_t key);
@@ -75,11 +73,7 @@ class LogStore {
   int64_t Load(const std::string& path);
 
   size_t GetNumKeys() {
-#ifdef USE_STL_HASHMAP_KV
-    return key_map_.size();
-#else
     return keys_.size();
-#endif
   }
 
   int64_t GetSize() {
@@ -88,16 +82,8 @@ class LogStore {
 
 private:
 
-#ifdef USE_STL_HASHMAP_KV
-  bool MatchFirst(const std::vector<uint32_t>& offsets, const char* suffix, const size_t len) {
-    for (auto off: offsets) {
-      if (strncmp(data_ + off + ngram_n_, suffix, len)) {
-        return true;
-      }
-    }
-    return false;
-  }
-#else
+  int InternalAppend(const int64_t key, const std::string& value);
+
   int64_t GetValueOffsetPos(const int64_t key) {
     size_t pos = std::lower_bound(keys_.begin(), keys_.end(), key)
     - keys_.begin();
@@ -110,7 +96,6 @@ private:
             value_offset)) - value_offsets_.begin();
     return (pos >= (int64_t) value_offsets_.size()) ? -1 : pos;
   }
-#endif
 
   template<typename T>
   size_t WriteVectorToFile(std::ostream& out, std::vector<T>& data) {
@@ -150,17 +135,12 @@ private:
   uint32_t tail_;
   int page_size_;
 
-#ifdef USE_STL_HASHMAP_KV
-  KeyIdx key_map_;
-#else
   std::vector<int64_t> keys_;
   std::vector<int32_t> value_offsets_;
-#endif
 
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;
-
-  boost::shared_mutex mutex_;
+  TaskManager *append_manager_;
 };
 }
 
