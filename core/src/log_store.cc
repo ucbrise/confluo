@@ -42,11 +42,13 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   if (tail_ + value.length() > kLogStoreSize) {
     return -1;   // Data exceeds max chunk size
   }
+
+  uint64_t end = tail_;
+
   {
     std::lock_guard<std::mutex> guard(append_mtx_);
 
     // Append value to log
-    uint64_t end = tail_;
     memcpy(data_ + end, value.c_str(), value.length());
 
 #ifdef PERSIST_AFTER_EVERY_WRITE
@@ -55,7 +57,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
 
     // Update primary index
     keys_.push_back(key);
-    value_offsets_.push_back(tail_);
+    value_offsets_.push_back(end);
 
 #ifndef NON_CONCURRENT_WRITES
   }
