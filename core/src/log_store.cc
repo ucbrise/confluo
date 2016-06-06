@@ -42,48 +42,49 @@ int LogStore::Append(const int64_t key, const std::string& value) {
   if (tail_ + value.length() > kLogStoreSize) {
     return -1;   // Data exceeds max chunk size
   }
+  {
+    std::lock_guard<std::mutex> guard(append_mtx_);
 
-#ifdef NON_CONCURRENT_WRITES
-  std::lock_guard<std::mutex> guard(append_mtx_);
-#endif
-
-  // Append value to log
-  uint64_t end = tail_;
-  memcpy(data_ + end, value.c_str(), value.length());
+    // Append value to log
+    uint64_t end = tail_;
+    memcpy(data_ + end, value.c_str(), value.length());
 
 #ifdef PERSIST_AFTER_EVERY_WRITE
-  msync(data_ + tail_ - tail_ % page_size_, value.length(), MS_SYNC);
+    msync(data_ + tail_ - tail_ % page_size_, value.length(), MS_SYNC);
 #endif
 
-  // Update primary index
-#ifdef USE_STL_HASHMAP_KV
-  key_map_[key] = (end << 32 | value.length());
-#else
-  keys_.push_back(key);
-  value_offsets_.push_back(tail_);
-#endif
+    // Update primary index
+    keys_.push_back(key);
+    value_offsets_.push_back(tail_);
 
-  // Update secondary index
-  for (int64_t i = std::max(static_cast<int64_t>(0),
-                            static_cast<int64_t>(end - ngram_n_));
-      i < end + value.length() - ngram_n_; i++) {
-#ifdef USE_INT_HASH
-    uint32_t ngram = Hash::simple_hash3(data_ + i);
-#else
-    std::string ngram;
-    for (uint32_t off = 0; off < ngram_n_; off++) {
-      ngram += data_[i + off];
-    }
-#endif
-    {
 #ifndef NON_CONCURRENT_WRITES
-      std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx_);
-#endif
-      ngram_idx_[ngram].offsets_.push_back(i);
-    }
   }
+#endif
 
-  tail_ += value.length();
+    // Update secondary index
+    for (int64_t i = std::max(static_cast<int64_t>(0),
+                              static_cast<int64_t>(end - ngram_n_));
+        i < end + value.length() - ngram_n_; i++) {
+#ifdef USE_INT_HASH
+      uint32_t ngram = Hash::simple_hash3(data_ + i);
+#else
+      std::string ngram;
+      for (uint32_t off = 0; off < ngram_n_; off++) {
+        ngram += data_[i + off];
+      }
+#endif
+      {
+#ifndef NON_CONCURRENT_WRITES
+        std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx_);
+#endif
+        ngram_idx_[ngram].offsets_.push_back(i);
+      }
+    }
+
+    tail_ += value.length();
+#ifdef NON_CONCURRENT_WRITES
+  }
+#endif
 
   return 0;
 }

@@ -22,12 +22,7 @@
 #include <mutex>
 #include <thread>
 
-#define USE_INT_HASH
-#define USE_STL_HASHMAP_NGRAM
-//#define PERSIST_AFTER_EVERY_WRITE
-
-// Concurrency optimizations
-#define NON_CONCURRENT_WRITES
+#include "flags.h"
 
 namespace succinct {
 
@@ -52,16 +47,12 @@ class Hash {
 };
 #endif
 
-class OffsetList {
- public:
-  OffsetList() {
-  }
-
+typedef struct {
   std::vector<uint32_t> offsets_;
 #ifndef NON_CONCURRENT_WRITES
   std::mutex mtx_;
 #endif
-};
+} OffsetList;
 
 class LogStore {
  public:
@@ -152,9 +143,7 @@ private:
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;
 
-#ifdef NON_CONCURRENT_WRITES
   std::mutex append_mtx_;
-#endif
 };
 }
 
