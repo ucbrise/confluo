@@ -26,6 +26,9 @@
 #define USE_STL_HASHMAP_NGRAM
 //#define PERSIST_AFTER_EVERY_WRITE
 
+// Concurrency optimizations
+#define NON_CONCURRENT_WRITES
+
 namespace succinct {
 
 #ifdef USE_INT_HASH
@@ -55,7 +58,9 @@ class OffsetList {
   }
 
   std::vector<uint32_t> offsets_;
+#ifndef NON_CONCURRENT_WRITES
   std::mutex mtx_;
+#endif
 };
 
 class LogStore {
@@ -138,7 +143,7 @@ private:
   }
 
   char *data_;
-  uint32_t tail_;
+  std::atomic<uint32_t> tail_;
   int page_size_;
 
   std::vector<int64_t> keys_;
@@ -146,6 +151,10 @@ private:
 
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;
+
+#ifdef NON_CONCURRENT_WRITES
+  std::mutex append_mtx_;
+#endif
 };
 }
 

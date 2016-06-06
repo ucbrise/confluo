@@ -43,6 +43,10 @@ int LogStore::Append(const int64_t key, const std::string& value) {
     return -1;   // Data exceeds max chunk size
   }
 
+#ifdef NON_CONCURRENT_WRITES
+  std::lock_guard<std::mutex> guard(append_mtx_);
+#endif
+
   // Append value to log
   uint64_t end = tail_;
   memcpy(data_ + end, value.c_str(), value.length());
@@ -72,10 +76,13 @@ int LogStore::Append(const int64_t key, const std::string& value) {
     }
 #endif
     {
+#ifndef NON_CONCURRENT_WRITES
       std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx_);
+#endif
       ngram_idx_[ngram].offsets_.push_back(i);
     }
   }
+
   tail_ += value.length();
 
   return 0;
@@ -88,9 +95,11 @@ void LogStore::Get(std::string& value, const int64_t key) {
     value = "INVALID";
     return;
   }
+
   int64_t start = value_offsets_[pos];
+  uint32_t tail = tail_;
   int64_t end =
-      (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail_;
+      (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail;
   size_t len = end - start;
 
   value.assign(data_ + start, len);
@@ -102,6 +111,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   char *suffix = substr + ngram_n_;
   bool skip_filter = (query.length() <= ngram_n_);
   size_t suffix_len = skip_filter ? 0 : query.length() - ngram_n_;
+  uint32_t tail = tail_;
 
 #ifdef USE_INT_HASH
   uint32_t prefix_ngram = Hash::simple_hash3(substr);
@@ -111,8 +121,9 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
 
   auto& idx_off = ngram_idx_[prefix_ngram].offsets_;
   for (uint32_t i = 0; i < idx_off.size(); i++) {
-    if (skip_filter
-        || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0) {
+    if (idx_off[i] < tail
+        && (skip_filter
+            || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0)) {
       // TODO: Take care of query.length() < ngram_n_ case
       int64_t pos = GetKeyPos(idx_off[i]);
       if (pos >= 0)
