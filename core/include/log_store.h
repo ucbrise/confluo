@@ -49,10 +49,14 @@ class Hash {
 };
 #endif
 
-typedef struct {
-  std::vector<uint32_t> offsets;
-  std::mutex mtx;
-} OffsetList;
+class OffsetList {
+ public:
+  OffsetList() {
+  }
+
+  std::vector<uint32_t> offsets_;
+  std::mutex mtx_;
+};
 
 class LogStore {
  public:

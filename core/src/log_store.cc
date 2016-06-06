@@ -72,8 +72,8 @@ int LogStore::Append(const int64_t key, const std::string& value) {
     }
 #endif
     {
-      std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx);
-      ngram_idx_[ngram].offsets.push_back(i);
+      std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx_);
+      ngram_idx_[ngram].offsets_.push_back(i);
     }
   }
   tail_ += value.length();
@@ -109,7 +109,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
-  auto& idx_off = ngram_idx_[prefix_ngram].offsets;
+  auto& idx_off = ngram_idx_[prefix_ngram].offsets_;
   for (uint32_t i = 0; i < idx_off.size(); i++) {
     if (skip_filter
         || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0) {
@@ -143,7 +143,7 @@ int64_t LogStore::Dump(const std::string& path) {
   size_t ngram_idx_size = ngram_idx_.size();
   out.write(reinterpret_cast<const char *>(&(ngram_idx_size)), sizeof(size_t));
   out_size += sizeof(size_t);
-  for (auto entry : ngram_idx_) {
+  for (auto& entry : ngram_idx_) {
 #ifdef USE_INT_HASH
     out.write(reinterpret_cast<const char *>(&(entry.first)), sizeof(uint32_t));
     out_size += (sizeof(uint32_t));
@@ -153,7 +153,7 @@ int64_t LogStore::Dump(const std::string& path) {
     out_size += (ngram_n_ * sizeof(char));
 #endif
 
-    out_size += WriteVectorToFile(out, entry.second);
+    out_size += WriteVectorToFile(out, entry.second.offsets_);
   }
   return out_size;
 }
@@ -189,10 +189,9 @@ int64_t LogStore::Load(const std::string& path) {
   for (size_t i = 0; i < ngram_idx_size; i++) {
 
 #ifdef USE_INT_HASH
-    typedef std::pair<uint32_t, std::vector<uint32_t>> IdxEntry;
     uint32_t first;
 
-    in.read(reinterpret_cast<char *>(&first), sizeof(uint32_t));
+    in.read(reinterpret_cast<char *>(&(first)), sizeof(uint32_t));
     in_size += sizeof(uint32_t);
 #else
     typedef std::pair<const std::string, std::vector<uint32_t>> IdxEntry;
@@ -203,10 +202,7 @@ int64_t LogStore::Load(const std::string& path) {
     in_size += (ngram_n_ * sizeof(char));
 #endif
 
-    std::vector<uint32_t> second;
-    in_size += ReadVectorFromFile(in, second);
-
-    ngram_idx_.insert(IdxEntry(first, second));
+    in_size += ReadVectorFromFile(in, ngram_idx_[first].offsets_);
   }
 
   return in_size;
