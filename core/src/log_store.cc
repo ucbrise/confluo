@@ -36,19 +36,9 @@ LogStore::LogStore(uint32_t ngram_n, const char* path)
     fprintf(stderr, "Could not mmap file.\n");
     throw -1;
   }
-
-  append_manager_ = new TaskManager(1);
 }
 
 int LogStore::Append(const int64_t key, const std::string& value) {
-  std::future<int> result = append_manager_->enqueue([&] {
-    return InternalAppend(key, value);
-  });
-
-  return result.get();
-}
-
-int LogStore::InternalAppend(const int64_t key, const std::string& value) {
   if (tail_ + value.length() > kLogStoreSize) {
     return -1;   // Data exceeds max chunk size
   }
@@ -81,12 +71,10 @@ int LogStore::InternalAppend(const int64_t key, const std::string& value) {
       ngram += data_[i + off];
     }
 #endif
-
-#ifdef USE_STL_HASHMAP_KV
-    ngram_idx_[ngram][key].push_back(i);
-#else
-    ngram_idx_[ngram].push_back(i);
-#endif
+    {
+      std::lock_guard guard(ngram_idx_[ngram].mtx);
+      ngram_idx_[ngram].offsets.push_back(i);
+    }
   }
   tail_ += value.length();
 
@@ -94,15 +82,6 @@ int LogStore::InternalAppend(const int64_t key, const std::string& value) {
 }
 
 void LogStore::Get(std::string& value, const int64_t key) {
-#ifdef USE_STL_HASHMAP_KV
-  try {
-    uint64_t val_info = key_map_.at(key);
-    value.assign(data_ + (val_info >> 32), val_info & 0xFFFFFFFF);
-  } catch (std::exception& e) {
-    value = "INVALID";
-    return;
-  }
-#else
   int64_t pos = GetValueOffsetPos(key);
 
   if (pos < 0) {
@@ -115,8 +94,6 @@ void LogStore::Get(std::string& value, const int64_t key) {
   size_t len = end - start;
 
   value.assign(data_ + start, len);
-#endif
-
 }
 
 void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
@@ -132,17 +109,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
-#ifdef USE_STL_HASHMAP_KV
-  auto idx_map = ngram_idx_[prefix_ngram];
-  for (auto idx_entry : idx_map) {
-    auto offsets = idx_entry.second;
-    if (skip_filter || MatchFirst(offsets, suffix, suffix_len)) {
-      // TODO: Take care of query.length() < ngram_n_ case
-      results.insert(idx_entry.first);
-    }
-  }
-#else
-  std::vector<uint32_t> idx_off = ngram_idx_[prefix_ngram];
+  auto& idx_off = ngram_idx_[prefix_ngram].offsets;
   for (uint32_t i = 0; i < idx_off.size(); i++) {
     if (skip_filter
         || strncmp(data_ + idx_off[i] + ngram_n_, suffix, suffix_len) == 0) {
@@ -152,14 +119,10 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
         results.insert(keys_[pos]);
     }
   }
-#endif
 }
 
 int64_t LogStore::Dump(const std::string& path) {
   int64_t out_size = 0;
-#ifdef USE_STL_HASHMAP_KV
-  fprintf(stderr, "Dump not supported yet.\n");
-#else
   std::ofstream out(path);
 
   // Write data
@@ -192,15 +155,11 @@ int64_t LogStore::Dump(const std::string& path) {
 
     out_size += WriteVectorToFile(out, entry.second);
   }
-#endif
   return out_size;
 }
 
 int64_t LogStore::Load(const std::string& path) {
   int64_t in_size = 0;
-#ifdef USE_STL_HASHMAP_KV
-  fprintf(stderr, "Dump not supported yet.\n");
-#else
   std::ifstream in(path);
 
   // Read data
@@ -249,7 +208,6 @@ int64_t LogStore::Load(const std::string& path) {
 
     ngram_idx_.insert(IdxEntry(first, second));
   }
-#endif
 
   return in_size;
 }

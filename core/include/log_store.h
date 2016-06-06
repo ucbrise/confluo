@@ -18,8 +18,9 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-
-#include "task_manager.h"
+#include <atomic>
+#include <mutex>
+#include <thread>
 
 #define USE_INT_HASH
 #define USE_STL_HASHMAP_NGRAM
@@ -48,6 +49,11 @@ class Hash {
 };
 #endif
 
+typedef struct {
+  std::vector<uint32_t> offsets;
+  std::mutex mtx;
+} OffsetList;
+
 class LogStore {
  public:
   static const uint32_t kLogStoreSize = 1024 * 1024 * 1024;
@@ -55,7 +61,7 @@ class LogStore {
 
 #ifdef USE_INT_HASH
 #ifdef USE_STL_HASHMAP_NGRAM
-  typedef std::unordered_map<uint32_t, std::vector<uint32_t>> NGramIdx;
+  typedef std::unordered_map<uint32_t, OffsetList> NGramIdx;
 #else
   typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
 #endif
@@ -64,9 +70,6 @@ class LogStore {
 #endif
 
   LogStore(uint32_t ngram_n = 3, const char* path = "log");
-  ~LogStore() {
-    delete append_manager_;
-  }
 
   int Append(const int64_t key, const std::string& value);
   void Get(std::string& value, const int64_t key);
@@ -83,9 +86,6 @@ class LogStore {
   }
 
 private:
-
-  int InternalAppend(const int64_t key, const std::string& value);
-
   int64_t GetValueOffsetPos(const int64_t key) {
     size_t pos = std::lower_bound(keys_.begin(), keys_.end(), key)
     - keys_.begin();
@@ -134,7 +134,7 @@ private:
   }
 
   char *data_;
-  uint32_t tail_;
+  std::atomic<uint32_t> tail_;
   int page_size_;
 
   std::vector<int64_t> keys_;
@@ -142,7 +142,6 @@ private:
 
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;
-  TaskManager *append_manager_;
 };
 }
 
