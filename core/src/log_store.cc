@@ -72,7 +72,7 @@ int LogStore::Append(const int64_t key, const std::string& value) {
     }
 #endif
     {
-      std::lock_guard guard(ngram_idx_[ngram].mtx);
+      std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx);
       ngram_idx_[ngram].offsets.push_back(i);
     }
   }

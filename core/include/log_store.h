@@ -134,7 +134,7 @@ private:
   }
 
   char *data_;
-  std::atomic<uint32_t> tail_;
+  uint32_t tail_;
   int page_size_;
 
   std::vector<int64_t> keys_;
