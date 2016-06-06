@@ -77,9 +77,13 @@ int LogStore::Append(const int64_t key, const std::string& value) {
 #endif
       {
 #ifndef NON_CONCURRENT_WRITES
-        std::lock_guard<std::mutex> guard(ngram_idx_[ngram].mtx_);
+        if (ngram_idx_.find(ngram) == ngram_idx_.end()) {
+          std::lock_guard<std::mutex> idx_guard(idx_append_mtx_);
+          ngram_idx_[ngram];
+        }
+        std::lock_guard<std::mutex> guard(ngram_idx_.at(ngram).mtx_);
 #endif
-        ngram_idx_[ngram].offsets_.push_back(i);
+        ngram_idx_.at(ngram).offsets_.push_back(i);
       }
     }
 
@@ -122,7 +126,7 @@ void LogStore::Search(std::set<int64_t>& results, const std::string& query) {
   std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
-  auto& idx_off = ngram_idx_[prefix_ngram].offsets_;
+  auto& idx_off = ngram_idx_.at(prefix_ngram).offsets_;
   for (uint32_t i = 0; i < idx_off.size(); i++) {
     if (idx_off[i] < tail
         && (skip_filter
