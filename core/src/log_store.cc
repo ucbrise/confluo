@@ -76,11 +76,14 @@ int LogStore::Append(const int64_t key, const std::string& value) {
       }
 #endif
       {
-#ifndef NON_CONCURRENT_WRITES
+
         if (ngram_idx_.find(ngram) == ngram_idx_.end()) {
+#ifndef NON_CONCURRENT_WRITES
           std::lock_guard<std::mutex> idx_guard(idx_append_mtx_);
+#endif
           ngram_idx_[ngram];
         }
+#ifndef NON_CONCURRENT_WRITES
         std::lock_guard<std::mutex> guard(ngram_idx_.at(ngram).mtx_);
 #endif
         ngram_idx_.at(ngram).offsets_.push_back(i);
