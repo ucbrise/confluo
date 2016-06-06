@@ -27,13 +27,8 @@
   }\
 }
 
-MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
-
-#ifdef MICA_BENCHMARK
-  shard_ = new MicaStore();
-#else
+MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
   shard_ = new LogStore();
-#endif
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
   data_path_ = resolved_path;
@@ -90,9 +85,11 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode) {
         "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
         load_keys_, load_end_offset_, avg_latency);
 
-    fprintf(stderr, "Dumping data structures to disk...");
-    shard_->Dump(data_path + ".logstore");
-    fprintf(stderr, "Done.\n");
+    if (dump) {
+      fprintf(stderr, "Dumping data structures to disk...");
+      shard_->Dump(data_path + ".logstore");
+      fprintf(stderr, "Done.\n");
+    }
   } else if (mode == 1) {
     fprintf(stderr, "Loading...\n");
     shard_->Load(data_path + ".logstore");
@@ -234,9 +231,10 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   result_stream.close();
 }
 
-void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
-                                         double append_f,
-                                         uint32_t num_clients) {
+void MicroBenchmark::BenchmarkThroughput(const double get_f,
+                                         const double search_f,
+                                         const double append_f,
+                                         const uint32_t num_clients) {
 
   if (get_f + search_f + append_f != 1.0) {
     fprintf(stderr, "Query fractions must add up to 1.0. Sum = %lf\n",
@@ -321,7 +319,7 @@ void MicroBenchmark::BenchmarkThroughput(double get_f, double search_f,
 
               std::ofstream ofs;
               char output_file[100];
-              sprintf(output_file, "throughput_%.2f_%.2f_%.2f", get_f, search_f, append_f);
+              sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, num_clients);
               ofs.open(output_file, std::ofstream::out | std::ofstream::app);
               ofs << thput << "\n";
               ofs.close();
@@ -366,7 +364,8 @@ int main(int argc, char** argv) {
   int c;
   std::string bench_type = "latency-get";
   int mode = 0, num_clients = 1;
-  while ((c = getopt(argc, argv, "b:m:n:")) != -1) {
+  bool dump = false;
+  while ((c = getopt(argc, argv, "b:m:n:d")) != -1) {
     switch (c) {
       case 'b':
         bench_type = std::string(optarg);
@@ -376,6 +375,9 @@ int main(int argc, char** argv) {
         break;
       case 'n':
         num_clients = atoi(optarg);
+        break;
+      case 'd':
+        dump = true;
         break;
       default:
         fprintf(stderr, "Could not parse command line arguments.\n");
@@ -389,7 +391,7 @@ int main(int argc, char** argv) {
 
   std::string data_path = std::string(argv[optind]);
 
-  MicroBenchmark ls_bench(data_path, mode);
+  MicroBenchmark ls_bench(data_path, mode, dump);
   if (bench_type == "latency-get") {
     ls_bench.BenchmarkGetLatency();
   } else if (bench_type == "latency-search") {
@@ -404,8 +406,10 @@ int main(int argc, char** argv) {
     double get_f = atof(tokens[1].c_str());
     double search_f = atof(tokens[2].c_str());
     double append_f = atof(tokens[3].c_str());
-    fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, num_clients = %d\n",
-            get_f, search_f, append_f, num_clients);
+    fprintf(
+        stderr,
+        "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, num_clients = %d\n",
+        get_f, search_f, append_f, num_clients);
     ls_bench.BenchmarkThroughput(get_f, search_f, append_f, num_clients);
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
