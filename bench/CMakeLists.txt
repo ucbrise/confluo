@@ -16,4 +16,3 @@ add_executable(lsbench src/log_store_benchmark.cc)
 add_executable(mbench src/micro_benchmark.cc)
 
 target_link_libraries(lsbench serverclient ${THRIFT_LIBRARIES})
-target_link_libraries(mbench logstore)

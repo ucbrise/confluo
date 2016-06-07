@@ -19,7 +19,6 @@ enable_language(C)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 # Builds all sub-modules
-add_subdirectory(core)
 add_subdirectory(server)
 add_subdirectory(shell)
 add_subdirectory(bench)
