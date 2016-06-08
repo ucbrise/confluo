@@ -19,18 +19,17 @@
 #include <algorithm>
 #include <fstream>
 #include <atomic>
-#include <mutex>
-#include <thread>
 
 #include "flags.h"
 #include "hash_ops.h"
+#include "locks.h"
 
 namespace succinct {
 
 typedef struct {
   std::vector<uint32_t> offsets_;
 #ifndef NON_CONCURRENT_WRITES
-  std::mutex mtx_;
+  Mutex mtx_;
 #endif
 } OffsetList;
 
@@ -88,24 +87,35 @@ class LogStore {
       return -1;   // Data exceeds max chunk size
     }
 
-    // Update write_tail
-    uint64_t value_offset = tail_.fetch_add(value.length());
+    int32_t value_offset;
+    size_t key_pos;
+
+    // Safely update keys, value offsets
+    {
+      // TODO: We should come up with a more efficient concurrent primary index
+      WriteLock keys_guard(keys_mtx_);
+      WriteLock value_offsets_guard(value_offsets_mtx_);
+      WriteLock valid_records_guard(valid_records_mtx_);
+
+      value_offset = tail_.fetch_add(value.length());
+      key_pos = keys_.size();
+
+      assert(key_pos == valid_records_.size());
+      assert(key_pos == value_offsets_.size());
+
+      keys_.push_back(key);
+      value_offsets_.push_back(value_offset);
+      valid_records_.push_back(false);
+    }
+
+    int32_t value_end = value_offset + value.length();
 
     // Append value to log; can be done without locking since
     // this thread has exclusive access to the region.
     memcpy(data_ + value_offset, value.c_str(), value.length());
 
-    // Safely update primary index
-    {
-      std::lock_guard<std::mutex> primary_idx_guard(append_mtx_);
-
-      keys_.push_back(key);
-      value_offsets_.push_back(value_offset);
-    }
-
     // Safely update secondary index entries
-    for (int64_t i = value_offset; i < value_offset + value.length() - ngram_n_;
-        i++) {
+    for (int64_t i = value_offset; i < value_end - ngram_n_; i++) {
 #ifdef USE_INT_HASH
       uint32_t ngram = Hash::simple_hash3(data_ + i);
 #else
@@ -113,12 +123,18 @@ class LogStore {
 #endif
       {
         if (ngram_idx_.find(ngram) == ngram_idx_.end()) {
-          std::lock_guard<std::mutex> secondary_idx_guard(idx_append_mtx_);
+          WriteLock secondary_idx_guard(secondary_idx_mtx_);
           ngram_idx_[ngram];
         }
-        std::lock_guard<std::mutex> guard(ngram_idx_.at(ngram).mtx_);
+        ReadLock secondary_idx_guard(secondary_idx_mtx_);
+        WriteLock ngram_entry_guard(ngram_idx_.at(ngram).mtx_);
         ngram_idx_.at(ngram).offsets_.push_back(i);
       }
+    }
+
+    {
+      WriteLock valid_records_guard(valid_records_mtx_);
+      valid_records_[key_pos] = true;
     }
 
     return 0;
@@ -130,13 +146,15 @@ class LogStore {
     if (pos < 0)
       return;
 
-    int64_t start = value_offsets_[pos];
-    uint32_t tail = tail_;
-    int64_t end =
-        (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail;
-    size_t len = end - start;
+    int64_t start, end;
+    {
+      ReadLock value_offsets_guard(value_offsets_mtx_);
+      start = value_offsets_[pos];
+      uint32_t tail = tail_;
+      end = (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail;
+    }
 
-    value.assign(data_ + start, len);
+    value.assign(data_ + start, end - start);
   }
 
   const void Search(std::set<int64_t>& results, const std::string& query) {
@@ -151,14 +169,25 @@ class LogStore {
     std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
-    auto& offsets = ngram_idx_.at(prefix_ngram).offsets_;
+    std::vector<uint32_t> offsets;
+    {
+      ReadLock secondary_idx_guard(secondary_idx_mtx_);
+      {
+        ReadLock ngram_guard(ngram_idx_.at(prefix_ngram).mtx_);
+        auto& offsets_ref = ngram_idx_.at(prefix_ngram).offsets_;
+        offsets = offsets_ref;
+      }
+    }
+
     for (uint32_t i = 0; i < offsets.size(); i++) {
       if (skip_filter
           || !strncmp(data_ + offsets[i] + ngram_n_, suffix, suffix_len)) {
         // TODO: Take care of query.length() < ngram_n_ case
         int64_t pos = GetKeyPos(offsets[i]);
-        if (pos >= 0)
+        if (pos >= 0) {
+          ReadLock keys_guard(keys_mtx_);
           results.insert(keys_[pos]);
+        }
       }
     }
   }
@@ -255,29 +284,47 @@ class LogStore {
     return in_size;
   }
 
-  size_t GetNumKeys() {
+  const size_t GetNumKeys() {
+    ReadLock keys_guard(keys_mtx_);
     return keys_.size();
   }
 
-  int64_t GetSize() {
+  const int64_t GetSize() {
     return tail_;
   }
 
  private:
+  const bool IsValid(const size_t key_pos) {
+    ReadLock valid_records_guard(valid_records_mtx_);
+    return valid_records_.at(key_pos);
+  }
+
   const int64_t GetValueOffsetPos(const int64_t key) {
-    auto begin = keys_.begin();
-    auto end = keys_.end();
-    auto size = end - begin;
-    size_t pos = std::lower_bound(begin, end, key) - begin;
-    return (pos >= size || keys_[pos] != key) ? -1 : pos;
+    size_t pos, size;
+    int64_t found_key;
+    {
+      ReadLock keys_guard(keys_mtx_);
+      auto begin = keys_.begin();
+      auto end = keys_.end();
+      pos = std::lower_bound(begin, end, key) - begin;
+      found_key = keys_[pos];
+      size = end - begin;
+    }
+
+    return (pos >= size || found_key != key || !IsValid(pos)) ? -1 : pos;
   }
 
   const int64_t GetKeyPos(const int64_t value_offset) {
-    auto begin = value_offsets_.begin();
-    auto end = value_offsets_.end();
-    int64_t size = end - begin;
-    int64_t pos = std::prev(std::upper_bound(begin, end, value_offset)) - begin;
-    return (pos >= size) ? -1 : pos;
+    int64_t pos, size;
+    {
+      ReadLock value_offsets_guard(value_offsets_mtx_);
+      auto begin = value_offsets_.begin();
+      auto end = value_offsets_.end();
+      size = end - begin;
+      pos = std::prev(std::upper_bound(begin, end, value_offset)) - begin;
+    }
+
+    return (pos >= size || !IsValid(pos)) ? -1 : pos;
   }
 
   template<typename T>
@@ -321,11 +368,15 @@ class LogStore {
   std::vector<int64_t> keys_;
   std::vector<int32_t> value_offsets_;
 
+  std::vector<bool> valid_records_;
+
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;
 
-  std::mutex append_mtx_;
-  std::mutex idx_append_mtx_;
+  Mutex keys_mtx_;
+  Mutex value_offsets_mtx_;
+  Mutex secondary_idx_mtx_;
+  Mutex valid_records_mtx_;
 };
 }
 
