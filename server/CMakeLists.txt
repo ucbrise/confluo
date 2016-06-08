@@ -21,4 +21,4 @@ add_executable(server ${SERVER_SOURCES})
 
 add_library(serverclient ${SERVER_CLIENT_SOURCES})
 
-target_link_libraries(server ${THRIFT_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(server ${THRIFT_LIBRARIES} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
