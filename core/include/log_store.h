@@ -77,6 +77,10 @@ class LogStore {
   }
 
   int Append(const int64_t key, const std::string& value) {
+    return Append(value);
+  }
+
+  int Append(const std::string& value) {
     if (tail_ + value.length() > kLogStoreSize) {
       return -1;   // Data exceeds max chunk size
     }
@@ -97,7 +101,7 @@ class LogStore {
       assert(key_pos == valid_records_.size());
       assert(key_pos == value_offsets_.size());
 
-      keys_.push_back(key);
+      keys_.push_back(key_pos);
       value_offsets_.push_back(value_offset);
       valid_records_.push_back(false);
     }
