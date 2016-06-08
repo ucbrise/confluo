@@ -23,15 +23,9 @@
 #include "flags.h"
 #include "hash_ops.h"
 #include "locks.h"
+#include "offset_list.h"
 
 namespace succinct {
-
-typedef struct {
-  std::vector<uint32_t> offsets_;
-#ifndef NON_CONCURRENT_WRITES
-  Mutex mtx_;
-#endif
-} OffsetList;
 
 class LogStore {
  public:
@@ -127,8 +121,7 @@ class LogStore {
           ngram_idx_[ngram];
         }
         ReadLock secondary_idx_guard(secondary_idx_mtx_);
-        WriteLock ngram_entry_guard(ngram_idx_.at(ngram).mtx_);
-        ngram_idx_.at(ngram).offsets_.push_back(i);
+        ngram_idx_.at(ngram).push_back(i);
       }
     }
 
@@ -172,11 +165,7 @@ class LogStore {
     std::vector<uint32_t> offsets;
     {
       ReadLock secondary_idx_guard(secondary_idx_mtx_);
-      {
-        ReadLock ngram_guard(ngram_idx_.at(prefix_ngram).mtx_);
-        auto& offsets_ref = ngram_idx_.at(prefix_ngram).offsets_;
-        offsets = offsets_ref;
-      }
+      ngram_idx_.at(prefix_ngram).snapshot(offsets);
     }
 
     for (uint32_t i = 0; i < offsets.size(); i++) {
@@ -227,7 +216,7 @@ class LogStore {
       out_size += (ngram_n_ * sizeof(char));
 #endif
 
-      out_size += WriteVectorToFile(out, entry.second.offsets_);
+      out_size += WriteVectorToFile(out, entry.second.vector());
     }
     return out_size;
   }
@@ -278,7 +267,7 @@ class LogStore {
       in_size += (ngram_n_ * sizeof(char));
 #endif
 
-      in_size += ReadVectorFromFile(in, ngram_idx_[first].offsets_);
+      in_size += ReadVectorFromFile(in, ngram_idx_[first].vector());
     }
 
     return in_size;
