@@ -20,7 +20,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost REQUIRED COMPONENTS thread system)
+find_package(Boost 1.53 REQUIRED COMPONENTS thread system)
 
 # Builds all sub-modules
 add_subdirectory(server)
