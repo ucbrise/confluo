@@ -29,7 +29,7 @@
 
 namespace succinct {
 
-template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = 1024 * 1024 * 1024>
+template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = 1073741824>
 class LogStore {
  public:
   LogStore(uint32_t ngram_n = 3, const char* path = "log")
