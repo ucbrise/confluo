@@ -91,17 +91,14 @@ class LogStore {
     // Safely update keys, value offsets
     {
       // TODO: We should come up with a more efficient concurrent primary index
-      WriteLock keys_guard(keys_mtx_);
       WriteLock value_offsets_guard(value_offsets_mtx_);
       WriteLock valid_records_guard(valid_records_mtx_);
 
       value_offset = tail_.fetch_add(value.length());
-      key_pos = keys_.size();
+      key_pos = value_offsets_.size();
 
       assert(key_pos == valid_records_.size());
-      assert(key_pos == value_offsets_.size());
 
-      keys_.push_back(key_pos);
       value_offsets_.push_back(value_offset);
       valid_records_.push_back(false);
     }
@@ -138,17 +135,15 @@ class LogStore {
   }
 
   const void Get(std::string& value, const int64_t key) {
-    int64_t pos = GetValueOffsetPos(key);
-
-    if (pos < 0)
+    if (key < 0)
       return;
 
     int64_t start, end;
     {
       ReadLock value_offsets_guard(value_offsets_mtx_);
-      start = value_offsets_[pos];
+      start = value_offsets_.at(key);
       uint32_t tail = tail_;
-      end = (pos + 1 < value_offsets_.size()) ? value_offsets_[pos + 1] : tail;
+      end = (key + 1 < value_offsets_.size()) ? value_offsets_.at(key + 1) : tail;
     }
 
     value.assign(data_ + start, end - start);
@@ -166,20 +161,25 @@ class LogStore {
     std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
+#ifdef LOCK_FREE
+    // FIXME: Not thread safe!!
+    OffsetList& offsets = ngram_idx_.at(prefix_ngram);
+#else
     std::vector<uint32_t> offsets;
     {
       ReadLock secondary_idx_guard(secondary_idx_mtx_);
       ngram_idx_.at(prefix_ngram).snapshot(offsets);
     }
+#endif
 
+    uint32_t size = offsets.size();
     for (uint32_t i = 0; i < offsets.size(); i++) {
       if (skip_filter
-          || !strncmp(data_ + offsets[i] + ngram_n_, suffix, suffix_len)) {
+          || !strncmp(data_ + offsets.at(i) + ngram_n_, suffix, suffix_len)) {
         // TODO: Take care of query.length() < ngram_n_ case
-        int64_t pos = GetKeyPos(offsets[i]);
-        if (pos >= 0) {
-          ReadLock keys_guard(keys_mtx_);
-          results.insert(keys_[pos]);
+        int64_t key = GetKey(offsets.at(i));
+        if (key >= 0) {
+          results.insert(key);
         }
       }
     }
@@ -195,9 +195,6 @@ class LogStore {
     out_size += sizeof(uint32_t);
     out.write(reinterpret_cast<const char *>(data_), tail * sizeof(char));
     out_size += (tail * sizeof(char));
-
-    // Write keys
-    out_size += WriteVectorToFile(out, keys_);
 
     // Write value offsets
     out_size += WriteVectorToFile(out, value_offsets_);
@@ -220,7 +217,7 @@ class LogStore {
       out_size += (ngram_n_ * sizeof(char));
 #endif
 
-      out_size += WriteVectorToFile(out, entry.second.vector());
+      out_size += entry.second.serialize(out);
     }
     return out_size;
   }
@@ -236,10 +233,6 @@ class LogStore {
     in.read(reinterpret_cast<char *>(data_), tail * sizeof(char));
     in_size += (tail * sizeof(char));
     tail_ = tail;
-
-    // Read keys
-    keys_.clear();
-    in_size += ReadVectorFromFile(in, keys_);
 
     // Read value offsets
     value_offsets_.clear();
@@ -271,15 +264,15 @@ class LogStore {
       in_size += (ngram_n_ * sizeof(char));
 #endif
 
-      in_size += ReadVectorFromFile(in, ngram_idx_[first].vector());
+      in_size += ngram_idx_[first].deserialize(in);
     }
 
     return in_size;
   }
 
   const size_t GetNumKeys() {
-    ReadLock keys_guard(keys_mtx_);
-    return keys_.size();
+    ReadLock value_offsets_guard(value_offsets_mtx_);
+    return value_offsets_.size();
   }
 
   const int64_t GetSize() {
@@ -292,22 +285,7 @@ class LogStore {
     return valid_records_.at(key_pos);
   }
 
-  const int64_t GetValueOffsetPos(const int64_t key) {
-    size_t pos, size;
-    int64_t found_key;
-    {
-      ReadLock keys_guard(keys_mtx_);
-      auto begin = keys_.begin();
-      auto end = keys_.end();
-      pos = std::lower_bound(begin, end, key) - begin;
-      found_key = keys_[pos];
-      size = end - begin;
-    }
-
-    return (pos >= size || found_key != key || !IsValid(pos)) ? -1 : pos;
-  }
-
-  const int64_t GetKeyPos(const int64_t value_offset) {
+  const int64_t GetKey(const int64_t value_offset) {
     int64_t pos, size;
     {
       ReadLock value_offsets_guard(value_offsets_mtx_);
@@ -358,15 +336,12 @@ class LogStore {
   std::atomic<uint32_t> tail_;
   int page_size_;
 
-  std::vector<int64_t> keys_;
   std::vector<int32_t> value_offsets_;
-
   std::vector<bool> valid_records_;
 
   NGramIdx ngram_idx_;
   uint32_t ngram_n_;
 
-  Mutex keys_mtx_;
   Mutex value_offsets_mtx_;
   Mutex secondary_idx_mtx_;
   Mutex valid_records_mtx_;
