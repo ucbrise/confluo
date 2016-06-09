@@ -1,6 +1,8 @@
 #ifndef LOCKS_H_
 #define LOCKS_H_
 
+#include <mutex>
+
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
