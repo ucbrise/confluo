@@ -20,7 +20,7 @@
   } else if (query_types[i % kThreadQueryCount] == 1) {\
     shard_->Search(search_res, terms[i % terms.size()]);\
   } else {\
-    if (shard_->Append(cur_key, values[i % values.size()]) != 0) {\
+    if (shard_->Append(cur_key, values[i % values.size()]) == -1) {\
       fprintf(stderr, "Log is full\n");\
       break;\
     }\
@@ -206,7 +206,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string cur_value = values[i];
     int ret = shard_->Append(cur_key++, cur_value);
-    if (ret != 0) {
+    if (ret == -1) {
       fprintf(stderr, "Log store is full.\n");
       return;
     }
