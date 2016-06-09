@@ -59,7 +59,7 @@ class MicroBenchmark {
 #ifdef MICA_BENCHMARK
   MicaStore *shard_;
 #else
-  LogStore *shard_;
+  LogStore<> *shard_;
 #endif
 };
 

@@ -24,114 +24,69 @@
 #include "hash_ops.h"
 #include "locks.h"
 #include "offset_list.h"
+#include "ngram_idx.h"
+#include "memory_map.h"
 
 namespace succinct {
 
+template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = 1024 * 1024 * 1024>
 class LogStore {
  public:
-  static const uint32_t kLogStoreSize = 1024 * 1024 * 1024;
-
-#ifdef USE_INT_HASH
-#ifdef USE_STL_HASHMAP_NGRAM
-  typedef std::unordered_map<uint32_t, OffsetList> NGramIdx;
-#else
-  typedef std::map<uint32_t, std::vector<uint32_t>> NGramIdx;
-#endif
-#else
-  typedef std::map<const std::string, std::vector<uint32_t>> NGramIdx;
-#endif
-
   LogStore(uint32_t ngram_n = 3, const char* path = "log")
-      : tail_(0),
+      : ongoing_appends_tail_(0),
+        completed_appends_tail_(0),
         ngram_n_(ngram_n) {
 
-    if ((page_size_ = sysconf(_SC_PAGE_SIZE)) < 0) {
-      fprintf(stderr, "Could not obtain page size.\n");
-      throw -1;
-    }
-
-    int fd = open(path, (O_CREAT | O_TRUNC | O_RDWR),
-                  (S_IRWXU | S_IRWXG | S_IRWXO));
-
-    if (fd < 0) {
-      fprintf(stderr, "Could not obtain file descriptor.\n");
-      throw -1;
-    }
-
-    off_t lastoffset = lseek(fd, kLogStoreSize, SEEK_SET);
-    const char eof[1] = { 0 };
-    size_t bytes_written = write(fd, eof, 1);
-
-    if (bytes_written != 1) {
-      fprintf(stderr, "Could not write to file.\n");
-      throw -1;
-    }
-
-    data_ = (char *) mmap(NULL, kLogStoreSize, PROT_READ | PROT_WRITE,
-    MAP_SHARED,
-                          fd, 0);
-    if (data_ == MAP_FAILED) {
-      fprintf(stderr, "Could not mmap file.\n");
-      throw -1;
-    }
+    data_ = MemoryMap::map(path, LOG_SIZE);
+    valid_records_.resize(MAX_KEYS, false);
   }
 
   int Append(const int64_t key, const std::string& value) {
     return Append(value);
   }
 
-  int Append(const std::string& value) {
-    if (tail_ + value.length() > kLogStoreSize) {
-      return -1;   // Data exceeds max chunk size
+  int32_t Append(const std::string& value) {
+    if (ongoing_appends_tail_ + value.length() > LOG_SIZE) {
+      return -1;   // Data exceeds max log size
     }
 
-    int32_t value_offset;
-    size_t key_pos;
+    uint32_t value_offset;
+    uint32_t internal_key;
 
     // Safely update keys, value offsets
     {
-      // TODO: We should come up with a more efficient concurrent primary index
+      // TODO: Take care of user keys
       WriteLock value_offsets_guard(value_offsets_mtx_);
-      WriteLock valid_records_guard(valid_records_mtx_);
 
-      value_offset = tail_.fetch_add(value.length());
-      key_pos = value_offsets_.size();
-
-      assert(key_pos == valid_records_.size());
-
+      value_offset = ongoing_appends_tail_.fetch_add(value.length());
+      internal_key = value_offsets_.size();
       value_offsets_.push_back(value_offset);
-      valid_records_.push_back(false);
     }
 
-    int32_t value_end = value_offset + value.length();
+    uint32_t value_end = value_offset + value.length();
 
     // Append value to log; can be done without locking since
     // this thread has exclusive access to the region.
     memcpy(data_ + value_offset, value.c_str(), value.length());
 
     // Safely update secondary index entries
-    for (int64_t i = value_offset; i < value_end - ngram_n_; i++) {
+    for (uint32_t i = value_offset; i < value_end - ngram_n_; i++) {
 #ifdef USE_INT_HASH
       uint32_t ngram = Hash::simple_hash3(data_ + i);
 #else
       std::string ngram(data_ + i, ngram_n_);
 #endif
-      {
-        if (ngram_idx_.find(ngram) == ngram_idx_.end()) {
-          WriteLock secondary_idx_guard(secondary_idx_mtx_);
-          ngram_idx_[ngram];
-        }
-        ReadLock secondary_idx_guard(secondary_idx_mtx_);
-        ngram_idx_.at(ngram).push_back(i);
-      }
+      ngram_idx_.add_if_not_contains(ngram);
+      ngram_idx_.at(ngram).push_back(i);
     }
 
-    {
-      WriteLock valid_records_guard(valid_records_mtx_);
-      valid_records_[key_pos] = true;
-    }
+    Validate(internal_key);
 
-    return 0;
+    while (!std::atomic_compare_exchange_weak(&completed_appends_tail_,
+                                              &value_offset, value_end))
+      ;
+
+    return internal_key;
   }
 
   const void Get(std::string& value, const int64_t key) {
@@ -142,8 +97,9 @@ class LogStore {
     {
       ReadLock value_offsets_guard(value_offsets_mtx_);
       start = value_offsets_.at(key);
-      uint32_t tail = tail_;
-      end = (key + 1 < value_offsets_.size()) ? value_offsets_.at(key + 1) : tail;
+      uint32_t tail = ongoing_appends_tail_;
+      end =
+          (key + 1 < value_offsets_.size()) ? value_offsets_.at(key + 1) : tail;
     }
 
     value.assign(data_ + start, end - start);
@@ -162,14 +118,10 @@ class LogStore {
 #endif
 
 #ifdef LOCK_FREE
-    // FIXME: Not thread safe!!
     OffsetList& offsets = ngram_idx_.at(prefix_ngram);
 #else
     std::vector<uint32_t> offsets;
-    {
-      ReadLock secondary_idx_guard(secondary_idx_mtx_);
-      ngram_idx_.at(prefix_ngram).snapshot(offsets);
-    }
+    ngram_idx_.at(prefix_ngram).snapshot(offsets);
 #endif
 
     uint32_t size = offsets.size();
@@ -187,7 +139,7 @@ class LogStore {
 
   const int64_t Dump(const std::string& path) {
     int64_t out_size = 0;
-    uint32_t tail = tail_;
+    uint32_t tail = completed_appends_tail_;
     std::ofstream out(path);
 
     // Write data
@@ -232,7 +184,8 @@ class LogStore {
     in_size += sizeof(uint32_t);
     in.read(reinterpret_cast<char *>(data_), tail * sizeof(char));
     in_size += (tail * sizeof(char));
-    tail_ = tail;
+    ongoing_appends_tail_ = tail;
+    completed_appends_tail_ = tail;
 
     // Read value offsets
     value_offsets_.clear();
@@ -247,7 +200,6 @@ class LogStore {
 #ifndef USE_INT_HASH
     char *ngram_buf = new char[ngram_n_];
 #endif
-    ngram_idx_.clear();
     for (size_t i = 0; i < ngram_idx_size; i++) {
 
 #ifdef USE_INT_HASH
@@ -264,7 +216,7 @@ class LogStore {
       in_size += (ngram_n_ * sizeof(char));
 #endif
 
-      in_size += ngram_idx_[first].deserialize(in);
+      in_size += ngram_idx_.at(first).deserialize(in);
     }
 
     return in_size;
@@ -276,10 +228,15 @@ class LogStore {
   }
 
   const int64_t GetSize() {
-    return tail_;
+    return completed_appends_tail_;
   }
 
  private:
+  void Validate(const size_t key_pos) {
+    WriteLock valid_records_guard(valid_records_mtx_);
+    valid_records_[key_pos] = true;
+  }
+
   const bool IsValid(const size_t key_pos) {
     ReadLock valid_records_guard(valid_records_mtx_);
     return valid_records_.at(key_pos);
@@ -333,13 +290,13 @@ class LogStore {
   }
 
   char *data_;
-  std::atomic<uint32_t> tail_;
-  int page_size_;
+  std::atomic<uint32_t> ongoing_appends_tail_;
+  std::atomic<uint32_t> completed_appends_tail_;
 
   std::vector<int32_t> value_offsets_;
   std::vector<bool> valid_records_;
 
-  NGramIdx ngram_idx_;
+  ConcurrentNGramIdx ngram_idx_;
   uint32_t ngram_n_;
 
   Mutex value_offsets_mtx_;

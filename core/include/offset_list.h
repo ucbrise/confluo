@@ -5,7 +5,7 @@
 #include "conc_vectors.h"
 
 #ifdef LOCK_FREE
-typedef LockFreeGrowingList<int32_t,64,24,-1> OffsetList;
+typedef LockFreeGrowingList<int32_t,16,24> OffsetList;
 #else
 typedef ConcurrentVector<uint32_t> OffsetList;
 #endif
