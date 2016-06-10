@@ -328,7 +328,15 @@ class LockFreeGrowingList : public __LockFreeBase<T, FBS, NBUCKETS> {
   }
 
   const uint32_t serialize(std::ostream& out) {
-    return this->serialize(out, this->size());
+    return __LockFreeBase<T, FBS, NBUCKETS>::serialize(out, this->size());
+  }
+
+  const uint32_t deserialize(std::istream& in) {
+    uint32_t num_entries;
+    uint32_t in_size = __LockFreeBase<T, FBS, NBUCKETS>::deserialize(in, &num_entries);
+    write_tail_ = num_entries;
+    read_tail_ = num_entries;
+    return in_size;
   }
 
   const_iterator end() const {

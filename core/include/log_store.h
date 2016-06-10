@@ -41,7 +41,6 @@ class LogStore {
         ngram_n_(ngram_n) {
 
     data_ = MemoryMap::map(path, LOG_SIZE);
-    valid_records_.resize(MAX_KEYS, false);
   }
 
   int Append(const int64_t key, const std::string& value) {
@@ -239,16 +238,6 @@ class LogStore {
   }
 
  private:
-  void Validate(const size_t key_pos) {
-    WriteLock valid_records_guard(valid_records_mtx_);
-    valid_records_[key_pos] = true;
-  }
-
-  const bool IsValid(const size_t key_pos) {
-    ReadLock valid_records_guard(valid_records_mtx_);
-    return valid_records_.at(key_pos);
-  }
-
   uint64_t TailIncrement(uint32_t value_length) {
     return KEY_INCR | value_length;
   }
@@ -311,7 +300,6 @@ class LogStore {
   std::atomic<uint64_t> completed_appends_tail_;
 
   ValueOffsets value_offsets_;
-  std::vector<bool> valid_records_;
 
   ConcurrentNGramIdx ngram_idx_;
   uint32_t ngram_n_;
