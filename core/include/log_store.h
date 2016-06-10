@@ -49,7 +49,7 @@ class LogStore {
   }
 
   int32_t Append(const std::string& value) {
-    if (ongoing_appends_tail_ + value.length() > LOG_SIZE) {
+    if (GetSize() + value.length() > LOG_SIZE || GetNumKeys() > MAX_KEYS) {
       return -1;   // Data exceeds max log size
     }
 
