@@ -235,7 +235,7 @@ class LogStore {
 
   const int64_t GetSize() {
     uint64_t current_tail = completed_appends_tail_;
-    return current_tail & 0xFF;
+    return current_tail & 0xFFFF;
   }
 
  private:
