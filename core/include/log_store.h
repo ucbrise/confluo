@@ -23,6 +23,7 @@
 #include "flags.h"
 #include "hash_ops.h"
 #include "locks.h"
+#include "value_offsets.h"
 #include "offset_list.h"
 #include "ngram_idx.h"
 #include "memory_map.h"
@@ -32,6 +33,8 @@ namespace succinct {
 template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = 1073741824>
 class LogStore {
  public:
+  static const uint64_t KEY_INCR = 1ULL << 32;
+
   LogStore(uint32_t ngram_n = 3, const char* path = "log")
       : ongoing_appends_tail_(0),
         completed_appends_tail_(0),
@@ -50,26 +53,28 @@ class LogStore {
       return -1;   // Data exceeds max log size
     }
 
-    uint32_t value_offset;
-    uint32_t internal_key;
+    // Atomically update the ongoing append tail of the log
+    uint64_t tail_increment = TailIncrement(value.length());
+    uint64_t current_tail = AtomicUpdateOngoingAppendsTail(tail_increment);
 
-    // Safely update keys, value offsets
-    {
-      // TODO: Take care of user keys
-      WriteLock value_offsets_guard(value_offsets_mtx_);
+    // This thread now has exclusive access to
+    // (1) the current internal key, and
+    // (2) the region marked by (current value offset, current value offset + current value length)
+    uint32_t internal_key = current_tail << 32;
+    uint32_t value_offset = current_tail & 0xFFFF, value_length =
+        value.length();
 
-      value_offset = ongoing_appends_tail_.fetch_add(value.length());
-      internal_key = value_offsets_.size();
-      value_offsets_.push_back(value_offset);
-    }
+    // We can add the new value offset to the value offsets array
+    // without worrying about locking, since we have uncontested
+    // access to the 'internal_key' index in the value offsets array.
+    value_offsets_.set(internal_key, value_offset);
 
-    uint32_t value_end = value_offset + value.length();
+    // Similarly, we can append the value to the log without locking
+    // since this thread has exclusive access to the region (value_offset, value_offset + .
+    memcpy(data_ + value_offset, value.c_str(), value_length);
 
-    // Append value to log; can be done without locking since
-    // this thread has exclusive access to the region.
-    memcpy(data_ + value_offset, value.c_str(), value.length());
-
-    // Safely update secondary index entries
+    // Safely update secondary index entries. Currently uses locks for the index; TODO: remove
+    uint32_t value_end = value_offset + value_length;
     for (uint32_t i = value_offset; i < value_end - ngram_n_; i++) {
 #ifdef USE_INT_HASH
       uint32_t ngram = Hash::simple_hash3(data_ + i);
@@ -80,36 +85,35 @@ class LogStore {
       ngram_idx_.at(ngram).push_back(i);
     }
 
-    Validate(internal_key);
+    // Atomically update the completed append tail of the log.
+    // This is done using CAS, and may have bounded waiting until
+    // all appends before the current_tail are completed.
+    AtomicUpdateCompletedAppendsTail(current_tail, tail_increment);
 
-    while (!std::atomic_compare_exchange_weak(&completed_appends_tail_,
-                                              &value_offset, value_end))
-      ;
-
+    // Return the current internal key
     return internal_key;
   }
 
   const void Get(std::string& value, const int64_t key) {
-    if (key < 0)
+    uint64_t current_tail = completed_appends_tail_;
+    uint32_t max_key = current_tail >> 32;
+    if (key < 0 || key >= max_key)
       return;
 
-    int64_t start, end;
-    {
-      ReadLock value_offsets_guard(value_offsets_mtx_);
-      start = value_offsets_.at(key);
-      uint32_t tail = ongoing_appends_tail_;
-      end =
-          (key + 1 < value_offsets_.size()) ? value_offsets_.at(key + 1) : tail;
-    }
+    uint32_t start = value_offsets_.get(key);
+    uint32_t end =
+        (key + 1 < max_key) ? value_offsets_.get(key + 1) : current_tail & 0xFF;
 
     value.assign(data_ + start, end - start);
   }
 
   const void Search(std::set<int64_t>& results, const std::string& query) {
+    uint64_t current_tail = completed_appends_tail_;
+    uint32_t max_key = current_tail >> 32;
+    uint32_t max_off = current_tail & 0xFFFF;
     char *substr = (char *) query.c_str();
     char *suffix = substr + ngram_n_;
-    bool skip_filter = (query.length() <= ngram_n_);
-    size_t suffix_len = skip_filter ? 0 : query.length() - ngram_n_;
+    size_t suffix_len = query.length() - ngram_n_;
 
 #ifdef USE_INT_HASH
     uint32_t prefix_ngram = Hash::simple_hash3(substr);
@@ -117,7 +121,7 @@ class LogStore {
     std::string prefix_ngram = query.substr(0, ngram_n_);
 #endif
 
-#ifdef LOCK_FREE
+#ifdef LOCK_FREE_OFFSET_LIST
     OffsetList& offsets = ngram_idx_.at(prefix_ngram);
 #else
     std::vector<uint32_t> offsets;
@@ -125,12 +129,11 @@ class LogStore {
 #endif
 
     uint32_t size = offsets.size();
-    for (uint32_t i = 0; i < offsets.size(); i++) {
-      if (skip_filter
-          || !strncmp(data_ + offsets.at(i) + ngram_n_, suffix, suffix_len)) {
-        // TODO: Take care of query.length() < ngram_n_ case
-        int64_t key = GetKey(offsets.at(i));
-        if (key >= 0) {
+    for (uint32_t i = 0; i < size; i++) {
+      if (!strncmp(data_ + offsets.at(i) + ngram_n_, suffix, suffix_len)) {
+        // TODO: Take care of query.length() <= ngram_n_ case
+        int64_t key = GetKey(offsets.at(i), max_key);
+        if (key >= 0 && key < max_key) {
           results.insert(key);
         }
       }
@@ -139,17 +142,19 @@ class LogStore {
 
   const int64_t Dump(const std::string& path) {
     int64_t out_size = 0;
-    uint32_t tail = completed_appends_tail_;
+    uint64_t tail = completed_appends_tail_;
+    uint32_t log_size = tail & 0xFFFF;
+    uint32_t max_key = tail >> 32;
     std::ofstream out(path);
 
     // Write data
-    out.write(reinterpret_cast<const char *>(&(tail)), sizeof(uint32_t));
+    out.write(reinterpret_cast<const char *>(&(log_size)), sizeof(uint32_t));
     out_size += sizeof(uint32_t);
-    out.write(reinterpret_cast<const char *>(data_), tail * sizeof(char));
-    out_size += (tail * sizeof(char));
+    out.write(reinterpret_cast<const char *>(data_), log_size * sizeof(char));
+    out_size += (log_size * sizeof(char));
 
     // Write value offsets
-    out_size += WriteVectorToFile(out, value_offsets_);
+    out_size += value_offsets_.serialize(out, max_key);
 
     // Write n-gram index
     out.write(reinterpret_cast<const char *>(&(ngram_n_)), sizeof(uint32_t));
@@ -176,20 +181,21 @@ class LogStore {
 
   int64_t Load(const std::string& path) {
     int64_t in_size = 0;
-    uint32_t tail;
+    uint32_t log_size;
+    uint32_t max_key;
     std::ifstream in(path);
 
     // Read data
-    in.read(reinterpret_cast<char *>(&tail), sizeof(uint32_t));
+    in.read(reinterpret_cast<char *>(&log_size), sizeof(uint32_t));
     in_size += sizeof(uint32_t);
-    in.read(reinterpret_cast<char *>(data_), tail * sizeof(char));
-    in_size += (tail * sizeof(char));
-    ongoing_appends_tail_ = tail;
-    completed_appends_tail_ = tail;
+    in.read(reinterpret_cast<char *>(data_), log_size * sizeof(char));
+    in_size += (log_size * sizeof(char));
 
     // Read value offsets
-    value_offsets_.clear();
-    in_size += ReadVectorFromFile(in, value_offsets_);
+    in_size += value_offsets_.deserialize(in, &max_key);
+    ongoing_appends_tail_ = ((uint64_t) max_key) << 32 | ((uint64_t) log_size);
+    completed_appends_tail_ = ((uint64_t) max_key) << 32
+        | ((uint64_t) log_size);
 
     // Read n-gram index
     in.read(reinterpret_cast<char *>(&ngram_n_), sizeof(uint32_t));
@@ -223,12 +229,13 @@ class LogStore {
   }
 
   const size_t GetNumKeys() {
-    ReadLock value_offsets_guard(value_offsets_mtx_);
-    return value_offsets_.size();
+    uint64_t current_tail = completed_appends_tail_;
+    return current_tail >> 32;
   }
 
   const int64_t GetSize() {
-    return completed_appends_tail_;
+    uint64_t current_tail = completed_appends_tail_;
+    return current_tail & 0xFF;
   }
 
  private:
@@ -242,17 +249,27 @@ class LogStore {
     return valid_records_.at(key_pos);
   }
 
-  const int64_t GetKey(const int64_t value_offset) {
-    int64_t pos, size;
-    {
-      ReadLock value_offsets_guard(value_offsets_mtx_);
-      auto begin = value_offsets_.begin();
-      auto end = value_offsets_.end();
-      size = end - begin;
-      pos = std::prev(std::upper_bound(begin, end, value_offset)) - begin;
-    }
+  uint64_t TailIncrement(uint32_t value_length) {
+    return KEY_INCR | value_length;
+  }
 
-    return (pos >= size || !IsValid(pos)) ? -1 : pos;
+  uint64_t AtomicUpdateOngoingAppendsTail(uint64_t tail_increment) {
+    return std::atomic_fetch_add(&ongoing_appends_tail_, tail_increment);
+  }
+
+  void AtomicUpdateCompletedAppendsTail(uint64_t expected_append_tail,
+                                        uint64_t tail_increment) {
+    while (!std::atomic_compare_exchange_weak(
+        &completed_appends_tail_, &expected_append_tail,
+        expected_append_tail + tail_increment))
+      ;
+  }
+
+  const int64_t GetKey(const uint32_t value_offset, const uint32_t max_key) {
+    auto begin = value_offsets_.begin();
+    auto end = value_offsets_.end(max_key);
+    int64_t internal_key = std::prev(std::upper_bound(begin, end, value_offset)) - begin;
+    return (internal_key >= max_key || internal_key < 0) ? -1 : internal_key;
   }
 
   template<typename T>
@@ -290,10 +307,10 @@ class LogStore {
   }
 
   char *data_;
-  std::atomic<uint32_t> ongoing_appends_tail_;
-  std::atomic<uint32_t> completed_appends_tail_;
+  std::atomic<uint64_t> ongoing_appends_tail_;
+  std::atomic<uint64_t> completed_appends_tail_;
 
-  std::vector<int32_t> value_offsets_;
+  ValueOffsets value_offsets_;
   std::vector<bool> valid_records_;
 
   ConcurrentNGramIdx ngram_idx_;

@@ -5,5 +5,6 @@
 #define USE_STL_HASHMAP_NGRAM
 #define STL_LOCKS
 #define BSR
+//#define LOCK_FREE_OFFSET_LIST
 
 #endif /* FLAGS_H_ */

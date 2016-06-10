@@ -4,7 +4,7 @@
 #include "flags.h"
 #include "conc_vectors.h"
 
-#ifdef LOCK_FREE
+#ifdef LOCK_FREE_OFFSET_LIST
 typedef LockFreeGrowingList<int32_t,16,24> OffsetList;
 #else
 typedef ConcurrentVector<uint32_t> OffsetList;
