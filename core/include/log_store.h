@@ -249,7 +249,7 @@ class LogStore {
 
   ValueOffsets value_offsets_;
 
-  CuckooNGramIdx ngram_idx_;
+  ConcurrentNGramIdx ngram_idx_;
 };
 }
 
