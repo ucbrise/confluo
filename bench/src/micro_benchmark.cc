@@ -68,28 +68,28 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
     auto b_start = start;
 #ifdef PROFILE
     Profiler::profile(
-        "load", [&]() {
+        [&]() {
 #endif
-          for (auto& cur_value : values) {
-            shard_->Append(cur_key++, cur_value);
-            load_end_offset_ += cur_value.length();
-            load_keys_++;
+    for (auto& cur_value : values) {
+      shard_->Append(cur_key++, cur_value);
+      load_end_offset_ += cur_value.length();
+      load_keys_++;
 
-            // Periodically print out statistics
-        if (load_keys_ % b_size == 0) {
-          auto b_end = high_resolution_clock::now();
-          auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
-          double avg_latency = (double) elapsed_us / (double) b_size;
-          double completion = 100.0 * (double) (load_end_offset_)
-          / (double) (target_data_size);
-          LOG(stderr,
-              "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
-              completion, load_end_offset_, avg_latency);
-          b_start = high_resolution_clock::now();
-        }
+      // Periodically print out statistics
+      if (load_keys_ % b_size == 0) {
+        auto b_end = high_resolution_clock::now();
+        auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
+        double avg_latency = (double) elapsed_us / (double) b_size;
+        double completion = 100.0 * (double) (load_end_offset_)
+            / (double) (target_data_size);
+        LOG(stderr,
+            "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
+            completion, load_end_offset_, avg_latency);
+        b_start = high_resolution_clock::now();
       }
+    }
 #ifdef PROFILE
-    });
+  });
 #endif
 
     // Print end of load statistics
