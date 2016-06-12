@@ -67,8 +67,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
     auto start = high_resolution_clock::now();
     auto b_start = start;
 #ifdef PROFILE
-    Profiler::profile(
-        [&]() {
+    Profiler::StartProfiling();
 #endif
     for (auto& cur_value : values) {
       shard_->Append(cur_key++, cur_value);
@@ -89,7 +88,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
       }
     }
 #ifdef PROFILE
-  });
+    Profiler::StopProfiling();
 #endif
 
     // Print end of load statistics
