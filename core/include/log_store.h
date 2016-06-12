@@ -87,10 +87,10 @@ class LogStore {
     return current_tail;
   }
 
-  const void Get(std::string& value, const int64_t key) {
+  const void Get(std::string& value, const uint32_t key) {
     uint64_t current_tail = completed_appends_tail_;
     uint32_t max_key = current_tail >> 32;
-    if (key < 0 || key >= max_key)
+    if (key >= max_key)
       return;
 
     uint32_t start = value_offsets_.get(key);
