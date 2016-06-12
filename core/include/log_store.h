@@ -46,9 +46,9 @@ class LogStore {
     return Append(value);
   }
 
-  int32_t Append(const std::string& value) {
+  uint64_t Append(const std::string& value) {
     if (GetSize() + value.length() > LOG_SIZE || GetNumKeys() > MAX_KEYS) {
-      return -1;   // Data exceeds max log size
+      throw -1;   // Data exceeds max log size
     }
 
     // Atomically update the ongoing append tail of the log
@@ -71,7 +71,7 @@ class LogStore {
     // since this thread has exclusive access to the region (value_offset, value_offset + .
     memcpy(data_ + value_offset, value.c_str(), value_length);
 
-    // Safely update secondary index entries. Currently uses locks for the index; TODO: remove
+    // Safely update secondary index entries, in a lock-free manner.
     uint32_t value_end = value_offset + value_length;
     for (uint32_t i = value_offset; i < value_end - NGRAM_N; i++)
       ngram_idx_.add_offset(data_ + i, i);
@@ -81,8 +81,8 @@ class LogStore {
     // all appends before the current_tail are completed.
     AtomicUpdateCompletedAppendsTail(current_tail, tail_increment);
 
-    // Return the current internal key
-    return internal_key;
+    // Return the current tail
+    return current_tail;
   }
 
   const void Get(std::string& value, const int64_t key) {
