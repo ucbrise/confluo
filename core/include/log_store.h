@@ -41,7 +41,7 @@ class LogStore {
     data_ = new char[LOG_SIZE];
   }
 
-  int Append(const int64_t key, const std::string& value) {
+  uint32_t Append(const int64_t key, const std::string& value) {
     uint64_t current_tail = InternalAppend(value);
     uint64_t tail_increment = TailIncrement(value.length());
 
@@ -66,7 +66,7 @@ class LogStore {
     // (1) the current internal key, and
     // (2) the region marked by (current value offset, current value offset + current value length)
     uint32_t internal_key = current_tail << 32;
-    uint32_t value_offset = current_tail & 0xFFFF, value_length =
+    uint32_t value_offset = current_tail & 0xFFFFFFFF, value_length =
         value.length();
 
     // We can add the new value offset to the value offsets array
@@ -95,7 +95,7 @@ class LogStore {
 
     uint32_t start = value_offsets_.get(key);
     uint32_t end =
-        (key + 1 < max_key) ? value_offsets_.get(key + 1) : current_tail & 0xFF;
+        (key + 1 < max_key) ? value_offsets_.get(key + 1) : current_tail & 0xFFFFFFFF;
 
     value.assign(data_ + start, end - start);
   }
@@ -103,7 +103,7 @@ class LogStore {
   const void Search(std::set<int64_t>& results, const std::string& query) {
     uint64_t current_tail = completed_appends_tail_;
     uint32_t max_key = current_tail >> 32;
-    uint32_t max_off = current_tail & 0xFFFF;
+    uint32_t max_off = current_tail & 0xFFFFFFFF;
     char *substr = (char *) query.c_str();
     char *suffix = substr + NGRAM_N;
     size_t suffix_len = query.length() - NGRAM_N;
@@ -130,7 +130,7 @@ class LogStore {
   const size_t Dump(const std::string& path) {
     size_t out_size = 0;
     uint64_t tail = completed_appends_tail_;
-    uint32_t log_size = tail & 0xFFFF;
+    uint32_t log_size = tail & 0xFFFFFFFF;
     uint32_t max_key = tail >> 32;
 
     std::ofstream out(path);
@@ -183,7 +183,7 @@ class LogStore {
 
   const int64_t GetSize() {
     uint64_t current_tail = completed_appends_tail_;
-    return current_tail & 0xFFFF;
+    return current_tail & 0xFFFFFFFF;
   }
 
  private:
