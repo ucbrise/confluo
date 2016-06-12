@@ -52,7 +52,7 @@ class ServerImpl : virtual public ServerIf {
   int32_t Initialize() {
     // Initialize data structures
     Info("Initializing data structures...");
-    shard_ = new LogStore<>(3);
+    shard_ = new LogStore<>();
     Info("Initialized Log Store.");
 
     return 0;
