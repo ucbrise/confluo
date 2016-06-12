@@ -19,9 +19,6 @@
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
-#ifdef PROFILE
-#endif
-
 #define QUERY(i) {\
   std::string get_res;\
   std::set<int64_t> search_res;\
@@ -62,6 +59,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
       std::string cur_value;
       std::getline(in, cur_value);
       values.push_back(cur_value);
+      load_data_size += cur_value.length();
     }
 
     LOG(stderr, "Loading...\n");
