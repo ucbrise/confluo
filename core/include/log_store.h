@@ -246,10 +246,8 @@ class LogStore {
   char *data_;
   std::atomic<uint64_t> ongoing_appends_tail_;
   std::atomic<uint64_t> completed_appends_tail_;
-
   ValueOffsets value_offsets_;
-
-  ConcurrentNGramIdx ngram_idx_;
+  ArrayNGramIdx<> ngram_idx_;
 };
 }
 
