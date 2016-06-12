@@ -38,15 +38,22 @@ class LogStore {
   LogStore(const char* path = "log")
       : ongoing_appends_tail_(0),
         completed_appends_tail_(0) {
-
-    data_ = MemoryMap::map(path, LOG_SIZE);
+    data_ = new char[LOG_SIZE];
   }
 
   int Append(const int64_t key, const std::string& value) {
-    return Append(value);
+    uint64_t current_tail = InternalAppend(value);
+    uint64_t tail_increment = TailIncrement(value.length());
+
+    // Atomically update the completed append tail of the log.
+    // This is done using CAS, and may have bounded waiting until
+    // all appends before the current_tail are completed.
+    AtomicUpdateCompletedAppendsTail(current_tail, tail_increment);
+
+    return current_tail >> 32;
   }
 
-  uint64_t Append(const std::string& value) {
+  uint64_t InternalAppend(const std::string& value) {
     if (GetSize() + value.length() > LOG_SIZE || GetNumKeys() > MAX_KEYS) {
       throw -1;   // Data exceeds max log size
     }
@@ -75,11 +82,6 @@ class LogStore {
     uint32_t value_end = value_offset + value_length;
     for (uint32_t i = value_offset; i < value_end - NGRAM_N; i++)
       ngram_idx_.add_offset(data_ + i, i);
-
-    // Atomically update the completed append tail of the log.
-    // This is done using CAS, and may have bounded waiting until
-    // all appends before the current_tail are completed.
-    AtomicUpdateCompletedAppendsTail(current_tail, tail_increment);
 
     // Return the current tail
     return current_tail;
