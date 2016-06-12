@@ -11,6 +11,16 @@
 #include <condition_variable>
 #include <unistd.h>
 #include <sstream>
+#include "profiler.h"
+
+#ifdef NO_LOG
+#define LOG(out, fmt, ...)
+#else
+#define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
+#endif
+
+#ifdef PROFILE
+#endif
 
 #define QUERY(i) {\
   std::string get_res;\
@@ -20,10 +30,7 @@
   } else if (query_types[i % kThreadQueryCount] == 1) {\
     shard_->Search(search_res, terms[i % terms.size()]);\
   } else {\
-    if (shard_->Append(cur_key, values[i % values.size()]) == -1) {\
-      fprintf(stderr, "Log is full\n");\
-      break;\
-    }\
+    shard_->Append(cur_key, values[i % values.size()]);\
   }\
 }
 
@@ -41,6 +48,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
      */
 
     const int64_t target_data_size = 250 * 1024 * 1024;
+    int64_t load_data_size = 0;
     load_end_offset_ = 0;
     load_keys_ = 0;
     uint64_t b_size = 1000;
@@ -48,69 +56,79 @@ MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
     int64_t cur_key = 0;
 
     std::ifstream in(data_path);
+    std::vector<std::string> values;
 
-    fprintf(stderr, "Loading...\n");
+    while (load_data_size < target_data_size) {
+      std::string cur_value;
+      std::getline(in, cur_value);
+      values.push_back(cur_value);
+    }
+
+    LOG(stderr, "Loading...\n");
 
     auto start = high_resolution_clock::now();
     auto b_start = start;
-    while (load_end_offset_ < target_data_size) {
-      std::string cur_value;
-      std::getline(in, cur_value);
-      shard_->Append(cur_key++, cur_value);
-      load_end_offset_ += cur_value.length();
-      load_keys_++;
+#ifdef PROFILE
+    Profiler::profile(
+        "load", [&]() {
+#endif
+          for (auto& cur_value : values) {
+            shard_->Append(cur_key++, cur_value);
+            load_end_offset_ += cur_value.length();
+            load_keys_++;
 
-      // Periodically print out statistics
-      if (load_keys_ % b_size == 0) {
-        auto b_end = high_resolution_clock::now();
-        auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
-        double avg_latency = (double) elapsed_us / (double) b_size;
-        double completion = 100.0 * (double) (load_end_offset_)
-            / (double) (target_data_size);
-        fprintf(
-            stderr,
-            "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
-            completion, load_end_offset_, avg_latency);
-        b_start = high_resolution_clock::now();
+            // Periodically print out statistics
+        if (load_keys_ % b_size == 0) {
+          auto b_end = high_resolution_clock::now();
+          auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
+          double avg_latency = (double) elapsed_us / (double) b_size;
+          double completion = 100.0 * (double) (load_end_offset_)
+          / (double) (target_data_size);
+          LOG(stderr,
+              "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
+              completion, load_end_offset_, avg_latency);
+          b_start = high_resolution_clock::now();
+        }
       }
-    }
+#ifdef PROFILE
+    });
+#endif
 
     // Print end of load statistics
     auto end = high_resolution_clock::now();
     auto elapsed_us = duration_cast<nanoseconds>(end - start).count();
     double avg_latency = (double) elapsed_us / (double) load_keys_;
 
-    fprintf(
-        stderr,
+    LOG(stderr,
         "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
         load_keys_, load_end_offset_, avg_latency);
 
     if (dump) {
-      fprintf(stderr, "Dumping data structures to disk...");
+      LOG(stderr, "Dumping data structures to disk...");
       shard_->Dump(data_path + ".logstore");
-      fprintf(stderr, "Done.\n");
+      LOG(stderr, "Done.\n");
     }
   } else if (mode == 1) {
-    fprintf(stderr, "Loading...\n");
+    LOG(stderr, "Loading...\n");
     shard_->Load(data_path + ".logstore");
     load_keys_ = shard_->GetNumKeys();
     load_end_offset_ = shard_->GetSize();
-    fprintf(stderr, "Loaded %lld key-value pairs.\n", load_keys_);
+    LOG(stderr, "Loaded %lld key-value pairs.\n", load_keys_);
   } else {
-    fprintf(stderr, "Invalid mode: %d\n", mode);
+    LOG(stderr, "Invalid mode: %d\n", mode);
     exit(-1);
   }
 
   if (shard_->GetSize() != load_end_offset_) {
-    fprintf(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
-            load_end_offset_, shard_->GetSize());
+    LOG(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
+        load_end_offset_, shard_->GetSize());
   }
 
 }
 
 void MicroBenchmark::BenchmarkGetLatency() {
   // Generate queries
-  fprintf(stderr, "Generating queries...");
+  LOG(stderr, "Generating queries...");
   std::vector<int64_t> keys;
 
   for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
@@ -118,20 +136,20 @@ void MicroBenchmark::BenchmarkGetLatency() {
     keys.push_back(key);
   }
 
-  fprintf(stderr, "Done.\n");
+  LOG(stderr, "Done.\n");
 
   std::ofstream result_stream("latency_get");
 
   // Warmup
-  fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
+  LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string result;
     shard_->Get(result, keys[i]);
   }
-  fprintf(stderr, "Warmup complete.\n");
+  LOG(stderr, "Warmup complete.\n");
 
   // Measure
-  fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
+  LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string result;
     auto t0 = high_resolution_clock::now();
@@ -140,12 +158,12 @@ void MicroBenchmark::BenchmarkGetLatency() {
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     result_stream << keys[i] << "\t" << tdiff << "\n";
   }
-  fprintf(stderr, "Measure complete.\n");
+  LOG(stderr, "Measure complete.\n");
   result_stream.close();
 }
 
 void MicroBenchmark::BenchmarkSearchLatency() {
-  fprintf(stderr, "Reading queries...");
+  LOG(stderr, "Reading queries...");
   std::vector<std::string> queries;
 
   std::ifstream in(data_path_ + ".queries");
@@ -155,21 +173,21 @@ void MicroBenchmark::BenchmarkSearchLatency() {
     queries.push_back(query);
   }
 
-  fprintf(stderr, "Done.\n");
+  LOG(stderr, "Done.\n");
 
   std::ofstream result_stream("latency_search");
 
   // Warmup
-  fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
+  LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string query = queries[i % queries.size()];
     std::set<int64_t> results;
     shard_->Search(results, query);
   }
-  fprintf(stderr, "Warmup complete.\n");
+  LOG(stderr, "Warmup complete.\n");
 
   // Measure
-  fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
+  LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string query = queries[i % queries.size()];
     std::set<int64_t> results;
@@ -179,13 +197,13 @@ void MicroBenchmark::BenchmarkSearchLatency() {
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     result_stream << results.size() << "\t" << tdiff << "\n";
   }
-  fprintf(stderr, "Measure complete.\n");
+  LOG(stderr, "Measure complete.\n");
   result_stream.close();
 }
 
 void MicroBenchmark::BenchmarkAppendLatency() {
   // Generate queries
-  fprintf(stderr, "Generating queries...");
+  LOG(stderr, "Generating queries...");
   std::vector<std::string> values;
 
   std::ifstream in(data_path_);
@@ -197,37 +215,29 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   }
   int64_t cur_key = load_keys_;
 
-  fprintf(stderr, "Done.\n");
+  LOG(stderr, "Done.\n");
 
   std::ofstream result_stream("latency_append");
 
   // Warmup
-  fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
+  LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string cur_value = values[i];
     int ret = shard_->Append(cur_key++, cur_value);
-    if (ret == -1) {
-      fprintf(stderr, "Log store is full.\n");
-      return;
-    }
   }
-  fprintf(stderr, "Warmup complete.\n");
+  LOG(stderr, "Warmup complete.\n");
 
   // Measure
-  fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
+  LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value = values[i];
     auto t0 = high_resolution_clock::now();
     int ret = shard_->Append(cur_key++, cur_value);
     auto t1 = high_resolution_clock::now();
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
-    if (ret != 0) {
-      fprintf(stderr, "Log store is full.\n");
-      break;
-    }
     result_stream << (cur_key - 1) << "\t" << tdiff << "\n";
   }
-  fprintf(stderr, "Measure complete.\n");
+  LOG(stderr, "Measure complete.\n");
   result_stream.close();
 }
 
@@ -237,8 +247,8 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
                                          const uint32_t num_clients) {
 
   if (get_f + search_f + append_f != 1.0) {
-    fprintf(stderr, "Query fractions must add up to 1.0. Sum = %lf\n",
-            get_f + search_f + append_f);
+    LOG(stderr, "Query fractions must add up to 1.0. Sum = %lf\n",
+        get_f + search_f + append_f);
     return;
   }
 
@@ -260,7 +270,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
               int64_t cur_key = load_keys_;
               std::string term, value;
               std::vector<uint32_t> query_types;
-              fprintf(stderr, "Generating queries...\n");
+              LOG(stderr, "Generating queries...\n");
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
                 int64_t key = rand() % load_keys_;
                 std::getline(in_s, term);
@@ -279,7 +289,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
                   query_types.push_back(2);
                 }
               }
-              fprintf(stderr, "Done.\n");
+              LOG(stderr, "Done.\n");
 
               double thput = 0;
 
@@ -312,10 +322,10 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
                 }
 
               } catch (std::exception &e) {
-                fprintf(stderr, "Throughput thread ended prematurely.\n");
+                LOG(stderr, "Throughput thread ended prematurely.\n");
               }
 
-              fprintf(stderr, "Throughput: %lf\n", thput);
+              LOG(stderr, "Throughput: %lf\n", thput);
 
               std::ofstream ofs;
               char output_file[100];
@@ -334,9 +344,8 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
 }
 
 void PrintUsage(char *exec) {
-  fprintf(stderr,
-          "Usage: %s [-b bench-type] [-m mode] [-n num-clients] data-path\n",
-          exec);
+  LOG(stderr,
+      "Usage: %s [-b bench-type] [-m mode] [-n num-clients] data-path\n", exec);
 }
 
 std::vector<std::string> &Split(const std::string &s, char delim,
@@ -380,7 +389,7 @@ int main(int argc, char** argv) {
         dump = true;
         break;
       default:
-        fprintf(stderr, "Could not parse command line arguments.\n");
+        LOG(stderr, "Could not parse command line arguments.\n");
     }
   }
 
@@ -401,18 +410,17 @@ int main(int argc, char** argv) {
   } else if (bench_type.find("throughput") == 0) {
     std::vector<std::string> tokens = Split(bench_type, '-');
     if (tokens.size() != 4) {
-      fprintf(stderr, "Error: Incorrect throughput benchmark format.\n");
+      LOG(stderr, "Error: Incorrect throughput benchmark format.\n");
     }
     double get_f = atof(tokens[1].c_str());
     double search_f = atof(tokens[2].c_str());
     double append_f = atof(tokens[3].c_str());
-    fprintf(
-        stderr,
+    LOG(stderr,
         "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, num_clients = %d\n",
         get_f, search_f, append_f, num_clients);
     ls_bench.BenchmarkThroughput(get_f, search_f, append_f, num_clients);
   } else {
-    fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
+    LOG(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }
 
   return 0;
