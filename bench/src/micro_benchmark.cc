@@ -19,15 +19,18 @@
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
-#define QUERY(i) {\
+#define QUERY(i, num_keys) {\
   std::string get_res;\
   std::set<int64_t> search_res;\
   if (query_types[i % kThreadQueryCount] == 0) {\
     shard_->Get(get_res, keys[i % keys.size()]);\
+    num_keys++;\
   } else if (query_types[i % kThreadQueryCount] == 1) {\
     shard_->Search(search_res, terms[i % terms.size()]);\
+    num_keys += search_res.size();\
   } else {\
     shard_->Append(cur_key, values[i % values.size()]);\
+    num_keys++;\
   }\
 }
 
@@ -288,14 +291,16 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
               }
               LOG(stderr, "Done.\n");
 
-              double thput = 0;
+              double query_thput = 0;
+              double key_thput = 0;
 
               try {
                 // Warmup phase
                 long i = 0;
+                long num_keys = 0;
                 TimeStamp warmup_start = GetTimestamp();
                 while (GetTimestamp() - warmup_start < kWarmupTime) {
-                  QUERY(i);
+                  QUERY(i, num_keys);
                   i++;
                 }
 
@@ -303,18 +308,19 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
                 i = 0;
                 TimeStamp start = GetTimestamp();
                 while (GetTimestamp() - start < kMeasureTime) {
-                  QUERY(i);
+                  QUERY(i, num_keys);
                   i++;
                 }
                 TimeStamp end = GetTimestamp();
                 double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                thput = ((double) i / totsecs);
+                query_thput = ((double) i / totsecs);
+                key_thput = ((double) num_keys / totsecs);
 
                 // Cooldown phase
                 i = 0;
                 TimeStamp cooldown_start = GetTimestamp();
                 while (GetTimestamp() - cooldown_start < kCooldownTime) {
-                  QUERY(i);
+                  QUERY(i, num_keys);
                   i++;
                 }
 
@@ -322,13 +328,13 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
                 LOG(stderr, "Throughput thread ended prematurely.\n");
               }
 
-              LOG(stderr, "Throughput: %lf\n", thput);
+              LOG(stderr, "Throughput: %lf\n", query_thput);
 
               std::ofstream ofs;
               char output_file[100];
               sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, num_clients);
               ofs.open(output_file, std::ofstream::out | std::ofstream::app);
-              ofs << thput << "\n";
+              ofs << query_thput << "\t" << key_thput << "\n";
               ofs.close();
 
             })));
