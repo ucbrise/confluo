@@ -89,7 +89,7 @@ class LogStore {
     // This thread now has exclusive access to
     // (1) the current internal key, and
     // (2) the region marked by (current value offset, current value offset + current value length)
-    uint32_t internal_key = current_tail << 32;
+    uint32_t internal_key = current_tail >> 32;
     uint32_t value_offset = current_tail & 0xFFFFFFFF, value_length = value
         .length();
 
