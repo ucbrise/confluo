@@ -245,8 +245,7 @@ class __LockFreeBase {
     uint32_t hibit = HighestBit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    T* bucket = buckets_[bucket_idx];
-    return bucket[bucket_off];
+    return buckets_[bucket_idx][bucket_off];
   }
 
   const_iterator begin() const {
