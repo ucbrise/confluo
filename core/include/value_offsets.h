@@ -3,6 +3,6 @@
 
 #include "conc_vectors.h"
 
-typedef __LockFreeBase<uint32_t, 16, 32> ValueOffsets;
+typedef __LockFreeBase<uint32_t, 32> ValueOffsets;
 
 #endif /* VALUE_OFFSETS_H_ */

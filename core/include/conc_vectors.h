@@ -173,19 +173,36 @@ class ConstLockFreeBaseIterator {
   pos_type pos_;
 };
 
-template<class T, uint32_t FBS = 2, uint32_t NBUCKETS = 32>
+static inline uint32_t HighestBit(uint32_t x) {
+  uint32_t y = 0;
+#ifdef BSR
+  asm ( "\tbsr %1, %0\n"
+      : "=r"(y)
+      : "r" (x)
+  );
+#else
+  while (x >>= 1)
+  ++y;
+#endif
+  return y;
+}
+
+template<class T, uint32_t NBUCKETS = 32>
 class __LockFreeBase {
  public:
   // Type definitions
   typedef uint32_t pos_type;
   typedef uint32_t size_type;
-  typedef ConstLockFreeBaseIterator<__LockFreeBase <T, FBS, NBUCKETS>> iterator;
-  typedef ConstLockFreeBaseIterator<__LockFreeBase <T, FBS, NBUCKETS>> const_iterator;
+  typedef ConstLockFreeBaseIterator<__LockFreeBase <T, NBUCKETS>> iterator;
+  typedef ConstLockFreeBaseIterator<__LockFreeBase <T, NBUCKETS>> const_iterator;
   typedef std::random_access_iterator_tag iterator_category;
   typedef T value_type;
   typedef T* pointer;
   typedef T& reference;
   typedef int64_t difference_type;
+
+  static const uint32_t FBS = 16;
+  static const uint32_t FBS_HIBIT = 4;
 
   typedef std::atomic<T*> AtomicBucketRef;
 
@@ -198,7 +215,7 @@ class __LockFreeBase {
   }
 
   void try_allocate_bucket(uint32_t bucket_idx) {
-    uint32_t size = FBS * (1U << (bucket_idx - 1));
+    uint32_t size = (1U << (bucket_idx + FBS_HIBIT));
     T* new_bucket = new T[size];
     T* null_ptr = NULL;
 
@@ -214,17 +231,20 @@ class __LockFreeBase {
   }
 
   void set(uint32_t idx, const T val) {
-    uint32_t bucket_idx = idx >= FBS ? (log2(idx / FBS) + 1) : 0;
-    uint32_t bucket_start = idx >= FBS ? (FBS * (1U << (bucket_idx - 1))) : 0;
-    uint32_t bucket_off = idx - bucket_start;
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = HighestBit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
     if (buckets_[bucket_idx] == NULL)
       try_allocate_bucket(bucket_idx);
     buckets_[bucket_idx][bucket_off] = val;
   }
 
   T get(const uint32_t idx) const {
-    uint32_t bucket_idx = idx >= FBS ? (log2(idx / FBS) + 1) : 0;
-    uint32_t bucket_off = idx - (FBS * (1U << (bucket_idx - 1)));
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = HighestBit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
     T* bucket = buckets_[bucket_idx];
     return bucket[bucket_off];
   }
@@ -276,30 +296,16 @@ class __LockFreeBase {
   }
 
  private:
-  static inline uint32_t log2(uint32_t x) {
-    uint32_t y = 0;
-#ifdef BSR
-    asm ( "\tbsr %1, %0\n"
-        : "=r"(y)
-        : "r" (x)
-    );
-#else
-    while (x >>= 1)
-      ++y;
-#endif
-    return y;
-  }
-
   std::array<AtomicBucketRef, NBUCKETS> buckets_;
 };
 
-template<class T, uint32_t FBS = 2, uint32_t NBUCKETS = 32>
-class LockFreeGrowingList : public __LockFreeBase<T, FBS, NBUCKETS> {
+template<class T, uint32_t NBUCKETS = 32>
+class LockFreeGrowingList : public __LockFreeBase<T, NBUCKETS> {
  public:
   typedef uint32_t pos_type;
   typedef uint32_t size_type;
-  typedef ConstLockFreeBaseIterator<LockFreeGrowingList<T, FBS, NBUCKETS>> iterator;
-  typedef ConstLockFreeBaseIterator<LockFreeGrowingList<T, FBS, NBUCKETS>> const_iterator;
+  typedef ConstLockFreeBaseIterator<__LockFreeBase <T, NBUCKETS>> iterator;
+  typedef ConstLockFreeBaseIterator<__LockFreeBase <T, NBUCKETS>> const_iterator;
   typedef std::random_access_iterator_tag iterator_category;
   typedef T value_type;
   typedef T* pointer;
@@ -328,12 +334,13 @@ class LockFreeGrowingList : public __LockFreeBase<T, FBS, NBUCKETS> {
   }
 
   const uint32_t serialize(std::ostream& out) {
-    return __LockFreeBase<T, FBS, NBUCKETS>::serialize(out, this->size());
+    return __LockFreeBase<T, NBUCKETS>::serialize(out, this->size());
   }
 
   const uint32_t deserialize(std::istream& in) {
     uint32_t num_entries;
-    uint32_t in_size = __LockFreeBase<T, FBS, NBUCKETS>::deserialize(in, &num_entries);
+    uint32_t in_size = __LockFreeBase<T, NBUCKETS>::deserialize(in,
+                                                                &num_entries);
     write_tail_ = num_entries;
     read_tail_ = num_entries;
     return in_size;
@@ -352,4 +359,4 @@ class LockFreeGrowingList : public __LockFreeBase<T, FBS, NBUCKETS> {
   std::atomic<uint32_t> read_tail_;
 };
 
-#endif /* CONC_VECTORS_H_ */
+#endif
