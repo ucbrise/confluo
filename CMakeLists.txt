@@ -17,11 +17,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g -Wno-format")
 enable_language(C)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
+
 find_package(Threads REQUIRED)
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost 1.53 REQUIRED COMPONENTS thread system)
+find_package(Gperftools REQUIRED)
 
 # Builds all sub-modules
 add_subdirectory(server)

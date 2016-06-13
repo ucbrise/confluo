@@ -2,14 +2,16 @@
 #define PROFILER_H_
 
 #include <stdlib.h>
+#include "gperftools/profiler.h"
 
 struct Profiler {
-  static void StartProfiling() {
-    system("callgrind_control -i on");
+  static void StartProfiling(const char* name = "profile.dat") {
+    ProfilerStart(name);
   }
 
   static void StopProfiling() {
-    system("callgrind_control -i off");
+    ProfilerFlush();
+    ProfilerStop();
   }
 };
 
