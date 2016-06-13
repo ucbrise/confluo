@@ -16,4 +16,4 @@ add_executable(lsbench src/log_store_benchmark.cc)
 add_executable(mbench src/micro_benchmark.cc)
 
 target_link_libraries(lsbench serverclient ${THRIFT_LIBRARIES})
-target_link_libraries(mbench ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${GPERFTOOLS_LIBRARIES})
+target_link_libraries(mbench ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${JEMALLOC_LIBRARIES})
