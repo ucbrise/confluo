@@ -99,9 +99,11 @@ class LogStore {
       throw -1;
 
     // We can add the new value offset to the value offsets array
-    // without worrying about locking, since we have uncontested
-    // access to the 'internal_key' index in the value offsets array.
+    // and initialize its delete tail without worrying about locking,
+    // since we have uncontested access to the 'internal_key' index in the
+    // value offsets array and the deleted entries array.
     value_offsets_.set(internal_key, value_offset);
+    deleted_.set(internal_key, 0);
 
     // Similarly, we can append the value to the log without locking
     // since this thread has exclusive access to the region (value_offset, value_offset + .
@@ -128,6 +130,17 @@ class LogStore {
     // for the internal key hasn't completed yet. Return -1
     // indicating failure.
     if (internal_key >= max_key)
+      return -1;
+
+    // Get the delete tail for the internal key, and the current read tail.
+    uint32_t delete_tail = deleted_.get(internal_key);
+    uint32_t read_tail = current_tail & 0xFFFFFFFF;
+
+    // If the delete tail is non zero (i.e., the value has been deleted),
+    // and the read tail is greater than the delete tail, then the
+    // value must have been deleted after the read began; return -1 to indicate
+    // get failure.
+    if (delete_tail && read_tail > delete_tail)
       return -1;
 
     // Get the beginning and end offset for the value if key is valid.
@@ -166,27 +179,33 @@ class LogStore {
     // Scan through the list of offsets, adding only valid offsets into the
     // set of results.
     uint32_t size = offsets->size();
+    char* data_ptr = data_ + NGRAM_N;
     for (uint32_t i = 0; i < size; i++) {
       // An offset is valid if
       // (1) the remaining query suffix matches the data at that location in
       //     the log,
-      // (2) the key is not larger than the maximum valid key (i.e., the write
+      // (2) the location does not exceed the maximum valid offset (i.e., the
+      //     write at that location was incomplete when the search started)
+      // (3) the key is not larger than the maximum valid key (i.e., the write
       //     for that key was incomplete when the search started)
-      // (3) the key was not deleted before the search began.
-      if (!strncmp(data_ + offsets->at(i) + NGRAM_N, suffix, suffix_len)) {
-        // TODO: Take care of query.length() <= ngram_n_ case
-        int64_t key = GetKey(offsets->at(i), max_key);
-        if (key >= 0 && key < max_key)
-          results.insert(key);
-      }
+      // (4) the key was not deleted before the search began.
+      //
+      // TODO: Take care of query.length() <= ngram_n_ case
+      uint32_t off = offsets->at(i);
+      if (off < max_off && !strncmp(data_ptr + off, suffix, suffix_len))
+        FindAndInsertKey(results, offsets->at(i), max_key, max_off);
     }
   }
 
-  void InvalidateKey(const uint32_t internal_key, const uint64_t tail) {
-
+  bool InvalidateKey(const uint32_t internal_key, const uint32_t offset) {
+    return deleted_.update(internal_key, offset);
   }
 
-  int Delete(const uint32_t internal_key) {
+  // Atomically deletes the key from the LogStore.
+  //
+  // Returns true if the delete is successful, false if the key was already
+  // deleted or not yet created.
+  bool Delete(const uint32_t internal_key) {
     // Atomically increase the ongoing append tail of the log.
     uint64_t current_tail = AtomicUpdateOngoingAppendsTail(DEL_INCR);
 
@@ -198,13 +217,16 @@ class LogStore {
     if (value_offset + 1 >= LOG_SIZE)
       throw -1;
 
-    // Invalidate the given internal key.
-    InvalidateKey(internal_key, current_tail);
+    if (internal_key >= current_tail >> 32)
+      return false;
 
-    // Return 0 on a successful delete.
-    return 0;
+    // Invalidate the given internal key.
+    return InvalidateKey(internal_key, value_offset + 1);
   }
 
+  // Atomically removes an existing key, and adds a new value.
+  //
+  // Returns the internal key associated with the value.
   uint32_t Update(const uint32_t internal_key, const std::string& value) {
     // Add the new value to the Log and generate and advance the ongoing
     // appends tail.
@@ -213,15 +235,15 @@ class LogStore {
     // Obtain the tail increment for the new value.
     uint64_t tail_increment = TailIncrement(value.length());
 
-    // Invalidate the old internal key.
-    InvalidateKey(internal_key, current_tail);
+    // Invalidate the old internal key. Don't care about the outcome.
+    InvalidateKey(internal_key, current_tail & 0xFFFFFFFF + 1);
 
     // Atomically update the completed append tail of the log.
     // This is done using CAS, and may have bounded waiting until
     // all appends before the current_tail are completed.
     AtomicUpdateCompletedAppendsTail(current_tail, tail_increment);
 
-    return 0;
+    return current_tail >> 32;
   }
 
   // Dumps the entire LogStore data to the specified path.
@@ -316,16 +338,34 @@ class LogStore {
       ;
   }
 
-  // Get the internal key given the value offset and the maximum valid key.
-  //
-  // Returns -1 if there is no valid key corresponding to the value offset,
-  // returns the corresponding internal key otherwise.
-  const int64_t GetKey(const uint32_t value_offset, const uint32_t max_key) {
-    auto begin = value_offsets_.begin();
-    auto end = value_offsets_.end(max_key);
-    int64_t internal_key = std::prev(std::upper_bound(begin, end, value_offset))
-        - begin;
-    return (internal_key >= max_key || internal_key < 0) ? -1 : internal_key;
+  // Finds the internal key given data offset, the maximum valid key and offset,
+  // and inserts the key into the provided set if it hasn't been deleted.
+  const void FindAndInsertKey(std::set<int64_t>& keys, const uint32_t offset,
+                              const uint32_t max_key, const uint32_t max_off) {
+
+    // Binary search for the offset in the list of value offsets.
+    uint32_t lo = 0, hi = max_key;
+    while (lo <= hi) {
+      uint32_t mid = lo + (hi - lo) / 2;
+      uint32_t v = value_offsets_.get(mid);
+      if (v <= offset)
+        lo = mid + 1;
+      else
+        hi = mid;
+    }
+
+    // Get the delete tail for the value offset.
+    uint32_t delete_tail = 0;  // TODO: Get the delete tail
+
+    // If the delete tail is non zero (i.e., the value has been deleted),
+    // and the current max offset is greater than the delete tail, then the
+    // value must have been deleted after the read began; return max_key
+    // as an invalid key.
+    if (delete_tail && max_off > delete_tail)
+      return;
+
+    // Insert the internal key where the search (successfully) ended.
+    keys.insert(lo - 1);
   }
 
   char *data_;                                    // Actual log data.
@@ -334,6 +374,9 @@ class LogStore {
   ValueOffsets value_offsets_;                    // Lock-free, dynamically
                                                   // growing list of value
                                                   // offsets.
+  DeletedOffsets deleted_;                        // Lock-free, dynamically
+                                                  // growing list of atomic
+                                                  // delete tails (offsets).
   ArrayNGramIdx<> ngram_idx_;                     // Lock-free dynamically
                                                   // Growing index mapping
                                                   // N-grams to their locations
