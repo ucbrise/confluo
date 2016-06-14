@@ -63,7 +63,9 @@ class ServerImpl : virtual public ServerIf {
   }
 
   void Get(std::string& _return, const int64_t key) {
-    shard_->Get(_return, key);
+    char data[10*1024];
+    shard_->Get(data, key);
+    _return.assign(data);
   }
 
   void Search(std::set<int64_t>& _return, const std::string& query) {

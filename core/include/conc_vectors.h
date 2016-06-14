@@ -2,6 +2,7 @@
 #define CONC_VECTORS_H_
 
 #include <array>
+#include <vector>
 #include <atomic>
 #include <fstream>
 
@@ -219,22 +220,6 @@ class __LockFreeBaseAtomic {
     return buckets_[bucket_idx][bucket_off];
   }
 
-  bool update(const uint32_t idx, const T val) {
-    uint32_t pos = idx + FBS;
-    uint32_t hibit = HighestBit(pos);
-    uint32_t bucket_off = pos ^ (1 << hibit);
-    uint32_t bucket_idx = hibit - FBS_HIBIT;
-
-    T current_val;
-    bool success;
-    do {
-      current_val = buckets_[bucket_idx][bucket_off];
-      success = std::atomic_compare_exchange_weak(
-          &buckets_[bucket_idx][bucket_off], &current_val, val);
-    } while ((!current_val || val < current_val) && !success);
-    return success;
-  }
-
   const uint32_t serialize(std::ostream& out, uint32_t sz) {
     uint32_t out_size = 0;
 
@@ -265,7 +250,7 @@ class __LockFreeBaseAtomic {
     return in_size;
   }
 
- private:
+ protected:
   std::array<AtomicBucketRef, NBUCKETS> buckets_;
 };
 

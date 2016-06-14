@@ -1,15 +1,11 @@
 #ifndef LOCKS_H_
 #define LOCKS_H_
 
-#include <mutex>
-
-#include <boost/thread/locks.hpp>
-#include <boost/thread/shared_mutex.hpp>
+#ifdef CUSTOM_LOCKS
 
 #include <pthread.h>
 #include <poll.h>
 
-#ifdef CUSTOM_LOCKS
 
 class MutexImpl {
  public:
@@ -69,12 +65,18 @@ typedef ReadLockImpl<Mutex> ReadLock;
 #endif
 
 #ifdef BOOST_LOCKS
+#include <boost/thread/locks.hpp>
+#include <boost/thread/shared_mutex.hpp>
+
 typedef boost::shared_mutex Mutex;
 typedef boost::unique_lock<Mutex> WriteLock;
 typedef boost::shared_lock<Mutex> ReadLock;
 #endif
 
 #ifdef STL_LOCKS
+
+#include <mutex>
+
 typedef std::mutex Mutex;
 typedef std::lock_guard<Mutex> WriteLock;
 typedef std::lock_guard<Mutex> ReadLock;

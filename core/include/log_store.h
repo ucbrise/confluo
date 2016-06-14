@@ -41,13 +41,18 @@ class LogStore {
   static const uint64_t DEL_INCR = 1ULL;
 
   // Constructor to initialize the LogStore.
-  LogStore()
-      : ongoing_appends_tail_(0),     // Initialize both ongoing and completed
-        completed_appends_tail_(0) {  // appends tail to 0.
+  LogStore() {
     // Initialize the log store to a constant size.
     // Note we can use a lock-free exponentially or linear growing allocator
     // to make the Log dynamically sized rather than static.
     data_ = new char[LOG_SIZE];
+
+    // Initialize both ongoing and completed appends tail to 0.
+    ongoing_appends_tail_ = 0;
+    completed_appends_tail_ = 0;
+    value_offsets_ = new ValueOffsets;
+    deleted_ = new DeletedOffsets;
+    ngram_idx_ = new ArrayNGramIdx<>;
   }
 
   // Adds a new key value pair to the LogStore atomically.
@@ -102,8 +107,8 @@ class LogStore {
     // and initialize its delete tail without worrying about locking,
     // since we have uncontested access to the 'internal_key' index in the
     // value offsets array and the deleted entries array.
-    value_offsets_.set(internal_key, value_offset);
-    deleted_.set(internal_key, 0);
+    value_offsets_->set(internal_key, value_offset);
+    deleted_->set(internal_key, 0);
 
     // Similarly, we can append the value to the log without locking
     // since this thread has exclusive access to the region (value_offset, value_offset + .
@@ -112,7 +117,7 @@ class LogStore {
     // Safely update secondary index entries, in a lock-free manner.
     uint32_t value_end = value_offset + value_length;
     for (uint32_t i = value_offset; i < value_end - NGRAM_N; i++)
-      ngram_idx_.add_offset(data_ + i, i);
+      ngram_idx_->add_offset(data_ + i, i);
 
     // Return the current tail
     return current_tail;
@@ -121,7 +126,7 @@ class LogStore {
   // Fetch a value from the LogStore by its internal key.
   //
   // Returns 0 if the fetch is successful, -1 otherwise.
-  const int Get(std::string& value, const uint32_t internal_key) {
+  const int Get(char* value, const uint32_t internal_key) {
     // Get the current completed appends tail, and get the maximum valid key.
     uint64_t current_tail = completed_appends_tail_;
     uint32_t max_key = current_tail >> 32;
@@ -133,24 +138,27 @@ class LogStore {
       return -1;
 
     // Get the delete tail for the internal key, and the current read tail.
-    uint32_t delete_tail = deleted_.get(internal_key);
+    uint32_t delete_tail = deleted_->get(internal_key);
     uint32_t read_tail = current_tail & 0xFFFFFFFF;
 
     // If the delete tail is non zero (i.e., the value has been deleted),
     // and the read tail is greater than the delete tail, then the
     // value must have been deleted after the read began; return -1 to indicate
     // get failure.
-    if (delete_tail && read_tail > delete_tail)
+    if (delete_tail && read_tail >= delete_tail)
       return -1;
 
     // Get the beginning and end offset for the value if key is valid.
-    uint32_t start = value_offsets_.get(internal_key);
+    uint32_t start = value_offsets_->get(internal_key);
     uint32_t end =
         (internal_key + 1 < max_key) ?
-            value_offsets_.get(internal_key + 1) : current_tail & 0xFFFFFFFF;
+            value_offsets_->get(internal_key + 1) : current_tail & 0xFFFFFFFF;
 
-    // Copy the value data into the value.
-    value.assign(data_ + start, end - start);
+    char* data_ptr = data_ + start;
+    uint32_t i = 0;
+    for (; i < end - start && data_ptr[i] != 0; i++)
+      value[i] = data_ptr[i];
+    value[i] = '\0';
 
     // Return 0 for successful get.
     return 0;
@@ -174,7 +182,7 @@ class LogStore {
 
     // Obtain the offsets into the values corresponding to the substring ngram
     // from the N-gram index.
-    OffsetList* offsets = ngram_idx_.get_offsets(substr);
+    OffsetList* offsets = ngram_idx_->get_offsets(substr);
 
     // Scan through the list of offsets, adding only valid offsets into the
     // set of results.
@@ -198,7 +206,7 @@ class LogStore {
   }
 
   bool InvalidateKey(const uint32_t internal_key, const uint32_t offset) {
-    return deleted_.update(internal_key, offset);
+    return deleted_->update(internal_key, offset);
   }
 
   // Atomically deletes the key from the LogStore.
@@ -221,7 +229,15 @@ class LogStore {
       return false;
 
     // Invalidate the given internal key.
-    return InvalidateKey(internal_key, value_offset + 1);
+    if (InvalidateKey(internal_key, value_offset + 1)) {
+      // Atomically update the completed append tail of the log.
+      // This is done using CAS, and may have bounded waiting until
+      // all appends before the current_tail are completed.
+      AtomicUpdateCompletedAppendsTail(current_tail, DEL_INCR);
+      return true;
+    }
+
+    return false;
   }
 
   // Atomically removes an existing key, and adds a new value.
@@ -264,10 +280,10 @@ class LogStore {
     out_size += (log_size * sizeof(char));
 
     // Write value offsets
-    out_size += value_offsets_.serialize(out, max_key);
+    out_size += value_offsets_->serialize(out, max_key);
 
     // Write n-gram index
-    out_size += ngram_idx_.serialize(out);
+    out_size += ngram_idx_->serialize(out);
 
     return out_size;
   }
@@ -288,10 +304,10 @@ class LogStore {
     in_size += (log_size * sizeof(char));
 
     // Read value offsets
-    in_size += value_offsets_.deserialize(in, &max_key);
+    in_size += value_offsets_->deserialize(in, &max_key);
 
     // Read n-gram index
-    in_size += ngram_idx_.deserialize(in);
+    in_size += ngram_idx_->deserialize(in);
 
     // Set the tail values
     ongoing_appends_tail_ = ((uint64_t) max_key) << 32 | ((uint64_t) log_size);
@@ -345,42 +361,45 @@ class LogStore {
 
     // Binary search for the offset in the list of value offsets.
     uint32_t lo = 0, hi = max_key;
-    while (lo <= hi) {
+    while (lo < hi) {
       uint32_t mid = lo + (hi - lo) / 2;
-      uint32_t v = value_offsets_.get(mid);
+      uint32_t v = value_offsets_->get(mid);
       if (v <= offset)
         lo = mid + 1;
       else
         hi = mid;
     }
 
-    // Get the delete tail for the value offset.
-    uint32_t delete_tail = 0;  // TODO: Get the delete tail
+    // The internal key where the search ended.
+    uint32_t internal_key = lo - 1;
 
-    // If the delete tail is non zero (i.e., the value has been deleted),
+    // Get the delete tail for the internal key.
+    uint32_t delete_tail = deleted_->get(internal_key);
+
+    // If the delete tail is non zero (i.e., the key has been deleted),
     // and the current max offset is greater than the delete tail, then the
-    // value must have been deleted after the read began; return max_key
-    // as an invalid key.
-    if (delete_tail && max_off > delete_tail)
-      return;
+    // value must have been deleted after the read began; return without
+    // inserting internal key into the result set.
+    if (delete_tail && max_off >= delete_tail)
+        return;
 
     // Insert the internal key where the search (successfully) ended.
-    keys.insert(lo - 1);
+    keys.insert(internal_key);
   }
 
-  char *data_;                                    // Actual log data.
-  std::atomic<uint64_t> ongoing_appends_tail_;    // Ongoing appends tail.
-  std::atomic<uint64_t> completed_appends_tail_;  // Completed appends tail.
-  ValueOffsets value_offsets_;                    // Lock-free, dynamically
-                                                  // growing list of value
-                                                  // offsets.
-  DeletedOffsets deleted_;                        // Lock-free, dynamically
-                                                  // growing list of atomic
-                                                  // delete tails (offsets).
-  ArrayNGramIdx<> ngram_idx_;                     // Lock-free dynamically
-                                                  // Growing index mapping
-                                                  // N-grams to their locations
-                                                  // in the log.
+  char *data_;                                     // Actual log data.
+  std::atomic<uint64_t> ongoing_appends_tail_;     // Ongoing appends tail.
+  std::atomic<uint64_t> completed_appends_tail_;   // Completed appends tail.
+  ValueOffsets *value_offsets_;                    // Lock-free, dynamically
+                                                   // growing list of value
+                                                   // offsets.
+  DeletedOffsets *deleted_;                        // Lock-free, dynamically
+                                                   // growing list of atomic
+                                                   // delete tails (offsets).
+  ArrayNGramIdx<> *ngram_idx_;                     // Lock-free dynamically
+                                                   // Growing index mapping
+                                                   // N-grams to their locations
+                                                   // in the log.
 };
 }
 

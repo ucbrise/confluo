@@ -20,7 +20,6 @@
 #endif
 
 #define QUERY(i, num_keys) {\
-  std::string get_res;\
   std::set<int64_t> search_res;\
   if (query_types[i % kThreadQueryCount] == 0) {\
     shard_->Get(get_res, keys[i % keys.size()]);\
@@ -140,10 +139,10 @@ void MicroBenchmark::BenchmarkGetLatency() {
 
   std::ofstream result_stream("latency_get");
 
+  char result[10*1024];
   // Warmup
   LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
-    std::string result;
     shard_->Get(result, keys[i]);
   }
   LOG(stderr, "Warmup complete.\n");
@@ -151,7 +150,6 @@ void MicroBenchmark::BenchmarkGetLatency() {
   // Measure
   LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
-    std::string result;
     auto t0 = high_resolution_clock::now();
     shard_->Get(result, keys[i]);
     auto t1 = high_resolution_clock::now();
@@ -293,6 +291,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
 
               double query_thput = 0;
               double key_thput = 0;
+              char get_res[10*1024];
 
               try {
                 // Warmup phase
