@@ -310,7 +310,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
   }
 
   const double get_m = get_f, search_m = get_f + search_f, append_m = get_f
-      + search_f, delete_m = 1.0;
+      + search_f + append_f, delete_m = get_f + search_f + append_f + delete_f;
 
   std::condition_variable cvar;
   std::vector<std::thread> threads;
@@ -318,91 +318,92 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(
         std::move(
-            std::thread([&] {
-              std::vector<int64_t> keys;
-              std::vector<std::string> values, terms;
+            std::thread(
+                [&] {
+                  std::vector<int64_t> keys;
+                  std::vector<std::string> values, terms;
 
-              std::ifstream in_s(data_path_ + ".queries");
-              std::ifstream in_a(data_path_);
-              int64_t cur_key = load_keys_;
-              std::string term, value;
-              std::vector<uint32_t> query_types;
-              LOG(stderr, "Generating queries...\n");
-              for (int64_t i = 0; i < kThreadQueryCount; i++) {
-                int64_t key = RandomInteger(0, load_keys_);
-                std::getline(in_s, term);
-                std::getline(in_a, value);
+                  std::ifstream in_s(data_path_ + ".queries");
+                  std::ifstream in_a(data_path_);
+                  int64_t cur_key = load_keys_;
+                  std::string term, value;
+                  std::vector<uint32_t> query_types;
+                  LOG(stderr, "Generating queries...\n");
+                  for (int64_t i = 0; i < kThreadQueryCount; i++) {
+                    int64_t key = RandomInteger(0, load_keys_);
+                    std::getline(in_s, term);
+                    std::getline(in_a, value);
 
-                keys.push_back(key);
-                terms.push_back(term);
-                values.push_back(value);
+                    keys.push_back(key);
+                    terms.push_back(term);
+                    values.push_back(value);
 
-                double r = RandomDouble(0, 1);
-                if (r <= get_m) {
-                  query_types.push_back(0);
-                } else if (r <= search_m) {
-                  query_types.push_back(1);
-                } else if (r <= append_m) {
-                  query_types.push_back(2);
-                } else if (r <= delete_m) {
-                  query_types.push_back(3);
-                }
-              }
+                    double r = RandomDouble(0, 1);
+                    if (r <= get_m) {
+                      query_types.push_back(0);
+                    } else if (r <= search_m) {
+                      query_types.push_back(1);
+                    } else if (r <= append_m) {
+                      query_types.push_back(2);
+                    } else if (r <= delete_m) {
+                      query_types.push_back(3);
+                    }
+                  }
 
-              std::random_shuffle(keys.begin(), keys.end(), MicroBenchmark::RandomIndex);
-              std::random_shuffle(terms.begin(), terms.end(), MicroBenchmark::RandomIndex);
-              LOG(stderr, "Done.\n");
+                  std::random_shuffle(keys.begin(), keys.end(), MicroBenchmark::RandomIndex);
+                  std::random_shuffle(terms.begin(), terms.end(), MicroBenchmark::RandomIndex);
+                  LOG(stderr, "Done.\n");
 
-              double query_thput = 0;
-              double key_thput = 0;
-              char get_res[10*1024];
+                  double query_thput = 0;
+                  double key_thput = 0;
+                  char get_res[10*1024];
 
-              try {
-                // Warmup phase
-                long i = 0;
-                long num_keys = 0;
-                TimeStamp warmup_start = GetTimestamp();
-                while (GetTimestamp() - warmup_start < kWarmupTime) {
-                  QUERY(i, num_keys);
-                  i++;
-                }
+                  try {
+                    // Warmup phase
+                    long i = 0;
+                    long num_keys = 0;
+                    TimeStamp warmup_start = GetTimestamp();
+                    while (GetTimestamp() - warmup_start < kWarmupTime) {
+                      QUERY(i, num_keys);
+                      i++;
+                    }
 
-                // Measure phase
-                i = 0;
-                num_keys = 0;
-                TimeStamp start = GetTimestamp();
-                while (GetTimestamp() - start < kMeasureTime) {
-                  QUERY(i, num_keys);
-                  i++;
-                }
-                TimeStamp end = GetTimestamp();
-                double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                query_thput = ((double) i / totsecs);
-                key_thput = ((double) num_keys / totsecs);
+                    // Measure phase
+                    i = 0;
+                    num_keys = 0;
+                    TimeStamp start = GetTimestamp();
+                    while (GetTimestamp() - start < kMeasureTime) {
+                      QUERY(i, num_keys);
+                      i++;
+                    }
+                    TimeStamp end = GetTimestamp();
+                    double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+                    query_thput = ((double) i / totsecs);
+                    key_thput = ((double) num_keys / totsecs);
 
-                // Cooldown phase
-                i = 0;
-                num_keys = 0;
-                TimeStamp cooldown_start = GetTimestamp();
-                while (GetTimestamp() - cooldown_start < kCooldownTime) {
-                  QUERY(i, num_keys);
-                  i++;
-                }
+                    // Cooldown phase
+                    i = 0;
+                    num_keys = 0;
+                    TimeStamp cooldown_start = GetTimestamp();
+                    while (GetTimestamp() - cooldown_start < kCooldownTime) {
+                      QUERY(i, num_keys);
+                      i++;
+                    }
 
-              } catch (std::exception &e) {
-                LOG(stderr, "Throughput thread ended prematurely.\n");
-              }
+                  } catch (std::exception &e) {
+                    LOG(stderr, "Throughput thread ended prematurely.\n");
+                  }
 
-              LOG(stderr, "Throughput: %lf\n", query_thput);
+                  LOG(stderr, "Throughput: %lf\n", query_thput);
 
-              std::ofstream ofs;
-              char output_file[100];
-              sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, delete_f, num_clients);
-              ofs.open(output_file, std::ofstream::out | std::ofstream::app);
-              ofs << query_thput << "\t" << key_thput << "\n";
-              ofs.close();
+                  std::ofstream ofs;
+                  char output_file[100];
+                  sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, delete_f, num_clients);
+                  ofs.open(output_file, std::ofstream::out | std::ofstream::app);
+                  ofs << query_thput << "\t" << key_thput << "\n";
+                  ofs.close();
 
-            })));
+                })));
   }
 
   for (auto& th : threads) {
