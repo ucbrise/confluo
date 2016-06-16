@@ -2,7 +2,11 @@
 
 mkdir -p build
 cd build
-cmake .. -DCMAKE_CXX_COMPILER=g++
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  cmake .. -DCMAKE_CXX_COMPILER=g++
+else
+  cmake ..
+fi
 START=$(date +%s)
 make && make test ARGS="-VV"
 END=$(date +%s)
