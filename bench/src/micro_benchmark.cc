@@ -350,8 +350,8 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
                     }
                   }
 
-                  std::random_shuffle(keys.begin(), keys.end(), MicroBenchmark::RandomIndex);
-                  std::random_shuffle(terms.begin(), terms.end(), MicroBenchmark::RandomIndex);
+                  std::shuffle(keys.begin(), keys.end(), PRNG());
+                  std::shuffle(terms.begin(), terms.end(), PRNG());
                   LOG(stderr, "Done.\n");
 
                   double query_thput = 0;
