@@ -58,6 +58,12 @@ class MicroBenchmark {
     return RandomInteger(0, i);
   }
 
+  static std::mt19937 PRNG() {
+    std::random_device r;
+    std::seed_seq seed { r(), r(), r(), r(), r(), r(), r(), r() };
+    return std::mt19937(seed);
+  }
+
   static double RandomDouble(const double min, const double max) {
     std::random_device r;
     std::seed_seq seed { r(), r(), r(), r(), r(), r(), r(), r() };
