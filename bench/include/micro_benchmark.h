@@ -23,7 +23,7 @@ class MicroBenchmark {
   static const uint64_t kMeasureTime = 10000000;
   static const uint64_t kCooldownTime = 5000000;
 
-  static const uint64_t kThreadQueryCount = 100000;
+  static const uint64_t kThreadQueryCount = 75000;
 
   MicroBenchmark(std::string& data_path, int mode = 0, bool dump = false);  // Mode: 0 = Load from scratch, 1 = Load from dump
 
