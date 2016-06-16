@@ -369,6 +369,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
 
                 // Measure phase
                 i = 0;
+                num_keys = 0;
                 TimeStamp start = GetTimestamp();
                 while (GetTimestamp() - start < kMeasureTime) {
                   QUERY(i, num_keys);
@@ -381,6 +382,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
 
                 // Cooldown phase
                 i = 0;
+                num_keys = 0
                 TimeStamp cooldown_start = GetTimestamp();
                 while (GetTimestamp() - cooldown_start < kCooldownTime) {
                   QUERY(i, num_keys);
