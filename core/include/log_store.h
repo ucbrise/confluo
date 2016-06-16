@@ -318,15 +318,22 @@ class LogStore {
   }
 
   // Atomically get the number of currently readable keys.
-  const size_t GetNumKeys() {
+  const uint32_t GetNumKeys() {
     uint64_t current_tail = completed_appends_tail_;
     return current_tail >> 32;
   }
 
   // Atomically get the size of the currently readable portion of the LogStore.
-  const int64_t GetSize() {
+  const uint32_t GetSize() {
     uint64_t current_tail = completed_appends_tail_;
     return current_tail & 0xFFFFFFFF;
+  }
+
+  // Get the difference between the ongoing appends tail and the completed
+  // appends tail. Note that the operation is not atomic, and should only be
+  // used for approximate measurements.
+  const uint64_t GetGap() {
+    return ongoing_appends_tail_ - completed_appends_tail_;
   }
 
  private:
