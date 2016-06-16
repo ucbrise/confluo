@@ -477,8 +477,9 @@ int main(int argc, char** argv) {
     ls_bench.BenchmarkDeleteLatency();
   } else if (bench_type.find("throughput") == 0) {
     std::vector<std::string> tokens = Split(bench_type, '-');
-    if (tokens.size() != 4) {
+    if (tokens.size() != 5) {
       LOG(stderr, "Error: Incorrect throughput benchmark format.\n");
+      return -1;
     }
     double get_f = atof(tokens[1].c_str());
     double search_f = atof(tokens[2].c_str());
