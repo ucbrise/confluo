@@ -47,7 +47,9 @@ class MicroBenchmark {
   }
 
   static uint32_t RandomInteger(const uint32_t min, const uint32_t max) {
-    static thread_local std::mt19937 generator;
+    std::random_device r;
+    std::seed_seq seed { r(), r(), r(), r(), r(), r(), r(), r() };
+    static thread_local std::mt19937 generator(seed);
     std::uniform_int_distribution<uint32_t> distribution(min, max);
     return distribution(generator);
   }
@@ -57,7 +59,9 @@ class MicroBenchmark {
   }
 
   static double RandomDouble(const double min, const double max) {
-    static thread_local std::mt19937 generator;
+    std::random_device r;
+    std::seed_seq seed { r(), r(), r(), r(), r(), r(), r(), r() };
+    static thread_local std::mt19937 generator(seed);
     std::uniform_real_distribution<double> distribution(min, max);
     return distribution(generator);
   }
