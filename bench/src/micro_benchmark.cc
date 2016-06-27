@@ -404,11 +404,13 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
             })));
   }
 
+#ifdef MEASURE_GAP
   OPEN_GAP_LOG(get_f, search_f, append_f, delete_f, num_clients);
   TimeStamp start = GetTimestamp();
   while (GetTimestamp() - start < kWarmupTime + kMeasureTime + kCooldownTime) {
     LOG_GAP;
   }
+#endif
 
   for (auto& th : threads) {
     th.join();
