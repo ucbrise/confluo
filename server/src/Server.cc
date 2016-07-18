@@ -639,20 +639,19 @@ uint32_t Server_Search_result::read(::apache::thrift::protocol::TProtocol* iprot
     switch (fid)
     {
       case 0:
-        if (ftype == ::apache::thrift::protocol::T_SET) {
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->success.clear();
             uint32_t _size0;
             ::apache::thrift::protocol::TType _etype3;
-            xfer += iprot->readSetBegin(_etype3, _size0);
+            xfer += iprot->readListBegin(_etype3, _size0);
+            this->success.resize(_size0);
             uint32_t _i4;
             for (_i4 = 0; _i4 < _size0; ++_i4)
             {
-              int64_t _elem5;
-              xfer += iprot->readI64(_elem5);
-              this->success.insert(_elem5);
+              xfer += iprot->readI64(this->success[_i4]);
             }
-            xfer += iprot->readSetEnd();
+            xfer += iprot->readListEnd();
           }
           this->__isset.success = true;
         } else {
@@ -678,15 +677,15 @@ uint32_t Server_Search_result::write(::apache::thrift::protocol::TProtocol* opro
   xfer += oprot->writeStructBegin("Server_Search_result");
 
   if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_SET, 0);
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
-      xfer += oprot->writeSetBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>(this->success.size()));
-      std::set<int64_t> ::const_iterator _iter6;
-      for (_iter6 = this->success.begin(); _iter6 != this->success.end(); ++_iter6)
+      xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>(this->success.size()));
+      std::vector<int64_t> ::const_iterator _iter5;
+      for (_iter5 = this->success.begin(); _iter5 != this->success.end(); ++_iter5)
       {
-        xfer += oprot->writeI64((*_iter6));
+        xfer += oprot->writeI64((*_iter5));
       }
-      xfer += oprot->writeSetEnd();
+      xfer += oprot->writeListEnd();
     }
     xfer += oprot->writeFieldEnd();
   }
@@ -722,20 +721,19 @@ uint32_t Server_Search_presult::read(::apache::thrift::protocol::TProtocol* ipro
     switch (fid)
     {
       case 0:
-        if (ftype == ::apache::thrift::protocol::T_SET) {
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             (*(this->success)).clear();
-            uint32_t _size7;
-            ::apache::thrift::protocol::TType _etype10;
-            xfer += iprot->readSetBegin(_etype10, _size7);
-            uint32_t _i11;
-            for (_i11 = 0; _i11 < _size7; ++_i11)
+            uint32_t _size6;
+            ::apache::thrift::protocol::TType _etype9;
+            xfer += iprot->readListBegin(_etype9, _size6);
+            (*(this->success)).resize(_size6);
+            uint32_t _i10;
+            for (_i10 = 0; _i10 < _size6; ++_i10)
             {
-              int64_t _elem12;
-              xfer += iprot->readI64(_elem12);
-              (*(this->success)).insert(_elem12);
+              xfer += iprot->readI64((*(this->success))[_i10]);
             }
-            xfer += iprot->readSetEnd();
+            xfer += iprot->readListEnd();
           }
           this->__isset.success = true;
         } else {
@@ -1411,7 +1409,7 @@ void ServerClient::recv_Get(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Get failed: unknown result");
 }
 
-void ServerClient::Search(std::set<int64_t> & _return, const std::string& query)
+void ServerClient::Search(std::vector<int64_t> & _return, const std::string& query)
 {
   send_Search(query);
   recv_Search(_return);
@@ -1431,7 +1429,7 @@ void ServerClient::send_Search(const std::string& query)
   oprot_->getTransport()->flush();
 }
 
-void ServerClient::recv_Search(std::set<int64_t> & _return)
+void ServerClient::recv_Search(std::vector<int64_t> & _return)
 {
 
   int32_t rseqid = 0;
@@ -2284,7 +2282,7 @@ void ServerConcurrentClient::recv_Get(std::string& _return, const int32_t seqid)
   } // end while(true)
 }
 
-void ServerConcurrentClient::Search(std::set<int64_t> & _return, const std::string& query)
+void ServerConcurrentClient::Search(std::vector<int64_t> & _return, const std::string& query)
 {
   int32_t seqid = send_Search(query);
   recv_Search(_return, seqid);
@@ -2308,7 +2306,7 @@ int32_t ServerConcurrentClient::send_Search(const std::string& query)
   return cseqid;
 }
 
-void ServerConcurrentClient::recv_Search(std::set<int64_t> & _return, const int32_t seqid)
+void ServerConcurrentClient::recv_Search(std::vector<int64_t> & _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;

@@ -7,7 +7,7 @@ service Server {
   // Supported operations
   void Append(1: i64 key, 2: string value),
   string Get(1: i64 key),
-  set<i64> Search(1: string query),
+  list<i64> Search(1: string query),
   void Delete(1: i64 key),
 
   // Metadata

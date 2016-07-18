@@ -24,7 +24,7 @@ class ServerIf {
   virtual int32_t Initialize() = 0;
   virtual void Append(const int64_t key, const std::string& value) = 0;
   virtual void Get(std::string& _return, const int64_t key) = 0;
-  virtual void Search(std::set<int64_t> & _return, const std::string& query) = 0;
+  virtual void Search(std::vector<int64_t> & _return, const std::string& query) = 0;
   virtual void Delete(const int64_t key) = 0;
   virtual int64_t GetNumKeys() = 0;
   virtual int64_t GetSize() = 0;
@@ -67,7 +67,7 @@ class ServerNull : virtual public ServerIf {
   void Get(std::string& /* _return */, const int64_t /* key */) {
     return;
   }
-  void Search(std::set<int64_t> & /* _return */, const std::string& /* query */) {
+  void Search(std::vector<int64_t> & /* _return */, const std::string& /* query */) {
     return;
   }
   void Delete(const int64_t /* key */) {
@@ -435,11 +435,11 @@ class Server_Search_result {
   }
 
   virtual ~Server_Search_result() throw();
-  std::set<int64_t>  success;
+  std::vector<int64_t>  success;
 
   _Server_Search_result__isset __isset;
 
-  void __set_success(const std::set<int64_t> & val);
+  void __set_success(const std::vector<int64_t> & val);
 
   bool operator == (const Server_Search_result & rhs) const
   {
@@ -468,7 +468,7 @@ class Server_Search_presult {
 
 
   virtual ~Server_Search_presult() throw();
-  std::set<int64_t> * success;
+  std::vector<int64_t> * success;
 
   _Server_Search_presult__isset __isset;
 
@@ -780,9 +780,9 @@ class ServerClient : virtual public ServerIf {
   void Get(std::string& _return, const int64_t key);
   void send_Get(const int64_t key);
   void recv_Get(std::string& _return);
-  void Search(std::set<int64_t> & _return, const std::string& query);
+  void Search(std::vector<int64_t> & _return, const std::string& query);
   void send_Search(const std::string& query);
-  void recv_Search(std::set<int64_t> & _return);
+  void recv_Search(std::vector<int64_t> & _return);
   void Delete(const int64_t key);
   void send_Delete(const int64_t key);
   void recv_Delete();
@@ -880,7 +880,7 @@ class ServerMultiface : virtual public ServerIf {
     return;
   }
 
-  void Search(std::set<int64_t> & _return, const std::string& query) {
+  void Search(std::vector<int64_t> & _return, const std::string& query) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -956,9 +956,9 @@ class ServerConcurrentClient : virtual public ServerIf {
   void Get(std::string& _return, const int64_t key);
   int32_t send_Get(const int64_t key);
   void recv_Get(std::string& _return, const int32_t seqid);
-  void Search(std::set<int64_t> & _return, const std::string& query);
+  void Search(std::vector<int64_t> & _return, const std::string& query);
   int32_t send_Search(const std::string& query);
-  void recv_Search(std::set<int64_t> & _return, const int32_t seqid);
+  void recv_Search(std::vector<int64_t> & _return, const int32_t seqid);
   void Delete(const int64_t key);
   int32_t send_Delete(const int64_t key);
   void recv_Delete(const int32_t seqid);

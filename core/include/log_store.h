@@ -232,6 +232,75 @@ class LogStore {
     }
   }
 
+  // Search the LogStore for a column value.
+  //
+  // Returns the set of valid, matching internal keys.
+  const void ColSearch(std::vector<int64_t>& results,
+                       const std::string& col_value) {
+    // Get the current completed appends tail, and extract the maximum valid
+    // key and value offset.
+    uint64_t current_tail = completed_appends_tail_;
+    uint32_t max_key = current_tail >> 32;
+    uint32_t max_off = current_tail & 0xFFFFFFFF;
+
+    // Obtain the offsets into the values corresponding to the prefix and
+    // suffix ngram for the substring from the N-gram index.
+    char *substr = (char *) col_value.c_str();
+    OffsetList* prefix_offsets = ngram_idx_->get_offsets(substr);
+    OffsetList* suffix_offsets = ngram_idx_->get_offsets(
+        substr + col_value.length() - NGRAM_N);
+
+    if (prefix_offsets->size() < suffix_offsets->size()) {
+      // Extract the remaining suffix to compare with the actual data.
+      char *suffix = substr + NGRAM_N;
+      size_t suffix_len = col_value.length() - NGRAM_N;
+
+      // Scan through the list of offsets, adding only valid offsets into the
+      // set of results.
+      uint32_t size = prefix_offsets->size();
+      char* data_ptr = data_ + NGRAM_N;
+      for (uint32_t i = 0; i < size; i++) {
+        // An offset is valid if
+        // (1) the remaining query suffix matches the data at that location in
+        //     the log,
+        // (2) the location does not exceed the maximum valid offset (i.e., the
+        //     write at that location was incomplete when the search started)
+        // (3) the key is not larger than the maximum valid key (i.e., the write
+        //     for that key was incomplete when the search started)
+        // (4) the key was not deleted before the search began.
+        //
+        // TODO: Take care of query.length() <= NGRAM_N case
+        uint32_t off = prefix_offsets->at(i);
+        if (off < max_off && !strncmp(data_ptr + off, suffix, suffix_len))
+          FindAndInsertKey(results, off, max_key, max_off);
+      }
+    } else {
+      // Extract the remaining prefix to compare with the actual data.
+      char *prefix = substr;
+      size_t prefix_len = col_value.length() - NGRAM_N;
+
+      // Scan through the list of offsets, adding only valid offsets into the
+      // set of results.
+      uint32_t size = suffix_offsets->size();
+      char* data_ptr = data_ - prefix_len;
+      for (uint32_t i = 0; i < size; i++) {
+        // An offset is valid if
+        // (1) the remaining query prefix matches the data at that location in
+        //     the log,
+        // (2) the location does not exceed the maximum valid offset (i.e., the
+        //     write at that location was incomplete when the search started)
+        // (3) the key is not larger than the maximum valid key (i.e., the write
+        //     for that key was incomplete when the search started)
+        // (4) the key was not deleted before the search began.
+        //
+        // TODO: Take care of query.length() <= NGRAM_N case
+        uint32_t off = suffix_offsets->at(i);
+        if (off < max_off && !strncmp(data_ptr + off, prefix, prefix_len))
+          FindAndInsertKey(results, off, max_key, max_off);
+      }
+    }
+  }
+
   bool InvalidateKey(const uint32_t internal_key, const uint32_t offset) {
     return deleted_->update(internal_key, offset);
   }
@@ -419,6 +488,39 @@ class LogStore {
 
     // Insert the internal key where the search (successfully) ended.
     keys.insert(internal_key);
+  }
+
+  // Finds the internal key given data offset, the maximum valid key and offset,
+  // and inserts the key into the provided set if it hasn't been deleted.
+  const void FindAndInsertKey(std::vector<int64_t>& keys, const uint32_t offset,
+                              const uint32_t max_key, const uint32_t max_off) {
+
+    // Binary search for the offset in the list of value offsets.
+    uint32_t lo = 0, hi = max_key;
+    while (lo < hi) {
+      uint32_t mid = lo + (hi - lo) / 2;
+      uint32_t v = value_offsets_->get(mid);
+      if (v <= offset)
+        lo = mid + 1;
+      else
+        hi = mid;
+    }
+
+    // The internal key where the search ended.
+    uint32_t internal_key = lo - 1;
+
+    // Get the delete tail for the internal key.
+    uint32_t delete_tail = deleted_->get(internal_key);
+
+    // If the delete tail is non zero (i.e., the key has been deleted),
+    // and the current max offset is greater than the delete tail, then the
+    // value must have been deleted after the read began; return without
+    // inserting internal key into the result set.
+    if (delete_tail && max_off >= delete_tail)
+      return;
+
+    // Insert the internal key where the search (successfully) ended.
+    keys.push_back(internal_key);
   }
 
   char *data_;                                     // Actual log data.

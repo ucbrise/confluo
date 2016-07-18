@@ -68,8 +68,8 @@ class ServerImpl : virtual public ServerIf {
     _return.assign(data);
   }
 
-  void Search(std::set<int64_t>& _return, const std::string& query) {
-    shard_->Search(_return, query);
+  void Search(std::vector<int64_t>& _return, const std::string& query) {
+    shard_->ColSearch(_return, query);
   }
 
   void Delete(const int64_t key) {
