@@ -393,6 +393,8 @@ int main(int argc, char** argv) {
     ls_bench.BenchmarkSearchLatency();
   } else if (bench_type == "latency-append") {
     ls_bench.BenchmarkAppendLatency();
+  } else if (bench_type == "latency-delete") {
+    ls_bench.BenchmarkDeleteLatency();
   } else if (bench_type.find("throughput") == 0) {
     std::vector<std::string> tokens = Split(bench_type, '-');
     if (tokens.size() != 5) {
