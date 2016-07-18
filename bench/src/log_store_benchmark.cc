@@ -204,11 +204,7 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string cur_value = values[i];
-    int ret = client->Append(cur_key++, cur_value);
-    if (ret != 0) {
-      fprintf(stderr, "Log store is full.\n");
-      break;
-    }
+    client->Append(cur_key++, cur_value);
   }
   fprintf(stderr, "Warmup complete.\n");
 
@@ -217,13 +213,9 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value = values[i];
     t0 = GetTimestamp();
-    int ret = client->Append(cur_key++, cur_value);
+    client->Append(cur_key++, cur_value);
     t1 = GetTimestamp();
     tdiff = t1 - t0;
-    if (ret != 0) {
-      fprintf(stderr, "Log store is full.\n");
-      break;
-    }
     result_stream << (cur_key - 1) << "\t" << tdiff << "\n";
   }
   fprintf(stderr, "Measure complete.\n");
