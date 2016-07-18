@@ -17,7 +17,7 @@
 #endif
 
 #define QUERY(i, num_keys) {\
-  std::set<int64_t> search_res;\
+  std::vector<int64_t> search_res;\
   std::string get_res;\
   if (query_types[i % kThreadQueryCount] == 0) {\
     client->Get(get_res, keys[i % keys.size()]);\
@@ -166,7 +166,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
   fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string query = queries[i % queries.size()];
-    std::set<int64_t> results;
+    std::vector<int64_t> results;
     client->Search(results, query);
   }
   fprintf(stderr, "Warmup complete.\n");
@@ -175,7 +175,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
   fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string query = queries[i % queries.size()];
-    std::set<int64_t> results;
+    std::vector<int64_t> results;
     t0 = GetTimestamp();
     client->Search(results, query);
     t1 = GetTimestamp();
