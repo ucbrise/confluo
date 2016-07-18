@@ -55,7 +55,6 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path) {
   int64_t cur_key = 0;
 
   std::ifstream in(data_path);
-
   fprintf(stderr, "Loading...\n");
 
   TimeStamp start = GetTimestamp();
@@ -185,7 +184,7 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   fprintf(stderr, "Generating queries...");
   std::vector<std::string> values;
 
-  std::ifstream in(data_path_);
+  std::ifstream in(data_path_ + ".inserts");
   in.seekg(load_end_offset_);
   for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value;
@@ -254,7 +253,7 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
               std::vector<std::string> values, terms;
 
               std::ifstream in_s(data_path_ + ".queries");
-              std::ifstream in_a(data_path_);
+              std::ifstream in_a(data_path_ + ".inserts");
               in_a.seekg(load_end_offset_);
               int64_t cur_key = load_keys_;
               std::string term, value;
