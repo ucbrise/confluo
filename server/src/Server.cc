@@ -293,20 +293,7 @@ uint32_t Server_Append_result::read(::apache::thrift::protocol::TProtocol* iprot
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -321,11 +308,6 @@ uint32_t Server_Append_result::write(::apache::thrift::protocol::TProtocol* opro
 
   xfer += oprot->writeStructBegin("Server_Append_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I32, 0);
-    xfer += oprot->writeI32(this->success);
-    xfer += oprot->writeFieldEnd();
-  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -355,20 +337,7 @@ uint32_t Server_Append_presult::read(::apache::thrift::protocol::TProtocol* ipro
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -786,11 +755,11 @@ uint32_t Server_Search_presult::read(::apache::thrift::protocol::TProtocol* ipro
 }
 
 
-Server_Dump_args::~Server_Dump_args() throw() {
+Server_Delete_args::~Server_Delete_args() throw() {
 }
 
 
-uint32_t Server_Dump_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Server_Delete_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -812,9 +781,9 @@ uint32_t Server_Dump_args::read(::apache::thrift::protocol::TProtocol* iprot) {
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->key);
+          this->__isset.key = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -831,13 +800,13 @@ uint32_t Server_Dump_args::read(::apache::thrift::protocol::TProtocol* iprot) {
   return xfer;
 }
 
-uint32_t Server_Dump_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Server_Delete_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Server_Dump_args");
+  xfer += oprot->writeStructBegin("Server_Delete_args");
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->key);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -846,17 +815,17 @@ uint32_t Server_Dump_args::write(::apache::thrift::protocol::TProtocol* oprot) c
 }
 
 
-Server_Dump_pargs::~Server_Dump_pargs() throw() {
+Server_Delete_pargs::~Server_Delete_pargs() throw() {
 }
 
 
-uint32_t Server_Dump_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Server_Delete_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Server_Dump_pargs");
+  xfer += oprot->writeStructBegin("Server_Delete_pargs");
 
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->path)));
+  xfer += oprot->writeFieldBegin("key", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->key)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -865,11 +834,11 @@ uint32_t Server_Dump_pargs::write(::apache::thrift::protocol::TProtocol* oprot) 
 }
 
 
-Server_Dump_result::~Server_Dump_result() throw() {
+Server_Delete_result::~Server_Delete_result() throw() {
 }
 
 
-uint32_t Server_Dump_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Server_Delete_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -888,20 +857,7 @@ uint32_t Server_Dump_result::read(::apache::thrift::protocol::TProtocol* iprot) 
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -910,28 +866,23 @@ uint32_t Server_Dump_result::read(::apache::thrift::protocol::TProtocol* iprot) 
   return xfer;
 }
 
-uint32_t Server_Dump_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Server_Delete_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("Server_Dump_result");
+  xfer += oprot->writeStructBegin("Server_Delete_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
-    xfer += oprot->writeI64(this->success);
-    xfer += oprot->writeFieldEnd();
-  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
 }
 
 
-Server_Dump_presult::~Server_Dump_presult() throw() {
+Server_Delete_presult::~Server_Delete_presult() throw() {
 }
 
 
-uint32_t Server_Dump_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Server_Delete_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -950,207 +901,7 @@ uint32_t Server_Dump_presult::read(::apache::thrift::protocol::TProtocol* iprot)
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-
-Server_Load_args::~Server_Load_args() throw() {
-}
-
-
-uint32_t Server_Load_args::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->path);
-          this->__isset.path = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t Server_Load_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Server_Load_args");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->path);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-Server_Load_pargs::~Server_Load_pargs() throw() {
-}
-
-
-uint32_t Server_Load_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
-  uint32_t xfer = 0;
-  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Server_Load_pargs");
-
-  xfer += oprot->writeFieldBegin("path", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->path)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-Server_Load_result::~Server_Load_result() throw() {
-}
-
-
-uint32_t Server_Load_result::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
-    xfer += iprot->readFieldEnd();
-  }
-
-  xfer += iprot->readStructEnd();
-
-  return xfer;
-}
-
-uint32_t Server_Load_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
-
-  uint32_t xfer = 0;
-
-  xfer += oprot->writeStructBegin("Server_Load_result");
-
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
-    xfer += oprot->writeI64(this->success);
-    xfer += oprot->writeFieldEnd();
-  }
-  xfer += oprot->writeFieldStop();
-  xfer += oprot->writeStructEnd();
-  return xfer;
-}
-
-
-Server_Load_presult::~Server_Load_presult() throw() {
-}
-
-
-uint32_t Server_Load_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
-
-  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
-  uint32_t xfer = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TType ftype;
-  int16_t fid;
-
-  xfer += iprot->readStructBegin(fname);
-
-  using ::apache::thrift::protocol::TProtocolException;
-
-
-  while (true)
-  {
-    xfer += iprot->readFieldBegin(fname, ftype, fid);
-    if (ftype == ::apache::thrift::protocol::T_STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -1548,10 +1299,10 @@ int32_t ServerClient::recv_Initialize()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Initialize failed: unknown result");
 }
 
-int32_t ServerClient::Append(const int64_t key, const std::string& value)
+void ServerClient::Append(const int64_t key, const std::string& value)
 {
   send_Append(key, value);
-  return recv_Append();
+  recv_Append();
 }
 
 void ServerClient::send_Append(const int64_t key, const std::string& value)
@@ -1569,7 +1320,7 @@ void ServerClient::send_Append(const int64_t key, const std::string& value)
   oprot_->getTransport()->flush();
 }
 
-int32_t ServerClient::recv_Append()
+void ServerClient::recv_Append()
 {
 
   int32_t rseqid = 0;
@@ -1594,17 +1345,12 @@ int32_t ServerClient::recv_Append()
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  int32_t _return;
   Server_Append_presult result;
-  result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
   iprot_->getTransport()->readEnd();
 
-  if (result.__isset.success) {
-    return _return;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Append failed: unknown result");
+  return;
 }
 
 void ServerClient::Get(std::string& _return, const int64_t key)
@@ -1723,19 +1469,19 @@ void ServerClient::recv_Search(std::set<int64_t> & _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Search failed: unknown result");
 }
 
-int64_t ServerClient::Dump(const std::string& path)
+void ServerClient::Delete(const int64_t key)
 {
-  send_Dump(path);
-  return recv_Dump();
+  send_Delete(key);
+  recv_Delete();
 }
 
-void ServerClient::send_Dump(const std::string& path)
+void ServerClient::send_Delete(const int64_t key)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("Dump", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("Delete", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Server_Dump_pargs args;
-  args.path = &path;
+  Server_Delete_pargs args;
+  args.key = &key;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -1743,7 +1489,7 @@ void ServerClient::send_Dump(const std::string& path)
   oprot_->getTransport()->flush();
 }
 
-int64_t ServerClient::recv_Dump()
+void ServerClient::recv_Delete()
 {
 
   int32_t rseqid = 0;
@@ -1763,80 +1509,17 @@ int64_t ServerClient::recv_Dump()
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("Dump") != 0) {
+  if (fname.compare("Delete") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  int64_t _return;
-  Server_Dump_presult result;
-  result.success = &_return;
+  Server_Delete_presult result;
   result.read(iprot_);
   iprot_->readMessageEnd();
   iprot_->getTransport()->readEnd();
 
-  if (result.__isset.success) {
-    return _return;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Dump failed: unknown result");
-}
-
-int64_t ServerClient::Load(const std::string& path)
-{
-  send_Load(path);
-  return recv_Load();
-}
-
-void ServerClient::send_Load(const std::string& path)
-{
-  int32_t cseqid = 0;
-  oprot_->writeMessageBegin("Load", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  Server_Load_pargs args;
-  args.path = &path;
-  args.write(oprot_);
-
-  oprot_->writeMessageEnd();
-  oprot_->getTransport()->writeEnd();
-  oprot_->getTransport()->flush();
-}
-
-int64_t ServerClient::recv_Load()
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  iprot_->readMessageBegin(fname, mtype, rseqid);
-  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-    ::apache::thrift::TApplicationException x;
-    x.read(iprot_);
-    iprot_->readMessageEnd();
-    iprot_->getTransport()->readEnd();
-    throw x;
-  }
-  if (mtype != ::apache::thrift::protocol::T_REPLY) {
-    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    iprot_->readMessageEnd();
-    iprot_->getTransport()->readEnd();
-  }
-  if (fname.compare("Load") != 0) {
-    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-    iprot_->readMessageEnd();
-    iprot_->getTransport()->readEnd();
-  }
-  int64_t _return;
-  Server_Load_presult result;
-  result.success = &_return;
-  result.read(iprot_);
-  iprot_->readMessageEnd();
-  iprot_->getTransport()->readEnd();
-
-  if (result.__isset.success) {
-    return _return;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Load failed: unknown result");
+  return;
 }
 
 int64_t ServerClient::GetNumKeys()
@@ -2049,8 +1732,7 @@ void ServerProcessor::process_Append(int32_t seqid, ::apache::thrift::protocol::
 
   Server_Append_result result;
   try {
-    result.success = iface_->Append(args.key, args.value);
-    result.__isset.success = true;
+    iface_->Append(args.key, args.value);
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
       this->eventHandler_->handlerError(ctx, "Server.Append");
@@ -2188,38 +1870,37 @@ void ServerProcessor::process_Search(int32_t seqid, ::apache::thrift::protocol::
   }
 }
 
-void ServerProcessor::process_Dump(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void ServerProcessor::process_Delete(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("Server.Dump", callContext);
+    ctx = this->eventHandler_->getContext("Server.Delete", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Server.Dump");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Server.Delete");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "Server.Dump");
+    this->eventHandler_->preRead(ctx, "Server.Delete");
   }
 
-  Server_Dump_args args;
+  Server_Delete_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "Server.Dump", bytes);
+    this->eventHandler_->postRead(ctx, "Server.Delete", bytes);
   }
 
-  Server_Dump_result result;
+  Server_Delete_result result;
   try {
-    result.success = iface_->Dump(args.path);
-    result.__isset.success = true;
+    iface_->Delete(args.key);
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "Server.Dump");
+      this->eventHandler_->handlerError(ctx, "Server.Delete");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("Dump", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("Delete", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -2228,71 +1909,17 @@ void ServerProcessor::process_Dump(int32_t seqid, ::apache::thrift::protocol::TP
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "Server.Dump");
+    this->eventHandler_->preWrite(ctx, "Server.Delete");
   }
 
-  oprot->writeMessageBegin("Dump", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("Delete", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "Server.Dump", bytes);
-  }
-}
-
-void ServerProcessor::process_Load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
-{
-  void* ctx = NULL;
-  if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("Server.Load", callContext);
-  }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Server.Load");
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "Server.Load");
-  }
-
-  Server_Load_args args;
-  args.read(iprot);
-  iprot->readMessageEnd();
-  uint32_t bytes = iprot->getTransport()->readEnd();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "Server.Load", bytes);
-  }
-
-  Server_Load_result result;
-  try {
-    result.success = iface_->Load(args.path);
-    result.__isset.success = true;
-  } catch (const std::exception& e) {
-    if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "Server.Load");
-    }
-
-    ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("Load", ::apache::thrift::protocol::T_EXCEPTION, seqid);
-    x.write(oprot);
-    oprot->writeMessageEnd();
-    oprot->getTransport()->writeEnd();
-    oprot->getTransport()->flush();
-    return;
-  }
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "Server.Load");
-  }
-
-  oprot->writeMessageBegin("Load", ::apache::thrift::protocol::T_REPLY, seqid);
-  result.write(oprot);
-  oprot->writeMessageEnd();
-  bytes = oprot->getTransport()->writeEnd();
-  oprot->getTransport()->flush();
-
-  if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "Server.Load", bytes);
+    this->eventHandler_->postWrite(ctx, "Server.Delete", bytes);
   }
 }
 
@@ -2494,10 +2121,10 @@ int32_t ServerConcurrentClient::recv_Initialize(const int32_t seqid)
   } // end while(true)
 }
 
-int32_t ServerConcurrentClient::Append(const int64_t key, const std::string& value)
+void ServerConcurrentClient::Append(const int64_t key, const std::string& value)
 {
   int32_t seqid = send_Append(key, value);
-  return recv_Append(seqid);
+  recv_Append(seqid);
 }
 
 int32_t ServerConcurrentClient::send_Append(const int64_t key, const std::string& value)
@@ -2519,7 +2146,7 @@ int32_t ServerConcurrentClient::send_Append(const int64_t key, const std::string
   return cseqid;
 }
 
-int32_t ServerConcurrentClient::recv_Append(const int32_t seqid)
+void ServerConcurrentClient::recv_Append(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2557,19 +2184,13 @@ int32_t ServerConcurrentClient::recv_Append(const int32_t seqid)
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      int32_t _return;
       Server_Append_presult result;
-      result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
       iprot_->getTransport()->readEnd();
 
-      if (result.__isset.success) {
-        sentry.commit();
-        return _return;
-      }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Append failed: unknown result");
+      sentry.commit();
+      return;
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -2747,20 +2368,20 @@ void ServerConcurrentClient::recv_Search(std::set<int64_t> & _return, const int3
   } // end while(true)
 }
 
-int64_t ServerConcurrentClient::Dump(const std::string& path)
+void ServerConcurrentClient::Delete(const int64_t key)
 {
-  int32_t seqid = send_Dump(path);
-  return recv_Dump(seqid);
+  int32_t seqid = send_Delete(key);
+  recv_Delete(seqid);
 }
 
-int32_t ServerConcurrentClient::send_Dump(const std::string& path)
+int32_t ServerConcurrentClient::send_Delete(const int64_t key)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  oprot_->writeMessageBegin("Dump", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("Delete", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Server_Dump_pargs args;
-  args.path = &path;
+  Server_Delete_pargs args;
+  args.key = &key;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -2771,7 +2392,7 @@ int32_t ServerConcurrentClient::send_Dump(const std::string& path)
   return cseqid;
 }
 
-int64_t ServerConcurrentClient::recv_Dump(const int32_t seqid)
+void ServerConcurrentClient::recv_Delete(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2800,7 +2421,7 @@ int64_t ServerConcurrentClient::recv_Dump(const int32_t seqid)
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("Dump") != 0) {
+      if (fname.compare("Delete") != 0) {
         iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
@@ -2809,103 +2430,13 @@ int64_t ServerConcurrentClient::recv_Dump(const int32_t seqid)
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      int64_t _return;
-      Server_Dump_presult result;
-      result.success = &_return;
+      Server_Delete_presult result;
       result.read(iprot_);
       iprot_->readMessageEnd();
       iprot_->getTransport()->readEnd();
 
-      if (result.__isset.success) {
-        sentry.commit();
-        return _return;
-      }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Dump failed: unknown result");
-    }
-    // seqid != rseqid
-    this->sync_.updatePending(fname, mtype, rseqid);
-
-    // this will temporarily unlock the readMutex, and let other clients get work done
-    this->sync_.waitForWork(seqid);
-  } // end while(true)
-}
-
-int64_t ServerConcurrentClient::Load(const std::string& path)
-{
-  int32_t seqid = send_Load(path);
-  return recv_Load(seqid);
-}
-
-int32_t ServerConcurrentClient::send_Load(const std::string& path)
-{
-  int32_t cseqid = this->sync_.generateSeqId();
-  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  oprot_->writeMessageBegin("Load", ::apache::thrift::protocol::T_CALL, cseqid);
-
-  Server_Load_pargs args;
-  args.path = &path;
-  args.write(oprot_);
-
-  oprot_->writeMessageEnd();
-  oprot_->getTransport()->writeEnd();
-  oprot_->getTransport()->flush();
-
-  sentry.commit();
-  return cseqid;
-}
-
-int64_t ServerConcurrentClient::recv_Load(const int32_t seqid)
-{
-
-  int32_t rseqid = 0;
-  std::string fname;
-  ::apache::thrift::protocol::TMessageType mtype;
-
-  // the read mutex gets dropped and reacquired as part of waitForWork()
-  // The destructor of this sentry wakes up other clients
-  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
-
-  while(true) {
-    if(!this->sync_.getPending(fname, mtype, rseqid)) {
-      iprot_->readMessageBegin(fname, mtype, rseqid);
-    }
-    if(seqid == rseqid) {
-      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
-        ::apache::thrift::TApplicationException x;
-        x.read(iprot_);
-        iprot_->readMessageEnd();
-        iprot_->getTransport()->readEnd();
-        sentry.commit();
-        throw x;
-      }
-      if (mtype != ::apache::thrift::protocol::T_REPLY) {
-        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        iprot_->readMessageEnd();
-        iprot_->getTransport()->readEnd();
-      }
-      if (fname.compare("Load") != 0) {
-        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
-        iprot_->readMessageEnd();
-        iprot_->getTransport()->readEnd();
-
-        // in a bad state, don't commit
-        using ::apache::thrift::protocol::TProtocolException;
-        throw TProtocolException(TProtocolException::INVALID_DATA);
-      }
-      int64_t _return;
-      Server_Load_presult result;
-      result.success = &_return;
-      result.read(iprot_);
-      iprot_->readMessageEnd();
-      iprot_->getTransport()->readEnd();
-
-      if (result.__isset.success) {
-        sentry.commit();
-        return _return;
-      }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Load failed: unknown result");
+      sentry.commit();
+      return;
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

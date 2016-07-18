@@ -27,8 +27,8 @@ find_package(Gperftools REQUIRED)
 find_package(JeMalloc REQUIRED)
 
 # Builds all sub-modules
-#add_subdirectory(server)
-#add_subdirectory(shell)
+add_subdirectory(server)
+add_subdirectory(shell)
 add_subdirectory(bench)
 
 # Testing framework
