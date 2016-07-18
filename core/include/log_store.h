@@ -116,7 +116,7 @@ class LogStore {
 
     // Safely update secondary index entries, in a lock-free manner.
     uint32_t value_end = value_offset + value_length;
-    for (uint32_t i = value_offset; i < value_end - NGRAM_N; i++)
+    for (uint32_t i = value_offset; i <= value_end - NGRAM_N; i++)
       ngram_idx_->add_offset(data_ + i, i);
 
     // Return the current tail
