@@ -100,13 +100,11 @@ class __LockFreeBase {
     for (auto& x : buckets_)
       x = null_ptr;
     buckets_[0] = new T[FBS];
-    memset(buckets_[0], 0, sizeof(T) * FBS);
   }
 
   void try_allocate_bucket(uint32_t bucket_idx) {
     uint32_t size = (1U << (bucket_idx + FBS_HIBIT));
     T* new_bucket = new T[size];
-    memset(new_bucket, 0, sizeof(T) * size);
     T* null_ptr = NULL;
 
     // Only one thread will be successful in replacing the NULL reference with newly
