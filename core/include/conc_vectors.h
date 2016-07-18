@@ -99,12 +99,12 @@ class __LockFreeBase {
     T* null_ptr = NULL;
     for (auto& x : buckets_)
       x = null_ptr;
-    buckets_[0] = new T[FBS];
+    buckets_[0] = new T[FBS](0);
   }
 
   void try_allocate_bucket(uint32_t bucket_idx) {
     uint32_t size = (1U << (bucket_idx + FBS_HIBIT));
-    T* new_bucket = new T[size];
+    T* new_bucket = new T[size](0);
     T* null_ptr = NULL;
 
     // Only one thread will be successful in replacing the NULL reference with newly
@@ -255,9 +255,9 @@ class __LockFreeBaseAtomic {
 };
 
 template<class T, uint32_t NBUCKETS = 32>
-class LockFreeGrowingList : public __LockFreeBase<T, NBUCKETS> {
+class LockFreeAtomicList : public __LockFreeBase<T, NBUCKETS> {
  public:
-  LockFreeGrowingList()
+  LockFreeAtomicList()
       : write_tail_(0),
         read_tail_(0) {
   }
@@ -294,6 +294,42 @@ class LockFreeGrowingList : public __LockFreeBase<T, NBUCKETS> {
  private:
   std::atomic<uint32_t> write_tail_;
   std::atomic<uint32_t> read_tail_;
+};
+
+template<class T, uint32_t NBUCKETS = 32>
+class LockFreeNonAtomicList : public __LockFreeBase<T, NBUCKETS> {
+ public:
+  LockFreeNonAtomicList()
+      : tail_(0) {
+  }
+
+  uint32_t push_back(const T val) {
+    uint32_t idx = std::atomic_fetch_add(&tail_, 1U);
+    this->set(idx, val);
+    return idx;
+  }
+
+  const T at(const uint32_t idx) {
+    return this->get(idx);
+  }
+
+  const uint32_t size() {
+    return tail_;
+  }
+
+  const uint32_t serialize(std::ostream& out) {
+    return __LockFreeBase<T, NBUCKETS>::serialize(out, this->size());
+  }
+
+  const uint32_t deserialize(std::istream& in) {
+    uint32_t num_entries;
+    uint32_t in_size = __LockFreeBase<T, NBUCKETS>::deserialize(in, &num_entries);
+    tail_ = num_entries;
+    return in_size;
+  }
+
+ private:
+  std::atomic<uint32_t> tail_;
 };
 
 #endif

@@ -42,7 +42,7 @@ TEST_F(ConcVectorsTest, LockFreeBaseAtomicTest) {
 }
 
 TEST_F(ConcVectorsTest, LockFreeVectorTest) {
-  LockFreeGrowingList<uint64_t> array;
+  LockFreeAtomicList<uint64_t> array;
   for (uint64_t i = 0; i < kArraySize; i++) {
     array.push_back(i);
   }
