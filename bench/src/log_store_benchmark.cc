@@ -150,7 +150,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
     std::string attr_val;
     std::stringstream ss(query_line);
     ss >> attr_id >> attr_val;
-    attr_val = (kBeginDelim + attr_id) + attr_val + (kBeginDelim + attr_id + 1);
+    attr_val = (char)(kBeginDelim + attr_id) + attr_val + (char)(kBeginDelim + attr_id + 1);
     fprintf(stderr, "%d, %s\n", attr_id, attr_val.c_str());
     queries.push_back(attr_val);
   }
