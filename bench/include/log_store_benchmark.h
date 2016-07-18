@@ -49,6 +49,7 @@ class LogStoreBenchmark {
   static const uint64_t kCooldownTime = 500000;
 
   static const uint64_t kThreadQueryCount = 75000;
+  static const char kBeginDelim = -128;
 
   LogStoreBenchmark(std::string& data_path);  // Mode: 0 = Load from scratch, 1 = Load from dump
 
