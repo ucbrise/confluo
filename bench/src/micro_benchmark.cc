@@ -13,7 +13,6 @@
 #include <sstream>
 #include <algorithm>
 #include <unistd.h>
-#include "profiler.h"
 
 #ifdef NO_LOG
 #define LOG(out, fmt, ...)
@@ -37,6 +36,10 @@
 #else
 #define OPEN_GAP_LOG(get_f, search_f, append_f, delete_f, num_clients)
 #define LOG_GAP(last_log_time)
+#endif
+
+#ifdef PROFILE
+#include "profiler.h"
 #endif
 
 #define QUERY(i, num_keys) {\
