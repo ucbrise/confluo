@@ -142,10 +142,16 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
   std::vector<std::string> queries;
 
   std::ifstream in(data_path_ + ".queries");
-  std::string query;
+  std::string query_line;
   while (queries.size() < kWarmupCount + kMeasureCount
-      && std::getline(in, query)) {
-    queries.push_back(query);
+      && std::getline(in, query_line)) {
+
+    uint32_t attr_id;
+    std::string attr_val;
+    std::stringstream ss(query_line);
+    ss >> attr_id >> attr_val;
+    fprintf(stderr, "%d, %s\n", attr_id, attr_val);
+    queries.push_back(attr_val);
   }
 
   fprintf(stderr, "Done.\n");
