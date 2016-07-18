@@ -32,11 +32,9 @@ void Shell::Run() {
       cx.client->Get(result, key);
       std::cout << "KEY: " << key << "; VALUE: " << result << "\n";
     } else if (cmd == "put" || cmd == "PUT") {
-      int ret = cx.client->Append(cur_key++, arg);
-      if (ret == 0) {
-        std::cout << "PUT successful. KEY: " << cur_key - 1 << "; VALUE: "
-                  << arg << "\n";
-      }
+      cx.client->Append(cur_key++, arg);
+      std::cout << "PUT for KEY: " << cur_key - 1 << "; VALUE: " << arg
+                << "successful.\n";
     } else if (cmd == "search" || cmd == "SEARCH") {
       std::set<int64_t> ret;
       cx.client->Search(ret, arg);
