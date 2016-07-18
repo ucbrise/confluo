@@ -58,12 +58,12 @@ class ServerImpl : virtual public ServerIf {
     return 0;
   }
 
-  int32_t Append(const int64_t key, const std::string& value) {
-    return shard_->Append(key, value);
+  void Append(const int64_t key, const std::string& value) {
+    shard_->Append(key, value);
   }
 
   void Get(std::string& _return, const int64_t key) {
-    char data[10*1024];
+    char data[10 * 1024];
     shard_->Get(data, key);
     _return.assign(data);
   }
@@ -72,12 +72,8 @@ class ServerImpl : virtual public ServerIf {
     shard_->Search(_return, query);
   }
 
-  int64_t Dump(const std::string& path) {
-    return shard_->Dump(path);
-  }
-
-  int64_t Load(const std::string& path) {
-    return shard_->Load(path);
+  void Delete(const int64_t key) {
+    shard_->Delete(key);
   }
 
   int64_t GetNumKeys() {

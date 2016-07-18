@@ -10,22 +10,31 @@
 #include <unistd.h>
 #include <sstream>
 
-#define QUERY(i) {\
-  std::string get_res;\
+#ifdef NO_LOG
+#define LOG(out, fmt, ...)
+#else
+#define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
+#endif
+
+#define QUERY(i, num_keys) {\
   std::set<int64_t> search_res;\
+  std::string get_res;\
   if (query_types[i % kThreadQueryCount] == 0) {\
     client->Get(get_res, keys[i % keys.size()]);\
+    num_keys++;\
   } else if (query_types[i % kThreadQueryCount] == 1) {\
     client->Search(search_res, terms[i % terms.size()]);\
+    num_keys += search_res.size();\
+  } else if (query_types[i % kThreadQueryCount] == 2) {\
+    client->Append(cur_key, values[i % values.size()]);\
+    num_keys++;\
   } else {\
-    if (client->Append(cur_key, values[i % values.size()]) != 0) {\
-      fprintf(stderr, "Log is full\n");\
-      break;\
-    }\
+    client->Delete(keys[i % keys.size()]);\
+    num_keys++;\
   }\
 }
 
-LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
+LogStoreBenchmark::LogStoreBenchmark(std::string& data_path) {
 
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
@@ -33,69 +42,55 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path, int mode) {
 
   BenchmarkConnection cx("localhost", 11002);
 
-  if (mode == 0) {
-    /** Load the data
-     *  =============
-     *
-     *  We load the log store with ~250MB of data (~25% of total capacity).
-     */
+  /** Load the data
+   *  =============
+   *
+   *  We load the log store with ~250MB of data (~25% of total capacity).
+   */
 
-    const int64_t target_data_size = 250 * 1024 * 1024;
-    load_end_offset_ = 0;
-    load_keys_ = 0;
+  const int64_t target_data_size = 250 * 1024 * 1024;
+  load_end_offset_ = 0;
+  load_keys_ = 0;
 
-    int64_t cur_key = 0;
+  int64_t cur_key = 0;
 
-    std::ifstream in(data_path);
+  std::ifstream in(data_path);
 
-    fprintf(stderr, "Loading...\n");
+  fprintf(stderr, "Loading...\n");
 
-    TimeStamp start = GetTimestamp();
-    TimeStamp batch_start = start;
-    while (load_end_offset_ < target_data_size) {
-      std::string cur_value;
-      std::getline(in, cur_value);
-      cx.client->Append(cur_key++, cur_value);
-      load_end_offset_ += cur_value.length();
-      load_keys_++;
+  TimeStamp start = GetTimestamp();
+  TimeStamp batch_start = start;
+  while (load_end_offset_ < target_data_size) {
+    std::string cur_value;
+    std::getline(in, cur_value);
+    cx.client->Append(cur_key++, cur_value);
+    load_end_offset_ += cur_value.length();
+    load_keys_++;
 
-      // Periodically print out statistics
-      if (load_keys_ % 1000 == 0) {
-        TimeStamp batch_end = GetTimestamp();
-        auto elapsed_us = batch_end - batch_start;
-        double avg_latency = (double) elapsed_us / 1000.0;
-        double completion = 100.0 * (double) (load_end_offset_)
-            / (double) (target_data_size);
-        fprintf(stderr,
-                "\033[A\033[2KLoading: %2.02lf%% (%9ld B). Avg latency: %.2lf us\n",
-                completion, load_end_offset_, avg_latency);
-        batch_start = GetTimestamp();
-      }
+    // Periodically print out statistics
+    if (load_keys_ % 1000 == 0) {
+      TimeStamp batch_end = GetTimestamp();
+      auto elapsed_us = batch_end - batch_start;
+      double avg_latency = (double) elapsed_us / 1000.0;
+      double completion = 100.0 * (double) (load_end_offset_)
+          / (double) (target_data_size);
+      fprintf(
+          stderr,
+          "\033[A\033[2KLoading: %2.02lf%% (%9ld B). Avg latency: %.2lf us\n",
+          completion, load_end_offset_, avg_latency);
+      batch_start = GetTimestamp();
     }
-
-    // Print end of load statistics
-    TimeStamp end = GetTimestamp();
-    auto elapsed_us = end - start;
-    double avg_latency = (double) elapsed_us / (double) load_keys_;
-
-    fprintf(
-        stderr,
-        "\033[A\033[2KLoaded %ld key-value pairs (%lld B). Avg latency: %lf us\n",
-        load_keys_, load_end_offset_, avg_latency);
-
-    fprintf(stderr, "Dumping data structures to disk...");
-    cx.client->Dump(data_path + ".logstore");
-    fprintf(stderr, "Done.\n");
-  } else if (mode == 1) {
-    fprintf(stderr, "Loading...\n");
-    cx.client->Load(data_path + ".logstore");
-    load_keys_ = cx.client->GetNumKeys();
-    load_end_offset_ = cx.client->GetSize();
-    fprintf(stderr, "Loaded %ld key-value pairs.\n", load_keys_);
-  } else {
-    fprintf(stderr, "Invalid mode: %d\n", mode);
-    exit(-1);
   }
+
+  // Print end of load statistics
+  TimeStamp end = GetTimestamp();
+  auto elapsed_us = end - start;
+  double avg_latency = (double) elapsed_us / (double) load_keys_;
+
+  fprintf(
+      stderr,
+      "\033[A\033[2KLoaded %ld key-value pairs (%lld B). Avg latency: %lf us\n",
+      load_keys_, load_end_offset_, avg_latency);
 
   if (cx.client->GetSize() != load_end_offset_) {
     fprintf(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
@@ -237,21 +232,19 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
 }
 
 void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
-                                            double append_f,
+                                            double append_f, double delete_f,
                                             uint32_t num_clients) {
 
-  if (get_f + search_f + append_f != 1.0) {
-    fprintf(stderr, "Query fractions must add up to 1.0. Sum = %lf\n",
-            get_f + search_f + append_f);
+  if (get_f + search_f + append_f + delete_f != 1.0) {
+    LOG(stderr, "Query fractions must add up to 1.0. Sum = %lf\n",
+        get_f + search_f + append_f + delete_f);
     return;
   }
 
-  const double get_m = get_f, search_m = get_f + search_f, append_m = 1.0;
+  const double get_m = get_f, search_m = get_f + search_f, append_m = get_f
+      + search_f + append_f, delete_m = get_f + search_f + append_f + delete_f;
 
-  std::mutex mtx;
-  std::condition_variable cvar;
   std::vector<std::thread> threads;
-  uint32_t num_ready = 0;
 
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(
@@ -262,12 +255,13 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
 
               std::ifstream in_s(data_path_ + ".queries");
               std::ifstream in_a(data_path_);
+              in_a.seekg(load_end_offset_);
               int64_t cur_key = load_keys_;
               std::string term, value;
               std::vector<uint32_t> query_types;
-              fprintf(stderr, "Generating queries...\n");
+              LOG(stderr, "Generating queries...\n");
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
-                int64_t key = rand() % load_keys_;
+                int64_t key = RandomInteger(0, load_keys_);
                 std::getline(in_s, term);
                 std::getline(in_a, value);
 
@@ -275,66 +269,72 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
                 terms.push_back(term);
                 values.push_back(value);
 
-                double r = ((double) rand() / (RAND_MAX));
+                double r = RandomDouble(0, 1);
                 if (r <= get_m) {
                   query_types.push_back(0);
                 } else if (r <= search_m) {
                   query_types.push_back(1);
                 } else if (r <= append_m) {
                   query_types.push_back(2);
+                } else if (r <= delete_m) {
+                  query_types.push_back(3);
                 }
               }
-              fprintf(stderr, "Done.\n");
 
-              std::unique_lock<std::mutex> lck(mtx);
-              num_ready++;
-              while (num_ready < num_clients) {
-                cvar.wait(lck);
-              }
+              std::shuffle(keys.begin(), keys.end(), PRNG());
+              std::shuffle(terms.begin(), terms.end(), PRNG());
+              std::shuffle(values.begin(), values.end(), PRNG());
+              LOG(stderr, "Done.\n");
 
-              double thput = 0;
+              double query_thput = 0;
+              double key_thput = 0;
+
               BenchmarkConnection cx("localhost", 11002);
               auto client = cx.client;
 
               try {
                 // Warmup phase
                 long i = 0;
+                long num_keys = 0;
                 TimeStamp warmup_start = GetTimestamp();
                 while (GetTimestamp() - warmup_start < kWarmupTime) {
-                  QUERY(i);
+                  QUERY(i, num_keys);
                   i++;
                 }
 
                 // Measure phase
                 i = 0;
+                num_keys = 0;
                 TimeStamp start = GetTimestamp();
                 while (GetTimestamp() - start < kMeasureTime) {
-                  QUERY(i);
+                  QUERY(i, num_keys);
                   i++;
                 }
                 TimeStamp end = GetTimestamp();
                 double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                thput = ((double) i / totsecs);
+                query_thput = ((double) i / totsecs);
+                key_thput = ((double) num_keys / totsecs);
 
                 // Cooldown phase
                 i = 0;
+                num_keys = 0;
                 TimeStamp cooldown_start = GetTimestamp();
                 while (GetTimestamp() - cooldown_start < kCooldownTime) {
-                  QUERY(i);
+                  QUERY(i, num_keys);
                   i++;
                 }
 
               } catch (std::exception &e) {
-                fprintf(stderr, "Throughput thread ended prematurely.\n");
+                LOG(stderr, "Throughput thread ended prematurely.\n");
               }
 
-              fprintf(stderr, "Throughput: %lf\n", thput);
+              LOG(stderr, "Throughput: %lf\n", query_thput);
 
               std::ofstream ofs;
               char output_file[100];
-              sprintf(output_file, "throughput_%.2f_%.2f_%.2f", get_f, search_f, append_f);
+              sprintf(output_file, "throughput_%.2f_%.2f_%.2f_%.2f_%d", get_f, search_f, append_f, delete_f, num_clients);
               ofs.open(output_file, std::ofstream::out | std::ofstream::app);
-              ofs << thput << "\n";
+              ofs << query_thput << "\t" << key_thput << "\n";
               ofs.close();
 
             })));
@@ -374,14 +374,14 @@ int main(int argc, char** argv) {
 
   int c;
   std::string bench_type = "latency-get";
-  int mode = 0;
-  while ((c = getopt(argc, argv, "b:m:")) != -1) {
+  int num_clients = 1;
+  while ((c = getopt(argc, argv, "b:n:")) != -1) {
     switch (c) {
       case 'b':
         bench_type = std::string(optarg);
         break;
-      case 'm':
-        mode = atoi(optarg);
+      case 'n':
+        num_clients = atoi(optarg);
         break;
       default:
         fprintf(stderr, "Could not parse command line arguments.\n");
@@ -395,7 +395,7 @@ int main(int argc, char** argv) {
 
   std::string data_path = std::string(argv[optind]);
 
-  LogStoreBenchmark ls_bench(data_path, mode);
+  LogStoreBenchmark ls_bench(data_path);
   if (bench_type == "latency-get") {
     ls_bench.BenchmarkGetLatency();
   } else if (bench_type == "latency-search") {
@@ -404,15 +404,18 @@ int main(int argc, char** argv) {
     ls_bench.BenchmarkAppendLatency();
   } else if (bench_type.find("throughput") == 0) {
     std::vector<std::string> tokens = Split(bench_type, '-');
-    if (tokens.size() != 4) {
-      fprintf(stderr, "Error: Incorrect throughput benchmark format.\n");
+    if (tokens.size() != 5) {
+      LOG(stderr, "Error: Incorrect throughput benchmark format.\n");
+      return -1;
     }
     double get_f = atof(tokens[1].c_str());
     double search_f = atof(tokens[2].c_str());
     double append_f = atof(tokens[3].c_str());
-    fprintf(stderr, "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf\n",
-            get_f, search_f, append_f);
-    ls_bench.BenchmarkThroughput(get_f, search_f, append_f);
+    double delete_f = atof(tokens[4].c_str());
+    LOG(stderr,
+        "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, delete_f = %.2lf, num_clients = %d\n",
+        get_f, search_f, append_f, delete_f, num_clients);
+    ls_bench.BenchmarkThroughput(get_f, search_f, append_f, delete_f);
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }

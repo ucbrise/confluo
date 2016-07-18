@@ -20,8 +20,6 @@
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
-#define MEASURE_GAP
-
 #ifdef MEASURE_GAP
 #define OPEN_GAP_LOG(get_f, search_f, append_f, delete_f, num_clients)\
   char gap_log_fname[100];\
@@ -247,7 +245,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string cur_value = values[i];
-    int ret = shard_->Append(cur_key++, cur_value);
+    shard_->Append(cur_key++, cur_value);
   }
   LOG(stderr, "Warmup complete.\n");
 
@@ -256,7 +254,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value = values[i];
     auto t0 = high_resolution_clock::now();
-    int ret = shard_->Append(cur_key++, cur_value);
+    shard_->Append(cur_key++, cur_value);
     auto t1 = high_resolution_clock::now();
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     result_stream << (cur_key - 1) << "\t" << tdiff << "\n";
@@ -326,6 +324,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
 
               std::ifstream in_s(data_path_ + ".queries");
               std::ifstream in_a(data_path_);
+              in_a.seekg(load_end_offset_);
               int64_t cur_key = load_keys_;
               std::string term, value;
               std::vector<uint32_t> query_types;
@@ -353,6 +352,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
 
               std::shuffle(keys.begin(), keys.end(), PRNG());
               std::shuffle(terms.begin(), terms.end(), PRNG());
+              std::shuffle(values.begin(), values.end(), PRNG());
               LOG(stderr, "Done.\n");
 
               double query_thput = 0;

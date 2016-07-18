@@ -71,6 +71,7 @@ class MicroBenchmark {
     std::uniform_real_distribution<double> distribution(min, max);
     return distribution(generator);
   }
+
   std::string data_path_;
   int64_t load_end_offset_;
   int64_t load_keys_;

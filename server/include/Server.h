@@ -22,11 +22,10 @@ class ServerIf {
  public:
   virtual ~ServerIf() {}
   virtual int32_t Initialize() = 0;
-  virtual int32_t Append(const int64_t key, const std::string& value) = 0;
+  virtual void Append(const int64_t key, const std::string& value) = 0;
   virtual void Get(std::string& _return, const int64_t key) = 0;
   virtual void Search(std::set<int64_t> & _return, const std::string& query) = 0;
-  virtual int64_t Dump(const std::string& path) = 0;
-  virtual int64_t Load(const std::string& path) = 0;
+  virtual void Delete(const int64_t key) = 0;
   virtual int64_t GetNumKeys() = 0;
   virtual int64_t GetSize() = 0;
 };
@@ -62,9 +61,8 @@ class ServerNull : virtual public ServerIf {
     int32_t _return = 0;
     return _return;
   }
-  int32_t Append(const int64_t /* key */, const std::string& /* value */) {
-    int32_t _return = 0;
-    return _return;
+  void Append(const int64_t /* key */, const std::string& /* value */) {
+    return;
   }
   void Get(std::string& /* _return */, const int64_t /* key */) {
     return;
@@ -72,13 +70,8 @@ class ServerNull : virtual public ServerIf {
   void Search(std::set<int64_t> & /* _return */, const std::string& /* query */) {
     return;
   }
-  int64_t Dump(const std::string& /* path */) {
-    int64_t _return = 0;
-    return _return;
-  }
-  int64_t Load(const std::string& /* path */) {
-    int64_t _return = 0;
-    return _return;
+  void Delete(const int64_t /* key */) {
+    return;
   }
   int64_t GetNumKeys() {
     int64_t _return = 0;
@@ -238,30 +231,19 @@ class Server_Append_pargs {
 
 };
 
-typedef struct _Server_Append_result__isset {
-  _Server_Append_result__isset() : success(false) {}
-  bool success :1;
-} _Server_Append_result__isset;
 
 class Server_Append_result {
  public:
 
   Server_Append_result(const Server_Append_result&);
   Server_Append_result& operator=(const Server_Append_result&);
-  Server_Append_result() : success(0) {
+  Server_Append_result() {
   }
 
   virtual ~Server_Append_result() throw();
-  int32_t success;
 
-  _Server_Append_result__isset __isset;
-
-  void __set_success(const int32_t val);
-
-  bool operator == (const Server_Append_result & rhs) const
+  bool operator == (const Server_Append_result & /* rhs */) const
   {
-    if (!(success == rhs.success))
-      return false;
     return true;
   }
   bool operator != (const Server_Append_result &rhs) const {
@@ -275,19 +257,12 @@ class Server_Append_result {
 
 };
 
-typedef struct _Server_Append_presult__isset {
-  _Server_Append_presult__isset() : success(false) {}
-  bool success :1;
-} _Server_Append_presult__isset;
 
 class Server_Append_presult {
  public:
 
 
   virtual ~Server_Append_presult() throw();
-  int32_t* success;
-
-  _Server_Append_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -501,37 +476,37 @@ class Server_Search_presult {
 
 };
 
-typedef struct _Server_Dump_args__isset {
-  _Server_Dump_args__isset() : path(false) {}
-  bool path :1;
-} _Server_Dump_args__isset;
+typedef struct _Server_Delete_args__isset {
+  _Server_Delete_args__isset() : key(false) {}
+  bool key :1;
+} _Server_Delete_args__isset;
 
-class Server_Dump_args {
+class Server_Delete_args {
  public:
 
-  Server_Dump_args(const Server_Dump_args&);
-  Server_Dump_args& operator=(const Server_Dump_args&);
-  Server_Dump_args() : path() {
+  Server_Delete_args(const Server_Delete_args&);
+  Server_Delete_args& operator=(const Server_Delete_args&);
+  Server_Delete_args() : key(0) {
   }
 
-  virtual ~Server_Dump_args() throw();
-  std::string path;
+  virtual ~Server_Delete_args() throw();
+  int64_t key;
 
-  _Server_Dump_args__isset __isset;
+  _Server_Delete_args__isset __isset;
 
-  void __set_path(const std::string& val);
+  void __set_key(const int64_t val);
 
-  bool operator == (const Server_Dump_args & rhs) const
+  bool operator == (const Server_Delete_args & rhs) const
   {
-    if (!(path == rhs.path))
+    if (!(key == rhs.key))
       return false;
     return true;
   }
-  bool operator != (const Server_Dump_args &rhs) const {
+  bool operator != (const Server_Delete_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Server_Dump_args & ) const;
+  bool operator < (const Server_Delete_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -539,103 +514,37 @@ class Server_Dump_args {
 };
 
 
-class Server_Dump_pargs {
+class Server_Delete_pargs {
  public:
 
 
-  virtual ~Server_Dump_pargs() throw();
-  const std::string* path;
+  virtual ~Server_Delete_pargs() throw();
+  const int64_t* key;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Server_Dump_result__isset {
-  _Server_Dump_result__isset() : success(false) {}
-  bool success :1;
-} _Server_Dump_result__isset;
 
-class Server_Dump_result {
+class Server_Delete_result {
  public:
 
-  Server_Dump_result(const Server_Dump_result&);
-  Server_Dump_result& operator=(const Server_Dump_result&);
-  Server_Dump_result() : success(0) {
+  Server_Delete_result(const Server_Delete_result&);
+  Server_Delete_result& operator=(const Server_Delete_result&);
+  Server_Delete_result() {
   }
 
-  virtual ~Server_Dump_result() throw();
-  int64_t success;
+  virtual ~Server_Delete_result() throw();
 
-  _Server_Dump_result__isset __isset;
-
-  void __set_success(const int64_t val);
-
-  bool operator == (const Server_Dump_result & rhs) const
+  bool operator == (const Server_Delete_result & /* rhs */) const
   {
-    if (!(success == rhs.success))
-      return false;
     return true;
   }
-  bool operator != (const Server_Dump_result &rhs) const {
+  bool operator != (const Server_Delete_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Server_Dump_result & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _Server_Dump_presult__isset {
-  _Server_Dump_presult__isset() : success(false) {}
-  bool success :1;
-} _Server_Dump_presult__isset;
-
-class Server_Dump_presult {
- public:
-
-
-  virtual ~Server_Dump_presult() throw();
-  int64_t* success;
-
-  _Server_Dump_presult__isset __isset;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-
-};
-
-typedef struct _Server_Load_args__isset {
-  _Server_Load_args__isset() : path(false) {}
-  bool path :1;
-} _Server_Load_args__isset;
-
-class Server_Load_args {
- public:
-
-  Server_Load_args(const Server_Load_args&);
-  Server_Load_args& operator=(const Server_Load_args&);
-  Server_Load_args() : path() {
-  }
-
-  virtual ~Server_Load_args() throw();
-  std::string path;
-
-  _Server_Load_args__isset __isset;
-
-  void __set_path(const std::string& val);
-
-  bool operator == (const Server_Load_args & rhs) const
-  {
-    if (!(path == rhs.path))
-      return false;
-    return true;
-  }
-  bool operator != (const Server_Load_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const Server_Load_args & ) const;
+  bool operator < (const Server_Delete_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -643,67 +552,11 @@ class Server_Load_args {
 };
 
 
-class Server_Load_pargs {
+class Server_Delete_presult {
  public:
 
 
-  virtual ~Server_Load_pargs() throw();
-  const std::string* path;
-
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _Server_Load_result__isset {
-  _Server_Load_result__isset() : success(false) {}
-  bool success :1;
-} _Server_Load_result__isset;
-
-class Server_Load_result {
- public:
-
-  Server_Load_result(const Server_Load_result&);
-  Server_Load_result& operator=(const Server_Load_result&);
-  Server_Load_result() : success(0) {
-  }
-
-  virtual ~Server_Load_result() throw();
-  int64_t success;
-
-  _Server_Load_result__isset __isset;
-
-  void __set_success(const int64_t val);
-
-  bool operator == (const Server_Load_result & rhs) const
-  {
-    if (!(success == rhs.success))
-      return false;
-    return true;
-  }
-  bool operator != (const Server_Load_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const Server_Load_result & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _Server_Load_presult__isset {
-  _Server_Load_presult__isset() : success(false) {}
-  bool success :1;
-} _Server_Load_presult__isset;
-
-class Server_Load_presult {
- public:
-
-
-  virtual ~Server_Load_presult() throw();
-  int64_t* success;
-
-  _Server_Load_presult__isset __isset;
+  virtual ~Server_Delete_presult() throw();
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -921,21 +774,18 @@ class ServerClient : virtual public ServerIf {
   int32_t Initialize();
   void send_Initialize();
   int32_t recv_Initialize();
-  int32_t Append(const int64_t key, const std::string& value);
+  void Append(const int64_t key, const std::string& value);
   void send_Append(const int64_t key, const std::string& value);
-  int32_t recv_Append();
+  void recv_Append();
   void Get(std::string& _return, const int64_t key);
   void send_Get(const int64_t key);
   void recv_Get(std::string& _return);
   void Search(std::set<int64_t> & _return, const std::string& query);
   void send_Search(const std::string& query);
   void recv_Search(std::set<int64_t> & _return);
-  int64_t Dump(const std::string& path);
-  void send_Dump(const std::string& path);
-  int64_t recv_Dump();
-  int64_t Load(const std::string& path);
-  void send_Load(const std::string& path);
-  int64_t recv_Load();
+  void Delete(const int64_t key);
+  void send_Delete(const int64_t key);
+  void recv_Delete();
   int64_t GetNumKeys();
   void send_GetNumKeys();
   int64_t recv_GetNumKeys();
@@ -961,8 +811,7 @@ class ServerProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_Append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_Get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_Search(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_Dump(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_Load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_Delete(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_GetNumKeys(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_GetSize(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
@@ -972,8 +821,7 @@ class ServerProcessor : public ::apache::thrift::TDispatchProcessor {
     processMap_["Append"] = &ServerProcessor::process_Append;
     processMap_["Get"] = &ServerProcessor::process_Get;
     processMap_["Search"] = &ServerProcessor::process_Search;
-    processMap_["Dump"] = &ServerProcessor::process_Dump;
-    processMap_["Load"] = &ServerProcessor::process_Load;
+    processMap_["Delete"] = &ServerProcessor::process_Delete;
     processMap_["GetNumKeys"] = &ServerProcessor::process_GetNumKeys;
     processMap_["GetSize"] = &ServerProcessor::process_GetSize;
   }
@@ -1013,13 +861,13 @@ class ServerMultiface : virtual public ServerIf {
     return ifaces_[i]->Initialize();
   }
 
-  int32_t Append(const int64_t key, const std::string& value) {
+  void Append(const int64_t key, const std::string& value) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
       ifaces_[i]->Append(key, value);
     }
-    return ifaces_[i]->Append(key, value);
+    ifaces_[i]->Append(key, value);
   }
 
   void Get(std::string& _return, const int64_t key) {
@@ -1042,22 +890,13 @@ class ServerMultiface : virtual public ServerIf {
     return;
   }
 
-  int64_t Dump(const std::string& path) {
+  void Delete(const int64_t key) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->Dump(path);
+      ifaces_[i]->Delete(key);
     }
-    return ifaces_[i]->Dump(path);
-  }
-
-  int64_t Load(const std::string& path) {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->Load(path);
-    }
-    return ifaces_[i]->Load(path);
+    ifaces_[i]->Delete(key);
   }
 
   int64_t GetNumKeys() {
@@ -1111,21 +950,18 @@ class ServerConcurrentClient : virtual public ServerIf {
   int32_t Initialize();
   int32_t send_Initialize();
   int32_t recv_Initialize(const int32_t seqid);
-  int32_t Append(const int64_t key, const std::string& value);
+  void Append(const int64_t key, const std::string& value);
   int32_t send_Append(const int64_t key, const std::string& value);
-  int32_t recv_Append(const int32_t seqid);
+  void recv_Append(const int32_t seqid);
   void Get(std::string& _return, const int64_t key);
   int32_t send_Get(const int64_t key);
   void recv_Get(std::string& _return, const int32_t seqid);
   void Search(std::set<int64_t> & _return, const std::string& query);
   int32_t send_Search(const std::string& query);
   void recv_Search(std::set<int64_t> & _return, const int32_t seqid);
-  int64_t Dump(const std::string& path);
-  int32_t send_Dump(const std::string& path);
-  int64_t recv_Dump(const int32_t seqid);
-  int64_t Load(const std::string& path);
-  int32_t send_Load(const std::string& path);
-  int64_t recv_Load(const int32_t seqid);
+  void Delete(const int64_t key);
+  int32_t send_Delete(const int64_t key);
+  void recv_Delete(const int32_t seqid);
   int64_t GetNumKeys();
   int32_t send_GetNumKeys();
   int64_t recv_GetNumKeys(const int32_t seqid);

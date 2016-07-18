@@ -1,15 +1,14 @@
 namespace cpp succinct
 
 service Server {
-	// Initialize
-	i32 Initialize(),
+  // Initialize
+  i32 Initialize(),
 	
-	// Supported operations
-	i32 Append(1: i64 key, 2: string value),
-	string Get(1: i64 key),
-	set<i64> Search(1: string query),
-	i64 Dump(1: string path),
-	i64 Load(1: string path),
+  // Supported operations
+  void Append(1: i64 key, 2: string value),
+  string Get(1: i64 key),
+  set<i64> Search(1: string query),
+  void Delete(1: i64 key),
 
   // Metadata
   i64 GetNumKeys(),
