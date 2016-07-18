@@ -36,7 +36,7 @@ void Shell::Run() {
       std::cout << "PUT for KEY: " << cur_key - 1 << "; VALUE: " << arg
                 << "successful.\n";
     } else if (cmd == "search" || cmd == "SEARCH") {
-      std::set<int64_t> ret;
+      std::vector<int64_t> ret;
       cx.client->Search(ret, arg);
       std::cout << "Found " << ret.size() << " matches.\n";
       for (auto key : ret) {
