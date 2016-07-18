@@ -222,6 +222,42 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   result_stream.close();
 }
 
+void LogStoreBenchmark::BenchmarkDeleteLatency() {
+  // Generate queries
+  LOG(stderr, "Generating queries...");
+  std::vector<int64_t> keys;
+
+  for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
+    int64_t key = rand() % load_keys_;
+    keys.push_back(key);
+  }
+
+  LOG(stderr, "Done.\n");
+
+  std::ofstream result_stream("latency_delete");
+  BenchmarkConnection cx("localhost", 11002);
+  auto client = cx.client;
+
+  // Warmup
+  LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
+  for (uint64_t i = 0; i < kWarmupCount; i++) {
+    client->Delete(keys[i]);
+  }
+  LOG(stderr, "Warmup complete.\n");
+
+  // Measure
+  LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
+  for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
+    auto t0 = GetTimestamp();
+    client->Delete(keys[i]);
+    auto t1 = GetTimestamp();
+    auto tdiff = t1 - t0;
+    result_stream << keys[i] << "\t" << tdiff << "\n";
+  }
+  LOG(stderr, "Measure complete.\n");
+  result_stream.close();
+}
+
 void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
                                             double append_f, double delete_f,
                                             uint32_t num_clients) {
