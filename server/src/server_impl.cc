@@ -45,17 +45,31 @@ namespace succinct {
 class ServerImpl : virtual public ServerIf {
  public:
   ServerImpl() {
-    shard_ = NULL;
-    Initialize();
-  }
-
-  int32_t Initialize() {
     // Initialize data structures
     Info("Initializing data structures...");
     shard_ = new LogStore<>();
     Info("Initialized Log Store.");
+  }
 
-    return 0;
+  int32_t Load(const std::string& loadfile) {
+    uint32_t cur_key = 0;
+    std::string cur_value;
+
+    std::ifstream in(loadfile + ".ser");
+    fprintf(stderr, "Loading...\n");
+
+    // Load all records in file.
+    while (std::getline(in, cur_value)) {
+      std::string cur_value;
+      shard_->Append(cur_key++, cur_value);
+    }
+
+    // Check for correctness
+    if (shard_->GetNumKeys() != cur_key) {
+      Warn("Expected number of keys = %u, Actual number of keys %u\n", cur_key,
+           shard_->GetNumKeys());
+    }
+    return cur_key;
   }
 
   void Append(const int64_t key, const std::string& value) {
@@ -88,10 +102,6 @@ class ServerImpl : virtual public ServerIf {
   LogStore<> *shard_;
 };
 
-}
-
-void print_usage(char *exec) {
-  fprintf(stderr, "Usage: %s [id] [file]\n", exec);
 }
 
 int main(int argc, char **argv) {

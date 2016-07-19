@@ -9,11 +9,11 @@
 namespace succinct {
 
 
-Server_Initialize_args::~Server_Initialize_args() throw() {
+Server_Load_args::~Server_Load_args() throw() {
 }
 
 
-uint32_t Server_Initialize_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Server_Load_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -32,7 +32,20 @@ uint32_t Server_Initialize_args::read(::apache::thrift::protocol::TProtocol* ipr
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->load_file);
+          this->__isset.load_file = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -41,10 +54,14 @@ uint32_t Server_Initialize_args::read(::apache::thrift::protocol::TProtocol* ipr
   return xfer;
 }
 
-uint32_t Server_Initialize_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Server_Load_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Server_Initialize_args");
+  xfer += oprot->writeStructBegin("Server_Load_args");
+
+  xfer += oprot->writeFieldBegin("load_file", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->load_file);
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -52,14 +69,18 @@ uint32_t Server_Initialize_args::write(::apache::thrift::protocol::TProtocol* op
 }
 
 
-Server_Initialize_pargs::~Server_Initialize_pargs() throw() {
+Server_Load_pargs::~Server_Load_pargs() throw() {
 }
 
 
-uint32_t Server_Initialize_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Server_Load_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Server_Initialize_pargs");
+  xfer += oprot->writeStructBegin("Server_Load_pargs");
+
+  xfer += oprot->writeFieldBegin("load_file", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->load_file)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -67,11 +88,11 @@ uint32_t Server_Initialize_pargs::write(::apache::thrift::protocol::TProtocol* o
 }
 
 
-Server_Initialize_result::~Server_Initialize_result() throw() {
+Server_Load_result::~Server_Load_result() throw() {
 }
 
 
-uint32_t Server_Initialize_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Server_Load_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -112,11 +133,11 @@ uint32_t Server_Initialize_result::read(::apache::thrift::protocol::TProtocol* i
   return xfer;
 }
 
-uint32_t Server_Initialize_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Server_Load_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("Server_Initialize_result");
+  xfer += oprot->writeStructBegin("Server_Load_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I32, 0);
@@ -129,11 +150,11 @@ uint32_t Server_Initialize_result::write(::apache::thrift::protocol::TProtocol* 
 }
 
 
-Server_Initialize_presult::~Server_Initialize_presult() throw() {
+Server_Load_presult::~Server_Load_presult() throw() {
 }
 
 
-uint32_t Server_Initialize_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Server_Load_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1240,18 +1261,19 @@ uint32_t Server_GetSize_presult::read(::apache::thrift::protocol::TProtocol* ipr
   return xfer;
 }
 
-int32_t ServerClient::Initialize()
+int32_t ServerClient::Load(const std::string& load_file)
 {
-  send_Initialize();
-  return recv_Initialize();
+  send_Load(load_file);
+  return recv_Load();
 }
 
-void ServerClient::send_Initialize()
+void ServerClient::send_Load(const std::string& load_file)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("Initialize", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("Load", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Server_Initialize_pargs args;
+  Server_Load_pargs args;
+  args.load_file = &load_file;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -1259,7 +1281,7 @@ void ServerClient::send_Initialize()
   oprot_->getTransport()->flush();
 }
 
-int32_t ServerClient::recv_Initialize()
+int32_t ServerClient::recv_Load()
 {
 
   int32_t rseqid = 0;
@@ -1279,13 +1301,13 @@ int32_t ServerClient::recv_Initialize()
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("Initialize") != 0) {
+  if (fname.compare("Load") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
   int32_t _return;
-  Server_Initialize_presult result;
+  Server_Load_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1294,7 +1316,7 @@ int32_t ServerClient::recv_Initialize()
   if (result.__isset.success) {
     return _return;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Initialize failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Load failed: unknown result");
 }
 
 void ServerClient::Append(const int64_t key, const std::string& value)
@@ -1653,38 +1675,38 @@ bool ServerProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot,
   return true;
 }
 
-void ServerProcessor::process_Initialize(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void ServerProcessor::process_Load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("Server.Initialize", callContext);
+    ctx = this->eventHandler_->getContext("Server.Load", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Server.Initialize");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Server.Load");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "Server.Initialize");
+    this->eventHandler_->preRead(ctx, "Server.Load");
   }
 
-  Server_Initialize_args args;
+  Server_Load_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "Server.Initialize", bytes);
+    this->eventHandler_->postRead(ctx, "Server.Load", bytes);
   }
 
-  Server_Initialize_result result;
+  Server_Load_result result;
   try {
-    result.success = iface_->Initialize();
+    result.success = iface_->Load(args.load_file);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "Server.Initialize");
+      this->eventHandler_->handlerError(ctx, "Server.Load");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("Initialize", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("Load", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1693,17 +1715,17 @@ void ServerProcessor::process_Initialize(int32_t seqid, ::apache::thrift::protoc
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "Server.Initialize");
+    this->eventHandler_->preWrite(ctx, "Server.Load");
   }
 
-  oprot->writeMessageBegin("Initialize", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("Load", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "Server.Initialize", bytes);
+    this->eventHandler_->postWrite(ctx, "Server.Load", bytes);
   }
 }
 
@@ -2036,19 +2058,20 @@ void ServerProcessor::process_GetSize(int32_t seqid, ::apache::thrift::protocol:
   return processor;
 }
 
-int32_t ServerConcurrentClient::Initialize()
+int32_t ServerConcurrentClient::Load(const std::string& load_file)
 {
-  int32_t seqid = send_Initialize();
-  return recv_Initialize(seqid);
+  int32_t seqid = send_Load(load_file);
+  return recv_Load(seqid);
 }
 
-int32_t ServerConcurrentClient::send_Initialize()
+int32_t ServerConcurrentClient::send_Load(const std::string& load_file)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  oprot_->writeMessageBegin("Initialize", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("Load", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Server_Initialize_pargs args;
+  Server_Load_pargs args;
+  args.load_file = &load_file;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -2059,7 +2082,7 @@ int32_t ServerConcurrentClient::send_Initialize()
   return cseqid;
 }
 
-int32_t ServerConcurrentClient::recv_Initialize(const int32_t seqid)
+int32_t ServerConcurrentClient::recv_Load(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2088,7 +2111,7 @@ int32_t ServerConcurrentClient::recv_Initialize(const int32_t seqid)
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("Initialize") != 0) {
+      if (fname.compare("Load") != 0) {
         iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
@@ -2098,7 +2121,7 @@ int32_t ServerConcurrentClient::recv_Initialize(const int32_t seqid)
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       int32_t _return;
-      Server_Initialize_presult result;
+      Server_Load_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -2109,7 +2132,7 @@ int32_t ServerConcurrentClient::recv_Initialize(const int32_t seqid)
         return _return;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Initialize failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "Load failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

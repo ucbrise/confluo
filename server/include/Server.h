@@ -21,7 +21,7 @@ namespace succinct {
 class ServerIf {
  public:
   virtual ~ServerIf() {}
-  virtual int32_t Initialize() = 0;
+  virtual int32_t Load(const std::string& load_file) = 0;
   virtual void Append(const int64_t key, const std::string& value) = 0;
   virtual void Get(std::string& _return, const int64_t key) = 0;
   virtual void Search(std::vector<int64_t> & _return, const std::string& query) = 0;
@@ -57,7 +57,7 @@ class ServerIfSingletonFactory : virtual public ServerIfFactory {
 class ServerNull : virtual public ServerIf {
  public:
   virtual ~ServerNull() {}
-  int32_t Initialize() {
+  int32_t Load(const std::string& /* load_file */) {
     int32_t _return = 0;
     return _return;
   }
@@ -83,26 +83,37 @@ class ServerNull : virtual public ServerIf {
   }
 };
 
+typedef struct _Server_Load_args__isset {
+  _Server_Load_args__isset() : load_file(false) {}
+  bool load_file :1;
+} _Server_Load_args__isset;
 
-class Server_Initialize_args {
+class Server_Load_args {
  public:
 
-  Server_Initialize_args(const Server_Initialize_args&);
-  Server_Initialize_args& operator=(const Server_Initialize_args&);
-  Server_Initialize_args() {
+  Server_Load_args(const Server_Load_args&);
+  Server_Load_args& operator=(const Server_Load_args&);
+  Server_Load_args() : load_file() {
   }
 
-  virtual ~Server_Initialize_args() throw();
+  virtual ~Server_Load_args() throw();
+  std::string load_file;
 
-  bool operator == (const Server_Initialize_args & /* rhs */) const
+  _Server_Load_args__isset __isset;
+
+  void __set_load_file(const std::string& val);
+
+  bool operator == (const Server_Load_args & rhs) const
   {
+    if (!(load_file == rhs.load_file))
+      return false;
     return true;
   }
-  bool operator != (const Server_Initialize_args &rhs) const {
+  bool operator != (const Server_Load_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Server_Initialize_args & ) const;
+  bool operator < (const Server_Load_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -110,66 +121,67 @@ class Server_Initialize_args {
 };
 
 
-class Server_Initialize_pargs {
+class Server_Load_pargs {
  public:
 
 
-  virtual ~Server_Initialize_pargs() throw();
+  virtual ~Server_Load_pargs() throw();
+  const std::string* load_file;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Server_Initialize_result__isset {
-  _Server_Initialize_result__isset() : success(false) {}
+typedef struct _Server_Load_result__isset {
+  _Server_Load_result__isset() : success(false) {}
   bool success :1;
-} _Server_Initialize_result__isset;
+} _Server_Load_result__isset;
 
-class Server_Initialize_result {
+class Server_Load_result {
  public:
 
-  Server_Initialize_result(const Server_Initialize_result&);
-  Server_Initialize_result& operator=(const Server_Initialize_result&);
-  Server_Initialize_result() : success(0) {
+  Server_Load_result(const Server_Load_result&);
+  Server_Load_result& operator=(const Server_Load_result&);
+  Server_Load_result() : success(0) {
   }
 
-  virtual ~Server_Initialize_result() throw();
+  virtual ~Server_Load_result() throw();
   int32_t success;
 
-  _Server_Initialize_result__isset __isset;
+  _Server_Load_result__isset __isset;
 
   void __set_success(const int32_t val);
 
-  bool operator == (const Server_Initialize_result & rhs) const
+  bool operator == (const Server_Load_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const Server_Initialize_result &rhs) const {
+  bool operator != (const Server_Load_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Server_Initialize_result & ) const;
+  bool operator < (const Server_Load_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Server_Initialize_presult__isset {
-  _Server_Initialize_presult__isset() : success(false) {}
+typedef struct _Server_Load_presult__isset {
+  _Server_Load_presult__isset() : success(false) {}
   bool success :1;
-} _Server_Initialize_presult__isset;
+} _Server_Load_presult__isset;
 
-class Server_Initialize_presult {
+class Server_Load_presult {
  public:
 
 
-  virtual ~Server_Initialize_presult() throw();
+  virtual ~Server_Load_presult() throw();
   int32_t* success;
 
-  _Server_Initialize_presult__isset __isset;
+  _Server_Load_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -771,9 +783,9 @@ class ServerClient : virtual public ServerIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  int32_t Initialize();
-  void send_Initialize();
-  int32_t recv_Initialize();
+  int32_t Load(const std::string& load_file);
+  void send_Load(const std::string& load_file);
+  int32_t recv_Load();
   void Append(const int64_t key, const std::string& value);
   void send_Append(const int64_t key, const std::string& value);
   void recv_Append();
@@ -807,7 +819,7 @@ class ServerProcessor : public ::apache::thrift::TDispatchProcessor {
   typedef  void (ServerProcessor::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
-  void process_Initialize(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_Load(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_Append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_Get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_Search(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -817,7 +829,7 @@ class ServerProcessor : public ::apache::thrift::TDispatchProcessor {
  public:
   ServerProcessor(boost::shared_ptr<ServerIf> iface) :
     iface_(iface) {
-    processMap_["Initialize"] = &ServerProcessor::process_Initialize;
+    processMap_["Load"] = &ServerProcessor::process_Load;
     processMap_["Append"] = &ServerProcessor::process_Append;
     processMap_["Get"] = &ServerProcessor::process_Get;
     processMap_["Search"] = &ServerProcessor::process_Search;
@@ -852,13 +864,13 @@ class ServerMultiface : virtual public ServerIf {
     ifaces_.push_back(iface);
   }
  public:
-  int32_t Initialize() {
+  int32_t Load(const std::string& load_file) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->Initialize();
+      ifaces_[i]->Load(load_file);
     }
-    return ifaces_[i]->Initialize();
+    return ifaces_[i]->Load(load_file);
   }
 
   void Append(const int64_t key, const std::string& value) {
@@ -947,9 +959,9 @@ class ServerConcurrentClient : virtual public ServerIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  int32_t Initialize();
-  int32_t send_Initialize();
-  int32_t recv_Initialize(const int32_t seqid);
+  int32_t Load(const std::string& load_file);
+  int32_t send_Load(const std::string& load_file);
+  int32_t recv_Load(const int32_t seqid);
   void Append(const int64_t key, const std::string& value);
   int32_t send_Append(const int64_t key, const std::string& value);
   void recv_Append(const int32_t seqid);

@@ -2,8 +2,8 @@ namespace cpp succinct
 
 service Server {
   // Initialize
-  i32 Initialize(),
-	
+  i32 Load(1: string load_file),
+
   // Supported operations
   void Append(1: i64 key, 2: string value),
   string Get(1: i64 key),

@@ -43,61 +43,12 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path,
   hostname_ = hostname;
 
   BenchmarkConnection cx(hostname_, 11002);
-
-  /** Load the data
-   *  =============
-   *
-   *  We load the log store with ~250MB of data (~25% of total capacity).
-   */
-
-  const int64_t target_data_size = 250 * 1024 * 1024;
-  load_end_offset_ = 0;
-  load_keys_ = 0;
-
-  int64_t cur_key = 0;
-
-  std::ifstream in(data_path + ".ser");
-  fprintf(stderr, "Loading...\n");
-
-  TimeStamp start = GetTimestamp();
-  TimeStamp batch_start = start;
-  while (load_end_offset_ < target_data_size) {
-    std::string cur_value;
-    std::getline(in, cur_value);
-    cx.client->Append(cur_key++, cur_value);
-    load_end_offset_ += cur_value.length();
-    load_keys_++;
-
-    // Periodically print out statistics
-    if (load_keys_ % 1000 == 0) {
-      TimeStamp batch_end = GetTimestamp();
-      auto elapsed_us = batch_end - batch_start;
-      double avg_latency = (double) elapsed_us / 1000.0;
-      double completion = 100.0 * (double) (load_end_offset_)
-          / (double) (target_data_size);
-      fprintf(
-          stderr,
-          "\033[A\033[2KLoading: %2.02lf%% (%9ld B). Avg latency: %.2lf us\n",
-          completion, load_end_offset_, avg_latency);
-      batch_start = GetTimestamp();
-    }
-  }
-
-  // Print end of load statistics
-  TimeStamp end = GetTimestamp();
-  auto elapsed_us = end - start;
-  double avg_latency = (double) elapsed_us / (double) load_keys_;
-
-  fprintf(
-      stderr,
-      "\033[A\033[2KLoaded %ld key-value pairs (%lld B). Avg latency: %lf us\n",
-      load_keys_, load_end_offset_, avg_latency);
-
-  if (cx.client->GetSize() != load_end_offset_) {
-    fprintf(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
-            load_end_offset_, cx.client->GetSize());
-  }
-
+  LOG(stderr, "Loading data on server...\n");
+  uint64_t start = GetTimestamp();
+  load_keys_ = cx.client->Load(data_path);
+  uint64_t end = GetTimestamp();
+  uint64_t time_taken = (end - start) / 10e6;
+  LOG(stderr, "Data load complete: took %llu seconds.\n", time_taken);
 }
 
 void LogStoreBenchmark::BenchmarkGetLatency() {
@@ -197,7 +148,6 @@ void LogStoreBenchmark::BenchmarkAppendLatency() {
   std::vector<std::string> values;
 
   std::ifstream in(data_path_ + ".inserts");
-  in.seekg(load_end_offset_);
   for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value;
     std::getline(in, cur_value);

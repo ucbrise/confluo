@@ -100,7 +100,6 @@ class LogStoreBenchmark {
 
   std::string data_path_;
   std::string hostname_;
-  int64_t load_end_offset_;
   int64_t load_keys_;
 };
 
