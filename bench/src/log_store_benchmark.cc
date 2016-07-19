@@ -305,7 +305,7 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
                   std::stringstream ss(query_line);
                   ss >> attr_id >> attr_val;
                   attr_val = (char) (kBeginDelim + attr_id) + attr_val
-                  + (char) (kBeginDelim + attr_id + 1);
+                      + (char) (kBeginDelim + attr_id + 1);
                   terms.push_back(attr_val);
                 }
                 if (std::getline(in_a, value)) values.push_back(value);
@@ -322,6 +322,8 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
                   query_types.push_back(3);
                 }
               }
+
+              fprintf(stderr, "Read %zu keys, %zu search queries and %zu append queries.\n", keys.size(), terms.size(), values.size());
 
               std::shuffle(keys.begin(), keys.end(), PRNG());
               std::shuffle(terms.begin(), terms.end(), PRNG());
