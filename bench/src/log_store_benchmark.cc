@@ -292,7 +292,6 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
 
               std::ifstream in_s(data_path_ + ".queries");
               std::ifstream in_a(data_path_ + ".inserts");
-              in_a.seekg(load_end_offset_);
               int64_t cur_key = load_keys_;
               std::string query_line, value;
               std::vector<uint32_t> query_types;
