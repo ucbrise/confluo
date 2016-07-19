@@ -60,7 +60,6 @@ class ServerImpl : virtual public ServerIf {
 
     // Load all records in file.
     while (std::getline(in, cur_value)) {
-      std::string cur_value;
       shard_->Append(cur_key++, cur_value);
     }
 
