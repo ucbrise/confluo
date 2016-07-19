@@ -22,7 +22,7 @@ class LogStoreBenchmark {
  public:
   typedef struct BenchmarkConnection {
    public:
-    BenchmarkConnection(const char* hostname, int port) {
+    BenchmarkConnection(std::string& hostname, int port) {
       // Setup connection
       socket = boost::shared_ptr<TSocket>(new TSocket(hostname, port));
       transport = boost::shared_ptr<TTransport>(new TBufferedTransport(socket));
