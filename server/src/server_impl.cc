@@ -63,7 +63,7 @@ class ServerImpl : virtual public ServerIf {
       shard_->Append(cur_key++, cur_value);
     }
 
-    Info("Finished loading %u keys.\n", cur_key);
+    Info("Finished loading %u keys.", cur_key);
 
     // Check for correctness
     if (shard_->GetNumKeys() != cur_key) {
