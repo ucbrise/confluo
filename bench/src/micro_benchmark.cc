@@ -211,8 +211,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   LOG(stderr, "Generating queries...");
   std::vector<std::string> values;
 
-  std::ifstream in(data_path_);
-  in.seekg(load_end_offset_);
+  std::ifstream in(data_path_ + ".inserts");
   for (int64_t i = 0; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value;
     std::getline(in, cur_value);
@@ -306,8 +305,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
               std::vector<std::string> values, terms;
 
               std::ifstream in_s(data_path_ + ".queries");
-              std::ifstream in_a(data_path_);
-              in_a.seekg(load_end_offset_);
+              std::ifstream in_a(data_path_ + ".inserts");
               int64_t cur_key = load_keys_;
               std::string term, value;
               std::vector<uint32_t> query_types;
