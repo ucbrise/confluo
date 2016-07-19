@@ -6,8 +6,8 @@
 class LogStoreTest : public testing::Test {
  public:
   std::string to_string(uint64_t i) {
-    char buf[5];
-    sprintf(buf, "%04d", i);
+    char buf[6];
+    sprintf(buf, "%05d", i);
     return std::string(buf);
   }
 };

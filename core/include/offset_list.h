@@ -5,7 +5,7 @@
 #include "conc_vectors.h"
 
 #ifdef LOCK_FREE_OFFSET_LIST
-typedef LockFreeNonAtomicList<int32_t, 24> OffsetList;
+typedef LockFreeAtomicList<int32_t, 24> OffsetList;
 #else
 typedef ConcurrentVector<uint32_t> OffsetList;
 #endif
