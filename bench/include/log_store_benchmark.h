@@ -44,14 +44,14 @@ class LogStoreBenchmark {
   static const uint64_t kMeasureCount = 100000;
   static const uint64_t kCooldownCount = 1000;
 
-  static const uint64_t kWarmupTime = 10000000;
+  static const uint64_t kWarmupTime = 5000000;
   static const uint64_t kMeasureTime = 10000000;
-  static const uint64_t kCooldownTime = 500000;
+  static const uint64_t kCooldownTime = 5000000;
 
   static const uint64_t kThreadQueryCount = 75000;
   static const char kBeginDelim = -128;
 
-  LogStoreBenchmark(std::string& data_path);  // Mode: 0 = Load from scratch, 1 = Load from dump
+  LogStoreBenchmark(std::string& data_path, std::string& hostname);
 
   // Latency benchmarks
   void BenchmarkGetLatency();
@@ -99,6 +99,7 @@ class LogStoreBenchmark {
   }
 
   std::string data_path_;
+  std::string hostname_;
   int64_t load_end_offset_;
   int64_t load_keys_;
 };
