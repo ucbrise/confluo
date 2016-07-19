@@ -150,10 +150,13 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
     std::string attr_val;
     std::stringstream ss(query_line);
     ss >> attr_id >> attr_val;
-    attr_val = (char)(kBeginDelim + attr_id) + attr_val + (char)(kBeginDelim + attr_id + 1);
-    fprintf(stderr, "%d, %s\n", attr_id, attr_val.c_str());
+    attr_val = (char) (kBeginDelim + attr_id) + attr_val
+        + (char) (kBeginDelim + attr_id + 1);
     queries.push_back(attr_val);
   }
+
+  size_t warmup_count = queries.size() / 10;
+  size_t measure_count = queries.size() - warmup_count;
 
   fprintf(stderr, "Done.\n");
 
@@ -164,7 +167,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
 
   // Warmup
   fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
-  for (uint64_t i = 0; i < kWarmupCount; i++) {
+  for (uint64_t i = 0; i < warmup_count; i++) {
     std::string query = queries[i % queries.size()];
     std::vector<int64_t> results;
     client->Search(results, query);
@@ -173,7 +176,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
 
   // Measure
   fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
-  for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
+  for (uint64_t i = warmup_count; i < warmup_count + measure_count; i++) {
     std::string query = queries[i % queries.size()];
     std::vector<int64_t> results;
     t0 = GetTimestamp();
@@ -291,17 +294,22 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
               std::ifstream in_a(data_path_ + ".inserts");
               in_a.seekg(load_end_offset_);
               int64_t cur_key = load_keys_;
-              std::string term, value;
+              std::string query_line, value;
               std::vector<uint32_t> query_types;
               LOG(stderr, "Generating queries...\n");
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
                 int64_t key = RandomInteger(0, load_keys_);
-                std::getline(in_s, term);
-                std::getline(in_a, value);
-
+                if (std::getline(in_s, query_line)) {
+                  uint32_t attr_id;
+                  std::string attr_val;
+                  std::stringstream ss(query_line);
+                  ss >> attr_id >> attr_val;
+                  attr_val = (char) (kBeginDelim + attr_id) + attr_val
+                  + (char) (kBeginDelim + attr_id + 1);
+                  terms.push_back(attr_val);
+                }
+                if (std::getline(in_a, value)) values.push_back(value);
                 keys.push_back(key);
-                terms.push_back(term);
-                values.push_back(value);
 
                 double r = RandomDouble(0, 1);
                 if (r <= get_m) {
