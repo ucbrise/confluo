@@ -228,6 +228,6 @@ class ArrayNGramIdx {
   std::array<AtomicRef, MAX_SIZE> idx_;
 };
 
-typedef LockFreeNGramIdx NGramIdx;
+typedef ArrayNGramIdx<> NGramIdx;
 
 #endif /* NGRAM_IDX_H_ */
