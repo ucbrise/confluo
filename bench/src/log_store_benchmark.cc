@@ -459,7 +459,7 @@ int main(int argc, char** argv) {
     LOG(stderr,
         "get_f = %.2lf, search_f = %.2lf, append_f = %.2lf, delete_f = %.2lf, num_clients = %d\n",
         get_f, search_f, append_f, delete_f, num_clients);
-    ls_bench.BenchmarkThroughput(get_f, search_f, append_f, delete_f);
+    ls_bench.BenchmarkThroughput(get_f, search_f, append_f, delete_f, num_clients);
   } else {
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }
