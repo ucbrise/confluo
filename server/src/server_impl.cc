@@ -56,7 +56,7 @@ class ServerImpl : virtual public ServerIf {
     std::string cur_value;
 
     std::ifstream in(loadfile);
-    Info("Loading data from file %s...\n", loadfile.c_str());
+    Info("Loading data from file %s...", loadfile.c_str());
 
     // Load all records in file.
     while (std::getline(in, cur_value)) {
@@ -67,7 +67,7 @@ class ServerImpl : virtual public ServerIf {
 
     // Check for correctness
     if (shard_->GetNumKeys() != cur_key) {
-      Warn("Expected number of keys = %u, Actual number of keys %u\n", cur_key,
+      Warn("Expected %u records, actual %u records", cur_key,
            shard_->GetNumKeys());
     }
     return cur_key;
