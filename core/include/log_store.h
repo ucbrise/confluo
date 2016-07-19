@@ -52,7 +52,7 @@ class LogStore {
     completed_appends_tail_ = 0;
     value_offsets_ = new ValueOffsets;
     deleted_ = new DeletedOffsets;
-    ngram_idx_ = new ArrayNGramIdx<>;
+    ngram_idx_ = new NGramIdx;
   }
 
   // Adds a new key value pair to the LogStore atomically.
@@ -358,61 +358,6 @@ class LogStore {
     return current_tail >> 32;
   }
 
-  // Dumps the entire LogStore data to the specified path.
-  //
-  // Returns the number of bytes written.
-  const size_t Dump(const std::string& path) {
-    size_t out_size = 0;
-    uint64_t tail = completed_appends_tail_;
-    uint32_t log_size = tail & 0xFFFFFFFF;
-    uint32_t max_key = tail >> 32;
-
-    std::ofstream out(path);
-
-    // Write data
-    out.write(reinterpret_cast<const char *>(&(log_size)), sizeof(uint32_t));
-    out_size += sizeof(uint32_t);
-    out.write(reinterpret_cast<const char *>(data_), log_size * sizeof(char));
-    out_size += (log_size * sizeof(char));
-
-    // Write value offsets
-    out_size += value_offsets_->serialize(out, max_key);
-
-    // Write n-gram index
-    out_size += ngram_idx_->serialize(out);
-
-    return out_size;
-  }
-
-  // Loads the LogStore from the dump at specified path.
-  //
-  // Returns the number of bytes read.
-  size_t Load(const std::string& path) {
-    size_t in_size = 0;
-    uint32_t log_size, max_key;
-
-    std::ifstream in(path);
-
-    // Read data
-    in.read(reinterpret_cast<char *>(&log_size), sizeof(uint32_t));
-    in_size += sizeof(uint32_t);
-    in.read(reinterpret_cast<char *>(data_), log_size * sizeof(char));
-    in_size += (log_size * sizeof(char));
-
-    // Read value offsets
-    in_size += value_offsets_->deserialize(in, &max_key);
-
-    // Read n-gram index
-    in_size += ngram_idx_->deserialize(in);
-
-    // Set the tail values
-    ongoing_appends_tail_ = ((uint64_t) max_key) << 32 | ((uint64_t) log_size);
-    completed_appends_tail_ = ((uint64_t) max_key) << 32
-        | ((uint64_t) log_size);
-
-    return in_size;
-  }
-
   // Atomically get the number of currently readable keys.
   const uint32_t GetNumKeys() {
     uint64_t current_tail = completed_appends_tail_;
@@ -532,7 +477,7 @@ class LogStore {
   DeletedOffsets *deleted_;                        // Lock-free, dynamically
                                                    // growing list of atomic
                                                    // delete tails (offsets).
-  ArrayNGramIdx<> *ngram_idx_;                     // Lock-free dynamically
+  NGramIdx *ngram_idx_;                            // Lock-free dynamically
                                                    // Growing index mapping
                                                    // N-grams to their locations
                                                    // in the log.

@@ -8,6 +8,7 @@
 #include "offset_list.h"
 #include "locks.h"
 #include "hash_ops.h"
+#include "lock_free_ngram_idx.h"
 
 class ConcurrentNGramIdx {
  public:
@@ -226,5 +227,7 @@ class ArrayNGramIdx {
 
   std::array<AtomicRef, MAX_SIZE> idx_;
 };
+
+typedef LockFreeNGramIdx NGramIdx;
 
 #endif /* NGRAM_IDX_H_ */

@@ -57,90 +57,73 @@
   }\
 }
 
-MicroBenchmark::MicroBenchmark(std::string& data_path, int mode, bool dump) {
+MicroBenchmark::MicroBenchmark(std::string& data_path) {
   shard_ = new LogStore<>();
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
   data_path_ = resolved_path;
 
-  if (mode == 0) {
-    /** Load the data
-     *  =============
-     *
-     *  We load the log store with ~250MB of data (~25% of total capacity).
-     */
+  /** Load the data
+   *  =============
+   *
+   *  We load the log store with ~250MB of data (~25% of total capacity).
+   */
 
-    const int64_t target_data_size = 250 * 1024 * 1024;
-    int64_t load_data_size = 0;
-    load_end_offset_ = 0;
-    load_keys_ = 0;
-    uint64_t b_size = 1000;
+  const int64_t target_data_size = 250 * 1024 * 1024;
+  int64_t load_data_size = 0;
+  load_end_offset_ = 0;
+  load_keys_ = 0;
+  uint64_t b_size = 1000;
 
-    int64_t cur_key = 0;
+  int64_t cur_key = 0;
 
-    std::ifstream in(data_path);
-    std::vector<std::string> values;
+  std::ifstream in(data_path);
+  std::vector<std::string> values;
 
-    while (load_data_size < target_data_size) {
-      std::string cur_value;
-      std::getline(in, cur_value);
-      values.push_back(cur_value);
-      load_data_size += cur_value.length();
-    }
-
-    LOG(stderr, "Loading...\n");
-
-    auto start = high_resolution_clock::now();
-    auto b_start = start;
-#ifdef PROFILE
-    Profiler::StartProfiling();
-#endif
-    for (auto& cur_value : values) {
-      shard_->Append(cur_key++, cur_value);
-      load_end_offset_ += cur_value.length();
-      load_keys_++;
-
-      // Periodically print out statistics
-      if (load_keys_ % b_size == 0) {
-        auto b_end = high_resolution_clock::now();
-        auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
-        double avg_latency = (double) elapsed_us / (double) b_size;
-        double completion = 100.0 * (double) (load_end_offset_)
-            / (double) (target_data_size);
-        LOG(stderr,
-            "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
-            completion, load_end_offset_, avg_latency);
-        b_start = high_resolution_clock::now();
-      }
-    }
-#ifdef PROFILE
-    Profiler::StopProfiling();
-#endif
-
-    // Print end of load statistics
-    auto end = high_resolution_clock::now();
-    auto elapsed_us = duration_cast<nanoseconds>(end - start).count();
-    double avg_latency = (double) elapsed_us / (double) load_keys_;
-
-    LOG(stderr,
-        "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
-        load_keys_, load_end_offset_, avg_latency);
-
-    if (dump) {
-      LOG(stderr, "Dumping data structures to disk...");
-      shard_->Dump(data_path + ".logstore");
-      LOG(stderr, "Done.\n");
-    }
-  } else if (mode == 1) {
-    LOG(stderr, "Loading...\n");
-    shard_->Load(data_path + ".logstore");
-    load_keys_ = shard_->GetNumKeys();
-    load_end_offset_ = shard_->GetSize();
-    LOG(stderr, "Loaded %lld key-value pairs.\n", load_keys_);
-  } else {
-    LOG(stderr, "Invalid mode: %d\n", mode);
-    exit(-1);
+  while (load_data_size < target_data_size) {
+    std::string cur_value;
+    std::getline(in, cur_value);
+    values.push_back(cur_value);
+    load_data_size += cur_value.length();
   }
+
+  LOG(stderr, "Loading...\n");
+
+  auto start = high_resolution_clock::now();
+  auto b_start = start;
+#ifdef PROFILE
+  Profiler::StartProfiling();
+#endif
+  for (auto& cur_value : values) {
+    shard_->Append(cur_key++, cur_value);
+    load_end_offset_ += cur_value.length();
+    load_keys_++;
+
+    // Periodically print out statistics
+    if (load_keys_ % b_size == 0) {
+      auto b_end = high_resolution_clock::now();
+      auto elapsed_us = duration_cast<nanoseconds>(b_end - b_start).count();
+      double avg_latency = (double) elapsed_us / (double) b_size;
+      double completion = 100.0 * (double) (load_end_offset_)
+          / (double) (target_data_size);
+      LOG(stderr,
+          "\033[A\033[2KLoading: %2.02lf%% (%9lld B). Avg latency: %.2lf ns\n",
+          completion, load_end_offset_, avg_latency);
+      b_start = high_resolution_clock::now();
+    }
+  }
+#ifdef PROFILE
+  Profiler::StopProfiling();
+#endif
+
+  // Print end of load statistics
+  auto end = high_resolution_clock::now();
+  auto elapsed_us = duration_cast<nanoseconds>(end - start).count();
+  double avg_latency = (double) elapsed_us / (double) load_keys_;
+
+  LOG(stderr,
+      "\033[A\033[2KLoaded %lld key-value pairs (%lld B). Avg latency: %lf ns\n",
+      load_keys_, load_end_offset_, avg_latency);
 
   if (shard_->GetSize() != load_end_offset_) {
     LOG(stderr, "Inconsistency: expected size = %lld, actual size %lld\n",
@@ -443,28 +426,21 @@ std::vector<std::string> Split(const std::string &s, char delim) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 2 || argc > 8) {
+  if (argc < 2 || argc > 6) {
     PrintUsage(argv[0]);
     return -1;
   }
 
   int c;
   std::string bench_type = "latency-get";
-  int mode = 0, num_clients = 1;
-  bool dump = false;
-  while ((c = getopt(argc, argv, "b:m:n:d")) != -1) {
+  int num_clients = 1;
+  while ((c = getopt(argc, argv, "b:n:")) != -1) {
     switch (c) {
       case 'b':
         bench_type = std::string(optarg);
         break;
-      case 'm':
-        mode = atoi(optarg);
-        break;
       case 'n':
         num_clients = atoi(optarg);
-        break;
-      case 'd':
-        dump = true;
         break;
       default:
         LOG(stderr, "Could not parse command line arguments.\n");
@@ -478,7 +454,7 @@ int main(int argc, char** argv) {
 
   std::string data_path = std::string(argv[optind]);
 
-  MicroBenchmark ls_bench(data_path, mode, dump);
+  MicroBenchmark ls_bench(data_path);
   if (bench_type == "latency-get") {
     ls_bench.BenchmarkGetLatency();
   } else if (bench_type == "latency-search") {
