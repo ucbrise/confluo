@@ -21,16 +21,16 @@ class LockFreeNGramIdxTest : public testing::Test {
   }
 };
 
-TEST_F(LockFreeNGramIdxTest, AccessTest) {
-  LockFreeNGramIdx idx;
-  for (uint64_t i = 0; i < 1000; i++) {
-    std::string str = to_string(i);
-    idx.add_offset(str.c_str(), i);
-  }
-
-  for (uint64_t i = 0; i < 1000; i++) {
-    std::string str = to_string(i);
-    OffsetList* list = idx.get_offsets(str.c_str());
-    ASSERT_EQ(i, list->at(0));
-  }
-}
+//TEST_F(LockFreeNGramIdxTest, AccessTest) {
+//  LockFreeNGramIdx idx;
+//  for (uint64_t i = 0; i < 1000; i++) {
+//    std::string str = to_string(i);
+//    idx.add_offset(str.c_str(), i);
+//  }
+//
+//  for (uint64_t i = 0; i < 1000; i++) {
+//    std::string str = to_string(i);
+//    OffsetList* list = idx.get_offsets(str.c_str());
+//    ASSERT_EQ(i, list->at(0));
+//  }
+//}
