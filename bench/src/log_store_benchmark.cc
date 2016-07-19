@@ -44,11 +44,11 @@ LogStoreBenchmark::LogStoreBenchmark(std::string& data_path,
 
   BenchmarkConnection cx(hostname_, 11002);
   LOG(stderr, "Loading data on server...\n");
-  uint64_t start = GetTimestamp();
+  double start = GetTimestamp();
   load_keys_ = cx.client->Load(data_path + ".ser");
-  uint64_t end = GetTimestamp();
-  uint64_t time_taken = (end - start) / 10e6;
-  LOG(stderr, "Data load complete: took %llu seconds.\n", time_taken);
+  double end = GetTimestamp();
+  double time_taken = (end - start) / 1000000.0;
+  LOG(stderr, "Data load complete, took %lf seconds.\n", time_taken);
 }
 
 void LogStoreBenchmark::BenchmarkGetLatency() {
