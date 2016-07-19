@@ -55,14 +55,16 @@ class ServerImpl : virtual public ServerIf {
     uint32_t cur_key = 0;
     std::string cur_value;
 
-    std::ifstream in(loadfile + ".ser");
-    fprintf(stderr, "Loading...\n");
+    std::ifstream in(loadfile);
+    Info("Loading data from file %s...\n", loadfile.c_str());
 
     // Load all records in file.
     while (std::getline(in, cur_value)) {
       std::string cur_value;
       shard_->Append(cur_key++, cur_value);
     }
+
+    Info("Finished loading %u keys.\n", cur_key);
 
     // Check for correctness
     if (shard_->GetNumKeys() != cur_key) {
