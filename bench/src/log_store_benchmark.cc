@@ -276,12 +276,11 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
                     }
                   }
 
-                  fprintf(stderr, "Read %zu keys, %zu search queries and %zu append queries.\n", keys.size(), terms.size(), values.size());
-
                   std::shuffle(keys.begin(), keys.end(), PRNG());
                   std::shuffle(terms.begin(), terms.end(), PRNG());
                   std::shuffle(values.begin(), values.end(), PRNG());
-                  LOG(stderr, "Done.\n");
+
+                  fprintf(stderr, "Read %zu keys, %zu search queries and %zu append queries.\n", keys.size(), terms.size(), values.size());
 
                   double query_thput = 0;
                   double key_thput = 0;
@@ -290,6 +289,7 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
                   auto client = cx.client;
 
                   barrier.Wait();
+                  LOG(stderr, "Starting benchmark...\n");
 
                   try {
                     // Warmup phase
