@@ -10,6 +10,9 @@
 
 #include "Server.h"
 
+#include <condition_variable>
+#include <mutex>
+
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
