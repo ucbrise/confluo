@@ -234,6 +234,7 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
       + search_f + append_f, delete_m = get_f + search_f + append_f + delete_f;
 
   std::vector<std::thread> threads;
+  Barrier barrier(num_clients);
 
   for (uint32_t i = 0; i < num_clients; i++) {
     threads.push_back(
@@ -287,6 +288,8 @@ void LogStoreBenchmark::BenchmarkThroughput(double get_f, double search_f,
 
                   BenchmarkConnection cx(hostname_, 11002);
                   auto client = cx.client;
+
+                  barrier.Wait();
 
                   try {
                     // Warmup phase

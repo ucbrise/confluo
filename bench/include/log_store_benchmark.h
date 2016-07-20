@@ -38,6 +38,26 @@ class LogStoreBenchmark {
     boost::shared_ptr<TProtocol> protocol;
   } BenchmarkConnection;
 
+  class Barrier {
+   public:
+    explicit Barrier(std::size_t count)
+        : count_ { count } {
+    }
+    void Wait() {
+      std::unique_lock<std::mutex> lock { mutex_ };
+      if (--count_ == 0) {
+        cv_.notify_all();
+      } else {
+        cv_.wait(lock, [this] {return count_ == 0;});
+      }
+    }
+
+   private:
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    std::size_t count_;
+  };
+
   typedef unsigned long long int TimeStamp;
 
   static const uint64_t kWarmupCount = 1000;
