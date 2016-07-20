@@ -312,12 +312,10 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
               LOG(stderr, "Generating queries...\n");
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
                 int64_t key = RandomInteger(0, load_keys_);
-                std::getline(in_s, term);
-                std::getline(in_a, value);
-
+                
                 keys.push_back(key);
-                terms.push_back(term);
-                values.push_back(value);
+                if (std::getline(in_s, term)) terms.push_back(term);
+                if (std::getline(in_a, value)) values.push_back(value);
 
                 double r = RandomDouble(0, 1);
                 if (r <= get_m) {
