@@ -7,7 +7,7 @@ ssh -o StrictHostKeyChecking=no $hostname "killall server"
 
 echo "Benchmarking server at $hostname"
 for dataset in "tpch" "conviva"; do
-  for bench in "get-latency" "search-latency" "append-latency" "delete-latency"; do
+  for bench in "latency-get" "latency-search" "latency-append" "latency-delete"; do
     ssh -o StrictHostKeyChecking=no $hostname "nohup /home/ec2-user/log-store/build/server/bin/server >/dev/null 2>/dev/null &"
     sleep 5
     $sbin/../build/bench/bin/lsbench -b $bench -h $hostname ~/${dataset}
