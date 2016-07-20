@@ -119,7 +119,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
   auto client = cx.client;
 
   // Warmup
-  fprintf(stderr, "Warming up for %llu queries...\n", kWarmupCount);
+  fprintf(stderr, "Warming up for %llu queries...\n", warmup_count);
   for (uint64_t i = 0; i < warmup_count; i++) {
     std::string query = queries[i % queries.size()];
     std::vector<int64_t> results;
@@ -128,7 +128,7 @@ void LogStoreBenchmark::BenchmarkSearchLatency() {
   fprintf(stderr, "Warmup complete.\n");
 
   // Measure
-  fprintf(stderr, "Measuring for %llu queries...\n", kMeasureCount);
+  fprintf(stderr, "Measuring for %llu queries...\n", measure_count);
   for (uint64_t i = warmup_count; i < warmup_count + measure_count; i++) {
     std::string query = queries[i % queries.size()];
     std::vector<int64_t> results;

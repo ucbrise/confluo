@@ -178,13 +178,15 @@ void MicroBenchmark::BenchmarkSearchLatency() {
     queries.push_back(query);
   }
 
+  size_t warmup_count = queries.size() / 10;
+  size_t measure_count = queries.size() - warmup_count;
   LOG(stderr, "Done.\n");
 
   std::ofstream result_stream("latency_search");
 
   // Warmup
-  LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
-  for (uint64_t i = 0; i < kWarmupCount; i++) {
+  LOG(stderr, "Warming up for %llu queries...\n", warmup_count);
+  for (uint64_t i = 0; i < warmup_count; i++) {
     std::string query = queries[i % queries.size()];
     std::set<int64_t> results;
     shard_->Search(results, query);
@@ -192,8 +194,8 @@ void MicroBenchmark::BenchmarkSearchLatency() {
   LOG(stderr, "Warmup complete.\n");
 
   // Measure
-  LOG(stderr, "Measuring for %llu queries...\n", kMeasureCount);
-  for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
+  LOG(stderr, "Measuring for %llu queries...\n", measure_count);
+  for (uint64_t i = warmup_count; i < warmup_count + measure_count; i++) {
     std::string query = queries[i % queries.size()];
     std::set<int64_t> results;
     auto t0 = high_resolution_clock::now();
@@ -312,7 +314,7 @@ void MicroBenchmark::BenchmarkThroughput(const double get_f,
               LOG(stderr, "Generating queries...\n");
               for (int64_t i = 0; i < kThreadQueryCount; i++) {
                 int64_t key = RandomInteger(0, load_keys_);
-                
+
                 keys.push_back(key);
                 if (std::getline(in_s, term)) terms.push_back(term);
                 if (std::getline(in_a, value)) values.push_back(value);
