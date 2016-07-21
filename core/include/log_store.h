@@ -10,6 +10,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 
 #include <string>
 #include <set>
@@ -54,6 +55,16 @@ class LogStore {
     deleted_ = new DeletedOffsets;
     ngram_idx_ = new NGramIdx;
   }
+
+#ifdef DEBUG
+  typedef unsigned long long int TimeStamp;
+  static TimeStamp GetTimestamp() {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+
+    return now.tv_usec + (TimeStamp) now.tv_sec * 1000000;
+  }
+#endif
 
   // Adds a new key value pair to the LogStore atomically.
   //
@@ -250,7 +261,14 @@ class LogStore {
     OffsetList* suffix_offsets = ngram_idx_->get_offsets(
         substr + col_value.length() - NGRAM_N);
 
-    if (prefix_offsets->size() < suffix_offsets->size()) {
+    uint32_t prefix_size = prefix_offsets->size();
+    uint32_t suffix_size = suffix_offsets->size();
+#ifdef DEBUG
+    fprintf(stderr, "prefix_size = %u, suffix_size = %u\n", prefix_size,
+            suffix_size);
+    TimeStamp start = GetTimestamp();
+#endif
+    if (prefix_size < suffix_size) {
       // Extract the remaining suffix to compare with the actual data.
       char *suffix = substr + NGRAM_N;
       size_t suffix_len = col_value.length() - NGRAM_N;
@@ -299,6 +317,10 @@ class LogStore {
           FindAndInsertKey(results, off, max_key, max_off);
       }
     }
+#ifdef DEBUG
+    TimeStamp end = GetTimestamp();
+    fprintf(stderr, "Time taken = %llu", (end - start));
+#endif
   }
 
   bool InvalidateKey(const uint32_t internal_key, const uint32_t offset) {
