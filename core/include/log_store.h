@@ -264,7 +264,7 @@ class LogStore {
     uint32_t prefix_size = prefix_offsets->size();
     uint32_t suffix_size = suffix_offsets->size();
 #ifdef DEBUG
-    fprintf(stderr, "prefix_size = %u, suffix_size = %u\n", prefix_size,
+    fprintf(stderr, "prefix_size = %u, suffix_size = %u, ", prefix_size,
             suffix_size);
     TimeStamp start = GetTimestamp();
 #endif
@@ -319,7 +319,7 @@ class LogStore {
     }
 #ifdef DEBUG
     TimeStamp end = GetTimestamp();
-    fprintf(stderr, "Time taken = %llu", (end - start));
+    fprintf(stderr, "time taken = %llu\n", (end - start));
 #endif
   }
 
