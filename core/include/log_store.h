@@ -188,7 +188,6 @@ class LogStore {
     uint32_t min_size = LOG_SIZE, ngram_off = 0;
     for (uint32_t i = 0; i < substr_len - NGRAM_N; i++) {
       OffsetList *cur = ngram_idx_->get_offsets(substr + i);
-      Debug("Cur size = %u", cur->size());
       if (cur->size() < min_size) {
         min_size = cur->size();
         offsets = cur;
@@ -196,7 +195,7 @@ class LogStore {
       }
     }
     assert(offsets != NULL);
-    Debug("Min size = %u", min_size);
+    Debug("Min size = %u, substring = %s, offset = %u", min_size, substring + ngram_off, ngram_off);
 
     // Scan through the list of offsets, adding only valid offsets into the
     // set of results.
