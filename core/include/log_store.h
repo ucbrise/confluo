@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <fstream>
 #include <atomic>
-#include <cassert>
 
 #include "flags.h"
 #include "hash_ops.h"
@@ -181,38 +180,58 @@ class LogStore {
     // Obtain the offsets into the values corresponding to the prefix and
     // suffix ngram for the substring from the N-gram index.
     char *substr = (char *) query.c_str();
-    size_t substr_len = query.length();
-    assert(substr_len >= NGRAM_N);
+    OffsetList* prefix_offsets = ngram_idx_->get_offsets(substr);
+    OffsetList* suffix_offsets = ngram_idx_->get_offsets(
+        substr + query.length() - NGRAM_N);
 
-    OffsetList* offsets = NULL;
-    uint32_t min_size = LOG_SIZE, ngram_off = 0;
-    for (uint32_t i = 0; i < substr_len - NGRAM_N; i++) {
-      OffsetList *cur = ngram_idx_->get_offsets(substr + i);
-      if (cur->size() < min_size) {
-        min_size = cur->size();
-        offsets = cur;
-        ngram_off = i;
+    if (prefix_offsets->size() < suffix_offsets->size()) {
+      // Extract the remaining suffix to compare with the actual data.
+      char *suffix = substr + NGRAM_N;
+      size_t suffix_len = query.length() - NGRAM_N;
+
+      // Scan through the list of offsets, adding only valid offsets into the
+      // set of results.
+      uint32_t size = prefix_offsets->size();
+      char* data_ptr = data_ + NGRAM_N;
+      for (uint32_t i = 0; i < size; i++) {
+        // An offset is valid if
+        // (1) the remaining query suffix matches the data at that location in
+        //     the log,
+        // (2) the location does not exceed the maximum valid offset (i.e., the
+        //     write at that location was incomplete when the search started)
+        // (3) the key is not larger than the maximum valid key (i.e., the write
+        //     for that key was incomplete when the search started)
+        // (4) the key was not deleted before the search began.
+        //
+        // TODO: Take care of query.length() <= NGRAM_N case
+        uint32_t off = prefix_offsets->at(i);
+        if (off < max_off && !strncmp(data_ptr + off, suffix, suffix_len))
+          FindAndInsertKey(results, off, max_key, max_off);
       }
-    }
-    assert(offsets != NULL);
+    } else {
+      // Extract the remaining prefix to compare with the actual data.
+      char *prefix = substr;
+      size_t prefix_len = query.length() - NGRAM_N;
 
-    // Scan through the list of offsets, adding only valid offsets into the
-    // set of results.
-    char* data_ptr = data_ - ngram_off;
-    for (uint32_t i = 0; i < min_size; i++) {
-      // An offset is valid if
-      // (1) the remaining query suffix matches the data at that location in
-      //     the log,
-      // (2) the location does not exceed the maximum valid offset (i.e., the
-      //     write at that location was incomplete when the search started)
-      // (3) the key is not larger than the maximum valid key (i.e., the write
-      //     for that key was incomplete when the search started)
-      // (4) the key was not deleted before the search began.
-      //
-      // TODO: Take care of query.length() <= NGRAM_N case
-      uint32_t o = offsets->at(i);
-      if (o < max_off && !strncmp(data_ptr + o, substr, substr_len))
-        FindAndInsertKey(results, o, max_key, max_off);
+      // Scan through the list of offsets, adding only valid offsets into the
+      // set of results.
+      uint32_t size = suffix_offsets->size();
+      char* data_ptr = data_ - prefix_len;
+      for (uint32_t i = 0; i < size; i++) {
+        // An offset is valid if
+        // (1) the remaining query prefix matches the data at that location in
+        //     the log,
+        // (2) the location does not exceed the maximum valid offset (i.e., the
+        //     write at that location was incomplete when the search started)
+        // (3) the key is not larger than the maximum valid key (i.e., the write
+        //     for that key was incomplete when the search started)
+        // (4) the key was not deleted before the search began.
+        //
+        // TODO: Take care of query.length() <= NGRAM_N case
+        uint32_t off = suffix_offsets->at(i);
+        if (off < max_off && !strncmp(data_ptr + off, prefix, prefix_len))
+          FindAndInsertKey(results, off, max_key, max_off);
+      }
     }
   }
 
@@ -220,8 +239,7 @@ class LogStore {
   //
   // Returns the set of valid, matching internal keys.
   const void ColSearch(std::vector<int64_t>& results,
-                       const std::string& query) {
-
+                       const std::string& col_value) {
     // Get the current completed appends tail, and extract the maximum valid
     // key and value offset.
     uint64_t current_tail = completed_appends_tail_;
@@ -230,38 +248,61 @@ class LogStore {
 
     // Obtain the offsets into the values corresponding to the prefix and
     // suffix ngram for the substring from the N-gram index.
-    char *substr = (char *) query.c_str();
-    size_t substr_len = query.length();
-    assert(substr_len >= NGRAM_N);
+    char *substr = (char *) col_value.c_str();
+    OffsetList* prefix_offsets = ngram_idx_->get_offsets(substr);
+    OffsetList* suffix_offsets = ngram_idx_->get_offsets(
+        substr + col_value.length() - NGRAM_N);
 
-    OffsetList* offsets = NULL;
-    uint32_t min_size = LOG_SIZE, ngram_off = 0;
-    for (uint32_t i = 0; i < substr_len - NGRAM_N; i++) {
-      OffsetList *cur = ngram_idx_->get_offsets(substr + i);
-      if (cur->size() < min_size) {
-        min_size = cur->size();
-        offsets = cur;
-        ngram_off = i;
+    uint32_t prefix_size = prefix_offsets->size();
+    uint32_t suffix_size = suffix_offsets->size();
+    if (prefix_size < suffix_size) {
+      // Extract the remaining suffix to compare with the actual data.
+      char *suffix = substr + NGRAM_N;
+      size_t suffix_len = col_value.length() - NGRAM_N;
+
+      // Scan through the list of offsets, adding only valid offsets into the
+      // set of results.
+      uint32_t size = prefix_offsets->size();
+      char* data_ptr = data_ + NGRAM_N;
+      for (uint32_t i = 0; i < size; i++) {
+        // An offset is valid if
+        // (1) the remaining query suffix matches the data at that location in
+        //     the log,
+        // (2) the location does not exceed the maximum valid offset (i.e., the
+        //     write at that location was incomplete when the search started)
+        // (3) the key is not larger than the maximum valid key (i.e., the write
+        //     for that key was incomplete when the search started)
+        // (4) the key was not deleted before the search began.
+        //
+        // TODO: Take care of query.length() <= NGRAM_N case
+        uint32_t off = prefix_offsets->at(i);
+        if (off < max_off && !strncmp(data_ptr + off, suffix, suffix_len))
+          FindAndInsertKey(results, off, max_key, max_off);
       }
-    }
-    assert(offsets != NULL);
+    } else {
+      // Extract the remaining prefix to compare with the actual data.
+      char *prefix = substr;
+      size_t prefix_len = col_value.length() - NGRAM_N;
 
-    // Scan through the list of offsets, adding only valid offsets into the
-    // set of results.
-    for (uint32_t i = 0; i < min_size; i++) {
-      // An offset is valid if
-      // (1) the remaining query suffix matches the data at that location in
-      //     the log,
-      // (2) the location does not exceed the maximum valid offset (i.e., the
-      //     write at that location was incomplete when the search started)
-      // (3) the key is not larger than the maximum valid key (i.e., the write
-      //     for that key was incomplete when the search started)
-      // (4) the key was not deleted before the search began.
-      //
-      // TODO: Take care of query.length() <= NGRAM_N case
-      uint32_t o = offsets->at(i);
-      if (o < max_off && !strncmp(data_ + o - ngram_off, substr, substr_len))
-        FindAndInsertKey(results, o, max_key, max_off);
+      // Scan through the list of offsets, adding only valid offsets into the
+      // set of results.
+      uint32_t size = suffix_offsets->size();
+      char* data_ptr = data_ - prefix_len;
+      for (uint32_t i = 0; i < size; i++) {
+        // An offset is valid if
+        // (1) the remaining query prefix matches the data at that location in
+        //     the log,
+        // (2) the location does not exceed the maximum valid offset (i.e., the
+        //     write at that location was incomplete when the search started)
+        // (3) the key is not larger than the maximum valid key (i.e., the write
+        //     for that key was incomplete when the search started)
+        // (4) the key was not deleted before the search began.
+        //
+        // TODO: Take care of query.length() <= NGRAM_N case
+        uint32_t off = suffix_offsets->at(i);
+        if (off < max_off && !strncmp(data_ptr + off, prefix, prefix_len))
+          FindAndInsertKey(results, off, max_key, max_off);
+      }
     }
   }
 
