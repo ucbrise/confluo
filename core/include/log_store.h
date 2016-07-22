@@ -195,10 +195,10 @@ class LogStore {
       }
     }
     assert(offsets != NULL);
-    Debug("Min size = %u, substring = %s, offset = %u", min_size, substr + ngram_off, ngram_off);
 
     // Scan through the list of offsets, adding only valid offsets into the
     // set of results.
+    char* data_ptr = data_ - ngram_off;
     for (uint32_t i = 0; i < min_size; i++) {
       // An offset is valid if
       // (1) the remaining query suffix matches the data at that location in
@@ -211,7 +211,7 @@ class LogStore {
       //
       // TODO: Take care of query.length() <= NGRAM_N case
       uint32_t o = offsets->at(i);
-      if (o < max_off && !strncmp(data_ + o - ngram_off, substr, substr_len))
+      if (o < max_off && !strncmp(data_ptr + o, substr, substr_len))
         FindAndInsertKey(results, o, max_key, max_off);
     }
   }
