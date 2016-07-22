@@ -195,7 +195,7 @@ class LogStore {
       }
     }
     assert(offsets != NULL);
-    Debug("Min size = %u, substring = %s, offset = %u", min_size, substring + ngram_off, ngram_off);
+    Debug("Min size = %u, substring = %s, offset = %u", min_size, substr + ngram_off, ngram_off);
 
     // Scan through the list of offsets, adding only valid offsets into the
     // set of results.
