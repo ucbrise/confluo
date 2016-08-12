@@ -1,6 +1,9 @@
 #ifndef LOG_STORE_BENCHMARK_H_
 #define LOG_STORE_BENCHMARK_H_
 
+#include <condition_variable>
+#include <mutex>
+
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
 #include <thrift/server/TNonblockingServer.h>
@@ -10,16 +13,11 @@
 
 #include "Server.h"
 
-#include <condition_variable>
-#include <mutex>
-
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
-using namespace ::succinct;
-
-using boost::shared_ptr;
+using namespace ::slog;
 
 class LogStoreBenchmark {
  public:
@@ -27,18 +25,18 @@ class LogStoreBenchmark {
    public:
     BenchmarkConnection(std::string& hostname, int port) {
       // Setup connection
-      socket = boost::shared_ptr<TSocket>(new TSocket(hostname, port));
-      transport = boost::shared_ptr<TTransport>(new TBufferedTransport(socket));
-      protocol = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport));
-      client = boost::shared_ptr<ServerClient>(new ServerClient(protocol));
+      socket = std::shared_ptr<TSocket>(new TSocket(hostname, port));
+      transport = std::shared_ptr<TTransport>(new TBufferedTransport(socket));
+      protocol = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport));
+      client = std::shared_ptr<ServerClient>(new ServerClient(protocol));
 
       transport->open();
     }
 
-    boost::shared_ptr<ServerClient> client;
-    boost::shared_ptr<TSocket> socket;
-    boost::shared_ptr<TTransport> transport;
-    boost::shared_ptr<TProtocol> protocol;
+    std::shared_ptr<ServerClient> client;
+    std::shared_ptr<TSocket> socket;
+    std::shared_ptr<TTransport> transport;
+    std::shared_ptr<TProtocol> protocol;
   } BenchmarkConnection;
 
   class Barrier {

@@ -6,7 +6,7 @@
  */
 #include "server_constants.h"
 
-namespace succinct {
+namespace slog {
 
 const serverConstants g_server_constants;
 

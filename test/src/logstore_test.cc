@@ -1,4 +1,5 @@
-#include "log_store.h"
+#include "logstore.h"
+
 #include "gtest/gtest.h"
 
 #define kLogStoreSize 4194304
@@ -13,69 +14,69 @@ class LogStoreTest : public testing::Test {
 };
 
 TEST_F(LogStoreTest, AppendAndGetTest) {
-  succinct::LogStore<kMaxKeys, kLogStoreSize> ls;
+  slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.Append(i, to_string(i));
+    ls.append(i, to_string(i));
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     char value[5];
-    ls.Get(value, i);
+    ls.get(value, i);
     ASSERT_EQ(std::string(value), to_string(i));
   }
 }
 
 TEST_F(LogStoreTest, AppendAndSearchTest) {
-  succinct::LogStore<kMaxKeys, kLogStoreSize> ls;
+  slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.Append(i, "|" + to_string(i) + "|");
+    ls.append(i, "|" + to_string(i) + "|");
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    ls.Search(results, "|" + to_string(i) + "|");
+    ls.search(results, "|" + to_string(i) + "|");
     ASSERT_EQ(results.size(), 1);
     ASSERT_TRUE(results.find(i) != results.end());
   }
 }
 
 TEST_F(LogStoreTest, AppendDeleteGetTest) {
-  succinct::LogStore<kMaxKeys, kLogStoreSize> ls;
+  slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.Append(i, to_string(i));
+    ls.append(i, to_string(i));
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     char value[5];
-    int ret = ls.Get(value, i);
+    int ret = ls.get(value, i);
     ASSERT_EQ(ret, 0);
     ASSERT_EQ(std::string(value), to_string(i));
 
-    bool success = ls.Delete(i);
+    bool success = ls.delete_record(i);
     ASSERT_TRUE(success);
 
-    ret = ls.Get(value, i);
+    ret = ls.get(value, i);
     ASSERT_EQ(ret, -1);
   }
 }
 
 TEST_F(LogStoreTest, AppendDeleteSearchTest) {
-  succinct::LogStore<kMaxKeys, kLogStoreSize> ls;
+  slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.Append(i, "|" + to_string(i) + "|");
+    ls.append(i, "|" + to_string(i) + "|");
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    ls.Search(results, "|" + to_string(i) + "|");
+    ls.search(results, "|" + to_string(i) + "|");
     ASSERT_EQ(results.size(), 1);
     ASSERT_TRUE(results.find(i) != results.end());
     results.clear();
 
-    bool success = ls.Delete(i);
+    bool success = ls.delete_record(i);
     ASSERT_TRUE(success);
 
-    ls.Search(results, "|" + to_string(i) + "|");
+    ls.search(results, "|" + to_string(i) + "|");
     ASSERT_EQ(results.size(), 0);
   }
 }

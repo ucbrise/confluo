@@ -5,9 +5,9 @@
 #include <sys/time.h>
 #include <random>
 
-#include "log_store.h"
+#include "logstore.h"
 
-using namespace ::succinct;
+using namespace ::slog;
 using namespace ::std::chrono;
 
 class MicroBenchmark {
@@ -75,7 +75,7 @@ class MicroBenchmark {
   std::string data_path_;
   int64_t load_end_offset_;
   int64_t load_keys_;
-  LogStore<> *shard_;
+  log_store<> *shard_;
 };
 
 #endif

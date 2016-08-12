@@ -11,6 +11,6 @@
 
 #include <thrift/TToString.h>
 
-namespace succinct {
+namespace slog {
 
 } // namespace

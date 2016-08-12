@@ -6,7 +6,7 @@
  */
 #include "Server.h"
 
-namespace succinct {
+namespace slog {
 
 
 Server_Load_args::~Server_Load_args() throw() {

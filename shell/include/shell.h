@@ -17,7 +17,7 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
-using namespace ::succinct;
+using namespace ::slog;
 
 using boost::shared_ptr;
 

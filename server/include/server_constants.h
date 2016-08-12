@@ -9,7 +9,7 @@
 
 #include "server_types.h"
 
-namespace succinct {
+namespace slog {
 
 class serverConstants {
  public:

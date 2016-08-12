@@ -11,7 +11,7 @@
 #include <thrift/async/TConcurrentClientSyncInfo.h>
 #include "server_types.h"
 
-namespace succinct {
+namespace slog {
 
 #ifdef _WIN32
   #pragma warning( push )
