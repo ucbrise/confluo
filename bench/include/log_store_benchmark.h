@@ -25,18 +25,18 @@ class LogStoreBenchmark {
    public:
     BenchmarkConnection(std::string& hostname, int port) {
       // Setup connection
-      socket = std::shared_ptr<TSocket>(new TSocket(hostname, port));
-      transport = std::shared_ptr<TTransport>(new TBufferedTransport(socket));
-      protocol = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport));
-      client = std::shared_ptr<ServerClient>(new ServerClient(protocol));
+      socket = boost::shared_ptr<TSocket>(new TSocket(hostname, port));
+      transport = boost::shared_ptr<TTransport>(new TBufferedTransport(socket));
+      protocol = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport));
+      client = boost::shared_ptr<ServerClient>(new ServerClient(protocol));
 
       transport->open();
     }
 
-    std::shared_ptr<ServerClient> client;
-    std::shared_ptr<TSocket> socket;
-    std::shared_ptr<TTransport> transport;
-    std::shared_ptr<TProtocol> protocol;
+    boost::shared_ptr<ServerClient> client;
+    boost::shared_ptr<TSocket> socket;
+    boost::shared_ptr<TTransport> transport;
+    boost::shared_ptr<TProtocol> protocol;
   } BenchmarkConnection;
 
   class Barrier {
