@@ -98,7 +98,7 @@ class hash_table {
     }
   }
 
-  bool put(const key_t key, const data_type value) {
+  bool insert(const key_t key, const data_type value) {
     node_t *node = new node_t();  // XXX: should pull out of a memory pool
     size_t bucket;
     uint64_t lkey = key;
@@ -106,8 +106,6 @@ class hash_table {
     lkey = hashword(lkey);
     bucket = lkey % buckets_.size();
 
-    assert(node);
-    assert((lkey & MSB) == 0);
     node->key = regularkey(lkey);
     node->value = value;
     node->next = UNINITIALIZED;
@@ -127,6 +125,28 @@ class hash_table {
       assert(dsize >= csize * 2);
     }
     return true;
+  }
+
+  void upsert(const key_t key, const data_type value) {
+    size_t bucket;
+    uint64_t lkey = key;
+
+    lkey = hashword(lkey);
+    bucket = lkey % buckets_.size();
+
+    so_key_t node_key = regularkey(lkey);
+
+    if (buckets_[bucket] == UNINITIALIZED)
+      initialize_bucket(bucket);
+
+    list_ops<data_type>::upsert(&(buckets_[bucket]), node_key, value, NULL);
+
+    size_t csize = buckets_.size();
+    if (count.fetch_add(1) / csize > MAX_LOAD) {
+      // double size
+      size_t dsize = buckets_.double_size(csize);
+      assert(dsize >= csize * 2);
+    }
   }
 
   bool get(const key_t key, data_type* value) {

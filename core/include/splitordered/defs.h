@@ -12,7 +12,7 @@ typedef uint64_t so_key_t;
 template<class data_type>
 struct hash_entry {
   so_key_t key;
-  data_type value;
+  std::atomic<data_type> value;
   hash_entry<data_type>* next;
 };
 

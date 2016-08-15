@@ -11,7 +11,8 @@ namespace splitordered {
 template<class data_type>
 class list_ops {
  public:
-  typedef hash_entry<data_type>* node_ptr_t;
+  typedef hash_entry<data_type> node_t;
+  typedef node_t* node_ptr_t;
 
   // Atomically inserts a node in the list; if the key corresponding to the node
   // already exists, fails and returns.
@@ -33,6 +34,35 @@ class list_ops {
           *ocur = cur;
         return true;
       }
+    }
+  }
+
+  static void upsert(node_ptr_t *head, so_key_t key, data_type value,
+                     node_ptr_t *ocur) {
+    while (1) {
+      node_ptr_t *lprev;
+      node_ptr_t cur;
+      data_type cur_value;
+      if (find(head, key, &cur_value, &lprev, &cur, NULL)) {  // needs to set cur/prev
+        bool success = false;
+        while (!success && cur_value < value) {
+          std::atomic_compare_exchange_weak(&cur->value, &cur_value, value);
+        }
+        if (ocur)
+          *ocur = cur;
+        return;
+      }
+
+      node_t *node = new node_t;
+      node->key = key;
+      node->value = value;
+      node->next = cur;
+      if (CAS(lprev, node->next, node) == cur) {
+        if (ocur)
+          *ocur = cur;
+        return;
+      }
+      delete node;
     }
   }
 
