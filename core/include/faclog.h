@@ -76,6 +76,16 @@ class __faclog_base {
     return buckets_[bucket_idx][bucket_off];
   }
 
+  T& operator[](const uint32_t idx) {
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = bit_utils::highest_bit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
+    if (buckets_[bucket_idx] == NULL)
+      try_allocate_bucket(bucket_idx);
+    return buckets_[bucket_idx][bucket_off];
+  }
+
   // Copies a contiguous region of the FACLog base into the provided buffer.
   // The buffer should have sufficient space to hold the data requested, otherwise
   // undefined behavior may result.
@@ -155,7 +165,7 @@ class __faclog_base {
     return size;
   }
 
-  std::array<__atomic_bucket_ref, NBUCKETS> buckets_; // Stores the pointers to the buckets for FACLog.
+  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for FACLog.
 };
 
 /**
