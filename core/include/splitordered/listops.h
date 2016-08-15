@@ -5,11 +5,16 @@
 
 namespace splitordered {
 
+// Lock free operations on lists. Only support two operations:
+// - insert
+// - find
 template<class data_type>
 class list_ops {
  public:
   typedef hash_entry<data_type>* node_ptr_t;
 
+  // Atomically inserts a node in the list; if the key corresponding to the node
+  // already exists, fails and returns.
   static bool insert(node_ptr_t *head, node_ptr_t node, node_ptr_t *ocur) {
     so_key_t key = node->key;
 
@@ -31,6 +36,8 @@ class list_ops {
     }
   }
 
+  // Atomically finds a given key in the list, while populating the corresponding value,
+  // the containing node, and the nodes immediately before and after the containing node
   static bool find(node_ptr_t *head, so_key_t key, data_type* oval,
                    node_ptr_t **oprev, node_ptr_t *ocur, node_ptr_t *onext) {
     so_key_t ckey;
@@ -57,11 +64,15 @@ class list_ops {
         next = cur->next;
         ckey = cur->key;
         cval = cur->value;
+
+        // this means someone mucked with the list; start over
         if (*prev != cur) {
-          break;  // this means someone mucked with the list; start over
+          break;
         }
 
-        if (ckey >= key) {  // if current key > key, the key isn't in the list; if current key == key, the key IS in the list
+        // if current key > key, the key isn't in the list;
+        // if current key == key, the key IS in the list
+        if (ckey >= key) {
           if (oprev)
             *oprev = prev;
           if (ocur)

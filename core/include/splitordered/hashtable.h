@@ -13,6 +13,8 @@
 
 namespace splitordered {
 
+// The container class for the bucket array; can be doubled in size when
+// the load exceeds threshold
 template<class T>
 class doubling_list {
  public:
@@ -68,6 +70,7 @@ class doubling_list {
   std::array<std::atomic<T*>, 32> buckets_;
 };
 
+// Lock-free hash table based on split-ordered lists
 template<class data_type>
 class hash_table {
  public:

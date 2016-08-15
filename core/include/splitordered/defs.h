@@ -18,7 +18,6 @@ struct hash_entry {
 
 /* These are GCC builtins; other compilers may require inline assembly */
 #define CAS(ADDR, OLDV, NEWV) __sync_val_compare_and_swap((ADDR), (OLDV), (NEWV))
-#define INCR(ADDR, INCVAL) __sync_fetch_and_add((ADDR), (INCVAL))
 
 #define UNINITIALIZED        NULL
 
