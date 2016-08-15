@@ -49,7 +49,7 @@
     shard_->search(search_res, terms[i % terms.size()]);\
     num_keys += search_res.size();\
   } else if (query_types[i % kThreadQueryCount] == 2) {\
-    shard_->append(cur_key, values[i % values.size()]);\
+    shard_->insert(cur_key, values[i % values.size()]);\
     num_keys++;\
   } else {\
     shard_->delete_record(keys[i % keys.size()]);\
@@ -95,7 +95,7 @@ MicroBenchmark::MicroBenchmark(std::string& data_path) {
   Profiler::StartProfiling();
 #endif
   for (auto& cur_value : values) {
-    shard_->append(cur_key++, cur_value);
+    shard_->insert(cur_key++, cur_value);
     load_end_offset_ += cur_value.length();
     load_keys_++;
 
@@ -229,7 +229,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   LOG(stderr, "Warming up for %llu queries...\n", kWarmupCount);
   for (uint64_t i = 0; i < kWarmupCount; i++) {
     std::string cur_value = values[i];
-    shard_->append(cur_key++, cur_value);
+    shard_->insert(cur_key++, cur_value);
   }
   LOG(stderr, "Warmup complete.\n");
 
@@ -238,7 +238,7 @@ void MicroBenchmark::BenchmarkAppendLatency() {
   for (uint64_t i = kWarmupCount; i < kWarmupCount + kMeasureCount; i++) {
     std::string cur_value = values[i];
     auto t0 = high_resolution_clock::now();
-    shard_->append(cur_key++, cur_value);
+    shard_->insert(cur_key++, cur_value);
     auto t1 = high_resolution_clock::now();
     auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
     result_stream << (cur_key - 1) << "\t" << tdiff << "\n";

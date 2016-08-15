@@ -14,7 +14,7 @@
 #include <thrift/transport/TSocket.h>
 #include <thrift/concurrency/PosixThreadFactory.h>
 
-#include "../../core/include/logstore.h"
+#include "logstore.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -60,7 +60,7 @@ class ServerImpl : virtual public ServerIf {
 
     // Load all records in file.
     while (std::getline(in, cur_value)) {
-      shard_->append(cur_key++, cur_value);
+      shard_->insert(cur_key++, cur_value);
     }
 
     Info("Finished loading %u keys.", cur_key);
@@ -74,7 +74,7 @@ class ServerImpl : virtual public ServerIf {
   }
 
   void Append(const int64_t key, const std::string& value) {
-    shard_->append(key, value);
+    shard_->insert(key, value);
   }
 
   void Get(std::string& _return, const int64_t key) {
