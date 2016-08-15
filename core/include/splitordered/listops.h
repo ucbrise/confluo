@@ -37,8 +37,8 @@ class list_ops {
     }
   }
 
-  static void upsert(node_ptr_t *head, so_key_t key, data_type value,
-                     node_ptr_t *ocur) {
+  static bool upsert(node_ptr_t *head, so_key_t key, data_type value,
+                     data_type *old_value) {
     while (1) {
       node_ptr_t *lprev;
       node_ptr_t cur;
@@ -46,11 +46,11 @@ class list_ops {
       if (find(head, key, &cur_value, &lprev, &cur, NULL)) {  // needs to set cur/prev
         bool success = false;
         while (!success && cur_value < value) {
-          std::atomic_compare_exchange_weak(&cur->value, &cur_value, value);
+          success = std::atomic_compare_exchange_weak(&cur->value, &cur_value, value);
         }
-        if (ocur)
-          *ocur = cur;
-        return;
+        if (old_value)
+          *old_value = cur_value;
+        return success;
       }
 
       node_t *node = new node_t;
@@ -58,9 +58,7 @@ class list_ops {
       node->value = value;
       node->next = cur;
       if (CAS(lprev, node->next, node) == cur) {
-        if (ocur)
-          *ocur = cur;
-        return;
+        return false;
       }
       delete node;
     }

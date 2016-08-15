@@ -24,7 +24,8 @@
 
 namespace slog {
 
-template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = UINT_MAX>
+template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = UINT_MAX,
+    class kvmap_type = sysgen_kvmap>
 class log_store {
  public:
   // The internal key component of the tail increment for appends and updates.
@@ -37,22 +38,22 @@ class log_store {
   // Constructor to initialize the LogStore.
   log_store() {
     // Initialize the log store to a constant size.
-    // Note we can use a lock-free exponentially or linear growing allocator
+
+    // Note: we can use a lock-free exponentially or linear growing allocator
     // to make the Log dynamically sized rather than static.
     data_log_ = new char[LOG_SIZE];
 
-    // Initialize both ongoing and completed appends tail to 0.
-    write_tail_ = 0;
-    read_tail_ = 0;
-    value_offsets_ = new value_offset_list;
-    deleted_ = new deleted_offsets;
+    // Initialize both read and write tail to 0.
+    write_tail_.store(0);
+    read_tail_.store(0);
+
     index_log_ = new ngram_index;
   }
 
   // Adds a new key value pair to the LogStore atomically.
   //
   // Returns 0 for a successful append, -1 otherwise.
-  int append(const int64_t key, const std::string& value) {
+  bool insert(const int64_t key, const std::string& value) {
     // Add the value to the Log and generate and advance the ongoing
     // appends tail.
     uint64_t current_tail = internal_append(value);
@@ -60,18 +61,37 @@ class log_store {
     // Obtain the tail increment for the value.
     uint64_t tail_increment = increment_tail(value.length());
 
-    // This is where the user-defined key to internal key
-    // mapping would be created.
-    //
-    // key_mapping_.add(key, current_tail >> 32);
+    // Add external to internal key mapping
+    kvmap_.add_external(key, current_tail >> 32, current_tail & 0xFFFFFFFF);
 
     // Atomically update the completed append tail of the log.
     // This is done using CAS, and may have bounded waiting until
     // all appends before the current_tail are completed.
     atomic_advance_read_tail(current_tail, tail_increment);
 
-    // Return 0 for success
-    return 0;
+    // Return true for success
+    return true;
+  }
+
+  int64_t insert(const std::string& value) {
+    // Add the value to the Log and generate and advance the ongoing
+    // appends tail.
+    uint64_t current_tail = internal_append(value);
+
+    // Obtain the tail increment for the value.
+    uint64_t tail_increment = increment_tail(value.length());
+
+    // Add external to internal key mapping
+    kvmap_.add_external(current_tail >> 32, current_tail >> 32,
+                        current_tail & 0xFFFFFFFF);
+
+    // Atomically update the completed append tail of the log.
+    // This is done using CAS, and may have bounded waiting until
+    // all appends before the current_tail are completed.
+    atomic_advance_read_tail(current_tail, tail_increment);
+
+    // Return internal key
+    return current_tail >> 32;
   }
 
   // Internal append operation to add a value and its corresponding index
@@ -101,8 +121,7 @@ class log_store {
     // and initialize its delete tail without worrying about locking,
     // since we have uncontested access to the 'internal_key' index in the
     // value offsets array and the deleted entries array.
-    value_offsets_->set(internal_key, value_offset);
-    deleted_->set(internal_key, 0);
+    kvmap_.add_internal(internal_key, value_offset);
 
     // Similarly, we can append the value to the log without locking
     // since this thread has exclusive access to the region (value_offset, value_offset + .
@@ -120,33 +139,29 @@ class log_store {
   // Fetch a value from the LogStore by its internal key.
   //
   // Returns 0 if the fetch is successful, -1 otherwise.
-  const int get(char* value, const uint32_t internal_key) {
+  const bool get(char* value, const int64_t key) {
     // Get the current completed appends tail, and get the maximum valid key.
     uint64_t current_tail = read_tail_;
     uint32_t max_key = current_tail >> 32;
+    uint32_t mark = current_tail & 0xFFFFFFFF;
+
+    // Convert to internal key
+    uint32_t internal_key;
+    bool exists = kvmap_.ext_to_int(key, &internal_key);
 
     // If requested internal key is < max_key, the write
     // for the internal key hasn't completed yet. Return -1
     // indicating failure.
-    if (internal_key >= max_key)
-      return -1;
+    if (!exists || internal_key >= max_key)
+      return false;
 
-    // Get the delete tail for the internal key, and the current read tail.
-    uint32_t delete_tail = deleted_->get(internal_key);
-    uint32_t read_tail = current_tail & 0xFFFFFFFF;
+    uint32_t start, end;
+    bool valid = kvmap_.fwd_lookup_internal(internal_key, max_key, mark, &start,
+                                            &end);
 
-    // If the delete tail is non zero (i.e., the value has been deleted),
-    // and the read tail is greater than the delete tail, then the
-    // value must have been deleted after the read began; return -1 to indicate
-    // get failure.
-    if (delete_tail && read_tail >= delete_tail)
-      return -1;
-
-    // Get the beginning and end offset for the value if key is valid.
-    uint32_t start = value_offsets_->get(internal_key);
-    uint32_t end =
-        (internal_key + 1 < max_key) ?
-            value_offsets_->get(internal_key + 1) : current_tail & 0xFFFFFFFF;
+    // Return false if the forward mapping is invalid.
+    if (!valid)
+      return false;
 
     char* data_ptr = data_log_ + start;
     uint32_t i = 0;
@@ -154,8 +169,8 @@ class log_store {
       value[i] = data_ptr[i];
     value[i] = '\0';
 
-    // Return 0 for successful get.
-    return 0;
+    // Return true for successful get.
+    return true;
   }
 
   // Search the LogStore for a query string.
@@ -230,7 +245,7 @@ class log_store {
   //
   // Returns the set of valid, matching internal keys.
   const void col_search(std::vector<int64_t>& results,
-                       const std::string& col_value) {
+                        const std::string& col_value) {
     // Get the current completed appends tail, and extract the maximum valid
     // key and value offset.
     uint64_t current_tail = read_tail_;
@@ -297,15 +312,15 @@ class log_store {
     }
   }
 
-  bool invalidate_key(const uint32_t internal_key, const uint32_t offset) {
-    return deleted_->update(internal_key, offset);
-  }
-
   // Atomically deletes the key from the LogStore.
   //
   // Returns true if the delete is successful, false if the key was already
   // deleted or not yet created.
-  bool delete_record(const uint32_t internal_key) {
+  bool delete_record(const int64_t key) {
+    uint32_t internal_key;
+    if (!kvmap_.ext_to_int(key, &internal_key))
+      return false;
+
     // Atomically increase the ongoing append tail of the log.
     uint64_t current_tail = atomic_advance_write_tail(DEL_INCR);
 
@@ -321,37 +336,14 @@ class log_store {
       return false;
 
     // Invalidate the given internal key.
-    if (invalidate_key(internal_key, value_offset + 1)) {
-      // Atomically update the completed append tail of the log.
-      // This is done using CAS, and may have bounded waiting until
-      // all appends before the current_tail are completed.
-      atomic_advance_read_tail(current_tail, DEL_INCR);
-      return true;
-    }
+    bool success = kvmap_.invalidate_internal(internal_key, value_offset + 1);
 
-    return false;
-  }
-
-  // Atomically removes an existing key, and adds a new value.
-  //
-  // Returns the internal key associated with the value.
-  uint32_t update_record(const uint32_t internal_key, const std::string& value) {
-    // Add the new value to the Log and generate and advance the ongoing
-    // appends tail.
-    uint64_t current_tail = internal_append(value);
-
-    // Obtain the tail increment for the new value.
-    uint64_t tail_increment = increment_tail(value.length());
-
-    // Invalidate the old internal key. Don't care about the outcome.
-    invalidate_key(internal_key, current_tail & 0xFFFFFFFF + 1);
-
-    // Atomically update the write read for the log.
-    // This is done using CAS, and may require bounded wait until
+    // Atomically update the completed append tail of the log.
+    // This is done using CAS, and may have bounded waiting until
     // all appends before the current_tail are completed.
-    atomic_advance_read_tail(current_tail, tail_increment);
+    atomic_advance_read_tail(current_tail, DEL_INCR);
 
-    return current_tail >> 32;
+    return success;
   }
 
   // Atomically get the number of currently readable keys.
@@ -391,7 +383,7 @@ class log_store {
   // Atomically advance the read tail by the given amount.
   // Waits if there are appends before the expected append tail.
   void atomic_advance_read_tail(uint64_t expected_append_tail,
-                                        uint64_t tail_increment) {
+                                uint64_t tail_increment) {
     while (!std::atomic_compare_exchange_weak(
         &read_tail_, &expected_append_tail,
         expected_append_tail + tail_increment))
@@ -401,74 +393,38 @@ class log_store {
   // Finds the internal key given data offset, the maximum valid key and offset,
   // and inserts the key into the provided set if it hasn't been deleted.
   const void find_and_insert_key(std::set<int64_t>& keys, const uint32_t offset,
-                              const uint32_t max_key, const uint32_t max_off) {
+                                 const uint32_t max_key,
+                                 const uint32_t max_off) {
 
-    // Binary search for the offset in the list of value offsets.
-    uint32_t lo = 0, hi = max_key;
-    while (lo < hi) {
-      uint32_t mid = lo + (hi - lo) / 2;
-      uint32_t v = value_offsets_->get(mid);
-      if (v <= offset)
-        lo = mid + 1;
-      else
-        hi = mid;
+    uint32_t internal_key;
+    bool valid = kvmap_.bwd_lookup_internal(offset, max_off, 0, max_key,
+                                            &internal_key);
+
+    int64_t external_key;
+    if (valid && kvmap_.int_to_ext(internal_key, &external_key)) {
+      keys.insert(external_key);
     }
-
-    // The internal key where the search ended.
-    uint32_t internal_key = lo - 1;
-
-    // Get the delete tail for the internal key.
-    uint32_t delete_tail = deleted_->get(internal_key);
-
-    // If the delete tail is non zero (i.e., the key has been deleted),
-    // and the current max offset is greater than the delete tail, then the
-    // value must have been deleted after the read began; return without
-    // inserting internal key into the result set.
-    if (delete_tail && max_off >= delete_tail)
-      return;
-
-    // Insert the internal key where the search (successfully) ended.
-    keys.insert(internal_key);
   }
 
   // Finds the internal key given data offset, the maximum valid key and offset,
   // and inserts the key into the provided set if it hasn't been deleted.
-  const void find_and_insert_key(std::vector<int64_t>& keys, const uint32_t offset,
-                              const uint32_t max_key, const uint32_t max_off) {
+  const void find_and_insert_key(std::vector<int64_t>& keys,
+                                 const uint32_t offset, const uint32_t max_key,
+                                 const uint32_t max_off) {
+    uint32_t internal_key;
+    bool valid = kvmap_.bwd_lookup_internal(offset, max_off, 0, max_key,
+                                            &internal_key);
 
-    // Binary search for the offset in the list of value offsets.
-    uint32_t lo = 0, hi = max_key;
-    while (lo < hi) {
-      uint32_t mid = lo + (hi - lo) / 2;
-      uint32_t v = value_offsets_->get(mid);
-      if (v <= offset)
-        lo = mid + 1;
-      else
-        hi = mid;
+    int64_t external_key;
+    if (valid && kvmap_.int_to_ext(internal_key, &external_key)) {
+      keys.push_back(external_key);
     }
-
-    // The internal key where the search ended.
-    uint32_t internal_key = lo - 1;
-
-    // Get the delete tail for the internal key.
-    uint32_t delete_tail = deleted_->get(internal_key);
-
-    // If the delete tail is non zero (i.e., the key has been deleted),
-    // and the current max offset is greater than the delete tail, then the
-    // value must have been deleted after the read began; return without
-    // inserting internal key into the result set.
-    if (delete_tail && max_off >= delete_tail)
-      return;
-
-    // Insert the internal key where the search (successfully) ended.
-    keys.push_back(internal_key);
   }
 
   char *data_log_;                                 // Data log
   std::atomic<uint64_t> write_tail_;               // Write tail
   std::atomic<uint64_t> read_tail_;                // Read tail
-  value_offset_list *value_offsets_;               // List of value offsets
-  deleted_offsets *deleted_;                       // List of Delete markers
+  kvmap_type kvmap_;                               // Key-value offset mapping
   ngram_index *index_log_;                         // Index log
 };
 }

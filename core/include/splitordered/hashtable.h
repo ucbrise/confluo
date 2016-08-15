@@ -127,7 +127,7 @@ class hash_table {
     return true;
   }
 
-  void upsert(const key_t key, const data_type value) {
+  bool upsert(const key_t key, const data_type value, data_type* old_value) {
     size_t bucket;
     uint64_t lkey = key;
 
@@ -139,7 +139,8 @@ class hash_table {
     if (buckets_[bucket] == UNINITIALIZED)
       initialize_bucket(bucket);
 
-    list_ops<data_type>::upsert(&(buckets_[bucket]), node_key, value, NULL);
+    bool updated = list_ops<data_type>::upsert(&(buckets_[bucket]), node_key,
+                                               value, old_value);
 
     size_t csize = buckets_.size();
     if (count.fetch_add(1) / csize > MAX_LOAD) {
@@ -147,6 +148,8 @@ class hash_table {
       size_t dsize = buckets_.double_size(csize);
       assert(dsize >= csize * 2);
     }
+
+    return updated;
   }
 
   bool get(const key_t key, data_type* value) {
