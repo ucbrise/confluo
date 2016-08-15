@@ -75,7 +75,7 @@ class MicroBenchmark {
   std::string data_path_;
   int64_t load_end_offset_;
   int64_t load_keys_;
-  log_store<> *shard_;
+  log_store<134217728, UINT_MAX> *shard_;
 };
 
 #endif

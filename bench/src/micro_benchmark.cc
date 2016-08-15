@@ -58,7 +58,7 @@
 }
 
 MicroBenchmark::MicroBenchmark(std::string& data_path) {
-  shard_ = new log_store<>();
+  shard_ = new log_store<134217728, UINT_MAX>();
   char resolved_path[100];
   realpath(data_path.c_str(), resolved_path);
   data_path_ = resolved_path;
