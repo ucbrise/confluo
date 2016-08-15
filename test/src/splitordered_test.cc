@@ -25,34 +25,4 @@ TEST_F(SplitOrderedTest, PutAndGetTest) {
     bool success = table.get(i, &ret);
     ASSERT_FALSE(success);
   }
-
-}
-
-TEST_F(SplitOrderedTest, PutGetAndDeleteTest) {
-  splitordered::hash_table<uint64_t> table;
-  for (uint64_t i = 0; i < kMaxSize; i++) {
-    table.put(i, i);
-  }
-
-  for (uint64_t i = 0; i < kMaxSize; i++) {
-    uint64_t ret;
-    bool success = table.get(i, &ret);
-    ASSERT_TRUE(success);
-    ASSERT_EQ(ret, i);
-  }
-
-  for (uint64_t i = 0; i < kMaxSize; i++) {
-    if (i % 2 == 0) {
-      bool success = table.remove(i);
-      ASSERT_TRUE(success);
-    }
-  }
-
-  for (uint64_t i = 0; i < kMaxSize; i++) {
-    uint64_t ret;
-    bool success = table.get(i, &ret);
-    ASSERT_EQ(success, i % 2 != 0);
-    if (success)
-      ASSERT_EQ(ret, i);
-  }
 }

@@ -20,9 +20,10 @@ class doubling_list {
     T* null_ptr = NULL;
     for (auto& x : buckets_)
       x = null_ptr;
-    buckets_[0] = new T[1];
-    buckets_[1] = new T[1];
-    num_populated_buckets_.store(2);
+    buckets_[0] = new T[2];
+    buckets_[0][0] = 0;
+    buckets_[0][1] = 0;
+    num_populated_buckets_.store(1);
   }
 
   ~doubling_list() {
@@ -31,22 +32,23 @@ class doubling_list {
   }
 
   T& operator[](uint32_t i) {
-    uint32_t pos = i + 1;
-    uint32_t bucket_idx = slog::bit_utils::highest_bit(pos);
-    uint32_t bucket_off = pos ^ (1 << bucket_idx);
+    uint32_t hibit = slog::bit_utils::highest_bit(i);
+    uint32_t bucket_off = i ^ (1 << hibit);
+    uint32_t bucket_idx = hibit;
     return buckets_[bucket_idx][bucket_off];
   }
 
   size_t size() {
     uint32_t n = num_populated_buckets_.load();
-    return 0x01 << (n - 1);
+    return 0x01 << n;
   }
 
   size_t double_size(size_t expected_size) {
     uint32_t n = num_populated_buckets_.load();
-    uint32_t s = 0x01 << (n - 1);
+    uint32_t s = 0x01 << n;
     if (expected_size == s) {
       T* new_bucket = new T[s];
+      memset(new_bucket, 0, s * sizeof(T));
       T* null_ptr = NULL;
 
       // Only one thread will be successful in replacing the NULL reference with newly
@@ -71,35 +73,35 @@ class hash_table {
  public:
   static const int32_t MAX_LOAD = 4;
 
+  typedef hash_entry<data_type> node_t;
+  typedef node_t* node_ptr_t;
+
   hash_table() {
     count.store(0);
     {
-      hash_entry<data_type> *dummy = new hash_entry<data_type>();
+      node_t *dummy = new node_t();
       assert(dummy);
-      buckets_[0] = CONSTRUCT(0, dummy);
+      buckets_[0] = dummy;
     }
   }
 
   ~hash_table() {
-    marked_ptr_t cursor;
+    node_ptr_t cursor;
     cursor = buckets_[0];
-    while (PTR_OF(cursor) != NULL) {
-      marked_ptr_t tmp = cursor;
-      assert(MARK_OF(tmp) == 0);
-      cursor = PTR_OF(cursor)->next;
-      free(PTR_OF(tmp));
+    while (cursor != NULL) {
+      node_ptr_t tmp = cursor;
+      cursor = cursor->next;
+      delete tmp;
     }
   }
 
   bool put(const key_t key, const data_type value) {
-    hash_entry<data_type> *node = new hash_entry<data_type>();  // XXX: should pull out of a memory pool
+    node_t *node = new node_t();  // XXX: should pull out of a memory pool
     size_t bucket;
     uint64_t lkey = key;
 
     lkey = hashword(lkey);
     bucket = lkey % buckets_.size();
-
-    fprintf(stderr, "#Buckets = %zu, bucket_idx=%zu\n", buckets_.size(), bucket);
 
     assert(node);
     assert((lkey & MSB) == 0);
@@ -111,7 +113,7 @@ class hash_table {
       initialize_bucket(bucket);
 
     if (!list_ops<data_type>::insert(&(buckets_[bucket]), node, NULL)) {
-      free(node);
+      delete node;
       return false;
     }
 
@@ -141,44 +143,26 @@ class hash_table {
                                      NULL);
   }
 
-  bool remove(const key_t key) {
-    size_t bucket;
-    uint64_t lkey = key;
-
-    lkey = hashword(lkey);
-    bucket = lkey % buckets_.size();
-
-    if (buckets_[bucket] == UNINITIALIZED)
-      initialize_bucket(bucket);
-
-    if (!list_ops<data_type>::remove(&(buckets_[bucket]), regularkey(lkey)))
-      return false;
-
-    count.fetch_add(-1);
-    return true;
-  }
-
  private:
   void initialize_bucket(size_t bucket) {
     size_t parent = get_parent(bucket);
-    marked_ptr_t cur;
+    node_ptr_t cur;
 
-    if (buckets_[parent] == UNINITIALIZED) {
+    if (buckets_[parent] == UNINITIALIZED)
       initialize_bucket(parent);
-    }
 
-    hash_entry<data_type> *dummy = new hash_entry<data_type>();  // XXX: should pull out of a memory pool
+    node_t *dummy = new node_t();  // XXX: should pull out of a memory pool
     assert(dummy);
     dummy->key = dummykey(bucket);
-    dummy->value = INVALID(data_type);
+    dummy->value = (data_type) 0;
     dummy->next = UNINITIALIZED;
     if (!list_ops<data_type>::insert(&(buckets_[parent]), dummy, &cur)) {
-      free(dummy);
-      dummy = PTR_OF(cur);
-      while (buckets_[bucket] != CONSTRUCT(0, dummy))
+      delete dummy;
+      dummy = cur;
+      while (buckets_[bucket] != dummy)
         ;
     } else {
-      buckets_[bucket] = CONSTRUCT(0, dummy);
+      buckets_[bucket] = dummy;
     }
   }
 
@@ -239,7 +223,7 @@ class hash_table {
     return ((uint64_t) c + (((uint64_t) b) << 32)) & (~MSB);
   }
 
-  doubling_list<marked_ptr_t> buckets_;
+  doubling_list<node_ptr_t> buckets_;
   std::atomic<int64_t> count;
 };
 
