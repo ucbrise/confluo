@@ -34,7 +34,6 @@ struct hash_entry {
     (REVERSE_BYTE((((so_key_t)(x)) >> 56) & 0xff) << 0))
 
 #define rot(x, k) (((x) << (k)) | ((x) >> (32 - (k))))
-
 }
 
 #endif /* SPLITORDERED_DEFS_H_ */
