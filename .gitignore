@@ -34,7 +34,7 @@ build
 scratch
 dat
 log
-res
+results
 bench/res
 bench/plot
 thrift/gen
