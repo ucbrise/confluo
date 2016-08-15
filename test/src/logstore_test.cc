@@ -13,10 +13,10 @@ class LogStoreTest : public testing::Test {
   }
 };
 
-TEST_F(LogStoreTest, AppendAndGetTest) {
+TEST_F(LogStoreTest, InsertAndGetTest) {
   slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.append(i, to_string(i));
+    ls.insert(i, to_string(i));
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
@@ -26,10 +26,10 @@ TEST_F(LogStoreTest, AppendAndGetTest) {
   }
 }
 
-TEST_F(LogStoreTest, AppendAndSearchTest) {
+TEST_F(LogStoreTest, InsertAndSearchTest) {
   slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.append(i, "|" + to_string(i) + "|");
+    ls.insert(i, "|" + to_string(i) + "|");
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
@@ -40,30 +40,98 @@ TEST_F(LogStoreTest, AppendAndSearchTest) {
   }
 }
 
-TEST_F(LogStoreTest, AppendDeleteGetTest) {
+TEST_F(LogStoreTest, InsertDeleteGetTest) {
   slog::log_store<kMaxKeys, kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.append(i, to_string(i));
+    ls.insert(i, to_string(i));
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     char value[5];
-    int ret = ls.get(value, i);
-    ASSERT_EQ(ret, 0);
+    bool exists = ls.get(value, i);
+    ASSERT_TRUE(exists);
     ASSERT_EQ(std::string(value), to_string(i));
+
+    bool deleted = ls.delete_record(i);
+    ASSERT_TRUE(deleted);
+
+    exists = ls.get(value, i);
+    ASSERT_FALSE(exists);
+  }
+}
+
+TEST_F(LogStoreTest, InsertDeleteSearchTest) {
+  slog::log_store<kMaxKeys, kLogStoreSize> ls;
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    ls.insert(i, "|" + to_string(i) + "|");
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    ls.search(results, "|" + to_string(i) + "|");
+    ASSERT_EQ(results.size(), 1);
+    ASSERT_TRUE(results.find(i) != results.end());
+    results.clear();
 
     bool success = ls.delete_record(i);
     ASSERT_TRUE(success);
 
-    ret = ls.get(value, i);
-    ASSERT_EQ(ret, -1);
+    ls.search(results, "|" + to_string(i) + "|");
+    ASSERT_EQ(results.size(), 0);
   }
 }
 
-TEST_F(LogStoreTest, AppendDeleteSearchTest) {
-  slog::log_store<kMaxKeys, kLogStoreSize> ls;
+TEST_F(LogStoreTest, UDefInsertAndGetTest) {
+  slog::log_store<kMaxKeys, kLogStoreSize, slog::udef_kvmap> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.append(i, "|" + to_string(i) + "|");
+    ls.insert(i, to_string(i));
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    char value[5];
+    ls.get(value, i);
+    ASSERT_EQ(std::string(value), to_string(i));
+  }
+}
+
+TEST_F(LogStoreTest, UDefInsertAndSearchTest) {
+  slog::log_store<kMaxKeys, kLogStoreSize, slog::udef_kvmap> ls;
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    ls.insert(i, "|" + to_string(i) + "|");
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    ls.search(results, "|" + to_string(i) + "|");
+    ASSERT_EQ(results.size(), 1);
+    ASSERT_TRUE(results.find(i) != results.end());
+  }
+}
+
+TEST_F(LogStoreTest, UDefInsertDeleteGetTest) {
+  slog::log_store<kMaxKeys, kLogStoreSize, slog::udef_kvmap> ls;
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    ls.insert(i, to_string(i));
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    char value[5];
+    bool exists = ls.get(value, i);
+    ASSERT_TRUE(exists);
+    ASSERT_EQ(std::string(value), to_string(i));
+
+    bool deleted = ls.delete_record(i);
+    ASSERT_TRUE(deleted);
+
+    exists = ls.get(value, i);
+    ASSERT_FALSE(exists);
+  }
+}
+
+TEST_F(LogStoreTest, UDefInsertDeleteSearchTest) {
+  slog::log_store<kMaxKeys, kLogStoreSize, slog::udef_kvmap> ls;
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    ls.insert(i, "|" + to_string(i) + "|");
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {

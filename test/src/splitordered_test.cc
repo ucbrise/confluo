@@ -100,7 +100,7 @@ TEST_F(SplitOrderedTest, ConcurrentInsertAndConcurrentGetTest) {
 TEST_F(SplitOrderedTest, UpsertAndGetTest) {
   splitordered::hash_table<uint64_t> table;
   for (uint64_t i = 0; i < kMaxSize; i++) {
-    table.upsert(i, i);
+    table.upsert(i, i, NULL);
   }
 
   for (uint64_t i = 0; i < kMaxSize; i++) {
@@ -124,7 +124,7 @@ TEST_F(SplitOrderedTest, ConcurrentUpsertAndGetTest) {
     threads.push_back(std::thread([this, t, &table]()
     {
       for (uint64_t i = 0; i < kMaxSize; i++) {
-        table.upsert(i, t);
+        table.upsert(i, t, NULL);
       }
     }));
   }
