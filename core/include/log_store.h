@@ -29,6 +29,8 @@
 #include "ngram_idx.h"
 #include "memory_map.h"
 
+#include "logging.h"
+
 namespace succinct {
 
 template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = 1073741824>
@@ -55,16 +57,6 @@ class LogStore {
     deleted_ = new DeletedOffsets;
     ngram_idx_ = new NGramIdx;
   }
-
-#ifdef DEBUG
-  typedef unsigned long long int TimeStamp;
-  static TimeStamp GetTimestamp() {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-
-    return now.tv_usec + (TimeStamp) now.tv_sec * 1000000;
-  }
-#endif
 
   // Adds a new key value pair to the LogStore atomically.
   //
@@ -263,11 +255,6 @@ class LogStore {
 
     uint32_t prefix_size = prefix_offsets->size();
     uint32_t suffix_size = suffix_offsets->size();
-#ifdef DEBUG
-    fprintf(stderr, "prefix_size = %u, suffix_size = %u\n", prefix_size,
-            suffix_size);
-    TimeStamp start = GetTimestamp();
-#endif
     if (prefix_size < suffix_size) {
       // Extract the remaining suffix to compare with the actual data.
       char *suffix = substr + NGRAM_N;
@@ -317,10 +304,6 @@ class LogStore {
           FindAndInsertKey(results, off, max_key, max_off);
       }
     }
-#ifdef DEBUG
-    TimeStamp end = GetTimestamp();
-    fprintf(stderr, "Time taken = %llu", (end - start));
-#endif
   }
 
   bool InvalidateKey(const uint32_t internal_key, const uint32_t offset) {
