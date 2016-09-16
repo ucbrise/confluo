@@ -30,7 +30,7 @@ class MicroBenchmark {
   // Latency benchmarks
   void BenchmarkGetLatency();
   void BenchmarkSearchLatency();
-  void BenchmarkAppendLatency();
+  void BenchmarkInsertLatency();
   void BenchmarkDeleteLatency();
 
   // Throughput benchmarks

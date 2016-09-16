@@ -208,7 +208,7 @@ void MicroBenchmark::BenchmarkSearchLatency() {
   result_stream.close();
 }
 
-void MicroBenchmark::BenchmarkAppendLatency() {
+void MicroBenchmark::BenchmarkInsertLatency() {
   // Generate queries
   LOG(stderr, "Generating queries...");
   std::vector<std::string> values;
@@ -458,7 +458,7 @@ int main(int argc, char** argv) {
   } else if (bench_type == "latency-search") {
     ls_bench.BenchmarkSearchLatency();
   } else if (bench_type == "latency-append") {
-    ls_bench.BenchmarkAppendLatency();
+    ls_bench.BenchmarkInsertLatency();
   } else if (bench_type == "latency-delete") {
     ls_bench.BenchmarkDeleteLatency();
   } else if (bench_type.find("throughput") == 0) {
