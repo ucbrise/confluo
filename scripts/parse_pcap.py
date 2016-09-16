@@ -16,8 +16,8 @@ def main(inp, outd, outa):
       ip = eth.data
       if ip.p == dpkt.ip.IP_PROTO_TCP:
         tcp = ip.data
-        attrs = (long(ts*1000000L), wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
-    print "%d %d %d %d %d %d" % attrs
+        attrs = (long(ts*1000000L), wbytes, socket.inet_ntoa(ip.src), socket.inet_ntoa(ip.dst), tcp.sport, tcp.dport)
+    print "%d %d %s %s %d %d" % attrs
 
 if __name__ == "__main__" :
   inp = open(sys.argv[1])
