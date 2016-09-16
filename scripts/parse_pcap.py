@@ -1,25 +1,23 @@
 #!/usr/bin/env python
-
-import dpkt
-import sys
-import socket
+# -*- coding: UTF-8 -*-
+try:
+    import scapy.all as scapy
+except ImportError:
+    import scapy
+    
 
 def main(inp, outd, outa):
-  pcap = dpkt.pcap.Reader(inp)
+  packets = scapy.rdpcap(inp)
   wbytes = 0
-  for ts, buf in pcap:
-    eth = dpkt.ethernet.Ethernet(buf)
-    attrs = (ts, wbytes, 0, 0, 0, 0)
-    if eth.type == dpkt.ethernet.ETH_TYPE_IP:
-      ip = eth.data
-      if ip.p == dpkt.ip.IP_PROTO_TCP:
-        tcp = ip.data
-        attrs = (ts, wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
+  for packet in packets:
+    attrs = (packet.time, wbytes, 0, 0, 0, 0)
+    if IP in packet and TCP in packet:
+      attrs = (packet.time, wbytes, pkt[IP].src, pkt[IP].dst, pkt[TCP].sport, pkt[TCP].dport)
     wbytes += len(buf)
     print attrs
 
 if __name__ == "__main__" :
-  inp = open(sys.argv[1])
+  inp = sys.argv[1]
   outd = open(sys.argv[2] + ".data", 'wb')
   outa = open(sys.argv[2] + ".attr", 'wb')
   main(inp, outd, outa)
