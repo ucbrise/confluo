@@ -17,10 +17,10 @@ def main(inp, outd, outa):
       if ip.p == dpkt.ip.IP_PROTO_TCP:
         tcp = ip.data
         attrs = (long(ts*1000000L), wbytes, socket.inet_ntoa(ip.src), socket.inet_ntoa(ip.dst), tcp.sport, tcp.dport)
-    print "%d %d %s %s %d %d" % attrs
+    outa.write("%d %d %s %s %d %d\n" % attrs)
 
 if __name__ == "__main__" :
   inp = open(sys.argv[1])
   outd = open(sys.argv[2] + ".data", 'wb')
-  outa = open(sys.argv[2] + ".attr", 'wb')
+  outa = open(sys.argv[2] + ".attr", 'w')
   main(inp, outd, outa)
