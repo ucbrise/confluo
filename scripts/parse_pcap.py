@@ -14,7 +14,7 @@ def main(inp, outd, outa):
       ip = eth.data
       if ip.p == dpkt.ip.IP_PROTO_TCP:
         tcp = ip.data
-        attrs = (ts, wbytes, ip.src, ip.dst, tcp.src, tcp.dst)
+        attrs = (ts, wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
     wbytes += len(buf)
     print attrs
 
