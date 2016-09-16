@@ -5,7 +5,7 @@ try:
 except ImportError:
     import scapy
     
-
+import sys
 def main(inp, outd, outa):
   packets = scapy.rdpcap(inp)
   wbytes = 0
