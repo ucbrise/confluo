@@ -8,7 +8,7 @@ def main(f):
   pcap = dpkt.pcap.Reader(f)
   for ts, buf in pcap:
     eth = dpkt.ethernet.Ethernet(buf)
-    print "%d: %s" % (ts, eth.data.__name__)  
+    print "%d: %s" % (ts, eth.data.__class__.__name__)  
 
 if __name__ == "__main__" :
   f = open(sys.argv[1])
