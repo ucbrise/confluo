@@ -6,15 +6,15 @@ import socket
 
 def main(inp, outd, outa):
   pcap = dpkt.pcap.Reader(inp)
-  wbytes = 0
+  wbytes = 0L
   for ts, buf in pcap:
     eth = dpkt.ethernet.Ethernet(buf)
-    attrs = (ts*1000000L, wbytes, 0, 0, 0, 0)
+    attrs = (long(ts*1000000L), wbytes, 0, 0, 0, 0)
     if eth.type == dpkt.ethernet.ETH_TYPE_IP:
       ip = eth.data
       if ip.p == dpkt.ip.IP_PROTO_TCP:
         tcp = ip.data
-        attrs = (ts*1000000L, wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
+        attrs = (long(ts*1000000L), wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
     wbytes += len(buf)
     print attrs
 
