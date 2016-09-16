@@ -4,8 +4,8 @@ import dpkt
 import sys
 import socket
 
-def main(f):
-  pcap = dpkt.pcap.Reader(f)
+def main(inp, outd, outa):
+  pcap = dpkt.pcap.Reader(inp)
   wbytes = 0
   for ts, buf in pcap:
     eth = dpkt.ethernet.Ethernet(buf)
@@ -21,5 +21,5 @@ def main(f):
 if __name__ == "__main__" :
   inp = open(sys.argv[1])
   outd = open(sys.argv[2] + ".data", 'wb')
-  outa = open(sys.argv[3] + ".attr", 'wb')
-  main(f)
+  outa = open(sys.argv[2] + ".attr", 'wb')
+  main(inp, outd, outa)
