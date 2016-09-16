@@ -17,7 +17,7 @@ def main(inp, outd, outa):
       if ip.p == dpkt.ip.IP_PROTO_TCP:
         tcp = ip.data
         attrs = (long(ts*1000000L), wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
-    print attrs
+    print "%d %d %d %d %d %d"
 
 if __name__ == "__main__" :
   inp = open(sys.argv[1])
