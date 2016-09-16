@@ -9,12 +9,12 @@ def main(inp, outd, outa):
   wbytes = 0
   for ts, buf in pcap:
     eth = dpkt.ethernet.Ethernet(buf)
-    attrs = (ts, wbytes, 0, 0, 0, 0)
+    attrs = (ts*1000000, wbytes, 0, 0, 0, 0)
     if eth.type == dpkt.ethernet.ETH_TYPE_IP:
       ip = eth.data
       if ip.p == dpkt.ip.IP_PROTO_TCP:
         tcp = ip.data
-        attrs = (ts, wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
+        attrs = (ts*1000000, wbytes, ip.src, ip.dst, tcp.sport, tcp.dport)
     wbytes += len(buf)
     print attrs
 
