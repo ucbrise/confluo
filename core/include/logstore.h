@@ -19,13 +19,20 @@
 #include <fstream>
 #include <atomic>
 
-#include "kvmap.h"
-#include "ngram_idx.h"
+#include "indexlog.h"
+#include "offsetlog.h"
 
 namespace slog {
 
-template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = UINT_MAX,
-    class kvmap_type = sysgen_kvmap>
+struct tokens {
+  unsigned char src_ip[4];
+  unsigned char dst_ip[4];
+  unsigned char src_prt[2];
+  unsigned char dst_prt[2];
+  unsigned char prot[1];
+};
+
+template<uint32_t MAX_KEYS = 134217728, uint32_t LOG_SIZE = UINT_MAX>
 class log_store {
  public:
   // The internal key component of the tail increment for appends and updates.
@@ -41,49 +48,41 @@ class log_store {
 
     // Note: we can use a lock-free exponentially or linear growing allocator
     // to make the Log dynamically sized rather than static.
-    data_log_ = new char[LOG_SIZE];
+    dlog_ = new char[LOG_SIZE];
 
     // Initialize both read and write tail to 0.
     write_tail_.store(0);
     read_tail_.store(0);
 
-    index_log_ = new ngram_index;
+    srcip_idx_ = new indexlog<4, 3>();
+    dstip_idx_ = new indexlog<4, 3>();
+    srcprt_idx_ = new indexlog<2, 2>();
+    dstprt_idx_ = new indexlog<2, 2>();
+    prot_idx_ = new indexlog<1, 1>();
   }
 
-  // Adds a new key value pair to the LogStore atomically.
-  //
-  // Returns 0 for a successful append, -1 otherwise.
-  bool insert(const int64_t key, const std::string& value) {
+  int64_t insert(const unsigned char* record, uint16_t record_len,
+                 const tokens& tkns) {
     // Add the value to the Log and generate and advance the ongoing
     // appends tail.
-    uint64_t current_tail = internal_append(value);
 
-    // Obtain the tail increment for the value.
-    uint64_t tail_increment = increment_tail(value.length());
+    // Atomically update the ongoing append tail of the log
+    uint64_t tail_increment = increment_tail(record_len);
+    uint64_t current_tail = atomic_advance_write_tail(tail_increment);
 
-    // Add external to internal key mapping
-    kvmap_.add_external(key, current_tail >> 32, current_tail & 0xFFFFFFFF);
+    uint32_t record_id = current_tail >> 32;
+    uint32_t offset = current_tail & 0xFFFFFFFF;
 
-    // Atomically update the completed append tail of the log.
-    // This is done using CAS, and may have bounded waiting until
-    // all appends before the current_tail are completed.
-    atomic_advance_read_tail(current_tail, tail_increment);
+    // Throw an exception if internal key greater than the largest valid
+    // internal key or end of the value goes beyond maximum Log size.
+    if (record_id >= MAX_KEYS || offset + record_len >= LOG_SIZE)
+      throw -1;
 
-    // Return true for success
-    return true;
-  }
+    // Apend the (record_id, record) data to offsetlog and datalog
+    append_record(record_id, record, record_len, offset);
 
-  int64_t insert(const std::string& value) {
-    // Add the value to the Log and generate and advance the ongoing
-    // appends tail.
-    uint64_t current_tail = internal_append(value);
-
-    // Obtain the tail increment for the value.
-    uint64_t tail_increment = increment_tail(value.length());
-
-    // Add external to internal key mapping
-    kvmap_.add_external(current_tail >> 32, current_tail >> 32,
-                        current_tail & 0xFFFFFFFF);
+    // Append the index entries to indexlogs
+    append_tokens(record_id, tkns);
 
     // Atomically update the completed append tail of the log.
     // This is done using CAS, and may have bounded waiting until
@@ -94,249 +93,122 @@ class log_store {
     return current_tail >> 32;
   }
 
-  // Internal append operation to add a value and its corresponding index
-  // entries to the LogStore, and generate an internal key atomically.
-  // Advances the ongoing appends tail, but does not update the completed
-  // appends tail. This operation is always successful.
-  //
-  // Returns the ongoing appends tail that this append saw when it started.
-  uint64_t internal_append(const std::string& value) {
-    // Atomically update the ongoing append tail of the log
-    uint64_t tail_increment = increment_tail(value.length());
-    uint64_t current_tail = atomic_advance_write_tail(tail_increment);
+  // Append a (recordId, record) pair to the LogStore.
+  void append_record(uint32_t record_id, const unsigned char* record,
+                     uint16_t record_len, uint32_t offset) {
 
     // This thread now has exclusive access to
-    // (1) the current internal key, and
-    // (2) the region marked by (current value offset, current value offset + current value length)
-    uint32_t internal_key = current_tail >> 32;
-    uint32_t value_offset = current_tail & 0xFFFFFFFF, value_length = value
-        .length();
-
-    // Throw an exception if internal key greater than the largest valid
-    // internal key or end of the value goes beyond maximum Log size.
-    if (internal_key >= MAX_KEYS || value_offset + value_length >= LOG_SIZE)
-      throw -1;
+    // (1) the `record_id` index within offsetlog, and
+    // (2) the region marked by (offset, offset + record_len)
 
     // We can add the new value offset to the value offsets array
     // and initialize its delete tail without worrying about locking,
     // since we have uncontested access to the 'internal_key' index in the
     // value offsets array and the deleted entries array.
-    kvmap_.add_internal(internal_key, value_offset);
+    olog_.add(record_id, offset, record_len);
 
     // Similarly, we can append the value to the log without locking
     // since this thread has exclusive access to the region (value_offset, value_offset + .
-    memcpy(data_log_ + value_offset, value.c_str(), value_length);
-
-    // Safely update secondary index entries, in a lock-free manner.
-    uint32_t value_end = value_offset + value_length;
-    for (uint32_t i = value_offset; i <= value_end - NGRAM_N; i++)
-      index_log_->add_offset(data_log_ + i, i);
-
-    // Return the current tail
-    return current_tail;
+    memcpy(dlog_ + offset, record, record_len);
   }
 
-  // Fetch a value from the LogStore by its internal key.
+  void append_tokens(uint32_t record_id, const tokens& tkns) {
+    srcip_idx_->add_entry(tkns.src_ip, record_id);
+    dstip_idx_->add_entry(tkns.dst_ip, record_id);
+    srcprt_idx_->add_entry(tkns.src_prt, record_id);
+    dstprt_idx_->add_entry(tkns.dst_prt, record_id);
+    prot_idx_->add_entry(tkns.prot, record_id);
+  }
+
+  // Fetch a record from the LogStore by its recordId. The record buffer must be pre-allocated.
   //
-  // Returns 0 if the fetch is successful, -1 otherwise.
-  const bool get(char* value, const int64_t key) {
+  // Returns true if the fetch is successful, false otherwise.
+  const bool get(unsigned char* record, const int64_t record_id) {
     // Get the current completed appends tail, and get the maximum valid key.
-    uint64_t current_tail = read_tail_;
-    uint32_t max_key = current_tail >> 32;
+    uint64_t current_tail = read_tail_.load();
+    uint32_t max_record_id = current_tail >> 32;
     uint32_t mark = current_tail & 0xFFFFFFFF;
 
-    // Convert to internal key
-    uint32_t internal_key;
-    bool exists = kvmap_.ext_to_int(key, &internal_key);
-
-    // If requested internal key is < max_key, the write
-    // for the internal key hasn't completed yet. Return -1
+    // If requested internal key is >= max_key, the write
+    // for the internal key hasn't completed yet. Return false
     // indicating failure.
-    if (!exists || internal_key >= max_key)
+    if (record_id >= max_record_id)
       return false;
 
-    uint32_t start, end;
-    bool valid = kvmap_.fwd_lookup_internal(internal_key, max_key, mark, &start,
-                                            &end);
+    uint32_t offset, length;
+    bool valid = olog_.lookup(record_id, mark, offset, length);
 
-    // Return false if the forward mapping is invalid.
+    // Return false if the record has been invalidated.
     if (!valid)
       return false;
 
-    char* data_ptr = data_log_ + start;
-    uint32_t i = 0;
-    for (; i < end - start && data_ptr[i] != 0; i++)
-      value[i] = data_ptr[i];
-    value[i] = '\0';
+    // Copy data from data log to record buffer.
+    memcpy(record, dlog_ + offset, length);
 
     // Return true for successful get.
     return true;
   }
 
-  // Search the LogStore for a query string.
-  //
-  // Returns the set of valid, matching internal keys.
-  const void search(std::set<int64_t>& results, const std::string& query) {
-    // Get the current completed appends tail, and extract the maximum valid
-    // key and value offset.
-    uint64_t current_tail = read_tail_;
-    uint32_t max_key = current_tail >> 32;
-    uint32_t max_off = current_tail & 0xFFFFFFFF;
-
-    // Obtain the offsets into the values corresponding to the prefix and
-    // suffix ngram for the substring from the N-gram index.
-    char *substr = (char *) query.c_str();
-    offset_list* prefix_offsets = index_log_->get_offsets(substr);
-    offset_list* suffix_offsets = index_log_->get_offsets(
-        substr + query.length() - NGRAM_N);
-
-    if (prefix_offsets->size() < suffix_offsets->size()) {
-      // Extract the remaining suffix to compare with the actual data.
-      char *suffix = substr + NGRAM_N;
-      size_t suffix_len = query.length() - NGRAM_N;
-
-      // Scan through the list of offsets, adding only valid offsets into the
-      // set of results.
-      uint32_t size = prefix_offsets->size();
-      char* data_ptr = data_log_ + NGRAM_N;
-      for (uint32_t i = 0; i < size; i++) {
-        // An offset is valid if
-        // (1) the remaining query suffix matches the data at that location in
-        //     the log,
-        // (2) the location does not exceed the maximum valid offset (i.e., the
-        //     write at that location was incomplete when the search started)
-        // (3) the key is not larger than the maximum valid key (i.e., the write
-        //     for that key was incomplete when the search started)
-        // (4) the key was not deleted before the search began.
-        //
-        // TODO: Take care of query.length() <= NGRAM_N case
-        uint32_t off = prefix_offsets->at(i);
-        if (off < max_off && !strncmp(data_ptr + off, suffix, suffix_len))
-          find_and_insert_key(results, off, max_key, max_off);
-      }
-    } else {
-      // Extract the remaining prefix to compare with the actual data.
-      char *prefix = substr;
-      size_t prefix_len = query.length() - NGRAM_N;
-
-      // Scan through the list of offsets, adding only valid offsets into the
-      // set of results.
-      uint32_t size = suffix_offsets->size();
-      char* data_ptr = data_log_ - prefix_len;
-      for (uint32_t i = 0; i < size; i++) {
-        // An offset is valid if
-        // (1) the remaining query prefix matches the data at that location in
-        //     the log,
-        // (2) the location does not exceed the maximum valid offset (i.e., the
-        //     write at that location was incomplete when the search started)
-        // (3) the key is not larger than the maximum valid key (i.e., the write
-        //     for that key was incomplete when the search started)
-        // (4) the key was not deleted before the search began.
-        //
-        // TODO: Take care of query.length() <= NGRAM_N case
-        uint32_t off = suffix_offsets->at(i);
-        if (off < max_off && !strncmp(data_ptr + off, prefix, prefix_len))
-          find_and_insert_key(results, off, max_key, max_off);
-      }
-    }
+  const void filter_src_ip(std::set<int64_t>& results,
+                           const unsigned char* token_prefix,
+                           const uint32_t token_prefix_len) {
+    uint64_t current_tail = read_tail_.load();
+    filter(srcip_idx_, results, token_prefix, token_prefix_len, current_tail);
   }
 
-  // Search the LogStore for a column value.
-  //
-  // Returns the set of valid, matching internal keys.
-  const void col_search(std::vector<int64_t>& results,
-                        const std::string& col_value) {
-    // Get the current completed appends tail, and extract the maximum valid
-    // key and value offset.
-    uint64_t current_tail = read_tail_;
-    uint32_t max_key = current_tail >> 32;
-    uint32_t max_off = current_tail & 0xFFFFFFFF;
+  const void filter_dst_ip(std::set<int64_t>& results,
+                           const unsigned char* token_prefix,
+                           const uint32_t token_prefix_len) {
+    uint64_t current_tail = read_tail_.load();
+    filter(dstip_idx_, results, token_prefix, token_prefix_len, current_tail);
+  }
 
-    // Obtain the offsets into the values corresponding to the prefix and
-    // suffix ngram for the substring from the N-gram index.
-    char *substr = (char *) col_value.c_str();
-    offset_list* prefix_offsets = index_log_->get_offsets(substr);
-    offset_list* suffix_offsets = index_log_->get_offsets(
-        substr + col_value.length() - NGRAM_N);
+  const void filter_src_port(std::set<int64_t>& results,
+                             const unsigned char* token_prefix,
+                             const uint32_t token_prefix_len) {
+    uint64_t current_tail = read_tail_.load();
+    filter(srcprt_idx_, results, token_prefix, token_prefix_len, current_tail);
+  }
 
-    uint32_t prefix_size = prefix_offsets->size();
-    uint32_t suffix_size = suffix_offsets->size();
-    if (prefix_size < suffix_size) {
-      // Extract the remaining suffix to compare with the actual data.
-      char *suffix = substr + NGRAM_N;
-      size_t suffix_len = col_value.length() - NGRAM_N;
+  const void filter_dst_port(std::set<int64_t>& results,
+                             const unsigned char* token_prefix,
+                             const uint32_t token_prefix_len) {
+    uint64_t current_tail = read_tail_.load();
+    filter(dstprt_idx_, results, token_prefix, token_prefix_len, current_tail);
+  }
 
-      // Scan through the list of offsets, adding only valid offsets into the
-      // set of results.
-      uint32_t size = prefix_offsets->size();
-      char* data_ptr = data_log_ + NGRAM_N;
-      for (uint32_t i = 0; i < size; i++) {
-        // An offset is valid if
-        // (1) the remaining query suffix matches the data at that location in
-        //     the log,
-        // (2) the location does not exceed the maximum valid offset (i.e., the
-        //     write at that location was incomplete when the search started)
-        // (3) the key is not larger than the maximum valid key (i.e., the write
-        //     for that key was incomplete when the search started)
-        // (4) the key was not deleted before the search began.
-        //
-        // TODO: Take care of query.length() <= NGRAM_N case
-        uint32_t off = prefix_offsets->at(i);
-        if (off < max_off && !strncmp(data_ptr + off, suffix, suffix_len))
-          find_and_insert_key(results, off, max_key, max_off);
-      }
-    } else {
-      // Extract the remaining prefix to compare with the actual data.
-      char *prefix = substr;
-      size_t prefix_len = col_value.length() - NGRAM_N;
-
-      // Scan through the list of offsets, adding only valid offsets into the
-      // set of results.
-      uint32_t size = suffix_offsets->size();
-      char* data_ptr = data_log_ - prefix_len;
-      for (uint32_t i = 0; i < size; i++) {
-        // An offset is valid if
-        // (1) the remaining query prefix matches the data at that location in
-        //     the log,
-        // (2) the location does not exceed the maximum valid offset (i.e., the
-        //     write at that location was incomplete when the search started)
-        // (3) the key is not larger than the maximum valid key (i.e., the write
-        //     for that key was incomplete when the search started)
-        // (4) the key was not deleted before the search began.
-        //
-        // TODO: Take care of query.length() <= NGRAM_N case
-        uint32_t off = suffix_offsets->at(i);
-        if (off < max_off && !strncmp(data_ptr + off, prefix, prefix_len))
-          find_and_insert_key(results, off, max_key, max_off);
-      }
-    }
+  const void filter_prot(std::set<int64_t>& results,
+                         const unsigned char* token_prefix,
+                         const uint32_t token_prefix_len) {
+    uint64_t current_tail = read_tail_.load();
+    filter(prot_idx_, results, token_prefix, token_prefix_len, current_tail);
   }
 
   // Atomically deletes the key from the LogStore.
   //
   // Returns true if the delete is successful, false if the key was already
   // deleted or not yet created.
-  bool delete_record(const int64_t key) {
-    uint32_t internal_key;
-    if (!kvmap_.ext_to_int(key, &internal_key))
-      return false;
+  bool delete_record(const int64_t record_id) {
+    uint64_t current_tail = read_tail_.load();
 
-    // Atomically increase the ongoing append tail of the log.
-    uint64_t current_tail = atomic_advance_write_tail(DEL_INCR);
+    if (!olog_.is_valid(record_id, current_tail & 0xFFFFFFFF)
+        || record_id >= current_tail >> 32) {
+      return false;
+    }
+
+    // Atomically increase the write tail of the log.
+    current_tail = atomic_advance_write_tail(DEL_INCR);
 
     // Obtain the offset into the Log corresponding to the current Log.
-    uint32_t value_offset = current_tail & 0xFFFFFFFF;
+    uint32_t offset = current_tail & 0xFFFFFFFF;
 
     // Throw an exception if the delete causes the Log to grow beyond the
     // maximum Log size.
-    if (value_offset + 1 >= LOG_SIZE)
+    if (offset + 1 >= LOG_SIZE)
       throw -1;
 
-    if (internal_key >= current_tail >> 32)
-      return false;
-
     // Invalidate the given internal key.
-    bool success = kvmap_.invalidate_internal(internal_key, value_offset + 1);
+    bool success = olog_.invalidate(record_id, offset + 1);
 
     // Atomically update the completed append tail of the log.
     // This is done using CAS, and may have bounded waiting until
@@ -390,42 +262,87 @@ class log_store {
       ;
   }
 
-  // Finds the internal key given data offset, the maximum valid key and offset,
-  // and inserts the key into the provided set if it hasn't been deleted.
-  const void find_and_insert_key(std::set<int64_t>& keys, const uint32_t offset,
-                                 const uint32_t max_key,
-                                 const uint32_t max_off) {
+  // Filter recordIds on a given index log by given token prefix.
+  //
+  // Returns the set of valid, matching recordIds.
+  template<uint32_t L1, uint32_t L2>
+  const void filter(indexlog<L1, L2>* ilog, std::set<int64_t>& results,
+                    const unsigned char* token_prefix,
+                    const uint32_t token_prefix_len,
+                    const uint64_t current_tail) {
 
-    uint32_t internal_key;
-    bool valid = kvmap_.bwd_lookup_internal(offset, max_off, 0, max_key,
-                                            &internal_key);
+    // Extract the maximum valid recordId and record offset.
+    uint32_t max_rid = current_tail >> 32;
+    uint32_t max_off = current_tail & 0xFFFFFFFF;
 
-    int64_t external_key;
-    if (valid && kvmap_.int_to_ext(internal_key, &external_key)) {
-      keys.insert(external_key);
+    if (L2 > token_prefix_len) {
+      // Determine the range of prefixes in ilog
+      unsigned char token_buf[L1];
+      memcpy(token_buf, token_prefix, token_prefix_len);
+      for (uint32_t token_idx = token_prefix_len; token_idx < L2; token_idx++) {
+        token_buf[token_idx] = 0;
+      }
+      uint32_t start = token_ops<L1, L2>::prefix(token_prefix);
+      for (uint32_t token_idx = token_prefix_len; token_idx < L2; token_idx++) {
+        token_buf[token_idx] = 255;
+      }
+      uint32_t end = token_ops<L1, L2>::prefix(token_prefix);
+
+      // Sweep through the range and return all matches
+      for (uint32_t j = start; j <= end; j++) {
+        // Don't need to check suffixes
+        entry_list* list = ilog->get_entry_list(j);
+        if (list == NULL)
+          continue;
+        uint32_t size = list->size();
+        for (uint32_t i = 0; i < size; i++) {
+          uint32_t record_id = list->at(i) & 0xFFFFFFFF;
+          if (olog_.is_valid(record_id, max_off)) {
+            results.insert(record_id);
+          }
+        }
+      }
+    } else {
+      entry_list* list = ilog->get_entry_list(token_prefix);
+      if (list == NULL)
+        return;
+      uint32_t size = list->size();
+      if (L2 == token_prefix_len) {
+        // Don't need to check suffixes
+        for (uint32_t i = 0; i < size; i++) {
+          uint32_t record_id = list->at(i) & 0xFFFFFFFF;
+          if (olog_.is_valid(record_id, max_off)) {
+            results.insert(record_id);
+          }
+        }
+      } else {
+        // Need to filter by suffixes
+        uint32_t ignore = L1 - token_prefix_len;
+        for (uint32_t i = 0; i < size; i++) {
+          index_entry entry = list->at(i);
+          uint32_t record_id = entry & 0xFFFFFFFF;
+          uint32_t entry_suffix = entry >> 32;
+          uint32_t query_suffix = token_ops<L1, L2>::suffix(token_prefix);
+          if (entry_suffix >> ignore == query_suffix >> ignore
+              && olog_.is_valid(record_id, max_off)) {
+            results.insert(record_id);
+          }
+        }
+      }
     }
   }
 
-  // Finds the internal key given data offset, the maximum valid key and offset,
-  // and inserts the key into the provided set if it hasn't been deleted.
-  const void find_and_insert_key(std::vector<int64_t>& keys,
-                                 const uint32_t offset, const uint32_t max_key,
-                                 const uint32_t max_off) {
-    uint32_t internal_key;
-    bool valid = kvmap_.bwd_lookup_internal(offset, max_off, 0, max_key,
-                                            &internal_key);
+  char *dlog_;                                 // Data log
+  std::atomic<uint64_t> write_tail_;           // Write tail
+  std::atomic<uint64_t> read_tail_;            // Read tail
+  offsetlog olog_;                             // recordId-record offset mapping
 
-    int64_t external_key;
-    if (valid && kvmap_.int_to_ext(internal_key, &external_key)) {
-      keys.push_back(external_key);
-    }
-  }
-
-  char *data_log_;                                 // Data log
-  std::atomic<uint64_t> write_tail_;               // Write tail
-  std::atomic<uint64_t> read_tail_;                // Read tail
-  kvmap_type kvmap_;                               // Key-value offset mapping
-  ngram_index *index_log_;                         // Index log
+  // Index logs
+  indexlog<4, 3> *srcip_idx_;
+  indexlog<4, 3> *dstip_idx_;
+  indexlog<2, 2> *srcprt_idx_;
+  indexlog<2, 2> *dstprt_idx_;
+  indexlog<1, 1> *prot_idx_;
 };
 }
 

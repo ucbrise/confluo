@@ -4,37 +4,105 @@
 #include <map>
 #include <unordered_map>
 
-#include "faclog.h"
 #include "flags.h"
+#include "monolog.h"
 #include "utils.h"
+
+template<uint32_t TOKEN_LEN, uint32_t PREFIX_LEN>
+class token_ops {
+ public:
+  static uint32_t prefix(const unsigned char* token) {
+    uint32_t prefix_val = 0;
+    for (uint32_t i = 0; i < PREFIX_LEN; i++) {
+      prefix_val = prefix_val * 256 + token[i];
+    }
+    return prefix_val;
+  }
+
+  static uint32_t suffix(const unsigned char* token) {
+    uint32_t suffix_val = 0;
+    for (uint32_t i = PREFIX_LEN; i < TOKEN_LEN; i++) {
+      suffix_val = suffix_val * 256 + token[i];
+    }
+    return suffix_val;
+  }
+};
+
+template<>
+class token_ops<4, 3> {
+ public:
+  static uint32_t prefix(const unsigned char* token) {
+    return token[0] * 65536 + token[1] * 256 + token[2];
+  }
+
+  static uint32_t suffix(const unsigned char* token) {
+    return token[3];
+  }
+};
+
+template<>
+class token_ops<2, 2> {
+ public:
+  static uint32_t prefix(const unsigned char* token) {
+    return token[0] * 256 + token[1];
+  }
+
+  static uint32_t suffix(const unsigned char* token) {
+    return 0;
+  }
+};
+
+template<>
+class token_ops<1, 1> {
+ public:
+  static uint32_t prefix(const unsigned char* token) {
+    return (uint32_t)token[0];
+  }
+
+  static uint32_t suffix(const unsigned char* token) {
+    return 0;
+  }
+};
 
 namespace slog {
 
-typedef faclog_relaxed<int32_t, 24> offset_list;
+typedef uint64_t index_entry;
+typedef monolog_relaxed<index_entry, 24> entry_list;
 
-template<uint32_t MAX_SIZE = 16777216>
-class array_ngram_index {
+template<uint32_t TOKEN_LEN = 4, uint32_t PREFIX_LEN = 3>
+class indexlog {
+  static_assert(TOKEN_LEN >= PREFIX_LEN, "Token length cannot be smaller than prefix length.");
+  static_assert(PREFIX_LEN <= 3, "Prefix length too large.");
+  static_assert(PREFIX_LEN > 0, "Prefix length cannot be zero.");
+  static_assert(TOKEN_LEN - PREFIX_LEN < 4, "Suffix length must be smaller than 4.");
+
  public:
-  typedef std::atomic<offset_list*> atomic_ref;
+  typedef std::atomic<entry_list*> atomic_ref;
 
-  array_ngram_index() {
-    offset_list* null_ptr = NULL;
+  indexlog() {
+    entry_list* null_ptr = NULL;
     for (auto& x : idx_)
       x = null_ptr;
   }
 
-  void add_offset(const char* ngram, const uint32_t offset) {
-    uint32_t hash = hash_utils::simple_hash(ngram);
-    if (idx_[hash] == NULL) {
-      try_allocate_list(hash);
+  void add_entry(const unsigned char* token, const uint32_t record_id) {
+    uint32_t prefix = token_ops<TOKEN_LEN, PREFIX_LEN>::prefix(token);
+    uint64_t suffix = token_ops<TOKEN_LEN, PREFIX_LEN>::suffix(token);
+    if (idx_[prefix] == NULL) {
+      try_allocate_list(prefix);
     }
-    offset_list* list = idx_[hash];
-    list->push_back(offset);
+    entry_list* list = idx_[prefix];
+    index_entry entry = (suffix << 32) | record_id;
+    list->push_back(entry);
   }
 
-  offset_list* get_offsets(const char* ngram) {
-    uint32_t hash = hash_utils::simple_hash(ngram);
-    return idx_[hash];
+  entry_list* get_entry_list(const unsigned char* token) {
+    uint32_t prefix = token_ops<TOKEN_LEN, PREFIX_LEN>::prefix(token);
+    return idx_[prefix];
+  }
+
+  entry_list* get_entry_list(uint32_t idx) {
+    return idx_[idx];
   }
 
   size_t serialize(std::ostream& out) {
@@ -46,8 +114,8 @@ class array_ngram_index {
               sizeof(size_t));
     out_size += sizeof(size_t);
     {
-      for (uint32_t i = 0; i < MAX_SIZE; i++) {
-        offset_list* entry = idx_[i];
+      for (uint32_t i = 0; i < idx_.size(); i++) {
+        entry_list* entry = idx_[i].load();
         if (entry != NULL) {
           out.write(reinterpret_cast<const char *>(&(i)), sizeof(uint32_t));
           out_size += (sizeof(uint32_t));
@@ -71,7 +139,7 @@ class array_ngram_index {
       in.read(reinterpret_cast<char *>(&(first)), sizeof(uint32_t));
       in_size += sizeof(uint32_t);
 
-      slog::offset_list* offset_list = new slog::offset_list;
+      slog::entry_list* offset_list = new slog::entry_list;
       in_size += offset_list->deserialize(in);
       idx_[first] = offset_list;
     }
@@ -81,12 +149,12 @@ class array_ngram_index {
 
  private:
   void try_allocate_list(uint32_t i) {
-    slog::offset_list* new_list = new slog::offset_list;
-    slog::offset_list* null_ptr = NULL;
+    slog::entry_list* new_list = new slog::entry_list;
+    slog::entry_list* null_ptr = NULL;
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
-    if (std::atomic_compare_exchange_weak(&idx_[i], &null_ptr, new_list))
+    if (std::atomic_compare_exchange_strong(&idx_[i], &null_ptr, new_list))
       return;
 
     // All other threads will deallocate the newly allocated bucket.
@@ -96,15 +164,13 @@ class array_ngram_index {
   size_t size() {
     size_t sz = 0;
     for (auto& x : idx_)
-      if (x != NULL)
-        sz++;
+      if (x.load() != NULL)
+        sz += x.load()->size();
     return sz;
   }
 
-  std::array<atomic_ref, MAX_SIZE> idx_;
+  std::array<atomic_ref, 1 << (PREFIX_LEN * 8)> idx_;
 };
-
-typedef array_ngram_index<> ngram_index;
 
 }
 

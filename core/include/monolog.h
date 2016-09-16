@@ -11,7 +11,7 @@
 namespace slog {
 
 /**
- * The base class for Fast Append-only Concurrent Log (FACLog).
+ * The base class for Monotonic Log (MonoLog).
  *
  * Implements get/set/multiget/multiset functionalities,
  * but does not maintain read or write tails and does not
@@ -19,14 +19,14 @@ namespace slog {
  *
  */
 template<class T, uint32_t NBUCKETS = 32>
-class __faclog_base {
+class __monolog_base {
  public:
   static const uint32_t FBS = 16;
   static const uint32_t FBS_HIBIT = 4;
 
   typedef std::atomic<T*> __atomic_bucket_ref;
 
-  __faclog_base() {
+  __monolog_base() {
     T* null_ptr = NULL;
     for (auto& x : buckets_)
       x = null_ptr;
@@ -44,7 +44,7 @@ class __faclog_base {
     buckets_[bucket_idx][bucket_off] = val;
   }
 
-  // Sets a contiguous region of the FACLog base to the provided data.
+  // Sets a contiguous region of the MonoLog base to the provided data.
   void set(uint32_t idx, const T* data, const uint32_t len) {
     uint32_t pos = idx + FBS;
     uint32_t hibit = bit_utils::highest_bit(pos);
@@ -86,7 +86,7 @@ class __faclog_base {
     return buckets_[bucket_idx][bucket_off];
   }
 
-  // Copies a contiguous region of the FACLog base into the provided buffer.
+  // Copies a contiguous region of the MonoLog base into the provided buffer.
   // The buffer should have sufficient space to hold the data requested, otherwise
   // undefined behavior may result.
   void get(T* data, const uint32_t idx, const uint32_t len) {
@@ -123,7 +123,7 @@ class __faclog_base {
     return out_size;
   }
 
-  // Deserialize the FACLog base from the input stream. The second argument is
+  // Deserialize the MonoLog base from the input stream. The second argument is
   // populated to the number of elements read if it is not NULL.
   uint32_t deserialize(std::istream& in, uint32_t *sz) {
     // Read keys
@@ -156,7 +156,7 @@ class __faclog_base {
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
-    if (!std::atomic_compare_exchange_weak(&buckets_[bucket_idx], &null_ptr,
+    if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
                                            new_bucket)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] new_bucket;
@@ -165,11 +165,11 @@ class __faclog_base {
     return size;
   }
 
-  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for FACLog.
+  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
 };
 
 /**
- * Strongly consistent (i.e., atomic, linearizable) implementation for the FACLog.
+ * Linearizable implementation for the MonoLog.
  *
  * Maintains a read and write tail to ensure:
  * - Read operations can only access data for completed writes; conversely,
@@ -178,18 +178,18 @@ class __faclog_base {
  *   start times.
  */
 template<class T, uint32_t NBUCKETS = 32>
-class faclog_consistent : public __faclog_base<T, NBUCKETS> {
+class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
  public:
-  faclog_consistent()
+  monolog_linearizable()
       : write_tail_(0),
         read_tail_(0) {
   }
 
-  // Append an entry at the end of the FACLog
+  // Append an entry at the end of the MonoLog
   uint32_t push_back(const T val) {
     uint32_t idx = std::atomic_fetch_add(&write_tail_, 1U);
     this->set(idx, val);
-    while (!std::atomic_compare_exchange_weak(&read_tail_, &idx, idx + 1))
+    while (!std::atomic_compare_exchange_strong(&read_tail_, &idx, idx + 1))
       ;
     return idx;
   }
@@ -199,22 +199,22 @@ class faclog_consistent : public __faclog_base<T, NBUCKETS> {
     return this->get(idx);
   }
 
-  // Get the size of the FACLog (i.e., number of completely written entries)
+  // Get the size of the MonoLog (i.e., number of completely written entries)
   const uint32_t size() {
-    return read_tail_;
+    return read_tail_.load();
   }
 
-  // Serialize the FACLog to the given output stream.
+  // Serialize the MonoLog to the given output stream.
   const uint32_t serialize(std::ostream& out) {
-    return __faclog_base<T, NBUCKETS>::serialize(out, this->size());
+    return __monolog_base<T, NBUCKETS>::serialize(out, this->size());
   }
 
-  // Deserialize the FACLog from the input stream.
+  // Deserialize the MonoLog from the input stream.
   const uint32_t deserialize(std::istream& in) {
     uint32_t nentries;
-    uint32_t in_size = __faclog_base<T, NBUCKETS>::deserialize(in, &nentries);
-    write_tail_ = nentries;
-    read_tail_ = nentries;
+    uint32_t in_size = __monolog_base<T, NBUCKETS>::deserialize(in, &nentries);
+    write_tail_.store(nentries);
+    read_tail_.store(nentries);
     return in_size;
   }
 
@@ -224,15 +224,15 @@ class faclog_consistent : public __faclog_base<T, NBUCKETS> {
 };
 
 /**
- * Eventually consistent (i.e., atomic, but not linearizable) implementation for the FACLog.
+ * Eventually consistent (i.e., atomic, but not linearizable) implementation for the MonoLog.
  *
  * Maintains a single tail that ensures:
  * - Write operations are atomic
  */
 template<class T, uint32_t NBUCKETS = 32>
-class faclog_relaxed : public __faclog_base<T, NBUCKETS> {
+class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
  public:
-  faclog_relaxed()
+  monolog_relaxed()
       : tail_(0) {
   }
 
@@ -247,17 +247,17 @@ class faclog_relaxed : public __faclog_base<T, NBUCKETS> {
   }
 
   const uint32_t size() {
-    return tail_;
+    return tail_.load();
   }
 
   const uint32_t serialize(std::ostream& out) {
-    return __faclog_base<T, NBUCKETS>::serialize(out, this->size());
+    return __monolog_base<T, NBUCKETS>::serialize(out, this->size());
   }
 
   const uint32_t deserialize(std::istream& in) {
     uint32_t nentries;
-    uint32_t in_size = __faclog_base<T, NBUCKETS>::deserialize(in, &nentries);
-    tail_ = nentries;
+    uint32_t in_size = __monolog_base<T, NBUCKETS>::deserialize(in, &nentries);
+    tail_.store(nentries);
     return in_size;
   }
 
@@ -267,4 +267,4 @@ class faclog_relaxed : public __faclog_base<T, NBUCKETS> {
 
 }
 
-#endif /* SLOG_FACLOG_H_ */
+#endif /* SLOG_MONOLOG_H_ */
