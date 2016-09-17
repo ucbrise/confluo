@@ -52,18 +52,6 @@ class token_ops<2, 2> {
   }
 };
 
-template<>
-class token_ops<1, 1> {
- public:
-  static uint32_t prefix(const unsigned char* token) {
-    return (uint32_t)token[0];
-  }
-
-  static uint32_t suffix(const unsigned char* token) {
-    return 0;
-  }
-};
-
 namespace slog {
 
 typedef uint64_t index_entry;
@@ -161,6 +149,7 @@ class indexlog {
     delete new_list;
   }
 
+  // Not atomic!
   size_t size() {
     size_t sz = 0;
     for (auto& x : idx_)

@@ -10,56 +10,59 @@ class DummyGenerator {
   DummyGenerator() {
   }
 
-  static slog::tokens gentokens(uint64_t val) {
-    slog::tokens tkns;
-    ipgen(tkns.src_ip, val);
-    ipgen(tkns.dst_ip, val);
-    portgen(tkns.src_prt, val);
-    portgen(tkns.dst_prt, val);
-    protgen(tkns.prot, val);
-    return tkns;
+  static void alloctokens(slog::tokens& tkns) {
+    tkns.time = new unsigned char[4];
+    tkns.src_ip = new unsigned char[4];
+    tkns.dst_ip = new unsigned char[4];
+    tkns.src_prt = new unsigned char[2];
+    tkns.dst_prt = new unsigned char[2];
   }
 
-  static void hdrgen(unsigned char* hdr, uint64_t val) {
-    for (uint32_t i = 0; i < 40; i++) {
-      hdr[i] = val % 256;
+  static void freetokens(slog::tokens& tkns) {
+    delete []tkns.time;
+    delete []tkns.src_ip;
+    delete []tkns.dst_ip;
+    delete []tkns.src_prt;
+    delete []tkns.dst_prt;
+  }
+
+  static void gentokens(slog::tokens& tkns, uint64_t val) {
+    gentok(tkns.time, 4, val);
+    gentok(tkns.src_ip, 4, val);
+    gentok(tkns.dst_ip, 4, val);
+    gentok(tkns.src_prt, 2, val);
+    gentok(tkns.dst_prt, 2, val);
+  }
+
+  static void gentok(unsigned char* tok, uint32_t len, uint32_t val) {
+    for (uint32_t i = 0; i < len; i++) {
+      tok[i] = val;
     }
   }
 
  private:
-  static void ipgen(unsigned char* ip, uint32_t val) {
-    ip[0] = val % 256;
-    ip[1] = val % 256;
-    ip[2] = val % 256;
-    ip[3] = val % 256;
-  }
-
-  static void portgen(unsigned char* port, uint32_t val) {
-    port[0] = val % 256;
-    port[1] = val % 256;
-  }
-
-  static void protgen(unsigned char* prot, uint32_t val) {
-    prot[0] = val % 256;
-  }
 };
 
 class LogStoreTest : public testing::Test {
  public:
-  std::string to_string(uint64_t i) {
-    char buf[6];
-    sprintf(buf, "%05d", i);
-    return std::string(buf);
+  LogStoreTest() {
+    DummyGenerator::alloctokens(tkns);
+  }
+
+  ~LogStoreTest() {
+    DummyGenerator::freetokens(tkns);
   }
 
   unsigned char hdr[40];
+  slog::tokens tkns;
 };
 
 TEST_F(LogStoreTest, InsertAndGetTest) {
-  slog::log_store<kMaxKeys, kLogStoreSize> ls;
+  slog::log_store<kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    DummyGenerator::hdrgen(hdr, i);
-    ls.insert(hdr, 40, DummyGenerator::gentokens(i));
+    DummyGenerator::gentok(hdr, 40, i);
+    DummyGenerator::gentokens(tkns, i);
+    ls.insert(hdr, 40, tkns);
   }
 
   unsigned char ret[40];
@@ -73,15 +76,16 @@ TEST_F(LogStoreTest, InsertAndGetTest) {
 }
 
 TEST_F(LogStoreTest, InsertAndFilterTest) {
-  slog::log_store<kMaxKeys, kLogStoreSize> ls;
+  slog::log_store<kLogStoreSize> ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    DummyGenerator::hdrgen(hdr, i);
-    ls.insert(hdr, 40, DummyGenerator::gentokens(i));
+    DummyGenerator::gentok(hdr, 40, i);
+    DummyGenerator::gentokens(tkns, i);
+    ls.insert(hdr, 40, tkns);
   }
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    slog::tokens tkns = DummyGenerator::gentokens(i);
+    DummyGenerator::gentokens(tkns, i);
     ls.filter_src_ip(results, tkns.src_ip, 4);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
@@ -106,7 +110,7 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    slog::tokens tkns = DummyGenerator::gentokens(i);
+    DummyGenerator::gentokens(tkns, i);
     ls.filter_dst_ip(results, tkns.dst_ip, 4);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
@@ -131,7 +135,7 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    slog::tokens tkns = DummyGenerator::gentokens(i);
+    DummyGenerator::gentokens(tkns, i);
     ls.filter_src_port(results, tkns.src_prt, 2);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
@@ -149,7 +153,7 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    slog::tokens tkns = DummyGenerator::gentokens(i);
+    DummyGenerator::gentokens(tkns, i);
     ls.filter_dst_port(results, tkns.dst_prt, 2);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
@@ -167,60 +171,26 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<int64_t> results;
-    slog::tokens tkns = DummyGenerator::gentokens(i);
-    ls.filter_prot(results, tkns.prot, 2);
+    DummyGenerator::gentokens(tkns, i);
+    ls.filter_time(results, tkns.time, 4);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
       ASSERT_EQ(id % 256, i % 256);
     }
     results.clear();
-  }
-}
 
-TEST_F(LogStoreTest, InsertDeleteGetTest) {
-  slog::log_store<kMaxKeys, kLogStoreSize> ls;
-  for (uint64_t i = 0; i < kMaxKeys; i++) {
-    DummyGenerator::hdrgen(hdr, i);
-    ls.insert(hdr, 40, DummyGenerator::gentokens(i));
-  }
-
-  unsigned char ret[40];
-  for (uint64_t i = 0; i < kMaxKeys; i++) {
-    bool exists = ls.get(ret, i);
-    ASSERT_TRUE(exists);
-    for (uint32_t j = 0; j < 40; j++) {
-      unsigned char expected = i % 256;
-      ASSERT_EQ(ret[j], expected);
+    ls.filter_time(results, tkns.time, 3);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
     }
-
-    bool deleted = ls.delete_record(i);
-    ASSERT_TRUE(deleted);
-
-    exists = ls.get(ret, i);
-    ASSERT_FALSE(exists);
-  }
-}
-
-TEST_F(LogStoreTest, InsertDeleteSearchTest) {
-  slog::log_store<kMaxKeys, kLogStoreSize> ls;
-  for (uint64_t i = 0; i < kMaxKeys; i++) {
-    DummyGenerator::hdrgen(hdr, i);
-    ls.insert(hdr, 40, DummyGenerator::gentokens(i));
-  }
-
-  for (uint64_t i = 0; i < kMaxKeys; i++) {
-    std::set<int64_t> results;
-    slog::tokens tkns = DummyGenerator::gentokens(i);
-    ls.filter_dst_ip(results, tkns.dst_ip, 4);
-    uint32_t size_before_delete = results.size();
     results.clear();
 
-    bool success = ls.delete_record(i);
-    ASSERT_TRUE(success);
-
-    ls.filter_dst_ip(results, tkns.dst_ip, 4);
-    uint32_t size_after_delete = results.size();
+    ls.filter_time(results, tkns.time, 2);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
     results.clear();
-    ASSERT_EQ(size_after_delete, size_before_delete - 1);
   }
 }
