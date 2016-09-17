@@ -17,6 +17,17 @@ TEST_F(MonoLogTest, MonoLogBaseBaseTest) {
   }
 }
 
+TEST_F(MonoLogTest, AtomicMonoLogBaseBaseTest) {
+  slog::__atomic_monolog_base<uint64_t> array;
+  for (uint64_t i = 0; i < kArraySize; i++) {
+    array.store(i, i);
+  }
+
+  for (uint64_t i = 0; i < kArraySize; i++) {
+    ASSERT_EQ(array.load(i), i);
+  }
+}
+
 TEST_F(MonoLogTest, MonoLogConsistentTest) {
   slog::monolog_linearizable<uint64_t> array;
   for (uint64_t i = 0; i < kArraySize; i++) {

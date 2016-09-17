@@ -67,7 +67,8 @@ TEST_F(LogStoreTest, InsertAndGetTest) {
 
   unsigned char ret[40];
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    ls.get(ret, i);
+    bool success = ls.get(ret, i);
+    ASSERT_TRUE(success);
     for (uint32_t j = 0; j < 40; j++) {
       unsigned char expected = i % 256;
       ASSERT_EQ(ret[j], expected);

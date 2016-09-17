@@ -47,9 +47,8 @@ class log_store {
     // to make the Log dynamically sized rather than static.
     dlog_ = new char[LOG_SIZE];
 
-    // Initialize both read and write tail to 0.
-    write_tail_.store(0);
-    read_tail_.store(0);
+    // Initialize data log tail to 1. Offset 0 is used to indicate invalid records.
+    dtail_.store(1);
 
     time_idx_ = new indexlog<4, 3>();
     srcip_idx_ = new indexlog<4, 3>();
@@ -58,18 +57,13 @@ class log_store {
     dstprt_idx_ = new indexlog<2, 2>();
   }
 
-  int64_t insert(const unsigned char* record, uint16_t record_len,
-                 const tokens& tkns) {
-    // Add the value to the Log and generate and advance the ongoing
-    // appends tail.
+  uint64_t insert(const unsigned char* record, uint16_t record_len,
+                  const tokens& tkns) {
+    // Start the insertion by obtaining a record id from offset log
+    uint64_t record_id = olog_.start();
 
-    // Atomically update the write tail of the log
-    uint64_t tail_increment = increment_tail(record_len);
-    uint64_t current_tail = atomic_advance_write_tail(tail_increment);
-
-
-    uint32_t record_id = current_tail >> 32;
-    uint32_t offset = current_tail & 0xFFFFFFFF;
+    // Atomically update the tail of the log
+    uint64_t offset = atomic_advance_tail(record_len);
 
     // Throw an exception if internal key greater than the largest valid
     // internal key or end of the value goes beyond maximum Log size.
@@ -79,19 +73,16 @@ class log_store {
     if (offset + record_len >= LOG_SIZE)
       throw log_overflow_exception();
 
-    // Append the (record_id, record) data to offset log and data log
-    append_record(record_id, record, record_len, offset);
+    // Append the record value to data log
+    append_record(record, record_len, offset);
 
     // Append the index entries to index logs
     append_tokens(record_id, tkns);
 
-    // Atomically update the read tail of the log.
-    // This is done using CAS, and may have bounded waiting until
-    // all appends before the current_tail are completed.
-    atomic_advance_read_tail(current_tail, tail_increment);
+    olog_.end(record_id, offset, record_len);
 
     // Return record_id
-    return current_tail >> 32;
+    return record_id;
   }
 
   // Atomically fetch a record from the LogStore by its recordId. The record
@@ -99,17 +90,11 @@ class log_store {
   //
   // Returns true if the fetch is successful, false otherwise.
   const bool get(unsigned char* record, const int64_t record_id) {
-    // Get the current completed appends tail, and get the maximum valid key.
-    uint64_t current_tail = read_tail_.load();
-    uint32_t max_record_id = current_tail >> 32;
-
-    // If requested internal key is >= max_key, the write
-    // for the internal key hasn't completed yet. Return false
-    // indicating failure.
-    if (record_id >= max_record_id)
+    // Checks if the record_id has been written yet, returns false on failure.
+    if (!olog_.is_valid(record_id))
       return false;
 
-    uint32_t offset;
+    uint64_t offset;
     uint16_t length;
     olog_.lookup(record_id, offset, length);
 
@@ -124,93 +109,64 @@ class log_store {
   const void filter_time(std::set<int64_t>& results,
                          const unsigned char* token_prefix,
                          const uint32_t token_prefix_len) {
-    uint64_t current_tail = read_tail_.load();
-    filter(time_idx_, results, token_prefix, token_prefix_len, current_tail);
+    filter(time_idx_, results, token_prefix, token_prefix_len, olog_.num_ids());
   }
 
   // Atomically filter on src_ip.
   const void filter_src_ip(std::set<int64_t>& results,
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
-    uint64_t current_tail = read_tail_.load();
-    filter(srcip_idx_, results, token_prefix, token_prefix_len, current_tail);
+    filter(srcip_idx_, results, token_prefix, token_prefix_len,
+           olog_.num_ids());
   }
 
   // Atomically filter on dst_ip.
   const void filter_dst_ip(std::set<int64_t>& results,
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
-    uint64_t current_tail = read_tail_.load();
-    filter(dstip_idx_, results, token_prefix, token_prefix_len, current_tail);
+    filter(dstip_idx_, results, token_prefix, token_prefix_len,
+           olog_.num_ids());
   }
 
   // Atomically filter on src_port.
   const void filter_src_port(std::set<int64_t>& results,
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
-    uint64_t current_tail = read_tail_.load();
-    filter(srcprt_idx_, results, token_prefix, token_prefix_len, current_tail);
+    filter(srcprt_idx_, results, token_prefix, token_prefix_len,
+           olog_.num_ids());
   }
 
   // Atomically filter on dst_port.
   const void filter_dst_port(std::set<int64_t>& results,
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
-    uint64_t current_tail = read_tail_.load();
-    filter(dstprt_idx_, results, token_prefix, token_prefix_len, current_tail);
+    filter(dstprt_idx_, results, token_prefix, token_prefix_len,
+           olog_.num_ids());
   }
 
   // Atomically get the number of currently readable keys.
-  const uint32_t get_num_keys() {
-    uint64_t current_tail = read_tail_;
-    return current_tail >> 32;
+  const uint32_t num_ids() {
+    return olog_.num_ids();
   }
 
   // Atomically get the size of the currently readable portion of the LogStore.
-  const uint32_t get_size() {
-    uint64_t current_tail = read_tail_;
-    return current_tail & 0xFFFFFFFF;
+  const uint32_t size() {
+    return dtail_.load();
   }
 
  private:
-  // Compute the tail increment for a given record length.
-  //
-  // Returns the tail increment.
-  uint64_t increment_tail(uint16_t record_length) {
-    return KEY_INCR | record_length;
-  }
-
   // Atomically advance the write tail by the given amount.
   //
   // Returns the tail value just before the advance occurred.
-  uint64_t atomic_advance_write_tail(uint64_t tail_increment) {
-    return std::atomic_fetch_add(&write_tail_, tail_increment);
-  }
-
-  // Atomically advance the read tail by the given amount.
-  // Waits if there are appends before the expected append tail.
-  void atomic_advance_read_tail(uint64_t expected_tail,
-                                uint64_t tail_increment) {
-    while (!std::atomic_compare_exchange_weak(&read_tail_, &expected_tail,
-                                              expected_tail + tail_increment))
-      ;
+  uint64_t atomic_advance_tail(uint64_t tail_increment) {
+    return std::atomic_fetch_add(&dtail_, tail_increment);
   }
 
   // Append a (recordId, record) pair to the log store.
-  void append_record(uint32_t record_id, const unsigned char* record,
-                     uint16_t record_len, uint32_t offset) {
+  void append_record(const unsigned char* record, uint16_t record_len,
+                     uint32_t offset) {
 
-    // This thread now has exclusive access to
-    // (1) the `record_id` index within offset log, and
-    // (2) the region marked by (offset, offset + record_len)
-
-    // We can add the new record (offset, length) entry to the offset log
-    // and initialize its delete tail without worrying about locking,
-    // since we have exclusive access to the 'record_id' index in the
-    // offset log.
-    olog_.add(record_id, offset, record_len);
-
-    // Similarly, we can append the value to the log without locking since this
+    // We can append the value to the log without locking since this
     // thread has exclusive access to the region (offset, offset + record_len).
     memcpy(dlog_ + offset, record, record_len);
   }
@@ -230,11 +186,7 @@ class log_store {
   template<uint32_t L1, uint32_t L2>
   const void filter(indexlog<L1, L2>* ilog, std::set<int64_t>& results,
                     const unsigned char* token_prefix,
-                    const uint32_t token_prefix_len,
-                    const uint64_t current_tail) {
-
-    // Extract the maximum valid recordId and record offset.
-    uint32_t max_rid = current_tail >> 32;
+                    const uint32_t token_prefix_len, const uint64_t max_rid) {
 
     if (L2 > token_prefix_len) {
       // Determine the range of prefixes in ilog
@@ -258,7 +210,7 @@ class log_store {
         uint32_t size = list->size();
         for (uint32_t i = 0; i < size; i++) {
           uint32_t record_id = list->at(i) & 0xFFFFFFFF;
-          if (record_id < max_rid)
+          if (olog_.is_valid(record_id, max_rid))
             results.insert(record_id);
         }
       }
@@ -271,7 +223,7 @@ class log_store {
         // Don't need to check suffixes
         for (uint32_t i = 0; i < size; i++) {
           uint32_t record_id = list->at(i) & 0xFFFFFFFF;
-          if (record_id < max_rid)
+          if (olog_.is_valid(record_id, max_rid))
             results.insert(record_id);
         }
       } else {
@@ -283,17 +235,17 @@ class log_store {
           uint32_t entry_suffix = entry >> 32;
           uint32_t query_suffix = token_ops<L1, L2>::suffix(token_prefix);
           if (entry_suffix >> ignore == query_suffix >> ignore
-              && record_id < max_rid)
+              && olog_.is_valid(record_id, max_rid))
             results.insert(record_id);
         }
       }
     }
   }
 
+  // Data log and index log
   char *dlog_;                                 // Data log
   offsetlog olog_;                             // recordId-record offset mapping
-  std::atomic<uint64_t> write_tail_;           // Write tail
-  std::atomic<uint64_t> read_tail_;            // Read tail
+  std::atomic<uint64_t> dtail_;                 // Data log tail
 
   // Index logs
   indexlog<4, 3> *time_idx_;

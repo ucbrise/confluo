@@ -29,8 +29,8 @@ class __monolog_base {
   __monolog_base() {
     T* null_ptr = NULL;
     for (auto& x : buckets_)
-      x = null_ptr;
-    buckets_[0] = new T[FBS];
+      x.store(null_ptr);
+    buckets_[0].store(new T[FBS]);
   }
 
   // Sets the data at index idx to val. Allocates memory if necessary.
@@ -157,12 +157,110 @@ class __monolog_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
-                                           new_bucket)) {
+                                             new_bucket)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] new_bucket;
     }
 
     return size;
+  }
+
+  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
+};
+
+template<class T, uint32_t NBUCKETS = 32>
+class __atomic_monolog_base {
+
+  static_assert(std::is_fundamental<T>::value, "Type for atomic monolog must be primitive.");
+ public:
+  static const uint32_t FBS = 16;
+  static const uint32_t FBS_HIBIT = 4;
+
+  typedef std::atomic<T> __atomic_ref;
+  typedef std::atomic<__atomic_ref *> __atomic_bucket_ref;
+
+  __atomic_monolog_base() {
+    __atomic_ref* null_ptr = NULL;
+    for (auto& x : buckets_)
+      x = null_ptr;
+    buckets_[0] = new __atomic_ref[FBS];
+  }
+
+  void alloc(uint32_t idx) {
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = bit_utils::highest_bit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
+    if (buckets_[bucket_idx] == NULL)
+      try_allocate_bucket(bucket_idx);
+  }
+
+  // Atomically store value at index idx.
+  // Allocates memory if necessary.
+  void store(uint32_t idx, const T val) {
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = bit_utils::highest_bit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
+    if (buckets_[bucket_idx] == NULL)
+      try_allocate_bucket(bucket_idx);
+    buckets_[bucket_idx][bucket_off].store(val);
+  }
+
+  __atomic_ref& operator[](const uint32_t idx) {
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = bit_utils::highest_bit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
+    if (buckets_[bucket_idx] == NULL)
+      try_allocate_bucket(bucket_idx);
+    return buckets_[bucket_idx][bucket_off];
+  }
+
+  // Atomically loads the data at index idx.
+  T load(const uint32_t idx) const {
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = bit_utils::highest_bit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
+    return buckets_[bucket_idx][bucket_off].load();
+  }
+
+  bool cas(const uint32_t idx, T& expected, T replacement) {
+    uint32_t pos = idx + FBS;
+    uint32_t hibit = bit_utils::highest_bit(pos);
+    uint32_t bucket_off = pos ^ (1 << hibit);
+    uint32_t bucket_idx = hibit - FBS_HIBIT;
+    return buckets_[bucket_idx][bucket_off].compare_exchange_strong(expected,
+        replacement);
+  }
+
+protected:
+  // Tries to allocate the specifies bucket. If another thread has already
+  // succeeded in allocating the bucket, the current thread deallocates and
+  // returns.
+  uint32_t try_allocate_bucket(uint32_t bucket_idx) {
+    uint32_t size = (1U << (bucket_idx + FBS_HIBIT));
+    __atomic_ref* bucket = new_bucket(size);
+    __atomic_ref* null_ptr = NULL;
+
+    // Only one thread will be successful in replacing the NULL reference with newly
+    // allocated bucket.
+    if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
+            bucket)) {
+      // All other threads will deallocate the newly allocated bucket.
+      delete[] bucket;
+    }
+
+    return size;
+  }
+
+  __atomic_ref* new_bucket(uint32_t size) {
+    __atomic_ref* bucket = new __atomic_ref[size];
+    for(uint32_t i = 0; i < size; i++) {
+      std::atomic_init(&bucket[i], T(0));
+    }
+    return bucket;
   }
 
   std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
