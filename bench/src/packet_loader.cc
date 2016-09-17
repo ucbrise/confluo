@@ -88,6 +88,7 @@ void packet_loader::load_packets(const uint32_t num_threads,
                     timestamp_t end = get_timestamp();
                     double totsecs = (double) (end - start) / (1000.0 * 1000.0);
                     throughput = ((double) local_ops / totsecs);
+                    LOG(stderr, "Thread #%u finished in %lf s. Throughput: %lf.\n", totsecs, throughput);
                   } catch (std::exception &e) {
                     LOG(stderr, "Throughput thread ended prematurely.\n");
                   }
