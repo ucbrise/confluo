@@ -77,7 +77,7 @@ void packet_loader::load_packets(const uint32_t num_threads,
                     int64_t total_ops = 0;
 
                     timestamp_t start = get_timestamp();
-                    while (idx < thread_ops && get_timestamp() - start < timebound) {
+                    while (local_ops < thread_ops && get_timestamp() - start < timebound) {
                       total_ops = insert_packet(idx++);
                       local_ops++;
                       if (total_ops % kReportRecordInterval == 0) {
