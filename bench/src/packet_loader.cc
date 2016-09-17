@@ -77,9 +77,9 @@ void packet_loader::load_packets(const uint32_t num_threads,
                     int64_t total_ops = 0;
 
                     timestamp_t start = get_timestamp();
-                    while (idx < thread_ops && get_timestamp() - start < timebound) {
-                      total_ops = insert_packet(idx);
-                      local_ops += (total_ops > 0);
+                    while (local_ops < thread_ops && get_timestamp() - start < timebound) {
+                      total_ops = insert_packet(idx++);
+                      local_ops++;
                       if (total_ops % kReportRecordInterval == 0) {
                         std::lock_guard<std::mutex> lock(report_mtx);
                         rfs << get_timestamp() << "\t" << total_ops << "\n";
@@ -88,6 +88,7 @@ void packet_loader::load_packets(const uint32_t num_threads,
                     timestamp_t end = get_timestamp();
                     double totsecs = (double) (end - start) / (1000.0 * 1000.0);
                     throughput = ((double) local_ops / totsecs);
+                    LOG(stderr, "Thread #%u finished in %lf s. Throughput: %lf.\n", totsecs, throughput);
                   } catch (std::exception &e) {
                     LOG(stderr, "Throughput thread ended prematurely.\n");
                   }
