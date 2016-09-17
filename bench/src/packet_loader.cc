@@ -56,7 +56,6 @@ void packet_loader::load_data() {
 void packet_loader::load_packets(const uint32_t num_clients,
                                  const uint64_t timebound) {
 
-  std::condition_variable cvar;
   std::vector<std::thread> threads;
 
   std::ofstream rfs;

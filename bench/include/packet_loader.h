@@ -11,6 +11,7 @@
 #include <string>
 #include <atomic>
 #include <thread>
+#include <mutex>
 
 #include "logstore.h"
 
