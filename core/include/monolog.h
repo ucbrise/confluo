@@ -258,7 +258,7 @@ protected:
   __atomic_ref* new_bucket(uint32_t size) {
     __atomic_ref* bucket = new __atomic_ref[size];
     for(uint32_t i = 0; i < size; i++) {
-      std::atomic_init(&bucket[i], T(0));
+      bucket[i].store(T(0));
     }
     return bucket;
   }
