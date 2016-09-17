@@ -23,20 +23,15 @@ class packet_loader {
   typedef unsigned long long int timestamp_t;
   static const uint64_t kReportRecordInterval = 1000000;
 
-  int64_t insert_packet() {
-    uint64_t cur_id = id.fetch_add(1L);
-    if (cur_id >= timestamps_.size()) {
-      return -1L;
-    }
-
+  int64_t insert_packet(uint64_t idx) {
     tokens tkns;
-    tkns.time = (unsigned char*) (&timestamps_[cur_id]);
-    tkns.src_ip = (unsigned char*) (&srcips_[cur_id]);
-    tkns.dst_ip = (unsigned char*) (&dstips_[cur_id]);
-    tkns.src_prt = (unsigned char*) (&sports_[cur_id]);
-    tkns.dst_prt = (unsigned char*) (&dports_[cur_id]);
+    tkns.time = (unsigned char*) (&timestamps_[idx]);
+    tkns.src_ip = (unsigned char*) (&srcips_[idx]);
+    tkns.dst_ip = (unsigned char*) (&dstips_[idx]);
+    tkns.src_prt = (unsigned char*) (&sports_[idx]);
+    tkns.dst_prt = (unsigned char*) (&dports_[idx]);
 
-    return logstore_->insert(datas_[cur_id], datalens_[cur_id], tkns) + 1;
+    return logstore_->insert(datas_[idx], datalens_[idx], tkns) + 1;
   }
 
   uint32_t parse_ip(std::string ip) {
