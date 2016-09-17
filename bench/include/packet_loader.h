@@ -70,7 +70,6 @@ class packet_loader {
   std::vector<uint16_t> datalens_;
 
   log_store<UINT_MAX> *logstore_;
-  std::atomic<uint64_t> id;
 };
 
 #endif /* RAMCLOUDBENCHMARK_H_ */
