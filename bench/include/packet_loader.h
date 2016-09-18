@@ -51,7 +51,7 @@ class packet_loader {
 
   uint32_t parse_time(uint32_t time) {
     unsigned char* timearr = (unsigned char*) (&time);
-    uint32_t ret = timearr[2] << 24 | timearr[1] << 16 | timearr[0] << 8;
+    uint32_t ret = timearr[2] | timearr[1] << 8 | timearr[0] << 16;
     print_time(time, ret);
     return ret;
   }
