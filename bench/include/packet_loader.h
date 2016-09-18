@@ -42,12 +42,11 @@ class packet_loader {
   }
 
   uint32_t parse_ip(std::string& ip) {
-    unsigned char byte0, byte1, byte2, byte3;
+    unsigned char byte0 = 0, byte1 = 0, byte2 = 0, byte3 = 0;
     const char* ip_str = ip.c_str();
     sscanf(ip_str, "%u.%u.%u.%u", &byte3, &byte2, &byte1, &byte0);
     fprintf(stderr, "%u, %u, %u, %u\n", &byte3, &byte2, &byte1, &byte0);
-    uint32_t ret = byte0 | byte1 << 8 | byte2 << 16
-        | byte3 << 24;
+    uint32_t ret = byte0 | byte1 << 8 | byte2 << 16 | byte3 << 24;
     print_ip_bytes(ip, ret);
     return ret;
   }
