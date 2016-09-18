@@ -10,7 +10,7 @@ class DummyGenerator {
   }
 
   static void alloctokens(slog::tokens& tkns) {
-    tkns.time = new unsigned char[4];
+    tkns.time = new unsigned char[3];
     tkns.src_ip = new unsigned char[4];
     tkns.dst_ip = new unsigned char[4];
     tkns.src_prt = new unsigned char[2];
@@ -26,7 +26,7 @@ class DummyGenerator {
   }
 
   static void gentokens(slog::tokens& tkns, uint64_t val) {
-    gentok(tkns.time, 4, val);
+    gentok(tkns.time, 3, val);
     gentok(tkns.src_ip, 4, val);
     gentok(tkns.dst_ip, 4, val);
     gentok(tkns.src_prt, 2, val);
@@ -192,13 +192,6 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<uint64_t> results;
     DummyGenerator::gentokens(tkns, i);
-    ls.filter_time(results, tkns.time, 4);
-    ASSERT_EQ(results.size(), 10);
-    for (int64_t id : results) {
-      ASSERT_EQ(id % 256, i % 256);
-    }
-    results.clear();
-
     ls.filter_time(results, tkns.time, 3);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
@@ -313,13 +306,6 @@ TEST_F(LogStoreTest, HandleInsertAndFilterTest) {
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     std::set<uint64_t> results;
     DummyGenerator::gentokens(tkns, i);
-    ls->filter_time(results, tkns.time, 4);
-    ASSERT_EQ(results.size(), 10);
-    for (int64_t id : results) {
-      ASSERT_EQ(id % 256, i % 256);
-    }
-    results.clear();
-
     ls->filter_time(results, tkns.time, 3);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {

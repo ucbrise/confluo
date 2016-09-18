@@ -41,6 +41,18 @@ class token_ops<4, 3> {
 };
 
 template<>
+class token_ops<3, 3> {
+ public:
+  static uint32_t prefix(const unsigned char* token) {
+    return token[0] * 65536 + token[1] * 256 + token[2];
+  }
+
+  static uint32_t suffix(const unsigned char* token) {
+    return 0;
+  }
+};
+
+template<>
 class token_ops<2, 2> {
  public:
   static uint32_t prefix(const unsigned char* token) {

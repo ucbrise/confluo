@@ -141,7 +141,7 @@ class log_store {
     dtail_.store(0);
 
     olog_ = new offsetlog();
-    time_idx_ = new indexlog<4, 3>();
+    time_idx_ = new indexlog<3, 3>();
     srcip_idx_ = new indexlog<4, 3>();
     dstip_idx_ = new indexlog<4, 3>;
     srcprt_idx_ = new indexlog<2, 2>;
@@ -332,7 +332,7 @@ class log_store {
   std::atomic<uint64_t> dtail_;                // Data log tail
 
   // Index logs
-  indexlog<4, 3>* time_idx_;
+  indexlog<3, 3>* time_idx_;
   indexlog<4, 3>* srcip_idx_;
   indexlog<4, 3>* dstip_idx_;
   indexlog<2, 2>* srcprt_idx_;

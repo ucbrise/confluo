@@ -23,7 +23,7 @@ class packet_loader {
   typedef unsigned long long int timestamp_t;
   static const uint64_t kReportRecordInterval = 1000000;
 
-  int64_t insert_packet(log_store::handle* handle, uint64_t idx) {
+  uint64_t insert_packet(log_store::handle* handle, uint64_t idx) {
     tokens tkns;
     tkns.time = (unsigned char*) (&timestamps_[idx]);
     tkns.src_ip = (unsigned char*) (&srcips_[idx]);
@@ -34,11 +34,20 @@ class packet_loader {
     return handle->insert(datas_[idx], datalens_[idx], tkns) + 1;
   }
 
+  // Debug
+  uint64_t print_ip_bytes(uint32_t ip) {
+    unsigned char* ip_bytes = (unsigned char *) (&ip);
+    fprintf(stderr, "%u,%u,%u,%u\n", ip_bytes);
+  }
+
   uint32_t parse_ip(std::string ip) {
     char ip_raw[4];
     sscanf(ip.c_str(), "%uhh.%uhh.%uhh.%uhh", &ip_raw[3], &ip_raw[2],
            &ip_raw[1], &ip_raw[0]);
-    return ip_raw[0] | ip_raw[1] << 8 | ip_raw[2] << 16 | ip_raw[3] << 24;
+    uint32_t ret = ip_raw[0] | ip_raw[1] << 8 | ip_raw[2] << 16
+        | ip_raw[3] << 24;
+    print_ip_bytes(ret);
+    return ret;
   }
 
   packet_loader(std::string& data_path, std::string& attr_path,
