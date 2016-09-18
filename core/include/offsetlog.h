@@ -12,8 +12,9 @@ class offsetlog {
  public:
   offsetlog() {
     current_id_.store(0L);
-    for (auto& v : valid_) {
-      v.store(false);
+    valid_ = new std::atomic_bool[134217728];
+    for (uint64_t i = 0; i < 134217728; i++) {
+      valid_[i].store(false);
     }
   }
 
@@ -48,7 +49,7 @@ class offsetlog {
 
  private:
   __monolog_base <uint64_t, 32> offlens_;
-  std::array<std::atomic<bool>, 134217728> valid_;
+  std::atomic_bool* valid_;
   std::atomic<uint64_t> current_id_;
 };
 
