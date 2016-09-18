@@ -37,17 +37,17 @@ class packet_loader {
   // Debug
   uint64_t print_ip_bytes(std::string& orig_ip, uint32_t ip) {
     unsigned char* ip_bytes = (unsigned char *) (&ip);
-    fprintf(stderr, "%s : %u : %u,%u,%u,%u\n", orig_ip.c_str(), ip, ip_bytes[0], ip_bytes[1], ip_bytes[2], ip_bytes[3]);
+    fprintf(stderr, "%s : %u : %u,%u,%u,%u\n", orig_ip.c_str(), ip, ip_bytes[0],
+            ip_bytes[1], ip_bytes[2], ip_bytes[3]);
   }
 
   uint32_t parse_ip(std::string& ip) {
-    unsigned char ip_raw[4];
+    unsigned char byte0, byte1, byte2, byte3;
     const char* ip_str = ip.c_str();
-    sscanf(ip_str, "%u.%u.%u.%u", &ip_raw[3], &ip_raw[2],
-           &ip_raw[1], &ip_raw[0]);
-    fprintf(stderr, "%u, %u, %u, %u\n", ip_raw[0], ip_raw[1], ip_raw[2], ip_raw[3]);
-    uint32_t ret = ip_raw[0] | ip_raw[1] << 8 | ip_raw[2] << 16
-        | ip_raw[3] << 24;
+    sscanf(ip_str, "%u.%u.%u.%u", &byte3, &byte2, &byte1, &byte0);
+    fprintf(stderr, "%u, %u, %u, %u\n", &byte3, &byte2, &byte1, &byte0);
+    uint32_t ret = byte0 | byte1 << 8 | byte2 << 16
+        | byte3 << 24;
     print_ip_bytes(ip, ret);
     return ret;
   }
