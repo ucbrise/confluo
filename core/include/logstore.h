@@ -62,10 +62,6 @@ class log_store {
         remaining_bytes_ = data_block_size_;
       }
 
-      if (cur_offset_ + record_len >= LOG_SIZE) {
-        throw log_overflow_exception();
-      }
-
       handle_.append_record(record, record_len, cur_offset_);
       handle_.append_tokens(cur_id_, tkns);
       handle_.olog_->set(cur_id_, cur_offset_, record_len);
@@ -140,7 +136,7 @@ class log_store {
 
     // Note: we can use a lock-free exponentially or linear growing allocator
     // to make the Log dynamically sized rather than static.
-    dlog_ = new char[LOG_SIZE];
+    dlog_ = new __monolog_linear_base<unsigned char>;
 
     // Initialize data log tail to 0
     dtail_.store(0);
@@ -157,16 +153,9 @@ class log_store {
                   const tokens& tkns) {
     // Atomically update the tail of the log
     uint64_t offset = request_bytes(record_len);
+
     // Start the insertion by obtaining a record id from offset log
     uint64_t record_id = olog_->start(offset, record_len);
-
-    // Throw an exception if internal key greater than the largest valid
-    // internal key or end of the value goes beyond maximum Log size.
-    //
-    // TODO: Replace data log with monolog structure, so that
-    // log_overflow_exception never occurs.
-    if (offset + record_len >= LOG_SIZE)
-      throw log_overflow_exception();
 
     // Append the record value to data log
     append_record(record, record_len, offset);
@@ -194,7 +183,7 @@ class log_store {
     olog_->lookup(record_id, offset, length);
 
     // Copy data from data log to record buffer.
-    memcpy(record, dlog_ + offset, length);
+    dlog_->read(offset, record, length);
 
     // Return true for successful get.
     return true;
@@ -264,7 +253,7 @@ class log_store {
 
     // We can append the value to the log without locking since this
     // thread has exclusive access to the region (offset, offset + record_len).
-    memcpy(dlog_ + offset, record, record_len);
+    dlog_->write(offset, record, record_len);
   }
 
   // Append (token, recordId) entries to index log.
@@ -339,7 +328,7 @@ class log_store {
   }
 
   // Data log and index log
-  char *dlog_;                                 // Data log
+  __monolog_linear_base<unsigned char>* dlog_; // Data log
   offsetlog* olog_;                            // recordId-record offset mapping
   std::atomic<uint64_t> dtail_;                // Data log tail
 

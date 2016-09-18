@@ -181,6 +181,55 @@ class __monolog_base {
   std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
 };
 
+template<class T, uint32_t NBUCKETS = 32, uint32_t BLOCK_SIZE = 4294967274U>
+class __monolog_linear_base {
+ public:
+  typedef std::atomic<T*> __atomic_bucket_ref;
+
+  __monolog_linear_base() {
+    T* null_ptr = NULL;
+    for (auto& x : buckets_)
+      x = null_ptr;
+    buckets_[0] = new T[BLOCK_SIZE];
+  }
+
+  // Write len bytes of data at offset.
+  // Allocates memory if necessary.
+  void write(const uint64_t offset, const T* data, const uint32_t len) {
+    uint32_t bucket_idx = offset / BLOCK_SIZE;
+    uint32_t bucket_off = offset % BLOCK_SIZE;
+    if (buckets_[bucket_idx] == NULL)
+      try_allocate_bucket(bucket_idx);
+    memcpy(buckets_[bucket_idx].load() + bucket_off, data, len);
+  }
+
+  // Get len bytes of data at offset.
+  void read(const uint64_t offset, T* data, const uint32_t len) const {
+    uint32_t bucket_idx = offset / BLOCK_SIZE;
+    uint32_t bucket_off = offset % BLOCK_SIZE;
+    memcpy(data, buckets_[bucket_idx].load() + bucket_off, len);
+  }
+
+ protected:
+  // Tries to allocate the specifies bucket. If another thread has already
+  // succeeded in allocating the bucket, the current thread deallocates and
+  // returns.
+  void try_allocate_bucket(uint32_t bucket_idx) {
+    T* bucket = new T[BLOCK_SIZE];
+    T* null_ptr = NULL;
+
+    // Only one thread will be successful in replacing the NULL reference with newly
+    // allocated bucket.
+    if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
+            bucket)) {
+      // All other threads will deallocate the newly allocated bucket.
+      delete[] bucket;
+    }
+  }
+
+  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
+};
+
 template<class T, uint32_t NBUCKETS = 32>
 class __atomic_monolog_base {
 
