@@ -41,7 +41,7 @@ void packet_loader::load_data() {
     attr_stream >> ts >> len >> srcip >> dstip >> sport >> dport;
     unsigned char* data = new unsigned char[len];
     ind.read((char*) data, len);
-    timestamps_.push_back(ts);
+    timestamps_.push_back(parse_time(ts));
     srcips_.push_back(parse_ip(srcip));
     dstips_.push_back(parse_ip(srcip));
     sports_.push_back(sport);

@@ -34,18 +34,26 @@ class packet_loader {
     return handle->insert(datas_[idx], datalens_[idx], tkns) + 1;
   }
 
-  // Debug
-  uint64_t print_ip_bytes(std::string& orig_ip, uint32_t ip) {
-    unsigned char* ip_bytes = (unsigned char *) (&ip);
-    fprintf(stderr, "%s : %u : %u,%u,%u,%u\n", orig_ip.c_str(), ip, ip_bytes[0],
-            ip_bytes[1], ip_bytes[2], ip_bytes[3]);
-  }
-
   uint32_t parse_ip(std::string& ip) {
     uint32_t byte0 = 0, byte1 = 0, byte2 = 0, byte3 = 0;
     sscanf(ip.c_str(), "%u.%u.%u.%u", &byte3, &byte2, &byte1, &byte0);
-    print_ip_bytes(ip, byte3 | byte2 << 8 | byte1 << 16 | byte0 << 24);
     return byte3 | byte2 << 8 | byte1 << 16 | byte0 << 24;
+  }
+
+  void print_time(uint32_t orig, uint32_t parsed) {
+    unsigned char* orig_arr = (unsigned char*) (&orig);
+    unsigned char* parsed_arr = (unsigned char*) (&parsed);
+
+    fprintf(stderr, "Orig: %u,%u,%u,%u, Parsed: %u,%u,%u,%u\n", orig_arr[0],
+            orig_arr[1], orig_arr[2], orig_arr[3], parsed_arr[0], parsed_arr[1],
+            parsed_arr[2], parsed_arr[3]);
+  }
+
+  uint32_t parse_time(uint32_t time) {
+    unsigned char* timearr = (unsigned char*) (&time);
+    uint32_t ret = timearr[2] << 24 | timearr[1] << 16 | timearr[0] << 8;
+    print_time(time, ret);
+    return ret;
   }
 
   packet_loader(std::string& data_path, std::string& attr_path,
