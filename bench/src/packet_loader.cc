@@ -44,8 +44,8 @@ void packet_loader::load_data() {
     timestamps_.push_back(parse_time(ts));
     srcips_.push_back(parse_ip(srcip));
     dstips_.push_back(parse_ip(srcip));
-    sports_.push_back(sport);
-    dports_.push_back(dport);
+    sports_.push_back(parse_port(sport));
+    dports_.push_back(parse_port(dport));
     datas_.push_back(data);
     datalens_.push_back(len);
   }

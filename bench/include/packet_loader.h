@@ -40,19 +40,23 @@ class packet_loader {
     return byte3 | byte2 << 8 | byte1 << 16 | byte0 << 24;
   }
 
-  void print_time(uint32_t orig, uint32_t parsed) {
+  void print_port(uint16_t orig, uint16_t parsed) {
     unsigned char* orig_arr = (unsigned char*) (&orig);
     unsigned char* parsed_arr = (unsigned char*) (&parsed);
 
     fprintf(stderr, "Orig: %u,%u,%u,%u, Parsed: %u,%u,%u,%u\n", orig_arr[0],
-            orig_arr[1], orig_arr[2], orig_arr[3], parsed_arr[0], parsed_arr[1],
-            parsed_arr[2], parsed_arr[3]);
+            orig_arr[1], parsed_arr[0], parsed_arr[1]);
   }
 
   uint32_t parse_time(uint32_t time) {
     unsigned char* timearr = (unsigned char*) (&time);
-    uint32_t ret = timearr[2] | timearr[1] << 8 | timearr[0] << 16;
-    print_time(time, ret);
+    return timearr[2] | timearr[1] << 8 | timearr[0] << 16;
+  }
+
+  uint16_t parse_port(uint16_t port) {
+    unsigned char* portarr = (unsigned char*) (&port);
+    uint16_t ret = portarr[1] | portarr[0] << 8;
+    print_port(port, ret);
     return ret;
   }
 
