@@ -46,7 +46,7 @@ class packet_loader {
     const char* ip_str = ip.c_str();
     sscanf(ip_str, "%u.%u.%u.%u", &byte3, &byte2, &byte1, &byte0);
     fprintf(stderr, "%u, %u, %u, %u\n", byte3, byte2, byte1, byte0);
-    uint32_t ret = byte0 | byte1 << 8 | byte2 << 16 | byte3 << 24;
+    uint32_t ret = byte3 | byte2 << 8 | byte1 << 16 | byte0 << 24;
     print_ip_bytes(ip, ret);
     return ret;
   }
