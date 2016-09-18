@@ -2,7 +2,6 @@
 
 #include "gtest/gtest.h"
 
-#define kLogStoreSize 4194304
 #define kMaxKeys 2560
 
 class DummyGenerator {
@@ -58,7 +57,7 @@ class LogStoreTest : public testing::Test {
 };
 
 TEST_F(LogStoreTest, InsertAndGetTest) {
-  slog::log_store<kLogStoreSize> ls;
+  slog::log_store ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     DummyGenerator::gentok(hdr, 40, i);
     DummyGenerator::gentokens(tkns, i);
@@ -77,8 +76,8 @@ TEST_F(LogStoreTest, InsertAndGetTest) {
 }
 
 TEST_F(LogStoreTest, HandleInsertAndGetTest) {
-  slog::log_store<kLogStoreSize> ls_orig;
-  slog::log_store<kLogStoreSize>::handle* ls = ls_orig.get_handle();
+  slog::log_store ls_orig;
+  slog::log_store::handle* ls = ls_orig.get_handle();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     DummyGenerator::gentok(hdr, 40, i);
     DummyGenerator::gentokens(tkns, i);
@@ -97,7 +96,7 @@ TEST_F(LogStoreTest, HandleInsertAndGetTest) {
 }
 
 TEST_F(LogStoreTest, InsertAndFilterTest) {
-  slog::log_store<kLogStoreSize> ls;
+  slog::log_store ls;
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     DummyGenerator::gentok(hdr, 40, i);
     DummyGenerator::gentokens(tkns, i);
@@ -217,8 +216,8 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
 }
 
 TEST_F(LogStoreTest, HandleInsertAndFilterTest) {
-  slog::log_store<kLogStoreSize> ls_orig;
-  slog::log_store<kLogStoreSize>::handle* ls = ls_orig.get_handle();
+  slog::log_store ls_orig;
+  slog::log_store::handle* ls = ls_orig.get_handle();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     DummyGenerator::gentok(hdr, 40, i);
     DummyGenerator::gentokens(tkns, i);

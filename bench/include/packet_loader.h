@@ -23,7 +23,7 @@ class packet_loader {
   typedef unsigned long long int timestamp_t;
   static const uint64_t kReportRecordInterval = 1000000;
 
-  int64_t insert_packet(log_store<68719476736L>::handle* handle, uint64_t idx) {
+  int64_t insert_packet(log_store::handle* handle, uint64_t idx) {
     tokens tkns;
     tkns.time = (unsigned char*) (&timestamps_[idx]);
     tkns.src_ip = (unsigned char*) (&srcips_[idx]);
@@ -69,7 +69,7 @@ class packet_loader {
   std::vector<unsigned char*> datas_;
   std::vector<uint16_t> datalens_;
 
-  log_store<68719476736L> *logstore_;
+  log_store *logstore_;
 };
 
 #endif /* RAMCLOUDBENCHMARK_H_ */

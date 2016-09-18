@@ -33,12 +33,11 @@ struct tokens {
   unsigned char* dst_prt;
 };
 
-template<uint64_t LOG_SIZE = UINT_MAX>
 class log_store {
  public:
   struct handle {
    public:
-    handle(log_store<LOG_SIZE>& handle, uint64_t request_batch_size = 256,
+    handle(log_store& handle, uint64_t request_batch_size = 256,
            uint64_t data_block_size = 256 * 54)
         : handle_(handle) {
       id_block_size_ = request_batch_size;
@@ -123,7 +122,7 @@ class log_store {
     uint64_t cur_offset_;
     uint64_t remaining_bytes_;
 
-    log_store<LOG_SIZE>& handle_;
+    log_store& handle_;
   };
 
   handle* get_handle() {

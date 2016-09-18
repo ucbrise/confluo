@@ -17,7 +17,7 @@ packet_loader::packet_loader(std::string& data_path, std::string& attr_path,
   attr_path_ = std::string(resolved_path);
   hostname_ = hostname;
 
-  logstore_ = new log_store<68719476736L>();
+  logstore_ = new log_store();
 
   LOG(stderr, "Loading data...\n");
   load_data();
@@ -69,7 +69,7 @@ void packet_loader::load_packets(const uint32_t num_threads,
             std::thread(
                 [i, timebound, thread_ops, &rfs, &report_mtx, this] {
                   uint64_t idx = thread_ops * i;
-                  log_store<68719476736L>::handle* handle = logstore_->get_handle();
+                  log_store::handle* handle = logstore_->get_handle();
                   double throughput = 0;
                   LOG(stderr, "Starting benchmark.\n");
 
