@@ -42,7 +42,8 @@ class packet_loader {
 
   uint32_t parse_ip(std::string& ip) {
     char ip_raw[4];
-    sscanf(ip.c_str(), "%u.%u.%u.%u", &ip_raw[3], &ip_raw[2],
+    char* ip_str = ip.c_str();
+    sscanf(ip_str, "%u.%u.%u.%u", &ip_raw[3], &ip_raw[2],
            &ip_raw[1], &ip_raw[0]);
     uint32_t ret = ip_raw[0] | ip_raw[1] << 8 | ip_raw[2] << 16
         | ip_raw[3] << 24;
