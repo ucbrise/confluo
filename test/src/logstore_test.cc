@@ -19,11 +19,11 @@ class DummyGenerator {
   }
 
   static void freetokens(slog::tokens& tkns) {
-    delete []tkns.time;
-    delete []tkns.src_ip;
-    delete []tkns.dst_ip;
-    delete []tkns.src_prt;
-    delete []tkns.dst_prt;
+    delete[] tkns.time;
+    delete[] tkns.src_ip;
+    delete[] tkns.dst_ip;
+    delete[] tkns.src_prt;
+    delete[] tkns.dst_prt;
   }
 
   static void gentokens(slog::tokens& tkns, uint64_t val) {
@@ -68,6 +68,26 @@ TEST_F(LogStoreTest, InsertAndGetTest) {
   unsigned char ret[40];
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     bool success = ls.get(ret, i);
+    ASSERT_TRUE(success);
+    for (uint32_t j = 0; j < 40; j++) {
+      unsigned char expected = i % 256;
+      ASSERT_EQ(ret[j], expected);
+    }
+  }
+}
+
+TEST_F(LogStoreTest, HandleInsertAndGetTest) {
+  slog::log_store<kLogStoreSize> ls_orig;
+  slog::log_store<kLogStoreSize>::handle* ls = ls_orig.get_handle();
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    DummyGenerator::gentok(hdr, 40, i);
+    DummyGenerator::gentokens(tkns, i);
+    ls->insert(hdr, 40, tkns);
+  }
+
+  unsigned char ret[40];
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    bool success = ls->get(ret, i);
     ASSERT_TRUE(success);
     for (uint32_t j = 0; j < 40; j++) {
       unsigned char expected = i % 256;
@@ -188,6 +208,127 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
     results.clear();
 
     ls.filter_time(results, tkns.time, 2);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+  }
+}
+
+TEST_F(LogStoreTest, HandleInsertAndFilterTest) {
+  slog::log_store<kLogStoreSize> ls_orig;
+  slog::log_store<kLogStoreSize>::handle* ls = ls_orig.get_handle();
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    DummyGenerator::gentok(hdr, 40, i);
+    DummyGenerator::gentokens(tkns, i);
+    ls->insert(hdr, 40, tkns);
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    DummyGenerator::gentokens(tkns, i);
+    ls->filter_src_ip(results, tkns.src_ip, 4);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_src_ip(results, tkns.src_ip, 3);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_src_ip(results, tkns.src_ip, 2);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    DummyGenerator::gentokens(tkns, i);
+    ls->filter_dst_ip(results, tkns.dst_ip, 4);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_dst_ip(results, tkns.dst_ip, 3);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_dst_ip(results, tkns.dst_ip, 2);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    DummyGenerator::gentokens(tkns, i);
+    ls->filter_src_port(results, tkns.src_prt, 2);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_src_port(results, tkns.src_prt, 1);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    DummyGenerator::gentokens(tkns, i);
+    ls->filter_dst_port(results, tkns.dst_prt, 2);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_dst_port(results, tkns.dst_prt, 1);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+  }
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    std::set<int64_t> results;
+    DummyGenerator::gentokens(tkns, i);
+    ls->filter_time(results, tkns.time, 4);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_time(results, tkns.time, 3);
+    ASSERT_EQ(results.size(), 10);
+    for (int64_t id : results) {
+      ASSERT_EQ(id % 256, i % 256);
+    }
+    results.clear();
+
+    ls->filter_time(results, tkns.time, 2);
     ASSERT_EQ(results.size(), 10);
     for (int64_t id : results) {
       ASSERT_EQ(id % 256, i % 256);

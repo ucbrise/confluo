@@ -39,6 +39,88 @@ class log_store {
   // The internal key component of the tail increment for appends and updates.
   static const uint64_t KEY_INCR = 1ULL << 32;
 
+  struct handle {
+   public:
+    handle(log_store<LOG_SIZE>& handle, uint32_t request_batch_size = 16) : handle_(handle) {
+      remaining_ids_ = 0;
+      id_block_size_ = request_batch_size;
+      cur_start_id_ = 0;
+    }
+
+    uint64_t insert(const unsigned char* record, uint16_t record_len,
+                    const tokens& tkns) {
+      if (remaining_ids_ == 0) {
+        cur_start_id_ = handle_.olog_->request_id_block(id_block_size_);
+        remaining_ids_ = id_block_size_;
+      }
+
+      uint64_t offset = handle_.atomic_advance_tail(record_len);
+
+      if (offset + record_len >= LOG_SIZE) {
+        throw log_overflow_exception();
+      }
+
+      handle_.append_record(record, record_len, offset);
+      handle_.append_tokens(cur_start_id_, tkns);
+      handle_.olog_->set(cur_start_id_, offset, record_len);
+      handle_.olog_->end(cur_start_id_);
+      remaining_ids_--;
+      return ++cur_start_id_;
+    }
+
+    const bool get(unsigned char* record, const int64_t record_id) {
+      return handle_.get(record, record_id);
+    }
+
+    const void filter_time(std::set<int64_t>& results,
+                           const unsigned char* token_prefix,
+                           const uint32_t token_prefix_len) {
+      handle_.filter_time(results, token_prefix, token_prefix_len);
+    }
+
+    const void filter_src_ip(std::set<int64_t>& results,
+                             const unsigned char* token_prefix,
+                             const uint32_t token_prefix_len) {
+      handle_.filter_src_ip(results, token_prefix, token_prefix_len);
+    }
+
+    const void filter_dst_ip(std::set<int64_t>& results,
+                             const unsigned char* token_prefix,
+                             const uint32_t token_prefix_len) {
+      handle_.filter_time(results, token_prefix, token_prefix_len);
+    }
+
+    const void filter_src_port(std::set<int64_t>& results,
+                               const unsigned char* token_prefix,
+                               const uint32_t token_prefix_len) {
+      handle_.filter_src_port(results, token_prefix, token_prefix_len);
+    }
+
+    const void filter_dst_port(std::set<int64_t>& results,
+                               const unsigned char* token_prefix,
+                               const uint32_t token_prefix_len) {
+      handle_.filter_dst_port(results, token_prefix, token_prefix_len);
+    }
+
+    const uint64_t num_ids() {
+      return handle_.num_ids();
+    }
+
+    const uint64_t size() {
+      return handle_.size();
+    }
+
+   private:
+    uint64_t id_block_size_;
+    uint64_t cur_start_id_;
+    uint32_t remaining_ids_;
+    log_store<LOG_SIZE>& handle_;
+  };
+
+  handle* get_handle() {
+    return new handle(*this);
+  }
+
   // Constructor to initialize the LogStore.
   log_store() {
     // Initialize the log store to a constant size.
@@ -50,11 +132,12 @@ class log_store {
     // Initialize data log tail to 0
     dtail_.store(0);
 
+    olog_ = new offsetlog();
     time_idx_ = new indexlog<4, 3>();
     srcip_idx_ = new indexlog<4, 3>();
-    dstip_idx_ = new indexlog<4, 3>();
-    srcprt_idx_ = new indexlog<2, 2>();
-    dstprt_idx_ = new indexlog<2, 2>();
+    dstip_idx_ = new indexlog<4, 3>;
+    srcprt_idx_ = new indexlog<2, 2>;
+    dstprt_idx_ = new indexlog<2, 2>;
   }
 
   uint64_t insert(const unsigned char* record, uint16_t record_len,
@@ -62,7 +145,7 @@ class log_store {
     // Atomically update the tail of the log
     uint64_t offset = atomic_advance_tail(record_len);
     // Start the insertion by obtaining a record id from offset log
-    uint64_t record_id = olog_.start(offset, record_len);
+    uint64_t record_id = olog_->start(offset, record_len);
 
     // Throw an exception if internal key greater than the largest valid
     // internal key or end of the value goes beyond maximum Log size.
@@ -78,7 +161,7 @@ class log_store {
     // Append the index entries to index logs
     append_tokens(record_id, tkns);
 
-    olog_.end(record_id);
+    olog_->end(record_id);
 
     // Return record_id
     return record_id;
@@ -90,12 +173,12 @@ class log_store {
   // Returns true if the fetch is successful, false otherwise.
   const bool get(unsigned char* record, const int64_t record_id) {
     // Checks if the record_id has been written yet, returns false on failure.
-    if (!olog_.is_valid(record_id))
+    if (!olog_->is_valid(record_id))
       return false;
 
     uint64_t offset;
     uint16_t length;
-    olog_.lookup(record_id, offset, length);
+    olog_->lookup(record_id, offset, length);
 
     // Copy data from data log to record buffer.
     memcpy(record, dlog_ + offset, length);
@@ -108,7 +191,8 @@ class log_store {
   const void filter_time(std::set<int64_t>& results,
                          const unsigned char* token_prefix,
                          const uint32_t token_prefix_len) {
-    filter(time_idx_, results, token_prefix, token_prefix_len, olog_.num_ids());
+    filter(time_idx_, results, token_prefix, token_prefix_len,
+           olog_->num_ids());
   }
 
   // Atomically filter on src_ip.
@@ -116,7 +200,7 @@ class log_store {
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
     filter(srcip_idx_, results, token_prefix, token_prefix_len,
-           olog_.num_ids());
+           olog_->num_ids());
   }
 
   // Atomically filter on dst_ip.
@@ -124,7 +208,7 @@ class log_store {
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
     filter(dstip_idx_, results, token_prefix, token_prefix_len,
-           olog_.num_ids());
+           olog_->num_ids());
   }
 
   // Atomically filter on src_port.
@@ -132,7 +216,7 @@ class log_store {
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
     filter(srcprt_idx_, results, token_prefix, token_prefix_len,
-           olog_.num_ids());
+           olog_->num_ids());
   }
 
   // Atomically filter on dst_port.
@@ -140,16 +224,16 @@ class log_store {
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
     filter(dstprt_idx_, results, token_prefix, token_prefix_len,
-           olog_.num_ids());
+           olog_->num_ids());
   }
 
   // Atomically get the number of currently readable keys.
-  const uint32_t num_ids() {
-    return olog_.num_ids();
+  const uint64_t num_ids() {
+    return olog_->num_ids();
   }
 
   // Atomically get the size of the currently readable portion of the LogStore.
-  const uint32_t size() {
+  const uint64_t size() {
     return dtail_.load();
   }
 
@@ -209,7 +293,7 @@ class log_store {
         uint32_t size = list->size();
         for (uint32_t i = 0; i < size; i++) {
           uint32_t record_id = list->at(i) & 0xFFFFFFFF;
-          if (olog_.is_valid(record_id, max_rid))
+          if (olog_->is_valid(record_id, max_rid))
             results.insert(record_id);
         }
       }
@@ -222,7 +306,7 @@ class log_store {
         // Don't need to check suffixes
         for (uint32_t i = 0; i < size; i++) {
           uint32_t record_id = list->at(i) & 0xFFFFFFFF;
-          if (olog_.is_valid(record_id, max_rid))
+          if (olog_->is_valid(record_id, max_rid))
             results.insert(record_id);
         }
       } else {
@@ -234,7 +318,7 @@ class log_store {
           uint32_t entry_suffix = entry >> 32;
           uint32_t query_suffix = token_ops<L1, L2>::suffix(token_prefix);
           if (entry_suffix >> ignore == query_suffix >> ignore
-              && olog_.is_valid(record_id, max_rid))
+              && olog_->is_valid(record_id, max_rid))
             results.insert(record_id);
         }
       }
@@ -243,15 +327,15 @@ class log_store {
 
   // Data log and index log
   char *dlog_;                                 // Data log
-  offsetlog olog_;                             // recordId-record offset mapping
-  std::atomic<uint64_t> dtail_;                 // Data log tail
+  offsetlog* olog_;                            // recordId-record offset mapping
+  std::atomic<uint64_t> dtail_;                // Data log tail
 
   // Index logs
-  indexlog<4, 3> *time_idx_;
-  indexlog<4, 3> *srcip_idx_;
-  indexlog<4, 3> *dstip_idx_;
-  indexlog<2, 2> *srcprt_idx_;
-  indexlog<2, 2> *dstprt_idx_;
+  indexlog<4, 3>* time_idx_;
+  indexlog<4, 3>* srcip_idx_;
+  indexlog<4, 3>* dstip_idx_;
+  indexlog<2, 2>* srcprt_idx_;
+  indexlog<2, 2>* dstprt_idx_;
 };
 }
 

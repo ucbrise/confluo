@@ -33,6 +33,19 @@ class __monolog_base {
     buckets_[0].store(new T[FBS]);
   }
 
+  void ensure_alloc(uint32_t start_idx, uint32_t end_idx) {
+    uint32_t pos1 = start_idx + FBS;
+    uint32_t pos2 = end_idx + FBS;
+    uint32_t hibit1 = bit_utils::highest_bit(pos1);
+    uint32_t hibit2 = bit_utils::highest_bit(pos2);
+    uint32_t bucket_idx1 = hibit1 - FBS_HIBIT;
+    uint32_t bucket_idx2 = hibit2 - FBS_HIBIT;
+    for (uint32_t i = bucket_idx1; i <= bucket_idx2; i++) {
+      if (buckets_[i] == NULL)
+        try_allocate_bucket(i);
+    }
+  }
+
   // Sets the data at index idx to val. Allocates memory if necessary.
   void set(uint32_t idx, const T val) {
     uint32_t pos = idx + FBS;
@@ -182,7 +195,7 @@ class __atomic_monolog_base {
   __atomic_monolog_base() {
     __atomic_ref* null_ptr = NULL;
     for (auto& x : buckets_)
-      x = null_ptr;
+    x = null_ptr;
     buckets_[0] = new __atomic_ref[FBS];
   }
 
@@ -192,7 +205,7 @@ class __atomic_monolog_base {
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
     if (buckets_[bucket_idx] == NULL)
-      try_allocate_bucket(bucket_idx);
+    try_allocate_bucket(bucket_idx);
   }
 
   // Atomically store value at index idx.
@@ -203,7 +216,7 @@ class __atomic_monolog_base {
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
     if (buckets_[bucket_idx] == NULL)
-      try_allocate_bucket(bucket_idx);
+    try_allocate_bucket(bucket_idx);
     buckets_[bucket_idx][bucket_off].store(val);
   }
 
@@ -213,7 +226,7 @@ class __atomic_monolog_base {
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
     if (buckets_[bucket_idx] == NULL)
-      try_allocate_bucket(bucket_idx);
+    try_allocate_bucket(bucket_idx);
     return buckets_[bucket_idx][bucket_off];
   }
 
