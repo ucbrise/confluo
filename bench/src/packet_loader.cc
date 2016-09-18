@@ -57,20 +57,17 @@ void packet_loader::load_packets(const uint32_t num_threads,
                                  const uint64_t timebound) {
 
   std::vector<std::thread> threads;
-
-  std::ofstream rfs;
-  rfs.open("record_progress");
-
-  std::mutex report_mtx;
   uint64_t thread_ops = timestamps_.size() / num_threads;
   for (uint32_t i = 0; i < num_threads; i++) {
     threads.push_back(
         std::move(
             std::thread(
-                [i, timebound, thread_ops, &rfs, &report_mtx, this] {
+                [i, timebound, thread_ops, this] {
                   uint64_t idx = thread_ops * i;
                   log_store::handle* handle = logstore_->get_handle();
                   double throughput = 0;
+                  std::ofstream rfs;
+                  rfs.open("record_progress_" + std::to_string(i));
                   LOG(stderr, "Starting benchmark.\n");
 
                   try {
@@ -82,7 +79,6 @@ void packet_loader::load_packets(const uint32_t num_threads,
                       total_ops = insert_packet(handle, idx++);
                       local_ops++;
                       if (total_ops % kReportRecordInterval == 0) {
-                        std::lock_guard<std::mutex> lock(report_mtx);
                         rfs << get_timestamp() << "\t" << total_ops << "\n";
                       }
                     }
@@ -94,9 +90,7 @@ void packet_loader::load_packets(const uint32_t num_threads,
                     LOG(stderr, "Throughput thread ended prematurely.\n");
                   }
 
-                  LOG(stderr, "Throughput: %lf\n", throughput);
-
-                  std::ofstream ofs("write_throughput", std::ofstream::out | std::ofstream::app);
+                  std::ofstream ofs("write_throughput_" + std::to_string(i));
                   ofs << throughput << "\n";
                   ofs.close();
                 })));
