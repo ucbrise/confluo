@@ -44,7 +44,7 @@ class packet_loader {
     unsigned char* orig_arr = (unsigned char*) (&orig);
     unsigned char* parsed_arr = (unsigned char*) (&parsed);
 
-    fprintf(stderr, "Orig: %u,%u,%u,%u, Parsed: %u,%u,%u,%u\n", orig_arr[0],
+    fprintf(stderr, "Orig: %u,%u, Parsed: %u,%u\n", orig_arr[0],
             orig_arr[1], parsed_arr[0], parsed_arr[1]);
   }
 
