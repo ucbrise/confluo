@@ -41,31 +41,41 @@ class log_store {
 
   struct handle {
    public:
-    handle(log_store<LOG_SIZE>& handle, uint32_t request_batch_size = 64) : handle_(handle) {
-      remaining_ids_ = 0;
+    handle(log_store<LOG_SIZE>& handle, uint32_t request_batch_size = 64,
+           uint32_t data_block_size = 4096)
+        : handle_(handle) {
       id_block_size_ = request_batch_size;
-      cur_start_id_ = 0;
+      remaining_ids_ = 0;
+      cur_id_ = 0;
+
+      data_block_size_ = data_block_size;
+      remaining_bytes_ = 0;
+      cur_offset_ = 0;
     }
 
     uint64_t insert(const unsigned char* record, uint16_t record_len,
                     const tokens& tkns) {
       if (remaining_ids_ == 0) {
-        cur_start_id_ = handle_.olog_->request_id_block(id_block_size_);
+        cur_id_ = handle_.olog_->request_id_block(id_block_size_);
         remaining_ids_ = id_block_size_;
       }
 
-      uint64_t offset = handle_.atomic_advance_tail(record_len);
+      if (remaining_bytes_ < record_len) {
+        cur_offset_ = handle_.request_bytes(data_block_size_);
+        remaining_bytes_ = data_block_size_;
+      }
 
-      if (offset + record_len >= LOG_SIZE) {
+      if (cur_offset_ + record_len >= LOG_SIZE) {
         throw log_overflow_exception();
       }
 
-      handle_.append_record(record, record_len, offset);
-      handle_.append_tokens(cur_start_id_, tkns);
-      handle_.olog_->set(cur_start_id_, offset, record_len);
-      handle_.olog_->end(cur_start_id_);
+      handle_.append_record(record, record_len, cur_offset_);
+      handle_.append_tokens(cur_id_, tkns);
+      handle_.olog_->set(cur_id_, cur_offset_, record_len);
+      handle_.olog_->end(cur_id_);
       remaining_ids_--;
-      return ++cur_start_id_;
+      cur_offset_ += record_len;
+      return ++cur_id_;
     }
 
     const bool get(unsigned char* record, const int64_t record_id) {
@@ -111,9 +121,15 @@ class log_store {
     }
 
    private:
+    uint64_t data_block_size_;
     uint64_t id_block_size_;
-    uint64_t cur_start_id_;
+
+    uint64_t cur_id_;
     uint32_t remaining_ids_;
+
+    uint64_t cur_offset_;
+    uint64_t remaining_bytes_;
+
     log_store<LOG_SIZE>& handle_;
   };
 
@@ -143,7 +159,7 @@ class log_store {
   uint64_t insert(const unsigned char* record, uint16_t record_len,
                   const tokens& tkns) {
     // Atomically update the tail of the log
-    uint64_t offset = atomic_advance_tail(record_len);
+    uint64_t offset = request_bytes(record_len);
     // Start the insertion by obtaining a record id from offset log
     uint64_t record_id = olog_->start(offset, record_len);
 
@@ -241,7 +257,7 @@ class log_store {
   // Atomically advance the write tail by the given amount.
   //
   // Returns the tail value just before the advance occurred.
-  uint64_t atomic_advance_tail(uint64_t record_size) {
+  uint64_t request_bytes(uint64_t record_size) {
     return dtail_.fetch_add(record_size);
   }
 
