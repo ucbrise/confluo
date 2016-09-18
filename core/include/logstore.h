@@ -47,8 +47,8 @@ class log_store {
     // to make the Log dynamically sized rather than static.
     dlog_ = new char[LOG_SIZE];
 
-    // Initialize data log tail to 1. Offset 0 is used to indicate invalid records.
-    dtail_.store(1);
+    // Initialize data log tail to 0
+    dtail_.store(0);
 
     time_idx_ = new indexlog<4, 3>();
     srcip_idx_ = new indexlog<4, 3>();
