@@ -37,7 +37,7 @@ class packet_loader {
   // Debug
   uint64_t print_ip_bytes(uint32_t ip) {
     unsigned char* ip_bytes = (unsigned char *) (&ip);
-    fprintf(stderr, "%u,%u,%u,%u\n", ip_bytes);
+    fprintf(stderr, "%u,%u,%u,%u\n", ip_bytes[0], ip_bytes[1], ip_bytes[2], ip_bytes[3]);
   }
 
   uint32_t parse_ip(std::string ip) {
