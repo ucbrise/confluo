@@ -35,18 +35,18 @@ class packet_loader {
   }
 
   // Debug
-  uint64_t print_ip_bytes(uint32_t ip) {
+  uint64_t print_ip_bytes(std::string& orig_ip, uint32_t ip) {
     unsigned char* ip_bytes = (unsigned char *) (&ip);
-    fprintf(stderr, "%u,%u,%u,%u\n", ip_bytes[0], ip_bytes[1], ip_bytes[2], ip_bytes[3]);
+    fprintf(stderr, "%s : %u,%u,%u,%u\n", orig_ip.c_str(), ip_bytes[0], ip_bytes[1], ip_bytes[2], ip_bytes[3]);
   }
 
-  uint32_t parse_ip(std::string ip) {
+  uint32_t parse_ip(std::string& ip) {
     char ip_raw[4];
     sscanf(ip.c_str(), "%uhh.%uhh.%uhh.%uhh", &ip_raw[3], &ip_raw[2],
            &ip_raw[1], &ip_raw[0]);
     uint32_t ret = ip_raw[0] | ip_raw[1] << 8 | ip_raw[2] << 16
         | ip_raw[3] << 24;
-    print_ip_bytes(ret);
+    print_ip_bytes(ip, ret);
     return ret;
   }
 
