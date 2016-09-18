@@ -33,16 +33,13 @@ struct tokens {
   unsigned char* dst_prt;
 };
 
-template<uint32_t LOG_SIZE = UINT_MAX>
+template<uint64_t LOG_SIZE = UINT_MAX>
 class log_store {
  public:
-  // The internal key component of the tail increment for appends and updates.
-  static const uint64_t KEY_INCR = 1ULL << 32;
-
   struct handle {
    public:
-    handle(log_store<LOG_SIZE>& handle, uint32_t request_batch_size = 256,
-           uint32_t data_block_size = 8192)
+    handle(log_store<LOG_SIZE>& handle, uint64_t request_batch_size = 256,
+           uint64_t data_block_size = 256 * 54)
         : handle_(handle) {
       id_block_size_ = request_batch_size;
       remaining_ids_ = 0;
@@ -82,31 +79,31 @@ class log_store {
       return handle_.get(record, record_id);
     }
 
-    const void filter_time(std::set<int64_t>& results,
+    const void filter_time(std::set<uint64_t>& results,
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
       handle_.filter_time(results, token_prefix, token_prefix_len);
     }
 
-    const void filter_src_ip(std::set<int64_t>& results,
+    const void filter_src_ip(std::set<uint64_t>& results,
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
       handle_.filter_src_ip(results, token_prefix, token_prefix_len);
     }
 
-    const void filter_dst_ip(std::set<int64_t>& results,
+    const void filter_dst_ip(std::set<uint64_t>& results,
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
       handle_.filter_time(results, token_prefix, token_prefix_len);
     }
 
-    const void filter_src_port(std::set<int64_t>& results,
+    const void filter_src_port(std::set<uint64_t>& results,
                                const unsigned char* token_prefix,
                                const uint32_t token_prefix_len) {
       handle_.filter_src_port(results, token_prefix, token_prefix_len);
     }
 
-    const void filter_dst_port(std::set<int64_t>& results,
+    const void filter_dst_port(std::set<uint64_t>& results,
                                const unsigned char* token_prefix,
                                const uint32_t token_prefix_len) {
       handle_.filter_dst_port(results, token_prefix, token_prefix_len);
@@ -125,7 +122,7 @@ class log_store {
     uint64_t id_block_size_;
 
     uint64_t cur_id_;
-    uint32_t remaining_ids_;
+    uint64_t remaining_ids_;
 
     uint64_t cur_offset_;
     uint64_t remaining_bytes_;
@@ -187,7 +184,7 @@ class log_store {
   // buffer must be pre-allocated.
   //
   // Returns true if the fetch is successful, false otherwise.
-  const bool get(unsigned char* record, const int64_t record_id) {
+  const bool get(unsigned char* record, const uint64_t record_id) {
     // Checks if the record_id has been written yet, returns false on failure.
     if (!olog_->is_valid(record_id))
       return false;
@@ -204,7 +201,7 @@ class log_store {
   }
 
   // Atomically filter on time.
-  const void filter_time(std::set<int64_t>& results,
+  const void filter_time(std::set<uint64_t>& results,
                          const unsigned char* token_prefix,
                          const uint32_t token_prefix_len) {
     filter(time_idx_, results, token_prefix, token_prefix_len,
@@ -212,7 +209,7 @@ class log_store {
   }
 
   // Atomically filter on src_ip.
-  const void filter_src_ip(std::set<int64_t>& results,
+  const void filter_src_ip(std::set<uint64_t>& results,
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
     filter(srcip_idx_, results, token_prefix, token_prefix_len,
@@ -220,7 +217,7 @@ class log_store {
   }
 
   // Atomically filter on dst_ip.
-  const void filter_dst_ip(std::set<int64_t>& results,
+  const void filter_dst_ip(std::set<uint64_t>& results,
                            const unsigned char* token_prefix,
                            const uint32_t token_prefix_len) {
     filter(dstip_idx_, results, token_prefix, token_prefix_len,
@@ -228,7 +225,7 @@ class log_store {
   }
 
   // Atomically filter on src_port.
-  const void filter_src_port(std::set<int64_t>& results,
+  const void filter_src_port(std::set<uint64_t>& results,
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
     filter(srcprt_idx_, results, token_prefix, token_prefix_len,
@@ -236,7 +233,7 @@ class log_store {
   }
 
   // Atomically filter on dst_port.
-  const void filter_dst_port(std::set<int64_t>& results,
+  const void filter_dst_port(std::set<uint64_t>& results,
                              const unsigned char* token_prefix,
                              const uint32_t token_prefix_len) {
     filter(dstprt_idx_, results, token_prefix, token_prefix_len,
@@ -263,7 +260,7 @@ class log_store {
 
   // Append a (recordId, record) pair to the log store.
   void append_record(const unsigned char* record, uint16_t record_len,
-                     uint32_t offset) {
+                     uint64_t offset) {
 
     // We can append the value to the log without locking since this
     // thread has exclusive access to the region (offset, offset + record_len).
@@ -271,7 +268,7 @@ class log_store {
   }
 
   // Append (token, recordId) entries to index log.
-  void append_tokens(uint32_t record_id, const tokens& tkns) {
+  void append_tokens(uint64_t record_id, const tokens& tkns) {
     time_idx_->add_entry(tkns.time, record_id);
     srcip_idx_->add_entry(tkns.src_ip, record_id);
     dstip_idx_->add_entry(tkns.dst_ip, record_id);
@@ -283,7 +280,7 @@ class log_store {
   //
   // Returns the set of valid, matching recordIds.
   template<uint32_t L1, uint32_t L2>
-  const void filter(indexlog<L1, L2>* ilog, std::set<int64_t>& results,
+  const void filter(indexlog<L1, L2>* ilog, std::set<uint64_t>& results,
                     const unsigned char* token_prefix,
                     const uint32_t token_prefix_len, const uint64_t max_rid) {
 
