@@ -59,11 +59,10 @@ class log_store {
 
   uint64_t insert(const unsigned char* record, uint16_t record_len,
                   const tokens& tkns) {
-    // Start the insertion by obtaining a record id from offset log
-    uint64_t record_id = olog_.start();
-
     // Atomically update the tail of the log
     uint64_t offset = atomic_advance_tail(record_len);
+    // Start the insertion by obtaining a record id from offset log
+    uint64_t record_id = olog_.start(offset, record_len);
 
     // Throw an exception if internal key greater than the largest valid
     // internal key or end of the value goes beyond maximum Log size.
@@ -79,7 +78,7 @@ class log_store {
     // Append the index entries to index logs
     append_tokens(record_id, tkns);
 
-    olog_.end(record_id, offset, record_len);
+    olog_.end(record_id);
 
     // Return record_id
     return record_id;
@@ -158,8 +157,8 @@ class log_store {
   // Atomically advance the write tail by the given amount.
   //
   // Returns the tail value just before the advance occurred.
-  uint64_t atomic_advance_tail(uint64_t tail_increment) {
-    return std::atomic_fetch_add(&dtail_, tail_increment);
+  uint64_t atomic_advance_tail(uint64_t record_size) {
+    return dtail_.fetch_add(record_size);
   }
 
   // Append a (recordId, record) pair to the log store.
