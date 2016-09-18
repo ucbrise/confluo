@@ -41,8 +41,8 @@ class log_store {
 
   struct handle {
    public:
-    handle(log_store<LOG_SIZE>& handle, uint32_t request_batch_size = 64,
-           uint32_t data_block_size = 4096)
+    handle(log_store<LOG_SIZE>& handle, uint32_t request_batch_size = 256,
+           uint32_t data_block_size = 8192)
         : handle_(handle) {
       id_block_size_ = request_batch_size;
       remaining_ids_ = 0;
