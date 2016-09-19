@@ -147,6 +147,18 @@ class indexlog {
     return in_size;
   }
 
+  uint64_t storage_size() {
+    uint64_t array_size = idx_.size() * sizeof(atomic_ref);
+    uint64_t data_size = 0;
+    for (uint32_t i = 0; i < idx_.size(); i++) {
+      if (idx_[i].load() != NULL) {
+        data_size += idx_[i].load()->size();
+      }
+    }
+
+    return array_size + data_size;
+  }
+
  private:
   void try_allocate_list(uint32_t i) {
     slog::entry_list* new_list = new slog::entry_list;

@@ -10,5 +10,6 @@ set(CORE_INCLUDE ../core/include)
 include_directories(${INCLUDE} ${CORE_INCLUDE})
 
 add_executable(pktload src/packet_loader.cc)
+add_executable(storage src/storage_footprint.cc)
 
 target_link_libraries(pktload ${CMAKE_THREAD_LIBS_INIT} ${JEMALLOC_LIBRARIES})

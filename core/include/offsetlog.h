@@ -70,6 +70,10 @@ class offsetlog {
     return current_id_.load();
   }
 
+  uint64_t storage_size() {
+    return offlens_.storage_size() + valid_.storage_size();
+  }
+
   __monolog_base <uint64_t, 32> offlens_;
   __monolog_base <atomic_bool, 32> valid_;
   std::atomic<uint64_t> current_id_;
