@@ -82,7 +82,11 @@ class storage_footprint {
       while (completed_ops < num_packets_) {
         completed_ops = insert_packet(handle, completed_ops);
         if (completed_ops % report_marker == 0) {
-          rfs << completed_ops << "\t" << completed_ops << "\n";
+          handle->storage_footprint(st);
+          rfs << completed_ops << "\t" << st.dlog_size_ << "\t" << st.olog_size_
+              << "\t" << st.time_idx_size_ << "\t" << st.srcip_idx_size_ << "\t"
+              << st.dstip_idx_size_ << "\t" << st.srcprt_idx_size_ << "\t"
+              << st.dstprt_idx_size_ << "\n";
         }
       }
     } catch (std::exception &e) {
@@ -97,6 +101,7 @@ class storage_footprint {
 
  private:
   unsigned char data[HDR_SIZE];
+  log_store::storage st;
 
   uint64_t packet_rate_;
   uint64_t num_packets_;

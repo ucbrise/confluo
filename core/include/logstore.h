@@ -35,6 +35,16 @@ struct tokens {
 
 class log_store {
  public:
+  struct storage {
+    uint64_t dlog_size_;
+    uint64_t olog_size_;
+    uint64_t time_idx_size_;
+    uint64_t srcip_idx_size_;
+    uint64_t dstip_idx_size_;
+    uint64_t srcprt_idx_size_;
+    uint64_t dstprt_idx_size_;
+  };
+
   struct handle {
    public:
     handle(log_store& handle, uint64_t request_batch_size = 256,
@@ -112,8 +122,8 @@ class log_store {
       return handle_.size();
     }
 
-    uint64_t idx_size(uint32_t num_idx) {
-      return handle_.idx_size(num_idx);
+    void storage_footprint(storage& st) {
+      handle_.storage_footprint(st);
     }
 
    private:
@@ -242,32 +252,15 @@ class log_store {
         return dtail_.load();
       }
 
-      // Return the total size of the index log + offset log.
-      uint64_t idx_size(uint32_t num_idx) {
-        uint64_t size = olog_->storage_size();
-        switch (num_idx) {
-          case 0: {
-            return size;
-          }
-          case 1: {
-            return size + time_idx_->storage_size();
-          }
-          case 2: {
-            return size + time_idx_->storage_size() + srcip_idx_->storage_size();
-          }
-          case 3: {
-            return size + time_idx_->storage_size() + srcip_idx_->storage_size() + dstip_idx_->storage_size();
-          }
-          case 4: {
-            return size + time_idx_->storage_size() + srcip_idx_->storage_size() + dstip_idx_->storage_size() + srcprt_idx_->storage_size();
-          }
-          case 5: {
-            return size + time_idx_->storage_size() + srcip_idx_->storage_size() + dstip_idx_->storage_size() + srcprt_idx_->storage_size() + dstprt_idx_->storage_size();
-          }
-          default: {
-            return size;
-          }
-        }
+      // get storage statistics
+      void storage_footprint(storage& st) {
+        st.dlog_size_ = dlog_->storage_size();
+        st.olog_size_ = olog_->storage_size();
+        st.time_idx_size_ = time_idx_->storage_size();
+        st.srcip_idx_size_ = srcip_idx_->storage_size();
+        st.dstip_idx_size_ = dstip_idx_->storage_size();
+        st.srcprt_idx_size_ = srcprt_idx_->storage_size();
+        st.dstprt_idx_size_ = dstprt_idx_->storage_size();
       }
 
     private:

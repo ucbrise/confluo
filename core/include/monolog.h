@@ -159,7 +159,7 @@ class __monolog_base {
   }
 
   const uint64_t storage_size() {
-    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
+    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
     uint64_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++)
       if (buckets_[i].load() != NULL)
@@ -219,6 +219,15 @@ class __monolog_linear_base {
     memcpy(data, buckets_[bucket_idx].load() + bucket_off, len);
   }
 
+  const uint64_t storage_size() {
+    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
+    uint64_t data_size = 0;
+    for (uint32_t i = 0; i < buckets_.size(); i++)
+      if (buckets_[i].load() != NULL)
+        data_size += (BLOCK_SIZE * sizeof(T));
+    return bucket_size + data_size;
+  }
+
  protected:
   // Tries to allocate the specifies bucket. If another thread has already
   // succeeded in allocating the bucket, the current thread deallocates and
@@ -230,7 +239,7 @@ class __monolog_linear_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
-            bucket)) {
+                                             bucket)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
