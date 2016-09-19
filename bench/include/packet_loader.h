@@ -38,21 +38,21 @@ class rate_limiter {
  public:
   rate_limiter(uint64_t ops_per_sec, log_store::handle* handle) {
     handle_ = handle;
-    min_ns_per_1000_ops = 1e12 / ops_per_sec;
+    min_ns_per_10000_ops = 1e13 / ops_per_sec;
     local_ops_ = 0;
     last_ts_ = high_resolution_clock::now();
     tspec_.tv_sec = 0;
-    LOG(stderr, "1000 ops per %lld ns.\n", min_ns_per_1000_ops);
+    LOG(stderr, "10000 ops per %lld ns.\n", min_ns_per_10000_ops);
   }
 
   uint64_t insert_packet(unsigned char* data, uint16_t len, tokens& tkns) {
     uint64_t num_pkts = handle_->insert(data, len, tkns) + 1;
     local_ops_++;
-    if (local_ops_ % 1000 == 0) {
+    if (local_ops_ % 10000 == 0) {
       high_resolution_clock::time_point now = high_resolution_clock::now();
-      auto ns_last_1000_ops = duration_cast<nanoseconds>(now - last_ts_).count();
-      if (ns_last_1000_ops < min_ns_per_1000_ops) {
-        tspec_.tv_nsec = (min_ns_per_1000_ops - ns_last_1000_ops);
+      auto ns_last_10000_ops = duration_cast<nanoseconds>(now - last_ts_).count();
+      if (ns_last_10000_ops < min_ns_per_10000_ops) {
+        tspec_.tv_nsec = (min_ns_per_10000_ops - ns_last_10000_ops);
         nanosleep(&tspec_, NULL);
       }
       last_ts_ = high_resolution_clock::now();
@@ -68,7 +68,7 @@ class rate_limiter {
   struct timespec tspec_;
   high_resolution_clock::time_point last_ts_;
   uint64_t local_ops_;
-  int64_t min_ns_per_1000_ops;
+  int64_t min_ns_per_10000_ops;
   log_store::handle* handle_;
 };
 
