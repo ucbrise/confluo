@@ -439,10 +439,6 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
     return in_size;
   }
 
-  uint64_t storage_footprint() {
-    return this->storage_footprint();
-  }
-
  private:
   std::atomic<uint32_t> tail_;
 };

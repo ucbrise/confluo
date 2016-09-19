@@ -153,7 +153,7 @@ class indexlog {
     for (uint32_t i = 0; i < idx_.size(); i++) {
       entry_list* entry = idx_[i].load();
       if (entry != NULL) {
-        data_size += entry->storage_footprint();
+        data_size += entry->storage_size();
       }
     }
 
