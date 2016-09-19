@@ -14,6 +14,7 @@
 #include <mutex>
 #include <unistd.h>
 
+#include "cpu_utilization.h"
 #include "logstore.h"
 
 #ifdef NO_LOG
