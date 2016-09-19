@@ -25,52 +25,78 @@
 using namespace ::slog;
 using namespace ::std::chrono;
 
+typedef int64_t timestamp_t;
+
+static timestamp_t get_timestamp() {
+  struct timeval now;
+  gettimeofday(&now, NULL);
+
+  return now.tv_usec + (timestamp_t) now.tv_sec * 1000000;
+}
+
 class rate_limiter {
  public:
-  rate_limiter(uint64_t pkts_per_sec, log_store::handle* handle) {
+  rate_limiter(uint64_t ops_per_sec, log_store::handle* handle) {
     handle_ = handle;
-    dur_.tv_sec = 0;
-    dur_.tv_nsec = 0;
-    sleep_ns_ = 1e9 / pkts_per_sec;
-    LOG(stderr, "Send one packet per %lld ns.\n", sleep_ns_);
+    min_ns_per_1000_ops = 1e12 / ops_per_sec;
+    local_ops_ = 0;
+    last_ts_ = high_resolution_clock::now();
+    tspec_.tv_sec = 0;
+    LOG(stderr, "1000 ops per %lld ns.\n", min_ns_per_1000_ops);
   }
 
   uint64_t insert_packet(unsigned char* data, uint16_t len, tokens& tkns) {
-    auto t0 = high_resolution_clock::now();
     uint64_t num_pkts = handle_->insert(data, len, tkns) + 1;
-    auto t1 = high_resolution_clock::now();
-    dur_.tv_nsec = sleep_ns_ - duration_cast<nanoseconds>(t1 - t0).count();
-    LOG(stderr, "Going to sleep for %lld nanoseconds\n", dur_.tv_nsec);
-    if (dur_.tv_nsec > 0) {
-      nanosleep(&dur_, NULL);
+    local_ops_++;
+    if (local_ops_ % 1000 == 0) {
+      high_resolution_clock::time_point now = high_resolution_clock::now();
+      auto ns_last_1000_ops = duration_cast<nanoseconds>(now - last_ts_).count();
+      if (ns_last_1000_ops < min_ns_per_1000_ops) {
+        tspec_.tv_nsec = (min_ns_per_1000_ops - ns_last_1000_ops);
+        nanosleep(&tspec_, NULL);
+      }
+      last_ts_ = high_resolution_clock::now();
     }
     return num_pkts;
   }
 
+  uint64_t local_ops() {
+    return local_ops_;
+  }
+
  private:
-  struct timespec dur_;
-  int64_t sleep_ns_;
+  struct timespec tspec_;
+  high_resolution_clock::time_point last_ts_;
+  uint64_t local_ops_;
+  int64_t min_ns_per_1000_ops;
   log_store::handle* handle_;
 };
 
 class rate_limiter_inf {
  public:
-  rate_limiter_inf(uint64_t pkts_per_sec, log_store::handle* handle) {
+  rate_limiter_inf(uint64_t ops_per_sec, log_store::handle* handle) {
     handle_ = handle;
+    local_ops_ = 0;
+    local_ops_++;
   }
 
   uint64_t insert_packet(unsigned char* data, uint16_t len, tokens& tkns) {
+    local_ops_++;
     return handle_->insert(data, len, tkns) + 1;
   }
 
+  uint64_t local_ops() {
+    return local_ops_;
+  }
+
  private:
+  uint64_t local_ops_;
   log_store::handle* handle_;
 };
 
 template<class rlimiter = rate_limiter_inf>
 class packet_loader {
  public:
-  typedef unsigned long long int timestamp_t;
   static const uint64_t kReportRecordInterval = 1000000;
 
   uint64_t insert_packet(log_store::handle* handle, uint64_t idx) {
@@ -172,22 +198,20 @@ class packet_loader {
                     LOG(stderr, "Starting benchmark.\n");
 
                     try {
-                      int64_t local_ops = 0;
-                      int64_t total_ops = 0;
+                      uint64_t total_ops = 0;
 
                       timestamp_t start = get_timestamp();
-                      while (local_ops < thread_ops && get_timestamp() - start < timebound) {
+                      while (limiter->local_ops() < thread_ops && get_timestamp() - start < timebound) {
                         init_tokens(tkns, idx);
                         total_ops = limiter->insert_packet(datas_[idx], datalens_[idx], tkns);
                         idx++;
-                        local_ops++;
                         if (total_ops % kReportRecordInterval == 0) {
                           rfs << get_timestamp() << "\t" << total_ops << "\n";
                         }
                       }
                       timestamp_t end = get_timestamp();
                       double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                      throughput = ((double) local_ops / totsecs);
+                      throughput = ((double) limiter->local_ops() / totsecs);
                       LOG(stderr, "Thread #%u finished in %lf s. Throughput: %lf.\n", i, totsecs, throughput);
                     } catch (std::exception &e) {
                       LOG(stderr, "Throughput thread ended prematurely.\n");
@@ -208,13 +232,6 @@ class packet_loader {
   }
 
  private:
-  static timestamp_t get_timestamp() {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-
-    return now.tv_usec + (timestamp_t) now.tv_sec * 1000000;
-  }
-
   std::string data_path_;
   std::string attr_path_;
   std::string hostname_;
