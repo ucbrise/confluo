@@ -40,6 +40,7 @@ class rate_limiter {
     uint64_t num_pkts = handle_->insert(data, len, tkns) + 1;
     auto t1 = high_resolution_clock::now();
     dur_.tv_nsec = sleep_ns_ - duration_cast<nanoseconds>(t1 - t0).count();
+    LOG(stderr, "Going to sleep for %lld nanoseconds\n", dur_.tv_nsec);
     if (dur_.tv_nsec > 0) {
       nanosleep(&dur_, NULL);
     }
