@@ -101,7 +101,7 @@ class rate_limiter_inf {
 template<class rlimiter = rate_limiter_inf>
 class packet_loader {
  public:
-  static const uint64_t kReportRecordInterval = 10000;
+  static const uint64_t kReportRecordInterval = 11111;
 
   uint64_t insert_packet(log_store::handle* handle, uint64_t idx) {
     tokens tkns;
