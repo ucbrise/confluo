@@ -22,6 +22,8 @@
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
+#define MEASURE_CPU
+
 using namespace ::slog;
 using namespace ::std::chrono;
 
@@ -50,7 +52,8 @@ class rate_limiter {
     local_ops_++;
     if (local_ops_ % 10000 == 0) {
       high_resolution_clock::time_point now = high_resolution_clock::now();
-      auto ns_last_10000_ops = duration_cast<nanoseconds>(now - last_ts_).count();
+      auto ns_last_10000_ops =
+          duration_cast<nanoseconds>(now - last_ts_).count();
       if (ns_last_10000_ops < min_ns_per_10000_ops) {
         tspec_.tv_nsec = (min_ns_per_10000_ops - ns_last_10000_ops);
         nanosleep(&tspec_, NULL);
@@ -193,8 +196,7 @@ class packet_loader {
                     log_store::handle* handle = logstore_->get_handle();
                     rlimiter* limiter = new rlimiter(local_rate_limit, handle);
                     double throughput = 0;
-                    std::ofstream rfs;
-                    rfs.open("record_progress_" + std::to_string(i));
+                    std::ofstream rfs("record_progress_" + std::to_string(i));
                     LOG(stderr, "Starting benchmark.\n");
 
                     try {
@@ -220,14 +222,32 @@ class packet_loader {
                     std::ofstream ofs("write_throughput_" + std::to_string(i));
                     ofs << throughput << "\n";
                     ofs.close();
+                    rfs.close();
                     delete limiter;
                     delete handle;
                   })));
     }
 
+#ifdef MEASURE_CPU
+    std::thread cpu_measure_thread([&] {
+      timestamp_t start = get_timestamp();
+      std::ofstream util_stream("cpu_utilization");
+      cpu_utilization::init();
+      while (get_timestamp() - start < timebound) {
+        sleep(1);
+        util_stream << cpu_utilization::current() << "\n";
+      }
+      util_stream.close();
+    });
+#endif
+
     for (auto& th : threads) {
       th.join();
     }
+
+#ifdef MEASURE_CPU
+    cpu_measure_thread.join();
+#endif
 
   }
 
