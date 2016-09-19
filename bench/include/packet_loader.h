@@ -32,6 +32,7 @@ class rate_limiter {
     dur_.tv_sec = 0;
     dur_.tv_nsec = 0;
     sleep_ns_ = 1e9 / pkts_per_sec;
+    LOG(stderr, "Send one packet per %lld ns.\n", sleep_ns_);
   }
 
   uint64_t insert_packet(unsigned char* data, uint16_t len, tokens& tkns) {
@@ -153,6 +154,8 @@ class packet_loader {
     std::vector<std::thread> threads;
     uint64_t thread_ops = timestamps_.size() / num_threads;
     uint64_t local_rate_limit = rate_limit / num_threads;
+
+    LOG(stderr, "Setting timebound to %llu us\n", timebound);
     for (uint32_t i = 0; i < num_threads; i++) {
       threads.push_back(
           std::move(
