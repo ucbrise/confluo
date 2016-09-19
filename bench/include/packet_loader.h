@@ -24,6 +24,7 @@
 #endif
 
 #define MEASURE_CPU
+#define MEASURE_LATENCY
 
 using namespace ::slog;
 using namespace ::std::chrono;
@@ -101,7 +102,7 @@ class rate_limiter_inf {
 template<class rlimiter = rate_limiter_inf>
 class packet_loader {
  public:
-  static const uint64_t kReportRecordInterval = 1000000;
+  static const uint64_t kReportRecordInterval = 100000;
 
   uint64_t insert_packet(log_store::handle* handle, uint64_t idx) {
     tokens tkns;
@@ -197,36 +198,49 @@ class packet_loader {
                     log_store::handle* handle = logstore_->get_handle();
                     rlimiter* limiter = new rlimiter(local_rate_limit, handle);
                     double throughput = 0;
-                    std::ofstream rfs("record_progress_" + std::to_string(i));
-                    LOG(stderr, "Starting benchmark.\n");
+#ifdef MEASURE_LATENCY
+                  high_resolution_clock::time_point t0, t1;
+                  std::ofstream lfs("write_latency_" + std::to_string(i));
+#endif
+                  std::ofstream rfs("record_progress_" + std::to_string(i));
+                  LOG(stderr, "Starting benchmark.\n");
 
-                    try {
-                      uint64_t total_ops = 0;
+                  try {
+                    uint64_t total_ops = 0;
+                    timestamp_t start = get_timestamp();
+                    while (limiter->local_ops() < thread_ops && get_timestamp() - start < timebound) {
+                      init_tokens(tkns, idx);
+                      idx++;
+                      if (total_ops % kReportRecordInterval == 0) {
+                        rfs << get_timestamp() << "\t" << total_ops << "\n";
+#ifdef MEASURE_LATENCY
+                  t0 = high_resolution_clock::now();
+#endif
+                  total_ops = limiter->insert_packet(datas_[idx], datalens_[idx], tkns);
+#ifdef MEASURE_LATENCY
+                  t1 = high_resolution_clock::now();
+                  auto tdiff = duration_cast<nanoseconds>(t1 - t0).count();
+                  lfs << tdiff << "\n";
+#endif
+                } else {
+                  total_ops = limiter->insert_packet(datas_[idx], datalens_[idx], tkns);
+                }
+              }
+              timestamp_t end = get_timestamp();
+              double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+              throughput = ((double) limiter->local_ops() / totsecs);
+              LOG(stderr, "Thread #%u finished in %lf s. Throughput: %lf.\n", i, totsecs, throughput);
+            } catch (std::exception &e) {
+              LOG(stderr, "Throughput thread ended prematurely.\n");
+            }
 
-                      timestamp_t start = get_timestamp();
-                      while (limiter->local_ops() < thread_ops && get_timestamp() - start < timebound) {
-                        init_tokens(tkns, idx);
-                        total_ops = limiter->insert_packet(datas_[idx], datalens_[idx], tkns);
-                        idx++;
-                        if (total_ops % kReportRecordInterval == 0) {
-                          rfs << get_timestamp() << "\t" << total_ops << "\n";
-                        }
-                      }
-                      timestamp_t end = get_timestamp();
-                      double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                      throughput = ((double) limiter->local_ops() / totsecs);
-                      LOG(stderr, "Thread #%u finished in %lf s. Throughput: %lf.\n", i, totsecs, throughput);
-                    } catch (std::exception &e) {
-                      LOG(stderr, "Throughput thread ended prematurely.\n");
-                    }
-
-                    std::ofstream ofs("write_throughput_" + std::to_string(i));
-                    ofs << throughput << "\n";
-                    ofs.close();
-                    rfs.close();
-                    delete limiter;
-                    delete handle;
-                  })));
+            std::ofstream ofs("write_throughput_" + std::to_string(i));
+            ofs << throughput << "\n";
+            ofs.close();
+            rfs.close();
+            delete limiter;
+            delete handle;
+          })));
     }
 
 #ifdef MEASURE_CPU
