@@ -151,8 +151,9 @@ class indexlog {
     uint64_t array_size = idx_.size() * sizeof(atomic_ref);
     uint64_t data_size = 0;
     for (uint32_t i = 0; i < idx_.size(); i++) {
-      if (idx_[i].load() != NULL) {
-        data_size += idx_[i].load()->size();
+      entry_list* entry = idx_[i].load();
+      if (entry != NULL) {
+        data_size += entry->storage_footprint();
       }
     }
 
