@@ -7,14 +7,15 @@
 #include <sys/times.h>
 
 class cpu_utilization {
-  static void init() {
+ public:
+  cpu_utilization() {
     struct tms time_sample;
     last_cpu = times(&time_sample);
     last_sys_cpu = time_sample.tms_stime;
     last_user_cpu = time_sample.tms_utime;
   }
 
-  static double current() {
+  double current() {
     struct tms time_sample;
     clock_t now;
     double percent;
@@ -38,7 +39,7 @@ class cpu_utilization {
   }
 
  private:
-  static clock_t last_cpu, last_sys_cpu, last_user_cpu;
+  clock_t last_cpu, last_sys_cpu, last_user_cpu;
 };
 
 #endif /* BENCH_CPU_UTILIZATION_H_ */

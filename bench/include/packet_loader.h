@@ -233,10 +233,10 @@ class packet_loader {
     std::thread cpu_measure_thread([&] {
       timestamp_t start = get_timestamp();
       std::ofstream util_stream("cpu_utilization");
-      cpu_utilization::init();
+      cpu_utilization util;
       while (get_timestamp() - start < timebound) {
         sleep(1);
-        util_stream << cpu_utilization::current() << "\n";
+        util_stream << util.current() << "\n";
       }
       util_stream.close();
     });
