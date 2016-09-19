@@ -23,7 +23,6 @@
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
-#define MEASURE_CPU
 #define MEASURE_LATENCY
 
 using namespace ::slog;
@@ -102,7 +101,7 @@ class rate_limiter_inf {
 template<class rlimiter = rate_limiter_inf>
 class packet_loader {
  public:
-  static const uint64_t kReportRecordInterval = 100000;
+  static const uint64_t kReportRecordInterval = 10000;
 
   uint64_t insert_packet(log_store::handle* handle, uint64_t idx) {
     tokens tkns;
