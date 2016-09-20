@@ -235,7 +235,7 @@ class log_store {
           for (uint32_t i = 0; i < size; i++) {
             index_entry entry = list->at(i);
             uint32_t record_id = entry & 0xFFFFFFFF;
-            if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != sip_set.end()) {
+            if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
               count++;
             }
           }
