@@ -206,6 +206,7 @@ class log_store {
         std::set<uint64_t> sip_set, dip_set, time_set;
         uint64_t max_rid = olog_->num_ids();
         filter(srcip_idx_, sip_set, sip, 4, max_rid);
+        fprintf(stderr, "#SRC IPS: %llu\t", sip_set.size());
 
         entry_list* list = dstip_idx_->get_entry_list(dip);
         if (list == NULL) {
@@ -222,6 +223,7 @@ class log_store {
             dip_set.insert(record_id);
           }
         }
+        fprintf(stderr, "#DST IPS: %llu\t", dip_set.size());
 
         uint32_t start = token_ops<3, 3>::prefix(stime);
         uint32_t end = token_ops<3, 3>::prefix(etime);
@@ -238,6 +240,7 @@ class log_store {
             }
           }
         }
+        fprintf(stderr, "Count: %llu\n", count);
 
         return count;
       }
