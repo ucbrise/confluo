@@ -1,27 +1,26 @@
-#include "packet_loader.h"
+#include "filter_benchmark.h"
 
 const char* usage =
-    "Usage: %s -n [numthreads] -r [ratelimit] -t [maxtime] [data] [attrs]\n";
+    "Usage: %s [-b bench-type] [-n numthreads] [-r ratelimit] data-path\n";
 
 void print_usage(char *exec) {
-  fprintf(stderr, usage, exec);
+  LOG(stderr, usage, exec);
 }
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 9) {
+  if (argc < 2 || argc > 6) {
     print_usage(argv[0]);
     return -1;
   }
 
   int c;
+  std::string bench_type = "latency-get";
   int num_threads = 1;
-  uint8_t num_attributes = 1;
-  uint64_t timebound = UINT64_MAX;
   uint64_t rate_limit = 0;
-  while ((c = getopt(argc, argv, "t:n:h:r:")) != -1) {
+  while ((c = getopt(argc, argv, "b:n:")) != -1) {
     switch (c) {
-      case 't':
-        timebound = atol(optarg) * 1000000;
+      case 'b':
+        bench_type = std::string(optarg);
         break;
       case 'n':
         num_threads = atoi(optarg);
@@ -42,12 +41,13 @@ int main(int argc, char** argv) {
   std::string data_path = std::string(argv[optind]);
   std::string attr_path = std::string(argv[optind + 1]);
 
-  if (rate_limit == 0) {
-    packet_loader<> loader(data_path, attr_path);
-    loader.load_packets(num_threads, timebound, 0);
+  filter_benchmark ls_bench(data_path, attr_path);
+  if (bench_type == "latency") {
+
+  } else if (bench_type == "throughput") {
+
   } else {
-    packet_loader<rate_limiter> loader(data_path, attr_path);
-    loader.load_packets(num_threads, timebound, rate_limit);
+    LOG(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }
 
   return 0;

@@ -1,12 +1,12 @@
 #include "storage_footprint.h"
 
-void PrintUsage(char *exec) {
+void print_usage(char *exec) {
   LOG(stderr, "Usage: %s -n num_packets -r packet_rate\n", exec);
 }
 
 int main(int argc, char** argv) {
   if (argc > 5) {
-    PrintUsage(argv[0]);
+    print_usage(argv[0]);
     return -1;
   }
 

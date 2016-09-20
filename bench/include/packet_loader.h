@@ -23,8 +23,6 @@
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
-#define MEASURE_LATENCY
-
 using namespace ::slog;
 using namespace ::std::chrono;
 
@@ -103,6 +101,21 @@ class packet_loader {
  public:
   static const uint64_t kReportRecordInterval = 11111;
 
+  packet_loader(std::string& data_path, std::string& attr_path) {
+    char resolved_path[100];
+    realpath(data_path.c_str(), resolved_path);
+    data_path_ = std::string(resolved_path);
+    realpath(attr_path.c_str(), resolved_path);
+    attr_path_ = std::string(resolved_path);
+
+    logstore_ = new log_store();
+
+    LOG(stderr, "Loading data...\n");
+    load_data();
+
+    LOG(stderr, "Initialization complete.\n");
+  }
+
   uint64_t insert_packet(log_store::handle* handle, uint64_t idx) {
     tokens tkns;
     init_tokens(tkns, idx);
@@ -131,23 +144,6 @@ class packet_loader {
   uint16_t parse_port(uint16_t port) {
     unsigned char* portarr = (unsigned char*) (&port);
     return portarr[1] | portarr[0] << 8;
-  }
-
-  packet_loader(std::string& data_path, std::string& attr_path,
-                std::string& hostname) {
-    char resolved_path[100];
-    realpath(data_path.c_str(), resolved_path);
-    data_path_ = std::string(resolved_path);
-    realpath(attr_path.c_str(), resolved_path);
-    attr_path_ = std::string(resolved_path);
-    hostname_ = hostname;
-
-    logstore_ = new log_store();
-
-    LOG(stderr, "Loading data...\n");
-    load_data();
-
-    LOG(stderr, "Initialization complete.\n");
   }
 
   void load_data() {
@@ -244,15 +240,15 @@ class packet_loader {
 
 #ifdef MEASURE_CPU
     std::thread cpu_measure_thread([&] {
-      timestamp_t start = get_timestamp();
-      std::ofstream util_stream("cpu_utilization");
-      cpu_utilization util;
-      while (get_timestamp() - start < timebound) {
-        sleep(1);
-        util_stream << util.current() << "\n";
-      }
-      util_stream.close();
-    });
+          timestamp_t start = get_timestamp();
+          std::ofstream util_stream("cpu_utilization");
+          cpu_utilization util;
+          while (get_timestamp() - start < timebound) {
+            sleep(1);
+            util_stream << util.current() << "\n";
+          }
+          util_stream.close();
+        });
 #endif
 
     for (auto& th : threads) {
@@ -268,7 +264,6 @@ class packet_loader {
  private:
   std::string data_path_;
   std::string attr_path_;
-  std::string hostname_;
 
   std::vector<uint32_t> timestamps_;
   std::vector<uint32_t> srcips_;
