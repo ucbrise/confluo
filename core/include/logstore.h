@@ -160,6 +160,8 @@ class log_store {
         dstip_idx_ = new indexlog<4, 3>;
         srcprt_idx_ = new indexlog<2, 2>;
         dstprt_idx_ = new indexlog<2, 2>;
+
+        last_time_ = 0;
       }
 
       uint64_t insert(const unsigned char* record, uint16_t record_len,
@@ -284,7 +286,29 @@ class log_store {
         }
       }
 
-      const void q3() {
+      const void q3(std::set<uint32_t>& results, unsigned char* dport) {
+        std::set<uint64_t> sport_set;
+        uint64_t max_rid = olog_->num_ids();
+        filter(dstprt_idx_, sport_set, dport, 4, max_rid);
+
+        uint32_t start = last_time_ - 1;
+        uint32_t end = last_time_;
+        for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
+          entry_list* list = time_idx_->get_entry_list(time_idx);
+          if (list == NULL) {
+            continue;
+          }
+          uint32_t sz = list->size();
+          for (uint32_t i = 0; i < sz; i++) {
+            index_entry entry = list->at(i);
+            uint32_t record_id = entry & 0xFFFFFFFF;
+            if (olog_->is_valid(record_id, max_rid) && sport_set.find(record_id) != sport_set.end()) {
+              uint32_t ip;
+              extract((unsigned char*)&ip, record_id, 0, 4);
+              results.insert(ip);
+            }
+          }
+        }
       }
 
       const void q4(std::set<uint32_t>& results, unsigned char* sprefix, unsigned char* dport) {

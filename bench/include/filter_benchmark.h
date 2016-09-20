@@ -150,7 +150,18 @@ class filter_benchmark {
   }
 
   void latency_q3() {
-
+    std::ofstream q3_out("latency_q3");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q3(rids, (unsigned char*) &dports_[i]);
+      timestamp_t end = get_timestamp();
+      q3_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q3_out.close();
   }
 
   void latency_q4() {
