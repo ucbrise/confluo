@@ -312,8 +312,6 @@ class log_store {
         uint64_t max_rid = olog_->num_ids();
         filter(srcip_idx_, sip_set, sip, 4, max_rid);
 
-        fprintf(stderr, "sips: %zu\t", sip_set.size());
-
         entry_list* list = dstip_idx_->get_entry_list(dip);
         if (list == NULL || sip_set.empty()) {
           return;
@@ -330,8 +328,6 @@ class log_store {
           }
         }
 
-        fprintf(stderr, "dips: %zu\t", dip_set.size());
-
         list = srcprt_idx_->get_entry_list(sport);
         if (list == NULL || dip_set.empty()) {
           return;
@@ -345,8 +341,6 @@ class log_store {
             sport_set.insert(record_id);
           }
         }
-
-        fprintf(stderr, "sprts: %zu\t", sport_set.size());
 
         list = dstprt_idx_->get_entry_list(dport);
         if (list == NULL || sport_set.empty()) {

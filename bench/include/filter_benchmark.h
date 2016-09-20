@@ -119,8 +119,7 @@ class filter_benchmark {
     LOG(stderr, "Loaded %zu packets.\n", datas_.size());
   }
 
-  // Latency benchmarks
-  void filter_latency() {
+  void latency_q1() {
     // 1000 queries
     std::ofstream q1_out("latency_q1");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
@@ -133,7 +132,9 @@ class filter_benchmark {
       fprintf(stderr, "Count = %llu, Latency = %llu\n", count, (end - start));
     }
     q1_out.close();
+  }
 
+  void latency_q2() {
     std::ofstream q2_out("latency_q2");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
@@ -146,7 +147,13 @@ class filter_benchmark {
               (end - start));
     }
     q2_out.close();
+  }
 
+  void latency_q3() {
+
+  }
+
+  void latency_q4() {
     std::ofstream q4_out("latency_q4");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
@@ -160,7 +167,9 @@ class filter_benchmark {
               (end - start));
     }
     q4_out.close();
+  }
 
+  void latency_q5() {
     std::ofstream q5_out("latency_q5");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
@@ -175,6 +184,31 @@ class filter_benchmark {
               (end - start));
     }
     q5_out.close();
+  }
+
+  void latency_q6() {
+    std::ofstream q6_out("latency_q6");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q6(rids, (unsigned char*) &srcips_[i]);
+      timestamp_t end = get_timestamp();
+      q6_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q6_out.close();
+  }
+
+  // Latency benchmarks
+  void latency_all() {
+    latency_q1();
+    latency_q2();
+    latency_q3();
+    latency_q4();
+    latency_q5();
+    latency_q6();
   }
 
   // Throughput benchmarks

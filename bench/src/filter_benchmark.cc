@@ -42,8 +42,22 @@ int main(int argc, char** argv) {
   std::string attr_path = std::string(argv[optind + 1]);
 
   filter_benchmark ls_bench(data_path, attr_path);
-  if (bench_type == "latency") {
-    ls_bench.filter_latency();
+  if (bench_type.find("latency") == 0) {
+    if (bench_type == "latency-q1") {
+      ls_bench.latency_q1();
+    } else if (bench_type == "latency-q2") {
+      ls_bench.latency_q2();
+    } else if (bench_type == "latency-q3") {
+      ls_bench.latency_q3();
+    } else if (bench_type == "latency-q4") {
+      ls_bench.latency_q4();
+    } else if (bench_type == "latency-q5") {
+      ls_bench.latency_q5();
+    } else if (bench_type == "latency-q6") {
+      ls_bench.latency_q6();
+    } else {
+      ls_bench.latency_all();
+    }
   } else if (bench_type == "throughput") {
 
   } else {
