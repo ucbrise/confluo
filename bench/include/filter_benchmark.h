@@ -122,14 +122,26 @@ class filter_benchmark {
   // Latency benchmarks
   void filter_latency() {
     // 1000 queries
-    std::ofstream out("latency");
+    std::ofstream q1_out("latency_q1");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       timestamp_t start = get_timestamp();
       uint64_t count = logstore_->q1((unsigned char*) &srcips_[i],
                                      (unsigned char*) &dstips_[i]);
       timestamp_t end = get_timestamp();
-      out << count << "\t" << (end - start) << "\n";
+      q1_out << count << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", count, (end - start));
+    }
+    q1_out.close();
+
+    std::ofstream q2_out("latency_q2");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      timestamp_t start = get_timestamp();
+      uint64_t count = logstore_->q1((unsigned char*) &srcips_[i],
+                                     (unsigned char*) &dstips_[i]);
+      timestamp_t end = get_timestamp();
+      q2_out << count << "\t" << (end - start) << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", count, (end - start));
     }
   }

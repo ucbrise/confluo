@@ -202,6 +202,22 @@ class log_store {
         return true;
       }
 
+      const bool extract(unsigned char* record, const uint64_t record_id, uint32_t off, uint32_t len) {
+        // Checks if the record_id has been written yet, returns false on failure.
+        if (!olog_->is_valid(record_id))
+        return false;
+
+        uint64_t offset;
+        uint16_t length;
+        olog_->lookup(record_id, offset, length);
+
+        // Copy data from data log to record buffer.
+        dlog_->read(offset + off, record, len);
+
+        // Return true for successful get.
+        return true;
+      }
+
       const uint64_t q1(unsigned char* sip, unsigned char* dip) {
         std::set<uint64_t> sip_set, dip_set, time_set;
         uint64_t max_rid = olog_->num_ids();
@@ -226,7 +242,6 @@ class log_store {
         uint32_t start = last_time_ - 1;
         uint32_t end = last_time_;
         uint64_t count = 0;
-        uint64_t time_pkts = 0;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
           list = time_idx_->get_entry_list(time_idx);
           if (list == NULL) {
@@ -236,15 +251,37 @@ class log_store {
           for (uint32_t i = 0; i < size; i++) {
             index_entry entry = list->at(i);
             uint32_t record_id = entry & 0xFFFFFFFF;
-            time_pkts++;
             if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
               count++;
             }
           }
         }
-
-        fprintf(stderr, "packets analyzed for time = ", time_pkts);
         return count;
+      }
+
+      const void q2(std::set<uint32_t> results, unsigned char* sip, unsigned char* dip) {
+        std::set<uint64_t> dip_set, time_set;
+        uint64_t max_rid = olog_->num_ids();
+        filter(dstip_idx_, dip_set, sip, 4, max_rid);
+
+        uint32_t start = last_time_ - 1;
+        uint32_t end = last_time_;
+        for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
+          entry_list* list = time_idx_->get_entry_list(time_idx);
+          if (list == NULL) {
+            continue;
+          }
+          size = list->size();
+          for (uint32_t i = 0; i < size; i++) {
+            index_entry entry = list->at(i);
+            uint32_t record_id = entry & 0xFFFFFFFF;
+            if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
+              uint32_t ip;
+              extract((unsigned char*)&ip, record_id, 0, 4);
+              results.insert(ip);
+            }
+          }
+        }
       }
 
       // Atomically filter on time.
