@@ -313,6 +313,8 @@ class log_store {
         uint64_t max_rid = olog_->num_ids();
         filter(srcip_idx_, sip_set, sip, 4, max_rid);
 
+        fprintf(stderr, "sips: %zu\t", sip_set.size());
+
         entry_list* list = dstip_idx_->get_entry_list(dip);
         if (list == NULL || sip_set.empty()) {
           return;
@@ -329,6 +331,8 @@ class log_store {
           }
         }
 
+        fprintf(stderr, "dips: %zu\t", dip_set.size());
+
         list = srcprt_idx_->get_entry_list(sport);
         if (list == NULL || dip_set.empty()) {
           return;
@@ -344,6 +348,8 @@ class log_store {
           }
         }
 
+        fprintf(stderr, "sprts: %zu\t", sport_set.size());
+
         list = dstprt_idx_->get_entry_list(dport);
         if (list == NULL || sport_set.empty()) {
           return;
@@ -358,6 +364,8 @@ class log_store {
             dport_set.insert(record_id);
           }
         }
+
+        fprintf(stderr, "dprts: %zu\t", dport_set.size());
 
         if (dport_set.empty()) {
           return;
@@ -379,11 +387,41 @@ class log_store {
             }
           }
         }
+
+        fprintf(stderr, "times: %zu\t", results.size());
       }
 
       const void q5(std::set<uint32_t>& results, unsigned char* ip1, unsigned char* ip2, unsigned char* p1, unsigned char* p2) {
         q5_base(results, ip1, ip2, p1, p2);
         q5_base(results, ip2, ip1, p2, p1);
+      }
+
+      const void q6_base(std::set<uint32_t>& results, indexlog<4, 3>* ilog, unsigned char* ip) {
+        std::set<uint64_t> ip_set, time_set;
+        uint64_t max_rid = olog_->num_ids();
+        filter(ilog, ip_set, ip, 4, max_rid);
+
+        uint32_t start = last_time_ - 1;
+        uint32_t end = last_time_;
+        for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
+          entry_list* list = time_idx_->get_entry_list(time_idx);
+          if (list == NULL) {
+            continue;
+          }
+          uint32_t sz = list->size();
+          for (uint32_t i = 0; i < sz; i++) {
+            index_entry entry = list->at(i);
+            uint32_t record_id = entry & 0xFFFFFFFF;
+            if (olog_->is_valid(record_id, max_rid) && ip_set.find(record_id) != ip_set.end()) {
+              results.insert(record_id);
+            }
+          }
+        }
+      }
+
+      const void q6(std::set<uint32_t>& results, unsigned char* ip) {
+        q6_base(results, srcip_idx_, ip);
+        q6_base(results, dstip_idx_, ip);
       }
 
       // Atomically filter on time.
