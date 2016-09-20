@@ -91,9 +91,11 @@ class filter_benchmark {
     std::ifstream ind(data_path_);
     std::ifstream ina(attr_path_);
     std::string attr_line;
+    log_store::handle* handle = logstore_->get_handle();
     LOG(stderr, "Reading from path data=%s, attr=%s\n", data_path_.c_str(),
         attr_path_.c_str());
 
+    uint64_t idx = 0;
     while (std::getline(ina, attr_line)) {
       std::stringstream attr_stream(attr_line);
       uint32_t ts;
@@ -111,6 +113,7 @@ class filter_benchmark {
       datas_.push_back(data);
       datalens_.push_back(len);
       etime_ = ts;
+      insert_packet(handle, idx++);
     }
 
     LOG(stderr, "Loaded %zu packets.\n", datas_.size());
@@ -128,7 +131,9 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       timestamp_t start = get_timestamp();
-      uint64_t count = logstore_->q1((unsigned char*) &srcips_[i], (unsigned char*) &dstips_[i], stime, etime);
+      uint64_t count = logstore_->q1((unsigned char*) &srcips_[i],
+                                     (unsigned char*) &dstips_[i], stime,
+                                     etime);
       timestamp_t end = get_timestamp();
       out << (end - start) << "\n";
       fprintf(stderr, "Latency = %llu\n", (end - start));
