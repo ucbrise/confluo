@@ -139,11 +139,24 @@ class filter_benchmark {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> sips;
       timestamp_t start = get_timestamp();
-      logstore_->q2(sips, (unsigned char*) &srcips_[i],
-                    (unsigned char*) &dstips_[i]);
+      logstore_->q2(sips, (unsigned char*) &dstips_[i]);
       timestamp_t end = get_timestamp();
       q2_out << sips.size() << "\t" << (end - start) << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(), (end - start));
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
+              (end - start));
+    }
+
+    std::ofstream q4_out("latency_q4");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q4(rids, (unsigned char*) &srcips_[i],
+                    (unsigned char*) &sports_[i]);
+      timestamp_t end = get_timestamp();
+      q4_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
     }
   }
 

@@ -259,10 +259,10 @@ class log_store {
         return count;
       }
 
-      const void q2(std::set<uint32_t> results, unsigned char* sip, unsigned char* dip) {
+      const void q2(std::set<uint32_t> results, unsigned char* dip) {
         std::set<uint64_t> dip_set, time_set;
         uint64_t max_rid = olog_->num_ids();
-        filter(dstip_idx_, dip_set, sip, 4, max_rid);
+        filter(dstip_idx_, dip_set, dip, 4, max_rid);
 
         uint32_t start = last_time_ - 1;
         uint32_t end = last_time_;
@@ -280,6 +280,30 @@ class log_store {
               extract((unsigned char*)&ip, record_id, 0, 4);
               results.insert(ip);
             }
+          }
+        }
+      }
+
+      const void q3() {
+      }
+
+      const void q4(std::set<uint32_t> results, unsigned char* sprefix, unsigned char* dport) {
+        std::set<uint64_t> sip_set;
+        uint64_t max_rid = olog_->num_ids();
+        filter(srcip_idx_, sip_set, sprefix, 3, max_rid);
+
+        entry_list* list = dstprt_idx_->get_entry_list(dport);
+        if (list == NULL) {
+          return;
+        }
+
+        uint32_t size = list->size();
+        for (uint32_t i = 0; i < size; i++) {
+          index_entry entry = list->at(i);
+          uint32_t record_id = entry & 0xFFFFFFFF;
+          uint32_t query_suffix = token_ops<2, 2>::suffix(dport);
+          if (olog_->is_valid(record_id, max_rid) && sip_set.find(record_id) != sip_set.end()) {
+            results.insert(record_id);
           }
         }
       }
