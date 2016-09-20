@@ -301,7 +301,6 @@ class log_store {
         for (uint32_t i = 0; i < size; i++) {
           index_entry entry = list->at(i);
           uint32_t record_id = entry & 0xFFFFFFFF;
-          uint32_t query_suffix = token_ops<2, 2>::suffix(dport);
           if (olog_->is_valid(record_id, max_rid) && sip_set.find(record_id) != sip_set.end()) {
             results.insert(record_id);
           }
@@ -342,7 +341,6 @@ class log_store {
         for (uint32_t i = 0; i < sz; i++) {
           index_entry entry = list->at(i);
           uint32_t record_id = entry & 0xFFFFFFFF;
-          uint32_t query_suffix = token_ops<2, 2>::suffix(sport);
           if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
             sport_set.insert(record_id);
           }
@@ -359,13 +357,10 @@ class log_store {
         for (uint32_t i = 0; i < sz; i++) {
           index_entry entry = list->at(i);
           uint32_t record_id = entry & 0xFFFFFFFF;
-          uint32_t query_suffix = token_ops<2, 2>::suffix(dport);
           if (olog_->is_valid(record_id, max_rid) && sport_set.find(record_id) != sport_set.end()) {
             dport_set.insert(record_id);
           }
         }
-
-        fprintf(stderr, "dprts: %zu\t", dport_set.size());
 
         if (dport_set.empty()) {
           return;
@@ -387,8 +382,6 @@ class log_store {
             }
           }
         }
-
-        fprintf(stderr, "times: %zu\t", results.size());
       }
 
       const void q5(std::set<uint32_t>& results, unsigned char* ip1, unsigned char* ip2, unsigned char* p1, unsigned char* p2) {
