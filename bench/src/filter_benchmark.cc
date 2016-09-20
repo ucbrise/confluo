@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 
   filter_benchmark ls_bench(data_path, attr_path);
   if (bench_type == "latency") {
-
+    ls_bench.filter_latency();
   } else if (bench_type == "throughput") {
 
   } else {

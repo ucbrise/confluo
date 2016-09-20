@@ -202,6 +202,46 @@ class log_store {
         return true;
       }
 
+      const uint64_t q1(unsigned char* sip, unsigned char* dip, unsigned char* stime, unsigned char* etime) {
+        std::set<uint64_t> sip_set, dip_set, time_set;
+        uint64_t max_rid = olog_->num_ids();
+        filter(srcip_idx_, sip_set, sip, 4, max_rid);
+
+        entry_list* list = dstip_idx_->get_entry_list(dip);
+        if (list == NULL) {
+          return 0;
+        }
+
+        uint32_t size = list->size();
+        for (uint32_t i = 0; i < size; i++) {
+          index_entry entry = list->at(i);
+          uint32_t record_id = entry & 0xFFFFFFFF;
+          uint32_t entry_suffix = entry >> 32;
+          uint32_t query_suffix = token_ops<4, 3>::suffix(dip);
+          if (entry_suffix == query_suffix && olog_->is_valid(record_id, max_rid) && sip_set.find(record_id) != sip_set.end()) {
+            dip_set.insert(record_id);
+          }
+        }
+
+        uint32_t start = token_ops<3, 3>::prefix(stime);
+        uint32_t end = token_ops<3, 3>::prefix(etime);
+        uint64_t count = 0;
+        for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
+          list = time_idx_->get_entry_list(time_idx);
+          if (list == NULL) continue;
+          uint32_t size = list->size();
+          for (uint32_t i = 0; i < size; i++) {
+            index_entry entry = list->at(i);
+            uint32_t record_id = entry & 0xFFFFFFFF;
+            if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != sip_set.end()) {
+              count++;
+            }
+          }
+        }
+
+        return count;
+      }
+
       // Atomically filter on time.
       const void filter_time(std::set<uint64_t>& results,
           const unsigned char* token_prefix,
