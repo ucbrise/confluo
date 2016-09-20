@@ -135,8 +135,8 @@ class filter_benchmark {
                                      (unsigned char*) &dstips_[i], stime,
                                      etime);
       timestamp_t end = get_timestamp();
-      out << (end - start) << "\n";
-      fprintf(stderr, "Latency = %llu\n", (end - start));
+      out << count << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", count, (end - start));
     }
   }
 
