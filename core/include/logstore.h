@@ -287,9 +287,11 @@ class log_store {
       }
 
       const void q3(std::set<uint32_t>& results, unsigned char* dport) {
-        std::set<uint64_t> sport_set;
+        std::set<uint64_t> dport_set;
         uint64_t max_rid = olog_->num_ids();
-        filter(dstprt_idx_, sport_set, dport, 2, max_rid);
+        filter(dstprt_idx_, dport_set, dport, 2, max_rid);
+
+        fprintf(stderr, "dport_set: %zu\n", dport_set.size());
 
         uint32_t start = last_time_ - 1;
         uint32_t end = last_time_;
@@ -302,7 +304,7 @@ class log_store {
           for (uint32_t i = 0; i < sz; i++) {
             index_entry entry = list->at(i);
             uint32_t record_id = entry & 0xFFFFFFFF;
-            if (olog_->is_valid(record_id, max_rid) && sport_set.find(record_id) != sport_set.end()) {
+            if (olog_->is_valid(record_id, max_rid) && dport_set.find(record_id) != dport_set.end()) {
               uint32_t ip;
               extract((unsigned char*)&ip, record_id, 0, 4);
               results.insert(ip);
