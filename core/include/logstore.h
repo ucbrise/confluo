@@ -308,6 +308,84 @@ class log_store {
         }
       }
 
+      const void q5_base(std::set<uint32_t>& results, unsigned char* sip, unsigned char* dip, unsigned char* sport, unsigned char* dport) {
+        std::set<uint64_t> sip_set, dip_set, sport_set, dport_set;
+        uint64_t max_rid = olog_->num_ids();
+        filter(srcip_idx_, sip_set, sip, 4, max_rid);
+
+        entry_list* list = dstip_idx_->get_entry_list(dip);
+        if (list == NULL || sip_set.empty()) {
+          return;
+        }
+
+        uint32_t sz = list->size();
+        for (uint32_t i = 0; i < sz; i++) {
+          index_entry entry = list->at(i);
+          uint32_t record_id = entry & 0xFFFFFFFF;
+          uint32_t entry_suffix = entry >> 32;
+          uint32_t query_suffix = token_ops<4, 3>::suffix(dip);
+          if (entry_suffix == query_suffix && olog_->is_valid(record_id, max_rid) && sip_set.find(record_id) != sip_set.end()) {
+            dip_set.insert(record_id);
+          }
+        }
+
+        list = srcprt_idx_->get_entry_list(sport);
+        if (list == NULL || dip_set.empty()) {
+          return;
+        }
+
+        sz = list->size();
+        for (uint32_t i = 0; i < sz; i++) {
+          index_entry entry = list->at(i);
+          uint32_t record_id = entry & 0xFFFFFFFF;
+          uint32_t query_suffix = token_ops<2, 2>::suffix(sport);
+          if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
+            sport_set.insert(record_id);
+          }
+        }
+
+        list = dstprt_idx_->get_entry_list(dport);
+        if (list == NULL || sport_set.empty()) {
+          return;
+        }
+
+        sz = list->size();
+        for (uint32_t i = 0; i < sz; i++) {
+          index_entry entry = list->at(i);
+          uint32_t record_id = entry & 0xFFFFFFFF;
+          uint32_t query_suffix = token_ops<2, 2>::suffix(dport);
+          if (olog_->is_valid(record_id, max_rid) && sport_set.find(record_id) != sport_set.end()) {
+            dport_set.insert(record_id);
+          }
+        }
+
+        if (dport_set.empty()) {
+          return;
+        }
+
+        uint32_t start = last_time_ - 1;
+        uint32_t end = last_time_;
+        for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
+          list = time_idx_->get_entry_list(time_idx);
+          if (list == NULL) {
+            continue;
+          }
+          sz = list->size();
+          for (uint32_t i = 0; i < sz; i++) {
+            index_entry entry = list->at(i);
+            uint32_t record_id = entry & 0xFFFFFFFF;
+            if (olog_->is_valid(record_id, max_rid) && dport_set.find(record_id) != dport_set.end()) {
+              results.insert(record_id);
+            }
+          }
+        }
+      }
+
+      const void q5(std::set<uint32_t>& results, unsigned char* ip1, unsigned char* ip2, unsigned char* p1, unsigned char* p2) {
+        q5_base(results, ip1, ip2, p1, p2);
+        q5_base(results, ip2, ip1, p2, p1);
+      }
+
       // Atomically filter on time.
       const void filter_time(std::set<uint64_t>& results,
           const unsigned char* token_prefix,

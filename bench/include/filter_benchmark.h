@@ -153,13 +153,28 @@ class filter_benchmark {
       std::set<uint32_t> rids;
       timestamp_t start = get_timestamp();
       logstore_->q4(rids, (unsigned char*) &srcips_[i],
-                    (unsigned char*) &sports_[i]);
+                    (unsigned char*) &dports_[i]);
       timestamp_t end = get_timestamp();
       q4_out << rids.size() << "\t" << (end - start) << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
               (end - start));
     }
     q4_out.close();
+
+    std::ofstream q5_out("latency_q5");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q5(rids, (unsigned char*) &srcips_[i],
+                    (unsigned char*) &dstips_[i], (unsigned char*) &sports_[i],
+                    (unsigned char*) &dports_[i]);
+      timestamp_t end = get_timestamp();
+      q5_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q5_out.close();
   }
 
   // Throughput benchmarks
