@@ -271,8 +271,8 @@ class log_store {
           if (list == NULL) {
             continue;
           }
-          size = list->size();
-          for (uint32_t i = 0; i < size; i++) {
+          uint32_t sz = list->size();
+          for (uint32_t i = 0; i < sz; i++) {
             index_entry entry = list->at(i);
             uint32_t record_id = entry & 0xFFFFFFFF;
             if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
