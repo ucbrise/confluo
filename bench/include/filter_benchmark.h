@@ -145,6 +145,7 @@ class filter_benchmark {
       fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
               (end - start));
     }
+    q2_out.close();
 
     std::ofstream q4_out("latency_q4");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
@@ -158,6 +159,7 @@ class filter_benchmark {
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
               (end - start));
     }
+    q4_out.close();
   }
 
   // Throughput benchmarks

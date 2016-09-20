@@ -259,7 +259,7 @@ class log_store {
         return count;
       }
 
-      const void q2(std::set<uint32_t> results, unsigned char* dip) {
+      const void q2(std::set<uint32_t>& results, unsigned char* dip) {
         std::set<uint64_t> dip_set, time_set;
         uint64_t max_rid = olog_->num_ids();
         filter(dstip_idx_, dip_set, dip, 4, max_rid);
@@ -287,7 +287,7 @@ class log_store {
       const void q3() {
       }
 
-      const void q4(std::set<uint32_t> results, unsigned char* sprefix, unsigned char* dport) {
+      const void q4(std::set<uint32_t>& results, unsigned char* sprefix, unsigned char* dport) {
         std::set<uint64_t> sip_set;
         uint64_t max_rid = olog_->num_ids();
         filter(srcip_idx_, sip_set, sprefix, 3, max_rid);
