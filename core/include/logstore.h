@@ -289,7 +289,7 @@ class log_store {
       const void q3(std::set<uint32_t>& results, unsigned char* dport) {
         std::set<uint64_t> sport_set;
         uint64_t max_rid = olog_->num_ids();
-        filter(dstprt_idx_, sport_set, dport, 4, max_rid);
+        filter(dstprt_idx_, sport_set, dport, 2, max_rid);
 
         uint32_t start = last_time_ - 1;
         uint32_t end = last_time_;
