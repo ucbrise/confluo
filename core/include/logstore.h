@@ -202,7 +202,7 @@ class log_store {
         return true;
       }
 
-      const uint64_t q1(unsigned char* sip, unsigned char* dip, unsigned char* stime, unsigned char* etime) {
+      const uint64_t q1(unsigned char* sip, unsigned char* dip) {
         std::set<uint64_t> sip_set, dip_set, time_set;
         uint64_t max_rid = olog_->num_ids();
         filter(srcip_idx_, sip_set, sip, 4, max_rid);
@@ -225,13 +225,15 @@ class log_store {
         }
         fprintf(stderr, "#DST IPS: %llu\t", dip_set.size());
 
-        uint32_t start = token_ops<3, 3>::prefix(stime);
-        uint32_t end = token_ops<3, 3>::prefix(etime);
+        uint32_t start = last_time_ - 1;
+        uint32_t end = last_time_;
         uint64_t count = 0;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
           list = time_idx_->get_entry_list(time_idx);
-          if (list == NULL) continue;
-          uint32_t size = list->size();
+          if (list == NULL) {
+            continue;
+          }
+          size = list->size();
           for (uint32_t i = 0; i < size; i++) {
             index_entry entry = list->at(i);
             uint32_t record_id = entry & 0xFFFFFFFF;
@@ -307,6 +309,8 @@ class log_store {
       }
 
     private:
+
+      uint32_t last_time_;
       // Atomically advance the write tail by the given amount.
       //
       // Returns the tail value just before the advance occurred.
@@ -325,7 +329,7 @@ class log_store {
 
       // Append (token, recordId) entries to index log.
       void append_tokens(uint64_t record_id, const tokens& tkns) {
-        time_idx_->add_entry(tkns.time, record_id);
+        last_time_ = time_idx_->add_entry(tkns.time, record_id);
         srcip_idx_->add_entry(tkns.src_ip, record_id);
         dstip_idx_->add_entry(tkns.dst_ip, record_id);
         srcprt_idx_->add_entry(tkns.src_prt, record_id);

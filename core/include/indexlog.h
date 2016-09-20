@@ -85,7 +85,7 @@ class indexlog {
       x = null_ptr;
   }
 
-  void add_entry(const unsigned char* token, const uint32_t record_id) {
+  uint32_t add_entry(const unsigned char* token, const uint32_t record_id) {
     uint32_t prefix = token_ops<TOKEN_LEN, PREFIX_LEN>::prefix(token);
     uint64_t suffix = token_ops<TOKEN_LEN, PREFIX_LEN>::suffix(token);
     if (idx_[prefix] == NULL) {
@@ -94,6 +94,7 @@ class indexlog {
     entry_list* list = idx_[prefix];
     index_entry entry = (suffix << 32) | record_id;
     list->push_back(entry);
+    return prefix;
   }
 
   entry_list* get_entry_list(const unsigned char* token) {
