@@ -160,6 +160,7 @@ class log_store {
         dstip_idx_ = new indexlog<4, 3>;
         srcprt_idx_ = new indexlog<2, 2>;
         dstprt_idx_ = new indexlog<2, 2>;
+        path_idx_ = new indexlog<4, 3>;
         q1_ = new monolog_relaxed<uint64_t, 32>();
         q2_ = new monolog_relaxed<uint64_t, 32>();
         q3_ = new monolog_relaxed<uint64_t, 32>();
@@ -391,12 +392,12 @@ class log_store {
         }
       }
 
-      const void q3(std::set<uint32_t>& results, unsigned char* dport) {
-        std::set<uint64_t> dport_set;
+      const void q3(std::set<uint32_t>& results) {
+        std::set<uint64_t> path_set;
+        uint32_t path = 0;
+        unsigned char* path_str = (unsigned char*)&path;
         uint64_t max_rid = olog_->num_ids();
-        filter(dstprt_idx_, dport_set, dport, 2, max_rid);
-
-        fprintf(stderr, "dport_set: %zu\n", dport_set.size());
+        filter(dstprt_idx_, path_set, path_str, 4, max_rid);
 
         uint32_t start = last_time_ - 1;
         uint32_t end = last_time_;
@@ -409,7 +410,7 @@ class log_store {
           for (uint32_t i = 0; i < sz; i++) {
             index_entry entry = list->at(i);
             uint32_t record_id = entry & 0xFFFFFFFF;
-            if (olog_->is_valid(record_id, max_rid) && dport_set.find(record_id) != dport_set.end()) {
+            if (olog_->is_valid(record_id, max_rid) && path_set.find(record_id) != path_set.end()) {
               uint32_t ip;
               extract((unsigned char*)&ip, record_id, 0, 4);
               results.insert(ip);
@@ -632,6 +633,8 @@ class log_store {
         dstip_idx_->add_entry(tkns.dst_ip, record_id);
         srcprt_idx_->add_entry(tkns.src_prt, record_id);
         dstprt_idx_->add_entry(tkns.dst_prt, record_id);
+        uint32_t path = rand() % 500000;
+        path_idx_->add_entry((unsigned char*) &path, record_id);
 
         uint64_t time = last_time_tok_ << 32;
         uint64_t entry = (record_id & 0xFFFFFFFF) | time;
@@ -644,7 +647,7 @@ class log_store {
           q2_->push_back(entry);
         }
 
-        if (rand() % 500000 == q3_path_) {
+        if (path == q3_path_) {
           q3_->push_back(entry);
         }
 
@@ -736,6 +739,7 @@ class log_store {
       indexlog<4, 3>* dstip_idx_;
       indexlog<2, 2>* srcprt_idx_;
       indexlog<2, 2>* dstprt_idx_;
+      indexlog<4, 3>* path_idx_;
 
       // Complex characters
       monolog_relaxed<uint64_t, 32>* q1_;

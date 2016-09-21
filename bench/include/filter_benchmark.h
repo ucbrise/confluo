@@ -136,8 +136,8 @@ class filter_benchmark {
       uint64_t count = logstore_->q1((unsigned char*) &srcips_[i],
                                      (unsigned char*) &dstips_[i]);
       auto end = high_resolution_clock::now();
-      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", count, duration_cast<nanoseconds>(end - start).count());
+      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q1_out.close();
   }
@@ -150,9 +150,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q2(sips, (unsigned char*) &dstips_[i]);
       auto end = high_resolution_clock::now();
-      q2_out << sips.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q2_out << sips.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q2_out.close();
   }
@@ -163,11 +162,10 @@ class filter_benchmark {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
       auto start = high_resolution_clock::now();
-      logstore_->q3(rids, (unsigned char*) &dports_[i]);
+      logstore_->q3(rids);
       auto end = high_resolution_clock::now();
-      q3_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q3_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q3_out.close();
   }
@@ -181,9 +179,8 @@ class filter_benchmark {
       logstore_->q4(rids, (unsigned char*) &srcips_[i],
                     (unsigned char*) &dports_[i]);
       auto end = high_resolution_clock::now();
-      q4_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q4_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q4_out.close();
   }
@@ -198,9 +195,8 @@ class filter_benchmark {
                     (unsigned char*) &dstips_[i], (unsigned char*) &sports_[i],
                     (unsigned char*) &dports_[i]);
       auto end = high_resolution_clock::now();
-      q5_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q5_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q5_out.close();
   }
@@ -213,9 +209,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q6(rids, (unsigned char*) &srcips_[i]);
       auto end = high_resolution_clock::now();
-      q6_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q6_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q6_out.close();
   }
@@ -224,7 +219,7 @@ class filter_benchmark {
   void latency_all() {
     latency_q1();
     latency_q2();
-    //latency_q3();
+    latency_q3();
     latency_q4();
     latency_q5();
     latency_q6();
@@ -238,7 +233,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       uint64_t count = logstore_->q1_fast();
       auto end = high_resolution_clock::now();
-      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
+      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q1_out.close();
   }
@@ -251,9 +247,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q2_fast(sips);
       auto end = high_resolution_clock::now();
-      q2_out << sips.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q2_out << sips.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q2_out.close();
   }
@@ -266,9 +261,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q3_fast(rids);
       auto end = high_resolution_clock::now();
-      q3_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q3_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q3_out.close();
   }
@@ -281,9 +275,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q4_fast(rids);
       auto end = high_resolution_clock::now();
-      q4_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q4_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q4_out.close();
   }
@@ -296,9 +289,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q5_fast(rids);
       auto end = high_resolution_clock::now();
-      q5_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q5_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q5_out.close();
   }
@@ -311,9 +303,8 @@ class filter_benchmark {
       auto start = high_resolution_clock::now();
       logstore_->q6_fast(rids);
       auto end = high_resolution_clock::now();
-      q6_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              duration_cast<nanoseconds>(end - start).count());
+      q6_out << rids.size() << "\t"
+             << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q6_out.close();
   }
