@@ -273,13 +273,10 @@ class log_store {
 
       const void q2_fast(std::set<uint32_t>& results) {
         uint32_t size = q2_->size();
-        uint32_t time2 = last_time_tok_;
-        unsigned char* ptr = (unsigned char*)&time2;
-        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q2_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == time2) {
+          if (time == last_time_tok_) {
             uint32_t ip;
             extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
             results.insert(ip + i);
@@ -289,13 +286,10 @@ class log_store {
 
       const void q3_fast(std::set<uint32_t>& results) {
         uint32_t size = q3_->size();
-        uint32_t time2 = last_time_tok_;
-        unsigned char* ptr = (unsigned char*)&time2;
-        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q3_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == time2) {
+          if (time == last_time_tok_) {
             uint32_t ip;
             extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
             results.insert(ip + i);
@@ -313,13 +307,10 @@ class log_store {
 
       const void q5_fast(std::set<uint32_t>& results) {
         uint32_t size = q5_->size();
-        uint32_t time2 = last_time_tok_;
-        unsigned char* ptr = (unsigned char*)&time2;
-        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q5_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == time2) {
+          if (time == last_time_tok_) {
             uint32_t ip;
             results.insert(rid_time & 0xFFFFFFFF);
           }
@@ -328,13 +319,10 @@ class log_store {
 
       const void q6_fast(std::set<uint32_t>& results) {
         uint32_t size = q6_->size();
-        uint32_t time2 = last_time_tok_;
-        unsigned char* ptr = (unsigned char*)&time2;
-        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q6_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == time2) {
+          if (time == last_time_tok_) {
             uint32_t ip;
             results.insert(rid_time & 0xFFFFFFFF);
           }
@@ -362,7 +350,7 @@ class log_store {
           }
         }
 
-        uint32_t start = last_time_ - 1;
+        uint32_t start = last_time_;
         uint32_t end = last_time_;
         uint64_t count = 0;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
@@ -387,7 +375,7 @@ class log_store {
         uint64_t max_rid = olog_->num_ids();
         filter(dstip_idx_, dip_set, dip, 4, max_rid);
 
-        uint32_t start = last_time_ - 1;
+        uint32_t start = last_time_;
         uint32_t end = last_time_;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
           entry_list* list = time_idx_->get_entry_list(time_idx);
@@ -414,7 +402,7 @@ class log_store {
         uint64_t max_rid = olog_->num_ids();
         filter(path_idx_, path_set, path_str, 4, max_rid);
 
-        uint32_t start = last_time_ - 1;
+        uint32_t start = last_time_;
         uint32_t end = last_time_;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
           entry_list* list = time_idx_->get_entry_list(time_idx);
@@ -507,7 +495,7 @@ class log_store {
           return;
         }
 
-        uint32_t start = last_time_ - 1;
+        uint32_t start = last_time_;
         uint32_t end = last_time_;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
           list = time_idx_->get_entry_list(time_idx);
@@ -535,7 +523,7 @@ class log_store {
         uint64_t max_rid = olog_->num_ids();
         filter(ilog, ip_set, ip, 4, max_rid);
 
-        uint32_t start = last_time_ - 1;
+        uint32_t start = last_time_;
         uint32_t end = last_time_;
         for (uint32_t time_idx = start; time_idx <= end; time_idx++) {
           entry_list* list = time_idx_->get_entry_list(time_idx);
