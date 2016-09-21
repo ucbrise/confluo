@@ -31,8 +31,9 @@ using namespace ::std::chrono;
 
 class rate_limiter {
  public:
-  rate_limiter(uint64_t ops_per_sec) {
-    min_us_per_op = 1e6 / ops_per_sec;
+  rate_limiter(double ops_per_sec) {
+    double tmp = (((double) 1e6) / ops_per_sec)
+    min_us_per_op = tmp;
     local_ops_ = 0;
     last_ts_ = high_resolution_clock::now();
     LOG(stderr, "1op per %lld ns.\n", min_us_per_op);
@@ -63,9 +64,8 @@ class rate_limiter {
 
 class rate_limiter_inf {
  public:
-  rate_limiter_inf(uint64_t ops_per_sec) {
+  rate_limiter_inf(double ops_per_sec) {
     local_ops_ = 0;
-    local_ops_++;
   }
 
   uint64_t limit() {
@@ -431,7 +431,7 @@ class filter_benchmark {
                         const std::string& tag) {
 
     std::vector<std::thread> threads;
-    uint64_t local_rate_limit = rate_limit / num_threads;
+    double local_rate_limit = (double) rate_limit / (double) num_threads;
 
     LOG(stderr, "Setting timebound to %llu us\n", timebound);
     for (uint32_t i = 0; i < num_threads; i++) {
