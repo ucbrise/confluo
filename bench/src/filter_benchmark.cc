@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   }
 
   int c;
-  std::string bench_type = "latency-get";
+  std::string bench_type = "thput";
   int num_threads = 1;
   uint64_t rate_limit = 0;
   uint64_t timebound = 60 * 1e6;

@@ -14,3 +14,4 @@ add_executable(storage src/storage_footprint.cc)
 add_executable(pktfilter src/filter_benchmark.cc)
 
 target_link_libraries(pktload ${CMAKE_THREAD_LIBS_INIT} ${JEMALLOC_LIBRARIES})
+target_link_libraries(pktfilter ${CMAKE_THREAD_LIBS_INIT} ${JEMALLOC_LIBRARIES})
