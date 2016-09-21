@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <unistd.h>
 
+#include "cpu_utilization.h"
 #include "logstore.h"
 
 #ifdef NO_LOG
@@ -28,8 +29,66 @@
 using namespace ::slog;
 using namespace ::std::chrono;
 
+class rate_limiter {
+ public:
+  rate_limiter(uint64_t ops_per_sec) {
+    min_ns_per_10000_ops = 1e13 / ops_per_sec;
+    local_ops_ = 0;
+    last_ts_ = high_resolution_clock::now();
+    tspec_.tv_sec = 0;
+    LOG(stderr, "10000 ops per %lld ns.\n", min_ns_per_10000_ops);
+  }
+
+  uint64_t limit() {
+    local_ops_++;
+    if (local_ops_ % 10000 == 0) {
+      high_resolution_clock::time_point now = high_resolution_clock::now();
+      auto ns_last_10000_ops =
+          duration_cast<nanoseconds>(now - last_ts_).count();
+      if (ns_last_10000_ops < min_ns_per_10000_ops) {
+        tspec_.tv_nsec = (min_ns_per_10000_ops - ns_last_10000_ops);
+        nanosleep(&tspec_, NULL);
+      }
+      last_ts_ = high_resolution_clock::now();
+    }
+    return local_ops_;
+  }
+
+  uint64_t local_ops() {
+    return local_ops_;
+  }
+
+ private:
+  struct timespec tspec_;
+  high_resolution_clock::time_point last_ts_;
+  uint64_t local_ops_;
+  int64_t min_ns_per_10000_ops;
+};
+
+class rate_limiter_inf {
+ public:
+  rate_limiter_inf(uint64_t ops_per_sec) {
+    local_ops_ = 0;
+    local_ops_++;
+  }
+
+  uint64_t limit() {
+    return ++local_ops_;
+  }
+
+  uint64_t local_ops() {
+    return local_ops_;
+  }
+
+ private:
+  uint64_t local_ops_;
+};
+
+template<class rlimiter = rate_limiter_inf>
 class filter_benchmark {
  public:
+  typedef uint64_t (filter_benchmark::*query_func)();
+
   typedef unsigned long long int timestamp_t;
 
   static const uint64_t kWarmupCount = 1000;
@@ -114,27 +173,98 @@ class filter_benchmark {
       etime_ = ts;
     }
 
-    size_t last = timestamps_.size() - 1;
-    logstore_->set_params((unsigned char*) &srcips_[last],
-                          (unsigned char*) &dstips_[last],
-                          (unsigned char*) &sports_[last],
-                          (unsigned char*) &dports_[last]);
+    last_ = timestamps_.size() - 1;
+    logstore_->set_params((unsigned char*) &srcips_[last_],
+                          (unsigned char*) &dstips_[last_],
+                          (unsigned char*) &sports_[last_],
+                          (unsigned char*) &dports_[last_]);
 
-    for (size_t i = 0; i <= last; i++) {
+    for (size_t i = 0; i <= last_; i++) {
       insert_packet(handle, i);
     }
 
     LOG(stderr, "Loaded %zu packets.\n", datas_.size());
   }
 
+  uint64_t q1() {
+    return logstore_->q1((unsigned char*) &srcips_[last_],
+                         (unsigned char*) &dstips_[last_]);
+  }
+
+  uint64_t q2() {
+    std::set<uint32_t> sips;
+    logstore_->q2(sips, (unsigned char*) &dstips_[last_]);
+    return sips.size();
+  }
+
+  uint64_t q3() {
+    std::set<uint32_t> rids;
+    logstore_->q3(rids);
+    return rids.size();
+  }
+
+  uint64_t q4() {
+    std::set<uint32_t> rids;
+    logstore_->q4(rids, (unsigned char*) &srcips_[last_],
+                  (unsigned char*) &dports_[last_]);
+    return rids.size();
+  }
+
+  uint64_t q5() {
+    std::set<uint32_t> rids;
+    logstore_->q5(rids, (unsigned char*) &srcips_[last_],
+                  (unsigned char*) &dstips_[last_],
+                  (unsigned char*) &sports_[last_],
+                  (unsigned char*) &dports_[last_]);
+    return rids.size();
+  }
+
+  uint64_t q6() {
+    std::set<uint32_t> rids;
+    logstore_->q6(rids, (unsigned char*) &srcips_[last_]);
+    return rids.size();
+  }
+
+  uint64_t q1_fast() {
+    return logstore_->q1_fast();
+  }
+
+  uint64_t q2_fast() {
+    std::set<uint32_t> results;
+    logstore_->q2_fast(results);
+    return results.size();
+  }
+
+  uint64_t q3_fast() {
+    std::set<uint32_t> results;
+    logstore_->q3_fast(results);
+    return results.size();
+  }
+
+  uint64_t q4_fast() {
+    std::set<uint32_t> results;
+    logstore_->q4_fast(results);
+    return results.size();
+  }
+
+  uint64_t q5_fast() {
+    std::set<uint32_t> results;
+    logstore_->q5_fast(results);
+    return results.size();
+  }
+
+  uint64_t q6_fast() {
+    std::set<uint32_t> results;
+    logstore_->q6_fast(results);
+    return results.size();
+  }
+
   void latency_q1() {
     // 1000 queries
     std::ofstream q1_out("latency_q1");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
       auto start = high_resolution_clock::now();
-      uint64_t count = logstore_->q1((unsigned char*) &srcips_[i],
-                                     (unsigned char*) &dstips_[i]);
+      uint64_t count = q1();
       auto end = high_resolution_clock::now();
       q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
              << "\n";
@@ -145,13 +275,11 @@ class filter_benchmark {
   void latency_q2() {
     std::ofstream q2_out("latency_q2");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> sips;
       auto start = high_resolution_clock::now();
-      logstore_->q2(sips, (unsigned char*) &dstips_[i]);
+      uint64_t count = q2();
       auto end = high_resolution_clock::now();
-      q2_out << sips.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
+      q2_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q2_out.close();
   }
@@ -159,13 +287,11 @@ class filter_benchmark {
   void latency_q3() {
     std::ofstream q3_out("latency_q3");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
       auto start = high_resolution_clock::now();
-      logstore_->q3(rids);
+      uint64_t count = q3();
       auto end = high_resolution_clock::now();
-      q3_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
+      q3_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q3_out.close();
   }
@@ -174,13 +300,11 @@ class filter_benchmark {
     std::ofstream q4_out("latency_q4");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
       auto start = high_resolution_clock::now();
-      logstore_->q4(rids, (unsigned char*) &srcips_[i],
-                    (unsigned char*) &dports_[i]);
+      uint64_t count = q4();
       auto end = high_resolution_clock::now();
-      q4_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
+      q4_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q4_out.close();
   }
@@ -189,14 +313,11 @@ class filter_benchmark {
     std::ofstream q5_out("latency_q5");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
       auto start = high_resolution_clock::now();
-      logstore_->q5(rids, (unsigned char*) &srcips_[i],
-                    (unsigned char*) &dstips_[i], (unsigned char*) &sports_[i],
-                    (unsigned char*) &dports_[i]);
+      uint64_t count = q4();
       auto end = high_resolution_clock::now();
-      q5_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
+      q5_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q5_out.close();
   }
@@ -205,12 +326,90 @@ class filter_benchmark {
     std::ofstream q6_out("latency_q6");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
       auto start = high_resolution_clock::now();
-      logstore_->q6(rids, (unsigned char*) &srcips_[i]);
+      uint64_t count = q1();
       auto end = high_resolution_clock::now();
-      q6_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
+      q6_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
+    }
+    q6_out.close();
+  }
+
+  void latency_q1_fast() {
+    // 1000 queries
+    std::ofstream q1_out("latency_q1_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      auto start = high_resolution_clock::now();
+      uint64_t count = q1_fast();
+      auto end = high_resolution_clock::now();
+      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
+    }
+    q1_out.close();
+  }
+
+  void latency_q2_fast() {
+    std::ofstream q2_out("latency_q2_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      auto start = high_resolution_clock::now();
+      uint64_t count = q2_fast();
+      auto end = high_resolution_clock::now();
+      q2_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
+    }
+    q2_out.close();
+  }
+
+  void latency_q3_fast() {
+    std::ofstream q3_out("latency_q3_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      auto start = high_resolution_clock::now();
+      uint64_t count = q3_fast();
+      auto end = high_resolution_clock::now();
+      q3_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
+    }
+    q3_out.close();
+  }
+
+  void latency_q4_fast() {
+    std::ofstream q4_out("latency_q4_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      auto start = high_resolution_clock::now();
+      uint64_t count = q4_fast();
+      auto end = high_resolution_clock::now();
+      q4_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
+    }
+    q4_out.close();
+  }
+
+  void latency_q5_fast() {
+    std::ofstream q5_out("latency_q5_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      auto start = high_resolution_clock::now();
+      uint64_t count = q5_fast();
+      auto end = high_resolution_clock::now();
+      q5_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
+    }
+    q5_out.close();
+  }
+
+  void latency_q6_fast() {
+    std::ofstream q6_out("latency_q6_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      auto start = high_resolution_clock::now();
+      uint64_t count = q6_fast();
+      auto end = high_resolution_clock::now();
+      q6_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
+             << "\n";
     }
     q6_out.close();
   }
@@ -223,99 +422,98 @@ class filter_benchmark {
     latency_q4();
     latency_q5();
     latency_q6();
-  }
-
-  void latency_q1_fast() {
-    // 1000 queries
-    std::ofstream q1_out("latency_q1_fast");
-    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      auto start = high_resolution_clock::now();
-      uint64_t count = logstore_->q1_fast();
-      auto end = high_resolution_clock::now();
-      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count()
-             << "\n";
-    }
-    q1_out.close();
-  }
-
-  void latency_q2_fast() {
-    std::ofstream q2_out("latency_q2_fast");
-    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> sips;
-      auto start = high_resolution_clock::now();
-      logstore_->q2_fast(sips);
-      auto end = high_resolution_clock::now();
-      q2_out << sips.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
-    }
-    q2_out.close();
-  }
-
-  void latency_q3_fast() {
-    std::ofstream q3_out("latency_q3_fast");
-    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
-      auto start = high_resolution_clock::now();
-      logstore_->q3_fast(rids);
-      auto end = high_resolution_clock::now();
-      q3_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
-    }
-    q3_out.close();
-  }
-
-  void latency_q4_fast() {
-    std::ofstream q4_out("latency_q4_fast");
-    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
-      auto start = high_resolution_clock::now();
-      logstore_->q4_fast(rids);
-      auto end = high_resolution_clock::now();
-      q4_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
-    }
-    q4_out.close();
-  }
-
-  void latency_q5_fast() {
-    std::ofstream q5_out("latency_q5_fast");
-    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
-      auto start = high_resolution_clock::now();
-      logstore_->q5_fast(rids);
-      auto end = high_resolution_clock::now();
-      q5_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
-    }
-    q5_out.close();
-  }
-
-  void latency_q6_fast() {
-    std::ofstream q6_out("latency_q6_fast");
-    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
-      uint64_t idx = rand() % timestamps_.size();
-      std::set<uint32_t> rids;
-      auto start = high_resolution_clock::now();
-      logstore_->q6_fast(rids);
-      auto end = high_resolution_clock::now();
-      q6_out << rids.size() << "\t"
-             << duration_cast<nanoseconds>(end - start).count() << "\n";
-    }
-    q6_out.close();
-  }
-
-  void latency_fast() {
     latency_q1_fast();
     latency_q2_fast();
     latency_q3_fast();
     latency_q4_fast();
     latency_q5_fast();
     latency_q6_fast();
+  }
+
+  void query_throughput(query_func f, const uint32_t num_threads,
+                        const uint64_t timebound, const uint64_t rate_limit,
+                        const std::string& tag) {
+
+    std::vector<std::thread> threads;
+    uint64_t local_rate_limit = rate_limit / num_threads;
+
+    LOG(stderr, "Setting timebound to %llu us\n", timebound);
+    for (uint32_t i = 0; i < num_threads; i++) {
+      threads.push_back(
+          std::move(
+              std::thread(
+                  [i, timebound, local_rate_limit, tag, &f, this] {
+                    LOG(stderr, "Starting benchmark.\n");
+                    rlimiter* limiter = new rlimiter(local_rate_limit);
+                    double throughput = 0;
+
+                    try {
+                      uint64_t total_ops = 0;
+                      timestamp_t start = get_timestamp();
+                      while (get_timestamp() - start < timebound) {
+                        (this->*f)();
+                        total_ops = limiter->limit();
+                      }
+                      timestamp_t end = get_timestamp();
+                      double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+                      throughput = ((double) limiter->local_ops() / totsecs);
+                      LOG(stderr, "Thread #%u finished in %lf s. Throughput: %lf.\n", i, totsecs, throughput);
+                    } catch (std::exception &e) {
+                      LOG(stderr, "Throughput thread ended prematurely.\n");
+                    }
+
+                    std::ofstream ofs("write_throughput_" + std::to_string(i) + "_" + tag);
+                    ofs << throughput << "\n";
+                    ofs.close();
+                    delete limiter;
+                  })));
+    }
+
+    std::thread cpu_measure_thread([&] {
+      timestamp_t start = get_timestamp();
+      std::ofstream util_stream("cpu_utilization" + tag);
+      cpu_utilization util;
+      while (get_timestamp() - start < timebound) {
+        sleep(1);
+        util_stream << util.current() << "\n";
+      }
+      util_stream.close();
+    });
+
+    for (auto& th : threads) {
+      th.join();
+    }
+    cpu_measure_thread.join();
+  }
+
+  void throughput_all(const uint32_t num_threads, const uint64_t timebound,
+                      const uint64_t rate_limit) {
+
+    query_throughput(&filter_benchmark::q1, num_threads, timebound, rate_limit,
+                     "q1_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q2, num_threads, timebound, rate_limit,
+                     "q2_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q3, num_threads, timebound, rate_limit,
+                     "q3_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q4, num_threads, timebound, rate_limit,
+                     "q4_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q5, num_threads, timebound, rate_limit,
+                     "q5_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q6, num_threads, timebound, rate_limit,
+                     "q6_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q1_fast, num_threads, timebound,
+                     rate_limit, "q1_fast_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q2_fast, num_threads, timebound,
+                     rate_limit, "q2_fast_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q3_fast, num_threads, timebound,
+                     rate_limit, "q3_fast_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q4_fast, num_threads, timebound,
+                     rate_limit, "q4_fast_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q5_fast, num_threads, timebound,
+                     rate_limit, "q5_fast_" + std::to_string(rate_limit));
+    query_throughput(&filter_benchmark::q6_fast, num_threads, timebound,
+                     rate_limit, "q6_fast_" + std::to_string(rate_limit));
+
   }
 
  private:
@@ -337,6 +535,7 @@ class filter_benchmark {
   std::vector<unsigned char*> datas_;
   std::vector<uint16_t> datalens_;
   uint32_t etime_;
+  size_t last_;
 
   log_store *logstore_;
 };
