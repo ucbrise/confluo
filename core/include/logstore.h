@@ -258,10 +258,13 @@ class log_store {
       const uint64_t q1_fast() {
         uint32_t size = q1_->size();
         uint64_t count = 0;
+        uint32_t time2 = last_time_tok_;
+        unsigned char* ptr = (unsigned char*)&time2;
+        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q1_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+          if (time == last_time_tok_ || time == time2) {
             count++;
           }
         }
@@ -270,10 +273,13 @@ class log_store {
 
       const void q2_fast(std::set<uint32_t>& results) {
         uint32_t size = q2_->size();
+        uint32_t time2 = last_time_tok_;
+        unsigned char* ptr = (unsigned char*)&time2;
+        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q2_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+          if (time == last_time_tok_ || time == time2) {
             uint32_t ip;
             extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
             results.insert(ip + i);
@@ -283,10 +289,13 @@ class log_store {
 
       const void q3_fast(std::set<uint32_t>& results) {
         uint32_t size = q3_->size();
+        uint32_t time2 = last_time_tok_;
+        unsigned char* ptr = (unsigned char*)&time2;
+        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q3_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+          if (time == last_time_tok_ || time == time2) {
             uint32_t ip;
             extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
             results.insert(ip + i);
@@ -304,10 +313,13 @@ class log_store {
 
       const void q5_fast(std::set<uint32_t>& results) {
         uint32_t size = q5_->size();
+        uint32_t time2 = last_time_tok_;
+        unsigned char* ptr = (unsigned char*)&time2;
+        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q5_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+          if (time == last_time_tok_ || time == time2) {
             uint32_t ip;
             results.insert(rid_time & 0xFFFFFFFF);
           }
@@ -316,10 +328,13 @@ class log_store {
 
       const void q6_fast(std::set<uint32_t>& results) {
         uint32_t size = q6_->size();
+        uint32_t time2 = last_time_tok_;
+        unsigned char* ptr = (unsigned char*)&time2;
+        ptr[2]++;
         for (uint32_t i = 0; i < size; i++) {
           uint64_t rid_time = q6_->get(i);
           uint64_t time = rid_time >> 32;
-          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+          if (time == last_time_tok_ || time == time2) {
             uint32_t ip;
             results.insert(rid_time & 0xFFFFFFFF);
           }
