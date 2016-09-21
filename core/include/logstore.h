@@ -275,7 +275,7 @@ class log_store {
           if (time == last_time_tok_ || time == last_time_tok_ - 1) {
             uint32_t ip;
             extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
-            results.insert(ip);
+            results.insert(ip + i);
           }
         }
       }
@@ -288,7 +288,7 @@ class log_store {
           if (time == last_time_tok_ || time == last_time_tok_ - 1) {
             uint32_t ip;
             extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
-            results.insert(ip);
+            results.insert(ip + i);
           }
         }
       }
@@ -385,7 +385,7 @@ class log_store {
             if (olog_->is_valid(record_id, max_rid) && dip_set.find(record_id) != dip_set.end()) {
               uint32_t ip;
               extract((unsigned char*)&ip, record_id, 0, 4);
-              results.insert(ip);
+              results.insert(ip + i);
             }
           }
         }
@@ -644,7 +644,7 @@ class log_store {
           q2_->push_back(entry);
         }
 
-        if (rand() % 5000000 == q3_path_) {
+        if (rand() % 500000 == q3_path_) {
           q3_->push_back(entry);
         }
 
@@ -659,7 +659,7 @@ class log_store {
         }
 
         if (!memcmp(tkns.src_ip, q6_ip_, 4) || !memcmp(tkns.dst_ip, q6_ip_, 4)) {
-          q6_->push_back(record_id);
+          q6_->push_back(entry);
         }
       }
 
