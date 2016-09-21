@@ -32,20 +32,20 @@ using namespace ::std::chrono;
 class rate_limiter {
  public:
   rate_limiter(uint64_t ops_per_sec) {
-    min_ns_per_op = 1e13 / ops_per_sec;
+    min_ns_per_op = 1e9 / ops_per_sec;
     local_ops_ = 0;
     last_ts_ = high_resolution_clock::now();
     tspec_.tv_sec = 0;
-    LOG(stderr, "1 op per %lld ns.\n", min_ns_per_op);
+    LOG(stderr, "1op per %lld ns.\n", min_ns_per_op);
   }
 
   uint64_t limit() {
     local_ops_++;
 
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    auto ns_last_ops = duration_cast<nanoseconds>(now - last_ts_).count();
-    if (ns_last_ops < min_ns_per_op) {
-      tspec_.tv_nsec = (min_ns_per_op - ns_last_ops);
+    auto ns_since_last_op = duration_cast<nanoseconds>(now - last_ts_).count();
+    if (ns_since_last_op < min_ns_per_op) {
+      tspec_.tv_nsec = (min_ns_per_op - ns_since_last_op);
       nanosleep(&tspec_, NULL);
     }
     last_ts_ = high_resolution_clock::now();
