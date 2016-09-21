@@ -132,12 +132,12 @@ class filter_benchmark {
     std::ofstream q1_out("latency_q1");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       uint64_t count = logstore_->q1((unsigned char*) &srcips_[i],
                                      (unsigned char*) &dstips_[i]);
-      timestamp_t end = get_timestamp();
-      q1_out << count << "\t" << (end - start) << "\n";
-      fprintf(stderr, "Count = %llu, Latency = %llu\n", count, (end - start));
+      auto end = high_resolution_clock::now();
+      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", count, duration_cast<nanoseconds>(end - start).count());
     }
     q1_out.close();
   }
@@ -147,12 +147,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> sips;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q2(sips, (unsigned char*) &dstips_[i]);
-      timestamp_t end = get_timestamp();
-      q2_out << sips.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q2_out << sips.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q2_out.close();
   }
@@ -162,12 +162,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q3(rids, (unsigned char*) &dports_[i]);
-      timestamp_t end = get_timestamp();
-      q3_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q3_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q3_out.close();
   }
@@ -177,13 +177,13 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q4(rids, (unsigned char*) &srcips_[i],
                     (unsigned char*) &dports_[i]);
-      timestamp_t end = get_timestamp();
-      q4_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q4_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q4_out.close();
   }
@@ -193,14 +193,14 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q5(rids, (unsigned char*) &srcips_[i],
                     (unsigned char*) &dstips_[i], (unsigned char*) &sports_[i],
                     (unsigned char*) &dports_[i]);
-      timestamp_t end = get_timestamp();
-      q5_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q5_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q5_out.close();
   }
@@ -210,12 +210,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q6(rids, (unsigned char*) &srcips_[i]);
-      timestamp_t end = get_timestamp();
-      q6_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q6_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q6_out.close();
   }
@@ -224,7 +224,7 @@ class filter_benchmark {
   void latency_all() {
     latency_q1();
     latency_q2();
-    latency_q3();
+    //latency_q3();
     latency_q4();
     latency_q5();
     latency_q6();
@@ -235,10 +235,10 @@ class filter_benchmark {
     std::ofstream q1_out("latency_q1_fast");
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       uint64_t count = logstore_->q1_fast();
-      timestamp_t end = get_timestamp();
-      q1_out << count << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q1_out << count << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
     }
     q1_out.close();
   }
@@ -248,12 +248,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> sips;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q2_fast(sips);
-      timestamp_t end = get_timestamp();
-      q2_out << sips.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q2_out << sips.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q2_out.close();
   }
@@ -263,12 +263,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q3_fast(rids);
-      timestamp_t end = get_timestamp();
-      q3_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q3_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q3_out.close();
   }
@@ -278,12 +278,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q4_fast(rids);
-      timestamp_t end = get_timestamp();
-      q4_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q4_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q4_out.close();
   }
@@ -293,12 +293,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q5_fast(rids);
-      timestamp_t end = get_timestamp();
-      q5_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q5_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q5_out.close();
   }
@@ -308,12 +308,12 @@ class filter_benchmark {
     for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
       uint64_t idx = rand() % timestamps_.size();
       std::set<uint32_t> rids;
-      timestamp_t start = get_timestamp();
+      auto start = high_resolution_clock::now();
       logstore_->q6_fast(rids);
-      timestamp_t end = get_timestamp();
-      q6_out << rids.size() << "\t" << (end - start) << "\n";
+      auto end = high_resolution_clock::now();
+      q6_out << rids.size() << "\t" << duration_cast<nanoseconds>(end - start).count() << "\n";
       fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
-              (end - start));
+              duration_cast<nanoseconds>(end - start).count());
     }
     q6_out.close();
   }
