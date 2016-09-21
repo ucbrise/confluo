@@ -95,13 +95,12 @@ class filter_benchmark {
     LOG(stderr, "Reading from path data=%s, attr=%s\n", data_path_.c_str(),
         attr_path_.c_str());
 
-    uint64_t idx = 0;
     while (std::getline(ina, attr_line)) {
-      std::stringstream attr_stream(attr_line);
       uint32_t ts;
       std::string srcip, dstip;
       uint16_t sport, dport;
       uint16_t len;
+      std::stringstream attr_stream(attr_line);
       attr_stream >> ts >> len >> srcip >> dstip >> sport >> dport;
       unsigned char* data = new unsigned char[len];
       ind.read((char*) data, len);
@@ -113,7 +112,16 @@ class filter_benchmark {
       datas_.push_back(data);
       datalens_.push_back(len);
       etime_ = ts;
-      insert_packet(handle, idx++);
+    }
+
+    size_t last = timestamps_.size() - 1;
+    logstore_->set_params((unsigned char*) &srcips_[last],
+                          (unsigned char*) &dstips_[last],
+                          (unsigned char*) &sports_[last],
+                          (unsigned char*) &dports_[last]);
+
+    for (size_t i = 0; i <= last; i++) {
+      insert_packet(handle, i);
     }
 
     LOG(stderr, "Loaded %zu packets.\n", datas_.size());
@@ -222,9 +230,101 @@ class filter_benchmark {
     latency_q6();
   }
 
-  // Throughput benchmarks
-  void filter_throughput() {
+  void latency_q1_fast() {
+    // 1000 queries
+    std::ofstream q1_out("latency_q1_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      timestamp_t start = get_timestamp();
+      uint64_t count = logstore_->q1_fast();
+      timestamp_t end = get_timestamp();
+      q1_out << count << "\t" << (end - start) << "\n";
+    }
+    q1_out.close();
+  }
 
+  void latency_q2_fast() {
+    std::ofstream q2_out("latency_q2_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> sips;
+      timestamp_t start = get_timestamp();
+      logstore_->q2_fast(sips);
+      timestamp_t end = get_timestamp();
+      q2_out << sips.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", sips.size(),
+              (end - start));
+    }
+    q2_out.close();
+  }
+
+  void latency_q3_fast() {
+    std::ofstream q3_out("latency_q3_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q3_fast(rids);
+      timestamp_t end = get_timestamp();
+      q3_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q3_out.close();
+  }
+
+  void latency_q4_fast() {
+    std::ofstream q4_out("latency_q4_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q4_fast(rids);
+      timestamp_t end = get_timestamp();
+      q4_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q4_out.close();
+  }
+
+  void latency_q5_fast() {
+    std::ofstream q5_out("latency_q5_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q5_fast(rids);
+      timestamp_t end = get_timestamp();
+      q5_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q5_out.close();
+  }
+
+  void latency_q6_fast() {
+    std::ofstream q6_out("latency_q6_fast");
+    for (uint32_t i = timestamps_.size() - 1000; i < timestamps_.size(); i++) {
+      uint64_t idx = rand() % timestamps_.size();
+      std::set<uint32_t> rids;
+      timestamp_t start = get_timestamp();
+      logstore_->q6_fast(rids);
+      timestamp_t end = get_timestamp();
+      q6_out << rids.size() << "\t" << (end - start) << "\n";
+      fprintf(stderr, "Count = %llu, Latency = %llu\n", rids.size(),
+              (end - start));
+    }
+    q6_out.close();
+  }
+
+  void latency_fast() {
+    latency_q1_fast();
+    latency_q2_fast();
+    latency_q3_fast();
+    latency_q4_fast();
+    latency_q5_fast();
+    latency_q6_fast();
   }
 
  private:

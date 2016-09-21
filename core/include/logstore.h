@@ -160,8 +160,42 @@ class log_store {
         dstip_idx_ = new indexlog<4, 3>;
         srcprt_idx_ = new indexlog<2, 2>;
         dstprt_idx_ = new indexlog<2, 2>;
+        q1_ = new monolog_relaxed<uint64_t, 32>();
+        q2_ = new monolog_relaxed<uint64_t, 32>();
+        q3_ = new monolog_relaxed<uint64_t, 32>();
+        q4_ = new monolog_relaxed<uint64_t, 32>();
+        q5_ = new monolog_relaxed<uint64_t, 32>();
+        q6_ = new monolog_relaxed<uint64_t, 32>();
 
         last_time_ = 0;
+        last_time_tok_ = 0;
+
+        set_params((unsigned char*)&last_time_, (unsigned char*)&last_time_, (unsigned char*)&last_time_, (unsigned char*)&last_time_);
+      }
+
+      void set_params(unsigned char* sip, unsigned char* dip, unsigned char* sport, unsigned char* dport) {
+        // q1 params
+        q1_sip_ = sip;
+        q1_dip_ = dip;
+
+        // q2 params
+        q2_dip_ = dip;
+
+        // q3 params
+        q3_path_ = 0;
+
+        // q4 params
+        q4_ip_prefix_ = sip;
+        q4_prt_ = sport;
+
+        // q5 params
+        q5_ip1_ = sip;
+        q5_ip2_ = dip;
+        q5_p1_ = sport;
+        q5_p2_ = dport;
+
+        // q6 params
+        q6_ip_ = sip;
       }
 
       uint64_t insert(const unsigned char* record, uint16_t record_len,
@@ -218,6 +252,77 @@ class log_store {
 
         // Return true for successful get.
         return true;
+      }
+
+      const uint64_t q1_fast() {
+        uint32_t size = q1_->size();
+        uint64_t count = 0;
+        for (uint32_t i = 0; i < size; i++) {
+          uint64_t rid_time = q1_->get(i);
+          uint64_t time = rid_time >> 32;
+          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+            count++;
+          }
+        }
+        return count;
+      }
+
+      const void q2_fast(std::set<uint32_t>& results) {
+        uint32_t size = q2_->size();
+        for (uint32_t i = 0; i < size; i++) {
+          uint64_t rid_time = q2_->get(i);
+          uint64_t time = rid_time >> 32;
+          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+            uint32_t ip;
+            extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
+            results.insert(ip);
+          }
+        }
+      }
+
+      const void q3_fast(std::set<uint32_t>& results) {
+        uint32_t size = q3_->size();
+        for (uint32_t i = 0; i < size; i++) {
+          uint64_t rid_time = q3_->get(i);
+          uint64_t time = rid_time >> 32;
+          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+            uint32_t ip;
+            extract((unsigned char*)&ip, rid_time & 0xFFFFFFFF, 0, 4);
+            results.insert(ip);
+          }
+        }
+      }
+
+      const void q4_fast(std::set<uint32_t>& results) {
+        uint32_t size = q4_->size();
+        for (uint32_t i = 0; i < size; i++) {
+          uint64_t rid_time = q4_->get(i);
+          results.insert(rid_time & 0xFFFFFFFF);
+        }
+      }
+
+      const void q5_fast(std::set<uint32_t>& results) {
+        uint32_t size = q5_->size();
+        for (uint32_t i = 0; i < size; i++) {
+          uint64_t rid_time = q5_->get(i);
+          uint64_t time = rid_time >> 32;
+          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+            uint32_t ip;
+            results.insert(rid_time & 0xFFFFFFFF);
+          }
+        }
+      }
+
+      const void q6_fast(std::set<uint32_t>& results) {
+        uint32_t size = q6_->size();
+        for (uint32_t i = 0; i < size; i++) {
+          uint64_t rid_time = q6_->get(i);
+          uint64_t time = rid_time >> 32;
+          if (time == last_time_tok_ || time == last_time_tok_ - 1) {
+            uint32_t ip;
+            results.insert(rid_time & 0xFFFFFFFF);
+          }
+        }
       }
 
       const uint64_t q1(unsigned char* sip, unsigned char* dip) {
@@ -501,6 +606,8 @@ class log_store {
     private:
 
       uint32_t last_time_;
+      uint64_t last_time_tok_;
+
       // Atomically advance the write tail by the given amount.
       //
       // Returns the tail value just before the advance occurred.
@@ -519,11 +626,41 @@ class log_store {
 
       // Append (token, recordId) entries to index log.
       void append_tokens(uint64_t record_id, const tokens& tkns) {
+        last_time_tok_ = *((uint32_t*)tkns.time);
         last_time_ = time_idx_->add_entry(tkns.time, record_id);
         srcip_idx_->add_entry(tkns.src_ip, record_id);
         dstip_idx_->add_entry(tkns.dst_ip, record_id);
         srcprt_idx_->add_entry(tkns.src_prt, record_id);
         dstprt_idx_->add_entry(tkns.dst_prt, record_id);
+
+        uint64_t time = last_time_tok_ << 32;
+        uint64_t entry = (record_id & 0xFFFFFFFF) | time;
+
+        if (!memcmp(tkns.src_ip, q1_sip_, 4) && !memcmp(tkns.dst_ip, q1_dip_, 4)) {
+          q1_->push_back(entry);
+        }
+
+        if (!memcmp(tkns.dst_ip, q2_dip_, 4)) {
+          q2_->push_back(entry);
+        }
+
+        if (rand() % 5000000 == q3_path_) {
+          q3_->push_back(entry);
+        }
+
+        if (!memcmp(tkns.src_ip, q4_ip_prefix_, 3) && !memcmp(tkns.dst_prt, q4_prt_, 2)) {
+          q4_->push_back(entry);
+        }
+
+        bool check1 = !memcmp(tkns.src_ip, q5_ip1_, 4) && !memcmp(tkns.dst_ip, q5_ip2_, 4) && !memcmp(tkns.src_prt, q5_p1_, 2) && !memcmp(tkns.dst_prt, q5_p2_, 2);
+        bool check2 = !memcmp(tkns.src_ip, q5_ip2_, 4) && !memcmp(tkns.dst_ip, q5_ip1_, 4) && !memcmp(tkns.src_prt, q5_p2_, 2) && !memcmp(tkns.dst_prt, q5_p1_, 2);
+        if (check1 || check2) {
+          q5_->push_back(entry);
+        }
+
+        if (!memcmp(tkns.src_ip, q6_ip_, 4) || !memcmp(tkns.dst_ip, q6_ip_, 4)) {
+          q6_->push_back(record_id);
+        }
       }
 
       // Atomically filter recordIds on a given index log by given token prefix.
@@ -599,6 +736,37 @@ class log_store {
       indexlog<4, 3>* dstip_idx_;
       indexlog<2, 2>* srcprt_idx_;
       indexlog<2, 2>* dstprt_idx_;
+
+      // Complex characters
+      monolog_relaxed<uint64_t, 32>* q1_;
+      monolog_relaxed<uint64_t, 32>* q2_;
+      monolog_relaxed<uint64_t, 32>* q3_;
+      monolog_relaxed<uint64_t, 32>* q4_;
+      monolog_relaxed<uint64_t, 32>* q5_;
+      monolog_relaxed<uint64_t, 32>* q6_;
+
+      // q1 params
+      unsigned char* q1_sip_;
+      unsigned char* q1_dip_;
+
+      // q2 params
+      unsigned char* q2_dip_;
+
+      // q3 params
+      uint32_t q3_path_;
+
+      // q4 params
+      unsigned char* q4_ip_prefix_;
+      unsigned char* q4_prt_;
+
+      // q5 params
+      unsigned char* q5_ip1_;
+      unsigned char* q5_ip2_;
+      unsigned char* q5_p1_;
+      unsigned char* q5_p2_;
+
+      // q6 params
+      unsigned char* q6_ip_;
     };
   }
 

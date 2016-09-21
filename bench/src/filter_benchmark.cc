@@ -58,8 +58,22 @@ int main(int argc, char** argv) {
     } else {
       ls_bench.latency_all();
     }
-  } else if (bench_type == "throughput") {
-
+  } else if (bench_type.find("fast") == 0) {
+    if (bench_type == "fast-latency-q1") {
+      ls_bench.latency_q1_fast();
+    } else if (bench_type == "fast-latency-q2") {
+      ls_bench.latency_q2_fast();
+    } else if (bench_type == "fast-latency-q3") {
+      ls_bench.latency_q3_fast();
+    } else if (bench_type == "fast-latency-q4") {
+      ls_bench.latency_q4_fast();
+    } else if (bench_type == "fast-latency-q5") {
+      ls_bench.latency_q5_fast();
+    } else if (bench_type == "fast-latency-q6") {
+      ls_bench.latency_q6_fast();
+    } else {
+      ls_bench.latency_fast();
+    }
   } else {
     LOG(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
   }
