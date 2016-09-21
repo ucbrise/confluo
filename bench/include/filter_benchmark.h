@@ -32,7 +32,7 @@ using namespace ::std::chrono;
 class rate_limiter {
  public:
   rate_limiter(double ops_per_sec) {
-    double tmp = (((double) 1e6) / ops_per_sec)
+    double tmp = (((double) 1e6) / ops_per_sec);
     min_us_per_op = tmp;
     local_ops_ = 0;
     last_ts_ = high_resolution_clock::now();
