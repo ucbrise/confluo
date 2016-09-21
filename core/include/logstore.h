@@ -397,7 +397,7 @@ class log_store {
         uint32_t path = 0;
         unsigned char* path_str = (unsigned char*)&path;
         uint64_t max_rid = olog_->num_ids();
-        filter(dstprt_idx_, path_set, path_str, 4, max_rid);
+        filter(path_idx_, path_set, path_str, 4, max_rid);
 
         uint32_t start = last_time_ - 1;
         uint32_t end = last_time_;
