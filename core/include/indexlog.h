@@ -4,9 +4,8 @@
 #include <map>
 #include <unordered_map>
 
-#include "flags.h"
+#include "entrylist.h"
 #include "monolog.h"
-#include "utils.h"
 
 template<uint32_t TOKEN_LEN, uint32_t PREFIX_LEN>
 class token_ops {
@@ -65,10 +64,6 @@ class token_ops<2, 2> {
 };
 
 namespace slog {
-
-typedef uint64_t index_entry;
-typedef monolog_relaxed<index_entry, 24> entry_list;
-
 template<uint32_t TOKEN_LEN = 4, uint32_t PREFIX_LEN = 3>
 class indexlog {
   static_assert(TOKEN_LEN >= PREFIX_LEN, "Token length cannot be smaller than prefix length.");
@@ -92,7 +87,7 @@ class indexlog {
       try_allocate_list(prefix);
     }
     entry_list* list = idx_[prefix];
-    index_entry entry = (suffix << 32) | record_id;
+    uint64_t entry = (suffix << 32) | record_id;
     list->push_back(entry);
     return prefix;
   }
