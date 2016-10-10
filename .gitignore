@@ -48,6 +48,9 @@ nbproject
 # Idea files
 .idea
 
+# Results
+netplay-results
+
 # generic ignores
 *.deps
 *.dirstamp
