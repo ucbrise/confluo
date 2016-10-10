@@ -261,7 +261,7 @@ class log_store {
    * @param stream_id The id of the stream.
    * @return The stream associated with the id.
    */
-  const entry_list* get_stream(uint32_t stream_id) {
+  entry_list* get_stream(uint32_t stream_id) {
     return streams_->at(stream_id)->get_stream();
   }
 

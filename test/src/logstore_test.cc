@@ -82,7 +82,7 @@ class LogStoreTest : public testing::Test {
     ASSERT_EQ(stream_ids[1], 1);
   }
 
-  std::array<slog::token_list, 256> generate_tokens(
+  std::array<slog::token_list, 256> generate_token_lists(
       const std::vector<uint32_t>& index_ids) {
     std::array<slog::token_list, 256> token_lists;
     for (uint32_t i = 0; i < 256; i++) {
@@ -94,6 +94,8 @@ class LogStoreTest : public testing::Test {
   std::array<slog::filter_query, 1536> generate_queries(
       std::array<slog::token_list, 256>& token_lists) {
     std::array<slog::filter_query, 1536> queries;
+
+    uint32_t query_id = 0;
     for (uint32_t i = 0; i < 256; i++) {
       for (uint32_t j = 0; j < 6; j++) {
         slog::filter_conjunction conjunction;
@@ -102,10 +104,36 @@ class LogStoreTest : public testing::Test {
         f.token_prefix = token_lists[i][j].data;
         f.token_prefix_len = token_lists[i][j].len;
         conjunction.push_back(f);
-        queries[i].push_back(conjunction);
+        queries[query_id].push_back(conjunction);
+        query_id++;
       }
     }
     return queries;
+  }
+
+  void print_token_lists(std::array<slog::token_list, 256>& token_lists) {
+    for (slog::token_list& token_list : token_lists) {
+      for (slog::token_t& token : token_list) {
+        fprintf(stderr, "index_id: %u ", token.index_id);
+        for (uint32_t i = 0; i < token.len; i++) {
+          fprintf(stderr, "%u,", token.data[i]);
+        }
+      }
+      fprintf(stderr, "\n");
+    }
+  }
+
+  void print_query(slog::filter_query& query) {
+    fprintf(stderr, "query: ");
+    for (slog::filter_conjunction& conjunction : query) {
+      for (slog::basic_filter& bfilter : conjunction) {
+        fprintf(stderr, "index_id: %u ", bfilter.index_id);
+        for (uint32_t i = 0; i < bfilter.token_prefix_len; i++) {
+          fprintf(stderr, "%u,", bfilter.token_prefix[i]);
+        }
+      }
+    }
+    fprintf(stderr, "\n");
   }
 
  protected:
@@ -120,7 +148,7 @@ TEST_F(LogStoreTest, InsertAndGetTest) {
   add_and_check_indexes(ls, index_ids);
   add_and_check_streams(ls, stream_ids);
 
-  auto tokens = generate_tokens(index_ids);
+  auto tokens = generate_token_lists(index_ids);
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     DummyGenerator::gentok(hdr, 40, i);
@@ -146,7 +174,7 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
   add_and_check_indexes(ls, index_ids);
   add_and_check_streams(ls, stream_ids);
 
-  auto token_lists = generate_tokens(index_ids);
+  auto token_lists = generate_token_lists(index_ids);
 
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     DummyGenerator::gentok(hdr, 40, i);
@@ -162,5 +190,35 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
       ASSERT_EQ(id % 256, i / 6);
     }
     results.clear();
+  }
+}
+
+TEST_F(LogStoreTest, InsertAndStreamTest) {
+  slog::log_store ls;
+  std::vector<uint32_t> index_ids;
+  std::vector<uint32_t> stream_ids;
+
+  add_and_check_indexes(ls, index_ids);
+  add_and_check_streams(ls, stream_ids);
+
+  auto token_lists = generate_token_lists(index_ids);
+
+  for (uint64_t i = 0; i < kMaxKeys; i++) {
+    DummyGenerator::gentok(hdr, 40, i);
+    ls.insert(hdr, 40, token_lists[i % 256]);
+  }
+
+  slog::entry_list* stream1 = ls.get_stream(0);
+  ASSERT_EQ(stream1->size(), kMaxKeys / 10);
+
+  for (uint32_t i = 0; i < stream1->size(); i++) {
+    ASSERT_TRUE(stream1->at(i) % 10 == 0);
+    ASSERT_EQ(stream1->at(i) / 10, i);
+  }
+
+  slog::entry_list* stream2 = ls.get_stream(1);
+  ASSERT_EQ(stream2->size(), kMaxKeys / 10);
+  for (uint32_t i = 0; i < stream2->size(); i++) {
+    ASSERT_EQ(stream2->at(i), i);
   }
 }
