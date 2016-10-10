@@ -283,28 +283,6 @@ class log_store {
     return dtail_.load();
   }
 
-  /** Get storage statistics
-   *
-   * @param storage_stats The storage structure which will be populated with
-   * storage statistics at the end of the call.
-   */
-  void storage_footprint(logstore_storage& storage_stats) {
-    /* Get size for data-log and offset-log */
-    storage_stats.dlog_size = dlog_->storage_size();
-    storage_stats.olog_size = olog_->storage_size();
-
-    /* Get size for index-logs */
-    index_size(storage_stats.idx_sizes, idx43_);
-    index_size(storage_stats.idx_sizes, idx42_);
-    index_size(storage_stats.idx_sizes, idx33_);
-    index_size(storage_stats.idx_sizes, idx32_);
-    index_size(storage_stats.idx_sizes, idx22_);
-    index_size(storage_stats.idx_sizes, idx11_);
-
-    /* Get size of stream-logs */
-    stream_size(storage_stats.stream_sizes);
-  }
-
   /**
    * Filter index-entries based on query.
    *
@@ -362,6 +340,28 @@ class log_store {
       }
       results.insert(conjunction_results.begin(), conjunction_results.end());
     }
+  }
+
+  /** Get storage statistics
+   *
+   * @param storage_stats The storage structure which will be populated with
+   * storage statistics at the end of the call.
+   */
+  void storage_footprint(logstore_storage& storage_stats) {
+    /* Get size for data-log and offset-log */
+    storage_stats.dlog_size = dlog_->storage_size();
+    storage_stats.olog_size = olog_->storage_size();
+
+    /* Get size for index-logs */
+    index_size(storage_stats.idx_sizes, idx43_);
+    index_size(storage_stats.idx_sizes, idx42_);
+    index_size(storage_stats.idx_sizes, idx33_);
+    index_size(storage_stats.idx_sizes, idx32_);
+    index_size(storage_stats.idx_sizes, idx22_);
+    index_size(storage_stats.idx_sizes, idx11_);
+
+    /* Get size of stream-logs */
+    stream_size(storage_stats.stream_sizes);
   }
 
  private:
