@@ -48,9 +48,16 @@ class log_store {
  public:
   class handle {
    public:
-    handle(log_store& handle, uint64_t request_batch_size = 256,
+    /**
+     * Constructor to initialize handle.
+     *
+     * @param base The base log-store for the handle.
+     * @param request_batch_size The record batch size (#records) for insert queries.
+     * @param data_block_size The data block size (#bytes) for insert queries.
+     */
+    handle(log_store& base, uint64_t request_batch_size = 256,
            uint64_t data_block_size = 256 * 64)
-        : handle_(handle) {
+        : base_(base) {
       id_block_size_ = request_batch_size;
       remaining_ids_ = 0;
       cur_id_ = 0;
@@ -60,29 +67,131 @@ class log_store {
       cur_offset_ = 0;
     }
 
+    /**
+     * Add a new index of specified token-length and prefix-length.
+     *
+     * @param token_length Length of the tokens.
+     * @param prefix_length Length of the prefix being indexed.
+     *
+     * @return The id (> 0) of the newly created index. Returns zero on failure.
+     */
+    uint32_t add_index(uint32_t token_length, uint32_t prefix_length) {
+      return base_.add_index(token_length, prefix_length);
+    }
+
+    /**
+     * Add a new stream with a specified filter function.
+     *
+     * @param fn The filter function.
+     * @return The id of the newly created stream.
+     */
+    uint32_t add_stream(filter_function fn) {
+      return base_.add_stream(fn);
+    }
+
+    /**
+     * Insert a new record into the log-store.
+     *
+     * @param record The buffer containing record data.
+     * @param record_len The length of the record.
+     * @param tokens Tokens associated with the record.
+     * @return The unique record id generated for the record.
+     */
     uint64_t insert(const unsigned char* record, uint16_t record_len,
                     token_list& tkns) {
       if (remaining_ids_ == 0) {
-        cur_id_ = handle_.olog_->request_id_block(id_block_size_);
+        cur_id_ = base_.olog_->request_id_block(id_block_size_);
         remaining_ids_ = id_block_size_;
       }
 
       if (remaining_bytes_ < record_len) {
-        cur_offset_ = handle_.request_bytes(data_block_size_);
+        cur_offset_ = base_.request_bytes(data_block_size_);
         remaining_bytes_ = data_block_size_;
       }
 
-      handle_.append_record(record, record_len, cur_offset_);
-      handle_.update_indexes(cur_id_, tkns);
-      handle_.olog_->set(cur_id_, cur_offset_, record_len);
-      handle_.olog_->end(cur_id_);
+      base_.append_record(record, record_len, cur_offset_);
+      base_.update_indexes(cur_id_, tkns);
+      base_.olog_->set(cur_id_, cur_offset_, record_len);
+      base_.olog_->end(cur_id_);
       remaining_ids_--;
       cur_offset_ += record_len;
       return ++cur_id_;
     }
 
-    const bool get(unsigned char* record, const int64_t record_id) {
-      return handle_.get(record, record_id);
+    /**
+     * Atomically fetch a record from the log-store given its recordId. The
+     * record buffer must be pre-allocated with sufficient size.
+     *
+     * @param record The (pre-allocated) record buffer.
+     * @param record_id The id of the record being requested.
+     * @return true if the fetch is successful, false otherwise.
+     */
+    const bool get(unsigned char* record, const uint64_t record_id) {
+      return base_.get(record, record_id);
+    }
+
+    /**
+     * Atomically extract a portion of the record from the log-store given its
+     * record-id, offset into the record and the number of bytes required. The
+     * record buffer must be pre-allocated with sufficient size.
+     *
+     * @param record The (pre-allocated) record-buffer.
+     * @param record_id The id of the record being requested.
+     * @param offset The offset into the record to begin extracting.
+     * @param length The number of bytes to extract. Updated with the actual
+     *  number of bytes extracted.
+     * @return true if the extract is successful, false otherwise.
+     */
+    const bool extract(unsigned char* record, const uint64_t record_id,
+                       uint32_t offset, uint32_t& length) {
+      return base_.extract(record, record_id, offset, length);
+    }
+
+    /**
+     * Get the stream associated with a given stream id.
+     *
+     * @param stream_id The id of the stream.
+     * @return The stream associated with the id.
+     */
+    entry_list* get_stream(uint32_t stream_id) {
+      return base_.get_stream(stream_id);
+    }
+
+    /* Statistics and helpers */
+
+    /** Atomically get the number of currently readable records.
+     *
+     * @return The number of readable records.
+     */
+    const uint64_t num_records() {
+      return base_.num_records();
+    }
+
+    /** Atomically get the size of the currently readable portion of the log-store.
+     *
+     * @return The size in bytes of the currently readable portion of the log-store.
+     */
+    const uint64_t size() {
+      return base_.size();
+    }
+
+    /**
+     * Filter index-entries based on query.
+     *
+     * @param results The results of the filter query.
+     * @param query The filter query.
+     */
+    void filter(std::unordered_set<uint64_t>& results, filter_query& query) {
+      base_.filter(results, query);
+    }
+
+    /** Get storage statistics
+     *
+     * @param storage_stats The storage structure which will be populated with
+     * storage statistics at the end of the call.
+     */
+    void storage_footprint(logstore_storage& storage_stats) {
+      base_.storage_footprint(storage_stats);
     }
 
    private:
@@ -95,7 +204,7 @@ class log_store {
     uint64_t cur_offset_;
     uint64_t remaining_bytes_;
 
-    log_store& handle_;
+    log_store& base_;
   };
 
   /**
@@ -231,7 +340,8 @@ class log_store {
    * @param record The (pre-allocated) record-buffer.
    * @param record_id The id of the record being requested.
    * @param offset The offset into the record to begin extracting.
-   * @param length The number of bytes to extract.
+   * @param length The number of bytes to extract. Updated with the actual
+   *  number of bytes extracted.
    * @return true if the extract is successful, false otherwise.
    */
   const bool extract(unsigned char* record, const uint64_t record_id,
