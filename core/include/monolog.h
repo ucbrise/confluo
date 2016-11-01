@@ -28,9 +28,16 @@ class __monolog_base {
 
   __monolog_base() {
     T* null_ptr = NULL;
-    for (auto& x : buckets_)
+    for (auto& x : buckets_) {
       x.store(null_ptr);
+    }
     buckets_[0].store(new T[FBS]);
+  }
+
+  ~__monolog_base() {
+    for (auto& x : buckets_) {
+      delete[] x.load();
+    }
   }
 
   void ensure_alloc(uint32_t start_idx, uint32_t end_idx) {
@@ -160,9 +167,16 @@ class __monolog_linear_base {
 
   __monolog_linear_base() {
     T* null_ptr = NULL;
-    for (auto& x : buckets_)
+    for (auto& x : buckets_) {
       x = null_ptr;
+    }
     buckets_[0] = new T[BLOCK_SIZE];
+  }
+
+  ~__monolog_linear_base() {
+    for (auto& x : buckets_) {
+      delete[] x.load();
+    }
   }
 
   // Write len bytes of data at offset.
@@ -224,9 +238,16 @@ class __atomic_monolog_base {
 
   __atomic_monolog_base() {
     __atomic_ref* null_ptr = NULL;
-    for (auto& x : buckets_)
-    x = null_ptr;
+    for (auto& x : buckets_) {
+      x = null_ptr;
+    }
     buckets_[0] = new __atomic_ref[FBS];
+  }
+
+  ~__atomic_monolog_base() {
+    for (auto& x : buckets_) {
+      delete[] x.load();
+    }
   }
 
   void alloc(uint32_t idx) {

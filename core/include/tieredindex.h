@@ -18,6 +18,12 @@ class indexlet {
     }
   }
 
+  ~indexlet() {
+    for (uint32_t i = 0; i < SIZE; i++) {
+      delete idx_[i].load();
+    }
+  }
+
   T* operator[](const uint32_t i) {
     while (idx_[i].load() == NULL) {
       T* item = new T();
@@ -59,12 +65,8 @@ class indexlet {
 template<size_t SIZE>
 class __index_depth1 {
  public:
-  __index_depth1() {
-    idx_ = new indexlet<entry_list, SIZE>;
-  }
-
   entry_list* get(uint32_t key) {
-    return (*idx_)[key];
+    return idx_[key];
   }
 
   void add_entry(uint32_t key, uint32_t val) {
@@ -77,22 +79,18 @@ class __index_depth1 {
   }
 
   size_t storage_size() {
-    return idx_->storage_size();
+    return idx_.storage_size();
   }
 
  private:
-  indexlet<entry_list, SIZE> *idx_;
+  indexlet<entry_list, SIZE> idx_;
 };
 
 template<size_t SIZE1, size_t SIZE2>
 class __index_depth2 {
  public:
-  __index_depth2() {
-    idx_ = new indexlet<indexlet<entry_list, SIZE2>, SIZE1>;
-  }
-
   entry_list* get(uint32_t key) {
-    indexlet<entry_list, SIZE2>* ilet = (*idx_)[key / SIZE2];
+    indexlet<entry_list, SIZE2>* ilet = idx_[key / SIZE2];
     return (*ilet)[key % SIZE2];
   }
 
@@ -106,11 +104,11 @@ class __index_depth2 {
   }
 
   size_t storage_size() {
-    return idx_->storage_size();
+    return idx_.storage_size();
   }
 
  private:
-  indexlet<indexlet<entry_list, SIZE2>, SIZE1> *idx_;
+  indexlet<indexlet<entry_list, SIZE2>, SIZE1> idx_;
 };
 
 typedef __index_depth1 <256> __index1;
