@@ -4,6 +4,7 @@
 extern std::string res_path_monolog;
 extern std::string res_path_index;
 extern std::string res_path_index2;
+extern std::string res_path_stream;
 extern std::string res_path_logstore;
 
 extern bool filter_fn1(uint64_t& record_id, const unsigned char* record,
@@ -24,7 +25,8 @@ int main(int argc, char** argv) {
   std::string res_path = std::string(argv[1]);
   res_path_monolog = res_path + "/monolog.txt";
   res_path_index = res_path + "/index.txt";
-  res_path_index2 = res_path + "/index2.txt";
+  res_path_index2 = res_path + "/index.txt";
+  res_path_stream = res_path + "/stream.txt";
   res_path_logstore = res_path + "/logstore.txt";
   return RUN_ALL_TESTS();
 }
