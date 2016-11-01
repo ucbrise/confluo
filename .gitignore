@@ -35,6 +35,7 @@ scratch
 results
 netplay-results
 ls-results
+thrift/gen
 
 # Eclipse files
 .settings
