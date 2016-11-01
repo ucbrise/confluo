@@ -63,7 +63,7 @@ TEST_F(Index2Test, IndexletTest) {
   ASSERT_EQ(expected_size, storage_size);
 }
 
-TEST_F(Index2Test, Index1GetFetchTest) {
+TEST_F(Index2Test, Index1AddFetchTest) {
   slog::__index1 index;
 
   index_test(index);
@@ -72,7 +72,7 @@ TEST_F(Index2Test, Index1GetFetchTest) {
   ASSERT_EQ(expected_size, storage_size);
 }
 
-TEST_F(Index2Test, Index2GetFetchTest) {
+TEST_F(Index2Test, Index2AddFetchTest) {
   slog::__index2 index;
 
   index_test(index);
@@ -81,7 +81,7 @@ TEST_F(Index2Test, Index2GetFetchTest) {
   ASSERT_EQ(expected_size, storage_size);
 }
 
-TEST_F(Index2Test, Index3GetFetchTest) {
+TEST_F(Index2Test, Index3AddFetchTest) {
   slog::__index3 index;
 
   index_test(index, 1);
@@ -91,7 +91,7 @@ TEST_F(Index2Test, Index3GetFetchTest) {
   ASSERT_EQ(expected_size, storage_size);
 }
 
-TEST_F(Index2Test, Index4GetFetchTest) {
+TEST_F(Index2Test, Index4AddFetchTest) {
   slog::__index4 index;
 
   index_test(index, 1);

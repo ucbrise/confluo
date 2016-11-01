@@ -53,31 +53,31 @@ class IndexPerf : public testing::Test {
   }
 };
 
-TEST_F(IndexPerf, Index43GetFetchPerf) {
+TEST_F(IndexPerf, Index43AddFetchPerf) {
   slog::indexlog<4, 3> *idx43 = new slog::indexlog<4, 3>;
 
   index_perf(idx43);
 }
 
-TEST_F(IndexPerf, Index42GetFetchPerf) {
+TEST_F(IndexPerf, Index42AddFetchPerf) {
   slog::indexlog<4, 2> *idx42 = new slog::indexlog<4, 2>;
 
   index_perf(idx42);
 }
 
-TEST_F(IndexPerf, Index33GetFetchPerf) {
+TEST_F(IndexPerf, Index33AddFetchPerf) {
   slog::indexlog<3, 3> *idx33 = new slog::indexlog<3, 3>;
 
   index_perf(idx33);
 }
 
-TEST_F(IndexPerf, Index32GetFetchPerf) {
+TEST_F(IndexPerf, Index32AddFetchPerf) {
   slog::indexlog<3, 2> *idx32 = new slog::indexlog<3, 2>;
 
   index_perf(idx32);
 }
 
-TEST_F(IndexPerf, Index22GetFetchPerf) {
+TEST_F(IndexPerf, Index22AddFetchPerf) {
   slog::indexlog<2, 2> *idx22 = new slog::indexlog<2, 2>;
 
   index_perf(idx22);

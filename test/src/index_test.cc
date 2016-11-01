@@ -25,16 +25,32 @@ class IndexTest : public testing::Test {
   }
 };
 
-TEST_F(IndexTest, IndexGetFetchTests) {
+TEST_F(IndexTest, IndexAddFetch43Test) {
   slog::indexlog<4, 3> *idx43 = new slog::indexlog<4, 3>;
-  slog::indexlog<4, 2> *idx42 = new slog::indexlog<4, 2>;
-  slog::indexlog<3, 3> *idx33 = new slog::indexlog<3, 3>;
-  slog::indexlog<3, 2> *idx32 = new slog::indexlog<3, 2>;
-  slog::indexlog<2, 2> *idx22 = new slog::indexlog<2, 2>;
 
   index_test(idx43);
+}
+
+TEST_F(IndexTest, IndexAddFetch42Test) {
+  slog::indexlog<4, 2> *idx42 = new slog::indexlog<4, 2>;
+
   index_test(idx42);
+}
+
+TEST_F(IndexTest, IndexAddFetch33Test) {
+  slog::indexlog<3, 3> *idx33 = new slog::indexlog<3, 3>;
+
   index_test(idx33);
+}
+
+TEST_F(IndexTest, IndexAddFetch32Tests) {
+  slog::indexlog<3, 2> *idx32 = new slog::indexlog<3, 2>;
+
   index_test(idx32);
+}
+
+TEST_F(IndexTest, IndexAddFetch22Test) {
+  slog::indexlog<2, 2> *idx22 = new slog::indexlog<2, 2>;
+
   index_test(idx22);
 }

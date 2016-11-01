@@ -53,25 +53,25 @@ class Index2Perf : public testing::Test {
   }
 };
 
-TEST_F(Index2Perf, Index1GetFetchPerf) {
+TEST_F(Index2Perf, Index1AddFetchPerf) {
   slog::__index1 idx1;
 
   index_perf(idx1, 1, "index1");
 }
 
-TEST_F(Index2Perf, Index2GetFetchPerf) {
+TEST_F(Index2Perf, Index2AddFetchPerf) {
   slog::__index2 idx2;
 
   index_perf(idx2, 1, "index2");
 }
 
-TEST_F(Index2Perf, Index3GetFetchPerf) {
+TEST_F(Index2Perf, Index3AddFetchPerf) {
   slog::__index3 idx3;
 
   index_perf(idx3, 1, "index3");
 }
 
-TEST_F(Index2Perf, Index4GetFetchPerf) {
+TEST_F(Index2Perf, Index4AddFetchPerf) {
   slog::__index4 idx4;
 
   index_perf(idx4, 1, "index4");
