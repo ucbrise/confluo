@@ -1,5 +1,5 @@
-#ifndef SLOG_NGRAM_IDX_H_
-#define SLOG_NGRAM_IDX_H_
+#ifndef SLOG_INDEXLOG_H_
+#define SLOG_INDEXLOG_H_
 
 #include <map>
 #include <unordered_map>
@@ -184,4 +184,4 @@ class indexlog {
 
 }
 
-#endif /* SLOG_NGRAM_IDX_H_ */
+#endif /* SLOG_INDEXLOG_H_ */
