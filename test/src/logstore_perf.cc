@@ -2,7 +2,15 @@
 #include "test_utils.h"
 #include "gtest/gtest.h"
 
-class LogStoreTest : public testing::Test {
+#include <ctime>
+#include <chrono>
+#include <fstream>
+
+using namespace ::std::chrono;
+
+std::string res_path_logstore;
+
+class LogStorePerf : public testing::Test {
  public:
   class DummyGenerator {
    public:
@@ -37,10 +45,11 @@ class LogStoreTest : public testing::Test {
     }
   };
 
-  LogStoreTest() {
+  LogStorePerf() {
+    res.open(res_path_logstore, std::fstream::app);
   }
 
-  ~LogStoreTest() {
+  ~LogStorePerf() {
   }
 
   void add_and_check_indexes(slog::log_store& ls,
@@ -72,7 +81,7 @@ class LogStoreTest : public testing::Test {
       const std::vector<uint32_t>& index_ids) {
     std::array<slog::token_list, 256> token_lists;
     for (uint32_t i = 0; i < 256; i++) {
-      LogStoreTest::DummyGenerator::gentokens(token_lists[i], index_ids, i);
+      LogStorePerf::DummyGenerator::gentokens(token_lists[i], index_ids, i);
     }
     return token_lists;
   }
@@ -99,9 +108,10 @@ class LogStoreTest : public testing::Test {
 
  protected:
   unsigned char hdr[40];
+  std::ofstream res;
 };
 
-TEST_F(LogStoreTest, InsertAndGetTest) {
+TEST_F(LogStorePerf, InsertAndGetPerf) {
   slog::log_store ls;
   std::vector<uint32_t> index_ids;
   std::vector<uint32_t> stream_ids;
@@ -111,23 +121,31 @@ TEST_F(LogStoreTest, InsertAndGetTest) {
 
   auto tokens = generate_token_lists(index_ids);
 
+  LogStorePerf::DummyGenerator::gentok(hdr, 40, 256);
+  auto write_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    LogStoreTest::DummyGenerator::gentok(hdr, 40, i);
     ls.insert(hdr, 40, tokens[i % 256]);
   }
+  auto write_end = high_resolution_clock::now();
+  double write_time =
+      duration_cast<microseconds>(write_end - write_start).count();
 
   unsigned char ret[40];
+  auto read_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     bool success = ls.get(ret, i);
     ASSERT_TRUE(success);
-    for (uint32_t j = 0; j < 40; j++) {
-      unsigned char expected = i % 256;
-      ASSERT_EQ(ret[j], expected);
-    }
   }
+  auto read_end = high_resolution_clock::now();
+  double read_time = duration_cast<microseconds>(read_end - read_start).count();
+
+  time_t tt = system_clock::to_time_t(system_clock::now());
+  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
+      << "indexandget" << "\t" << (write_time / kMaxKeys) << "\t"
+      << (read_time / kMaxKeys) << "\n";
 }
 
-TEST_F(LogStoreTest, InsertAndFilterTest) {
+TEST_F(LogStorePerf, InsertAndFilterPerf) {
   slog::log_store ls;
   std::vector<uint32_t> index_ids;
   std::vector<uint32_t> stream_ids;
@@ -137,24 +155,32 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
 
   auto token_lists = generate_token_lists(index_ids);
 
+  LogStorePerf::DummyGenerator::gentok(hdr, 40, 256);
+  auto write_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    LogStoreTest::DummyGenerator::gentok(hdr, 40, i);
     ls.insert(hdr, 40, token_lists[i % 256]);
   }
+  auto write_end = high_resolution_clock::now();
+  double write_time =
+      duration_cast<microseconds>(write_end - write_start).count();
 
   auto queries = generate_queries(token_lists);
+  auto read_start = high_resolution_clock::now();
   for (uint32_t i = 0; i < queries.size(); i++) {
     std::unordered_set<uint64_t> results;
     ls.filter(results, queries[i]);
     ASSERT_EQ(results.size(), 10);
-    for (uint64_t id : results) {
-      ASSERT_EQ(id % 256, i / 6);
-    }
-    results.clear();
   }
+  auto read_end = high_resolution_clock::now();
+  double read_time = duration_cast<microseconds>(read_end - read_start).count();
+
+  time_t tt = system_clock::to_time_t(system_clock::now());
+  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
+      << "indexandfilter" << "\t" << (write_time / kMaxKeys) << "\t"
+      << (read_time / queries.size()) << "\n";
 }
 
-TEST_F(LogStoreTest, InsertAndStreamTest) {
+TEST_F(LogStorePerf, InsertAndStreamPerf) {
   slog::log_store ls;
   std::vector<uint32_t> index_ids;
   std::vector<uint32_t> stream_ids;
@@ -164,22 +190,40 @@ TEST_F(LogStoreTest, InsertAndStreamTest) {
 
   auto token_lists = generate_token_lists(index_ids);
 
+  LogStorePerf::DummyGenerator::gentok(hdr, 40, 256);
+  auto write_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
-    LogStoreTest::DummyGenerator::gentok(hdr, 40, i);
     ls.insert(hdr, 40, token_lists[i % 256]);
   }
+  auto write_end = high_resolution_clock::now();
+  double write_time =
+      duration_cast<microseconds>(write_end - write_start).count();
 
   slog::entry_list* stream1 = ls.get_stream(0);
   ASSERT_EQ(stream1->size(), kMaxKeys / 10);
-
+  auto read_start1 = high_resolution_clock::now();
   for (uint32_t i = 0; i < stream1->size(); i++) {
     ASSERT_TRUE(stream1->at(i) % 10 == 0);
     ASSERT_EQ(stream1->at(i) / 10, i);
   }
+  auto read_end1 = high_resolution_clock::now();
+  double read_time1 =
+      duration_cast<microseconds>(read_end1 - read_start1).count();
 
   slog::entry_list* stream2 = ls.get_stream(1);
   ASSERT_EQ(stream2->size(), kMaxKeys / 10);
+  auto read_start2 = high_resolution_clock::now();
   for (uint32_t i = 0; i < stream2->size(); i++) {
     ASSERT_EQ(stream2->at(i), i);
   }
+  auto read_end2 = high_resolution_clock::now();
+  double read_time2 =
+      duration_cast<microseconds>(read_end2 - read_start2).count();
+  time_t tt = system_clock::to_time_t(system_clock::now());
+  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
+      << "indexandstream1" << "\t" << (write_time / kMaxKeys) << "\t"
+      << read_time1 << "\n";
+  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
+      << "indexandstream2" << "\t" << (write_time / kMaxKeys) << "\t"
+      << read_time2 << "\n";
 }
