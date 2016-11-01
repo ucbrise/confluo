@@ -1,6 +1,9 @@
 #ifndef SLOG_TOKENS_H_
 #define SLOG_TOKENS_H_
 
+#include <vector>
+#include <cstdint>
+
 namespace slog {
 
 typedef struct {
