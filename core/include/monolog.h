@@ -158,7 +158,7 @@ class __monolog_base {
     return in_size;
   }
 
-  const uint64_t storage_size() {
+  const size_t storage_size() {
     uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
     uint64_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++)
