@@ -31,4 +31,4 @@ add_subdirectory(external/gtest-1.7.0)
 add_subdirectory(test)
 
 enable_testing()
-add_test(LSTest ${TESTS_PATH}/ls_test)
+add_test(LSTest ${TESTS_PATH}/ls_test ${TESTS_PATH})
