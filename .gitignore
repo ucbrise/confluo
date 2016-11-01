@@ -32,6 +32,7 @@ bin/*
 # Directories
 build
 scratch
+reference
 results
 netplay-results
 ls-results
