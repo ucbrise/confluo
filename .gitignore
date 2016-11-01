@@ -32,12 +32,9 @@ bin/*
 # Directories
 build
 scratch
-dat
-log
 results
-bench/res
-bench/plot
-thrift/gen
+netplay-results
+ls-results
 
 # Eclipse files
 .settings
@@ -47,9 +44,6 @@ nbproject
 
 # Idea files
 .idea
-
-# Results
-netplay-results
 
 # generic ignores
 *.deps
