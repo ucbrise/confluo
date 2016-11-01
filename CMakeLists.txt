@@ -20,9 +20,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 find_package(Threads REQUIRED)
 
-# Builds all sub-modules
-add_subdirectory(bench)
-
 # Testing framework
 # Build google testing framework
 add_subdirectory(external/gtest-1.7.0)
@@ -31,4 +28,5 @@ add_subdirectory(external/gtest-1.7.0)
 add_subdirectory(test)
 
 enable_testing()
-add_test(LSTest ${TESTS_PATH}/ls_test ${TESTS_PATH})
+file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/results)
+add_test(LSTest ${TESTS_PATH}/ls_test ${PROJECT_SOURCE_DIR}/results)

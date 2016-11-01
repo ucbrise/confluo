@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf results
 mkdir -p build
 cd build
 if [[ "$OSTYPE" == "darwin"* ]]; then
