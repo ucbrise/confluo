@@ -159,7 +159,7 @@ class __monolog_base {
   }
 
   const uint64_t storage_size() {
-    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
+    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
     uint64_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++)
       if (buckets_[i].load() != NULL)
@@ -275,6 +275,10 @@ class __atomic_monolog_base {
     try_allocate_bucket(bucket_idx);
   }
 
+  void set(uint32_t idx, const T val) {
+    store(idx, val);
+  }
+
   // Atomically store value at index idx.
   // Allocates memory if necessary.
   void store(uint32_t idx, const T val) {
@@ -295,6 +299,10 @@ class __atomic_monolog_base {
     if (buckets_[bucket_idx] == NULL)
     try_allocate_bucket(bucket_idx);
     return buckets_[bucket_idx][bucket_off];
+  }
+
+  T get(const uint32_t idx) const {
+    return load(idx);
   }
 
   // Atomically loads the data at index idx.
