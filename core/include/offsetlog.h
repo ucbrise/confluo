@@ -70,7 +70,7 @@ class offsetlog {
     return current_id_.load();
   }
 
-  uint64_t storage_size() {
+  size_t storage_size() {
     return offlens_.storage_size() + valid_.storage_size();
   }
 

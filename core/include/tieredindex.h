@@ -42,6 +42,16 @@ class indexlet {
     return SIZE;
   }
 
+  size_t storage_size() {
+    size_t tot_size = SIZE * sizeof(atomic_ref);
+    for (uint32_t i = 0; i < SIZE; i++) {
+      if (idx_[i].load() != NULL) {
+        tot_size += idx_[i].load()->storage_size();
+      }
+    }
+    return tot_size;
+  }
+
  private:
   std::array<atomic_ref, SIZE> idx_;
 };
@@ -64,6 +74,10 @@ class __index_depth1 {
 
   size_t max_size() {
     return SIZE;
+  }
+
+  size_t storage_size() {
+    return idx_->storage_size();
   }
 
  private:
@@ -89,6 +103,10 @@ class __index_depth2 {
 
   size_t max_size() {
     return SIZE1 * SIZE2;
+  }
+
+  size_t storage_size() {
+    return idx_->storage_size();
   }
 
  private:

@@ -121,46 +121,9 @@ class __monolog_base {
     }
   }
 
-  // Serialize first `sz' elements to the provided output stream.
-  const uint32_t serialize(std::ostream& out, uint32_t sz) {
-    uint32_t out_size = 0;
-
-    out.write(reinterpret_cast<const char *>(&(sz)), sizeof(uint32_t));
-    out_size += sizeof(uint32_t);
-    for (uint32_t i = 0; i < sz; i++) {
-      T val = get(i);
-      out.write(reinterpret_cast<const char *>(&val), sizeof(T));
-      out_size += sizeof(T);
-    }
-
-    return out_size;
-  }
-
-  // Deserialize the MonoLog base from the input stream. The second argument is
-  // populated to the number of elements read if it is not NULL.
-  uint32_t deserialize(std::istream& in, uint32_t *sz) {
-    // Read keys
-    size_t in_size = 0;
-
-    uint32_t read_size;
-    in.read(reinterpret_cast<char *>(read_size), sizeof(uint32_t));
-    in_size += sizeof(uint32_t);
-    for (uint32_t i = 0; i < read_size; i++) {
-      uint64_t val;
-      in.read(reinterpret_cast<char *>(&val), sizeof(T));
-      set(i, val);
-      in_size += sizeof(T);
-    }
-
-    if (sz)
-      *sz = read_size;
-
-    return in_size;
-  }
-
   const size_t storage_size() {
-    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
-    uint64_t data_size = 0;
+    size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
+    size_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++)
       if (buckets_[i].load() != NULL)
         data_size += ((1U << (i + FBS_HIBIT)) * sizeof(T));
@@ -220,7 +183,7 @@ class __monolog_linear_base {
   }
 
   const uint64_t storage_size() {
-    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
+    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
     uint64_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++)
       if (buckets_[i].load() != NULL)
@@ -390,20 +353,6 @@ class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
     return read_tail_.load();
   }
 
-  // Serialize the MonoLog to the given output stream.
-  const uint32_t serialize(std::ostream& out) {
-    return __monolog_base<T, NBUCKETS>::serialize(out, this->size());
-  }
-
-  // Deserialize the MonoLog from the input stream.
-  const uint32_t deserialize(std::istream& in) {
-    uint32_t nentries;
-    uint32_t in_size = __monolog_base<T, NBUCKETS>::deserialize(in, &nentries);
-    write_tail_.store(nentries);
-    read_tail_.store(nentries);
-    return in_size;
-  }
-
  private:
   std::atomic<uint32_t> write_tail_;
   std::atomic<uint32_t> read_tail_;
@@ -434,17 +383,6 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
 
   const uint32_t size() {
     return tail_.load();
-  }
-
-  const uint32_t serialize(std::ostream& out) {
-    return __monolog_base<T, NBUCKETS>::serialize(out, this->size());
-  }
-
-  const uint32_t deserialize(std::istream& in) {
-    uint32_t nentries;
-    uint32_t in_size = __monolog_base<T, NBUCKETS>::deserialize(in, &nentries);
-    tail_.store(nentries);
-    return in_size;
   }
 
  private:

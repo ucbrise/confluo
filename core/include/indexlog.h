@@ -101,51 +101,9 @@ class indexlog {
     return idx_[idx];
   }
 
-  size_t serialize(std::ostream& out) {
-    size_t out_size = 0;
-
-    // Write n-gram index
-    size_t ngram_idx_size = size();
-    out.write(reinterpret_cast<const char *>(&(ngram_idx_size)),
-              sizeof(size_t));
-    out_size += sizeof(size_t);
-    {
-      for (uint32_t i = 0; i < idx_.size(); i++) {
-        entry_list* entry = idx_[i].load();
-        if (entry != NULL) {
-          out.write(reinterpret_cast<const char *>(&(i)), sizeof(uint32_t));
-          out_size += (sizeof(uint32_t));
-          out_size += entry->serialize(out);
-        }
-      }
-    }
-    return out_size;
-  }
-
-  size_t deserialize(std::istream& in) {
-    size_t in_size = 0;
-
-    // Read n-gram index
-    size_t ngram_idx_size;
-    in.read(reinterpret_cast<char *>(&ngram_idx_size), sizeof(size_t));
-    in_size += sizeof(size_t);
-    for (size_t i = 0; i < ngram_idx_size; i++) {
-      uint32_t first;
-
-      in.read(reinterpret_cast<char *>(&(first)), sizeof(uint32_t));
-      in_size += sizeof(uint32_t);
-
-      slog::entry_list* offset_list = new slog::entry_list;
-      in_size += offset_list->deserialize(in);
-      idx_[first] = offset_list;
-    }
-
-    return in_size;
-  }
-
-  uint64_t storage_size() {
-    uint64_t array_size = idx_.size() * sizeof(atomic_ref);
-    uint64_t data_size = 0;
+  size_t storage_size() {
+    size_t array_size = idx_.size() * sizeof(atomic_ref);
+    size_t data_size = 0;
     for (uint32_t i = 0; i < idx_.size(); i++) {
       entry_list* entry = idx_[i].load();
       if (entry != NULL) {
