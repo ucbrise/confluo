@@ -76,3 +76,27 @@ TEST_F(Index2Perf, Index4AddFetchPerf) {
 
   index_perf(idx4, 1, "index4");
 }
+
+TEST_F(Index2Perf, Index5AddFetchPerf) {
+  slog::__index5 idx5;
+
+  index_perf(idx5, 1, "index5");
+}
+
+TEST_F(Index2Perf, Index6AddFetchPerf) {
+  slog::__index6 idx6;
+
+  index_perf(idx6, 1, "index6");
+}
+
+TEST_F(Index2Perf, Index7AddFetchPerf) {
+  slog::__index7 idx7;
+
+  index_perf(idx7, 1, "index7");
+}
+
+TEST_F(Index2Perf, Index8AddFetchPerf) {
+  slog::__index8 idx8;
+
+  index_perf(idx8, 1, "index8");
+}
