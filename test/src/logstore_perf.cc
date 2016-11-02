@@ -41,7 +41,7 @@ class LogStorePerf : public testing::Test {
 
   void add_and_check_indexes(slog::log_store& ls,
                              std::vector<uint32_t>& index_ids) {
-    for (uint32_t i = 1; i <= 8; i++) {
+    for (uint32_t i = 1; i <= 4; i++) {
       index_ids.push_back(ls.add_index(i));
     }
 
@@ -70,13 +70,13 @@ class LogStorePerf : public testing::Test {
     return token_lists;
   }
 
-  std::array<slog::filter_query, 2048> generate_queries(
+  std::array<slog::filter_query, 1024> generate_queries(
       std::array<slog::token_list, 256>& token_lists) {
-    std::array<slog::filter_query, 2048> queries;
+    std::array<slog::filter_query, 1024> queries;
 
     uint32_t query_id = 0;
     for (uint32_t i = 0; i < 256; i++) {
-      for (uint32_t j = 0; j < 8; j++) {
+      for (uint32_t j = 0; j < 4; j++) {
         slog::filter_conjunction conjunction;
         conjunction.push_back(
             slog::basic_filter(token_lists[i][j].index_id(),
