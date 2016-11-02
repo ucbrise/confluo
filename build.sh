@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 rm -rf results
 mkdir -p build
@@ -8,6 +9,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   cmake ..
 fi
+
 START=$(date +%s)
 make && make test ARGS="-VV"
 END=$(date +%s)
