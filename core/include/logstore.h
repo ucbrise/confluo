@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <climits>
+#include <cassert>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/time.h>
@@ -20,7 +21,7 @@
 #include <atomic>
 
 #include "tokens.h"
-#include "indexlog.h"
+#include "tieredindex.h"
 #include "streamlog.h"
 #include "offsetlog.h"
 #include "filterops.h"
@@ -28,12 +29,14 @@
 #include "exceptions.h"
 
 #define OFFSETMIN 1024
-#define OFFSET43 1024
-#define OFFSET42 2048
-#define OFFSET33 4096
-#define OFFSET32 8192
-#define OFFSET22 16384
-#define OFFSET11 32768
+#define OFFSET1 1024
+#define OFFSET2 2048
+#define OFFSET3 4096
+#define OFFSET4 8192
+#define OFFSET5 16384
+#define OFFSET6 32768
+#define OFFSET7 65536
+#define OFFSET8 131072
 
 namespace slog {
 
@@ -75,8 +78,8 @@ class log_store {
      *
      * @return The id (> 0) of the newly created index. Returns zero on failure.
      */
-    uint32_t add_index(uint32_t token_length, uint32_t prefix_length) {
-      return base_.add_index(token_length, prefix_length);
+    uint32_t add_index(uint32_t token_length) {
+      return base_.add_index(token_length);
     }
 
     /**
@@ -219,12 +222,14 @@ class log_store {
     dtail_.store(0);
 
     /* Initialize all index classes */
-    idx43_ = new monolog_linearizable<indexlog<4, 3>*>;
-    idx42_ = new monolog_linearizable<indexlog<4, 2>*>;
-    idx33_ = new monolog_linearizable<indexlog<3, 3>*>;
-    idx32_ = new monolog_linearizable<indexlog<3, 2>*>;
-    idx22_ = new monolog_linearizable<indexlog<2, 2>*>;
-    idx11_ = new monolog_linearizable<indexlog<1, 1>*>;
+    idx1_ = new monolog_linearizable<__index1 *>;
+    idx2_ = new monolog_linearizable<__index2 *>;
+    idx3_ = new monolog_linearizable<__index3 *>;
+    idx4_ = new monolog_linearizable<__index4 *>;
+    idx5_ = new monolog_linearizable<__index5 *>;
+    idx6_ = new monolog_linearizable<__index6 *>;
+    idx7_ = new monolog_linearizable<__index7 *>;
+    idx8_ = new monolog_linearizable<__index8 *>;
 
     /* Initialize stream logs */
     streams_ = new monolog_linearizable<streamlog*>;
@@ -240,26 +245,30 @@ class log_store {
   }
 
   /**
-   * Add a new index of specified token-length and prefix-length.
+   * Add a new index for tokens of specified length.
    *
-   * @param token_length Length of the tokens.
-   * @param prefix_length Length of the prefix being indexed.
+   * @param token_length Length of the tokens to be indexed.
    *
    * @return The id (> 0) of the newly created index. Returns zero on failure.
    */
-  uint32_t add_index(uint32_t token_length, uint32_t prefix_length) {
-    if (token_length == 4 && prefix_length == 3) {
-      return OFFSET43 + idx43_->push_back(new indexlog<4, 3>);
-    } else if (token_length == 4 && prefix_length == 2) {
-      return OFFSET42 + idx42_->push_back(new indexlog<4, 2>);
-    } else if (token_length == 3 && prefix_length == 3) {
-      return OFFSET33 + idx33_->push_back(new indexlog<3, 3>);
-    } else if (token_length == 3 && prefix_length == 2) {
-      return OFFSET32 + idx32_->push_back(new indexlog<3, 2>);
-    } else if (token_length == 2 && prefix_length == 2) {
-      return OFFSET22 + idx22_->push_back(new indexlog<2, 2>);
-    } else if (token_length == 1 && prefix_length == 1) {
-      return OFFSET11 + idx11_->push_back(new indexlog<1, 1>);
+  uint32_t add_index(uint32_t token_length) {
+    switch (token_length) {
+      case 1:
+        return OFFSET1 + idx1_->push_back(new __index1);
+      case 2:
+        return OFFSET2 + idx2_->push_back(new __index2);
+      case 3:
+        return OFFSET3 + idx3_->push_back(new __index3);
+      case 4:
+        return OFFSET4 + idx4_->push_back(new __index4);
+      case 5:
+        return OFFSET5 + idx5_->push_back(new __index5);
+      case 6:
+        return OFFSET6 + idx6_->push_back(new __index6);
+      case 7:
+        return OFFSET7 + idx7_->push_back(new __index7);
+      case 8:
+        return OFFSET8 + idx8_->push_back(new __index8);
     }
 
     return 0;
@@ -405,40 +414,50 @@ class log_store {
       std::unordered_set<uint64_t> conjunction_results;
       for (basic_filter& basic : conjunction) {
         /* Identify which index the filter is on */
-        uint32_t idx = basic.index_id / OFFSETMIN;
-        uint32_t off = basic.index_id % OFFSETMIN;
+        uint32_t idx = basic.index_id() / OFFSETMIN;
+        uint32_t off = basic.index_id() % OFFSETMIN;
 
         /* Query relevant index */
         std::unordered_set<uint64_t> filter_res;
         switch (idx) {
           case 1: {
-            filter(filter_res, idx43_->at(off), basic.token_prefix,
-                   basic.token_prefix_len, max_rid, conjunction_results);
+            filter(filter_res, idx1_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
             break;
           }
           case 2: {
-            filter(filter_res, idx42_->at(off), basic.token_prefix,
-                   basic.token_prefix_len, max_rid, conjunction_results);
+            filter(filter_res, idx2_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
             break;
           }
           case 4: {
-            filter(filter_res, idx33_->at(off), basic.token_prefix,
-                   basic.token_prefix_len, max_rid, conjunction_results);
+            filter(filter_res, idx3_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
             break;
           }
           case 8: {
-            filter(filter_res, idx32_->at(off), basic.token_prefix,
-                   basic.token_prefix_len, max_rid, conjunction_results);
+            filter(filter_res, idx4_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
             break;
           }
           case 16: {
-            filter(filter_res, idx22_->at(off), basic.token_prefix,
-                   basic.token_prefix_len, max_rid, conjunction_results);
+            filter(filter_res, idx5_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
             break;
           }
           case 32: {
-            filter(filter_res, idx11_->at(off), basic.token_prefix,
-                   basic.token_prefix_len, max_rid, conjunction_results);
+            filter(filter_res, idx6_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
+            break;
+          }
+          case 64: {
+            filter(filter_res, idx7_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
+            break;
+          }
+          case 128: {
+            filter(filter_res, idx8_->at(off), basic.token_beg(),
+                   basic.token_end(), max_rid, conjunction_results);
             break;
           }
         }
@@ -463,12 +482,14 @@ class log_store {
     storage_stats.olog_size = olog_->storage_size();
 
     /* Get size for index-logs */
-    index_size(storage_stats.idx_sizes, idx43_);
-    index_size(storage_stats.idx_sizes, idx42_);
-    index_size(storage_stats.idx_sizes, idx33_);
-    index_size(storage_stats.idx_sizes, idx32_);
-    index_size(storage_stats.idx_sizes, idx22_);
-    index_size(storage_stats.idx_sizes, idx11_);
+    index_size(storage_stats.idx_sizes, idx1_);
+    index_size(storage_stats.idx_sizes, idx2_);
+    index_size(storage_stats.idx_sizes, idx3_);
+    index_size(storage_stats.idx_sizes, idx4_);
+    index_size(storage_stats.idx_sizes, idx5_);
+    index_size(storage_stats.idx_sizes, idx6_);
+    index_size(storage_stats.idx_sizes, idx7_);
+    index_size(storage_stats.idx_sizes, idx8_);
 
     /* Get size of stream-logs */
     stream_size(storage_stats.stream_sizes);
@@ -511,33 +532,42 @@ class log_store {
   void update_indexes(uint64_t record_id, token_list& tokens) {
     for (token_t& token : tokens) {
       /* Identify which index token belongs to */
-      uint32_t idx = token.index_id / OFFSETMIN;
-      uint32_t off = token.index_id % OFFSETMIN;
+      uint32_t idx = token.index_id() / OFFSETMIN;
+      uint32_t off = token.index_id() % OFFSETMIN;
 
       /* Update relevant index */
+      uint64_t key = token.data();
       switch (idx) {
         case 1: {
-          idx43_->at(off)->add_entry(token.data, record_id);
+          idx1_->at(off)->add_entry(key, record_id);
           break;
         }
         case 2: {
-          idx42_->at(off)->add_entry(token.data, record_id);
+          idx2_->at(off)->add_entry(key, record_id);
           break;
         }
         case 4: {
-          idx33_->at(off)->add_entry(token.data, record_id);
+          idx3_->at(off)->add_entry(key, record_id);
           break;
         }
         case 8: {
-          idx32_->at(off)->add_entry(token.data, record_id);
+          idx4_->at(off)->add_entry(key, record_id);
           break;
         }
         case 16: {
-          idx22_->at(off)->add_entry(token.data, record_id);
+          idx5_->at(off)->add_entry(key, record_id);
           break;
         }
         case 32: {
-          idx11_->at(off)->add_entry(token.data, record_id);
+          idx6_->at(off)->add_entry(key, record_id);
+          break;
+        }
+        case 64: {
+          idx7_->at(off)->add_entry(key, record_id);
+          break;
+        }
+        case 128: {
+          idx8_->at(off)->add_entry(key, record_id);
           break;
         }
       }
@@ -570,59 +600,21 @@ class log_store {
    * @param max_rid Largest record-id to consider.
    * @param superset The superset to which the results must belong.
    */
-  template<uint32_t L1, uint32_t L2>
-  const void filter(std::unordered_set<uint64_t>& results,
-                    indexlog<L1, L2>* ilog, const unsigned char* token_prefix,
-                    const uint32_t token_prefix_len, const uint64_t max_rid,
+  template<typename INDEX>
+  const void filter(std::unordered_set<uint64_t>& results, INDEX* index,
+                    uint64_t token_beg, uint64_t token_end,
+                    const uint64_t max_rid,
                     const std::unordered_set<uint64_t>& superset) {
 
-    if (L2 > token_prefix_len) {
-      /* Determine the range of prefixes in ilog */
-      unsigned char token_buf[L1];
-      memcpy(token_buf, token_prefix, token_prefix_len);
-      for (uint32_t token_idx = token_prefix_len; token_idx < L2; token_idx++) {
-        token_buf[token_idx] = 0;
-      }
-      uint32_t start = token_ops<L1, L2>::prefix(token_prefix);
-      for (uint32_t token_idx = token_prefix_len; token_idx < L2; token_idx++) {
-        token_buf[token_idx] = 255;
-      }
-      uint32_t end = token_ops<L1, L2>::prefix(token_prefix);
-
-      /* Sweep through the range and return all matches */
-      for (uint32_t j = start; j <= end; j++) {
-        /* Don't need to check suffixes */
-        entry_list* list = ilog->get_entry_list(j);
-        sweep_without_suffix_check(results, list, max_rid, superset);
-      }
-    } else {
-      entry_list* list = ilog->get_entry_list(token_prefix);
-      if (L2 == token_prefix_len) {
-        sweep_without_suffix_check(results, list, max_rid, superset);
-      } else {
-        if (list == NULL)
-          return;
-
-        /* Need to filter by suffixes */
-        uint32_t ignore = L1 - token_prefix_len;
-        uint32_t size = list->size();
-        for (uint32_t i = 0; i < size; i++) {
-          uint64_t entry = list->at(i);
-          uint32_t record_id = entry & 0xFFFFFFFF;
-          uint32_t entry_suffix = entry >> 32;
-          uint32_t query_suffix = token_ops<L1, L2>::suffix(token_prefix);
-          if (entry_suffix >> ignore == query_suffix >> ignore
-              && olog_->is_valid(record_id, max_rid)
-              && (superset.empty() || superset.find(record_id) != superset.end()))
-            results.insert(record_id);
-        }
-      }
+    for (uint64_t i = token_beg; i <= token_end; i++) {
+      entry_list* list = index->get(i);
+      sweep_list(results, list, max_rid, superset);
     }
   }
 
   /**
-   * Sweeps through the entry-list, adding all entries with id < max_rid to
-   * results without checking token suffix.
+   * Sweeps through the entry-list, adding all valid entries to the results.
+   *
    *
    * @param results The set of results to be populated.
    * @param list The entry list.
@@ -631,31 +623,19 @@ class log_store {
    * @param superset_check Flag which determines whether to perform superset
    *  check or not.
    */
-  const void sweep_without_suffix_check(
-      std::unordered_set<uint64_t>& results, entry_list* list, uint64_t max_rid,
-      const std::unordered_set<uint64_t>& superset) {
-
+  const void sweep_list(std::unordered_set<uint64_t>& results, entry_list* list,
+                        uint64_t max_rid,
+                        const std::unordered_set<uint64_t>& superset) {
     if (list == NULL)
       return;
 
     uint32_t size = list->size();
     for (uint32_t i = 0; i < size; i++) {
-      uint32_t record_id = list->at(i) & 0xFFFFFFFF;
+      uint64_t record_id = list->at(i);
       if (olog_->is_valid(record_id, max_rid)
           && (superset.empty() || superset.find(record_id) != superset.end()))
         results.insert(record_id);
     }
-  }
-
-  /**
-   * Compute the size of a single index-log.
-   *
-   * @param ilog The index-log whose size is to be computed.
-   * @return The storage size of the index log.
-   */
-  template<uint32_t L1, uint32_t L2>
-  const uint64_t index_size(indexlog<L1, L2>* ilog) {
-    return ilog->storage_size();
   }
 
   /**
@@ -664,9 +644,9 @@ class log_store {
    * @param sizes Vector to be populated with index sizes.
    * @param idx Monolog containing indexes.
    */
-  template<uint32_t L1, uint32_t L2>
+  template<typename INDEX>
   const void index_size(std::vector<size_t>& sizes,
-                        monolog_linearizable<indexlog<L1, L2>*> *idx) {
+                        monolog_linearizable<INDEX*> *idx) {
     uint32_t num_indexes = idx->size();
     for (uint32_t i = 0; i < num_indexes; i++) {
       sizes.push_back(idx->at(i)->storage_size());
@@ -693,12 +673,14 @@ class log_store {
   std::atomic<uint64_t> dtail_;
 
   /* Index logs */
-  monolog_linearizable<indexlog<4, 3>*> *idx43_;
-  monolog_linearizable<indexlog<4, 2>*> *idx42_;
-  monolog_linearizable<indexlog<3, 3>*> *idx33_;
-  monolog_linearizable<indexlog<3, 2>*> *idx32_;
-  monolog_linearizable<indexlog<2, 2>*> *idx22_;
-  monolog_linearizable<indexlog<1, 1>*> *idx11_;
+  monolog_linearizable<__index1 *> *idx1_;
+  monolog_linearizable<__index2 *> *idx2_;
+  monolog_linearizable<__index3 *> *idx3_;
+  monolog_linearizable<__index4 *> *idx4_;
+  monolog_linearizable<__index5 *> *idx5_;
+  monolog_linearizable<__index6 *> *idx6_;
+  monolog_linearizable<__index7 *> *idx7_;
+  monolog_linearizable<__index8 *> *idx8_;
 
   /* Stream logs */
   monolog_linearizable<streamlog*> *streams_;

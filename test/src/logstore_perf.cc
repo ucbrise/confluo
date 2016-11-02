@@ -21,26 +21,13 @@ class LogStorePerf : public testing::Test {
                           const std::vector<uint32_t>& index_ids,
                           const uint32_t val) {
       for (uint32_t i = 0; i < index_ids.size(); i++) {
-        slog::token_t tok;
-        tok.index_id = index_ids[i];
-        if (index_ids[i] == 1024 || index_ids[i] == 2048) {
-          tok.len = 4;
-        } else if (index_ids[i] == 4096 || index_ids[i] == 8192) {
-          tok.len = 3;
-        } else if (index_ids[i] == 16384) {
-          tok.len = 2;
-        } else if (index_ids[i] == 32768) {
-          tok.len = 1;
-        }
-        tok.data = new unsigned char[tok.len];
-        gentok(tok.data, tok.len, val);
-        tokens.push_back(tok);
+        tokens.push_back(slog::token_t(index_ids[i], val));
       }
     }
 
-    static void gentok(unsigned char* tok, uint32_t len, uint32_t val) {
+    static void gendata(unsigned char* buf, uint32_t len, uint32_t val) {
       for (uint32_t i = 0; i < len; i++) {
-        tok[i] = val;
+        buf[i] = val;
       }
     }
   };
@@ -54,16 +41,13 @@ class LogStorePerf : public testing::Test {
 
   void add_and_check_indexes(slog::log_store& ls,
                              std::vector<uint32_t>& index_ids) {
-    index_ids.push_back(ls.add_index(4, 3));
-    index_ids.push_back(ls.add_index(4, 2));
-    index_ids.push_back(ls.add_index(3, 3));
-    index_ids.push_back(ls.add_index(3, 2));
-    index_ids.push_back(ls.add_index(2, 2));
-    index_ids.push_back(ls.add_index(1, 1));
+    for (uint32_t i = 1; i <= 8; i++) {
+      index_ids.push_back(ls.add_index(i));
+    }
 
     uint32_t id = 1024;
     for (uint32_t i = 0; i < index_ids.size(); i++) {
-      ASSERT_EQ(index_ids[i], id);
+      ASSERT_EQ(id, index_ids[i]);
       id *= 2;
     }
   }
@@ -86,19 +70,17 @@ class LogStorePerf : public testing::Test {
     return token_lists;
   }
 
-  std::array<slog::filter_query, 1536> generate_queries(
+  std::array<slog::filter_query, 2048> generate_queries(
       std::array<slog::token_list, 256>& token_lists) {
-    std::array<slog::filter_query, 1536> queries;
+    std::array<slog::filter_query, 2048> queries;
 
     uint32_t query_id = 0;
     for (uint32_t i = 0; i < 256; i++) {
-      for (uint32_t j = 0; j < 6; j++) {
+      for (uint32_t j = 0; j < 8; j++) {
         slog::filter_conjunction conjunction;
-        slog::basic_filter f;
-        f.index_id = token_lists[i][j].index_id;
-        f.token_prefix = token_lists[i][j].data;
-        f.token_prefix_len = token_lists[i][j].len;
-        conjunction.push_back(f);
+        conjunction.push_back(
+            slog::basic_filter(token_lists[i][j].index_id(),
+                               token_lists[i][j].data()));
         queries[query_id].push_back(conjunction);
         query_id++;
       }
@@ -121,7 +103,7 @@ TEST_F(LogStorePerf, InsertAndGetPerf) {
 
   auto tokens = generate_token_lists(index_ids);
 
-  LogStorePerf::DummyGenerator::gentok(hdr, 40, 256);
+  LogStorePerf::DummyGenerator::gendata(hdr, 40, 256);
   auto write_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     ls.insert(hdr, 40, tokens[i % 256]);
@@ -154,7 +136,7 @@ TEST_F(LogStorePerf, InsertAndFilterPerf) {
 
   auto token_lists = generate_token_lists(index_ids);
 
-  LogStorePerf::DummyGenerator::gentok(hdr, 40, 256);
+  LogStorePerf::DummyGenerator::gendata(hdr, 40, 256);
   auto write_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     ls.insert(hdr, 40, token_lists[i % 256]);
@@ -188,7 +170,7 @@ TEST_F(LogStorePerf, InsertAndStreamPerf) {
 
   auto token_lists = generate_token_lists(index_ids);
 
-  LogStorePerf::DummyGenerator::gentok(hdr, 40, 256);
+  LogStorePerf::DummyGenerator::gendata(hdr, 40, 256);
   auto write_start = high_resolution_clock::now();
   for (uint64_t i = 0; i < kMaxKeys; i++) {
     ls.insert(hdr, 40, token_lists[i % 256]);
