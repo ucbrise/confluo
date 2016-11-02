@@ -92,8 +92,8 @@ template<size_t SIZE1, size_t SIZE2>
 class __index_depth2 {
  public:
   entry_list* get(uint64_t key) {
-    indexlet<entry_list, SIZE2>* ilet = idx_[key / SIZE2];
-    return (*ilet)[key % SIZE2];
+    __index_depth1 <SIZE2>* ilet = idx_[key / SIZE2];
+    return ilet->get(key % SIZE2);
   }
 
   void add_entry(uint64_t key, uint64_t val) {
@@ -110,13 +110,68 @@ class __index_depth2 {
   }
 
  private:
-  indexlet<indexlet<entry_list, SIZE2>, SIZE1> idx_;
+  indexlet<__index_depth1 <SIZE2>, SIZE1> idx_;
+};
+
+template<size_t SIZE1, size_t SIZE2, size_t SIZE3>
+class __index_depth3 {
+ public:
+  entry_list* get(uint64_t key) {
+    __index_depth2 <SIZE2, SIZE3>* ilet = idx_[key / (SIZE2 * SIZE3)];
+    return ilet->get(key % (SIZE2 * SIZE3));
+  }
+
+  void add_entry(uint64_t key, uint64_t val) {
+    entry_list* list = get(key);
+    list->push_back(val);
+  }
+
+  size_t max_size() {
+    return SIZE1 * SIZE2 * SIZE3;
+  }
+
+  size_t storage_size() {
+    return idx_.storage_size();
+  }
+
+ private:
+  indexlet<__index_depth2 <SIZE2, SIZE3>, SIZE1> idx_;
+};
+
+template<size_t SIZE1, size_t SIZE2, size_t SIZE3, size_t SIZE4>
+class __index_depth4 {
+ public:
+  entry_list* get(uint64_t key) {
+    __index_depth3 <SIZE2, SIZE3, SIZE4>* ilet = idx_[key
+        / (SIZE2 * SIZE3 * SIZE4)];
+    return ilet->get(key % (SIZE2 * SIZE3 * SIZE4));
+  }
+
+  void add_entry(uint64_t key, uint64_t val) {
+    entry_list* list = get(key);
+    list->push_back(val);
+  }
+
+  size_t max_size() {
+    return SIZE1 * SIZE2 * SIZE3;
+  }
+
+  size_t storage_size() {
+    return idx_.storage_size();
+  }
+
+ private:
+  indexlet<__index_depth3 <SIZE2, SIZE3, SIZE4>, SIZE1> idx_;
 };
 
 typedef __index_depth1 <256> __index1;
 typedef __index_depth1 <65536> __index2;
 typedef __index_depth2 <65536, 256> __index3;
 typedef __index_depth2 <65536, 65536> __index4;
+typedef __index_depth3 <65536, 65536, 256> __index5;
+typedef __index_depth3 <65536, 65536, 65536> __index6;
+typedef __index_depth4 <65536, 65536, 65536, 256> __index7;
+typedef __index_depth4 <65536, 65536, 65536, 65536> __index8;
 
 }
 #endif /* TIEREDINDEX_H_ */
