@@ -65,11 +65,11 @@ class indexlet {
 template<size_t SIZE>
 class __index_depth1 {
  public:
-  entry_list* get(uint32_t key) {
+  entry_list* get(uint64_t key) {
     return idx_[key];
   }
 
-  void add_entry(uint32_t key, uint32_t val) {
+  void add_entry(uint64_t key, uint64_t val) {
     entry_list* list = get(key);
     list->push_back(val);
   }
@@ -89,12 +89,12 @@ class __index_depth1 {
 template<size_t SIZE1, size_t SIZE2>
 class __index_depth2 {
  public:
-  entry_list* get(uint32_t key) {
+  entry_list* get(uint64_t key) {
     indexlet<entry_list, SIZE2>* ilet = idx_[key / SIZE2];
     return (*ilet)[key % SIZE2];
   }
 
-  void add_entry(uint32_t key, uint32_t val) {
+  void add_entry(uint64_t key, uint64_t val) {
     entry_list* list = get(key);
     list->push_back(val);
   }
