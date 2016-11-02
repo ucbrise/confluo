@@ -46,9 +46,7 @@ class IndexPerf : public testing::Test {
     double read_time =
         duration_cast<microseconds>(read_end - read_start).count();
 
-    time_t tt = system_clock::to_time_t(system_clock::now());
-    res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\tindex" << L1
-        << L2 << "\t" << (write_time / kMaxEntries) << "\t"
+    res << "index" << L1 << L2 << "\t" << (write_time / kMaxEntries) << "\t"
         << (read_time / kMaxEntries) << std::endl;
   }
 };

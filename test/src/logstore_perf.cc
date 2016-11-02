@@ -140,8 +140,7 @@ TEST_F(LogStorePerf, InsertAndGetPerf) {
   double read_time = duration_cast<microseconds>(read_end - read_start).count();
 
   time_t tt = system_clock::to_time_t(system_clock::now());
-  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
-      << "indexandget" << "\t" << (write_time / kMaxKeys) << "\t"
+  res << "indexandget" << "\t" << (write_time / kMaxKeys) << "\t"
       << (read_time / kMaxKeys) << "\n";
 }
 
@@ -175,8 +174,7 @@ TEST_F(LogStorePerf, InsertAndFilterPerf) {
   double read_time = duration_cast<microseconds>(read_end - read_start).count();
 
   time_t tt = system_clock::to_time_t(system_clock::now());
-  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
-      << "indexandfilter" << "\t" << (write_time / kMaxKeys) << "\t"
+  res << "indexandfilter" << "\t" << (write_time / kMaxKeys) << "\t"
       << (read_time / queries.size()) << "\n";
 }
 
@@ -220,10 +218,8 @@ TEST_F(LogStorePerf, InsertAndStreamPerf) {
   double read_time2 =
       duration_cast<microseconds>(read_end2 - read_start2).count();
   time_t tt = system_clock::to_time_t(system_clock::now());
-  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
-      << "indexandstream1" << "\t" << (write_time / kMaxKeys) << "\t"
+  res << "indexandstream1" << "\t" << (write_time / kMaxKeys) << "\t"
       << read_time1 << "\n";
-  res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t"
-      << "indexandstream2" << "\t" << (write_time / kMaxKeys) << "\t"
+  res << "indexandstream2" << "\t" << (write_time / kMaxKeys) << "\t"
       << read_time2 << "\n";
 }

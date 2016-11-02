@@ -33,10 +33,8 @@ class MonoLogPerf : public testing::Test {
     double read_time =
         duration_cast<microseconds>(read_end - read_start).count();
 
-    time_t tt = system_clock::to_time_t(system_clock::now());
-    res << std::put_time(std::localtime(&tt), "%Y-%m-%d %X") << "\t" << ds_name
-        << "\t" << (write_time / kArraySize) << "\t" << (read_time / kArraySize)
-        << std::endl;
+    res << ds_name << "\t" << (write_time / kArraySize) << "\t"
+        << (read_time / kArraySize) << std::endl;
   }
 
   std::ofstream res;
