@@ -30,7 +30,7 @@ class offsetlog {
   }
 
   uint64_t start(uint64_t offset, uint16_t length) {
-    uint64_t record_id = current_id_.fetch_add(1L);
+    uint64_t record_id = current_id_.fetch_add(1L, std::memory_order_release);
     uint64_t offlen = ((uint64_t) length) << 48 | (offset & 0xFFFFFFFFFFFF);
     offlens_.set(record_id, offlen);
     return record_id;
@@ -41,7 +41,8 @@ class offsetlog {
   }
 
   uint64_t request_id_block(uint32_t num_records) {
-    uint64_t start_id = current_id_.fetch_add(num_records);
+    uint64_t start_id = current_id_.fetch_add(num_records,
+                                              std::memory_order_release);
     offlens_.ensure_alloc(start_id, start_id + num_records);
     valid_.ensure_alloc(start_id, start_id + num_records);
     return start_id;
@@ -59,7 +60,8 @@ class offsetlog {
   }
 
   bool is_valid(uint64_t record_id) {
-    return record_id < current_id_.load() && valid_[record_id].load();
+    return record_id < current_id_.load(std::memory_order_acquire)
+        && valid_[record_id].load();
   }
 
   bool is_valid(uint64_t record_id, uint64_t max_rid) {
@@ -67,7 +69,7 @@ class offsetlog {
   }
 
   uint64_t num_ids() {
-    return current_id_.load();
+    return current_id_.load(std::memory_order_acquire);
   }
 
   size_t storage_size() {

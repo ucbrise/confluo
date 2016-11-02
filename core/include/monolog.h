@@ -31,12 +31,12 @@ class __monolog_base {
     for (auto& x : buckets_) {
       x.store(null_ptr);
     }
-    buckets_[0].store(new T[FBS]);
+    buckets_[0].store(new T[FBS], std::memory_order_release);
   }
 
   ~__monolog_base() {
     for (auto& x : buckets_) {
-      delete[] x.load();
+      delete[] x.load(std::memory_order_acquire);
     }
   }
 
@@ -48,8 +48,9 @@ class __monolog_base {
     uint32_t bucket_idx1 = hibit1 - FBS_HIBIT;
     uint32_t bucket_idx2 = hibit2 - FBS_HIBIT;
     for (uint32_t i = bucket_idx1; i <= bucket_idx2; i++) {
-      if (buckets_[i] == NULL)
+      if (buckets_[i].load(std::memory_order_acquire) == NULL) {
         try_allocate_bucket(i);
+      }
     }
   }
 
@@ -59,9 +60,10 @@ class __monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    if (buckets_[bucket_idx] == NULL)
+    if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
       try_allocate_bucket(bucket_idx);
-    buckets_[bucket_idx][bucket_off] = val;
+    }
+    buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off] = val;
   }
 
   // Sets a contiguous region of the MonoLog base to the provided data.
@@ -73,15 +75,16 @@ class __monolog_base {
     uint32_t data_remaining = len * sizeof(T);
     uint32_t data_off = 0;
     while (data_remaining) {
-      if (buckets_[bucket_idx] == NULL)
+      if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
         try_allocate_bucket(bucket_idx);
+      }
       uint32_t bucket_remaining =
           ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
       uint32_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
-      memcpy(buckets_[bucket_idx] + bucket_off, data + data_off,
-             bytes_to_write);
+      memcpy(buckets_[bucket_idx].load(std::memory_order_acquire) + bucket_off,
+             data + data_off, bytes_to_write);
       bucket_idx++;
       bucket_off = 0;
     }
@@ -93,7 +96,7 @@ class __monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    return buckets_[bucket_idx][bucket_off];
+    return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off];
   }
 
   T& operator[](const uint32_t idx) {
@@ -101,9 +104,10 @@ class __monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    if (buckets_[bucket_idx] == NULL)
+    if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
       try_allocate_bucket(bucket_idx);
-    return buckets_[bucket_idx][bucket_off];
+    }
+    return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off];
   }
 
   // Copies a contiguous region of the MonoLog base into the provided buffer.
@@ -122,7 +126,9 @@ class __monolog_base {
       uint32_t bytes_to_read = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_read;
       data_off += bytes_to_read;
-      memcpy(data + data_off, buckets_[bucket_idx] + bucket_off, bytes_to_read);
+      memcpy(data + data_off,
+             buckets_[bucket_idx].load(std::memory_order_acquire) + bucket_off,
+             bytes_to_read);
       bucket_idx++;
       bucket_off = 0;
     }
@@ -131,9 +137,11 @@ class __monolog_base {
   const size_t storage_size() {
     size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
     size_t data_size = 0;
-    for (uint32_t i = 0; i < buckets_.size(); i++)
-      if (buckets_[i].load() != NULL)
+    for (uint32_t i = 0; i < buckets_.size(); i++) {
+      if (buckets_[i].load(std::memory_order_acquire) != NULL) {
         data_size += ((1U << (i + FBS_HIBIT)) * sizeof(T));
+      }
+    }
     return bucket_size + data_size;
   }
 
@@ -148,8 +156,9 @@ class __monolog_base {
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
-    if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
-                                             new_bucket)) {
+    if (!std::atomic_compare_exchange_strong_explicit(
+        &buckets_[bucket_idx], &null_ptr, new_bucket, std::memory_order_release,
+        std::memory_order_release)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] new_bucket;
     }
@@ -184,24 +193,30 @@ class __monolog_linear_base {
   void write(const uint64_t offset, const T* data, const uint32_t len) {
     uint32_t bucket_idx = offset / BLOCK_SIZE;
     uint32_t bucket_off = offset % BLOCK_SIZE;
-    if (buckets_[bucket_idx] == NULL)
+    if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
       try_allocate_bucket(bucket_idx);
-    memcpy(buckets_[bucket_idx].load() + bucket_off, data, len);
+    }
+    memcpy(buckets_[bucket_idx].load(std::memory_order_acquire) + bucket_off,
+           data, len);
   }
 
   // Get len bytes of data at offset.
   void read(const uint64_t offset, T* data, const uint32_t len) const {
     uint32_t bucket_idx = offset / BLOCK_SIZE;
     uint32_t bucket_off = offset % BLOCK_SIZE;
-    memcpy(data, buckets_[bucket_idx].load() + bucket_off, len);
+    memcpy(data,
+           buckets_[bucket_idx].load(std::memory_order_acquire) + bucket_off,
+           len);
   }
 
   const uint64_t storage_size() {
     uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
     uint64_t data_size = 0;
-    for (uint32_t i = 0; i < buckets_.size(); i++)
-      if (buckets_[i].load() != NULL)
+    for (uint32_t i = 0; i < buckets_.size(); i++) {
+      if (buckets_[i].load(std::memory_order_acquire) != NULL) {
         data_size += (BLOCK_SIZE * sizeof(T));
+      }
+    }
     return bucket_size + data_size;
   }
 
@@ -215,8 +230,9 @@ class __monolog_linear_base {
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
-    if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
-                                             bucket)) {
+    if (!std::atomic_compare_exchange_strong_explicit(
+        &buckets_[bucket_idx], &null_ptr, bucket, std::memory_order_release,
+        std::memory_order_release)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -241,7 +257,7 @@ class __atomic_monolog_base {
     for (auto& x : buckets_) {
       x = null_ptr;
     }
-    buckets_[0] = new __atomic_ref[FBS];
+    buckets_[0].store(new __atomic_ref[FBS]);
   }
 
   ~__atomic_monolog_base() {
@@ -255,8 +271,9 @@ class __atomic_monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    if (buckets_[bucket_idx] == NULL)
-    try_allocate_bucket(bucket_idx);
+    if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
+      try_allocate_bucket(bucket_idx);
+    }
   }
 
   void set(uint32_t idx, const T val) {
@@ -270,9 +287,10 @@ class __atomic_monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    if (buckets_[bucket_idx] == NULL)
-    try_allocate_bucket(bucket_idx);
-    buckets_[bucket_idx][bucket_off].store(val);
+    if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
+      try_allocate_bucket(bucket_idx);
+    }
+    buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off].store(val);
   }
 
   __atomic_ref& operator[](const uint32_t idx) {
@@ -280,9 +298,10 @@ class __atomic_monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    if (buckets_[bucket_idx] == NULL)
-    try_allocate_bucket(bucket_idx);
-    return buckets_[bucket_idx][bucket_off];
+    if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
+      try_allocate_bucket(bucket_idx);
+    }
+    return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off].load();
   }
 
   T get(const uint32_t idx) const {
@@ -295,7 +314,7 @@ class __atomic_monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    return buckets_[bucket_idx][bucket_off].load();
+    return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off].load();
   }
 
   bool cas(const uint32_t idx, T& expected, T replacement) {
@@ -303,7 +322,7 @@ class __atomic_monolog_base {
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
-    return buckets_[bucket_idx][bucket_off].compare_exchange_strong(expected,
+    return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off].compare_exchange_strong(expected,
         replacement);
   }
 
@@ -318,8 +337,8 @@ protected:
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
-    if (!std::atomic_compare_exchange_strong(&buckets_[bucket_idx], &null_ptr,
-            bucket)) {
+    if (!std::atomic_compare_exchange_strong_explicit(&buckets_[bucket_idx], &null_ptr,
+            bucket, std::memory_order_release, std::memory_order_release)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -380,7 +399,7 @@ class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
 };
 
 /**
- * Eventually consistent (i.e., atomic, but not linearizable) implementation for the MonoLog.
+ * Relaxed (i.e., not linearizable) implementation for the MonoLog.
  *
  * Maintains a single tail that ensures:
  * - Write operations are atomic
@@ -393,7 +412,7 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
   }
 
   uint32_t push_back(const T val) {
-    uint32_t idx = std::atomic_fetch_add(&tail_, 1U);
+    uint32_t idx = tail_.fetch_add(1U, std::memory_order_release);
     this->set(idx, val);
     return idx;
   }
@@ -403,7 +422,7 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
   }
 
   const uint32_t size() {
-    return tail_.load();
+    return tail_.load(std::memory_order_acquire);
   }
 
  private:

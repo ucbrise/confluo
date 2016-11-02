@@ -14,34 +14,36 @@ class indexlet {
 
   indexlet() {
     for (uint32_t i = 0; i < SIZE; i++) {
-      idx_[i].store(NULL);
+      idx_[i].store(NULL, std::memory_order_release);
     }
   }
 
   ~indexlet() {
     for (uint32_t i = 0; i < SIZE; i++) {
-      delete idx_[i].load();
+      delete idx_[i].load(std::memory_order_acquire);
     }
   }
 
   T* operator[](const uint32_t i) {
-    while (idx_[i].load() == NULL) {
+    if (idx_[i].load() == NULL) {
       T* item = new T();
       T* null_ptr = NULL;
 
       // Only one thread will be successful in replacing the NULL reference with newly
       // allocated item.
-      if (!std::atomic_compare_exchange_strong(&idx_[i], &null_ptr, item)) {
+      if (!std::atomic_compare_exchange_strong_explicit(
+          &idx_[i], &null_ptr, item, std::memory_order_release,
+          std::memory_order_release)) {
         // All other threads will deallocate the newly allocated item.
         delete item;
       }
     }
 
-    return idx_[i].load();
+    return idx_[i].load(std::memory_order_acquire);
   }
 
   T* at(const uint32_t i) const {
-    return idx_[i].load();
+    return idx_[i].load(std::memory_order_acquire);
   }
 
   size_t size() {
@@ -51,8 +53,8 @@ class indexlet {
   size_t storage_size() {
     size_t tot_size = SIZE * sizeof(atomic_ref);
     for (uint32_t i = 0; i < SIZE; i++) {
-      if (idx_[i].load() != NULL) {
-        tot_size += idx_[i].load()->storage_size();
+      if (idx_[i].load(std::memory_order_acquire) != NULL) {
+        tot_size += idx_[i].load(std::memory_order_acquire)->storage_size();
       }
     }
     return tot_size;
