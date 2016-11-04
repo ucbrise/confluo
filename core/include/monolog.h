@@ -158,7 +158,7 @@ class __monolog_base {
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(
         &buckets_[bucket_idx], &null_ptr, new_bucket, std::memory_order_release,
-        std::memory_order_release)) {
+        std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] new_bucket;
     }
@@ -232,7 +232,7 @@ class __monolog_linear_base {
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(
         &buckets_[bucket_idx], &null_ptr, bucket, std::memory_order_release,
-        std::memory_order_release)) {
+        std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -338,7 +338,7 @@ protected:
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(&buckets_[bucket_idx], &null_ptr,
-            bucket, std::memory_order_release, std::memory_order_release)) {
+            bucket, std::memory_order_release, std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }

@@ -151,6 +151,16 @@ class log_store {
     }
 
     /**
+     * Filter index-entries based on query.
+     *
+     * @param results The results of the filter query.
+     * @param query The filter query.
+     */
+    void filter(std::unordered_set<uint64_t>& results, filter_query& query) {
+      base_.filter(results, query);
+    }
+
+    /**
      * Get the stream associated with a given stream id.
      *
      * @param stream_id The id of the stream.
@@ -176,16 +186,6 @@ class log_store {
      */
     const uint64_t size() {
       return base_.size();
-    }
-
-    /**
-     * Filter index-entries based on query.
-     *
-     * @param results The results of the filter query.
-     * @param query The filter query.
-     */
-    void filter(std::unordered_set<uint64_t>& results, filter_query& query) {
-      base_.filter(results, query);
     }
 
     /** Get storage statistics
@@ -324,7 +324,7 @@ class log_store {
    * @param record_id The id of the record being requested.
    * @return true if the fetch is successful, false otherwise.
    */
-  const bool get(unsigned char* record, const uint64_t record_id) {
+  bool get(unsigned char* record, const uint64_t record_id) {
 
     /* Checks if the record_id has been written yet, returns false on failure. */
     if (!olog_->is_valid(record_id))
@@ -353,8 +353,8 @@ class log_store {
    *  number of bytes extracted.
    * @return true if the extract is successful, false otherwise.
    */
-  const bool extract(unsigned char* record, const uint64_t record_id,
-                     uint32_t offset, uint32_t& length) {
+  bool extract(unsigned char* record, const uint64_t record_id, uint32_t offset,
+               uint32_t& length) {
 
     /* Checks if the record_id has been written yet, returns false on failure. */
     if (!olog_->is_valid(record_id))
@@ -390,7 +390,7 @@ class log_store {
    *
    * @return The number of readable records.
    */
-  const uint64_t num_records() {
+  uint64_t num_records() {
     return olog_->num_ids();
   }
 
@@ -398,7 +398,7 @@ class log_store {
    *
    * @return The size in bytes of the currently readable portion of the log-store.
    */
-  const uint64_t size() {
+  uint64_t size() {
     return dtail_.load();
   }
 

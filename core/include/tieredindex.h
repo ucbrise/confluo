@@ -33,7 +33,7 @@ class indexlet {
       // allocated item.
       if (!std::atomic_compare_exchange_strong_explicit(
           &idx_[i], &null_ptr, item, std::memory_order_release,
-          std::memory_order_release)) {
+          std::memory_order_acquire)) {
         // All other threads will deallocate the newly allocated item.
         delete item;
       }
