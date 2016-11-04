@@ -169,7 +169,7 @@ class __monolog_base {
   std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
 };
 
-template<class T, uint32_t NBUCKETS = 32, uint32_t BLOCK_SIZE = 4294967274U>
+template<class T, uint32_t NBUCKETS = 1024, uint32_t BLOCK_SIZE = 268435456U>
 class __monolog_linear_base {
  public:
   typedef std::atomic<T*> __atomic_bucket_ref;

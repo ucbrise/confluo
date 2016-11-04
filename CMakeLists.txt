@@ -15,6 +15,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 find_package(Threads REQUIRED)
 
+add_subdirectory(netplay)
+
 # Testing framework
 # Build google testing framework
 add_subdirectory(external/gtest-1.7.0)

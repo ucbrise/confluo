@@ -8,3 +8,7 @@ file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 set(INCLUDE include)
 set(CORE_INCLUDE ../core/include)
 include_directories(${INCLUDE} ${CORE_INCLUDE})
+
+add_executable(pktload src/packetload_bench.cc)
+
+target_link_libraries(pktload ${CMAKE_THREAD_LIBS_INIT} ${JEMALLOC_LIBRARIES})
