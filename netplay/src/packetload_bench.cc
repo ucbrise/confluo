@@ -26,6 +26,8 @@ using namespace ::std::chrono;
 #define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
 #endif
 
+#define MEASURE_LATENCY
+
 const char* usage =
     "Usage: %s -n [numthreads] -r [ratelimit] -t [maxtime] [data] [attrs]\n";
 
@@ -211,7 +213,6 @@ class packet_loader {
                       init_tokens(tokens, handle, idx);
                       idx++;
                       if (total_ops % kReportRecordInterval == 0) {
-                        rfs << get_timestamp() << "\t" << total_ops << "\n";
 #ifdef MEASURE_LATENCY
                   t0 = high_resolution_clock::now();
 #endif
