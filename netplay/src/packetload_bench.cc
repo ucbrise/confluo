@@ -140,13 +140,13 @@ class packet_loader {
 
   uint32_t parse_ip(std::string& ip) {
     uint32_t byte0 = 0, byte1 = 0, byte2 = 0, byte3 = 0;
-    sscanf(ip.c_str(), "%u.%u.%u.%u", &byte3, &byte2, &byte1, &byte0);
+    sscanf(ip.c_str(), "%u.%u.%u.%u", &byte0, &byte1, &byte2, &byte3);
     return byte3 | byte2 << 8 | byte1 << 16 | byte0 << 24;
   }
 
   uint32_t parse_time(uint32_t time) {
     unsigned char* timearr = (unsigned char*) (&time);
-    return timearr[2] | timearr[1] << 8 | timearr[0] << 16;
+    return timearr[0] | timearr[1] << 8 | timearr[2] << 16 | timearr[3] << 24;
   }
 
   uint16_t parse_port(uint16_t port) {
