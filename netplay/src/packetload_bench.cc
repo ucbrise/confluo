@@ -136,6 +136,14 @@ class packet_loader {
     handle->add_timestamp(tokens, timestamps_[idx]);
   }
 
+  void update_tokens(token_list& tokens, uint64_t idx) {
+    tokens[0].update_data(srcips_[idx]);
+    tokens[1].update_data(dstips_[idx]);
+    tokens[2].update_data(sports_[idx]);
+    tokens[3].update_data(dports_[idx]);
+    tokens[4].update_data(timestamps_[idx]);
+  }
+
   uint32_t parse_ip(std::string& ip) {
     uint32_t byte0 = 0, byte1 = 0, byte2 = 0, byte3 = 0;
     sscanf(ip.c_str(), "%u.%u.%u.%u", &byte3, &byte2, &byte1, &byte0);
@@ -184,33 +192,33 @@ class packet_loader {
   void load_packets(const uint32_t num_threads, const uint64_t timebound,
                     const uint64_t rate_limit) {
 
-    std::vector<std::thread> threads;
+    std::vector<std::thread> workers;
     uint64_t thread_ops = timestamps_.size() / num_threads;
-    uint64_t local_rate_limit = rate_limit / num_threads;
+    uint64_t worker_rate_limit = rate_limit / num_threads;
 
     LOG(stderr, "Setting timebound to %llu us\n", timebound);
     for (uint32_t i = 0; i < num_threads; i++) {
-      threads.push_back(
+      workers.push_back(
           std::move(
               std::thread(
-                  [i, timebound, local_rate_limit, thread_ops, this] {
+                  [i, timebound, worker_rate_limit, thread_ops, this] {
                     uint64_t idx = thread_ops * i;
                     token_list tokens;
                     packet_store::handle* handle = store_->get_handle();
-                    rlimiter* limiter = new rlimiter(local_rate_limit, handle);
+                    init_tokens(tokens, handle, idx);
+                    rlimiter* limiter = new rlimiter(worker_rate_limit, handle);
                     double throughput = 0;
 #ifdef MEASURE_LATENCY
                   high_resolution_clock::time_point t0, t1;
                   std::ofstream lfs("write_latency_" + std::to_string(i));
 #endif
-                  std::ofstream rfs("record_progress_" + std::to_string(i));
                   LOG(stderr, "Starting benchmark.\n");
 
                   try {
                     uint64_t total_ops = 0;
                     timestamp_t start = get_timestamp();
                     while (limiter->local_ops() < thread_ops && get_timestamp() - start < timebound) {
-                      init_tokens(tokens, handle, idx);
+                      update_tokens(tokens, idx);
                       idx++;
                       if (total_ops % kReportRecordInterval == 0) {
 #ifdef MEASURE_LATENCY
@@ -237,7 +245,6 @@ class packet_loader {
             std::ofstream ofs("write_throughput_" + std::to_string(i));
             ofs << throughput << "\n";
             ofs.close();
-            rfs.close();
             delete limiter;
             delete handle;
           })));
@@ -256,7 +263,7 @@ class packet_loader {
         });
 #endif
 
-    for (auto& th : threads) {
+    for (auto& th : workers) {
       th.join();
     }
 
