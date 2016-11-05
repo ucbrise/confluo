@@ -146,7 +146,7 @@ class packet_loader {
 
   uint32_t parse_time(uint32_t time) {
     unsigned char* timearr = (unsigned char*) (&time);
-    return timearr[0] | timearr[1] << 8 | timearr[2] << 16 | timearr[3] << 24;
+    return timearr[3] | timearr[2] << 8 | timearr[1] << 16 | timearr[0] << 24;
   }
 
   uint16_t parse_port(uint16_t port) {
