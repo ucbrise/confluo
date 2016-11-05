@@ -26,6 +26,10 @@ struct token_t {
     return data_;
   }
 
+  void update_data(uint64_t data) {
+    data_ = data;
+  }
+
  private:
   uint32_t index_id_;
   uint64_t data_;
