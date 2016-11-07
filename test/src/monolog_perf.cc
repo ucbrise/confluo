@@ -46,11 +46,11 @@ class MonoLogPerf : public testing::Test {
 
     auto write_start = high_resolution_clock::now();
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, &ds, this] {
+      workers.push_back(std::thread([i, &ds, this] {
         for (uint32_t j = 0; j < kArraySize; j++) {
           ds.push_back(i);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();
@@ -63,12 +63,12 @@ class MonoLogPerf : public testing::Test {
 
     auto read_start = high_resolution_clock::now();
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([num_threads, &ds, this] {
+      workers.push_back(std::thread([num_threads, &ds, this] {
         for (uint32_t j = 0; j < ds.size(); j++) {
           uint64_t val = ds.at(j);
           ASSERT_TRUE(val >= 1 && val <= num_threads);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();

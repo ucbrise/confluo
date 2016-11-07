@@ -57,8 +57,8 @@ class LogStorePerf : public testing::Test {
     stream_ids.push_back(ls.add_stream(filter_fn1));
     stream_ids.push_back(ls.add_stream(filter_fn2));
 
-    ASSERT_EQ(stream_ids[0], 0);
-    ASSERT_EQ(stream_ids[1], 1);
+    ASSERT_EQ(stream_ids[0], 0U);
+    ASSERT_EQ(stream_ids[1], 1U);
   }
 
   std::array<slog::token_list, 256> generate_token_lists(
@@ -121,7 +121,6 @@ TEST_F(LogStorePerf, InsertAndGetPerf) {
   auto read_end = high_resolution_clock::now();
   double read_time = duration_cast<microseconds>(read_end - read_start).count();
 
-  time_t tt = system_clock::to_time_t(system_clock::now());
   res << "indexandget" << "\t" << (write_time / kMaxKeys) << "\t"
       << (read_time / kMaxKeys) << "\n";
 }
@@ -150,12 +149,11 @@ TEST_F(LogStorePerf, InsertAndFilterPerf) {
   for (uint32_t i = 0; i < queries.size(); i++) {
     std::unordered_set<uint64_t> results;
     ls.filter(results, queries[i]);
-    ASSERT_EQ(results.size(), 10);
+    ASSERT_EQ(results.size(), static_cast<size_t>(10));
   }
   auto read_end = high_resolution_clock::now();
   double read_time = duration_cast<microseconds>(read_end - read_start).count();
 
-  time_t tt = system_clock::to_time_t(system_clock::now());
   res << "indexandfilter" << "\t" << (write_time / kMaxKeys) << "\t"
       << (read_time / queries.size()) << "\n";
 }
@@ -199,7 +197,7 @@ TEST_F(LogStorePerf, InsertAndStreamPerf) {
   auto read_end2 = high_resolution_clock::now();
   double read_time2 =
       duration_cast<microseconds>(read_end2 - read_start2).count();
-  time_t tt = system_clock::to_time_t(system_clock::now());
+
   res << "indexandstream1" << "\t" << (write_time / kMaxKeys) << "\t"
       << read_time1 << "\n";
   res << "indexandstream2" << "\t" << (write_time / kMaxKeys) << "\t"

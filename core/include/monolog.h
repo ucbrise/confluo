@@ -113,7 +113,7 @@ class __monolog_base {
   // Copies a contiguous region of the MonoLog base into the provided buffer.
   // The buffer should have sufficient space to hold the data requested, otherwise
   // undefined behavior may result.
-  void get(T* data, const uint32_t idx, const uint32_t len) {
+  void get(T* data, const uint32_t idx, const uint32_t len) const {
     uint32_t pos = idx + FBS;
     uint32_t hibit = bit_utils::highest_bit(pos);
     uint32_t bucket_off = pos ^ (1 << hibit);
@@ -134,7 +134,7 @@ class __monolog_base {
     }
   }
 
-  const size_t storage_size() {
+  size_t storage_size() const {
     size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
     size_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++) {
@@ -209,9 +209,9 @@ class __monolog_linear_base {
            len);
   }
 
-  const uint64_t storage_size() {
-    uint64_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
-    uint64_t data_size = 0;
+  size_t storage_size() const {
+    size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
+    size_t data_size = 0;
     for (uint32_t i = 0; i < buckets_.size(); i++) {
       if (buckets_[i].load(std::memory_order_acquire) != NULL) {
         data_size += (BLOCK_SIZE * sizeof(T));
@@ -269,7 +269,6 @@ class __atomic_monolog_base {
   void alloc(uint32_t idx) {
     uint32_t pos = idx + FBS;
     uint32_t hibit = bit_utils::highest_bit(pos);
-    uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
     if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
       try_allocate_bucket(bucket_idx);
@@ -384,12 +383,12 @@ class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
   }
 
   // Get the entry at the specified index `idx'.
-  const T at(const uint32_t idx) {
+  T at(const uint32_t idx) const {
     return this->get(idx);
   }
 
   // Get the size of the MonoLog (i.e., number of completely written entries)
-  const uint32_t size() {
+  uint32_t size() const {
     return read_tail_.load();
   }
 
@@ -417,11 +416,11 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
     return idx;
   }
 
-  const T at(const uint32_t idx) {
+  T at(const uint32_t idx) const {
     return this->get(idx);
   }
 
-  const uint32_t size() {
+  uint32_t size() const {
     return tail_.load(std::memory_order_acquire);
   }
 

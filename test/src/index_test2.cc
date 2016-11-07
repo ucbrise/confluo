@@ -31,11 +31,11 @@ class Index2Test : public testing::Test {
 
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, max, &index] {
+      workers.push_back(std::thread([i, max, &index] {
         for (uint32_t j = 0; j < max; j++) {
           index.add_entry(j, i);
         }
-      })));
+      }));
     }
 
     for (std::thread& worker : workers) {
@@ -56,7 +56,7 @@ class Index2Test : public testing::Test {
       }
 
       for (uint32_t count : counts) {
-        ASSERT_EQ(1, count);
+        ASSERT_EQ(1U, count);
       }
     }
   }

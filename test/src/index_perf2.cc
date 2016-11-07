@@ -61,11 +61,11 @@ class Index2Perf : public testing::Test {
 
     auto write_start = high_resolution_clock::now();
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, max, &index] {
+      workers.push_back(std::thread([i, max, &index] {
         for (uint32_t j = 0; j < max; j++) {
           index.add_entry(j, i);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();
@@ -78,7 +78,7 @@ class Index2Perf : public testing::Test {
 
     auto read_start = high_resolution_clock::now();
     for (uint32_t t = 1; t <= num_threads; t++) {
-      workers.push_back(std::move(std::thread([max, num_threads, &index] {
+      workers.push_back(std::thread([max, num_threads, &index] {
         for (uint32_t i = 0; i < max; i++) {
           slog::entry_list* list = index.get(i);
           uint32_t size = list->size();
@@ -87,7 +87,7 @@ class Index2Perf : public testing::Test {
             ASSERT_TRUE(val >= 1 && val <= num_threads);
           }
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();

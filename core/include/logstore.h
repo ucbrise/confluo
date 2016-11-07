@@ -129,7 +129,7 @@ class log_store {
      * @param record_id The id of the record being requested.
      * @return true if the fetch is successful, false otherwise.
      */
-    const bool get(unsigned char* record, const uint64_t record_id) {
+    bool get(unsigned char* record, const uint64_t record_id) const {
       return base_.get(record, record_id);
     }
 
@@ -145,8 +145,8 @@ class log_store {
      *  number of bytes extracted.
      * @return true if the extract is successful, false otherwise.
      */
-    const bool extract(unsigned char* record, const uint64_t record_id,
-                       uint32_t offset, uint32_t& length) {
+    bool extract(unsigned char* record, const uint64_t record_id,
+                 uint32_t offset, uint32_t& length) const {
       return base_.extract(record, record_id, offset, length);
     }
 
@@ -156,7 +156,8 @@ class log_store {
      * @param results The results of the filter query.
      * @param query The filter query.
      */
-    void filter(std::unordered_set<uint64_t>& results, filter_query& query) {
+    void filter(std::unordered_set<uint64_t>& results,
+                filter_query& query) const {
       base_.filter(results, query);
     }
 
@@ -166,7 +167,7 @@ class log_store {
      * @param stream_id The id of the stream.
      * @return The stream associated with the id.
      */
-    entry_list* get_stream(uint32_t stream_id) {
+    entry_list* get_stream(uint32_t stream_id) const {
       return base_.get_stream(stream_id);
     }
 
@@ -176,7 +177,7 @@ class log_store {
      *
      * @return The number of readable records.
      */
-    const uint64_t num_records() {
+    uint64_t num_records() const {
       return base_.num_records();
     }
 
@@ -184,7 +185,7 @@ class log_store {
      *
      * @return The size in bytes of the currently readable portion of the log-store.
      */
-    const uint64_t size() {
+    uint64_t size() const {
       return base_.size();
     }
 
@@ -193,7 +194,7 @@ class log_store {
      * @param storage_stats The storage structure which will be populated with
      * storage statistics at the end of the call.
      */
-    void storage_footprint(logstore_storage& storage_stats) {
+    void storage_footprint(logstore_storage& storage_stats) const {
       base_.storage_footprint(storage_stats);
     }
 
@@ -324,7 +325,7 @@ class log_store {
    * @param record_id The id of the record being requested.
    * @return true if the fetch is successful, false otherwise.
    */
-  bool get(unsigned char* record, const uint64_t record_id) {
+  bool get(unsigned char* record, const uint64_t record_id) const {
 
     /* Checks if the record_id has been written yet, returns false on failure. */
     if (!olog_->is_valid(record_id))
@@ -354,7 +355,7 @@ class log_store {
    * @return true if the extract is successful, false otherwise.
    */
   bool extract(unsigned char* record, const uint64_t record_id, uint32_t offset,
-               uint32_t& length) {
+               uint32_t& length) const {
 
     /* Checks if the record_id has been written yet, returns false on failure. */
     if (!olog_->is_valid(record_id))
@@ -380,7 +381,7 @@ class log_store {
    * @param stream_id The id of the stream.
    * @return The stream associated with the id.
    */
-  entry_list* get_stream(uint32_t stream_id) {
+  entry_list* get_stream(uint32_t stream_id) const {
     return streams_->at(stream_id)->get_stream();
   }
 
@@ -390,7 +391,7 @@ class log_store {
    *
    * @return The number of readable records.
    */
-  uint64_t num_records() {
+  uint64_t num_records() const {
     return olog_->num_ids();
   }
 
@@ -398,7 +399,7 @@ class log_store {
    *
    * @return The size in bytes of the currently readable portion of the log-store.
    */
-  uint64_t size() {
+  uint64_t size() const {
     return dtail_.load();
   }
 
@@ -408,7 +409,8 @@ class log_store {
    * @param results The results of the filter query.
    * @param query The filter query.
    */
-  void filter(std::unordered_set<uint64_t>& results, filter_query& query) {
+  void filter(std::unordered_set<uint64_t>& results,
+              filter_query& query) const {
     uint64_t max_rid = olog_->num_ids();
     for (filter_conjunction& conjunction : query) {
       std::unordered_set<uint64_t> conjunction_results;
@@ -476,7 +478,7 @@ class log_store {
    * @param storage_stats The storage structure which will be populated with
    * storage statistics at the end of the call.
    */
-  void storage_footprint(logstore_storage& storage_stats) {
+  void storage_footprint(logstore_storage& storage_stats) const {
     /* Get size for data-log and offset-log */
     storage_stats.dlog_size = dlog_->storage_size();
     storage_stats.olog_size = olog_->storage_size();
@@ -601,10 +603,9 @@ class log_store {
    * @param superset The superset to which the results must belong.
    */
   template<typename INDEX>
-  const void filter(std::unordered_set<uint64_t>& results, INDEX* index,
-                    uint64_t token_beg, uint64_t token_end,
-                    const uint64_t max_rid,
-                    const std::unordered_set<uint64_t>& superset) {
+  void filter(std::unordered_set<uint64_t>& results, INDEX* index,
+              uint64_t token_beg, uint64_t token_end, const uint64_t max_rid,
+              const std::unordered_set<uint64_t>& superset) const {
 
     for (uint64_t i = token_beg; i <= token_end; i++) {
       entry_list* list = index->get(i);
@@ -623,9 +624,9 @@ class log_store {
    * @param superset_check Flag which determines whether to perform superset
    *  check or not.
    */
-  const void sweep_list(std::unordered_set<uint64_t>& results, entry_list* list,
-                        uint64_t max_rid,
-                        const std::unordered_set<uint64_t>& superset) {
+  void sweep_list(std::unordered_set<uint64_t>& results, entry_list* list,
+                  uint64_t max_rid,
+                  const std::unordered_set<uint64_t>& superset) const {
     if (list == NULL)
       return;
 
@@ -645,8 +646,8 @@ class log_store {
    * @param idx Monolog containing indexes.
    */
   template<typename INDEX>
-  const void index_size(std::vector<size_t>& sizes,
-                        monolog_linearizable<INDEX*> *idx) {
+  void index_size(std::vector<size_t>& sizes,
+                  monolog_linearizable<INDEX*> *idx) const {
     uint32_t num_indexes = idx->size();
     for (uint32_t i = 0; i < num_indexes; i++) {
       sizes.push_back(idx->at(i)->storage_size());
@@ -658,7 +659,7 @@ class log_store {
    *
    * @param sizes Vector to be populated with stream sizes.
    */
-  const void stream_size(std::vector<size_t>& sizes) {
+  void stream_size(std::vector<size_t>& sizes) const {
     uint32_t num_streams = streams_->size();
     for (uint32_t i = 0; i < num_streams; i++) {
       sizes.push_back(streams_->at(i)->get_stream()->storage_size());

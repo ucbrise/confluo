@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <cassert>
 #include <vector>
 #include <string>
 #include <atomic>
@@ -20,18 +21,12 @@ using namespace ::netplay;
 using namespace ::slog;
 using namespace ::std::chrono;
 
-#ifdef NO_LOG
-#define LOG(out, fmt, ...)
-#else
-#define LOG(out, fmt, ...) fprintf(out, fmt, ##__VA_ARGS__)
-#endif
-
 #define MEASURE_LATENCY
 
 const char* usage =
     "Usage: %s -n [numthreads] -r [ratelimit] -t [maxtime] [data] [attrs]\n";
 
-typedef int64_t timestamp_t;
+typedef uint64_t timestamp_t;
 
 static timestamp_t get_timestamp() {
   struct timeval now;
@@ -48,7 +43,7 @@ class rate_limiter {
     local_ops_ = 0;
     last_ts_ = high_resolution_clock::now();
     tspec_.tv_sec = 0;
-    LOG(stderr, "10000 ops per %lld ns.\n", min_ns_per_10000_ops);
+    fprintf(stderr, "10000 ops per %lld ns.\n", min_ns_per_10000_ops);
   }
 
   uint64_t insert_packet(unsigned char* data, uint16_t len, token_list& tkns) {
@@ -85,6 +80,7 @@ class rate_limiter_inf {
     handle_ = handle;
     local_ops_ = 0;
     local_ops_++;
+    assert(ops_per_sec == 0);
   }
 
   uint64_t insert_packet(unsigned char* data, uint16_t len, token_list& tkns) {
@@ -116,10 +112,10 @@ class packet_loader {
 
     store_ = new packet_store();
 
-    LOG(stderr, "Loading data...\n");
+    fprintf(stderr, "Loading data...\n");
     load_data();
 
-    LOG(stderr, "Initialization complete.\n");
+    fprintf(stderr, "Initialization complete.\n");
   }
 
   void init_tokens(token_list& tokens, packet_store::handle* handle) {
@@ -158,8 +154,8 @@ class packet_loader {
     std::ifstream ind(data_path_);
     std::ifstream ina(attr_path_);
     std::string attr_line;
-    LOG(stderr, "Reading from path data=%s, attr=%s\n", data_path_.c_str(),
-        attr_path_.c_str());
+    fprintf(stderr, "Reading from path data=%s, attr=%s\n", data_path_.c_str(),
+            attr_path_.c_str());
 
     while (std::getline(ina, attr_line) && timestamps_.size() < kMaxNumPkts) {
       std::stringstream attr_stream(attr_line);
@@ -179,7 +175,7 @@ class packet_loader {
       datalens_.push_back(len);
     }
 
-    LOG(stderr, "Loaded %zu packets from dump.\n", datas_.size());
+    fprintf(stderr, "Loaded %zu packets from dump.\n", datas_.size());
   }
 
   // Throughput benchmarks
@@ -190,43 +186,42 @@ class packet_loader {
     uint64_t thread_ops = timestamps_.size() / num_threads;
     uint64_t worker_rate_limit = rate_limit / num_threads;
 
-    LOG(stderr, "Setting timebound to %llu us\n", timebound);
+    fprintf(stderr, "Setting timebound to %llu us\n", timebound);
     for (uint32_t i = 0; i < num_threads; i++) {
       workers.push_back(
-          std::move(
-              std::thread([i, timebound, worker_rate_limit, thread_ops, this] {
-                uint64_t idx = thread_ops * i;
-                packet_store::handle* handle = store_->get_handle();
-                token_list tokens;
-                init_tokens(tokens, handle);
-                rlimiter* limiter = new rlimiter(worker_rate_limit, handle);
-                double throughput = 0;
-                LOG(stderr, "Starting benchmark.\n");
-                try {
-                  uint64_t total_ops = 0;
-                  timestamp_t start = get_timestamp();
-                  while (limiter->local_ops() < thread_ops &&
-                      get_timestamp() - start < timebound) {
-                    set_tokens(tokens, idx);
-                    total_ops = limiter->insert_packet(datas_[idx],
-                        datalens_[idx], tokens);
-                    idx++;
-                  }
-                  timestamp_t end = get_timestamp();
-                  double totsecs = (double) (end - start) / (1000.0 * 1000.0);
-                  throughput = ((double) limiter->local_ops() / totsecs);
-                  LOG(stderr, "Thread #%u(%lfs): Throughput: %lf.\n",
-                      i, totsecs, throughput);
-                } catch (std::exception &e) {
-                  LOG(stderr, "Throughput thread ended prematurely.\n");
-                }
+          std::thread([i, timebound, worker_rate_limit, thread_ops, this] {
+            uint64_t idx = thread_ops * i;
+            packet_store::handle* handle = store_->get_handle();
+            token_list tokens;
+            init_tokens(tokens, handle);
+            rlimiter* limiter = new rlimiter(worker_rate_limit, handle);
+            double throughput = 0;
+            fprintf(stderr, "Starting benchmark.\n");
+            try {
+              uint64_t total_ops = 0;
+              timestamp_t start = get_timestamp();
+              while (limiter->local_ops() < thread_ops &&
+                  get_timestamp() - start < timebound) {
+                set_tokens(tokens, idx);
+                total_ops = limiter->insert_packet(datas_[idx],
+                    datalens_[idx], tokens);
+                idx++;
+              }
+              timestamp_t end = get_timestamp();
+              double totsecs = (double) (end - start) / (1000.0 * 1000.0);
+              throughput = ((double) limiter->local_ops() / totsecs);
+              fprintf(stderr, "Thread #%u(%lfs): Throughput: %lf.\n",
+                  i, totsecs, throughput);
+            } catch (std::exception &e) {
+              fprintf(stderr, "Throughput thread ended prematurely.\n");
+            }
 
-                std::ofstream ofs("write_throughput_" + std::to_string(i));
-                ofs << throughput << "\n";
-                ofs.close();
-                delete limiter;
-                delete handle;
-              })));
+            std::ofstream ofs("write_throughput_" + std::to_string(i));
+            ofs << throughput << "\n";
+            ofs.close();
+            delete limiter;
+            delete handle;
+          }));
     }
 
 #ifdef MEASURE_CPU
@@ -279,7 +274,6 @@ int main(int argc, char** argv) {
 
   int c;
   int num_threads = 1;
-  uint8_t num_attributes = 1;
   uint64_t timebound = UINT64_MAX;
   uint64_t rate_limit = 0;
   while ((c = getopt(argc, argv, "t:n:r:")) != -1) {

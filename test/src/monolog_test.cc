@@ -22,11 +22,11 @@ class MonoLogTest : public testing::Test {
   void monolog_test_mt(DS& ds, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, &ds, this] {
+      workers.push_back(std::thread([i, &ds, this] {
         for (uint32_t j = 0; j < kArraySize; j++) {
           ds.push_back(i);
         }
-      })));
+      }));
     }
 
     for (std::thread& worker : workers) {

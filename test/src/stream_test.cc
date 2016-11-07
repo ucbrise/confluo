@@ -18,11 +18,11 @@ class StreamTest : public testing::Test {
   void fill_stream_mt(slog::streamlog& stream, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, &stream, this] {
+      workers.push_back(std::thread([i, &stream, this] {
         for (uint32_t j = (i - 1) * kMaxEntries; j < i * kMaxEntries; j++) {
           stream.check_and_add(j, NULL, sizeof(uint32_t), tokens);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();
@@ -36,7 +36,7 @@ TEST_F(StreamTest, StreamAddFetchTest1) {
 
   slog::entry_list* list = stream.get_stream();
   uint32_t size = list->size();
-  ASSERT_EQ(10000, size);
+  ASSERT_EQ(10000U, size);
   for (uint32_t i = 0; i < size; i++) {
     ASSERT_EQ(i * 10, list->at(i));
   }
@@ -47,7 +47,7 @@ TEST_F(StreamTest, StreamAddFetchTest1) {
 
     slog::entry_list* list = s.get_stream();
     uint32_t size = list->size();
-    ASSERT_EQ(10000 * num_threads, size);
+    ASSERT_EQ(10000U * num_threads, size);
     std::vector<uint32_t> counts(size);
     for (uint32_t i = 0; i < size; i++) {
       uint64_t val = list->at(i);
@@ -56,7 +56,7 @@ TEST_F(StreamTest, StreamAddFetchTest1) {
     }
 
     for (uint32_t count : counts) {
-      ASSERT_EQ(1, count);
+      ASSERT_EQ(1U, count);
     }
   }
 }
@@ -67,7 +67,7 @@ TEST_F(StreamTest, StreamAddFetchTest2) {
 
   slog::entry_list* list = stream.get_stream();
   uint32_t size = list->size();
-  ASSERT_EQ(10000, size);
+  ASSERT_EQ(10000U, size);
   for (uint32_t i = 0; i < size; i++) {
     ASSERT_EQ(i, list->at(i));
   }
@@ -78,7 +78,7 @@ TEST_F(StreamTest, StreamAddFetchTest2) {
 
     slog::entry_list* list = s.get_stream();
     uint32_t size = list->size();
-    ASSERT_EQ(10000 * num_threads, size);
+    ASSERT_EQ(10000U * num_threads, size);
     std::vector<uint32_t> counts(size);
     for (uint32_t i = 0; i < size; i++) {
       uint64_t val = list->at(i);
@@ -87,7 +87,7 @@ TEST_F(StreamTest, StreamAddFetchTest2) {
     }
 
     for (uint32_t count : counts) {
-      ASSERT_EQ(1, count);
+      ASSERT_EQ(1U, count);
     }
   }
 }

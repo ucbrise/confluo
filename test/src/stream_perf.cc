@@ -24,11 +24,11 @@ class StreamPerf : public testing::Test {
   void fill_stream_mt(slog::streamlog& stream, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, &stream, this] {
+      workers.push_back(std::thread([i, &stream, this] {
         for (uint32_t j = (i - 1) * kMaxEntries; j < i * kMaxEntries; j++) {
           stream.check_and_add(j, NULL, sizeof(uint32_t), tokens);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();
@@ -101,13 +101,13 @@ TEST_F(StreamPerf, StreamAddFetchThroughputPerf1) {
     auto read_start = high_resolution_clock::now();
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, &s, this] {
+      workers.push_back(std::thread([i, &s, this] {
         slog::entry_list* list = s.get_stream();
         uint32_t size = list->size();
         for (uint32_t i = 0; i < size; i++) {
           ASSERT_TRUE(list->at(i) % 10 == 0);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();
@@ -139,14 +139,14 @@ TEST_F(StreamPerf, StreamAddFetchThroughputPerf2) {
     auto read_start = high_resolution_clock::now();
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::move(std::thread([i, &s, this] {
+      workers.push_back(std::thread([i, &s, this] {
         slog::entry_list* list = s.get_stream();
         uint32_t size = list->size();
         for (uint32_t i = 0; i < size; i++) {
           uint64_t val = list->at(i);
           ASSERT_TRUE(val >= 0 && val < size);
         }
-      })));
+      }));
     }
     for (std::thread& worker : workers) {
       worker.join();

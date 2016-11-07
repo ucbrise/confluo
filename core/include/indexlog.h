@@ -3,6 +3,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <cassert>
 
 #include "entrylist.h"
 #include "monolog.h"
@@ -47,6 +48,7 @@ class token_ops<3, 3> {
   }
 
   static uint32_t suffix(const unsigned char* token) {
+    assert(token);
     return 0;
   }
 };
@@ -59,6 +61,7 @@ class token_ops<2, 2> {
   }
 
   static uint32_t suffix(const unsigned char* token) {
+    assert(token);
     return 0;
   }
 };

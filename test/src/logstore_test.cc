@@ -49,8 +49,8 @@ class LogStoreTest : public testing::Test {
     stream_ids.push_back(ls.add_stream(filter_fn1));
     stream_ids.push_back(ls.add_stream(filter_fn2));
 
-    ASSERT_EQ(stream_ids[0], 0);
-    ASSERT_EQ(stream_ids[1], 1);
+    ASSERT_EQ(stream_ids[0], 0U);
+    ASSERT_EQ(stream_ids[1], 1U);
   }
 
   std::array<slog::token_list, 256> generate_token_lists(
@@ -129,7 +129,7 @@ TEST_F(LogStoreTest, InsertAndFilterTest) {
   for (uint32_t i = 0; i < queries.size(); i++) {
     std::unordered_set<uint64_t> results;
     ls.filter(results, queries[i]);
-    ASSERT_EQ(results.size(), 10);
+    ASSERT_EQ(results.size(), static_cast<size_t>(10));
     for (uint64_t id : results) {
       ASSERT_EQ(id % 256, i / 8);
     }
