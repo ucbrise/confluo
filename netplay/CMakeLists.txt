@@ -9,8 +9,6 @@ set(INCLUDE include)
 set(CORE_INCLUDE ../core/include)
 include_directories(${INCLUDE} ${CORE_INCLUDE})
 
-find_package(JeMalloc REQUIRED)
-
 add_executable(pktload src/packetload_bench.cc)
 
-target_link_libraries(pktload ${CMAKE_THREAD_LIBS_INIT} ${JEMALLOC_LIBRARIES})
+target_link_libraries(pktload ${CMAKE_THREAD_LIBS_INIT})
