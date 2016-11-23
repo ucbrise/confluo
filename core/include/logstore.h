@@ -58,8 +58,8 @@ class log_store {
      * @param request_batch_size The record batch size (#records) for insert queries.
      * @param data_block_size The data block size (#bytes) for insert queries.
      */
-    handle(log_store& base, uint64_t request_batch_size = 64,
-           uint64_t data_block_size = 64 * 40)
+    handle(log_store& base, uint64_t request_batch_size = 32,
+           uint64_t data_block_size = 32 * 40)
         : base_(base) {
       id_block_size_ = request_batch_size;
       remaining_ids_ = 0;
