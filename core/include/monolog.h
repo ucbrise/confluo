@@ -10,6 +10,52 @@
 
 namespace slog {
 
+template<typename monolog_impl>
+class monolog_iterator :
+  public std::iterator<std::input_iterator_tag,
+                       typename monolog_impl::value_type,
+                       typename monolog_impl::difference_type,
+                       typename monolog_impl::pointer,
+                       typename monolog_impl::reference> {
+ public:
+  typedef typename monolog_impl::value_type value_type;
+  typedef typename monolog_impl::difference_type difference_type;
+  typedef typename monolog_impl::pointer pointer;
+  typedef typename monolog_impl::reference reference;
+
+  monolog_iterator(monolog_impl& impl, uint32_t pos)
+    : impl_(impl), pos_(pos) {
+    pos_ = 0U;
+  }
+
+  reference operator*() const {
+    return impl_.get(pos_);
+  }
+
+  monolog_iterator& operator++() {
+    pos_++;
+    return *this;
+  }
+
+  monolog_iterator operator++(int) {
+    monolog_iterator it = *this;
+    ++(*this);
+    return it;
+  }
+
+  bool operator==(monolog_iterator other) const {
+    return (impl_ == other.impl_) && (pos_ == other.pos_);
+  }
+
+  bool operator!=(monolog_iterator other) const {
+    return !(*this == other);
+  }
+
+ private:
+  monolog_impl& impl_;
+  uint32_t pos_;
+};
+
 /**
  * The base class for Monotonic Log (MonoLog).
  *
@@ -79,7 +125,7 @@ class __monolog_base {
         try_allocate_bucket(bucket_idx);
       }
       uint32_t bucket_remaining =
-          ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
+        ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
       uint32_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
@@ -122,7 +168,7 @@ class __monolog_base {
     uint32_t data_off = 0;
     while (data_remaining) {
       uint32_t bucket_remaining =
-          ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
+        ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
       uint32_t bytes_to_read = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_read;
       data_off += bytes_to_read;
@@ -157,8 +203,8 @@ class __monolog_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(
-        &buckets_[bucket_idx], &null_ptr, new_bucket, std::memory_order_release,
-        std::memory_order_acquire)) {
+          &buckets_[bucket_idx], &null_ptr, new_bucket, std::memory_order_release,
+          std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] new_bucket;
     }
@@ -231,8 +277,8 @@ class __monolog_linear_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(
-        &buckets_[bucket_idx], &null_ptr, bucket, std::memory_order_release,
-        std::memory_order_acquire)) {
+          &buckets_[bucket_idx], &null_ptr, bucket, std::memory_order_release,
+          std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -322,10 +368,10 @@ class __atomic_monolog_base {
     uint32_t bucket_off = pos ^ (1 << hibit);
     uint32_t bucket_idx = hibit - FBS_HIBIT;
     return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off].compare_exchange_strong(expected,
-        replacement);
+           replacement);
   }
 
-protected:
+ protected:
   // Tries to allocate the specifies bucket. If another thread has already
   // succeeded in allocating the bucket, the current thread deallocates and
   // returns.
@@ -337,7 +383,7 @@ protected:
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(&buckets_[bucket_idx], &null_ptr,
-            bucket, std::memory_order_release, std::memory_order_acquire)) {
+        bucket, std::memory_order_release, std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -347,7 +393,7 @@ protected:
 
   __atomic_ref* new_bucket(uint32_t size) {
     __atomic_ref* bucket = new __atomic_ref[size];
-    for(uint32_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
       bucket[i].store(T(0));
     }
     return bucket;
@@ -368,9 +414,18 @@ protected:
 template<class T, uint32_t NBUCKETS = 32>
 class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
  public:
+  // Type definitions
+  typedef uint32_t size_type;
+  typedef uint32_t pos_type;
+  typedef T value_type;
+  typedef T difference_type;
+  typedef T* pointer;
+  typedef T reference;
+  typedef monolog_iterator<monolog_linearizable<T, NBUCKETS>> iterator;
+
   monolog_linearizable()
-      : write_tail_(0),
-        read_tail_(0) {
+    : write_tail_(0),
+      read_tail_(0) {
   }
 
   // Append an entry at the end of the MonoLog
@@ -392,6 +447,14 @@ class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
     return read_tail_.load();
   }
 
+  iterator begin() const {
+    return iterator(this, 0);
+  }
+
+  iterator end() const {
+    return iterator(this, size());
+  }
+
  private:
   std::atomic<uint32_t> write_tail_;
   std::atomic<uint32_t> read_tail_;
@@ -406,8 +469,17 @@ class monolog_linearizable : public __monolog_base<T, NBUCKETS> {
 template<class T, uint32_t NBUCKETS = 32>
 class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
  public:
+  // Type definitions
+  typedef uint32_t size_type;
+  typedef uint32_t pos_type;
+  typedef T value_type;
+  typedef T difference_type;
+  typedef T* pointer;
+  typedef T reference;
+  typedef monolog_iterator<monolog_relaxed<T, NBUCKETS>> iterator;
+
   monolog_relaxed()
-      : tail_(0) {
+    : tail_(0) {
   }
 
   uint32_t push_back(const T val) {
@@ -422,6 +494,14 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
 
   uint32_t size() const {
     return tail_.load(std::memory_order_acquire);
+  }
+
+  iterator begin() const {
+    return iterator(this, 0);
+  }
+
+  iterator end() const {
+    return iterator(this, size());
   }
 
  private:
