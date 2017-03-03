@@ -1,4 +1,4 @@
-namespace cpp succinct
+namespace cpp slog
 
 service Server {
   // Initialize

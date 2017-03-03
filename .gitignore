@@ -32,11 +32,10 @@ bin/*
 # Directories
 build
 scratch
-dat
-log
-res
-bench/res
-bench/plot
+reference
+results
+netplay-results
+ls-results
 thrift/gen
 
 # Eclipse files

@@ -1,5 +1,7 @@
 #!/bin/bash
+set -e
 
+rm -rf results
 mkdir -p build
 cd build
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -7,7 +9,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   cmake ..
 fi
+
 START=$(date +%s)
-make && make test ARGS="-VV"
+make
+make test ARGS="-VV"
 END=$(date +%s)
 echo "Total Build time (real) = $(( $END - $START )) seconds"
