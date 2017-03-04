@@ -11,7 +11,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -pedantic -Wextra")
 enable_language(C)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
+#set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 find_package(Threads REQUIRED)
 include(CTest)
@@ -21,3 +21,6 @@ add_subdirectory(external/gtest-1.7.0)
 
 # Monolog library
 add_subdirectory(libmonolog)
+
+# Applications
+add_subdirectory(app)

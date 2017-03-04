@@ -1,7 +1,6 @@
 #include "tokens.h"
 #include "gtest/gtest.h"
 
-extern std::string res_path_monolog;
 extern std::string res_path_index;
 extern std::string res_path_index2;
 extern std::string res_path_stream;
@@ -23,7 +22,6 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   assert(argc == 2);
   std::string res_path = std::string(argv[1]);
-  res_path_monolog = res_path + "/monolog";
   res_path_index = res_path + "/index_latency.txt";
   res_path_index2 = res_path + "/index";
   res_path_stream = res_path + "/stream";
