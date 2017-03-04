@@ -497,7 +497,7 @@ class __atomic_monolog_base {
 };
 
 /**
- * Linearizable implementation for the MonoLog.
+ * Write stalled, linearizable implementation for the MonoLog.
  *
  * Maintains a read and write tail to ensure:
  * - Read operations can only access data for completed writes; conversely,
