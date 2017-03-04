@@ -1,5 +1,5 @@
-#ifndef MONOLOG_FACLOG_H_
-#define MONOLOG_FACLOG_H_
+#ifndef MONOLOG_MONOLOG_H_
+#define MONOLOG_MONOLOG_H_
 
 #include <array>
 #include <vector>
