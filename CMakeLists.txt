@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
-project(log-store CXX)
+project(monolog CXX)
 
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
 if(COMPILER_SUPPORTS_CXX11)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 else()
@@ -14,16 +14,10 @@ enable_language(C)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 find_package(Threads REQUIRED)
+include(CTest)
 
-add_subdirectory(netplay)
-
-# Testing framework
-# Build google testing framework
+# Pre-requisites
 add_subdirectory(external/gtest-1.7.0)
 
-# Build and run all tests for succinct
-add_subdirectory(test)
-
-enable_testing()
-file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/results)
-add_test(LSTest ${TESTS_PATH}/ls_test ${PROJECT_SOURCE_DIR}/results)
+# Monolog library
+add_subdirectory(libmonolog)
