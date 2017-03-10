@@ -11,9 +11,10 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -pedantic -Wextra -Wno-missing-field-initializers")
 enable_language(C)
 
-#set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(Threads REQUIRED)
+find_package(Thrift)
 include(CTest)
 
 # Pre-requisites

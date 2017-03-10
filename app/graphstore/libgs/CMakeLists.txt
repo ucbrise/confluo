@@ -11,11 +11,14 @@ set(GRAPHSTORE_INCLUDE graphstore)
 include_directories(${gtest_SOURCE_DIR}/include
   ${MONOLOG_INCLUDE}
   ${DATASTORE_INCLUDE}
-  ${GRAPHSTORE_INCLUDE})
+  ${GRAPHSTORE_INCLUDE}
+  ${THRIFT_INCLUDE})
 
 # Build static library
-file(GLOB_RECURSE sources src/*.cc)
-add_library(gs STATIC ${sources})
+add_library(gs STATIC src/graph_store.cc)
+file(GLOB_RECURSE server_sources src/server/*.cc)
+add_executable(gsserver ${server_sources})
+target_link_libraries(gsserver gs ${THRIFT_LIBRARIES})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)
