@@ -11,12 +11,9 @@
 namespace monolog {
 
 template<typename monolog_impl>
-class monolog_iterator :
-  public std::iterator<std::input_iterator_tag,
-  typename monolog_impl::value_type,
-  typename monolog_impl::difference_type,
-  typename monolog_impl::pointer,
-  typename monolog_impl::reference> {
+class monolog_iterator : public std::iterator<std::input_iterator_tag,
+    typename monolog_impl::value_type, typename monolog_impl::difference_type,
+    typename monolog_impl::pointer, typename monolog_impl::reference> {
  public:
   typedef typename monolog_impl::value_type value_type;
   typedef typename monolog_impl::difference_type difference_type;
@@ -24,7 +21,8 @@ class monolog_iterator :
   typedef typename monolog_impl::reference reference;
 
   monolog_iterator(monolog_impl& impl, size_t pos)
-    : impl_(impl), pos_(pos) {
+      : impl_(impl),
+        pos_(pos) {
     pos_ = 0U;
   }
 
@@ -134,8 +132,8 @@ class __monolog_base {
       if (buckets_[bucket_idx].load(std::memory_order_acquire) == NULL) {
         try_allocate_bucket(bucket_idx);
       }
-      size_t bucket_remaining =
-        ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
+      size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
+          * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
@@ -157,8 +155,8 @@ class __monolog_base {
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
     while (data_remaining) {
-      size_t bucket_remaining =
-        ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
+      size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
+          * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
@@ -200,8 +198,8 @@ class __monolog_base {
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
     while (data_remaining) {
-      size_t bucket_remaining =
-        ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
+      size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
+          * sizeof(T);
       size_t bytes_to_read = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_read;
       data_off += bytes_to_read;
@@ -236,8 +234,8 @@ class __monolog_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(
-          &buckets_[bucket_idx], &null_ptr, new_bucket, std::memory_order_release,
-          std::memory_order_acquire)) {
+        &buckets_[bucket_idx], &null_ptr, new_bucket, std::memory_order_release,
+        std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] new_bucket;
     }
@@ -252,7 +250,7 @@ template<class T, size_t NBUCKETS = 1024, size_t BLOCK_SIZE = 1073741824UL>
 class __monolog_linear_base {
  public:
   typedef std::atomic<T*> __atomic_bucket_ref;
-  static const size_t BUFFER_SIZE = 1024; // 1KB buffer size
+  static const size_t BUFFER_SIZE = 1024;  // 1KB buffer size
 
   __monolog_linear_base() {
     T* null_ptr = NULL;
@@ -345,7 +343,8 @@ class __monolog_linear_base {
   void* ptr(const size_t offset) {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
-    return (void*)(buckets_[bucket_idx].load(std::memory_order_acquire) + bucket_off);
+    return (void*) (buckets_[bucket_idx].load(std::memory_order_acquire)
+        + bucket_off);
   }
 
   size_t storage_size() const {
@@ -370,8 +369,8 @@ class __monolog_linear_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(
-          &buckets_[bucket_idx], &null_ptr, bucket, std::memory_order_release,
-          std::memory_order_acquire)) {
+        &buckets_[bucket_idx], &null_ptr, bucket, std::memory_order_release,
+        std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -382,7 +381,6 @@ class __monolog_linear_base {
 
 template<class T, size_t NBUCKETS = 32>
 class __atomic_monolog_base {
-
   static_assert(std::is_fundamental<T>::value, "Type for atomic monolog must be primitive.");
  public:
   static const size_t FBS = 16;
@@ -396,7 +394,7 @@ class __atomic_monolog_base {
     for (auto& x : buckets_) {
       x.store(null_ptr, std::memory_order_release);
     }
-    buckets_[0].store(new __atomic_ref[FBS], std::memory_order_release);
+    buckets_[0].store(new_bucket(FBS), std::memory_order_release);
   }
 
   ~__atomic_monolog_base() {
@@ -461,11 +459,11 @@ class __atomic_monolog_base {
     size_t bucket_off = pos ^ (1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     return buckets_[bucket_idx].load(std::memory_order_acquire)[bucket_off]
-           .atomic_compare_exchange_strong_explicit(expected, replacement,
-               std::memory_order_release, std::memory_order_acquire);
+    .atomic_compare_exchange_strong_explicit(expected, replacement,
+        std::memory_order_release, std::memory_order_acquire);
   }
 
- protected:
+protected:
   // Tries to allocate the specifies bucket. If another thread has already
   // succeeded in allocating the bucket, the current thread deallocates and
   // returns.
@@ -477,7 +475,7 @@ class __atomic_monolog_base {
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
     if (!std::atomic_compare_exchange_strong_explicit(&buckets_[bucket_idx], &null_ptr,
-        bucket, std::memory_order_release, std::memory_order_acquire)) {
+            bucket, std::memory_order_release, std::memory_order_acquire)) {
       // All other threads will deallocate the newly allocated bucket.
       delete[] bucket;
     }
@@ -518,8 +516,8 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
   typedef monolog_iterator<monolog_write_stalled<T, NBUCKETS>> iterator;
 
   monolog_write_stalled()
-    : write_tail_(0),
-      read_tail_(0) {
+      : write_tail_(0),
+        read_tail_(0) {
   }
 
   // Append an entry at the end of the MonoLog
@@ -528,8 +526,9 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
     this->set(idx, val);
 
     size_t expected = idx;
-    while (!std::atomic_compare_exchange_weak_explicit(&read_tail_, &expected,
-           idx + 1, std::memory_order_release, std::memory_order_acquire))
+    while (!std::atomic_compare_exchange_weak_explicit(
+        &read_tail_, &expected, idx + 1, std::memory_order_release,
+        std::memory_order_acquire))
       expected = idx;
     return idx;
   }
@@ -541,8 +540,9 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
       this->set(idx + i, start + i);
 
     size_t expected = idx;
-    while (!std::atomic_compare_exchange_weak_explicit(&read_tail_, &expected,
-           idx + cnt, std::memory_order_release, std::memory_order_acquire))
+    while (!std::atomic_compare_exchange_weak_explicit(
+        &read_tail_, &expected, idx + cnt, std::memory_order_release,
+        std::memory_order_acquire))
       expected = idx;
 
     return idx;
@@ -590,7 +590,7 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
   typedef monolog_iterator<monolog_relaxed<T, NBUCKETS>> iterator;
 
   monolog_relaxed()
-    : tail_(0) {
+      : tail_(0) {
   }
 
   size_t push_back(const T val) {
