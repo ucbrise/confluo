@@ -29,8 +29,8 @@ class object_state {
   bool mark_updating() {
     uint64_t expected = initialized;
     return state_.compare_exchange_strong(expected, updating,
-                                          std::memory_order_acquire,
-                                          std::memory_order_release);
+                                          std::memory_order_release,
+                                          std::memory_order_acquire);
   }
 
   void update(uint64_t new_id) {
@@ -38,7 +38,7 @@ class object_state {
   }
 
   uint64_t get() {
-    return state_.load(std::memory_order_release);
+    return state_.load(std::memory_order_acquire);
   }
 
  private:
