@@ -74,7 +74,7 @@ TEST_F(GraphStore2Test, UpdateNodeTest) {
 
     for (uint64_t i = 0; i < kNumNodes; i++) {
       node_op n = gs.get_node(0, i);
-      ASSERT_TRUE(n.id >= 0);
+      ASSERT_TRUE(n.id != UINT64_MAX);
     }
   }
 }
@@ -126,7 +126,6 @@ TEST_F(GraphStore2Test, AddGetLinkTest) {
 TEST_F(GraphStore2Test, AddNodeLinkTest) {
   static const uint64_t kNumNodes = 1000;
   static const uint64_t kDegree = 10;
-  static const uint64_t kNumLinks = 10000;
 
   for (size_t num_threads = 1; num_threads <= kMaxThreads; num_threads++) {
     graph_store gs;
