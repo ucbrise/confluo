@@ -34,7 +34,7 @@ class object_state {
   }
 
   void update(uint64_t new_id) {
-    state_.store(new_id, std::memory_order_acquire);
+    state_.store(new_id, std::memory_order_release);
   }
 
   uint64_t get() {
