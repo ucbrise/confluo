@@ -19,12 +19,20 @@ struct node_op {
     type = -1;
     delete_op = false;
   }
+
+  static node_op empty() {
+    node_op op;
+    return op;
+  }
 };
 
 typedef monolog::monolog_relaxed<uint64_t, 24> adj_list;
 
-struct node: public datastore::object {
+struct node : public datastore::object {
  public:
+  /** Version of node **/
+  uint64_t version;
+
   /** Type of node **/
   int32_t type;
 
@@ -35,17 +43,45 @@ struct node: public datastore::object {
   adj_list* neighbors;
 
   node() {
+    version = UINT64_MAX;
     type = -1;
     neighbors = nullptr;
   }
 
-  node& operator=(const node_op& rhs) {
+  node(const node& rhs) {
+    *this = rhs;
+  }
+
+  node(const node_op& rhs)
+      : node() {
+    if (!rhs.delete_op) {
+      type = rhs.type;
+      data = rhs.data;
+      neighbors = new adj_list;
+    }
+  }
+
+  node& operator=(const node& rhs) {
+    version = rhs.version;
     type = rhs.type;
     data = rhs.data;
+    neighbors = rhs.neighbors;
+    return *this;
+  }
+
+  node& operator=(const node_op& rhs) {
+    if (!rhs.delete_op) {
+      type = rhs.type;
+      data = rhs.data;
+      neighbors = new adj_list;
+    }
     return *this;
   }
 
   node_op clone(int64_t id) const {
+    if (type == -1)
+      return node_op::empty();
+
     node_op n;
     n.id = id;
     n.type = type;

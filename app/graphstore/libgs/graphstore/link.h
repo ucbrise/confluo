@@ -26,6 +26,11 @@ struct link_op {
     delete_op = false;
   }
 
+  static link_op empty() {
+    link_op op;
+    return op;
+  }
+
   bool operator<(const link_op& rhs) const {
     return (time == rhs.time) ? id2 < rhs.id2 : time > rhs.time;
   }
@@ -33,6 +38,9 @@ struct link_op {
 
 struct link : public datastore::object {
  public:
+  /** Version of link **/
+  uint64_t version;
+
   /** The node id of the source of directed edge **/
   int64_t id1;
 
@@ -53,13 +61,23 @@ struct link : public datastore::object {
    * Default constructor
    */
   link() {
+    version = UINT64_MAX;
     id1 = -1;
     id2 = -1;
     link_type = -1;
     time = -1;
   }
 
-  link& operator=(const link_op& rhs) {
+  link(const link& rhs) {
+    *this = rhs;
+  }
+
+  link(const link_op& rhs) {
+    *this = rhs;
+  }
+
+  link& operator=(const link& rhs) {
+    version = rhs.version;
     id1 = rhs.id1;
     id2 = rhs.id2;
     link_type = rhs.link_type;
@@ -68,7 +86,16 @@ struct link : public datastore::object {
     return *this;
   }
 
-  link_op clone(uint64_t version) {
+  link& operator=(const link_op& rhs) {
+    id1 = rhs.delete_op ? -1 : rhs.id1;
+    id2 = rhs.id2;
+    link_type = rhs.link_type;
+    time = rhs.time;
+    data = rhs.data;
+    return *this;
+  }
+
+  link_op clone() {
     link_op l;
     l.version = version;
     l.id1 = id1;

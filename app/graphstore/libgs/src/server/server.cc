@@ -19,53 +19,54 @@ using namespace ::graphstore;
 
 class graph_store_service : virtual public GraphStoreServiceIf {
  public:
-  graph_store_service() {
+  graph_store_service(graph_store* store) {
+    store_ = store;
   }
 
   int64_t add_node(const TNode& n) {
-    return store_.add_node(tnode_to_node_op(n));
+    return store_->add_node(tnode_to_node_op(n));
   }
 
   void get_node(TNode& _return, const int64_t type, const int64_t id) {
-    _return = node_op_to_tnode(store_.get_node(type, id));
+    _return = node_op_to_tnode(store_->get_node(type, id));
   }
 
   bool update_node(const TNode& n) {
-    return store_.update_node(tnode_to_node_op(n));
+    return store_->update_node(tnode_to_node_op(n));
   }
 
   bool delete_node(const int64_t type, const int64_t id) {
-    return store_.delete_node(type, id);
+    return store_->delete_node(type, id);
   }
 
   bool add_link(const TLink& a) {
-    return store_.add_link(tlink_to_link_op(a));
+    return store_->add_link(tlink_to_link_op(a));
   }
 
   bool update_link(const TLink& a) {
-    return store_.update_link(tlink_to_link_op(a));
+    return store_->update_link(tlink_to_link_op(a));
   }
 
   bool delete_link(const int64_t id1, const int64_t link_type,
                    const int64_t id2) {
-    return store_.delete_link(id1, link_type, id2);
+    return store_->delete_link(id1, link_type, id2);
   }
 
   void get_link(TLink& _return, const int64_t id1, const int64_t link_type,
                 const int64_t id2) {
-    _return = link_op_to_tlink(store_.get_link(id1, link_type, id2));
+    _return = link_op_to_tlink(store_->get_link(id1, link_type, id2));
   }
 
   void multiget_link(std::vector<TLink> & _return, const int64_t id1,
                      const int64_t link_type, const std::set<int64_t> & id2s) {
-    auto res = store_.multiget_links(id1, link_type, id2s);
+    auto res = store_->multiget_links(id1, link_type, id2s);
     for (const link_op& op : res)
       _return.push_back(link_op_to_tlink(op));
   }
 
   void get_link_list(std::vector<TLink> & _return, const int64_t id1,
                      const int64_t link_type) {
-    auto res = store_.get_link_list(id1, link_type);
+    auto res = store_->get_link_list(id1, link_type);
     for (const link_op& op : res)
       _return.push_back(link_op_to_tlink(op));
   }
@@ -74,13 +75,14 @@ class graph_store_service : virtual public GraphStoreServiceIf {
                            const int64_t link_type, const int64_t min_ts,
                            const int64_t max_ts, const int64_t off,
                            const int64_t limit) {
-    auto res = store_.get_link_list(id1, link_type, min_ts, max_ts, off, limit);
+    auto res = store_->get_link_list(id1, link_type, min_ts, max_ts, off,
+                                     limit);
     for (const link_op& op : res)
       _return.push_back(link_op_to_tlink(op));
   }
 
   int64_t count_links(const int64_t id1, const int64_t link_type) {
-    return store_.count_links(id1, link_type);
+    return store_->count_links(id1, link_type);
   }
 
  private:
@@ -120,29 +122,35 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     return op;
   }
 
-  graph_store store_;
+  graph_store *store_;
 };
 
 class gs_processor_factory : public TProcessorFactory {
  public:
-  gs_processor_factory() {
-    fprintf(stderr, "Creating processor factory...\n");
+  gs_processor_factory(graph_store* store) {
+    fprintf(stderr, "Initializing processor factory...\n");
+    store_ = store;
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
     fprintf(stderr, "Creating new processor...\n");
-    boost::shared_ptr<graph_store_service> handler(new graph_store_service());
+    boost::shared_ptr<graph_store_service> handler(
+        new graph_store_service(store_));
     boost::shared_ptr<TProcessor> processor(
         new GraphStoreServiceProcessor(handler));
     return processor;
   }
+
+ private:
+  graph_store* store_;
 };
 
 int main(int argc, char **argv) {
   int port = 9090;
   try {
+    graph_store* store = new graph_store();
     shared_ptr<gs_processor_factory> handler_factory(
-        new gs_processor_factory());
+        new gs_processor_factory(store));
     shared_ptr<TServerSocket> server_transport(new TServerSocket(port));
     shared_ptr<TBufferedTransportFactory> transport_factory(
         new TBufferedTransportFactory());

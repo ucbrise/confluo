@@ -8,8 +8,8 @@ print "Importing Graph Store python client libraries from %s..." % lib_path
 
 sys.path.append(lib_path)
 
-from gs import GraphQueryAggregatorService
-from gs.ttypes import *
+from graphstore import GraphStoreService
+from graphstore.ttypes import *
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -20,7 +20,7 @@ gsClient = None
 gsTransport = None
 gsProtocol = None
 
-def gsConnect(host = 'localhost', port = 11001):
+def gsConnect(host = 'localhost', port = 9090):
   global gsClient
   global gsTransport
   global gsProtocol
@@ -35,7 +35,7 @@ def gsConnect(host = 'localhost', port = 11001):
   gsProtocol = TBinaryProtocol.TBinaryProtocol(gsTransport)
 
   # Create a client to use the protocol encoder
-  gsClient = GraphQueryAggregatorService.Client(gsProtocol)
+  gsClient = GraphStoreService.Client(gsProtocol)
 
   # Connect!
   gsTransport.open()

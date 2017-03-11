@@ -37,6 +37,7 @@ results
 netplay-results
 ls-results
 thrift/gen
+target
 
 # Eclipse files
 .settings
