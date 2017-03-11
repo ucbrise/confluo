@@ -3,8 +3,8 @@
 using namespace graphstore;
 
 graph_store::graph_store() {
-  write_tail_.store(0ULL, std::memory_order_relaxed);
-  read_tail_.store(0ULL, std::memory_order_relaxed);
+  write_tail_.store(0ULL, std::memory_order_release);
+  read_tail_.store(0ULL, std::memory_order_release);
   ndata_ = new node_log;
   ldata_ = new link_log;
 }
@@ -19,12 +19,12 @@ void graph_store::end_write_op(uint64_t tail) {
   do {
     old_tail = tail;
   } while (!read_tail_.compare_exchange_weak(old_tail, tail + 1,
-                                             std::memory_order_acquire,
-                                             std::memory_order_release));
+                                             std::memory_order_release,
+                                             std::memory_order_acquire));
 }
 
 uint64_t graph_store::get_graph_tail() const {
-  return read_tail_.load(std::memory_order_release);
+  return read_tail_.load(std::memory_order_acquire);
 }
 
 void graph_store::follow_update_refs(uint64_t& id, uint64_t tail) const {
@@ -118,10 +118,8 @@ bool graph_store::delete_node(int64_t type, uint64_t id) {
 }
 
 bool graph_store::add_link(const link_op& a) {
-  if (static_cast<uint64_t>(a.id1) >= ndata_->size()) {
-    fprintf(stderr, "Could not add link: %lld, %zu\n", a.id1, ndata_->size());
+  if (static_cast<uint64_t>(a.id1) >= ndata_->size())
     return false;
-  }
 
   uint64_t t = start_write_op();
   link l = a;

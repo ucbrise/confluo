@@ -82,7 +82,7 @@ TEST_F(StreamTest, StreamAddFetchTest2) {
     std::vector<uint32_t> counts(size);
     for (uint32_t i = 0; i < size; i++) {
       uint64_t val = list->at(i);
-      ASSERT_TRUE(val >= 0 && val < size);
+      ASSERT_TRUE(val < size);
       counts[val]++;
     }
 
