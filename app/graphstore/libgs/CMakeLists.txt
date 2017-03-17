@@ -11,6 +11,7 @@ set(GRAPHSTORE_INCLUDE graphstore)
 include_directories(${gtest_SOURCE_DIR}/include
   ${MONOLOG_INCLUDE}
   ${DATASTORE_INCLUDE}
+  ${UTILS_INCLUDE}
   ${GRAPHSTORE_INCLUDE}
   ${THRIFT_INCLUDE})
 
