@@ -24,8 +24,11 @@
 #include <algorithm>
 
 #include "cmd_parse.h"
+#include "logger.h"
 
 using namespace graphstore;
+using namespace utils::logging;
+
 
 #define LOOP_OPS(op, gs, num_ops, limit) \
   num_ops = 0;\
@@ -40,13 +43,13 @@ using namespace graphstore;
 
 #ifdef _GNU_SOURCE
 #define SET_CORE_AFFINITY(t, core_id)\
-  fprintf(stderr, "Pinning thread to core %zu\n", core_id);\
+  LOG_INFO << "Pinning thread to core" << core_id;\
   cpu_set_t cpuset;\
   CPU_ZERO(&cpuset);\
   CPU_SET(core_id, &cpuset);\
   int rc = pthread_setaffinity_np(t.native_handle(), sizeof(cpu_set_t), &cpuset);\
   if (rc != 0)\
-    fprintf(stderr, "Error calling pthread_setaffinity_np: %d\n", rc);
+    LOG_WARN << "Error calling pthread_setaffinity_np: " << rc;
 #else
 #define SET_CORE_AFFINITY(thread, core_id)
 #endif
@@ -79,11 +82,10 @@ static void bench_thput_thread(graph_op&& op, graph_store<tail_scheme>& gs,
                                std::vector<double>& thput) {
   size_t num_ops;
 
-  fprintf(stderr, "Running warmup for %llu ops\n", constants::WARMUP_OPS);
+  LOG_INFO<< "Running warmup for " << constants::WARMUP_OPS << " ops";
   LOOP_OPS(op, gs, num_ops, constants::WARMUP_OPS);
 
-  fprintf(stderr, "Warmup complete; running measure for %llu ops\n",
-          constants::MEASURE_OPS);
+  LOG_INFO<< "Warmup complete; running measure for " << constants::MEASURE_OPS << " ops";
   auto start = timer::now();
   LOOP_OPS(op, gs, num_ops, constants::MEASURE_OPS);
   auto end = timer::now();
@@ -93,11 +95,10 @@ static void bench_thput_thread(graph_op&& op, graph_store<tail_scheme>& gs,
   assert(usecs > 0);
   thput[i] = num_ops * 1e6 / usecs;
 
-  fprintf(stderr, "Measure complete; running cooldown for %llu ops\n",
-          constants::COOLDOWN_OPS);
+  LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_OPS << " ops";
   LOOP_OPS(op, gs, num_ops, constants::COOLDOWN_OPS);
 
-  fprintf(stderr, "Thread completed benchmark at %lf ops/s\n", thput[i]);
+  LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
 }
 
 template<typename tail_scheme>
@@ -117,14 +118,14 @@ class graph_store_perf {
       mkdir(output_dir.c_str(), 0777);
 
     // Pre-load data
-    fprintf(stderr, "Loading nodes...\n");
+    LOG_INFO<< "Loading nodes...";
     node_op op = create_node_op();
     for (size_t i = 0; i < INIT_NODES; i++) {
       gs_.add_node(op);
     }
-    fprintf(stderr, "Finished loading %llu nodes\n", INIT_NODES);
+    LOG_INFO<< "Finished loading " << INIT_NODES << " nodes";
 
-    fprintf(stderr, "Loading links...\n");
+    LOG_INFO<< "Loading links...";
     uint64_t num_links = 0;
     for (uint64_t id1 = 0; id1 < INIT_NODES; id1++) {
       size_t degree = rand_int64(INIT_DEGREE);
@@ -134,12 +135,11 @@ class graph_store_perf {
         link_op op = create_link_op(id1, link_type, id2);
         gs_.add_link(op);
         num_links++;
-        if (num_links % INIT_NODES == 0) {
-          fprintf(stderr, "Finished loading %llu links\n", num_links);
+        if (num_links % INIT_NODES == 0)
+          LOG_INFO<< "Finished loading " << num_links << " links";
         }
       }
-    }
-    fprintf(stderr, "Finished loading %llu links\n", num_links);
+    LOG_INFO<< "Finished loading " << num_links << " links";
   }
 
   static void add_node(graph_store<tail_scheme>& gs) {
@@ -251,7 +251,7 @@ class graph_store_perf {
     worker.join();
 
     double thput_tot = std::accumulate(thput.begin(), thput.end(), 0.0);
-    fprintf(stderr, "Completed benchmark at %lf ops/s\n", thput_tot);
+    LOG_INFO << "Completed benchmark at " << thput_tot << " ops/s";
 
     std::ofstream out(output_file);
     out << thput_tot << "\n";
@@ -311,7 +311,7 @@ void exec_bench(graph_store_perf<tail_scheme>& perf, int num_threads,
   else if (bench_type == "count_links")
     perf.bench_count_links(num_threads);
   else
-    fprintf(stderr, "Unknown bench_type: %s", bench_type.c_str());
+    fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
 }
 
 int main(int argc, char** argv) {
@@ -350,8 +350,10 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  fprintf(stderr, "Running benchmark %s with %d threads; output path %s\n",
-          bench_type.c_str(), num_threads, output_dir.c_str());
+  fprintf(stderr,
+          "bench_type=%s, num_threads=%d, output_dir=%s, tail_scheme=%s\n",
+          bench_type.c_str(), num_threads, output_dir.c_str(),
+          tail_scheme.c_str());
 
   if (tail_scheme == "write-stalled") {
     graph_store_perf<write_stalled_tail> perf(output_dir);

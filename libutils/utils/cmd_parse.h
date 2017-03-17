@@ -1,5 +1,5 @@
-#ifndef DATASTORE_CMD_PARSE_H_
-#define DATASTORE_CMD_PARSE_H_
+#ifndef UTILS_CMD_PARSE_H_
+#define UTILS_CMD_PARSE_H_
 
 #include <exception>
 #include <cassert>
@@ -222,4 +222,4 @@ class cmd_parser {
   std::map<std::string, std::string> values_;
 };
 
-#endif /* DATASTORE_CMD_PARSE_H_ */
+#endif /* UTILS_CMD_PARSE_H_ */
