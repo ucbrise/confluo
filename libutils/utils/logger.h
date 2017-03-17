@@ -46,7 +46,7 @@ class log {
   std::ostringstream& get(const log_level level) {
     msg_level_ = level;
     os_ << time_utils::current_date_time();
-    os_ << " " << to_string(level) << ":\t";
+    os_ << " " << to_string(level) << ": ";
     return os_;
   }
 
