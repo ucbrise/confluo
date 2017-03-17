@@ -39,15 +39,14 @@ using namespace graphstore;
   while (cnt != nthreads)
 
 #ifdef _GNU_SOURCE
-#define SET_CORE_AFFINITY(thread, core_id)\
-  fprintf(stderr, "Pinning thread to core %zu\n", core_id);
-cpu_set_t cpuset;
-CPU_ZERO(&cpuset);
-CPU_SET(core_id, &cpuset);
-int rc = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t),
-    &cpuset);
-if (rc != 0)
-fprintf(stderr, "Error calling pthread_setaffinity_np: %d\n", rc);
+#define SET_CORE_AFFINITY(t, core_id)\
+  fprintf(stderr, "Pinning thread to core %zu\n", core_id);\
+  cpu_set_t cpuset;\
+  CPU_ZERO(&cpuset);\
+  CPU_SET(core_id, &cpuset);\
+  int rc = pthread_setaffinity_np(t.native_handle(), sizeof(cpu_set_t), &cpuset);\
+  if (rc != 0)\
+    fprintf(stderr, "Error calling pthread_setaffinity_np: %d\n", rc);
 #else
 #define SET_CORE_AFFINITY(thread, core_id)
 #endif
