@@ -1,6 +1,7 @@
 #ifndef MONOLOG_MONOLOG_H_
 #define MONOLOG_MONOLOG_H_
 
+#include <cassert>
 #include <array>
 #include <vector>
 #include <atomic>
@@ -518,6 +519,8 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
   monolog_write_stalled()
       : write_tail_(0),
         read_tail_(0) {
+    assert(read_tail_.is_lock_free());
+    assert(write_tail_.is_lock_free());
   }
 
   // Append an entry at the end of the MonoLog
@@ -591,6 +594,7 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
 
   monolog_relaxed()
       : tail_(0) {
+    assert(tail_.is_lock_free());
   }
 
   size_t push_back(const T val) {

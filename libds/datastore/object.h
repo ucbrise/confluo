@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <atomic>
+#include <cassert>
 
 namespace datastore {
 
@@ -19,6 +20,7 @@ class object_state {
   static const uint64_t updating = UINT64_MAX - 2;
 
   object_state() {
+    assert(state_.is_lock_free());
     state_.store(uninitialized, std::memory_order_release);
   }
 
