@@ -69,9 +69,9 @@ using namespace utils::logging;
   std::uniform_int_distribution<int64_t> distribution(0, INIT_NODES)
 
 struct constants {
-  static const uint64_t WARMUP_OPS = 50000;
-  static const uint64_t MEASURE_OPS = 100000;
-  static const uint64_t COOLDOWN_OPS = 50000;
+  static const uint64_t WARMUP_OPS = 500000;
+  static const uint64_t MEASURE_OPS = 1000000;
+  static const uint64_t COOLDOWN_OPS = 500000;
 };
 
 typedef std::chrono::high_resolution_clock timer;
