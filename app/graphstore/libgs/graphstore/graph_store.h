@@ -8,9 +8,11 @@
 #include "monolog.h"
 #include "node.h"
 #include "link.h"
+#include "graph_tail.h"
 
 namespace graphstore {
 
+template<typename graph_tail = write_stalled_tail>
 class graph_store {
  public:
   typedef monolog::monolog_relaxed<node, 32> node_log;
@@ -38,11 +40,6 @@ class graph_store {
   size_t count_links(int64_t id1, int64_t link_type) const;
 
  private:
-  uint64_t start_write_op();
-  void end_write_op(uint64_t tail);
-
-  uint64_t get_graph_tail() const;
-
   void follow_update_refs(uint64_t& id, uint64_t tail) const;
   bool is_valid(uint64_t id, uint64_t tail) const;
 
@@ -52,8 +49,7 @@ class graph_store {
 
   node_log *ndata_;
   link_log *ldata_;
-  std::atomic<uint64_t> write_tail_;
-  std::atomic<uint64_t> read_tail_;
+  graph_tail tail_;
 };
 
 }

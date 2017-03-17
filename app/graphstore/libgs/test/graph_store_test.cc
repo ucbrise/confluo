@@ -13,7 +13,7 @@ class GraphStoreTest : public testing::Test {
 };
 
 TEST_F(GraphStoreTest, AddNodeTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -26,7 +26,7 @@ TEST_F(GraphStoreTest, AddNodeTest) {
 }
 
 TEST_F(GraphStoreTest, GetNodeTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -60,7 +60,7 @@ TEST_F(GraphStoreTest, GetNodeTest) {
 }
 
 TEST_F(GraphStoreTest, UpdateNodeTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -96,7 +96,7 @@ TEST_F(GraphStoreTest, UpdateNodeTest) {
 }
 
 TEST_F(GraphStoreTest, DeleteNodeTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -121,7 +121,7 @@ TEST_F(GraphStoreTest, DeleteNodeTest) {
 }
 
 TEST_F(GraphStoreTest, AddGetLinkTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -158,7 +158,7 @@ TEST_F(GraphStoreTest, AddGetLinkTest) {
 }
 
 TEST_F(GraphStoreTest, UpdateGetLinkTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -195,7 +195,7 @@ TEST_F(GraphStoreTest, UpdateGetLinkTest) {
 }
 
 TEST_F(GraphStoreTest, AddUpdateGetLinkTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -245,7 +245,7 @@ TEST_F(GraphStoreTest, AddUpdateGetLinkTest) {
 }
 
 TEST_F(GraphStoreTest, AddDeleteLinkTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -289,7 +289,7 @@ TEST_F(GraphStoreTest, AddDeleteLinkTest) {
 }
 
 TEST_F(GraphStoreTest, AddMultiGetLinkTest) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -372,7 +372,7 @@ TEST_F(GraphStoreTest, AddMultiGetLinkTest) {
 }
 
 TEST_F(GraphStoreTest, AddGetLinkList1Test) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -424,7 +424,7 @@ TEST_F(GraphStoreTest, AddGetLinkList1Test) {
 }
 
 TEST_F(GraphStoreTest, AddGetLinkList2Test) {
-  graph_store gs;
+  graph_store<> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;

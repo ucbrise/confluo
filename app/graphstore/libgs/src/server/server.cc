@@ -19,7 +19,7 @@ using namespace ::graphstore;
 
 class graph_store_service : virtual public GraphStoreServiceIf {
  public:
-  graph_store_service(graph_store* store) {
+  graph_store_service(graph_store<>* store) {
     store_ = store;
   }
 
@@ -122,12 +122,12 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     return op;
   }
 
-  graph_store *store_;
+  graph_store<> *store_;
 };
 
 class gs_processor_factory : public TProcessorFactory {
  public:
-  gs_processor_factory(graph_store* store) {
+  gs_processor_factory(graph_store<>* store) {
     fprintf(stderr, "Initializing processor factory...\n");
     store_ = store;
   }
@@ -142,13 +142,13 @@ class gs_processor_factory : public TProcessorFactory {
   }
 
  private:
-  graph_store* store_;
+  graph_store<> *store_;
 };
 
 int main(int argc, char **argv) {
   int port = 9090;
   try {
-    graph_store* store = new graph_store();
+    graph_store<>* store = new graph_store<>();
     shared_ptr<gs_processor_factory> handler_factory(
         new gs_processor_factory(store));
     shared_ptr<TServerSocket> server_transport(new TServerSocket(port));

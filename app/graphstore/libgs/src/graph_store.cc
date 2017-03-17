@@ -2,32 +2,16 @@
 
 using namespace graphstore;
 
-graph_store::graph_store() {
-  write_tail_.store(0ULL, std::memory_order_release);
-  read_tail_.store(0ULL, std::memory_order_release);
+template<typename graph_tail>
+graph_store<graph_tail>::graph_store() {
   ndata_ = new node_log;
   ldata_ = new link_log;
 }
 
 // Helper functions
-uint64_t graph_store::start_write_op() {
-  return write_tail_.fetch_add(1ULL, std::memory_order_release);
-}
-
-void graph_store::end_write_op(uint64_t tail) {
-  uint64_t old_tail;
-  do {
-    old_tail = tail;
-  } while (!read_tail_.compare_exchange_weak(old_tail, tail + 1,
-                                             std::memory_order_release,
-                                             std::memory_order_acquire));
-}
-
-uint64_t graph_store::get_graph_tail() const {
-  return read_tail_.load(std::memory_order_acquire);
-}
-
-void graph_store::follow_update_refs(uint64_t& id, uint64_t tail) const {
+template<typename graph_tail>
+void graph_store<graph_tail>::follow_update_refs(uint64_t& id,
+                                                 uint64_t tail) const {
   while (true) {
     uint64_t state;
     do {
@@ -45,10 +29,10 @@ void graph_store::follow_update_refs(uint64_t& id, uint64_t tail) const {
   }
 }
 
-template<typename F>
-void graph_store::filter_link_ids(std::map<int64_t, link_op>& links,
-                                  adj_list* list, int64_t link_type,
-                                  uint64_t tail, F&& f) const {
+template<typename graph_tail> template<typename F>
+void graph_store<graph_tail>::filter_link_ids(std::map<int64_t, link_op>& links,
+                                              adj_list* list, int64_t link_type,
+                                              uint64_t tail, F&& f) const {
   size_t size = list->size();
   for (size_t i = 0; i < size; i++) {
     link& l = (*ldata_)[list->at(i)];
@@ -63,18 +47,20 @@ void graph_store::filter_link_ids(std::map<int64_t, link_op>& links,
 }
 
 // API implementations
-uint64_t graph_store::add_node(const node_op& n) {
-  uint64_t t = start_write_op();
+template<typename graph_tail>
+uint64_t graph_store<graph_tail>::add_node(const node_op& n) {
+  uint64_t t = tail_.start_write_op();
   node internal_node = n;
   uint64_t id = ndata_->push_back(internal_node);
   (*ndata_)[id].version = t;
   (*ndata_)[id].state.initalize();
-  end_write_op(t);
+  tail_.end_write_op(t);
   return id;
 }
 
-node_op graph_store::get_node(int64_t type, uint64_t id) const {
-  uint64_t t = get_graph_tail();
+template<typename graph_tail>
+node_op graph_store<graph_tail>::get_node(int64_t type, uint64_t id) const {
+  uint64_t t = tail_.get_tail();
 
   // Node with specified type does not exist
   if (id >= ndata_->size() || (*ndata_)[id].version >= t
@@ -86,9 +72,10 @@ node_op graph_store::get_node(int64_t type, uint64_t id) const {
   return (*ndata_)[id].clone(original_id);
 }
 
-bool graph_store::update_node(const node_op& n) {
+template<typename graph_tail>
+bool graph_store<graph_tail>::update_node(const node_op& n) {
   uint64_t id = n.id;
-  uint64_t t = get_graph_tail();
+  uint64_t t = tail_.get_tail();
 
   // Node with specified type does not exist
   if (id >= ndata_->size() || (*ndata_)[id].version >= t
@@ -109,7 +96,8 @@ bool graph_store::update_node(const node_op& n) {
   return true;
 }
 
-bool graph_store::delete_node(int64_t type, uint64_t id) {
+template<typename graph_tail>
+bool graph_store<graph_tail>::delete_node(int64_t type, uint64_t id) {
   node_op n;
   n.id = id;
   n.type = type;
@@ -117,25 +105,29 @@ bool graph_store::delete_node(int64_t type, uint64_t id) {
   return update_node(n);
 }
 
-bool graph_store::add_link(const link_op& a) {
+template<typename graph_tail>
+bool graph_store<graph_tail>::add_link(const link_op& a) {
   if (static_cast<uint64_t>(a.id1) >= ndata_->size())
     return false;
 
-  uint64_t t = start_write_op();
+  uint64_t t = tail_.start_write_op();
   link l = a;
   uint64_t link_id = ldata_->push_back(l);
   (*ldata_)[link_id].version = t;
   (*ldata_)[link_id].state.initalize();
   (*ndata_)[a.id1].neighbors->push_back(link_id);
-  end_write_op(t);
+  tail_.end_write_op(t);
   return true;
 }
 
-bool graph_store::update_link(const link_op& a) {
+template<typename graph_tail>
+bool graph_store<graph_tail>::update_link(const link_op& a) {
   return add_link(a);
 }
 
-bool graph_store::delete_link(int64_t id1, int64_t link_type, int64_t id2) {
+template<typename graph_tail>
+bool graph_store<graph_tail>::delete_link(int64_t id1, int64_t link_type,
+                                          int64_t id2) {
   link_op dl;
   dl.id1 = id1;
   dl.id2 = id2;
@@ -144,9 +136,10 @@ bool graph_store::delete_link(int64_t id1, int64_t link_type, int64_t id2) {
   return add_link(dl);
 }
 
-link_op graph_store::get_link(int64_t id1, int64_t link_type,
-                              int64_t id2) const {
-  uint64_t t = get_graph_tail();
+template<typename graph_tail>
+link_op graph_store<graph_tail>::get_link(int64_t id1, int64_t link_type,
+                                          int64_t id2) const {
+  uint64_t t = tail_.get_tail();
   if (static_cast<uint64_t>(id1) >= ndata_->size())
     return link_op::empty();
 
@@ -162,9 +155,10 @@ link_op graph_store::get_link(int64_t id1, int64_t link_type,
   return links.at(id2);
 }
 
-std::vector<link_op> graph_store::multiget_links(int64_t id1, int64_t link_type,
-                                                 std::set<int64_t> id2s) const {
-  uint64_t t = get_graph_tail();
+template<typename graph_tail>
+std::vector<link_op> graph_store<graph_tail>::multiget_links(
+    int64_t id1, int64_t link_type, std::set<int64_t> id2s) const {
+  uint64_t t = tail_.get_tail();
   std::vector<link_op> l;
   if (static_cast<uint64_t>(id1) >= ndata_->size())
     return l;
@@ -182,9 +176,10 @@ std::vector<link_op> graph_store::multiget_links(int64_t id1, int64_t link_type,
   return l;
 }
 
-std::set<link_op> graph_store::get_link_list(int64_t id1,
-                                             int64_t link_type) const {
-  uint64_t t = get_graph_tail();
+template<typename graph_tail>
+std::set<link_op> graph_store<graph_tail>::get_link_list(
+    int64_t id1, int64_t link_type) const {
+  uint64_t t = tail_.get_tail();
   std::set<link_op> l;
   if (static_cast<uint64_t>(id1) >= ndata_->size())
     return l;
@@ -202,10 +197,14 @@ std::set<link_op> graph_store::get_link_list(int64_t id1,
   return l;
 }
 
-std::set<link_op> graph_store::get_link_list(int64_t id1, int64_t link_type,
-                                             int64_t min_ts, int64_t max_ts,
-                                             int64_t off, int64_t limit) const {
-  uint64_t t = get_graph_tail();
+template<typename graph_tail>
+std::set<link_op> graph_store<graph_tail>::get_link_list(int64_t id1,
+                                                         int64_t link_type,
+                                                         int64_t min_ts,
+                                                         int64_t max_ts,
+                                                         int64_t off,
+                                                         int64_t limit) const {
+  uint64_t t = tail_.get_tail();
   std::set<link_op> l;
   if (static_cast<uint64_t>(id1) >= ndata_->size())
     return l;
@@ -228,8 +227,10 @@ std::set<link_op> graph_store::get_link_list(int64_t id1, int64_t link_type,
   return output;
 }
 
-size_t graph_store::count_links(int64_t id1, int64_t link_type) const {
-  uint64_t t = get_graph_tail();
+template<typename graph_tail>
+size_t graph_store<graph_tail>::count_links(int64_t id1,
+                                            int64_t link_type) const {
+  uint64_t t = tail_.get_tail();
   size_t count = 0;
   if (static_cast<uint64_t>(id1) >= ndata_->size())
     return count;
@@ -246,3 +247,5 @@ size_t graph_store::count_links(int64_t id1, int64_t link_type) const {
 
   return count;
 }
+
+template class graphstore::graph_store<write_stalled_tail>;

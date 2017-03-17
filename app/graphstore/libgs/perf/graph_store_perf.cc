@@ -74,7 +74,7 @@ struct constants {
 typedef std::chrono::high_resolution_clock timer;
 
 template<typename GraphOp>
-static void bench_thput_thread(GraphOp&& op, graph_store& gs, size_t nthreads,
+static void bench_thput_thread(GraphOp&& op, graph_store<>& gs, size_t nthreads,
                                size_t i, std::vector<double>& thput) {
   size_t num_ops;
 
@@ -140,31 +140,31 @@ class graph_store_perf {
     fprintf(stderr, "Finished loading %llu links\n", num_links);
   }
 
-  static void add_node(graph_store& gs) {
+  static void add_node(graph_store<>& gs) {
     node_op op = graph_store_perf::create_node_op();
     gs.add_node(op);
   }
 
-  static void update_node(graph_store& gs) {
+  static void update_node(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     node_op op = create_node_op(id);
     gs.update_node(op);
   }
 
-  static void delete_node(graph_store& gs) {
+  static void delete_node(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     gs.delete_node(NODE_TYPE, id);
   };
 
-  static void get_node(graph_store& gs) {
+  static void get_node(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     gs.get_node(NODE_TYPE, id);
   };
 
-  static void add_link(graph_store& gs) {
+  static void add_link(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
@@ -172,7 +172,7 @@ class graph_store_perf {
     gs.add_link(op);
   };
 
-  static void update_link(graph_store& gs) {
+  static void update_link(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
@@ -180,27 +180,27 @@ class graph_store_perf {
     gs.add_link(op);
   };
 
-  static void delete_link(graph_store& gs) {
+  static void delete_link(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
     gs.delete_link(id1, 0, id2);
   };
 
-  static void get_link(graph_store& gs) {
+  static void get_link(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
     gs.get_link(id1, 0, id2);
   };
 
-  static void get_link_list(graph_store& gs) {
+  static void get_link_list(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     gs.get_link_list(id1, 0);
   };
 
-  static void count_links(graph_store& gs) {
+  static void count_links(graph_store<>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     gs.count_links(id1, 0);
@@ -278,7 +278,7 @@ class graph_store_perf {
 
 private:
   std::string output_dir_;
-  graph_store gs_;
+  graph_store<> gs_;
 };
 
 const std::string graph_store_perf::DATA = "123random123alphanumeric123text123";
