@@ -1,0 +1,4 @@
+#ifndef DATASTORE_LOGGER_H_
+#define DATASTORE_LOGGER_H_
+
+#endif /* DATASTORE_LOGGER_H_ */
