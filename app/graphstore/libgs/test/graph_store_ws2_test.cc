@@ -5,7 +5,7 @@
 
 using namespace graphstore;
 
-class GraphStore2Test : public testing::Test {
+class GraphStoreWS2Test : public testing::Test {
  public:
   static const size_t kMaxThreads = 4;
 
@@ -20,10 +20,10 @@ class GraphStore2Test : public testing::Test {
   }
 };
 
-TEST_F(GraphStore2Test, AddGetNodeTest) {
+TEST_F(GraphStoreWS2Test, AddGetNodeTest) {
   static const uint64_t kNumNodes = 1000;
   for (size_t num_threads = 1; num_threads <= kMaxThreads; num_threads++) {
-    graph_store<> gs;
+    graph_store<write_stalled_tail> gs;
 
     mt_test(num_threads, [&](size_t thread_id) -> void {
       for (uint64_t i = 0; i < kNumNodes; i++) {
@@ -47,10 +47,10 @@ TEST_F(GraphStore2Test, AddGetNodeTest) {
   }
 }
 
-TEST_F(GraphStore2Test, UpdateNodeTest) {
+TEST_F(GraphStoreWS2Test, UpdateNodeTest) {
   static const uint64_t kNumNodes = 1000;
   for (size_t num_threads = 1; num_threads <= kMaxThreads; num_threads++) {
-    graph_store<> gs;
+    graph_store<write_stalled_tail> gs;
 
     for (uint64_t i = 0; i < kNumNodes; i++) {
       node_op n;
@@ -79,13 +79,13 @@ TEST_F(GraphStore2Test, UpdateNodeTest) {
   }
 }
 
-TEST_F(GraphStore2Test, AddGetLinkTest) {
+TEST_F(GraphStoreWS2Test, AddGetLinkTest) {
   static const uint64_t kNumNodes = 1000;
   static const uint64_t kDegree = 10;
   static const uint64_t kNumLinks = 10000;
 
   for (size_t num_threads = 1; num_threads <= kMaxThreads; num_threads++) {
-    graph_store<> gs;
+    graph_store<write_stalled_tail> gs;
     for (uint64_t i = 0; i < kNumNodes; i++) {
       node_op n;
       n.id = i;
@@ -123,12 +123,12 @@ TEST_F(GraphStore2Test, AddGetLinkTest) {
   }
 }
 
-TEST_F(GraphStore2Test, AddNodeLinkTest) {
+TEST_F(GraphStoreWS2Test, AddNodeLinkTest) {
   static const uint64_t kNumNodes = 1000;
   static const uint64_t kDegree = 10;
 
   for (size_t num_threads = 1; num_threads <= kMaxThreads; num_threads++) {
-    graph_store<> gs;
+    graph_store<write_stalled_tail> gs;
     mt_test(num_threads, [&](size_t thread_id) -> void {
       for (uint64_t i = 0; i < kNumNodes; i++) {
         for (uint64_t j = 1; j <= kDegree; j++) {

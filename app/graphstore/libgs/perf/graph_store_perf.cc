@@ -73,9 +73,10 @@ struct constants {
 
 typedef std::chrono::high_resolution_clock timer;
 
-template<typename GraphOp>
-static void bench_thput_thread(GraphOp&& op, graph_store<>& gs, size_t nthreads,
-                               size_t i, std::vector<double>& thput) {
+template<typename tail_scheme, typename graph_op>
+static void bench_thput_thread(graph_op&& op, graph_store<tail_scheme>& gs,
+                               size_t nthreads, size_t i,
+                               std::vector<double>& thput) {
   size_t num_ops;
 
   fprintf(stderr, "Running warmup for %llu ops\n", constants::WARMUP_OPS);
@@ -99,6 +100,7 @@ static void bench_thput_thread(GraphOp&& op, graph_store<>& gs, size_t nthreads,
   fprintf(stderr, "Thread completed benchmark at %lf ops/s\n", thput[i]);
 }
 
+template<typename tail_scheme>
 class graph_store_perf {
  public:
   static const uint64_t NODE_TYPE = 1;
@@ -140,31 +142,31 @@ class graph_store_perf {
     fprintf(stderr, "Finished loading %llu links\n", num_links);
   }
 
-  static void add_node(graph_store<>& gs) {
+  static void add_node(graph_store<tail_scheme>& gs) {
     node_op op = graph_store_perf::create_node_op();
     gs.add_node(op);
   }
 
-  static void update_node(graph_store<>& gs) {
+  static void update_node(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     node_op op = create_node_op(id);
     gs.update_node(op);
   }
 
-  static void delete_node(graph_store<>& gs) {
+  static void delete_node(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     gs.delete_node(NODE_TYPE, id);
   };
 
-  static void get_node(graph_store<>& gs) {
+  static void get_node(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     gs.get_node(NODE_TYPE, id);
   };
 
-  static void add_link(graph_store<>& gs) {
+  static void add_link(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
@@ -172,7 +174,7 @@ class graph_store_perf {
     gs.add_link(op);
   };
 
-  static void update_link(graph_store<>& gs) {
+  static void update_link(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
@@ -180,27 +182,27 @@ class graph_store_perf {
     gs.add_link(op);
   };
 
-  static void delete_link(graph_store<>& gs) {
+  static void delete_link(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
     gs.delete_link(id1, 0, id2);
   };
 
-  static void get_link(graph_store<>& gs) {
+  static void get_link(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
     gs.get_link(id1, 0, id2);
   };
 
-  static void get_link_list(graph_store<>& gs) {
+  static void get_link_list(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     gs.get_link_list(id1, 0);
   };
 
-  static void count_links(graph_store<>& gs) {
+  static void count_links(graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     gs.count_links(id1, 0);
@@ -235,13 +237,13 @@ class graph_store_perf {
     return distribution(generator);
   }
 
-  template<typename GraphOp>
-  void bench_thput(GraphOp&& op, const size_t n_threads,
+  template<typename graph_op>
+  void bench_thput(graph_op&& op, const size_t n_threads,
       const std::string& output_file) {
     std::vector<std::thread> workers(n_threads);
     std::vector<double> thput(n_threads);
     for (size_t i = 0; i < n_threads; i++) {
-      workers[i] = std::thread(bench_thput_thread<GraphOp>, std::ref(op), std::ref(gs_), n_threads, i, std::ref(thput));
+      workers[i] = std::thread(bench_thput_thread<tail_scheme, graph_op>, std::ref(op), std::ref(gs_), n_threads, i, std::ref(thput));
       SET_CORE_AFFINITY(workers[i], i);
     }
 
@@ -278,46 +280,16 @@ class graph_store_perf {
 
 private:
   std::string output_dir_;
-  graph_store<> gs_;
+  graph_store<tail_scheme> gs_;
 };
 
-const std::string graph_store_perf::DATA = "123random123alphanumeric123text123";
+template<typename tail_scheme>
+const std::string graph_store_perf<tail_scheme>::DATA =
+    "123random123alphanumeric123text123";
 
-int main(int argc, char** argv) {
-  cmd_options opts;
-  opts.add(
-      cmd_option("num-threads", 't', false).set_default("1").set_description(
-          "Number of benchmark threads"));
-  opts.add(
-      cmd_option("bench-type", 'b', false).set_default("get_node")
-          .set_description("Benchmark type"));
-  opts.add(
-      cmd_option("output-dir", 'o', false).set_default(".").set_description(
-          "Output directory"));
-
-  cmd_parser parser(argc, argv, opts);
-  if (parser.get_flag("help")) {
-    fprintf(stderr, "%s\n", parser.help_msg().c_str());
-    return 0;
-  }
-
-  int num_threads;
-  std::string bench_type;
-  std::string output_dir;
-  try {
-    num_threads = parser.get_int("num-threads");
-    bench_type = parser.get("bench-type");
-    output_dir = parser.get("output-dir");
-  } catch (std::exception& e) {
-    fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
-    fprintf(stderr, "%s\n", parser.help_msg().c_str());
-    return 0;
-  }
-
-  fprintf(stderr, "Running benchmark %s with %d threads; output path %s\n",
-          bench_type.c_str(), num_threads, output_dir.c_str());
-
-  graph_store_perf perf(output_dir);
+template<typename tail_scheme>
+void exec_bench(graph_store_perf<tail_scheme>& perf, int num_threads,
+                const std::string& bench_type) {
   if (bench_type == "add_node")
     perf.bench_add_node(num_threads);
   else if (bench_type == "update_node")
@@ -340,6 +312,56 @@ int main(int argc, char** argv) {
     perf.bench_count_links(num_threads);
   else
     fprintf(stderr, "Unknown bench_type: %s", bench_type.c_str());
+}
+
+int main(int argc, char** argv) {
+  cmd_options opts;
+  opts.add(
+      cmd_option("num-threads", 't', false).set_default("1").set_description(
+          "Number of benchmark threads"));
+  opts.add(
+      cmd_option("bench-type", 'b', false).set_default("get_node")
+          .set_description("Benchmark type"));
+  opts.add(
+      cmd_option("output-dir", 'o', false).set_default("results")
+          .set_description("Output directory"));
+  opts.add(
+      cmd_option("tail-scheme", 's', false).set_default("read-stalled")
+          .set_description("Scheme for graph tail"));
+
+  cmd_parser parser(argc, argv, opts);
+  if (parser.get_flag("help")) {
+    fprintf(stderr, "%s\n", parser.help_msg().c_str());
+    return 0;
+  }
+
+  int num_threads;
+  std::string bench_type;
+  std::string output_dir;
+  std::string tail_scheme;
+  try {
+    num_threads = parser.get_int("num-threads");
+    bench_type = parser.get("bench-type");
+    output_dir = parser.get("output-dir");
+    tail_scheme = parser.get("tail-scheme");
+  } catch (std::exception& e) {
+    fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
+    fprintf(stderr, "%s\n", parser.help_msg().c_str());
+    return 0;
+  }
+
+  fprintf(stderr, "Running benchmark %s with %d threads; output path %s\n",
+          bench_type.c_str(), num_threads, output_dir.c_str());
+
+  if (tail_scheme == "write-stalled") {
+    graph_store_perf<write_stalled_tail> perf(output_dir);
+    exec_bench(perf, num_threads, bench_type);
+  } else if (tail_scheme == "read-stalled") {
+    graph_store_perf<read_stalled_tail> perf(output_dir);
+    exec_bench(perf, num_threads, bench_type);
+  } else {
+    fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());
+  }
 
   return 0;
 }

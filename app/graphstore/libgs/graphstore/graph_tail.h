@@ -32,6 +32,26 @@ class write_stalled_tail {
   std::atomic<uint64_t> write_tail_;
 };
 
+class read_stalled_tail {
+ public:
+  read_stalled_tail() {
+    tail_.store(0ULL, std::memory_order_release);
+  }
+
+  uint64_t start_write_op() {
+    return tail_.fetch_add(1ULL, std::memory_order_release);
+  }
+
+  void end_write_op(uint64_t tail) {}
+
+  uint64_t get_tail() const {
+    return tail_.load(std::memory_order_acquire);
+  }
+
+ private:
+  std::atomic<uint64_t> tail_;
+};
+
 }
 
 #endif /* GRAPHSTORE_GRAPH_TAIL_H_ */

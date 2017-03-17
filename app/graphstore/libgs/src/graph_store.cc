@@ -29,7 +29,8 @@ void graph_store<graph_tail>::follow_update_refs(uint64_t& id,
   }
 }
 
-template<typename graph_tail> template<typename F>
+template<typename graph_tail>
+template<typename F>
 void graph_store<graph_tail>::filter_link_ids(std::map<int64_t, link_op>& links,
                                               adj_list* list, int64_t link_type,
                                               uint64_t tail, F&& f) const {
@@ -249,3 +250,4 @@ size_t graph_store<graph_tail>::count_links(int64_t id1,
 }
 
 template class graphstore::graph_store<write_stalled_tail>;
+template class graphstore::graph_store<read_stalled_tail>;
