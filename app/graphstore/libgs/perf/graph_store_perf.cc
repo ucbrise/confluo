@@ -285,7 +285,7 @@ private:
 
 template<typename tail_scheme>
 const std::string graph_store_perf<tail_scheme>::DATA =
-    "123random123alphanumeric123text123";
+    "123random123alpha-numeric123text123random123alpha-numeric123text123random123alpha-numeric123text123random123alpha-numeric123text";
 
 template<typename tail_scheme>
 void exec_bench(graph_store_perf<tail_scheme>& perf, int num_threads,
