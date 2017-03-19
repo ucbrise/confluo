@@ -13,6 +13,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 
 #include "logger.h"
@@ -95,13 +96,13 @@ class benchmark {
   }
 
  protected:
-  template<typename graph_op>
-  void bench_thput(graph_op&& op, const size_t nthreads,
+  template<typename op_t>
+  void bench_thput(op_t&& op, const size_t nthreads,
                    const std::string& output_file) {
     std::vector<std::thread> workers(nthreads);
     std::vector<double> thput(nthreads);
     for (size_t i = 0; i < nthreads; i++) {
-      workers[i] = std::thread(bench_thput_thread<data_structure, graph_op>,
+      workers[i] = std::thread(bench_thput_thread<data_structure, op_t>,
                                std::ref(op), std::ref(ds_), nthreads, i,
                                std::ref(thput));
       SET_CORE_AFFINITY(workers[i], i);
