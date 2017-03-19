@@ -5,14 +5,14 @@
 #include <set>
 #include <map>
 
+#include "tail_scheme.h"
 #include "monolog.h"
 #include "node.h"
 #include "link.h"
-#include "graph_tail.h"
 
 namespace graphstore {
 
-template<typename graph_tail = write_stalled_tail>
+template<typename graph_tail>
 class graph_store {
  public:
   typedef monolog::monolog_relaxed<node, 32> node_log;

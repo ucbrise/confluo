@@ -15,6 +15,7 @@ using namespace ::apache::thrift::server;
 using boost::shared_ptr;
 
 using namespace ::graphstore;
+using namespace ::datastore;
 
 template<typename tail_scheme>
 class graph_store_service : virtual public GraphStoreServiceIf {

@@ -249,5 +249,5 @@ size_t graph_store<graph_tail>::count_links(int64_t id1,
   return count;
 }
 
-template class graphstore::graph_store<write_stalled_tail>;
-template class graphstore::graph_store<read_stalled_tail>;
+template class graphstore::graph_store<datastore::write_stalled_tail>;
+template class graphstore::graph_store<datastore::read_stalled_tail>;

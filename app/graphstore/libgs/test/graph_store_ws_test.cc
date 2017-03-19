@@ -4,6 +4,7 @@
 #include <thread>
 
 using namespace graphstore;
+using namespace datastore;
 
 class GraphStoreWSTest : public testing::Test {
  public:
