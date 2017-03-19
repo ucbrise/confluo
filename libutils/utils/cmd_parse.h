@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <getopt.h>
+#include <string.h>
 
 class cmd_parse_exception : std::exception {
  public:
