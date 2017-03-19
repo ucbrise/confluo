@@ -130,12 +130,12 @@ template<typename tail_scheme>
 class gs_processor_factory : public TProcessorFactory {
  public:
   gs_processor_factory(graph_store<tail_scheme>* store) {
-    LOG_INFO << "Initializing processor factory...\n";
+    LOG_INFO << "Initializing processor factory...";
     store_ = store;
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
-    LOG_INFO << "Creating new processor...\n";
+    LOG_INFO << "Creating new processor...";
     boost::shared_ptr<graph_store_service<tail_scheme>> handler(
         new graph_store_service<tail_scheme>(store_));
     boost::shared_ptr<TProcessor> processor(
@@ -162,7 +162,7 @@ void start_server(int port, graph_store<tail_scheme>* store) {
     LOG_INFO << "Listening for connections on port " << port;
     server.serve();
   } catch (std::exception& e) {
-    LOG_ERROR << "Could not start server listening on port %d: %s\n", e.what();
+    LOG_ERROR << "Could not start server listening on port " << port << ":" << e.what();
   }
 }
 
