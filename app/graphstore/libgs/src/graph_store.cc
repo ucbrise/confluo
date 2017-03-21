@@ -13,16 +13,9 @@ template<typename graph_tail>
 void graph_store<graph_tail>::follow_update_refs(uint64_t& id,
                                                  uint64_t tail) const {
   while (true) {
-    uint64_t state;
-    do {
-      state = (*ndata_)[id].state.get();
-    } while (state == datastore::object_state::uninitialized
-        || state == datastore::object_state::updating);
-
-    if (state == datastore::object_state::initialized
-        || (*ndata_)[state].version >= tail) {
+    uint64_t state = graph_tail::get_state((*ndata_)[id]);
+    if (graph_tail::is_valid(state) || (*ndata_)[state].version >= tail)
       break;
-    }
 
     // Updated version exists within tail
     id = state;
@@ -52,10 +45,9 @@ template<typename graph_tail>
 uint64_t graph_store<graph_tail>::add_node(const node_op& n) {
   uint64_t t = tail_.start_write_op();
   node internal_node = n;
+  internal_node.version = t;
   uint64_t id = ndata_->push_back(internal_node);
-  (*ndata_)[id].version = t;
-  (*ndata_)[id].state.initalize();
-  tail_.end_write_op(t);
+  tail_.end_write_op((*ndata_)[id], t);
   return id;
 }
 
@@ -87,13 +79,13 @@ bool graph_store<graph_tail>::update_node(const node_op& n) {
   node& old_node = (*ndata_)[id];
 
   // Try to mark node as 'updating'; retry on failure
-  if (!old_node.state.mark_updating())
+  if (!tail_.start_update_op(old_node))
     return update_node(n);
 
   // Only one op will succeeding in marking the node as 'updating'
   // Add the updated node as a new entry and link it to its previous version
   uint64_t new_id = add_node(n);
-  old_node.state.update(new_id);
+  tail_.end_update_op(old_node, new_id);
   return true;
 }
 
@@ -113,11 +105,10 @@ bool graph_store<graph_tail>::add_link(const link_op& a) {
 
   uint64_t t = tail_.start_write_op();
   link l = a;
+  l.version = t;
   uint64_t link_id = ldata_->push_back(l);
-  (*ldata_)[link_id].version = t;
-  (*ldata_)[link_id].state.initalize();
   (*ndata_)[a.id1].neighbors->push_back(link_id);
-  tail_.end_write_op(t);
+  tail_.end_write_op((*ldata_)[link_id], t);
   return true;
 }
 

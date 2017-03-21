@@ -12,8 +12,9 @@ class tail_scheme_benchmark : public utils::bench::benchmark<tail_scheme> {
   }
 
   static void operation(tail_scheme& tail) {
+    object o;
     uint64_t id = tail.start_write_op();
-    tail.end_write_op(id);
+    tail.end_write_op(o, id);
   }
 
   DEFINE_BENCH(operation)
