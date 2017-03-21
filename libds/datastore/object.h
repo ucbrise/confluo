@@ -2,8 +2,8 @@
 #define DATASTORE_OBJECT_H_
 
 #include <cstdint>
-#include <atomic>
 #include <cassert>
+#include "atomic.h"
 
 namespace datastore {
 
@@ -19,28 +19,24 @@ class object_state {
   static const uint64_t initialized = UINT64_MAX - 1;
   static const uint64_t updating = UINT64_MAX - 2;
 
-  object_state() {
-    assert(state_.is_lock_free());
-    state_.store(uninitialized, std::memory_order_release);
+  object_state()
+      : state_(uninitialized) {
   }
 
   void initalize() {
-    state_.store(initialized, std::memory_order_release);
+    atomic::store(&state_, initialized);
   }
 
-  bool mark_updating() {
-    uint64_t expected = initialized;
-    return state_.compare_exchange_strong(expected, updating,
-                                          std::memory_order_release,
-                                          std::memory_order_acquire);
+  bool mark_updating(uint64_t expected = initialized) {
+    return atomic::strong::cas(&state_, &expected, updating);
   }
 
   void update(uint64_t new_id) {
-    state_.store(new_id, std::memory_order_release);
+    atomic::store(&state_, new_id);
   }
 
-  uint64_t get() {
-    return state_.load(std::memory_order_acquire);
+  uint64_t get() const {
+    return atomic::load(&state_);
   }
 
  private:

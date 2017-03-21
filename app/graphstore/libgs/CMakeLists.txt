@@ -12,6 +12,7 @@ include_directories(${gtest_SOURCE_DIR}/include
   ${MONOLOG_INCLUDE}
   ${DATASTORE_INCLUDE}
   ${UTILS_INCLUDE}
+  ${ATOMIC_INCLUDE}
   ${GRAPHSTORE_INCLUDE}
   ${THRIFT_INCLUDE})
 

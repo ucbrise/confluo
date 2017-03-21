@@ -8,10 +8,12 @@ file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 set(DATASTORE_INCLUDE datastore)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
+set(ATOMIC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libatomic/atomic)
 
 include_directories(${gtest_SOURCE_DIR}/include
   ${DATASTORE_INCLUDE}
-  ${UTILS_INCLUDE})
+  ${UTILS_INCLUDE}
+  ${ATOMIC_INCLUDE})
 
 # Build perf
 file(GLOB_RECURSE perf_sources perf/*.cc)

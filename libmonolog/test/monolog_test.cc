@@ -52,11 +52,6 @@ TEST_F(MonoLogTest, MonoLogBaseBaseTest) {
   monolog_test(array);
 }
 
-TEST_F(MonoLogTest, AtomicMonoLogBaseBaseTest) {
-  monolog::__atomic_monolog_base<uint64_t> array;
-  monolog_test(array);
-}
-
 TEST_F(MonoLogTest, MonoLogConsistentTest) {
   monolog::monolog_write_stalled<uint64_t> array;
   monolog_test(array);

@@ -97,11 +97,6 @@ TEST_F(MonoLogPerf, MonoLogBaseLatencyPerf) {
   perf_latency(array, "__monolog_base_uint64_t");
 }
 
-TEST_F(MonoLogPerf, AtomicMonoLogBaseLatencyPerf) {
-  monolog::__atomic_monolog_base<uint64_t> array;
-  perf_latency(array, "__atomic_monolog_base_uint64_t");
-}
-
 TEST_F(MonoLogPerf, MonoLogConsistentLatencyPerf) {
   monolog::monolog_write_stalled<uint64_t> array;
   perf_latency(array, "monolog_linearizable_uint64_t");

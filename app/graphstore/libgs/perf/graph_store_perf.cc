@@ -8,7 +8,7 @@
 #include "utils.h"
 
 using namespace graphstore;
-using namespace utils::logging;
+using namespace utils::log;
 
 #define PREAMBLE_RNG\
   static thread_local std::mt19937 generator;\
