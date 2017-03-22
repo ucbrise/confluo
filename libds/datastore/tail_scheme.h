@@ -19,7 +19,8 @@ class write_stalled_tail {
   }
 
   static bool is_valid(uint64_t state) {
-    return state == object_state::uninitialized;
+    return state == object_state::uninitialized
+        || state == object_state::updating;
   }
 
   uint64_t start_write_op() {
