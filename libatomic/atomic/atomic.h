@@ -40,7 +40,7 @@ static inline void store(std::atomic<T>* obj, T arg) {
 
 template<typename T>
 static inline void init(std::atomic<T>* obj, T arg) {
-  obj->store(obj, std::memory_order_relaxed);
+  obj->store(arg, std::memory_order_relaxed);
 }
 
 }
