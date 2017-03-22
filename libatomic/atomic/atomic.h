@@ -34,13 +34,13 @@ static inline T load(const std::atomic<T>* obj) {
 }
 
 template<typename T>
-static inline void store(std::atomic<T>* obj, T arg)  {
+static inline void store(std::atomic<T>* obj, T arg) {
   std::atomic_store_explicit(obj, arg, std::memory_order_release);
 }
 
 template<typename T>
 static inline void init(std::atomic<T>* obj, T arg) {
-  std::atomic_init(obj, arg);
+  obj->store(obj, std::memory_order_relaxed);
 }
 
 }
