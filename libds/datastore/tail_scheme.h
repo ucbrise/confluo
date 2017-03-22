@@ -53,7 +53,7 @@ class write_stalled_tail {
 class read_stalled_tail {
  public:
   read_stalled_tail()
-      : tail_(0ULL) {
+      : tail_(UINT64_C(0)) {
   }
 
   static uint64_t get_state(object& o) {
@@ -70,7 +70,7 @@ class read_stalled_tail {
   }
 
   uint64_t start_write_op() {
-    return atomic::faa(&tail_, 1ULL);
+    return atomic::faa(&tail_, UINT64_C(1));
   }
 
   void end_write_op(object& obj, uint64_t tail) {
