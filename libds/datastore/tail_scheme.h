@@ -10,8 +10,8 @@ namespace datastore {
 class write_stalled_tail {
  public:
   write_stalled_tail()
-      : read_tail_(0ULL),
-        write_tail_(0ULL) {
+      : read_tail_(UINT64_C(0)),
+        write_tail_(UINT64_C(0)) {
   }
 
   static uint64_t get_state(object& o) {
@@ -23,7 +23,7 @@ class write_stalled_tail {
   }
 
   uint64_t start_write_op() {
-    return atomic::faa(&write_tail_, 1ULL);
+    return atomic::faa(&write_tail_, UINT64_C(1));
   }
 
   void end_write_op(object& obj, uint64_t tail) {
