@@ -7,16 +7,16 @@
 
 #include "utils.h"
 
-#define SET_LOG_LEVEL(level) utils::logging::log::LOG_LEVEL = utils::logging::log_level::level;
-#define LOG_TRACE utils::logging::log().get(utils::logging::log_level::TRACE)
-#define LOG_DEBUG utils::logging::log().get(utils::logging::log_level::DEBUG)
-#define LOG_INFO utils::logging::log().get(utils::logging::log_level::INFO)
-#define LOG_WARN utils::logging::log().get(utils::logging::log_level::WARN)
-#define LOG_ERROR utils::logging::log().get(utils::logging::log_level::ERROR)
-#define LOG_FATAL utils::logging::log().get(utils::logging::log_level::FATAL)
+#define SET_LOG_LEVEL(level) utils::log::logger::LOG_LEVEL = utils::log::log_level::level;
+#define LOG_TRACE utils::log::logger().get(utils::log::log_level::TRACE)
+#define LOG_DEBUG utils::log::logger().get(utils::log::log_level::DEBUG)
+#define LOG_INFO utils::log::logger().get(utils::log::log_level::INFO)
+#define LOG_WARN utils::log::logger().get(utils::log::log_level::WARN)
+#define LOG_ERROR utils::log::logger().get(utils::log::log_level::ERROR)
+#define LOG_FATAL utils::log::logger().get(utils::log::log_level::FATAL)
 
 namespace utils {
-namespace logging {
+namespace log {
 
 enum log_level {
   ALL = 0,
@@ -29,15 +29,15 @@ enum log_level {
   OFF = 7
 };
 
-class log {
+class logger {
  public:
   static log_level LOG_LEVEL;
 
-  log() {
+  logger() {
     msg_level_ = log_level::INFO;
   }
 
-  virtual ~log() {
+  virtual ~logger() {
     os_ << std::endl;
     fprintf(stderr, "%s", os_.str().c_str());
     fflush(stderr);
