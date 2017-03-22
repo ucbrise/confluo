@@ -9,6 +9,9 @@ namespace datastore {
 
 class write_stalled_tail {
  public:
+  static const uint64_t HI_BIT = UINT64_C(1) << ((sizeof(uint64_t) * 8) - 1);
+  static const uint64_t RT_MASK = ~(UINT64_C(1) << ((sizeof(uint64_t) * 8) - 1));
+
   write_stalled_tail()
       : read_tail_(UINT64_C(0)),
         write_tail_(UINT64_C(0)) {
@@ -43,7 +46,19 @@ class write_stalled_tail {
   }
 
   uint64_t get_tail() const {
-    return atomic::load(&read_tail_);
+    return atomic::load(&read_tail_) & RT_MASK;
+  }
+
+  uint64_t start_snapshot_op() {
+    uint64_t tail = get_tail();
+    while (!atomic::weak::cas(&read_tail_, &tail, tail | HI_BIT))
+      ;
+    return tail;
+  }
+
+  bool end_snapshot_op(uint64_t tail) {
+    uint64_t expected = tail | HI_BIT;
+    return atomic::strong::cas(&read_tail_, &expected, tail);
   }
 
  private:
@@ -54,7 +69,8 @@ class write_stalled_tail {
 class read_stalled_tail {
  public:
   read_stalled_tail()
-      : tail_(UINT64_C(0)) {
+      : tail_(UINT64_C(0)),
+        snapshot_(false) {
   }
 
   static uint64_t get_state(object& o) {
@@ -90,8 +106,19 @@ class read_stalled_tail {
     return atomic::load(&tail_);
   }
 
+  uint64_t start_snapshot_op() {
+    atomic::store(&snapshot_, true);
+    return get_tail();
+  }
+
+  bool end_snapshot_op(uint64_t tail) {
+    atomic::store(&snapshot_, false);
+    return true;
+  }
+
  private:
   std::atomic<uint64_t> tail_;
+  std::atomic<bool> snapshot_;
 };
 
 }

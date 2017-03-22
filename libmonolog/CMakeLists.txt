@@ -7,8 +7,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 set(ATOMIC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libatomic/atomic)
-set(INCLUDE monolog)
-include_directories(${gtest_SOURCE_DIR}/include ${ATOMIC_INCLUDE} ${INCLUDE})
+set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
+set(MONOLOG_INCLUDE monolog)
+include_directories(${gtest_SOURCE_DIR}/include 
+  ${ATOMIC_INCLUDE} 
+  ${UTILS_INCLUDE} 
+  ${MONOLOG_INCLUDE})
 
 file(GLOB_RECURSE test_sources test/*.cc)
 add_executable(mtest ${test_sources})

@@ -6,9 +6,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
-set(INCLUDE logstore)
+set(LS_INCLUDE logstore)
 
-include_directories(${gtest_SOURCE_DIR}/include ${INCLUDE} ${ATOMIC_INCLUDE} ${MONOLOG_INCLUDE})
+include_directories(${gtest_SOURCE_DIR}/include 
+  ${ATOMIC_INCLUDE} 
+  ${UTILS_INCLUDE}
+  ${MONOLOG_INCLUDE} 
+  ${LS_INCLUDE})
 
 file(GLOB_RECURSE test_sources test/*.cc)
 add_executable(lstest ${test_sources})

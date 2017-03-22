@@ -5,7 +5,7 @@
 #include "benchmark.h"
 #include "cmd_parse.h"
 #include "logger.h"
-#include "utils.h"
+#include "rand_utils.h"
 
 using namespace graphstore;
 using namespace utils::log;

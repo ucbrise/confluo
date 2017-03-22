@@ -6,7 +6,9 @@
 #include <fstream>
 
 #include "atomic.h"
-#include "utils.h"
+#include "bit_utils.h"
+
+using namespace utils;
 
 namespace monolog {
 
@@ -516,7 +518,7 @@ class monolog_relaxed_linear : public __monolog_linear_base<T, NBUCKETS,
   typedef T difference_type;
   typedef T* pointer;
   typedef T reference;
-  typedef monolog_iterator<monolog_relaxed<T, NBUCKETS>> iterator;
+  typedef monolog_iterator<monolog_relaxed_linear<T, NBUCKETS>> iterator;
 
   monolog_relaxed_linear()
       : tail_(0) {

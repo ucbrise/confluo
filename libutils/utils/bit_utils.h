@@ -1,11 +1,7 @@
-#ifndef MONOLOG_UTILS_H_
-#define MONOLOG_UTILS_H_
+#ifndef UTILS_BIT_UTILS_H_
+#define UTILS_BIT_UTILS_H_
 
-#include <cstdint>
-
-#define BSR
-
-namespace monolog {
+namespace utils {
 
 class bit_utils {
  public:
@@ -26,4 +22,4 @@ class bit_utils {
 
 }
 
-#endif /* MONOLOG_UTILS_H_ */
+#endif /* UTILS_BIT_UTILS_H_ */

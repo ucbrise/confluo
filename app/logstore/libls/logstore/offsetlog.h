@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include "monolog.h"
-#include "utils.h"
 
 namespace monolog {
 

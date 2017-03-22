@@ -14,7 +14,10 @@
 #include <thread>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <algorithm>
+#include <functional>
+#include <numeric>
 
 #include "logger.h"
 
