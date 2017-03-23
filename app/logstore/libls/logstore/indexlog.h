@@ -75,7 +75,7 @@ class indexlog {
   static_assert(TOKEN_LEN - PREFIX_LEN < 4, "Suffix length must be smaller than 4.");
 
  public:
-  typedef std::atomic<entry_list*> atomic_ref;
+  typedef atomic::type<entry_list*> atomic_ref;
 
   indexlog() {
     entry_list* null_ptr = NULL;
@@ -124,7 +124,7 @@ class indexlog {
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
-    if (std::atomic_compare_exchange_strong(&idx_[i], &null_ptr, new_list))
+    if (atomic::strong::cas(&idx_[i], &null_ptr, new_list))
       return;
 
     // All other threads will deallocate the newly allocated bucket.

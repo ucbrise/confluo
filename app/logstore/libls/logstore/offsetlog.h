@@ -80,8 +80,8 @@ class offsetlog {
   }
 
   offlen_type offlens_;
-  std::atomic<uint64_t> current_write_id_;
-  std::atomic<uint64_t> current_read_id_;
+  atomic::type<uint64_t> current_write_id_;
+  atomic::type<uint64_t> current_read_id_;
 };
 
 }

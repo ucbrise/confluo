@@ -62,7 +62,7 @@ class Index2Test : public testing::Test {
   }
 
   size_t value_size() {
-    return 24 * sizeof(std::atomic<uint64_t*>) + 16 * sizeof(uint64_t);
+    return 24 * sizeof(atomic::type<uint64_t*>) + 16 * sizeof(uint64_t);
   }
 
   size_t indexlet_size(size_t size) {
@@ -102,7 +102,7 @@ TEST_F(Index2Test, IndexletTest) {
 
   size_t storage_size = ilet.storage_size();
   size_t expected_size = ilet.size()
-      * (sizeof(std::atomic<uint32_t*>) + sizeof(uint32_t));
+      * (sizeof(atomic::type<uint32_t*>) + sizeof(uint32_t));
   ASSERT_EQ(expected_size, storage_size);
 }
 

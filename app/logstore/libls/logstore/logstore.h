@@ -545,7 +545,7 @@ class log_store {
   offsetlog* olog_;
 
   /* Tail for preserving atomicity */
-  std::atomic<uint64_t> dtail_;
+  atomic::type<uint64_t> dtail_;
 
   /* Index logs */
   monolog_write_stalled<__index1 *> *idx1_;

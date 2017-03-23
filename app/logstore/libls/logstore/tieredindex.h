@@ -20,7 +20,7 @@ namespace monolog {
 template<typename T, size_t SIZE = 65536>
 class indexlet {
  public:
-  typedef std::atomic<T*> atomic_ref;
+  typedef atomic::type<T*> atomic_ref;
 
   /**
    * @brief Constructor for the indexlet.
@@ -58,9 +58,7 @@ class indexlet {
 
       // Only one thread will be successful in replacing the NULL reference with newly
       // allocated item.
-      if (!std::atomic_compare_exchange_strong_explicit(
-            &idx_[i], &null_ptr, item, std::memory_order_release,
-            std::memory_order_acquire)) {
+      if (!atomic::strong::cas(&idx_[i], &null_ptr, item)) {
         // All other threads will deallocate the newly allocated item.
         delete item;
       }
@@ -134,7 +132,8 @@ class __tiered_index_base {
    * @brief Virtual destructor for __tiered_index_base.
    * @details Virtual destructor for __tiered_index_base.
    */
-  virtual ~__tiered_index_base() {}
+  virtual ~__tiered_index_base() {
+  }
 
   /**
    * @brief Pure virtual function for getting the value corresponding to a key.
@@ -161,7 +160,8 @@ class __index_depth1 : public __tiered_index_base<value_type> {
    * @brief Virtual destructor for __index_depth1.
    * @details Virtual destructor for __index_depth1.
    */
-  virtual ~__index_depth1() {}
+  virtual ~__index_depth1() {
+  }
 
   /**
    * @brief Creates and fetches the value corresponding to the key.
@@ -246,7 +246,8 @@ class __index_depth2 : public __tiered_index_base<value_type> {
    * @brief Virtual destructor for __index_depth2.
    * @details Virtual destructor for __index_depth2.
    */
-  virtual ~__index_depth2() {}
+  virtual ~__index_depth2() {
+  }
 
   /**
    * @brief Creates and fetches the value corresponding to the key.
@@ -329,14 +330,16 @@ class __index_depth2 : public __tiered_index_base<value_type> {
  * @tparam SIZE3 Maximum number of contiguous key entries in level 3 indexlet.
  * @tparam value_type = entry_list The value type for the index.
  */
-template<size_t SIZE1, size_t SIZE2, size_t SIZE3, typename value_type = entry_list>
+template<size_t SIZE1, size_t SIZE2, size_t SIZE3,
+    typename value_type = entry_list>
 class __index_depth3 : public __tiered_index_base<value_type> {
  public:
   /**
    * @brief Virtual destructor for __index_depth3.
    * @details Virtual destructor for __index_depth3.
    */
-  virtual ~__index_depth3() {}
+  virtual ~__index_depth3() {
+  }
 
   /**
    * @brief Creates and fetches the value corresponding to the key.
@@ -347,7 +350,8 @@ class __index_depth3 : public __tiered_index_base<value_type> {
    * @return Pointer to the value.
    */
   value_type* get(const uint64_t key) {
-    __index_depth2 <SIZE2, SIZE3, value_type>* ilet = idx_[key / (SIZE2 * SIZE3)];
+    __index_depth2 <SIZE2, SIZE3, value_type>* ilet =
+        idx_[key / (SIZE2 * SIZE3)];
     return ilet->get(key % (SIZE2 * SIZE3));
   }
 
@@ -370,7 +374,8 @@ class __index_depth3 : public __tiered_index_base<value_type> {
    * @return Pointer to the value.
    */
   value_type* at(const uint64_t key) const override {
-    __index_depth2 <SIZE2, SIZE3, value_type>* ilet = idx_.at(key / (SIZE2 * SIZE3));
+    __index_depth2 <SIZE2, SIZE3, value_type>* ilet = idx_.at(
+        key / (SIZE2 * SIZE3));
     if (ilet)
       return ilet->at(key % (SIZE2 * SIZE3));
     return NULL;
@@ -420,14 +425,16 @@ class __index_depth3 : public __tiered_index_base<value_type> {
  * @tparam SIZE3 Maximum number of contiguous key entries in level 4 indexlet.
  * @tparam value_type = entry_list The value type for the index.
  */
-template<size_t SIZE1, size_t SIZE2, size_t SIZE3, size_t SIZE4, typename value_type = entry_list>
+template<size_t SIZE1, size_t SIZE2, size_t SIZE3, size_t SIZE4,
+    typename value_type = entry_list>
 class __index_depth4 : public __tiered_index_base<value_type> {
  public:
   /**
    * @brief Virtual destructor for __index_depth4.
    * @details Virtual destructor for __index_depth4.
    */
-  virtual ~__index_depth4() {}
+  virtual ~__index_depth4() {
+  }
 
   /**
    * @brief Creates and fetches the value corresponding to the key.
@@ -438,7 +445,8 @@ class __index_depth4 : public __tiered_index_base<value_type> {
    * @return Pointer to the value.
    */
   value_type* get(const uint64_t key) {
-    __index_depth3 <SIZE2, SIZE3, SIZE4, value_type>* ilet = idx_[key / (SIZE2 * SIZE3 * SIZE4)];
+    __index_depth3 <SIZE2, SIZE3, SIZE4, value_type>* ilet = idx_[key
+        / (SIZE2 * SIZE3 * SIZE4)];
     return ilet->get(key % (SIZE2 * SIZE3 * SIZE4));
   }
 
@@ -449,7 +457,8 @@ class __index_depth4 : public __tiered_index_base<value_type> {
    *
    * @param i Index of the indexlet.
    */
-  __index_depth3 <SIZE2, SIZE3, SIZE4, value_type>* operator[](const uint64_t i) {
+  __index_depth3 <SIZE2, SIZE3, SIZE4, value_type>* operator[](
+      const uint64_t i) {
     return idx_[i];
   }
 
@@ -461,7 +470,8 @@ class __index_depth4 : public __tiered_index_base<value_type> {
    * @return Pointer to the value.
    */
   value_type* at(const uint64_t key) const override {
-    __index_depth3 <SIZE2, SIZE3, SIZE4, value_type>* ilet = idx_.at(key / (SIZE2 * SIZE3 * SIZE4));
+    __index_depth3 <SIZE2, SIZE3, SIZE4, value_type>* ilet = idx_.at(
+        key / (SIZE2 * SIZE3 * SIZE4));
     if (ilet)
       return ilet->at(key % (SIZE2 * SIZE3 * SIZE4));
     return NULL;
