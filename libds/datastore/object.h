@@ -75,6 +75,24 @@ struct object_ptr_t : public stateful {
   }
 };
 
+template<typename T>
+struct serializer {
+  static size_t size(const T& o) {
+    return sizeof(T);
+  }
+
+  static void serialize(void* dst, const T& o) {
+    memcpy(dst, &o, sizeof(T));
+  }
+};
+
+template<typename T>
+struct deserializer {
+  static void deserialize(const void* src, T* o) {
+    memcpy(o, src, sizeof(T));
+  }
+};
+
 }
 
 #endif /* DATASTORE_OBJECT_H_ */

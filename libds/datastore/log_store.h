@@ -44,24 +44,6 @@ struct persistent_relaxed {
   monolog::mmap_monolog_base<object_ptr_t> ptr_log_;
 };
 
-template<typename T>
-struct serializer {
-  static size_t size(const T& o) {
-    return sizeof(T);
-  }
-
-  static void serialize(void* dst, const T& o) {
-    memcpy(dst, &o, sizeof(T));
-  }
-};
-
-template<typename T>
-struct deserializer {
-  static void deserialize(const void* src, T* o) {
-    memcpy(o, src, sizeof(T));
-  }
-};
-
 template<typename storage, typename concurrency_control, typename aux_data>
 class log_store_base {
  public:
