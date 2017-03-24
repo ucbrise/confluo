@@ -2,22 +2,24 @@
 #define DATASTORE_TAIL_SCHEME_H_
 
 #include "atomic.h"
-#include "object.h"
 #include <cassert>
+#include <cstdio>
+
+#include "object.h"
 
 namespace datastore {
 
-class write_stalled_tail {
+class write_stalled {
  public:
   static const uint64_t HI_BIT = UINT64_C(1) << ((sizeof(uint64_t) * 8) - 1);
   static const uint64_t RT_MASK = ~(UINT64_C(1) << ((sizeof(uint64_t) * 8) - 1));
 
-  write_stalled_tail()
+  write_stalled()
       : read_tail_(UINT64_C(0)),
         write_tail_(UINT64_C(0)) {
   }
 
-  static uint64_t get_state(object& o) {
+  static uint64_t get_state(const stateful& o) {
     return o.state.get();
   }
 
@@ -30,18 +32,18 @@ class write_stalled_tail {
     return atomic::faa(&write_tail_, UINT64_C(1));
   }
 
-  void end_write_op(object& obj, uint64_t tail) {
+  void end_write_op(stateful& obj, uint64_t tail) {
     uint64_t old_tail;
     do {
       old_tail = tail;
     } while (!atomic::weak::cas(&read_tail_, &old_tail, tail + 1));
   }
 
-  bool start_update_op(object& obj) {
+  static bool start_update_op(stateful& obj) {
     return obj.state.mark_updating(object_state::uninitialized);
   }
 
-  void end_update_op(object& obj, uint64_t new_id) {
+  static void end_update_op(stateful& obj, uint64_t new_id) {
     obj.state.update(new_id);
   }
 
@@ -62,18 +64,18 @@ class write_stalled_tail {
   }
 
  private:
-  std::atomic<uint64_t> read_tail_;
-  std::atomic<uint64_t> write_tail_;
+  atomic::type<uint64_t> read_tail_;
+  atomic::type<uint64_t> write_tail_;
 };
 
-class read_stalled_tail {
+class read_stalled {
  public:
-  read_stalled_tail()
+  read_stalled()
       : tail_(UINT64_C(0)),
         snapshot_(false) {
   }
 
-  static uint64_t get_state(object& o) {
+  static uint64_t get_state(stateful& o) {
     uint64_t state;
     do {
       state = o.state.get();
@@ -90,15 +92,17 @@ class read_stalled_tail {
     return atomic::faa(&tail_, UINT64_C(1));
   }
 
-  void end_write_op(object& obj, uint64_t tail) {
+  void end_write_op(stateful& obj, uint64_t tail) {
+    while (atomic::load(&snapshot_) == true)
+      ;
     obj.state.initalize();
   }
 
-  bool start_update_op(object& obj) {
+  static bool start_update_op(stateful& obj) {
     return obj.state.mark_updating();
   }
 
-  void end_update_op(object& obj, uint64_t new_id) {
+  static void end_update_op(stateful& obj, uint64_t new_id) {
     obj.state.update(new_id);
   }
 
@@ -117,8 +121,8 @@ class read_stalled_tail {
   }
 
  private:
-  std::atomic<uint64_t> tail_;
-  std::atomic<bool> snapshot_;
+  atomic::type<uint64_t> tail_;
+  atomic::type<bool> snapshot_;
 };
 
 }

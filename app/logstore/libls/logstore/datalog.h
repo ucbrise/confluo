@@ -5,7 +5,7 @@
 
 namespace monolog {
 
-typedef __monolog_linear_base <uint8_t> datalog;
+typedef monolog_linear_base <uint8_t> datalog;
 
 }
 

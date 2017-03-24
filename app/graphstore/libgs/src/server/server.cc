@@ -194,10 +194,10 @@ int main(int argc, char **argv) {
   }
 
   if (tail_scheme == "write-stalled") {
-    graph_store<write_stalled_tail>* store = new graph_store<write_stalled_tail>();
+    graph_store<write_stalled>* store = new graph_store<write_stalled>();
     start_server(port, store);
   } else if (tail_scheme == "read-stalled") {
-    graph_store<read_stalled_tail>* store = new graph_store<read_stalled_tail>();
+    graph_store<read_stalled>* store = new graph_store<read_stalled>();
     start_server(port, store);
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());

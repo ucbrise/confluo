@@ -3,9 +3,14 @@
 
 #include <array>
 
-#include "entrylist.h"
+#include "atomic.h"
+#include "monolog.h"
 
-namespace monolog {
+namespace datastore {
+
+namespace index {
+
+typedef monolog::monolog_relaxed<uint64_t, 24> entry_list;
 
 /**
  * @brief The unit of indexing in tiered indexes.
@@ -514,14 +519,16 @@ class __index_depth4 : public __tiered_index_base<value_type> {
  * Useful type-definitions.
  */
 typedef __tiered_index_base <> tiered_index_base;
-typedef __index_depth1 <256> __index1;
-typedef __index_depth1 <65536> __index2;
-typedef __index_depth2 <65536, 256> __index3;
-typedef __index_depth2 <65536, 65536> __index4;
-typedef __index_depth3 <65536, 65536, 256> __index5;
-typedef __index_depth3 <65536, 65536, 65536> __index6;
-typedef __index_depth4 <65536, 65536, 65536, 256> __index7;
-typedef __index_depth4 <65536, 65536, 65536, 65536> __index8;
+typedef __index_depth1 <256> tiered_index1;
+typedef __index_depth1 <65536> tiered_index2;
+typedef __index_depth2 <65536, 256> tiered_index3;
+typedef __index_depth2 <65536, 65536> tiered_index4;
+typedef __index_depth3 <65536, 65536, 256> tiered_index5;
+typedef __index_depth3 <65536, 65536, 65536> tiered_index6;
+typedef __index_depth4 <65536, 65536, 65536, 256> tiered_index7;
+typedef __index_depth4 <65536, 65536, 65536, 65536> tiered_index8;
+
+}
 
 }
 #endif /* TIEREDINDEX_H_ */

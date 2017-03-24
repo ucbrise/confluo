@@ -2,6 +2,7 @@
 #define GRAPHSTORE_LINK_H_
 
 #include <cstdint>
+#include "object.h"
 
 namespace graphstore {
 
@@ -36,7 +37,7 @@ struct link_op {
   }
 };
 
-struct link : public datastore::object {
+struct link : public datastore::stateful {
  public:
   /** Version of link **/
   uint64_t version;

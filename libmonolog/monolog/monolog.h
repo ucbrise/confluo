@@ -7,6 +7,7 @@
 
 #include "atomic.h"
 #include "bit_utils.h"
+#include "mmap_utils.h"
 
 using namespace utils;
 
@@ -64,14 +65,14 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
  *
  */
 template<class T, size_t NBUCKETS = 32>
-class __monolog_base {
+class monolog_base {
  public:
   static const size_t FBS = 16;
   static const size_t FBS_HIBIT = 4;
 
-  typedef std::atomic<T*> __atomic_bucket_ref;
+  typedef atomic::type<T*> __atomic_bucket_ref;
 
-  __monolog_base() {
+  monolog_base() {
     T* null_ptr = NULL;
     for (auto& x : buckets_) {
       atomic::init(&x, null_ptr);
@@ -79,7 +80,7 @@ class __monolog_base {
     atomic::init(&buckets_[0], new T[FBS]);
   }
 
-  ~__monolog_base() {
+  ~monolog_base() {
     for (auto& x : buckets_) {
       delete[] atomic::load(&x);
     }
@@ -123,7 +124,7 @@ class __monolog_base {
   }
 
   // Sets a contiguous region of the MonoLog base to the provided data.
-  void set(size_t idx, const T* data, const size_t len) {
+  void set(size_t idx, const T* data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t bucket_off = pos ^ (1 << hibit);
@@ -149,7 +150,7 @@ class __monolog_base {
   // Sets a contiguous region of the MonoLog base to the provided data. Does
   // NOT allocate memory -- ensure memory is allocated before calling this
   // function.
-  void set_unsafe(size_t idx, const T* data, const size_t len) {
+  void set_unsafe(size_t idx, const T* data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t bucket_off = pos ^ (1 << hibit);
@@ -170,7 +171,7 @@ class __monolog_base {
   }
 
   // Gets the data at index idx.
-  T get(const size_t idx) const {
+  T get(size_t idx) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t bucket_off = pos ^ (1 << hibit);
@@ -178,7 +179,7 @@ class __monolog_base {
     return atomic::load(&buckets_[bucket_idx])[bucket_off];
   }
 
-  T& operator[](const size_t idx) {
+  T& operator[](size_t idx) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t bucket_off = pos ^ (1 << hibit);
@@ -193,7 +194,7 @@ class __monolog_base {
   // Copies a contiguous region of the MonoLog base into the provided buffer.
   // The buffer should have sufficient space to hold the data requested, otherwise
   // undefined behavior may result.
-  void get(T* data, const size_t idx, const size_t len) const {
+  void get(T* data, size_t idx, size_t len) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t bucket_off = pos ^ (1 << hibit);
@@ -248,12 +249,12 @@ class __monolog_base {
 };
 
 template<class T, size_t NBUCKETS = 1024, size_t BLOCK_SIZE = 1073741824UL>
-class __monolog_linear_base {
+class monolog_linear_base {
  public:
-  typedef std::atomic<T*> __atomic_bucket_ref;
+  typedef atomic::type<T*> __atomic_bucket_ref;
   static const size_t BUFFER_SIZE = 1024;  // 1KB buffer size
 
-  __monolog_linear_base() {
+  monolog_linear_base() {
     T* null_ptr = NULL;
     for (auto& x : buckets_) {
       atomic::init(&x, null_ptr);
@@ -261,7 +262,7 @@ class __monolog_linear_base {
     atomic::init(&buckets_[0], new T[BLOCK_SIZE + BUFFER_SIZE]);
   }
 
-  ~__monolog_linear_base() {
+  ~monolog_linear_base() {
     for (auto& x : buckets_) {
       delete[] atomic::load(&x);
     }
@@ -298,7 +299,7 @@ class __monolog_linear_base {
 
   // Write len bytes of data at offset.
   // Allocates memory if necessary.
-  void write(const size_t offset, const T* data, const size_t len) {
+  void write(size_t offset, const T* data, size_t len) {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
     T* bucket;
@@ -310,27 +311,27 @@ class __monolog_linear_base {
 
   // Write len bytes of data at offset. Does NOT allocate memory -- ensure
   // memory is allocated before calling this function.
-  void write_unsafe(const size_t offset, const T* data, const size_t len) {
+  void write_unsafe(size_t offset, const T* data, size_t len) {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
     memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off, data, len);
   }
 
   // Gets the data at index idx.
-  T get(const size_t idx) const {
+  T get(size_t idx) const {
     size_t bucket_idx = idx / BLOCK_SIZE;
     size_t bucket_off = idx % BLOCK_SIZE;
     return atomic::load(&buckets_[bucket_idx])[bucket_off];
   }
 
   // Get len bytes of data at offset.
-  void read(const size_t offset, T* data, const size_t len) const {
+  void read(size_t offset, T* data, size_t len) const {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
     memcpy(data, atomic::load(&buckets_[bucket_idx]) + bucket_off, len);
   }
 
-  T& operator[](const size_t idx) {
+  T& operator[](size_t idx) {
     size_t bucket_idx = idx / BLOCK_SIZE;
     size_t bucket_off = idx % BLOCK_SIZE;
     T* bucket;
@@ -340,7 +341,7 @@ class __monolog_linear_base {
     return bucket[bucket_off];
   }
 
-  void* ptr(const size_t offset) {
+  void* ptr(size_t offset) const {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
     return (void*) (atomic::load(&buckets_[bucket_idx]) + bucket_off);
@@ -378,6 +379,210 @@ class __monolog_linear_base {
   std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
 };
 
+typedef bool block_state;
+
+template<typename T, size_t BLOCK_SIZE = 33554432>
+class mmapped_block {
+ public:
+  static const block_state uninit = false;
+  static const block_state init = true;
+
+  static size_t const BUFFER_SIZE = 1024;
+
+  mmapped_block()
+      : path_(""),
+        state_(uninit),
+        data_(nullptr) {
+  }
+
+  mmapped_block(const std::string& path)
+      : path_(path),
+        state_(uninit),
+        data_(nullptr) {
+  }
+
+  mmapped_block(const mmapped_block& other)
+      : path_(other.path_),
+        state_(other.state_),
+        data_(other.data_) {
+  }
+
+  void set_path(const std::string& path) {
+    path_ = path;
+  }
+
+  size_t storage_size() const {
+    if (atomic::load(&data_) != nullptr)
+      return (BLOCK_SIZE + BUFFER_SIZE) * sizeof(T);
+    return 0;
+  }
+
+  void set(size_t i, const T& val) {
+    T* ptr;
+    if ((ptr = atomic::load(&data_)) == nullptr)
+      ptr = try_allocate();
+    ptr[i] = val;
+  }
+
+  void set_unsafe(size_t i, const T& val) {
+    atomic::load(&data_)[i] = val;
+  }
+
+  void write(size_t offset, const T* data, size_t len) {
+    T* ptr;
+    if ((ptr = atomic::load(&data_)) == nullptr)
+      ptr = try_allocate();
+    memcpy(ptr + offset, data, len);
+  }
+
+  void write_unsafe(size_t offset, const T* data, size_t len) {
+    memcpy(atomic::load(&data_) + offset, data, len);
+  }
+
+  T at(size_t i) const {
+    return atomic::load(&data_)[i];
+  }
+
+  void read(size_t offset, T* data, size_t len) const {
+    memcpy(data, atomic::load(&data_) + offset, len);
+  }
+
+  T& operator[](size_t i) {
+    T* ptr;
+    if ((ptr = atomic::load(&data_)) == nullptr)
+      ptr = try_allocate();
+    return ptr[i];
+  }
+
+  void* ptr(size_t offset) const {
+    return (void*) (atomic::load(&data_) + offset);
+  }
+
+  mmapped_block& operator=(const mmapped_block& other) {
+    path_ = other.path_;
+    atomic::init(&state_, atomic::load(&other.state_));
+    atomic::init(&data_, atomic::load(&other.data_));
+    return *this;
+  }
+
+  void ensure_alloc() {
+    if (atomic::load(&data_) == nullptr)
+      try_allocate();
+  }
+
+ private:
+  T* try_allocate() {
+    block_state state = uninit;
+    if (atomic::strong::cas(&state_, &state, init)) {
+      size_t file_size = (BLOCK_SIZE + BUFFER_SIZE) * sizeof(T);
+      T* data = (T*) utils::mmap_utils::mmap_rw_init(path_, file_size, 0xFF);
+      atomic::store(&data_, data);
+      return data;
+    }
+
+    // Stall until initialized
+    T* data;
+    while ((data = atomic::load(&data_)) == nullptr)
+      ;
+
+    return data;
+  }
+
+  std::string path_;
+  atomic::type<block_state> state_;
+  atomic::type<T*> data_;
+};
+
+template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 33554432>
+class mmap_monolog_base {
+ public:
+
+  mmap_monolog_base() = default;
+
+  mmap_monolog_base(const std::string& name, const std::string& data_path) {
+    init(name, data_path);
+  }
+
+  void init(const std::string& name, const std::string& data_path) {
+    name_ = name;
+    data_path_ = data_path;
+    for (size_t i = 0; i < MAX_BLOCKS; i++) {
+      std::string block_path = data_path + "/" + name + "." + std::to_string(i);
+      blocks_[i].set_path(block_path);
+    }
+    blocks_[0].ensure_alloc();
+  }
+
+  std::string name() const {
+    return name_;
+  }
+
+  std::string data_path() const {
+    return data_path_;
+  }
+
+  void ensure_alloc(size_t idx1, size_t idx2) {
+    size_t bucket_idx1 = idx1 / BLOCK_SIZE;
+    size_t bucket_idx2 = idx2 / BLOCK_SIZE;
+    for (size_t i = bucket_idx1; i <= bucket_idx2; i++)
+      blocks_[i].ensure_alloc();
+  }
+
+  // Sets the data at index idx to val. Allocates memory if necessary.
+  void set(size_t idx, const T& val) {
+    blocks_[idx / BLOCK_SIZE].set(idx % BLOCK_SIZE, val);
+  }
+
+  // Sets the data at index idx to val. Does NOT allocate memory -- ensure
+  // memory is allocated before calling this function.
+  void set_unsafe(size_t idx, const T val) {
+    blocks_[idx / BLOCK_SIZE].set_unsafe(idx % BLOCK_SIZE, val);
+  }
+
+  // Write len bytes of data at offset.
+  // Allocates memory if necessary.
+  void write(size_t offset, const T* data, size_t len) {
+    blocks_[offset / BLOCK_SIZE].write(offset % BLOCK_SIZE, data, len);
+  }
+
+  // Write len bytes of data at offset. Does NOT allocate memory -- ensure
+  // memory is allocated before calling this function.
+  void write_unsafe(size_t offset, const T* data, size_t len) {
+    blocks_[offset / BLOCK_SIZE].write_unsafe(offset % BLOCK_SIZE, data, len);
+  }
+
+  // Gets the data at index idx.
+  T get(size_t idx) const {
+    return blocks_[idx / BLOCK_SIZE].at(idx % BLOCK_SIZE);
+  }
+
+  // Get len bytes of data at offset.
+  void read(size_t offset, T* data, size_t len) const {
+    blocks_[offset / BLOCK_SIZE].read(offset % BLOCK_SIZE, data, len);
+  }
+
+  T& operator[](size_t idx) {
+    return blocks_[idx / BLOCK_SIZE][idx % BLOCK_SIZE];
+  }
+
+  void* ptr(size_t offset) {
+    return blocks_[offset / BLOCK_SIZE].ptr(offset % BLOCK_SIZE);
+  }
+
+  size_t storage_size() const {
+    size_t bucket_size = blocks_.size() * sizeof(mmapped_block<T, BLOCK_SIZE> );
+    size_t data_size = 0;
+    for (size_t i = 0; i < blocks_.size(); i++)
+      data_size += blocks_[i].storage_size();
+    return bucket_size + data_size;
+  }
+
+ protected:
+  std::string name_;
+  std::string data_path_;
+  std::array<mmapped_block<T, BLOCK_SIZE>, MAX_BLOCKS> blocks_;
+};
+
 /**
  * Write stalled, linearizable implementation for the MonoLog.
  *
@@ -388,7 +593,7 @@ class __monolog_linear_base {
  *   start times.
  */
 template<class T, size_t NBUCKETS = 32>
-class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
+class monolog_write_stalled : public monolog_base<T, NBUCKETS> {
  public:
   // Type definitions
   typedef size_t size_type;
@@ -405,7 +610,7 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
   }
 
   // Append an entry at the end of the MonoLog
-  size_t push_back(const T val) {
+  size_t push_back(const T& val) {
     size_t idx = atomic::faa(&write_tail_, 1UL);
     this->set(idx, val);
 
@@ -415,7 +620,7 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
     return idx;
   }
 
-  size_t push_back_range(const T start, const T end) {
+  size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&write_tail_, cnt);
     for (size_t i = 0; i < cnt; i++)
@@ -429,7 +634,7 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
   }
 
   // Get the entry at the specified index `idx'.
-  T at(const size_t idx) const {
+  T at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -447,8 +652,8 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
   }
 
  private:
-  std::atomic<size_t> write_tail_;
-  std::atomic<size_t> read_tail_;
+  atomic::type<size_t> write_tail_;
+  atomic::type<size_t> read_tail_;
 };
 
 /**
@@ -458,7 +663,7 @@ class monolog_write_stalled : public __monolog_base<T, NBUCKETS> {
  * - Write operations are atomic
  */
 template<class T, size_t NBUCKETS = 32>
-class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
+class monolog_relaxed : public monolog_base<T, NBUCKETS> {
  public:
   // Type definitions
   typedef size_t size_type;
@@ -473,13 +678,13 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
       : tail_(0) {
   }
 
-  size_t push_back(const T val) {
+  size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
-  size_t push_back_range(const T start, const T end) {
+  size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
     for (size_t i = 0; i < cnt; i++)
@@ -487,7 +692,7 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
     return idx;
   }
 
-  T at(const size_t idx) const {
+  T at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -504,11 +709,11 @@ class monolog_relaxed : public __monolog_base<T, NBUCKETS> {
   }
 
  private:
-  std::atomic<size_t> tail_;
+  atomic::type<size_t> tail_;
 };
 
 template<class T, size_t NBUCKETS = 32, size_t BLOCK_SIZE = 1073741824UL>
-class monolog_relaxed_linear : public __monolog_linear_base<T, NBUCKETS,
+class monolog_relaxed_linear : public monolog_linear_base<T, NBUCKETS,
     BLOCK_SIZE> {
  public:
   // Type definitions
@@ -524,13 +729,13 @@ class monolog_relaxed_linear : public __monolog_linear_base<T, NBUCKETS,
       : tail_(0) {
   }
 
-  size_t push_back(const T val) {
+  size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
-  size_t push_back_range(const T start, const T end) {
+  size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
     for (size_t i = 0; i < cnt; i++)
@@ -538,7 +743,13 @@ class monolog_relaxed_linear : public __monolog_linear_base<T, NBUCKETS,
     return idx;
   }
 
-  T at(const size_t idx) const {
+  size_t append(const T* data, size_t len) {
+    size_t offset = atomic::faa(&tail_, len);
+    this->write(offset, data, len);
+    return offset;
+  }
+
+  T at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -555,7 +766,73 @@ class monolog_relaxed_linear : public __monolog_linear_base<T, NBUCKETS,
   }
 
  private:
-  std::atomic<size_t> tail_;
+  atomic::type<size_t> tail_;
+};
+
+template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 33554432>
+class mmap_monolog_relaxed : public mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE> {
+ public:
+  // Type definitions
+  typedef size_t size_type;
+  typedef size_t pos_type;
+  typedef T value_type;
+  typedef T difference_type;
+  typedef T* pointer;
+  typedef T reference;
+  typedef monolog_iterator<mmap_monolog_relaxed<T, MAX_BLOCKS, BLOCK_SIZE>> iterator;
+
+  mmap_monolog_relaxed()
+      : mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>(),
+        tail_(0UL) {
+  }
+
+  mmap_monolog_relaxed(const std::string& name, const std::string& data_path)
+      : mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>(name, data_path),
+        tail_(0UL) {
+  }
+
+  size_t push_back(const T& val) {
+    size_t idx = atomic::faa(&tail_, 1UL);
+    this->set(idx, val);
+    return idx;
+  }
+
+  size_t push_back_range(const T& start, const T& end) {
+    size_t cnt = (end - start + 1);
+    size_t idx = atomic::faa(&tail_, cnt);
+    for (size_t i = 0; i < cnt; i++)
+      this->set(idx + i, start + i);
+    return idx;
+  }
+
+  size_t append(const T* data, size_t len) {
+    size_t offset = atomic::faa(&tail_, len);
+    this->write(offset, data, len);
+    return offset;
+  }
+
+  size_t reserve(size_t len) {
+    return atomic::faa(&tail_, len);
+  }
+
+  T at(size_t idx) const {
+    return this->get(idx);
+  }
+
+  size_t size() const {
+    return atomic::load(&tail_);
+  }
+
+  iterator begin() const {
+    return iterator(this, 0);
+  }
+
+  iterator end() const {
+    return iterator(this, size());
+  }
+
+ private:
+  atomic::type<size_t> tail_;
 };
 
 }

@@ -1,5 +1,4 @@
 #include "monolog.h"
-#include "mmap_monolog.h"
 #include "gtest/gtest.h"
 
 #include <thread>
@@ -49,7 +48,7 @@ class MonoLogTest : public testing::Test {
 };
 
 TEST_F(MonoLogTest, MonoLogBaseBaseTest) {
-  monolog::__monolog_base<uint64_t> array;
+  monolog::monolog_base<uint64_t> array;
   monolog_test(array);
 }
 
@@ -73,10 +72,10 @@ TEST_F(MonoLogTest, MonoLogRelaxedTest) {
 }
 
 TEST_F(MonoLogTest, MMapMonoLogTest) {
-  monolog::mmap_monolog<uint64_t, 8, 1048576> array("mlog", "/tmp");
+  monolog::mmap_monolog_relaxed<uint64_t, 8, 1048576> array("mlog", "/tmp");
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog::mmap_monolog<uint64_t, 8, 1048576> arr("mlog", "/tmp");
+    monolog::mmap_monolog_relaxed<uint64_t, 8, 1048576> arr("mlog", "/tmp");
     monolog_test_mt(arr, num_threads);
   }
 }

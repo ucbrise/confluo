@@ -93,7 +93,7 @@ class MonoLogPerf : public testing::Test {
 };
 
 TEST_F(MonoLogPerf, MonoLogBaseLatencyPerf) {
-  monolog::__monolog_base<uint64_t> array;
+  monolog::monolog_base<uint64_t> array;
   perf_latency(array, "__monolog_base_uint64_t");
 }
 

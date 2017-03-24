@@ -1,18 +1,18 @@
-#include "tail_scheme.h"
+#include "concurrency_control.h"
 #include "benchmark.h"
 #include "cmd_parse.h"
 
 using namespace ::datastore;
 
-template<typename tail_scheme>
-class tail_scheme_benchmark : public utils::bench::benchmark<tail_scheme> {
+template<typename concurrency_control>
+class concurrency_control_benchmark : public utils::bench::benchmark<concurrency_control> {
  public:
-  tail_scheme_benchmark(const std::string& output_dir)
-      : utils::bench::benchmark<tail_scheme>(output_dir) {
+  concurrency_control_benchmark(const std::string& output_dir)
+      : utils::bench::benchmark<concurrency_control>(output_dir) {
   }
 
-  static void operation(tail_scheme& tail) {
-    object o;
+  static void operation(concurrency_control& tail) {
+    stateful o;
     uint64_t id = tail.start_write_op();
     tail.end_write_op(o, id);
   }
@@ -40,28 +40,28 @@ int main(int argc, char** argv) {
 
   int num_threads;
   std::string output_dir;
-  std::string tail_scheme;
+  std::string concurrency_control;
   try {
     num_threads = parser.get_int("num-threads");
     output_dir = parser.get("output-dir");
-    tail_scheme = parser.get("tail-scheme");
+    concurrency_control = parser.get("tail-scheme");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
     return 0;
   }
 
-  fprintf(stderr, "num_threads=%d, output_dir=%s, tail_scheme=%s\n",
-          num_threads, output_dir.c_str(), tail_scheme.c_str());
+  fprintf(stderr, "num_threads=%d, output_dir=%s, concurrency_control=%s\n",
+          num_threads, output_dir.c_str(), concurrency_control.c_str());
 
-  if (tail_scheme == "write-stalled") {
-    tail_scheme_benchmark<datastore::write_stalled_tail> perf(output_dir);
+  if (concurrency_control == "write-stalled") {
+    concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
     perf.bench_operation(num_threads);
-  } else if (tail_scheme == "read-stalled") {
-    tail_scheme_benchmark<datastore::read_stalled_tail> perf(output_dir);
+  } else if (concurrency_control == "read-stalled") {
+    concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
     perf.bench_operation(num_threads);
   } else {
-    fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());
+    fprintf(stderr, "Unknown tail scheme: %s\n", concurrency_control.c_str());
   }
 
   return 0;

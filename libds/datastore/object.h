@@ -1,6 +1,7 @@
 #ifndef DATASTORE_OBJECT_H_
 #define DATASTORE_OBJECT_H_
 
+#include <cstdio>
 #include <cstdint>
 #include <cassert>
 #include "atomic.h"
@@ -23,6 +24,10 @@ class object_state {
       : state_(uninitialized) {
   }
 
+  object_state(const object_state& other) {
+    atomic::init(&state_, atomic::load(&other.state_));
+  }
+
   void initalize() {
     atomic::store(&state_, initialized);
   }
@@ -40,11 +45,34 @@ class object_state {
   }
 
  private:
-  std::atomic<uint64_t> state_;
+  atomic::type<uint64_t> state_;
 };
 
-struct object {
+struct stateful {
+  stateful() = default;
+  stateful(const stateful& other)
+      : state(other.state) {
+  }
   object_state state;
+};
+
+struct object_ptr_t : public stateful {
+  size_t offset :40;
+  size_t length :24;
+  uint64_t version;
+
+  object_ptr_t()
+      : offset(0UL),
+        length(0UL),
+        version(UINT64_MAX) {
+  }
+
+  object_ptr_t(const object_ptr_t& other)
+      : stateful(other),
+        offset(other.offset),
+        length(other.length),
+        version(other.version) {
+  }
 };
 
 }

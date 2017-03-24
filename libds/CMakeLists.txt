@@ -9,22 +9,24 @@ file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 set(DATASTORE_INCLUDE datastore)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 set(ATOMIC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libatomic/atomic)
+set(MONOLOG_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libmonolog/monolog)
 
 include_directories(${gtest_SOURCE_DIR}/include
   ${DATASTORE_INCLUDE}
   ${UTILS_INCLUDE}
-  ${ATOMIC_INCLUDE})
+  ${ATOMIC_INCLUDE}
+  ${MONOLOG_INCLUDE})
 
 # Build perf
 file(GLOB_RECURSE perf_sources perf/*.cc)
 add_executable(tsperf ${perf_sources})
 target_link_libraries(tsperf ${CMAKE_THREAD_LIBS_INIT})
 
-## Build test
-#file(GLOB_RECURSE test_sources test/*.cc)
-#add_executable(gstest ${test_sources})
-#target_link_libraries(gstest gs gtest_main)
+# Build test
+file(GLOB_RECURSE test_sources test/*.cc)
+add_executable(dstest ${test_sources})
+target_link_libraries(dstest gtest_main)
 
-## Register test
-#enable_testing()
-#add_test(GraphStoreTest ${EXECUTABLE_OUTPUT_PATH}/gstest)
+# Register test
+enable_testing()
+add_test(DataStoreTest ${EXECUTABLE_OUTPUT_PATH}/dstest)

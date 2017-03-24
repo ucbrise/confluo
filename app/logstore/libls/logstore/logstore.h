@@ -18,7 +18,6 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-#include <atomic>
 
 #include "tokens.h"
 #include "tieredindex.h"
@@ -64,13 +63,10 @@ class log_store {
   /**
    * Constructor to initialize the log-store.
    */
-  log_store() {
+  log_store(): dtail_(UINT64_C(0)) {
     /* Initialize data log and offset log */
     dlog_ = new datalog;
     olog_ = new offsetlog;
-
-    /* Initialize data log tail to zero. */
-    dtail_.store(0);
 
     /* Initialize all index classes */
     idx1_ = new monolog_write_stalled<__index1 *>;
@@ -255,7 +251,7 @@ class log_store {
    * @return The size in bytes of the currently readable portion of the log-store.
    */
   uint64_t size() const {
-    return dtail_.load();
+    return atomic::load(&dtail_);
   }
 
   /** Get storage statistics
@@ -291,7 +287,7 @@ class log_store {
    * @return The offset within data-log of the offered bytes.
    */
   uint64_t request_bytes(uint64_t request_bytes) {
-    uint64_t off = dtail_.fetch_add(request_bytes);
+    uint64_t off = atomic::faa(&dtail_, request_bytes);
     dlog_->ensure_alloc(off, off + request_bytes);
     return off;
   }

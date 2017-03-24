@@ -79,13 +79,13 @@ bool graph_store<graph_tail>::update_node(const node_op& n) {
   node& old_node = (*ndata_)[id];
 
   // Try to mark node as 'updating'; retry on failure
-  if (!tail_.start_update_op(old_node))
+  if (!graph_tail::start_update_op(old_node))
     return update_node(n);
 
   // Only one op will succeeding in marking the node as 'updating'
   // Add the updated node as a new entry and link it to its previous version
   uint64_t new_id = add_node(n);
-  tail_.end_update_op(old_node, new_id);
+  graph_tail::end_update_op(old_node, new_id);
   return true;
 }
 
@@ -240,5 +240,5 @@ size_t graph_store<graph_tail>::count_links(int64_t id1,
   return count;
 }
 
-template class graphstore::graph_store<datastore::write_stalled_tail>;
-template class graphstore::graph_store<datastore::read_stalled_tail>;
+template class graphstore::graph_store<datastore::write_stalled>;
+template class graphstore::graph_store<datastore::read_stalled>;

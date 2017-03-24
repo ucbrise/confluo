@@ -230,10 +230,10 @@ int main(int argc, char** argv) {
           tail_scheme.c_str());
 
   if (tail_scheme == "write-stalled") {
-    graph_store_perf<datastore::write_stalled_tail> perf(output_dir);
+    graph_store_perf<datastore::write_stalled> perf(output_dir);
     exec_bench(perf, num_threads, bench_type);
   } else if (tail_scheme == "read-stalled") {
-    graph_store_perf<datastore::read_stalled_tail> perf(output_dir);
+    graph_store_perf<datastore::read_stalled> perf(output_dir);
     exec_bench(perf, num_threads, bench_type);
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());

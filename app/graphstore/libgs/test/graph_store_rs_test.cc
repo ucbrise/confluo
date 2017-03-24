@@ -14,7 +14,7 @@ class GraphStoreRSTest : public testing::Test {
 };
 
 TEST_F(GraphStoreRSTest, AddNodeTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -27,7 +27,7 @@ TEST_F(GraphStoreRSTest, AddNodeTest) {
 }
 
 TEST_F(GraphStoreRSTest, GetNodeTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -61,7 +61,7 @@ TEST_F(GraphStoreRSTest, GetNodeTest) {
 }
 
 TEST_F(GraphStoreRSTest, UpdateNodeTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -97,7 +97,7 @@ TEST_F(GraphStoreRSTest, UpdateNodeTest) {
 }
 
 TEST_F(GraphStoreRSTest, DeleteNodeTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -122,7 +122,7 @@ TEST_F(GraphStoreRSTest, DeleteNodeTest) {
 }
 
 TEST_F(GraphStoreRSTest, AddGetLinkTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -159,7 +159,7 @@ TEST_F(GraphStoreRSTest, AddGetLinkTest) {
 }
 
 TEST_F(GraphStoreRSTest, UpdateGetLinkTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -196,7 +196,7 @@ TEST_F(GraphStoreRSTest, UpdateGetLinkTest) {
 }
 
 TEST_F(GraphStoreRSTest, AddUpdateGetLinkTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -246,7 +246,7 @@ TEST_F(GraphStoreRSTest, AddUpdateGetLinkTest) {
 }
 
 TEST_F(GraphStoreRSTest, AddDeleteLinkTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -290,7 +290,7 @@ TEST_F(GraphStoreRSTest, AddDeleteLinkTest) {
 }
 
 TEST_F(GraphStoreRSTest, AddMultiGetLinkTest) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -373,7 +373,7 @@ TEST_F(GraphStoreRSTest, AddMultiGetLinkTest) {
 }
 
 TEST_F(GraphStoreRSTest, AddGetLinkList1Test) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;
@@ -425,7 +425,7 @@ TEST_F(GraphStoreRSTest, AddGetLinkList1Test) {
 }
 
 TEST_F(GraphStoreRSTest, AddGetLinkList2Test) {
-  graph_store<read_stalled_tail> gs;
+  graph_store<read_stalled> gs;
 
   for (uint64_t i = 0; i < kNumNodes; i++) {
     node_op n;

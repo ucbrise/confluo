@@ -5,7 +5,7 @@
 #include <set>
 #include <map>
 
-#include "tail_scheme.h"
+#include "concurrency_control.h"
 #include "monolog.h"
 #include "node.h"
 #include "link.h"

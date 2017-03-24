@@ -28,7 +28,7 @@ struct node_op {
 
 typedef monolog::monolog_relaxed<uint64_t, 24> adj_list;
 
-struct node : public datastore::object {
+struct node : public datastore::stateful {
  public:
   /** Version of node **/
   uint64_t version;
