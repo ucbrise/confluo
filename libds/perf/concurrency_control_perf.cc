@@ -57,10 +57,10 @@ int main(int argc, char** argv) {
 
   if (concurrency_control == "write-stalled") {
     concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
-    perf.bench_operation(num_threads);
+    perf.bench_write(num_threads);
   } else if (concurrency_control == "read-stalled") {
     concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
-    perf.bench_operation(num_threads);
+    perf.bench_write(num_threads);
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", concurrency_control.c_str());
   }
