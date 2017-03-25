@@ -134,7 +134,8 @@ template<typename graph_tail>
 link_op graph_store<graph_tail>::get_link(int64_t id1, int64_t link_type,
                                           int64_t id2) const {
   uint64_t t = tail_.get_tail();
-  if (static_cast<uint64_t>(id1) >= ndata_->size())
+  if (static_cast<uint64_t>(id1) >= ndata_->size()
+      || (*ndata_)[id1].version >= t)
     return link_op::empty();
 
   adj_list* list = (*ndata_)[id1].neighbors;
@@ -154,7 +155,8 @@ std::vector<link_op> graph_store<graph_tail>::multiget_links(
     int64_t id1, int64_t link_type, std::set<int64_t> id2s) const {
   uint64_t t = tail_.get_tail();
   std::vector<link_op> l;
-  if (static_cast<uint64_t>(id1) >= ndata_->size())
+  if (static_cast<uint64_t>(id1) >= ndata_->size()
+      || (*ndata_)[id1].version >= t)
     return l;
 
   adj_list* list = (*ndata_)[id1].neighbors;
@@ -175,7 +177,8 @@ std::set<link_op> graph_store<graph_tail>::get_link_list(
     int64_t id1, int64_t link_type) const {
   uint64_t t = tail_.get_tail();
   std::set<link_op> l;
-  if (static_cast<uint64_t>(id1) >= ndata_->size())
+  if (static_cast<uint64_t>(id1) >= ndata_->size()
+      || (*ndata_)[id1].version >= t)
     return l;
 
   adj_list* list = (*ndata_)[id1].neighbors;
@@ -200,7 +203,8 @@ std::set<link_op> graph_store<graph_tail>::get_link_list(int64_t id1,
                                                          int64_t limit) const {
   uint64_t t = tail_.get_tail();
   std::set<link_op> l;
-  if (static_cast<uint64_t>(id1) >= ndata_->size())
+  if (static_cast<uint64_t>(id1) >= ndata_->size()
+      || (*ndata_)[id1].version >= t)
     return l;
 
   adj_list* list = (*ndata_)[id1].neighbors;
@@ -226,7 +230,8 @@ size_t graph_store<graph_tail>::count_links(int64_t id1,
                                             int64_t link_type) const {
   uint64_t t = tail_.get_tail();
   size_t count = 0;
-  if (static_cast<uint64_t>(id1) >= ndata_->size())
+  if (static_cast<uint64_t>(id1) >= ndata_->size()
+      || (*ndata_)[id1].version >= t)
     return count;
 
   adj_list* list = (*ndata_)[id1].neighbors;

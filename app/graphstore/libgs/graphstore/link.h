@@ -61,7 +61,8 @@ struct link : public datastore::stateful {
   /**
    * Default constructor
    */
-  link() {
+  link()
+      : stateful() {
     version = UINT64_MAX;
     id1 = -1;
     id2 = -1;
@@ -69,7 +70,8 @@ struct link : public datastore::stateful {
     time = -1;
   }
 
-  link(const link& rhs) {
+  link(const link& rhs)
+      : stateful(rhs) {
     *this = rhs;
   }
 

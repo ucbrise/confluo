@@ -42,13 +42,15 @@ struct node : public datastore::stateful {
   /** Node neighbors **/
   adj_list* neighbors;
 
-  node() {
+  node()
+      : stateful() {
     version = UINT64_MAX;
     type = -1;
     neighbors = nullptr;
   }
 
-  node(const node& rhs) {
+  node(const node& rhs)
+      : stateful(rhs) {
     *this = rhs;
   }
 
