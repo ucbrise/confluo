@@ -32,7 +32,10 @@ class write_stalled {
     return atomic::faa(&write_tail_, UINT64_C(1));
   }
 
-  void end_write_op(stateful& obj, uint64_t tail) {
+  void init_object(stateful& obj) {
+  }
+
+  void end_write_op(uint64_t tail) {
     uint64_t old_tail;
     do {
       old_tail = tail;
@@ -92,10 +95,13 @@ class read_stalled {
     return atomic::faa(&tail_, UINT64_C(1));
   }
 
-  void end_write_op(stateful& obj, uint64_t tail) {
+  void init_object(stateful& obj) {
     while (atomic::load(&snapshot_) == true)
       ;
     obj.state.initalize();
+  }
+
+  void end_write_op(uint64_t tail) {
   }
 
   static bool start_update_op(stateful& obj) {

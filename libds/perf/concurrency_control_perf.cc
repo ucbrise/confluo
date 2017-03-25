@@ -14,7 +14,8 @@ class concurrency_control_benchmark : public utils::bench::benchmark<concurrency
   static void operation(concurrency_control& tail) {
     stateful o;
     uint64_t id = tail.start_write_op();
-    tail.end_write_op(o, id);
+    tail.init_object(o);
+    tail.end_write_op(id);
   }
 
   DEFINE_BENCH(operation)
