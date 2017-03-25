@@ -11,14 +11,14 @@ class concurrency_control_benchmark : public utils::bench::benchmark<concurrency
       : utils::bench::benchmark<concurrency_control>(output_dir) {
   }
 
-  static void operation(concurrency_control& tail) {
+  static void write(concurrency_control& tail) {
     stateful o;
     uint64_t id = tail.start_write_op();
     tail.init_object(o);
     tail.end_write_op(id);
   }
 
-  DEFINE_BENCH(operation)
+  DEFINE_BENCH(write)
 };
 
 int main(int argc, char** argv) {
