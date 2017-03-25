@@ -1,6 +1,8 @@
 #ifndef DATASTORE_OBJECT_LOG_H_
 #define DATASTORE_OBJECT_LOG_H_
 
+#include <functional>
+
 #include "object.h"
 #include "monolog.h"
 #include "concurrency_control.h"
