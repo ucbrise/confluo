@@ -29,8 +29,9 @@ class coordinator_service : virtual public coordinator_serviceIf {
   }
 
   void get_snapshot(std::vector<int64_t> & _return) {
-    // Your implementation goes here
-    printf("get_snapshot\n");
+    snapshot s = coord_.get_snapshot();
+    for (auto t : s.tails)
+      _return.push_back(t);
   }
 
  private:

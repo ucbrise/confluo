@@ -5,8 +5,10 @@
 #include <chrono>
 #include <thread>
 
+#include "time_utils.h"
 #include "monolog.h"
 #include "atomic.h"
+#include "logger.h"
 
 namespace datastore {
 
@@ -22,13 +24,11 @@ struct snapshot {
 template<typename data_store>
 class coordinator {
  public:
-  static const uint64_t idle = UINT64_MAX;
-  static const uint64_t started = UINT64_MAX & ~(UINT64_C(1) << 63);
-
-  static const uint64_t CLEAR_MASK = ~(UINT64_C(1) << 63);
+  static const uint64_t MONITOR_SLEEP_US = 1000000;
 
   coordinator(std::vector<data_store>& stores, uint64_t sleep_us)
       : run_(false),
+        monitor_(false),
         sleep_us_(sleep_us),
         stores_(stores) {
   }
@@ -65,6 +65,37 @@ class coordinator {
     return success;
   }
 
+  bool start_monitor() {
+    bool expected = false;
+    if (atomic::strong::cas(&monitor_, &expected, true)) {
+      monitor_thread_ = std::thread([&] {
+        auto sleep_dur = std::chrono::microseconds(MONITOR_SLEEP_US);
+        uint64_t start = utils::time_utils::cur_ms();
+        while (true) {
+          std::this_thread::sleep_for(sleep_dur);
+          if (!atomic::load(&monitor_)) {
+            return;
+          }
+          uint64_t now = utils::time_utils::cur_ms();
+          size_t nsnapshots = snapshots_.size();
+          double snapshot_rate = (nsnapshots * 1000.0) / (double)(now - start);
+          LOG_INFO << nsnapshots << " snapshots in " << (now - start) <<
+            " ms [" << snapshot_rate << " snapshots/s]";
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+
+  bool stop_monitor() {
+    bool expected = true;
+    bool success = atomic::strong::cas(&monitor_, &expected, false);
+    if (success)
+      monitor_thread_.join();
+    return success;
+  }
+
  private:
   void do_snapshot() {
     snapshot s(stores_.size());
@@ -82,11 +113,13 @@ class coordinator {
   }
 
   atomic::type<bool> run_;
+  atomic::type<bool> monitor_;
   std::chrono::microseconds sleep_us_;
   monolog::monolog_relaxed<snapshot> snapshots_;
   std::vector<data_store>& stores_;
 
   std::thread snapshot_thread_;
+  std::thread monitor_thread_;
 };
 
 }

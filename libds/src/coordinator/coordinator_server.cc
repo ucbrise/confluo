@@ -5,6 +5,7 @@
 #include "string_utils.h"
 #include "error_handling.h"
 #include "cmd_parse.h"
+#include "logger.h"
 
 int main(int argc, char **argv) {
 
@@ -40,6 +41,8 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  LOG_INFO << "Sleep interval = " << sleep_us << "us";
+
   std::vector<std::string> hosts;
   std::vector<int> ports;
   std::ifstream in(hosts_file);
@@ -69,6 +72,7 @@ int main(int argc, char **argv) {
 
   datastore::coordinator<datastore::log_store_client> coord(clients, sleep_us);
   coord.start();
+  coord.start_monitor();
 
   datastore::coordinator_server::start(coord, port);
 
