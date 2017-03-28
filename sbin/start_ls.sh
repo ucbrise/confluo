@@ -3,6 +3,9 @@
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
+. "$sbin/monolog-config.sh"
+. "$MONOLOG_PREFIX/sbin/load-monolog-env.sh"
+
 LOG_PATH=$sbin/../log
 
 if [ "$CONCURRECY_CONTROL" = "" ]; then
