@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
   std::vector<int> ports;
   std::ifstream in(hosts_file);
   std::string line;
-  fprintf(stderr, "Hostlist:\n");
+  LOG_INFO << "Host list:";
   while (std::getline(in, line)) {
     std::vector<std::string> elems = utils::string_utils::split(line, ':');
     if (elems.size() == 2) {
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
       fprintf(stderr, "Could not parse hosts file\n");
       return 0;
     }
-    fprintf(stderr, "Host %s port %d\n", hosts.back().c_str(), ports.back());
+    LOG_INFO << "Host: " << hosts.back().c_str() << " Port: " << ports.back();
   }
 
   if (hosts.empty())
