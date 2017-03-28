@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 
+#include "monolog.h"
 #include "atomic.h"
 
 namespace datastore {
@@ -68,10 +69,16 @@ class coordinator {
   void do_snapshot() {
     snapshot s(stores_.size());
     for (size_t i = 0; i < stores_.size(); i++)
-      s.tails[i] = stores_[i].begin_snapshot();
+      stores_[i].send_begin_snapshot();
     for (size_t i = 0; i < stores_.size(); i++)
-      stores_[i].end_snapshot(s.tails[i]);
+      s.tails[i] = stores_[i].recv_begin_snapshot();
+
     snapshots_.push_back(s);
+
+    for (size_t i = 0; i < stores_.size(); i++)
+      stores_[i].send_end_snapshot(s.tails[i]);
+    for (size_t i = 0; i < stores_.size(); i++)
+      stores_[i].recv_end_snapshot();
   }
 
   atomic::type<bool> run_;

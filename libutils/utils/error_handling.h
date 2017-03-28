@@ -15,13 +15,13 @@ class error_handling {
  public:
   static const uint32_t MAX_FRAMES = 64;
 
-  static inline void intall_signal_handler() {
+  static inline void install_signal_handler() {
   }
 
   template<typename ...args>
-  static inline void intall_signal_handler(int sig, args ... more) {
-    signal(sig, error_handling::gdb_stack_trace);
-    error_handling::intall_signal_handler(std::forward<int>(more)...);
+  static inline void install_signal_handler(int sig, args ... more) {
+    signal(sig, error_handling::sighandler_stacktrace);
+    error_handling::install_signal_handler(std::forward<int>(more)...);
   }
 
  private:

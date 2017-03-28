@@ -169,7 +169,7 @@ void start_server(int port, graph_store<tail_scheme>* store) {
 
 int main(int argc, char **argv) {
 
-  utils::error_handling::intall_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
+  utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
 
   cmd_options opts;
   opts.add(

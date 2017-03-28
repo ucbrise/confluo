@@ -140,17 +140,21 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
   typedef concurrency_control cc;
 
   log_store(concurrency_control& ctrl)
-      : tail_(UINT64_C(0)),
+      : snapshot_tail_(UINT64_C(0)),
+        snapshot_success_(false),
+        tail_(UINT64_C(0)),
         cc_(ctrl) {
   }
 
   log_store(concurrency_control& ctrl, const std::string& path)
       : log_store_base<storage, concurrency_control, aux_data>(path),
+        snapshot_tail_(UINT64_C(0)),
+        snapshot_success_(false),
         tail_(UINT64_C(0)),
         cc_(ctrl) {
   }
 
-  uint64_t append(uint8_t* data, size_t length) {
+  uint64_t append(const uint8_t* data, size_t length) {
     uint64_t version = cc_.start_write_op();
     uint64_t id = atomic::faa(&tail_, UINT64_C(1));
     object_ptr_t& p = this->write(id, data, length, version);
@@ -194,7 +198,7 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     return this->read(id, data, max_version);
   }
 
-  bool update(uint64_t id, uint8_t* data, size_t length) {
+  bool update(uint64_t id, const uint8_t* data, size_t length) {
     if (id >= atomic::load(&tail_))
       return false;
     while (true) {
@@ -222,6 +226,10 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     }
   }
 
+  bool invalidate(uint64_t id) {
+    return update(id, NULL, 0);
+  }
+
   uint64_t begin_snapshot() {
     return cc_.start_snapshot_op();
   }
@@ -230,11 +238,25 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     return cc_.end_snapshot_op(id);
   }
 
-  bool invalidate(uint64_t id) {
-    return update(id, NULL, 0);
+  void send_begin_snapshot() {
+    snapshot_tail_ = cc_.start_snapshot_op();
+  }
+
+  uint64_t recv_begin_snapshot() {
+    return snapshot_tail_;
+  }
+
+  void send_end_snapshot(uint64_t id) {
+    snapshot_success_ = cc_.end_snapshot_op(id);
+  }
+
+  bool recv_end_snapshot() {
+    return snapshot_success_;
   }
 
  private:
+  uint64_t snapshot_tail_;
+  bool snapshot_success_;
   atomic::type<uint64_t> tail_;
   concurrency_control& cc_;
 };
@@ -247,13 +269,19 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
  public:
   typedef concurrency_control cc;
 
-  log_store() = default;
+  log_store()
+      : snapshot_tail_(UINT64_C(0)),
+        snapshot_success_(false) {
 
-  log_store(const std::string& path)
-      : log_store_base<storage, concurrency_control, aux_data>(path) {
   }
 
-  uint64_t append(uint8_t* data, size_t length) {
+  log_store(const std::string& path)
+      : log_store_base<storage, concurrency_control, aux_data>(path),
+        snapshot_tail_(UINT64_C(0)),
+        snapshot_success_(false) {
+  }
+
+  uint64_t append(const uint8_t* data, size_t length) {
     uint64_t id = cc_.start_write_op();
     object_ptr_t& p = this->write(id, data, length, id);
     cc_.end_write_op(p, id);
@@ -294,7 +322,7 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     return this->read(id, data, max_id);
   }
 
-  bool update(uint64_t id, uint8_t* data, size_t length) {
+  bool update(uint64_t id, const uint8_t* data, size_t length) {
     while (true) {
       uint64_t max_id = cc_.get_tail();
       if (id > max_id)
@@ -334,7 +362,25 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     return cc_.end_snapshot_op(id);
   }
 
+  void send_begin_snapshot() {
+    snapshot_tail_ = cc_.start_snapshot_op();
+  }
+
+  uint64_t recv_begin_snapshot() {
+    return snapshot_tail_;
+  }
+
+  void send_end_snapshot(uint64_t id) {
+    snapshot_success_ = cc_.end_snapshot_op(id);
+  }
+
+  bool recv_end_snapshot() {
+    return snapshot_success_;
+  }
+
  private:
+  uint64_t snapshot_tail_;
+  bool snapshot_success_;
   concurrency_control cc_;
 };
 
