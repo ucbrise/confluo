@@ -95,11 +95,11 @@ class log_store_server {
     try {
       shared_ptr<data_store_processor_factory> proc_factory(
           new data_store_processor_factory(store));
-      shared_ptr<TServerSocket> transport(new TServerSocket(port));
+      shared_ptr<TServerSocket> socket(new TServerSocket(port));
       shared_ptr<TBufferedTransportFactory> transport_factory(
           new TBufferedTransportFactory());
       shared_ptr<TProtocolFactory> prot_factory(new TBinaryProtocolFactory());
-      TThreadedServer server(proc_factory, transport, transport_factory,
+      TThreadedServer server(proc_factory, socket, transport_factory,
                              prot_factory);
 
       LOG_INFO<< "Listening for connections on port " << port;

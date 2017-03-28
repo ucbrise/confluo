@@ -38,6 +38,7 @@ class log_store_client {
     transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
     protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
     client_ = boost::shared_ptr<ls_client>(new ls_client(protocol_));
+    transport_->open();
   }
 
   int64_t append(const std::string& data) {

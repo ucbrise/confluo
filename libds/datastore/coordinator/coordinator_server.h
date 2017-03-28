@@ -66,11 +66,11 @@ class coordinator_server {
     typedef coord_processor_factory<data_store> processor_factory;
     try {
       shared_ptr<processor_factory> proc_factory(new processor_factory(coord));
-      shared_ptr<TServerSocket> transport(new TServerSocket(port));
+      shared_ptr<TServerSocket> socket(new TServerSocket(port));
       shared_ptr<TBufferedTransportFactory> transport_factory(
           new TBufferedTransportFactory());
       shared_ptr<TProtocolFactory> prot_factory(new TBinaryProtocolFactory());
-      TThreadedServer server(proc_factory, transport, transport_factory,
+      TThreadedServer server(proc_factory, socket, transport_factory,
                              prot_factory);
 
       LOG_INFO<< "Listening for connections on port " << port;
