@@ -95,9 +95,7 @@ class read_stalled {
   }
 
   void end_write_op(stateful& obj, uint64_t tail) {
-    while (atomic::load(&snapshot_) == true) {
-      fprintf(stderr, "Write paused...\n");
-    }
+    while (atomic::load(&snapshot_) == true);
     obj.state.initalize();
   }
 
