@@ -12,9 +12,10 @@ using namespace ::datastore;
 
 class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  public:
-  ls_server_benchmark(const std::string& output_dir, size_t load_records)
+  ls_server_benchmark(const std::string& output_dir, size_t load_records,
+                      const std::string& host, int port)
       : utils::bench::benchmark<log_store_client>(output_dir) {
-
+    ds_.connect(host, port);
     PRELOAD_RECORDS = load_records;
     for (size_t i = 0; i < load_records; i++)
       ds_.append(append_data());
@@ -71,6 +72,12 @@ int main(int argc, char** argv) {
   opts.add(
       cmd_option("preload-records", 'r', false).set_default("0").set_description(
           "#Records to pre-load the logstore with"));
+  opts.add(
+      cmd_option("server", 's', false).set_default("localhost").set_description(
+          "Server to connect"));
+  opts.add(
+      cmd_option("port", 'p', false).set_default("9090").set_description(
+          "Server port"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -82,22 +89,27 @@ int main(int argc, char** argv) {
   std::string output_dir;
   std::string bench_op;
   long load_records;
+  std::string server;
+  int port;
   try {
     num_threads = parser.get_int("num-threads");
     output_dir = parser.get("output-dir");
     bench_op = parser.get("bench-op");
     load_records = parser.get_long("preload-records");
+    server = parser.get("server");
+    port = parser.get_int("port");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
     return 0;
   }
 
-  fprintf(stderr,
-          "num_threads=%d, output_dir=%s, bench_op=%s, load_records=%ld\n",
-          num_threads, output_dir.c_str(), bench_op.c_str(), load_records);
+  const char* fmt = "#threads=%d, odir=%s, bench_op=%s,"
+      " #records=%ld, server=%s, port=%d\n";
+  fprintf(stderr, fmt, num_threads, output_dir.c_str(), bench_op.c_str(),
+          load_records, server.c_str(), port);
 
-  ls_server_benchmark perf(output_dir, load_records);
+  ls_server_benchmark perf(output_dir, load_records, server, port);
   if (bench_op == "append") {
     perf.bench_append(num_threads);
   } else if (bench_op == "get") {
@@ -112,7 +124,7 @@ int main(int argc, char** argv) {
                  "Need to pre-load data for invalidate benchmark");
     perf.bench_invalidate(num_threads);
   } else {
-    fprintf(stderr, "Unknown tail scheme: %s\n", bench_op.c_str());
+    fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }
 
   return 0;

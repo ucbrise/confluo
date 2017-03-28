@@ -20,10 +20,7 @@ class log_store_client {
   log_store_client() = default;
 
   log_store_client(const std::string& host, int port) {
-    socket_ = boost::shared_ptr<TSocket>(new TSocket(host, port));
-    transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
-    protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
-    client_ = boost::shared_ptr<ls_client>(new ls_client(protocol_));
+    connect(host, port);
   }
 
   log_store_client(const log_store_client& other) {
@@ -31,6 +28,13 @@ class log_store_client {
     transport_ = other.transport_;
     protocol_ = other.protocol_;
     client_ = other.client_;
+  }
+
+  void connect(const std::string& host, int port) {
+    socket_ = boost::shared_ptr<TSocket>(new TSocket(host, port));
+    transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
+    protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
+    client_ = boost::shared_ptr<ls_client>(new ls_client(protocol_));
   }
 
   int64_t append(const std::string& data) {
