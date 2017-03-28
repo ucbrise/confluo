@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <mutex>
 
 #include "logger.h"
 
@@ -117,10 +118,15 @@ class benchmark {
     double thput_tot = std::accumulate(thput.begin(), thput.end(), 0.0);
     LOG_INFO<< "Completed benchmark at " << thput_tot << " ops/s";
 
-    std::ofstream out(output_file);
-    out << thput_tot << "\n";
-    out.close();
+    {
+      std::lock_guard<std::mutex> lk(write_mtx_);
+      std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
+      out << thput_tot << "\n";
+      out.close();
+    }
   }
+
+  std::mutex write_mtx_;
 
   data_structure ds_;
   std::string output_dir_;
