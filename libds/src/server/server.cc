@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
           data_path);
       datastore::log_store_server::start(store, port);
     } else if (concurrency_control == "read-stalled") {
-      datastore::log_store<datastore::in_memory, datastore::write_stalled> store(
+      datastore::log_store<datastore::in_memory, datastore::read_stalled> store(
           data_path);
       datastore::log_store_server::start(store, port);
     } else {
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
       datastore::log_store_server::start(store, port);
     } else if (concurrency_control == "read-stalled") {
       datastore::log_store<datastore::persistent_relaxed,
-          datastore::write_stalled> store(data_path);
+          datastore::read_stalled> store(data_path);
       datastore::log_store_server::start(store, port);
     } else {
       fprintf(stderr, "Unknown concurrency control: %s\n",
