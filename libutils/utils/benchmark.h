@@ -56,9 +56,9 @@ namespace utils {
 namespace bench {
 
 struct constants {
-  static const uint64_t WARMUP_OPS = 5000000;
-  static const uint64_t MEASURE_OPS = 10000000;
-  static const uint64_t COOLDOWN_OPS = 5000000;
+  static const uint64_t WARMUP_OPS = 50000;
+  static const uint64_t MEASURE_OPS = 100000;
+  static const uint64_t COOLDOWN_OPS = 50000;
 };
 
 typedef std::chrono::high_resolution_clock timer;
