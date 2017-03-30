@@ -51,7 +51,7 @@
 #define BENCH_OP_BATCH(op, nthreads, batch_size)\
   std::string output_file = this->output_dir_ + "/throughput-" + #op + "-"\
      + std::to_string(nthreads) + "-" + std::to_string(batch_size) + ".txt";\
-  this->bench_thput_batch(op, batch_size, nthreads, output_file);
+  this->bench_thput_batch(op, nthreads, batch_size, output_file);
 
 #define DEFINE_BENCH(op)\
   void bench_##op(size_t nthreads) {\
