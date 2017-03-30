@@ -22,11 +22,13 @@ class log_store_serviceIf {
  public:
   virtual ~log_store_serviceIf() {}
   virtual int64_t append(const std::string& data) = 0;
+  virtual void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data) = 0;
   virtual void get(std::string& _return, const int64_t id) = 0;
   virtual bool update(const int64_t id, const std::string& data) = 0;
   virtual bool invalidate(const int64_t id) = 0;
   virtual int64_t begin_snapshot() = 0;
   virtual bool end_snapshot(const int64_t id) = 0;
+  virtual int64_t num_records() = 0;
 };
 
 class log_store_serviceIfFactory {
@@ -60,6 +62,9 @@ class log_store_serviceNull : virtual public log_store_serviceIf {
     int64_t _return = 0;
     return _return;
   }
+  void multi_append(std::vector<int64_t> & /* _return */, const std::vector<std::string> & /* data */) {
+    return;
+  }
   void get(std::string& /* _return */, const int64_t /* id */) {
     return;
   }
@@ -77,6 +82,10 @@ class log_store_serviceNull : virtual public log_store_serviceIf {
   }
   bool end_snapshot(const int64_t /* id */) {
     bool _return = false;
+    return _return;
+  }
+  int64_t num_records() {
+    int64_t _return = 0;
     return _return;
   }
 };
@@ -180,6 +189,110 @@ class log_store_service_append_presult {
   int64_t* success;
 
   _log_store_service_append_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _log_store_service_multi_append_args__isset {
+  _log_store_service_multi_append_args__isset() : data(false) {}
+  bool data :1;
+} _log_store_service_multi_append_args__isset;
+
+class log_store_service_multi_append_args {
+ public:
+
+  log_store_service_multi_append_args(const log_store_service_multi_append_args&);
+  log_store_service_multi_append_args& operator=(const log_store_service_multi_append_args&);
+  log_store_service_multi_append_args() {
+  }
+
+  virtual ~log_store_service_multi_append_args() throw();
+  std::vector<std::string>  data;
+
+  _log_store_service_multi_append_args__isset __isset;
+
+  void __set_data(const std::vector<std::string> & val);
+
+  bool operator == (const log_store_service_multi_append_args & rhs) const
+  {
+    if (!(data == rhs.data))
+      return false;
+    return true;
+  }
+  bool operator != (const log_store_service_multi_append_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const log_store_service_multi_append_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class log_store_service_multi_append_pargs {
+ public:
+
+
+  virtual ~log_store_service_multi_append_pargs() throw();
+  const std::vector<std::string> * data;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _log_store_service_multi_append_result__isset {
+  _log_store_service_multi_append_result__isset() : success(false) {}
+  bool success :1;
+} _log_store_service_multi_append_result__isset;
+
+class log_store_service_multi_append_result {
+ public:
+
+  log_store_service_multi_append_result(const log_store_service_multi_append_result&);
+  log_store_service_multi_append_result& operator=(const log_store_service_multi_append_result&);
+  log_store_service_multi_append_result() {
+  }
+
+  virtual ~log_store_service_multi_append_result() throw();
+  std::vector<int64_t>  success;
+
+  _log_store_service_multi_append_result__isset __isset;
+
+  void __set_success(const std::vector<int64_t> & val);
+
+  bool operator == (const log_store_service_multi_append_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const log_store_service_multi_append_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const log_store_service_multi_append_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _log_store_service_multi_append_presult__isset {
+  _log_store_service_multi_append_presult__isset() : success(false) {}
+  bool success :1;
+} _log_store_service_multi_append_presult__isset;
+
+class log_store_service_multi_append_presult {
+ public:
+
+
+  virtual ~log_store_service_multi_append_presult() throw();
+  std::vector<int64_t> * success;
+
+  _log_store_service_multi_append_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -700,6 +813,98 @@ class log_store_service_end_snapshot_presult {
 
 };
 
+
+class log_store_service_num_records_args {
+ public:
+
+  log_store_service_num_records_args(const log_store_service_num_records_args&);
+  log_store_service_num_records_args& operator=(const log_store_service_num_records_args&);
+  log_store_service_num_records_args() {
+  }
+
+  virtual ~log_store_service_num_records_args() throw();
+
+  bool operator == (const log_store_service_num_records_args & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const log_store_service_num_records_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const log_store_service_num_records_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class log_store_service_num_records_pargs {
+ public:
+
+
+  virtual ~log_store_service_num_records_pargs() throw();
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _log_store_service_num_records_result__isset {
+  _log_store_service_num_records_result__isset() : success(false) {}
+  bool success :1;
+} _log_store_service_num_records_result__isset;
+
+class log_store_service_num_records_result {
+ public:
+
+  log_store_service_num_records_result(const log_store_service_num_records_result&);
+  log_store_service_num_records_result& operator=(const log_store_service_num_records_result&);
+  log_store_service_num_records_result() : success(0) {
+  }
+
+  virtual ~log_store_service_num_records_result() throw();
+  int64_t success;
+
+  _log_store_service_num_records_result__isset __isset;
+
+  void __set_success(const int64_t val);
+
+  bool operator == (const log_store_service_num_records_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const log_store_service_num_records_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const log_store_service_num_records_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _log_store_service_num_records_presult__isset {
+  _log_store_service_num_records_presult__isset() : success(false) {}
+  bool success :1;
+} _log_store_service_num_records_presult__isset;
+
+class log_store_service_num_records_presult {
+ public:
+
+
+  virtual ~log_store_service_num_records_presult() throw();
+  int64_t* success;
+
+  _log_store_service_num_records_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 class log_store_serviceClient : virtual public log_store_serviceIf {
  public:
   log_store_serviceClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) {
@@ -728,6 +933,9 @@ class log_store_serviceClient : virtual public log_store_serviceIf {
   int64_t append(const std::string& data);
   void send_append(const std::string& data);
   int64_t recv_append();
+  void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data);
+  void send_multi_append(const std::vector<std::string> & data);
+  void recv_multi_append(std::vector<int64_t> & _return);
   void get(std::string& _return, const int64_t id);
   void send_get(const int64_t id);
   void recv_get(std::string& _return);
@@ -743,6 +951,9 @@ class log_store_serviceClient : virtual public log_store_serviceIf {
   bool end_snapshot(const int64_t id);
   void send_end_snapshot(const int64_t id);
   bool recv_end_snapshot();
+  int64_t num_records();
+  void send_num_records();
+  int64_t recv_num_records();
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -759,20 +970,24 @@ class log_store_serviceProcessor : public ::apache::thrift::TDispatchProcessor {
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
   void process_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_multi_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_invalidate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_begin_snapshot(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_end_snapshot(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   log_store_serviceProcessor(boost::shared_ptr<log_store_serviceIf> iface) :
     iface_(iface) {
     processMap_["append"] = &log_store_serviceProcessor::process_append;
+    processMap_["multi_append"] = &log_store_serviceProcessor::process_multi_append;
     processMap_["get"] = &log_store_serviceProcessor::process_get;
     processMap_["update"] = &log_store_serviceProcessor::process_update;
     processMap_["invalidate"] = &log_store_serviceProcessor::process_invalidate;
     processMap_["begin_snapshot"] = &log_store_serviceProcessor::process_begin_snapshot;
     processMap_["end_snapshot"] = &log_store_serviceProcessor::process_end_snapshot;
+    processMap_["num_records"] = &log_store_serviceProcessor::process_num_records;
   }
 
   virtual ~log_store_serviceProcessor() {}
@@ -808,6 +1023,16 @@ class log_store_serviceMultiface : virtual public log_store_serviceIf {
       ifaces_[i]->append(data);
     }
     return ifaces_[i]->append(data);
+  }
+
+  void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->multi_append(_return, data);
+    }
+    ifaces_[i]->multi_append(_return, data);
+    return;
   }
 
   void get(std::string& _return, const int64_t id) {
@@ -856,6 +1081,15 @@ class log_store_serviceMultiface : virtual public log_store_serviceIf {
     return ifaces_[i]->end_snapshot(id);
   }
 
+  int64_t num_records() {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->num_records();
+    }
+    return ifaces_[i]->num_records();
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -889,6 +1123,9 @@ class log_store_serviceConcurrentClient : virtual public log_store_serviceIf {
   int64_t append(const std::string& data);
   int32_t send_append(const std::string& data);
   int64_t recv_append(const int32_t seqid);
+  void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data);
+  int32_t send_multi_append(const std::vector<std::string> & data);
+  void recv_multi_append(std::vector<int64_t> & _return, const int32_t seqid);
   void get(std::string& _return, const int64_t id);
   int32_t send_get(const int64_t id);
   void recv_get(std::string& _return, const int32_t seqid);
@@ -904,6 +1141,9 @@ class log_store_serviceConcurrentClient : virtual public log_store_serviceIf {
   bool end_snapshot(const int64_t id);
   int32_t send_end_snapshot(const int64_t id);
   bool recv_end_snapshot(const int32_t seqid);
+  int64_t num_records();
+  int32_t send_num_records();
+  int64_t recv_num_records(const int32_t seqid);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;

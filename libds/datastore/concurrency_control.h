@@ -33,6 +33,11 @@ class write_stalled {
     return atomic::faa(&write_tail_, UINT64_C(1));
   }
 
+  // Batch op
+  uint64_t start_write_op(uint64_t cnt) {
+    return atomic::faa(&write_tail_, cnt);
+  }
+
   void init_object(stateful& obj, uint64_t tail) {
     // Do nothing
   }
@@ -40,6 +45,14 @@ class write_stalled {
   void end_write_op(uint64_t tail) {
     uint64_t old_tail = tail;
     while (!atomic::weak::cas(&read_tail_, &old_tail, tail + 1)) {
+      old_tail = tail;
+      std::this_thread::yield();
+    }
+  }
+
+  void end_write_op(uint64_t tail, uint64_t cnt) {
+    uint64_t old_tail = tail;
+    while (!atomic::weak::cas(&read_tail_, &old_tail, tail + cnt)) {
       old_tail = tail;
       std::this_thread::yield();
     }
@@ -59,8 +72,9 @@ class write_stalled {
 
   uint64_t start_snapshot_op() {
     uint64_t tail = get_tail();
-    while (!atomic::weak::cas(&read_tail_, &tail, tail | HI_BIT))
-      ;
+    while (!atomic::weak::cas(&read_tail_, &tail, tail | HI_BIT)) {
+      std::this_thread::yield();
+    }
     return tail;
   }
 
@@ -98,13 +112,23 @@ class read_stalled {
     return atomic::faa(&tail_, UINT64_C(1));
   }
 
+  // Batch op
+  uint64_t start_write_op(uint64_t cnt) {
+    return atomic::faa(&tail_, cnt);
+  }
+
   void init_object(stateful& obj, uint64_t tail) {
-    while (tail >= atomic::load(&snapshot_))
-      ;
+    while (tail >= atomic::load(&snapshot_)) {
+      std::this_thread::yield();
+    }
     obj.state.initalize();
   }
 
   void end_write_op(uint64_t tail) {
+    // Do nothing
+  }
+
+  void end_write_op(uint64_t tail, uint64_t cnt) {
     // Do nothing
   }
 

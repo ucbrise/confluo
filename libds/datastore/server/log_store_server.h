@@ -1,6 +1,9 @@
 #ifndef DATASTORE_SERVER_LOG_STORE_SERVER_H_
 #define DATASTORE_SERVER_LOG_STORE_SERVER_H_
 
+#include <algorithm>
+#include <numeric>
+
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -30,7 +33,13 @@ class log_store_service : virtual public log_store_serviceIf {
   }
 
   int64_t append(const std::string& data) {
-    return store_.append((const uint8_t*) data.c_str(), data.length());
+    return store_.append(data);
+  }
+
+  void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data) {
+    uint64_t start_id = store_.append_batch(data);
+    _return.resize(data.size());
+    std::iota(_return.begin(), _return.end(), start_id);
   }
 
   void get(std::string& _return, const int64_t id) {
@@ -42,7 +51,7 @@ class log_store_service : virtual public log_store_serviceIf {
   }
 
   bool update(const int64_t id, const std::string& data) {
-    return store_.update(id, (const uint8_t*) data.c_str(), data.length());
+    return store_.update(id, data);
   }
 
   bool invalidate(const int64_t id) {
@@ -55,6 +64,10 @@ class log_store_service : virtual public log_store_serviceIf {
 
   bool end_snapshot(const int64_t id) {
     return store_.end_snapshot(id);
+  }
+
+  int64_t num_records() {
+    return store_.num_records();
   }
 
  private:

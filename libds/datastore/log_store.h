@@ -173,16 +173,30 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     return id;
   }
 
-  template<typename data_gen>
-  uint64_t append(data_gen&& gen) {
-    uint64_t version = cc_.start_write_op();
-    uint64_t id = atomic::faa(&tail_, UINT64_C(1));
-    uint8_t* data;
-    size_t length;
-    gen(std::ref(data), std::ref(length));
-    object_ptr_t& p = this->write(id, data, length, version);
-    cc_.init_object(p, version);
-    cc_.end_write_op(version);
+  uint64_t append_batch(const std::vector<uint8_t*>& data_batch,
+                        std::vector<size_t>& length_batch) {
+    uint64_t cnt = data_batch.size();
+    uint64_t version = cc_.start_write_op(cnt);
+    uint64_t id = atomic::faa(&tail_, cnt);
+    for (size_t i = 0; i < cnt; i++) {
+      object_ptr_t& p = this->write(id, data_batch[i], length_batch[i],
+                                    version);
+      cc_.init_object(p, version);
+    }
+    cc_.end_write_op(version, cnt);
+    return id;
+  }
+
+  template<typename T>
+  uint64_t append_batch(const std::vector<T>& data_batch) {
+    uint64_t cnt = data_batch.size();
+    uint64_t version = cc_.start_write_op(cnt);
+    uint64_t id = atomic::faa(&tail_, cnt);
+    for (const T& data : data_batch) {
+      object_ptr_t& p = this->write(id, data, version);
+      cc_.init_object(p, version);
+    }
+    cc_.end_write_op(version, cnt);
     return id;
   }
 
@@ -245,7 +259,7 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     snapshot_tail_ = cc_.start_snapshot_op();
   }
 
-  uint64_t recv_begin_snapshot() {
+  uint64_t recv_begin_snapshot() const {
     return snapshot_tail_;
   }
 
@@ -253,8 +267,12 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     snapshot_success_ = cc_.end_snapshot_op(id);
   }
 
-  bool recv_end_snapshot() {
+  bool recv_end_snapshot() const {
     return snapshot_success_;
+  }
+
+  size_t num_records() const {
+    return atomic::load(&tail_);
   }
 
  private:
@@ -301,15 +319,27 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     return id;
   }
 
-  template<typename data_gen>
-  uint64_t append(data_gen&& gen) {
-    uint64_t id = cc_.start_write_op();
-    uint8_t* data;
-    size_t length;
-    gen(std::ref(data), std::ref(length));
-    object_ptr_t& p = this->write(id, data, length, id);
-    cc_.init_object(p, id);
-    cc_.end_write_op(id);
+  uint64_t append_batch(const std::vector<uint8_t*>& data_batch,
+                        std::vector<size_t>& length_batch) {
+    uint64_t cnt = data_batch.size();
+    uint64_t id = cc_.start_write_op(cnt);
+    for (size_t i = 0; i < cnt; i++) {
+      object_ptr_t& p = this->write(id, data_batch[i], length_batch[i], id);
+      cc_.init_object(p, id);
+    }
+    cc_.end_write_op(id, cnt);
+    return id;
+  }
+
+  template<typename T>
+  uint64_t append_batch(const std::vector<T>& data_batch) {
+    uint64_t cnt = data_batch.size();
+    uint64_t id = cc_.start_write_op(cnt);
+    for (const T& data : data_batch) {
+      object_ptr_t& p = this->write(id, data, id);
+      cc_.init_object(p, id);
+    }
+    cc_.end_write_op(id, cnt);
     return id;
   }
 
@@ -372,7 +402,7 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     snapshot_tail_ = cc_.start_snapshot_op();
   }
 
-  uint64_t recv_begin_snapshot() {
+  uint64_t recv_begin_snapshot() const {
     return snapshot_tail_;
   }
 
@@ -380,8 +410,12 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     snapshot_success_ = cc_.end_snapshot_op(id);
   }
 
-  bool recv_end_snapshot() {
+  bool recv_end_snapshot() const {
     return snapshot_success_;
+  }
+
+  size_t num_records() const {
+    return cc_.get_tail();
   }
 
  private:

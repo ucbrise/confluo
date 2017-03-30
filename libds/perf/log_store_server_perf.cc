@@ -13,33 +13,30 @@ using namespace ::datastore;
 class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  public:
   ls_server_benchmark(const std::string& output_dir, size_t load_records,
-                      size_t async_batch_size, const std::string& host,
-                      int port)
+                      size_t batch_size, const std::string& host, int port)
       : utils::bench::benchmark<log_store_client>(output_dir) {
     ds_.connect(host, port);
     PRELOAD_RECORDS = load_records;
-    ASYNC_BATCH_SIZE = async_batch_size;
+    BATCH_SIZE = batch_size;
+    APPEND_DATA_BATCH.resize(BATCH_SIZE, APPEND_DATA);
     for (size_t i = 0; i < load_records; i++)
-      ds_.append(append_data());
-  }
-
-  static std::string append_data() {
-    return std::string(DATA_SIZE, 'x');
-  }
-
-  static std::string update_data() {
-    return std::string(DATA_SIZE, 'x');
+      ds_.append(APPEND_DATA);
   }
 
   static void append(log_store_client& client) {
-    client.append(append_data());
+    client.append(APPEND_DATA);
   }
 
   static void append_async(log_store_client& client) {
-    for (size_t i = 0; i < ASYNC_BATCH_SIZE; i++)
-      client.send_append(append_data());
-    for (size_t i = 0; i < ASYNC_BATCH_SIZE; i++)
+    for (size_t i = 0; i < BATCH_SIZE; i++)
+      client.send_append(APPEND_DATA);
+    for (size_t i = 0; i < BATCH_SIZE; i++)
       client.recv_append();
+  }
+
+  static void multi_append(log_store_client& client) {
+    std::vector<int64_t> ids;
+    client.multi_append(ids, APPEND_DATA_BATCH);
   }
 
   static void get(log_store_client& client) {
@@ -48,8 +45,7 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
   }
 
   static void update(log_store_client& client) {
-    client.update(utils::rand_utils::rand_int64(PRELOAD_RECORDS),
-                  update_data());
+    client.update(utils::rand_utils::rand_int64(PRELOAD_RECORDS), UPDATE_DATA);
   }
 
   static void invalidate(log_store_client& client) {
@@ -64,11 +60,18 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
 
  private:
   static uint64_t PRELOAD_RECORDS;
-  static uint64_t ASYNC_BATCH_SIZE;
+  static uint64_t BATCH_SIZE;
+
+  static std::string APPEND_DATA;
+  static std::string UPDATE_DATA;
+  static std::vector<std::string> APPEND_DATA_BATCH;
 };
 
 uint64_t ls_server_benchmark::PRELOAD_RECORDS = 0;
-uint64_t ls_server_benchmark::ASYNC_BATCH_SIZE = 1;
+uint64_t ls_server_benchmark::BATCH_SIZE = 1;
+std::string ls_server_benchmark::APPEND_DATA = std::string('x', DATA_SIZE);
+std::string ls_server_benchmark::UPDATE_DATA = std::string('y', DATA_SIZE);
+std::vector<std::string> ls_server_benchmark::APPEND_DATA_BATCH;
 
 int main(int argc, char** argv) {
   cmd_options opts;

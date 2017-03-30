@@ -32,6 +32,10 @@ class log_store_client {
     client_ = other.client_;
   }
 
+  ~log_store_client() {
+    disconnect();
+  }
+
   void connect(const std::string& host, int port) {
     LOG_INFO << "Connecting to " << host << ":" << port;
     socket_ = boost::shared_ptr<TSocket>(new TSocket(host, port));
@@ -39,6 +43,10 @@ class log_store_client {
     protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
     client_ = boost::shared_ptr<ls_client>(new ls_client(protocol_));
     transport_->open();
+  }
+
+  void disconnect() {
+    transport_->close();
   }
 
   int64_t append(const std::string& data) {
@@ -51,6 +59,10 @@ class log_store_client {
 
   int64_t recv_append() {
     return client_->recv_append();
+  }
+
+  void multi_append(std::vector<int64_t>& ids, const std::vector<std::string>& data) {
+    return client_->multi_append(ids, data);
   }
 
   void get(std::string& _return, const int64_t id) {
