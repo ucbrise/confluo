@@ -48,9 +48,19 @@
      + std::to_string(nthreads) + ".txt";\
   this->bench_thput(op, nthreads, output_file);
 
+#define BENCH_OP_BATCH(op, nthreads, batch_size)\
+  std::string output_file = this->output_dir_ + "/throughput-" + #op + "-"\
+     + std::to_string(nthreads) + "-" + std::to_string(batch_size) + ".txt";\
+  this->bench_thput_batch(op, batch_size, nthreads, output_file);
+
 #define DEFINE_BENCH(op)\
   void bench_##op(size_t nthreads) {\
     BENCH_OP(op, nthreads)\
+  }
+
+#define DEFINE_BENCH_BATCH(op, batch_size)\
+  void bench_##op(size_t nthreads) {\
+    BENCH_OP_BATCH(op, nthreads, batch_size)\
   }
 
 namespace utils {
@@ -88,6 +98,30 @@ static void bench_thput_thread(op_t&& op, data_structure& ds, size_t nthreads,
   LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
 }
 
+template<typename data_structure, typename op_t>
+static void bench_thput_batch_thread(op_t&& op, data_structure& ds,
+                                     size_t nthreads, size_t batch_size,
+                                     size_t i, std::vector<double>& thput) {
+  size_t num_ops;
+
+  LOG_INFO<< "Running warmup for " << constants::WARMUP_OPS / batch_size << " ops";
+  LOOP_OPS(op, ds, num_ops, (constants::WARMUP_OPS / batch_size));
+
+  LOG_INFO<< "Warmup complete; running measure for " << constants::MEASURE_OPS / batch_size << " ops";
+  auto start = timer::now();
+  LOOP_OPS(op, ds, num_ops, (constants::MEASURE_OPS / batch_size));
+  auto end = timer::now();
+
+  auto usecs = std::chrono::duration_cast<us>(end - start).count();
+  assert(usecs > 0);
+  thput[i] = num_ops * batch_size * 1e6 / usecs;
+
+  LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_OPS / batch_size << " ops";
+  LOOP_OPS(op, ds, num_ops, (constants::COOLDOWN_OPS / batch_size));
+
+  LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
+}
+
 template<typename data_structure>
 class benchmark {
  public:
@@ -109,6 +143,33 @@ class benchmark {
       workers[i] = std::thread(bench_thput_thread<data_structure, op_t>,
                                std::ref(op), std::ref(ds_), nthreads, i,
                                std::ref(thput));
+      SET_CORE_AFFINITY(workers[i], i);
+    }
+
+    for (std::thread& worker : workers)
+      worker.join();
+
+    double thput_tot = std::accumulate(thput.begin(), thput.end(), 0.0);
+    LOG_INFO<< "Completed benchmark at " << thput_tot << " ops/s";
+
+    {
+      std::lock_guard<std::mutex> lk(write_mtx_);
+      std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
+      out << thput_tot << "\n";
+      out.close();
+    }
+  }
+
+  template<typename op_t>
+  void bench_thput_batch(op_t&& op, const size_t nthreads,
+                         const size_t batch_size,
+                         const std::string& output_file) {
+    std::vector<std::thread> workers(nthreads);
+    std::vector<double> thput(nthreads);
+    for (size_t i = 0; i < nthreads; i++) {
+      workers[i] = std::thread(bench_thput_batch_thread<data_structure, op_t>,
+                               std::ref(op), std::ref(ds_), nthreads,
+                               batch_size, i, std::ref(thput));
       SET_CORE_AFFINITY(workers[i], i);
     }
 

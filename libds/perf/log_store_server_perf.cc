@@ -53,8 +53,8 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
   }
 
   DEFINE_BENCH(append)
-  DEFINE_BENCH(append_async)
-  DEFINE_BENCH(multi_append)
+  DEFINE_BENCH_BATCH(append_async, BATCH_SIZE)
+  DEFINE_BENCH_BATCH(multi_append, BATCH_SIZE)
   DEFINE_BENCH(get)
   DEFINE_BENCH(update)
   DEFINE_BENCH(invalidate)
