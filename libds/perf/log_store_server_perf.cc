@@ -1,4 +1,5 @@
 #include "server/log_store_client.h"
+#define NPIN_CORES
 #include "benchmark.h"
 #include "logger.h"
 #include "assertions.h"

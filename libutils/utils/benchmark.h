@@ -30,6 +30,7 @@
   }
 
 #ifdef _GNU_SOURCE
+#ifndef NPIN_CORES
 #define SET_CORE_AFFINITY(t, core_id)\
   LOG_INFO << "Pinning thread to core" << core_id;\
   cpu_set_t cpuset;\
@@ -38,6 +39,7 @@
   int rc = pthread_setaffinity_np(t.native_handle(), sizeof(cpu_set_t), &cpuset);\
   if (rc != 0)\
     LOG_WARN << "Error calling pthread_setaffinity_np: " << rc;
+#endif
 #else
 #define SET_CORE_AFFINITY(thread, core_id)\
   LOG_WARN << "Not pinning thread to core";
