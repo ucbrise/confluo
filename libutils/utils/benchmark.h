@@ -39,10 +39,16 @@
   int rc = pthread_setaffinity_np(t.native_handle(), sizeof(cpu_set_t), &cpuset);\
   if (rc != 0)\
     LOG_WARN << "Error calling pthread_setaffinity_np: " << rc;
+#else
+#define SET_CORE_AFFINITY(thread, core_id)
 #endif
 #else
+#ifndef NPIN_CORES
 #define SET_CORE_AFFINITY(thread, core_id)\
   LOG_WARN << "Not pinning thread to core";
+#else
+#define SET_CORE_AFFINITY(thread, core_id)
+#endif
 #endif
 
 #define BENCH_OP(op, nthreads)\
