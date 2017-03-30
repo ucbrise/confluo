@@ -3,6 +3,8 @@
 #include "error_handling.h"
 #include "cmd_parse.h"
 
+using namespace ::datastore;
+
 int main(int argc, char **argv) {
 
   utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
@@ -46,26 +48,22 @@ int main(int argc, char **argv) {
 
   if (storage_scheme == "in-memory") {
     if (concurrency_control == "write-stalled") {
-      datastore::log_store<datastore::in_memory, datastore::write_stalled> store(
-          data_path);
-      datastore::log_store_server::start(store, port);
+      log_store<in_memory, write_stalled> store(data_path);
+      log_store_server::start(store, port);
     } else if (concurrency_control == "read-stalled") {
-      datastore::log_store<datastore::in_memory, datastore::read_stalled> store(
-          data_path);
-      datastore::log_store_server::start(store, port);
+      log_store<in_memory, read_stalled> store(data_path);
+      log_store_server::start(store, port);
     } else {
       fprintf(stderr, "Unknown concurrency control: %s\n",
               concurrency_control.c_str());
     }
   } else if (storage_scheme == "persistent") {
     if (concurrency_control == "write-stalled") {
-      datastore::log_store<datastore::persistent_relaxed,
-          datastore::write_stalled> store(data_path);
-      datastore::log_store_server::start(store, port);
+      log_store<persistent_relaxed, write_stalled> store(data_path);
+      log_store_server::start(store, port);
     } else if (concurrency_control == "read-stalled") {
-      datastore::log_store<datastore::persistent_relaxed,
-          datastore::read_stalled> store(data_path);
-      datastore::log_store_server::start(store, port);
+      log_store<persistent_relaxed, read_stalled> store(data_path);
+      log_store_server::start(store, port);
     } else {
       fprintf(stderr, "Unknown concurrency control: %s\n",
               concurrency_control.c_str());
