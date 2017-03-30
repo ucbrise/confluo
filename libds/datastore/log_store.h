@@ -158,7 +158,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t version = cc_.start_write_op();
     uint64_t id = atomic::faa(&tail_, UINT64_C(1));
     object_ptr_t& p = this->write(id, data, length, version);
-    cc_.end_write_op(p, version);
+    cc_.init_object(p, version);
+    cc_.end_write_op(version);
     return id;
   }
 
@@ -167,7 +168,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t version = cc_.start_write_op();
     uint64_t id = atomic::faa(&tail_, UINT64_C(1));
     object_ptr_t& p = this->write(id, data, version);
-    cc_.end_write_op(p, version);
+    cc_.init_object(p, version);
+    cc_.end_write_op(version);
     return id;
   }
 
@@ -179,7 +181,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     size_t length;
     gen(std::ref(data), std::ref(length));
     object_ptr_t& p = this->write(id, data, length, version);
-    cc_.end_write_op(p, version);
+    cc_.init_object(p, version);
+    cc_.end_write_op(version);
     return id;
   }
 
@@ -284,7 +287,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
   uint64_t append(const uint8_t* data, size_t length) {
     uint64_t id = cc_.start_write_op();
     object_ptr_t& p = this->write(id, data, length, id);
-    cc_.end_write_op(p, id);
+    cc_.init_object(p, id);
+    cc_.end_write_op(id);
     return id;
   }
 
@@ -292,7 +296,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
   uint64_t append(const T& data) {
     uint64_t id = cc_.start_write_op();
     object_ptr_t& p = this->write(id, data, id);
-    cc_.end_write_op(p, id);
+    cc_.init_object(p, id);
+    cc_.end_write_op(id);
     return id;
   }
 
@@ -303,7 +308,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     size_t length;
     gen(std::ref(data), std::ref(length));
     object_ptr_t& p = this->write(id, data, length, id);
-    cc_.end_write_op(p, id);
+    cc_.init_object(p, id);
+    cc_.end_write_op(id);
     return id;
   }
 
