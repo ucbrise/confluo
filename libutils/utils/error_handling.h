@@ -100,6 +100,7 @@ class error_handling {
     free(symbollist);
 
     fprintf(stderr, "%s\n", out.str().c_str());
+    exit(-1);
   }
 
   static inline void gdb_stack_trace(int sig) {
@@ -118,6 +119,7 @@ class error_handling {
     } else {
       waitpid(child_pid, NULL, 0);
     }
+    exit(-1);
   }
 };
 
