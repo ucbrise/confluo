@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cassert>
+#include <cstring>
 #include <string>
 #include "atomic.h"
 
