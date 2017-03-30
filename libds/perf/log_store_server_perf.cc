@@ -13,10 +13,12 @@ using namespace ::datastore;
 class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  public:
   ls_server_benchmark(const std::string& output_dir, size_t load_records,
-                      const std::string& host, int port)
+                      size_t async_batch_size, const std::string& host,
+                      int port)
       : utils::bench::benchmark<log_store_client>(output_dir) {
     ds_.connect(host, port);
     PRELOAD_RECORDS = load_records;
+    ASYNC_BATCH_SIZE = async_batch_size;
     for (size_t i = 0; i < load_records; i++)
       ds_.append(append_data());
   }
@@ -31,6 +33,13 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
 
   static void append(log_store_client& client) {
     client.append(append_data());
+  }
+
+  static void append_async(log_store_client& client) {
+    for (size_t i = 0; i < ASYNC_BATCH_SIZE; i++)
+      client.send_append(append_data());
+    for (size_t i = 0; i < ASYNC_BATCH_SIZE; i++)
+      client.recv_append();
   }
 
   static void get(log_store_client& client) {
@@ -48,15 +57,18 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
   }
 
   DEFINE_BENCH(append)
+  DEFINE_BENCH(append_async)
   DEFINE_BENCH(get)
   DEFINE_BENCH(update)
   DEFINE_BENCH(invalidate)
 
  private:
   static uint64_t PRELOAD_RECORDS;
+  static uint64_t ASYNC_BATCH_SIZE;
 };
 
 uint64_t ls_server_benchmark::PRELOAD_RECORDS = 0;
+uint64_t ls_server_benchmark::ASYNC_BATCH_SIZE = 1;
 
 int main(int argc, char** argv) {
   cmd_options opts;
@@ -69,6 +81,9 @@ int main(int argc, char** argv) {
   opts.add(
       cmd_option("bench-op", 'b', false).set_default("append").set_description(
           "Benchmark operation (append, get, update, invalidate)"));
+  opts.add(
+      cmd_option("append-batchsize", 'a', false).set_default("1")
+          .set_description("Append batch size"));
   opts.add(
       cmd_option("preload-records", 'r', false).set_default("0").set_description(
           "#Records to pre-load the logstore with"));
@@ -89,6 +104,7 @@ int main(int argc, char** argv) {
   std::string output_dir;
   std::string bench_op;
   long load_records;
+  long batch_size;
   std::string server;
   int port;
   try {
@@ -96,6 +112,7 @@ int main(int argc, char** argv) {
     output_dir = parser.get("output-dir");
     bench_op = parser.get("bench-op");
     load_records = parser.get_long("preload-records");
+    batch_size = parser.get_long("append-batchsize");
     server = parser.get("server");
     port = parser.get_int("port");
   } catch (std::exception& e) {
@@ -109,9 +126,11 @@ int main(int argc, char** argv) {
   fprintf(stderr, fmt, num_threads, output_dir.c_str(), bench_op.c_str(),
           load_records, server.c_str(), port);
 
-  ls_server_benchmark perf(output_dir, load_records, server, port);
+  ls_server_benchmark perf(output_dir, load_records, batch_size, server, port);
   if (bench_op == "append") {
     perf.bench_append(num_threads);
+  } else if (bench_op == "append-async") {
+    perf.bench_append_async(num_threads);
   } else if (bench_op == "get") {
     assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
     perf.bench_get(num_threads);

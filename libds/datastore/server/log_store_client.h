@@ -45,6 +45,14 @@ class log_store_client {
     return client_->append(data);
   }
 
+  void send_append(const std::string& data) {
+    return client_->send_append(data);
+  }
+
+  int64_t recv_append() {
+    return client_->recv_append();
+  }
+
   void get(std::string& _return, const int64_t id) {
     return client_->get(_return, id);
   }
