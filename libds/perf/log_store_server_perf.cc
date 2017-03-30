@@ -54,6 +54,7 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
 
   DEFINE_BENCH(append)
   DEFINE_BENCH(append_async)
+  DEFINE_BENCH(multi_append)
   DEFINE_BENCH(get)
   DEFINE_BENCH(update)
   DEFINE_BENCH(invalidate)
@@ -134,6 +135,8 @@ int main(int argc, char** argv) {
     perf.bench_append(num_threads);
   } else if (bench_op == "append-async") {
     perf.bench_append_async(num_threads);
+  } else if (bench_op == "multi-append") {
+    perf.bench_multi_append(num_threads);
   } else if (bench_op == "get") {
     assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
     perf.bench_get(num_threads);

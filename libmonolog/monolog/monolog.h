@@ -749,6 +749,10 @@ class monolog_relaxed_linear : public monolog_linear_base<T, NBUCKETS,
     return offset;
   }
 
+  size_t reserve(size_t len) {
+    return atomic::faa(&tail_, len);
+  }
+
   T at(size_t idx) const {
     return this->get(idx);
   }
