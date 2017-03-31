@@ -883,7 +883,7 @@ class monolog_bitvector {
     uint64_t rem = (bidx != bidx_max) ? 64 - boff : 64 - boff - count;
 
     if (boff == 0 && rem == 64) {
-      atomic::store(&bits_[bidx], 0xFFFFFFFFFFFFFFFFULL);
+      atomic::store(&bits_[bidx], UINT64_C(0xFFFFFFFFFFFFFFFF));
     } else {
       uint64_t block = bits_[bidx];
       while (!atomic::weak::cas(&bits_[bidx], &block,
@@ -893,7 +893,7 @@ class monolog_bitvector {
 
     bidx++;
     while (bidx != bidx_max) {
-      atomic::store(&bits_[bidx], 0xFFFFFFFFFFFFFFFFULL);
+      atomic::store(&bits_[bidx], UINT64_C(0xFFFFFFFFFFFFFFFF));
       bidx++;
     }
 
