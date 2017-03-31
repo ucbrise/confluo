@@ -171,7 +171,7 @@ class monolog_base {
   }
 
   // Gets the data at index idx.
-  T get(size_t idx) const {
+  const T& get(size_t idx) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t bucket_off = pos ^ (1 << hibit);
