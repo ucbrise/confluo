@@ -515,6 +515,98 @@ class __index_depth4 : public __tiered_index_base<value_type> {
   indexlet<__index_depth3 <SIZE2, SIZE3, SIZE4, value_type>, SIZE1> idx_;
 };
 
+struct empty_stats {
+};
+
+template<typename T, size_t K, size_t D, typename stats = empty_stats>
+class tiered_index {
+ public:
+  typedef tiered_index<T, K, D - 1, stats> child_type;
+  typedef indexlet<child_type, K> idx_type;
+
+  static uint64_t NUM_BITS;
+  static uint64_t NODE_RANGE;
+  static uint64_t CHILD_RANGE;
+
+  tiered_index() {
+    NUM_BITS = D * utils::bit_utils::highest_bit(K);
+    NODE_RANGE = UINT64_C(1) << NUM_BITS;
+    CHILD_RANGE = NODE_RANGE / K;
+  }
+
+  T* operator[](const uint64_t key) {
+    child_type* c = get_or_create_child(key / CHILD_RANGE);
+    return (*c)[key % CHILD_RANGE];
+  }
+
+  T* at(const uint64_t key) const {
+    child_type* c = get_child(key / CHILD_RANGE);
+    return c->at(key % CHILD_RANGE);
+  }
+
+  child_type* get_or_create_child(const uint64_t k) {
+    return idx_.get(k);
+  }
+
+  child_type* get_child(const uint64_t k) const {
+    return idx_.at(k);
+  }
+
+  stats& get_stats() {
+    return stats_;
+  }
+
+ private:
+  idx_type idx_;
+  stats stats_;
+};
+
+template<typename T, size_t K, typename stats>
+class tiered_index<T, K, 1, stats> {
+ public:
+  typedef T child_type;
+  typedef indexlet<T, K> idx_type;
+
+  static uint64_t NUM_BITS;
+  static uint64_t NODE_RANGE;
+  static uint64_t CHILD_RANGE;
+
+  tiered_index() = default;
+
+  T* operator[](const uint64_t key) {
+    return get_or_create_child(key);
+  }
+
+  T* at(const uint64_t key) const {
+    return get_child(key);
+  }
+
+  child_type* get_or_create_child(const uint64_t k) {
+    return idx_.get(k);
+  }
+
+  child_type* get_child(const uint64_t k) const {
+    return idx_.at(k);
+  }
+
+  stats& get_stats() {
+    return stats_;
+  }
+
+ private:
+  idx_type idx_;
+  stats stats_;
+};
+
+template<typename T, size_t K, size_t D, typename S>
+uint64_t tiered_index<T, K, D, S>::NUM_BITS;
+
+template<typename T, size_t K, size_t D, typename S>
+uint64_t tiered_index<T, K, D, S>::NODE_RANGE;
+
+template<typename T, size_t K, size_t D, typename S>
+uint64_t tiered_index<T, K, D, S>::CHILD_RANGE;
+
 /**
  * Useful type-definitions.
  */
