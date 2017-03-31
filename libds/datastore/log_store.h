@@ -28,8 +28,8 @@ struct in_memory {
   }
 
   std::string path;
-  monolog::monolog_relaxed_linear<uint8_t> data_log_;
-  monolog::monolog_linear_base<object_ptr_t, 8192, 16777216> ptr_log_;
+  monolog::monolog_relaxed_linear<uint8_t, 65536, 1073741824> data_log_;
+  monolog::monolog_linear_base<object_ptr_t, 65536, 16777216> ptr_log_;
 };
 
 struct persistent_relaxed {
@@ -42,8 +42,8 @@ struct persistent_relaxed {
   }
 
   std::string path;
-  monolog::mmap_monolog_relaxed<uint8_t> data_log_;
-  monolog::mmap_monolog_base<object_ptr_t> ptr_log_;
+  monolog::mmap_monolog_relaxed<uint8_t, 65536, 1073741824> data_log_;
+  monolog::mmap_monolog_base<object_ptr_t, 65536, 16777216> ptr_log_;
 };
 
 template<typename storage, typename concurrency_control, typename aux_data>
