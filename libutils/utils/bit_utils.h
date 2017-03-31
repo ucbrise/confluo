@@ -1,6 +1,8 @@
 #ifndef UTILS_BIT_UTILS_H_
 #define UTILS_BIT_UTILS_H_
 
+#include <cassert>
+
 #define BSR
 
 namespace utils {
@@ -127,6 +129,7 @@ class bit_utils {
   }
 
   static inline uint64_t set_bits(uint64_t n, uint64_t i, uint64_t cnt) {
+    assert(i + cnt < 65);
     return n | (low_bits_unset[i] & low_bits_set[i + cnt]);
   }
 
