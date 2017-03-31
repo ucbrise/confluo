@@ -120,7 +120,7 @@ class log_store_base {
   bool read(uint64_t id, T* data, uint64_t max_version) const {
     object_ptr_t p = cptr(id, max_version);
     if (p.version < max_version && p.length != 0) {
-      deserializer<T>::deserialize(primary_.data_log_.ptr(p.offset), data);
+      deserializer<T>::deserialize(primary_.data_log_.cptr(p.offset), data);
       return true;
     }
     return false;

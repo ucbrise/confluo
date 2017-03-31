@@ -95,7 +95,6 @@ struct serializer<std::string> {
   }
 
   static void serialize(void* dst, const std::string& o) {
-    *(uint8_t*)dst = 0; // DEBUG
     memcpy(dst, o.c_str(), o.length());
   }
 };
