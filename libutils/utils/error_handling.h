@@ -82,13 +82,25 @@ class error_handling {
                                         &status);
         if (status == 0) {
           funcname = ret;  // use possibly realloc()-ed string
-          out << "  " << symbollist[i] << " : " << funcname << "+"
-              << begin_offset << "\n";
+          out << "  " << symbollist[i] << ": " << funcname << "+"
+              << begin_offset;
         } else {
           // demangling failed. Output function name as a C function with
           // no arguments.
-          out << "  " << symbollist[i] << " : " << begin_name << "()+"
-              << begin_offset << "\n";
+          out << "  " << symbollist[i] << ": " << begin_name << "()+"
+              << begin_offset;
+        }
+
+        char syscom[256];
+        sprintf(syscom, "addr2line %p -e %s", addrlist[i], symbollist[i]);
+        FILE* cmd = popen(syscom, "r");
+        if (cmd) {
+          char buf[256];
+          fscanf(cmd, "%256s", buf);
+          pclose(cmd);
+          out << "(" << buf << ")\n";
+        } else {
+          out << "\n";
         }
       } else {
         // couldn't parse the line? print the whole line.
