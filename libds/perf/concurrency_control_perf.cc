@@ -5,7 +5,8 @@
 using namespace ::datastore;
 
 template<typename concurrency_control>
-class concurrency_control_benchmark : public utils::bench::benchmark<concurrency_control> {
+class concurrency_control_benchmark : public utils::bench::benchmark<
+    concurrency_control> {
  public:
   concurrency_control_benchmark(const std::string& output_dir)
       : utils::bench::benchmark<concurrency_control>(output_dir) {
@@ -24,14 +25,17 @@ class concurrency_control_benchmark : public utils::bench::benchmark<concurrency
 int main(int argc, char** argv) {
   cmd_options opts;
   opts.add(
+      cmd_option("bench-type", 'b', false).set_default("throughput-write")
+          .set_description("Benchmark type"));
+  opts.add(
       cmd_option("num-threads", 't', false).set_default("1").set_description(
           "Number of benchmark threads"));
   opts.add(
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
   opts.add(
-      cmd_option("tail-scheme", 's', false).set_default("read-stalled")
-          .set_description("Scheme for tail"));
+      cmd_option("concurrency-control", 'c', false).set_default("read-stalled")
+          .set_description("Concurrency control scheme"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -40,9 +44,11 @@ int main(int argc, char** argv) {
   }
 
   int num_threads;
+  std::string bench_type;
   std::string output_dir;
   std::string concurrency_control;
   try {
+    bench_type = parser.get("bench-type");
     num_threads = parser.get_int("num-threads");
     output_dir = parser.get("output-dir");
     concurrency_control = parser.get("tail-scheme");
@@ -52,15 +58,26 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  fprintf(stderr, "num_threads=%d, output_dir=%s, concurrency_control=%s\n",
-          num_threads, output_dir.c_str(), concurrency_control.c_str());
+  fprintf(stderr, "bench_type=%s, num_threads=%d, output_dir=%s, cc=%s\n",
+          bench_type.c_str(), num_threads, output_dir.c_str(),
+          concurrency_control.c_str());
 
   if (concurrency_control == "write-stalled") {
-    concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
-    perf.bench_write(num_threads);
+    if (bench_type == "throughput-write") {
+      concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
+      perf.bench_throughput_write(num_threads);
+    } else if (bench_type == "latency-write") {
+      concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
+      perf.bench_latency_write();
+    }
   } else if (concurrency_control == "read-stalled") {
-    concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
-    perf.bench_write(num_threads);
+    if (bench_type == "throughput-write") {
+      concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
+      perf.bench_throughput_write(num_threads);
+    } else if (bench_type == "latency-write") {
+      concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
+      perf.bench_latency_write();
+    }
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", concurrency_control.c_str());
   }

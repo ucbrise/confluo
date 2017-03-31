@@ -29,6 +29,14 @@
     num_ops++;\
   }
 
+#define TIME_OPS(op, ds, num_ops, limit, out) \
+  num_ops = 0;\
+  while (num_ops < limit) {\
+    uint64_t ns = time_utils::time_function_ns(op, std::ref(ds));\
+    out << ns << "\n";\
+    num_ops++;\
+  }\
+
 #ifdef _GNU_SOURCE
 #ifndef NPIN_CORES
 #define SET_CORE_AFFINITY(t, core_id)\
@@ -51,24 +59,40 @@
 #endif
 #endif
 
-#define BENCH_OP(op, nthreads)\
+#define BENCH_OP_THPUT(op, nthreads)\
   std::string output_file = this->output_dir_ + "/throughput-" + #op + "-"\
      + std::to_string(nthreads) + ".txt";\
   this->bench_thput(op, nthreads, output_file);
 
-#define BENCH_OP_BATCH(op, nthreads, batch_size)\
+#define BENCH_OP_LATENCY(op)\
+  std::string output_file = this->output_dir_ + "/latency-" + #op + ".txt";\
+  this->bench_latency(op, output_file);
+
+#define BENCH_OP_THPUT_BATCH(op, nthreads, batch_size)\
   std::string output_file = this->output_dir_ + "/throughput-" + #op + "-"\
      + std::to_string(nthreads) + "-" + std::to_string(batch_size) + ".txt";\
   this->bench_thput_batch(op, nthreads, batch_size, output_file);
 
+#define BENCH_OP_LATENCY_BATCH(op, batch_size)\
+  std::string output_file = this->output_dir_ + "/latency-" + #op + "-"\
+     + std::to_string(batch_size) + ".txt";\
+  this->bench_latency_batch(op, batch_size, output_file);
+
 #define DEFINE_BENCH(op)\
-  void bench_##op(size_t nthreads) {\
-    BENCH_OP(op, nthreads)\
+  void bench_throughput_##op(size_t nthreads) {\
+    BENCH_OP_THPUT(op, nthreads)\
+  }\
+  \
+  void bench_latency_##op() {\
+    BENCH_OP_LATENCY(op)\
   }
 
 #define DEFINE_BENCH_BATCH(op, batch_size)\
-  void bench_##op(size_t nthreads) {\
-    BENCH_OP_BATCH(op, nthreads, batch_size)\
+  void bench_throughput_##op(size_t nthreads) {\
+    BENCH_OP_THPUT_BATCH(op, nthreads, batch_size)\
+  }\
+  void bench_latency_##op() {\
+    BENCH_OP_LATENCY_BATCH(op, batch_size)\
   }
 
 namespace utils {
@@ -76,10 +100,11 @@ namespace bench {
 
 struct constants {
   static const uint64_t WARMUP_OPS = 500000;
-  static const uint64_t WARMUP_OPS_MIN = 5000;
   static const uint64_t MEASURE_OPS = 1000000;
-  static const uint64_t MEASURE_OPS_MIN = 10000;
   static const uint64_t COOLDOWN_OPS = 500000;
+
+  static const uint64_t WARMUP_OPS_MIN = 5000;
+  static const uint64_t MEASURE_OPS_MIN = 10000;
   static const uint64_t COOLDOWN_OPS_MIN = 5000;
 };
 
@@ -116,12 +141,12 @@ static void bench_thput_batch_thread(op_t&& op, data_structure& ds,
   size_t num_ops;
 
   uint64_t warmup_ops = std::max(constants::WARMUP_OPS / batch_size,
-                                 constants::WARMUP_OPS_MIN);
+                                 UINT64_C(5000));
   LOG_INFO<< "Running warmup for " << warmup_ops << " ops";
   LOOP_OPS(op, ds, num_ops, warmup_ops);
 
   uint64_t measure_ops = std::max(constants::MEASURE_OPS / batch_size,
-                                  constants::MEASURE_OPS_MIN);
+                                  UINT64_C(10000));
   LOG_INFO<< "Warmup complete; running measure for " << measure_ops << " ops";
   auto start = timer::now();
   LOOP_OPS(op, ds, num_ops, measure_ops);
@@ -132,7 +157,7 @@ static void bench_thput_batch_thread(op_t&& op, data_structure& ds,
   thput[i] = num_ops * batch_size * 1e6 / usecs;
 
   uint64_t cooldown_ops = std::max(constants::COOLDOWN_OPS / batch_size,
-                                   constants::COOLDOWN_OPS_MIN);
+                                   UINT64_C(5000));
   LOG_INFO<< "Measure complete; running cooldown for " << cooldown_ops << " ops";
   LOOP_OPS(op, ds, num_ops, cooldown_ops);
 
@@ -151,6 +176,43 @@ class benchmark {
   }
 
  protected:
+  template<typename op_t>
+  void bench_latency(op_t&& op, const std::string& output_file) {
+    size_t num_ops;
+
+    LOG_INFO<<"Running warmup for " << constants::WARMUP_OPS << " ops";
+    LOOP_OPS(op, ds_, num_ops, constants::WARMUP_OPS);
+
+    LOG_INFO<< "Warmup complete; running measure for " << constants::MEASURE_OPS << " ops";
+    std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
+    TIME_OPS(op, ds_, num_ops, constants::MEASURE_OPS, out);
+
+    LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_OPS << " ops";
+    LOOP_OPS(op, ds_, num_ops, constants::COOLDOWN_OPS);
+  }
+
+  template<typename op_t>
+  void bench_latency_batch(op_t&& op, size_t batch_size,
+                           const std::string& output_file) {
+    size_t num_ops;
+
+    uint64_t warmup_ops = std::max(constants::WARMUP_OPS / batch_size,
+                                   UINT64_C(5000));
+    LOG_INFO<< "Running warmup for " << warmup_ops << " ops";
+    LOOP_OPS(op, ds_, num_ops, warmup_ops);
+
+    uint64_t measure_ops = std::max(constants::MEASURE_OPS / batch_size,
+                                    UINT64_C(10000));
+    LOG_INFO<< "Warmup complete; running measure for " << measure_ops << " ops";
+    std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
+    TIME_OPS(op, ds_, num_ops, measure_ops, out);
+
+    uint64_t cooldown_ops = std::max(constants::COOLDOWN_OPS / batch_size,
+                                     UINT64_C(5000));
+    LOG_INFO<< "Measure complete; running cooldown for " << cooldown_ops << " ops";
+    LOOP_OPS(op, ds_, num_ops, cooldown_ops);
+  }
+
   template<typename op_t>
   void bench_thput(op_t&& op, const size_t nthreads,
                    const std::string& output_file) {

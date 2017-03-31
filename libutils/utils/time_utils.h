@@ -42,10 +42,10 @@ class time_utils {
     return duration_cast<seconds>(now.time_since_epoch()).count();
   }
 
-  template<typename F>
-  static uint64_t time_function_ns(F&& f) {
+  template<typename F, typename ...Args>
+  static uint64_t time_function_ns(F&& f, Args&&... args) {
     time_point<system_clock> start = system_clock::now();
-    f();
+    f(std::forward<Args>(args)...);
     time_point<system_clock> end = system_clock::now();
     return duration_cast<nanoseconds>(end - start).count();
   }

@@ -84,7 +84,8 @@ int main(int argc, char** argv) {
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
   opts.add(
-      cmd_option("bench-op", 'b', false).set_default("append").set_description(
+      cmd_option("bench-op", 'b', false).set_default("throughput-append")
+          .set_description(
           "Benchmark operation (append, get, update, invalidate)"));
   opts.add(
       cmd_option("append-batchsize", 'a', false).set_default("1")
@@ -132,23 +133,40 @@ int main(int argc, char** argv) {
           load_records, server.c_str(), port);
 
   ls_server_benchmark perf(output_dir, load_records, batch_size, server, port);
-  if (bench_op == "append") {
-    perf.bench_append(num_threads);
-  } else if (bench_op == "append-async") {
-    perf.bench_append_async(num_threads);
-  } else if (bench_op == "multi-append") {
-    perf.bench_multi_append(num_threads);
-  } else if (bench_op == "get") {
+  if (bench_op == "throughput-append") {
+    perf.bench_throughput_append(num_threads);
+  } else if (bench_op == "throughput-append-async") {
+    perf.bench_throughput_append_async(num_threads);
+  } else if (bench_op == "throughput-multi-append") {
+    perf.bench_throughput_multi_append(num_threads);
+  } else if (bench_op == "throughput-get") {
     assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
-    perf.bench_get(num_threads);
-  } else if (bench_op == "update") {
+    perf.bench_throughput_get(num_threads);
+  } else if (bench_op == "throughput-update") {
     assert_throw(load_records > 0,
                  "Need to pre-load data for update benchmark");
-    perf.bench_update(num_threads);
-  } else if (bench_op == "invalidate") {
+    perf.bench_throughput_update(num_threads);
+  } else if (bench_op == "throughput-invalidate") {
     assert_throw(load_records > 0,
                  "Need to pre-load data for invalidate benchmark");
-    perf.bench_invalidate(num_threads);
+    perf.bench_throughput_invalidate(num_threads);
+  } else if (bench_op == "latency-append") {
+    perf.bench_latency_append();
+  } else if (bench_op == "latency-append-async") {
+    perf.bench_latency_append_async();
+  } else if (bench_op == "latency-multi-append") {
+    perf.bench_latency_multi_append();
+  } else if (bench_op == "latency-get") {
+    assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
+    perf.bench_latency_get();
+  } else if (bench_op == "latency-update") {
+    assert_throw(load_records > 0,
+                 "Need to pre-load data for update benchmark");
+    perf.bench_latency_update();
+  } else if (bench_op == "latency-invalidate") {
+    assert_throw(load_records > 0,
+                 "Need to pre-load data for invalidate benchmark");
+    perf.bench_latency_invalidate();
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }

@@ -165,25 +165,25 @@ template<typename tail_scheme>
 void exec_bench(graph_store_perf<tail_scheme>& perf, int num_threads,
                 const std::string& bench_type) {
   if (bench_type == "add_node")
-    perf.bench_add_node(num_threads);
+    perf.bench_throughput_add_node(num_threads);
   else if (bench_type == "update_node")
-    perf.bench_update_node(num_threads);
+    perf.bench_throughput_update_node(num_threads);
   else if (bench_type == "delete_node")
-    perf.bench_delete_node(num_threads);
+    perf.bench_throughput_delete_node(num_threads);
   else if (bench_type == "get_node")
-    perf.bench_get_node(num_threads);
+    perf.bench_throughput_get_node(num_threads);
   else if (bench_type == "add_link")
-    perf.bench_add_link(num_threads);
+    perf.bench_throughput_add_link(num_threads);
   else if (bench_type == "update_link")
-    perf.bench_update_link(num_threads);
+    perf.bench_throughput_update_link(num_threads);
   else if (bench_type == "delete_link")
-    perf.bench_delete_link(num_threads);
+    perf.bench_throughput_delete_link(num_threads);
   else if (bench_type == "get_link")
-    perf.bench_get_link(num_threads);
+    perf.bench_throughput_get_link(num_threads);
   else if (bench_type == "get_link_list")
-    perf.bench_get_link_list(num_threads);
+    perf.bench_throughput_get_link_list(num_threads);
   else if (bench_type == "count_links")
-    perf.bench_count_links(num_threads);
+    perf.bench_throughput_count_links(num_threads);
   else
     fprintf(stderr, "Unknown benchmark type: %s\n", bench_type.c_str());
 }
