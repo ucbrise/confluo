@@ -39,6 +39,9 @@ class graph_store {
                                   int64_t limit) const;
   size_t count_links(int64_t id1, int64_t link_type) const;
 
+  uint64_t begin_snapshot();
+  bool end_snapshot(uint64_t id);
+
  private:
   void follow_update_refs(uint64_t& id, uint64_t tail) const;
   bool is_valid(uint64_t id, uint64_t tail) const;

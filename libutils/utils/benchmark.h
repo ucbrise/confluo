@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <mutex>
 
 #include "logger.h"
 
@@ -29,6 +30,7 @@
   }
 
 #ifdef _GNU_SOURCE
+#ifndef NPIN_CORES
 #define SET_CORE_AFFINITY(t, core_id)\
   LOG_INFO << "Pinning thread to core" << core_id;\
   cpu_set_t cpuset;\
@@ -38,8 +40,15 @@
   if (rc != 0)\
     LOG_WARN << "Error calling pthread_setaffinity_np: " << rc;
 #else
+#define SET_CORE_AFFINITY(thread, core_id)
+#endif
+#else
+#ifndef NPIN_CORES
 #define SET_CORE_AFFINITY(thread, core_id)\
   LOG_WARN << "Not pinning thread to core";
+#else
+#define SET_CORE_AFFINITY(thread, core_id)
+#endif
 #endif
 
 #define BENCH_OP(op, nthreads)\
@@ -47,18 +56,28 @@
      + std::to_string(nthreads) + ".txt";\
   this->bench_thput(op, nthreads, output_file);
 
+#define BENCH_OP_BATCH(op, nthreads, batch_size)\
+  std::string output_file = this->output_dir_ + "/throughput-" + #op + "-"\
+     + std::to_string(nthreads) + "-" + std::to_string(batch_size) + ".txt";\
+  this->bench_thput_batch(op, nthreads, batch_size, output_file);
+
 #define DEFINE_BENCH(op)\
   void bench_##op(size_t nthreads) {\
     BENCH_OP(op, nthreads)\
+  }
+
+#define DEFINE_BENCH_BATCH(op, batch_size)\
+  void bench_##op(size_t nthreads) {\
+    BENCH_OP_BATCH(op, nthreads, batch_size)\
   }
 
 namespace utils {
 namespace bench {
 
 struct constants {
-  static const uint64_t WARMUP_OPS = 5000000;
-  static const uint64_t MEASURE_OPS = 10000000;
-  static const uint64_t COOLDOWN_OPS = 5000000;
+  static const uint64_t WARMUP_OPS = 500000;
+  static const uint64_t MEASURE_OPS = 1000000;
+  static const uint64_t COOLDOWN_OPS = 500000;
 };
 
 typedef std::chrono::high_resolution_clock timer;
@@ -83,6 +102,30 @@ static void bench_thput_thread(op_t&& op, data_structure& ds, size_t nthreads,
 
   LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_OPS << " ops";
   LOOP_OPS(op, ds, num_ops, constants::COOLDOWN_OPS);
+
+  LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
+}
+
+template<typename data_structure, typename op_t>
+static void bench_thput_batch_thread(op_t&& op, data_structure& ds,
+                                     size_t nthreads, size_t batch_size,
+                                     size_t i, std::vector<double>& thput) {
+  size_t num_ops;
+
+  LOG_INFO<< "Running warmup for " << constants::WARMUP_OPS / batch_size << " ops";
+  LOOP_OPS(op, ds, num_ops, (constants::WARMUP_OPS / batch_size));
+
+  LOG_INFO<< "Warmup complete; running measure for " << constants::MEASURE_OPS / batch_size << " ops";
+  auto start = timer::now();
+  LOOP_OPS(op, ds, num_ops, (constants::MEASURE_OPS / batch_size));
+  auto end = timer::now();
+
+  auto usecs = std::chrono::duration_cast<us>(end - start).count();
+  assert(usecs > 0);
+  thput[i] = num_ops * batch_size * 1e6 / usecs;
+
+  LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_OPS / batch_size << " ops";
+  LOOP_OPS(op, ds, num_ops, (constants::COOLDOWN_OPS / batch_size));
 
   LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
 }
@@ -117,10 +160,42 @@ class benchmark {
     double thput_tot = std::accumulate(thput.begin(), thput.end(), 0.0);
     LOG_INFO<< "Completed benchmark at " << thput_tot << " ops/s";
 
-    std::ofstream out(output_file);
-    out << thput_tot << "\n";
-    out.close();
+    {
+      std::lock_guard<std::mutex> lk(write_mtx_);
+      std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
+      out << thput_tot << "\n";
+      out.close();
+    }
   }
+
+  template<typename op_t>
+  void bench_thput_batch(op_t&& op, const size_t nthreads,
+                         const size_t batch_size,
+                         const std::string& output_file) {
+    std::vector<std::thread> workers(nthreads);
+    std::vector<double> thput(nthreads);
+    for (size_t i = 0; i < nthreads; i++) {
+      workers[i] = std::thread(bench_thput_batch_thread<data_structure, op_t>,
+                               std::ref(op), std::ref(ds_), nthreads,
+                               batch_size, i, std::ref(thput));
+      SET_CORE_AFFINITY(workers[i], i);
+    }
+
+    for (std::thread& worker : workers)
+      worker.join();
+
+    double thput_tot = std::accumulate(thput.begin(), thput.end(), 0.0);
+    LOG_INFO<< "Completed benchmark at " << thput_tot << " ops/s";
+
+    {
+      std::lock_guard<std::mutex> lk(write_mtx_);
+      std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
+      out << thput_tot << "\n";
+      out.close();
+    }
+  }
+
+  std::mutex write_mtx_;
 
   data_structure ds_;
   std::string output_dir_;

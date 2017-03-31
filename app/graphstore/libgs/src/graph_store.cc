@@ -47,7 +47,7 @@ uint64_t graph_store<graph_tail>::add_node(const node_op& n) {
   node internal_node = n;
   internal_node.version = t;
   uint64_t id = ndata_->push_back(internal_node);
-  tail_.init_object((*ndata_)[id]);
+  tail_.init_object((*ndata_)[id], t);
   tail_.end_write_op(t);
   return id;
 }
@@ -109,7 +109,7 @@ bool graph_store<graph_tail>::add_link(const link_op& a) {
   l.version = t;
   uint64_t link_id = ldata_->push_back(l);
   (*ndata_)[a.id1].neighbors->push_back(link_id);
-  tail_.init_object((*ldata_)[link_id]);
+  tail_.init_object((*ldata_)[link_id], t);
   tail_.end_write_op(t);
   return true;
 }
@@ -245,6 +245,16 @@ size_t graph_store<graph_tail>::count_links(int64_t id1,
       count++;
 
   return count;
+}
+
+template<typename graph_tail>
+uint64_t graph_store<graph_tail>::begin_snapshot() {
+  return tail_.start_snapshot_op();
+}
+
+template<typename graph_tail>
+bool graph_store<graph_tail>::end_snapshot(uint64_t id) {
+  return tail_.end_snapshot_op(id);
 }
 
 template class graphstore::graph_store<datastore::write_stalled>;

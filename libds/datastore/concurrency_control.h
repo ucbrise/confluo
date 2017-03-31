@@ -4,6 +4,7 @@
 #include "atomic.h"
 #include <cassert>
 #include <cstdio>
+#include <thread>
 
 #include "object.h"
 
@@ -32,14 +33,29 @@ class write_stalled {
     return atomic::faa(&write_tail_, UINT64_C(1));
   }
 
-  void init_object(stateful& obj) {
+  // Batch op
+  uint64_t start_write_op(uint64_t cnt) {
+    return atomic::faa(&write_tail_, cnt);
+  }
+
+  void init_object(stateful& obj, uint64_t tail) {
+    // Do nothing
   }
 
   void end_write_op(uint64_t tail) {
-    uint64_t old_tail;
-    do {
+    uint64_t old_tail = tail;
+    while (!atomic::weak::cas(&read_tail_, &old_tail, tail + 1)) {
       old_tail = tail;
-    } while (!atomic::weak::cas(&read_tail_, &old_tail, tail + 1));
+      std::this_thread::yield();
+    }
+  }
+
+  void end_write_op(uint64_t tail, uint64_t cnt) {
+    uint64_t old_tail = tail;
+    while (!atomic::weak::cas(&read_tail_, &old_tail, tail + cnt)) {
+      old_tail = tail;
+      std::this_thread::yield();
+    }
   }
 
   static bool start_update_op(stateful& obj) {
@@ -56,8 +72,9 @@ class write_stalled {
 
   uint64_t start_snapshot_op() {
     uint64_t tail = get_tail();
-    while (!atomic::weak::cas(&read_tail_, &tail, tail | HI_BIT))
-      ;
+    while (!atomic::weak::cas(&read_tail_, &tail, tail | HI_BIT)) {
+      std::this_thread::yield();
+    }
     return tail;
   }
 
@@ -75,7 +92,7 @@ class read_stalled {
  public:
   read_stalled()
       : tail_(UINT64_C(0)),
-        snapshot_(false) {
+        snapshot_(UINT64_MAX) {
   }
 
   static uint64_t get_state(stateful& o) {
@@ -95,13 +112,24 @@ class read_stalled {
     return atomic::faa(&tail_, UINT64_C(1));
   }
 
-  void init_object(stateful& obj) {
-    while (atomic::load(&snapshot_) == true)
-      ;
+  // Batch op
+  uint64_t start_write_op(uint64_t cnt) {
+    return atomic::faa(&tail_, cnt);
+  }
+
+  void init_object(stateful& obj, uint64_t tail) {
+    while (tail >= atomic::load(&snapshot_)) {
+      std::this_thread::yield();
+    }
     obj.state.initalize();
   }
 
   void end_write_op(uint64_t tail) {
+    // Do nothing
+  }
+
+  void end_write_op(uint64_t tail, uint64_t cnt) {
+    // Do nothing
   }
 
   static bool start_update_op(stateful& obj) {
@@ -117,18 +145,18 @@ class read_stalled {
   }
 
   uint64_t start_snapshot_op() {
-    atomic::store(&snapshot_, true);
+    atomic::store(&snapshot_, get_tail());
     return get_tail();
   }
 
   bool end_snapshot_op(uint64_t tail) {
-    atomic::store(&snapshot_, false);
+    atomic::store(&snapshot_, UINT64_MAX);
     return true;
   }
 
  private:
   atomic::type<uint64_t> tail_;
-  atomic::type<bool> snapshot_;
+  atomic::type<uint64_t> snapshot_;
 };
 
 }

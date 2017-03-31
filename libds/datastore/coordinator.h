@@ -2,67 +2,124 @@
 #define DATASTORE_COORDINATOR_H_
 
 #include <cstdint>
+#include <chrono>
+#include <thread>
 
+#include "time_utils.h"
+#include "monolog.h"
 #include "atomic.h"
+#include "logger.h"
 
 namespace datastore {
 
-typedef uint8_t snapshot_state;
-
 struct snapshot {
   std::vector<uint64_t> tails;
-  uint64_t id;
 
+  snapshot() = default;
   snapshot(size_t size)
-      : tails(size, UINT64_MAX),
-        id(UINT64_MAX) {
+      : tails(size, UINT64_MAX) {
   }
 };
 
 template<typename data_store>
 class coordinator {
  public:
-  typedef uint64_t snapshot_state;
-  static const snapshot_state STALE = UINT64_MAX;
-  static const snapshot_state UPDATING = UINT64_MAX;
+  static const uint64_t MONITOR_SLEEP_US = 1000000;
 
-  coordinator(std::vector<data_store>& stores)
-      : stores_(stores),
-        snapshot_store_(cc_),
-        snapshot_bytes_(stores.size() * sizeof(uint64_t)) {
-  }
-
-  void ordering_op() {
-    cc_.end_write_op(cc_.start_write_op());
+  coordinator(std::vector<data_store>& stores, uint64_t sleep_us)
+      : run_(false),
+        monitor_(false),
+        sleep_us_(sleep_us),
+        stores_(stores) {
   }
 
   snapshot get_snapshot() {
-    return perform_snapshot();
+    uint64_t id = snapshots_.size();
+    while (snapshots_.size() != id + 1)
+      std::this_thread::yield();
+    return snapshots_.get(id);
+  }
+
+  bool start() {
+    bool expected = false;
+    if (atomic::strong::cas(&run_, &expected, true)) {
+      snapshot_thread_ = std::thread([&] {
+        while (true) {
+          std::this_thread::sleep_for(sleep_us_);
+          if (!atomic::load(&run_)) {
+            return;
+          }
+          do_snapshot();
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+
+  bool stop() {
+    bool expected = true;
+    bool success = atomic::strong::cas(&run_, &expected, false);
+    if (success)
+      snapshot_thread_.join();
+    return success;
+  }
+
+  bool start_monitor() {
+    bool expected = false;
+    if (atomic::strong::cas(&monitor_, &expected, true)) {
+      monitor_thread_ = std::thread([&] {
+        auto sleep_dur = std::chrono::microseconds(MONITOR_SLEEP_US);
+        uint64_t start = utils::time_utils::cur_ms();
+        while (true) {
+          std::this_thread::sleep_for(sleep_dur);
+          if (!atomic::load(&monitor_)) {
+            return;
+          }
+          uint64_t now = utils::time_utils::cur_ms();
+          size_t nsnapshots = snapshots_.size();
+          double snapshot_rate = (nsnapshots * 1000.0) / (double)(now - start);
+          LOG_INFO << nsnapshots << " snapshots in " << (now - start) <<
+            " ms [" << snapshot_rate << " snapshots/s]";
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+
+  bool stop_monitor() {
+    bool expected = true;
+    bool success = atomic::strong::cas(&monitor_, &expected, false);
+    if (success)
+      monitor_thread_.join();
+    return success;
   }
 
  private:
-  snapshot perform_snapshot() {
+  void do_snapshot() {
     snapshot s(stores_.size());
-    s.id = snapshot_store_.append(
-        [&s, this](uint8_t*& data, size_t& length)-> void {
-          for (size_t i = 0; i < stores_.size(); i++) {
-            s.tails[i] = stores_[i].begin_snapshot();
-          }
-          data = (uint8_t*) &s.tails[0];
-          length = snapshot_bytes_;
-        });
+    for (size_t i = 0; i < stores_.size(); i++)
+      stores_[i].send_begin_snapshot();
+    for (size_t i = 0; i < stores_.size(); i++)
+      s.tails[i] = stores_[i].recv_begin_snapshot();
+
+    snapshots_.push_back(s);
 
     for (size_t i = 0; i < stores_.size(); i++)
-      stores_[i].end_snapshot();
-
-    return s;
+      stores_[i].send_end_snapshot(s.tails[i]);
+    for (size_t i = 0; i < stores_.size(); i++)
+      stores_[i].recv_end_snapshot();
   }
 
-  size_t snapshot_bytes_;
-  atomic::type<snapshot_state> state_;
+  atomic::type<bool> run_;
+  atomic::type<bool> monitor_;
+  std::chrono::microseconds sleep_us_;
+  monolog::monolog_relaxed<snapshot> snapshots_;
   std::vector<data_store>& stores_;
-  write_stalled cc_;
-  dependent::log_store<in_memory, write_stalled> snapshot_store_;
+
+  std::thread snapshot_thread_;
+  std::thread monitor_thread_;
 };
 
 }

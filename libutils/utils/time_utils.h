@@ -3,6 +3,11 @@
 
 #include <cstdio>
 #include <ctime>
+#include <chrono>
+
+using namespace ::std::chrono;
+
+namespace utils {
 
 class time_utils {
  public:
@@ -16,6 +21,36 @@ class time_utils {
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%d.%X", timeinfo);
     return std::string(buffer);
   }
+
+  static uint64_t cur_ns() {
+    time_point<system_clock> now = system_clock::now();
+    return duration_cast<nanoseconds>(now.time_since_epoch()).count();
+  }
+
+  static uint64_t cur_us() {
+    time_point<system_clock> now = system_clock::now();
+    return duration_cast<microseconds>(now.time_since_epoch()).count();
+  }
+
+  static uint64_t cur_ms() {
+    time_point<system_clock> now = system_clock::now();
+    return duration_cast<milliseconds>(now.time_since_epoch()).count();
+  }
+
+  static uint64_t cur_s() {
+    time_point<system_clock> now = system_clock::now();
+    return duration_cast<seconds>(now.time_since_epoch()).count();
+  }
+
+  template<typename F>
+  static uint64_t time_function_ns(F&& f) {
+    time_point<system_clock> start = system_clock::now();
+    f();
+    time_point<system_clock> end = system_clock::now();
+    return duration_cast<nanoseconds>(end - start).count();
+  }
 };
+
+}
 
 #endif /* LIBUTILS_UTILS_TIME_UTILS_H_ */

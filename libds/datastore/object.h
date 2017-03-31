@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdint>
 #include <cassert>
+#include <cstring>
+#include <string>
 #include "atomic.h"
 
 namespace datastore {
@@ -83,6 +85,17 @@ struct serializer {
 
   static void serialize(void* dst, const T& o) {
     memcpy(dst, &o, sizeof(T));
+  }
+};
+
+template<>
+struct serializer<std::string> {
+  static size_t size(const std::string& o) {
+    return o.length();
+  }
+
+  static void serialize(void* dst, const std::string& o) {
+    memcpy(dst, o.c_str(), o.length());
   }
 };
 
