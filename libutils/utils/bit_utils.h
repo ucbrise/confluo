@@ -1,6 +1,8 @@
 #ifndef UTILS_BIT_UTILS_H_
 #define UTILS_BIT_UTILS_H_
 
+#define BSR
+
 namespace utils {
 
 class bit_utils {
