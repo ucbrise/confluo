@@ -13,7 +13,6 @@ class TieredIndexTest : public testing::Test {
   void index_test_tiered(index_type& index, uint64_t step = 1) {
     uint32_t max = kMaxEntries;
     for (uint64_t i = 0; i < max; i += step) {
-      fprintf(stderr, "i=%llu\n", i);
       index[i]->push_back(i);
     }
 
