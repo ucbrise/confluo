@@ -79,3 +79,42 @@ TEST_F(MonoLogTest, MMapMonoLogTest) {
     monolog_test_mt(arr, num_threads);
   }
 }
+
+TEST_F(MonoLogTest, MonoLogBitVectorSetGetTest) {
+  monolog::monolog_bitvector bits;
+
+  for (uint64_t i = 0; i < kArraySize; i++) {
+    bits.set_bit(i);
+  }
+
+  for (uint64_t i = 0; i < kArraySize; i++) {
+    ASSERT_TRUE(bits.get_bit(i));
+  }
+}
+
+TEST_F(MonoLogTest, MonoLogBitVectorMultiSetGetTest) {
+  {
+    // Aligned
+    monolog::monolog_bitvector bits;
+    for (uint64_t i = 0; i < kArraySize; i += 1024) {
+      bits.set_bits(i, 1024);
+    }
+
+    for (uint64_t i = 0; i < kArraySize; i++) {
+      ASSERT_TRUE(bits.get_bit(i));
+    }
+  }
+
+  {
+    // Unaligned
+    monolog::monolog_bitvector bits;
+    uint64_t max = 1000 * 1000;
+    for (uint64_t i = 0; i < max; i += 1000) {
+      bits.set_bits(i, 1000);
+    }
+
+    for (uint64_t i = 0; i < max; i++) {
+      ASSERT_TRUE(bits.get_bit(i));
+    }
+  }
+}

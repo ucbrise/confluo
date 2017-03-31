@@ -341,7 +341,17 @@ class monolog_linear_base {
     return bucket[bucket_off];
   }
 
-  void* ptr(size_t offset) const {
+  void* ptr(size_t offset) {
+    size_t bucket_idx = offset / BLOCK_SIZE;
+    size_t bucket_off = offset % BLOCK_SIZE;
+    T *bucket;
+    if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
+      bucket = try_allocate_bucket(bucket_idx);
+    }
+    return (void*) (bucket + bucket_off);
+  }
+
+  const void* cptr(size_t offset) const {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
     return (void*) (atomic::load(&buckets_[bucket_idx]) + bucket_off);
@@ -359,9 +369,9 @@ class monolog_linear_base {
   }
 
  protected:
-  // Tries to allocate the specifies bucket. If another thread has already
-  // succeeded in allocating the bucket, the current thread deallocates and
-  // returns.
+// Tries to allocate the specifies bucket. If another thread has already
+// succeeded in allocating the bucket, the current thread deallocates and
+// returns.
   T* try_allocate_bucket(size_t bucket_idx) {
     T* bucket = new T[BLOCK_SIZE + BUFFER_SIZE];
     T* expected = NULL;
@@ -454,7 +464,15 @@ class mmapped_block {
     return ptr[i];
   }
 
-  void* ptr(size_t offset) const {
+  void* ptr(size_t offset) {
+    T *data;
+    if ((data = atomic::load(&data_)) == NULL) {
+      data = try_allocate();
+    }
+    return (void*) (data + offset);
+  }
+
+  const void* cptr(size_t offset) const {
     return (void*) (atomic::load(&data_) + offset);
   }
 
@@ -567,6 +585,10 @@ class mmap_monolog_base {
 
   void* ptr(size_t offset) {
     return blocks_[offset / BLOCK_SIZE].ptr(offset % BLOCK_SIZE);
+  }
+
+  const void* cptr(size_t offset) const {
+    return blocks_[offset / BLOCK_SIZE].cptr(offset % BLOCK_SIZE);
   }
 
   size_t storage_size() const {
@@ -750,9 +772,7 @@ class monolog_relaxed_linear : public monolog_linear_base<T, NBUCKETS,
   }
 
   size_t reserve(size_t len) {
-    size_t ret = atomic::faa(&tail_, len);
-    this->ensure_alloc(ret, ret + len);
-    return ret;
+    return atomic::faa(&tail_, len);
   }
 
   T at(size_t idx) const {
@@ -818,9 +838,7 @@ class mmap_monolog_relaxed : public mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>
   }
 
   size_t reserve(size_t len) {
-    uint64_t ret = atomic::faa(&tail_, len);
-    this->ensure_alloc(ret, ret + len);
-    return ret;
+    return atomic::faa(&tail_, len);
   }
 
   T at(size_t idx) const {
@@ -841,6 +859,54 @@ class mmap_monolog_relaxed : public mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>
 
  private:
   atomic::type<size_t> tail_;
+};
+
+class monolog_bitvector {
+ public:
+  monolog_bitvector() = default;
+
+  bool get_bit(uint64_t i) const {
+    return utils::bit_utils::get_bit(bits_.get(i / 64), i % 64);
+  }
+
+  void set_bit(uint64_t i) {
+    uint64_t block = bits_[i / 64];
+    while (!atomic::weak::cas(&bits_[i / 64], &block,
+                              utils::bit_utils::set_bit(block, i % 64))) {
+    }
+  }
+
+  void set_bits(uint64_t i, uint64_t count) {
+    uint64_t bidx = i / 64;
+    uint64_t bidx_max = (i + count) / 64;
+    uint64_t boff = i % 64;
+    uint64_t rem = (bidx != bidx_max) ? 64 - boff : 64 - boff - count;
+
+    if (boff == 0 && rem == 64) {
+      atomic::store(&bits_[bidx], 0xFFFFFFFFFFFFFFFFULL);
+    } else {
+      uint64_t block = bits_[bidx];
+      while (!atomic::weak::cas(&bits_[bidx], &block,
+                                utils::bit_utils::set_bits(block, boff, rem))) {
+      }
+    }
+
+    bidx++;
+    while (bidx != bidx_max) {
+      atomic::store(&bits_[bidx], 0xFFFFFFFFFFFFFFFFULL);
+      bidx++;
+    }
+
+    if ((rem = (i + count) % 64)) {
+      uint64_t block = bits_[bidx];
+      while (!atomic::weak::cas(&bits_[bidx], &block,
+                                utils::bit_utils::set_bits(block, 0, rem))) {
+      }
+    }
+  }
+
+ private:
+  monolog_base<atomic::type<uint64_t>, 1024> bits_;
 };
 
 }
