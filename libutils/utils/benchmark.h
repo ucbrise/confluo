@@ -76,8 +76,11 @@ namespace bench {
 
 struct constants {
   static const uint64_t WARMUP_OPS = 500000;
+  static const uint64_t WARMUP_OPS_MIN = 5000;
   static const uint64_t MEASURE_OPS = 1000000;
+  static const uint64_t MEASURE_OPS_MIN = 10000;
   static const uint64_t COOLDOWN_OPS = 500000;
+  static const uint64_t COOLDOWN_OPS_MIN = 5000;
 };
 
 typedef std::chrono::high_resolution_clock timer;
@@ -112,20 +115,26 @@ static void bench_thput_batch_thread(op_t&& op, data_structure& ds,
                                      size_t i, std::vector<double>& thput) {
   size_t num_ops;
 
-  LOG_INFO<< "Running warmup for " << constants::WARMUP_OPS / batch_size << " ops";
-  LOOP_OPS(op, ds, num_ops, (constants::WARMUP_OPS / batch_size));
+  uint64_t warmup_ops = std::max(constants::WARMUP_OPS / batch_size,
+                                 constants::WARMUP_OPS_MIN);
+  LOG_INFO<< "Running warmup for " << warmup_ops << " ops";
+  LOOP_OPS(op, ds, num_ops, warmup_ops);
 
-  LOG_INFO<< "Warmup complete; running measure for " << constants::MEASURE_OPS / batch_size << " ops";
+  uint64_t measure_ops = std::max(constants::MEASURE_OPS / batch_size,
+                                  constants::MEASURE_OPS_MIN);
+  LOG_INFO<< "Warmup complete; running measure for " << measure_ops << " ops";
   auto start = timer::now();
-  LOOP_OPS(op, ds, num_ops, (constants::MEASURE_OPS / batch_size));
+  LOOP_OPS(op, ds, num_ops, measure_ops);
   auto end = timer::now();
 
   auto usecs = std::chrono::duration_cast<us>(end - start).count();
   assert(usecs > 0);
   thput[i] = num_ops * batch_size * 1e6 / usecs;
 
-  LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_OPS / batch_size << " ops";
-  LOOP_OPS(op, ds, num_ops, (constants::COOLDOWN_OPS / batch_size));
+  uint64_t cooldown_ops = std::max(constants::COOLDOWN_OPS / batch_size,
+                                   constants::COOLDOWN_OPS_MIN);
+  LOG_INFO<< "Measure complete; running cooldown for " << cooldown_ops << " ops";
+  LOOP_OPS(op, ds, num_ops, cooldown_ops);
 
   LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
 }
