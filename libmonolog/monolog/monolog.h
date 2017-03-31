@@ -750,7 +750,9 @@ class monolog_relaxed_linear : public monolog_linear_base<T, NBUCKETS,
   }
 
   size_t reserve(size_t len) {
-    return atomic::faa(&tail_, len);
+    size_t ret = atomic::faa(&tail_, len);
+    this->ensure_alloc(ret, ret + len);
+    return ret;
   }
 
   T at(size_t idx) const {
@@ -816,7 +818,9 @@ class mmap_monolog_relaxed : public mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>
   }
 
   size_t reserve(size_t len) {
-    return atomic::faa(&tail_, len);
+    uint64_t ret = atomic::faa(&tail_, len);
+    this->ensure_alloc(ret, ret + len);
+    return ret;
   }
 
   T at(size_t idx) const {
