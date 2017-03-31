@@ -344,7 +344,6 @@ class monolog_linear_base {
   void* ptr(size_t offset) {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
-    assert(bucket_idx < buckets_.size());
     T *bucket;
     if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
       bucket = try_allocate_bucket(bucket_idx);
