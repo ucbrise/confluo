@@ -279,7 +279,7 @@ class monolog_linear_base {
   }
 
   // Sets the data at index idx to val. Allocates memory if necessary.
-  void set(size_t idx, const T val) {
+  void set(size_t idx, const T& val) {
     size_t bucket_idx = idx / BLOCK_SIZE;
     size_t bucket_off = idx % BLOCK_SIZE;
     T* bucket;
@@ -306,7 +306,7 @@ class monolog_linear_base {
     if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
       bucket = try_allocate_bucket(bucket_idx);
     }
-    memcpy(bucket + bucket_off, data, len);
+    memcpy(bucket + bucket_off, data, len * sizeof(T));
   }
 
   // Write len bytes of data at offset. Does NOT allocate memory -- ensure
@@ -314,7 +314,8 @@ class monolog_linear_base {
   void write_unsafe(size_t offset, const T* data, size_t len) {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
-    memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off, data, len);
+    memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off, data,
+           len * sizeof(T));
   }
 
   // Gets the data at index idx.
@@ -328,7 +329,8 @@ class monolog_linear_base {
   void read(size_t offset, T* data, size_t len) const {
     size_t bucket_idx = offset / BLOCK_SIZE;
     size_t bucket_off = offset % BLOCK_SIZE;
-    memcpy(data, atomic::load(&buckets_[bucket_idx]) + bucket_off, len);
+    memcpy(data, atomic::load(&buckets_[bucket_idx]) + bucket_off,
+           len * sizeof(T));
   }
 
   T& operator[](size_t idx) {
@@ -442,11 +444,11 @@ class mmapped_block {
     T* ptr;
     if ((ptr = atomic::load(&data_)) == nullptr)
       ptr = try_allocate();
-    memcpy(ptr + offset, data, len);
+    memcpy(ptr + offset, data, len * sizeof(T));
   }
 
   void write_unsafe(size_t offset, const T* data, size_t len) {
-    memcpy(atomic::load(&data_) + offset, data, len);
+    memcpy(atomic::load(&data_) + offset, data, len * sizeof(T));
   }
 
   T at(size_t i) const {
@@ -454,7 +456,7 @@ class mmapped_block {
   }
 
   void read(size_t offset, T* data, size_t len) const {
-    memcpy(data, atomic::load(&data_) + offset, len);
+    memcpy(data, atomic::load(&data_) + offset, len * sizeof(T));
   }
 
   T& operator[](size_t i) {
