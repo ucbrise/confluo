@@ -9,3 +9,4 @@ set(ATOMIC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libatomic/atomic)
 # Add all applications
 add_subdirectory(logstore)
 add_subdirectory(graphstore)
+add_subdirectory(timeseries)
