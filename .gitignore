@@ -39,6 +39,7 @@ ls-results
 thrift/gen
 target
 log
+thrift-gen.files
 
 # Eclipse files
 .settings
