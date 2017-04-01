@@ -180,8 +180,8 @@ class timeseries_db_base {
 };
 
 template<size_t branch_factor, size_t depth>
-size_t timeseries_db_base<branch_factor, depth>::BLOCK_TIME_RANGE = 64
-    - (utils::bit_utils::highest_bit(branch_factor) * depth);
+size_t timeseries_db_base<branch_factor, depth>::BLOCK_TIME_RANGE = UINT64_C(1)
+    << (64 - (utils::bit_utils::highest_bit(branch_factor) * depth));
 
 template<size_t branch_factor = 64, size_t depth = 9>
 class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
@@ -196,7 +196,8 @@ class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
     return ver + len;
   }
 
-  version_t insert_values(const data_pt* pts, size_t len, timestamp_t ts_block) {
+  version_t insert_values(const data_pt* pts, size_t len,
+                          timestamp_t ts_block) {
     version_t ver = this->append(pts, len, ts_block);
     valid_.set_bits(ver, len);
     return ver + len;
@@ -251,7 +252,8 @@ class timeseries_db_ws : public timeseries_db_base<branch_factor, depth> {
     return ver + len;
   }
 
-  version_t insert_values(const data_pt* pts, size_t len, timestamp_t ts_block) {
+  version_t insert_values(const data_pt* pts, size_t len,
+                          timestamp_t ts_block) {
     version_t ver = this->append(pts, len, ts_block);
     update_read_tail(ver, len);
     return ver + len;
