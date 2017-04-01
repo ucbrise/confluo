@@ -5,6 +5,7 @@
 
 #include "atomic.h"
 #include "monolog.h"
+#include "assertions.h"
 
 namespace datastore {
 
@@ -547,12 +548,12 @@ class tiered_index {
   }
 
   child_type* get_or_create_child(const uint64_t k) {
-    assert(k < K);
+    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.get(k);
   }
 
   child_type* get_child(const uint64_t k) const {
-    assert(k < K);
+    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.at(k);
   }
 
@@ -586,12 +587,12 @@ class tiered_index<T, K, 1, stats> {
   }
 
   child_type* get_or_create_child(const uint64_t k) {
-    assert(k < K);
+    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.get(k);
   }
 
   child_type* get_child(const uint64_t k) const {
-    assert(k < K);
+    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.at(k);
   }
 
