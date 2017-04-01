@@ -57,19 +57,20 @@ class indexlet {
    * @return Pointer to the value.
    */
   T* get(const uint32_t i) {
-    if (atomic::load(&idx_[i]) == NULL) {
-      T* item = new T();
-      T* null_ptr = NULL;
+    T* item;
+    if ((item = atomic::load(&idx_[i])) == NULL) {
+      item = new T();
+      T* current_item = NULL;
 
       // Only one thread will be successful in replacing the NULL reference with newly
       // allocated item.
-      if (!atomic::strong::cas(&idx_[i], &null_ptr, item)) {
+      if (!atomic::strong::cas(&idx_[i], &current_item, item)) {
         // All other threads will deallocate the newly allocated item.
         delete item;
+        return current_item;
       }
     }
-
-    return atomic::load(&idx_[i]);
+    return item;
   }
 
   /**
@@ -532,6 +533,7 @@ class tiered_index {
     NUM_BITS = D * utils::bit_utils::highest_bit(K);
     NODE_RANGE = UINT64_C(1) << NUM_BITS;
     CHILD_RANGE = NODE_RANGE / K;
+    assert(NUM_BITS < 64);
   }
 
   T* operator[](const uint64_t key) {
@@ -545,10 +547,12 @@ class tiered_index {
   }
 
   child_type* get_or_create_child(const uint64_t k) {
+    assert(k < K);
     return idx_.get(k);
   }
 
   child_type* get_child(const uint64_t k) const {
+    assert(k < K);
     return idx_.at(k);
   }
 
@@ -582,10 +586,12 @@ class tiered_index<T, K, 1, stats> {
   }
 
   child_type* get_or_create_child(const uint64_t k) {
+    assert(k < K);
     return idx_.get(k);
   }
 
   child_type* get_child(const uint64_t k) const {
+    assert(k < K);
     return idx_.at(k);
   }
 
