@@ -43,15 +43,15 @@ static inline void _assert_fail(const char* expr, const char* file, int line,
 class assertion_failure_exception : public std::exception {
  public:
   assertion_failure_exception(const std::string& msg)
-      : msg_(msg.c_str()) {
+      : msg_(msg) {
   }
 
   virtual const char* what() const throw () {
-    return msg_;
+    return msg_.c_str();
   }
 
  private:
-  const char* msg_;
+  std::string msg_;
 };
 
 class assertion {
@@ -73,6 +73,7 @@ class assertion {
       msg_ << "Assertion '" << expr_str << "'";
 
     msg_ << " failed, file '" << file_ << "' at line " << line_;
+    fprintf(stderr, "Msg: %s\n", msg_.str().c_str());
     throw assertion_failure_exception(msg_.str());
   }
 
