@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
                            server, port);
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);
-  } else if (bench_op == "throughput-insert-values") {
+  } else if (bench_op == "latency-insert-values") {
     perf.bench_latency_insert_values();
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
