@@ -106,10 +106,10 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  const char* fmt = "#threads=%d, odir=%s, bench_op=%s,"
-      " #records=%ld, server=%s, port=%d\n";
-  fprintf(stderr, fmt, num_threads, output_dir.c_str(), bench_op.c_str(),
-          load_records, server.c_str(), port);
+  const char* fmt = "#threads=%d, ifile=%s, odir=%s, bench_op=%s, "
+      "#records=%ld, batch-size=%ld, server=%s, port=%d\n";
+  fprintf(stderr, fmt, num_threads, input_file.c_str(), output_dir.c_str(),
+          bench_op.c_str(), load_records, batch_size, server.c_str(), port);
 
   ts_server_benchmark perf(output_dir, input_file, load_records, batch_size,
                            server, port);
