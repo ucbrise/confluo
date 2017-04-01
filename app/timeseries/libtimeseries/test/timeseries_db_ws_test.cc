@@ -1,7 +1,7 @@
+#define BOOST_HAS_TR1_TUPLE
+
 #include "timeseries_db.h"
 #include "gtest/gtest.h"
-
-#define BOOST_HAS_TR1_TUPLE
 
 #include <thread>
 
