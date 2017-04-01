@@ -23,13 +23,13 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     BATCH_SIZE = batch_size;
     BATCH_BYTES = BATCH_SIZE * sizeof(data_pt);
     cur_off = 0;
-    data = utils::mmap_utils::mmap_r(input_file);
+    data = (char*) utils::mmap_utils::mmap_r(input_file);
     for (size_t i = 0; i < load_records; i++)
       ds_.insert_values(std::string());
   }
 
   static void insert_values(timeseries_db_client& client) {
-    ds_.insert_values(std::string(data + cur_off, BATCH_BYTES));
+    client.insert_values(std::string(data + cur_off, BATCH_BYTES));
     cur_off += BATCH_BYTES;
   }
 
@@ -45,7 +45,7 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
 
 uint64_t ts_server_benchmark::PRELOAD_RECORDS = 0;
 uint64_t ts_server_benchmark::BATCH_SIZE = 1;
-uint64_t ts_server_benchmark::BATCH_BYTES = sizeof(data_pt);
+size_t ts_server_benchmark::BATCH_BYTES = sizeof(data_pt);
 char* ts_server_benchmark::data;
 size_t ts_server_benchmark::cur_off;
 

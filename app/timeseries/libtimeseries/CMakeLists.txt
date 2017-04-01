@@ -21,10 +21,16 @@ file(GLOB_RECURSE server_sources src/server/*.cc)
 add_executable(tsserver ${server_sources})
 target_link_libraries(tsserver ${THRIFT_LIBRARIES})
 
-## Build perf
-#file(GLOB_RECURSE perf_sources perf/*.cc)
-#add_executable(tsperf ${perf_sources})
-#target_link_libraries(tsperf ${CMAKE_THREAD_LIBS_INIT})
+# Build client library
+set(client_sources src/server/timeseries_db_constants.cc 
+  src/server/timeseries_db_types.cc
+  src/server/timeseries_db_service.cc)
+add_library(tsclient STATIC ${client_sources})
+
+# Build perf
+file(GLOB_RECURSE perf_sources perf/*.cc)
+add_executable(tssperf ${perf_sources})
+target_link_libraries(tssperf tsclient ${CMAKE_THREAD_LIBS_INIT} ${THRIFT_LIBRARIES})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)

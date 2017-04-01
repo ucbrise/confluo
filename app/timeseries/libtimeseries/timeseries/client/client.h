@@ -5,6 +5,7 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TBufferTransports.h>
 
+#include "timeseries_db.h"
 #include "server/timeseries_db_service.h"
 
 #include "logger.h"
@@ -69,14 +70,14 @@ class timeseries_db_client {
 
   data_pt get_nearest_value(const bool direction,
       const timestamp_t ts, const version_t version) {
-    std::string& _return;
+    std::string _return;
     client_->get_nearest_value(_return, direction, ts, version);
     return *((data_pt*)_return.c_str());
   }
 
   data_pt get_nearest_value_latest(const bool direction,
       const timestamp_t ts) {
-    std::string& _return;
+    std::string _return;
     client_->get_nearest_value_latest(_return, direction, ts);
     return *((data_pt*)_return.c_str());
   }
