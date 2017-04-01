@@ -1,4 +1,4 @@
-#define BOOST_HAS_TR1_TUPLE
+#define GTEST_HAS_TR1_TUPLE 0
 
 #include "timeseries_db.h"
 #include "gtest/gtest.h"
