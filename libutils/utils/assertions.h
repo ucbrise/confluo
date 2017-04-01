@@ -73,7 +73,6 @@ class assertion {
       msg_ << "Assertion '" << expr_str << "'";
 
     msg_ << " failed, file '" << file_ << "' at line " << line_;
-    fprintf(stderr, "Msg: %s\n", msg_.str().c_str());
     throw assertion_failure_exception(msg_.str());
   }
 

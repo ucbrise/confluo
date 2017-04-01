@@ -534,15 +534,10 @@ class tiered_index {
     NUM_BITS = D * utils::bit_utils::highest_bit(K);
     NODE_RANGE = UINT64_C(1) << NUM_BITS;
     CHILD_RANGE = NODE_RANGE / K;
-    assert(NUM_BITS < 64);
+    assert_throw(NUM_BITS < 64, "NUM_BITS = " << NUM_BITS);
   }
 
   T* operator[](const uint64_t key) {
-    assert_throw(key < NODE_RANGE,
-                 "key = " << key << " NODE_RANGE = " << NODE_RANGE);
-    assert_throw(
-        key / CHILD_RANGE < K,
-        "key = " << key << " CHILD_RANGE = " << CHILD_RANGE << "K = " << K);
     child_type* c = get_or_create_child(key / CHILD_RANGE);
     return (*c)[key % CHILD_RANGE];
   }
@@ -553,12 +548,10 @@ class tiered_index {
   }
 
   child_type* get_or_create_child(const uint64_t k) {
-    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.get(k);
   }
 
   child_type* get_child(const uint64_t k) const {
-    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.at(k);
   }
 
@@ -592,12 +585,10 @@ class tiered_index<T, K, 1, stats> {
   }
 
   child_type* get_or_create_child(const uint64_t k) {
-    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.get(k);
   }
 
   child_type* get_child(const uint64_t k) const {
-    assert_throw(k < K, "k = " << k << " K = " << K);
     return idx_.at(k);
   }
 
