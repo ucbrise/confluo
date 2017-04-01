@@ -538,6 +538,11 @@ class tiered_index {
   }
 
   T* operator[](const uint64_t key) {
+    assert_throw(key < NODE_RANGE,
+                 "key = " << key << " NODE_RANGE = " << NODE_RANGE);
+    assert_throw(
+        key / CHILD_RANGE < K,
+        "key = " << key << " CHILD_RANGE = " << CHILD_RANGE << "K = " << K);
     child_type* c = get_or_create_child(key / CHILD_RANGE);
     return (*c)[key % CHILD_RANGE];
   }
