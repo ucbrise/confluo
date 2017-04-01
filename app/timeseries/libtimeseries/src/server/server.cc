@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
     timeseries_db_ws<> store;
     start_server(port, store);
   } else if (tail_scheme == "read-stalled") {
-    timeseries_db_ws<> store;
+    timeseries_db_rs<> store;
     start_server(port, store);
   } else {
     fprintf(stderr, "Unknown concurrency control scheme: %s\n",

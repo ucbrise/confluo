@@ -184,7 +184,7 @@ size_t timeseries_db_base<branch_factor, depth>::BLOCK_TIME_RANGE = 64
     - (utils::bit_utils::highest_bit(branch_factor) * depth);
 
 template<size_t branch_factor = 64, size_t depth = 9>
-class timeseries_db_rs : timeseries_db_base<branch_factor, depth> {
+class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
  public:
   timeseries_db_rs()
       : timeseries_db_base<branch_factor, depth>() {
@@ -237,7 +237,7 @@ class timeseries_db_rs : timeseries_db_base<branch_factor, depth> {
 };
 
 template<size_t branch_factor = 64, size_t depth = 9>
-class timeseries_db_ws : timeseries_db_base<branch_factor, depth> {
+class timeseries_db_ws : public timeseries_db_base<branch_factor, depth> {
  public:
   timeseries_db_ws()
       : timeseries_db_base<branch_factor, depth>(),
