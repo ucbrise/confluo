@@ -54,7 +54,7 @@ struct stats {
   }
 };
 
-template<size_t branch_factor = 64, size_t depth = 9>
+template<size_t branch_factor = 8192, size_t depth = 4>
 class timeseries_db_base {
  public:
   typedef monolog::monolog_relaxed_linear<data_pt> data_log;
