@@ -124,7 +124,7 @@ static void bench_thput_thread(op_t&& op, data_structure& ds, size_t nthreads,
   LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_SECS << " ops";
   LOOP_OPS(op, i, ds, num_ops, constants::COOLDOWN_SECS);
 
-  LOG_INFO<< "Thread completed benchmark at " << thput[i] << "ops/s";
+  LOG_INFO<< "Thread completed " << (thput[i] * usecs) / 1e6 << " ops at " << thput[i] << " ops/s";
 }
 
 template<typename data_structure>
