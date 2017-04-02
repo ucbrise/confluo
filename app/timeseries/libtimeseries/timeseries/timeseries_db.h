@@ -54,11 +54,11 @@ struct stats {
   }
 };
 
-template<size_t branch_factor = 256, size_t depth = 4>
+template<size_t branch_factor = 64, size_t depth = 5>
 class timeseries_db_base {
  public:
   typedef monolog::monolog_relaxed_linear<data_pt> data_log;
-  typedef monolog::monolog_relaxed_linear<data_ptr_t, 10, 1024> ptr_log;
+  typedef monolog::monolog_relaxed_linear<data_ptr_t, 10, 2500> ptr_log;
   typedef datastore::index::tiered_index<ptr_log, branch_factor, depth> time_index;
 
   timeseries_db_base() = default;
@@ -183,7 +183,7 @@ template<size_t branch_factor, size_t depth>
 size_t timeseries_db_base<branch_factor, depth>::BLOCK_TIME_RANGE = UINT64_C(1)
     << (64 - (utils::bit_utils::highest_bit(branch_factor) * depth));
 
-template<size_t branch_factor = 256, size_t depth = 4>
+template<size_t branch_factor = 64, size_t depth = 5>
 class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
  public:
   timeseries_db_rs()
@@ -237,7 +237,7 @@ class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
   monolog::monolog_bitvector valid_;
 };
 
-template<size_t branch_factor = 256, size_t depth = 4>
+template<size_t branch_factor = 64, size_t depth = 5>
 class timeseries_db_ws : public timeseries_db_base<branch_factor, depth> {
  public:
   timeseries_db_ws()
