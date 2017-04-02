@@ -51,31 +51,31 @@ class graph_store_perf :
     LOG_INFO<< "Finished loading " << num_links << " links";
   }
 
-  static void add_node(graph_store<tail_scheme>& gs) {
+  static void add_node(size_t i, graph_store<tail_scheme>& gs) {
     node_op op = graph_store_perf::create_node_op();
     gs.add_node(op);
   }
 
-  static void update_node(graph_store<tail_scheme>& gs) {
+  static void update_node(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     node_op op = create_node_op(id);
     gs.update_node(op);
   }
 
-  static void delete_node(graph_store<tail_scheme>& gs) {
+  static void delete_node(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     gs.delete_node(NODE_TYPE, id);
   };
 
-  static void get_node(graph_store<tail_scheme>& gs) {
+  static void get_node(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id = distribution(generator);
     gs.get_node(NODE_TYPE, id);
   };
 
-  static void add_link(graph_store<tail_scheme>& gs) {
+  static void add_link(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
@@ -83,7 +83,7 @@ class graph_store_perf :
     gs.add_link(op);
   };
 
-  static void update_link(graph_store<tail_scheme>& gs) {
+  static void update_link(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
@@ -91,27 +91,27 @@ class graph_store_perf :
     gs.add_link(op);
   };
 
-  static void delete_link(graph_store<tail_scheme>& gs) {
+  static void delete_link(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
     gs.delete_link(id1, 0, id2);
   };
 
-  static void get_link(graph_store<tail_scheme>& gs) {
+  static void get_link(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     int64_t id2 = distribution(generator);
     gs.get_link(id1, 0, id2);
   };
 
-  static void get_link_list(graph_store<tail_scheme>& gs) {
+  static void get_link_list(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     gs.get_link_list(id1, 0);
   };
 
-  static void count_links(graph_store<tail_scheme>& gs) {
+  static void count_links(size_t i, graph_store<tail_scheme>& gs) {
     PREAMBLE_RNG;
     int64_t id1 = distribution(generator);
     gs.count_links(id1, 0);

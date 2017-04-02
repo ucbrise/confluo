@@ -24,32 +24,32 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
       ds_.append(APPEND_DATA);
   }
 
-  static void append(log_store_client& client) {
+  static void append(size_t i, log_store_client& client) {
     client.append(APPEND_DATA);
   }
 
-  static void append_async(log_store_client& client) {
+  static void append_async(size_t i, log_store_client& client) {
     for (size_t i = 0; i < BATCH_SIZE; i++)
       client.send_append(APPEND_DATA);
     for (size_t i = 0; i < BATCH_SIZE; i++)
       client.recv_append();
   }
 
-  static void multi_append(log_store_client& client) {
+  static void multi_append(size_t i, log_store_client& client) {
     std::vector<int64_t> ids;
     client.multi_append(ids, APPEND_DATA_BATCH);
   }
 
-  static void get(log_store_client& client) {
+  static void get(size_t i, log_store_client& client) {
     std::string ret;
     client.get(ret, utils::rand_utils::rand_int64(PRELOAD_RECORDS));
   }
 
-  static void update(log_store_client& client) {
+  static void update(size_t i, log_store_client& client) {
     client.update(utils::rand_utils::rand_int64(PRELOAD_RECORDS), UPDATE_DATA);
   }
 
-  static void invalidate(log_store_client& client) {
+  static void invalidate(size_t i, log_store_client& client) {
     client.invalidate(utils::rand_utils::rand_int64(PRELOAD_RECORDS));
   }
 
