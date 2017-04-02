@@ -183,7 +183,7 @@ template<size_t branch_factor, size_t depth>
 size_t timeseries_db_base<branch_factor, depth>::BLOCK_TIME_RANGE = UINT64_C(1)
     << (64 - (utils::bit_utils::highest_bit(branch_factor) * depth));
 
-template<size_t branch_factor = 64, size_t depth = 9>
+template<size_t branch_factor = 8192, size_t depth = 4>
 class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
  public:
   timeseries_db_rs()
@@ -237,7 +237,7 @@ class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
   monolog::monolog_bitvector valid_;
 };
 
-template<size_t branch_factor = 64, size_t depth = 9>
+template<size_t branch_factor = 8192, size_t depth = 4>
 class timeseries_db_ws : public timeseries_db_base<branch_factor, depth> {
  public:
   timeseries_db_ws()
