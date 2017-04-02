@@ -11,7 +11,7 @@ using namespace datastore;
 class TimeseriesDBWSTest : public testing::Test {
  public:
   static const uint64_t kBatchSize = 1000;
-  static const uint64_t kTSMax = 1000000;
+  static const uint64_t kTSMax = 10000;
 
   std::vector<data_pt> get_pts(uint64_t start_ts) {
     std::vector<data_pt> pts;
