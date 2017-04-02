@@ -538,6 +538,8 @@ class tiered_index {
   }
 
   T* operator[](const uint64_t key) {
+    fprintf(stderr, "(k=%llu, off=%llu)=>", key / CHILD_RANGE,
+            key % CHILD_RANGE);
     child_type* c = get_or_create_child(key / CHILD_RANGE);
     return (*c)[key % CHILD_RANGE];
   }
@@ -577,6 +579,7 @@ class tiered_index<T, K, 1, stats> {
   tiered_index() = default;
 
   T* operator[](const uint64_t key) {
+    fprintf(stderr, "(k=%llu, off=1)\n", key);
     return get_or_create_child(key);
   }
 
