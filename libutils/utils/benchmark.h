@@ -121,7 +121,7 @@ static void bench_thput_thread(op_t&& op, data_structure& ds, size_t nthreads,
   assert(usecs > 0);
   thput[i] = num_ops * batch_size * 1e6 / usecs;
 
-  LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_SECS << " ops";
+  LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_SECS << " s";
   LOOP_OPS(op, i, ds, num_ops, constants::COOLDOWN_SECS);
 
   LOG_INFO<< "Thread completed " << (thput[i] * usecs) / 1e6 << " ops at " << thput[i] << " ops/s";
@@ -152,7 +152,7 @@ class benchmark {
     std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
     TIME_OPS(op, 0, ds_, num_ops, constants::MEASURE_SECS, out);
 
-    LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_SECS << " ops";
+    LOG_INFO<< "Measure complete; running cooldown for " << constants::COOLDOWN_SECS << " s";
     LOOP_OPS(op, 0, ds_, num_ops, constants::COOLDOWN_SECS);
   }
 
