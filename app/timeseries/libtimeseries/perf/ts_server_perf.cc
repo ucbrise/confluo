@@ -147,6 +147,8 @@ int main(int argc, char** argv) {
     perf.bench_throughput_get_range(num_threads);
   } else if (bench_op == "latency-insert-values") {
     perf.bench_latency_insert_values();
+  } else if (bench_op == "latency-get-range") {
+    perf.bench_latency_get_range();
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }
