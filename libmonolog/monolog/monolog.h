@@ -898,6 +898,9 @@ class monolog_bitvector {
       }
     }
 
+    if (bidx == bidx_max)
+      return;
+
     bidx++;
     while (bidx != bidx_max) {
       atomic::store(&bits_[bidx], UINT64_C(0xFFFFFFFFFFFFFFFF));
