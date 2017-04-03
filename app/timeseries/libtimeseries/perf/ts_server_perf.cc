@@ -29,7 +29,7 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
 
     LOG_INFO<< "Pre-loading " << load_records << " data points...";
     uint64_t preload_batch_bytes = 8192 * sizeof(data_pt);
-    for (size_t i = 0; i < load_records / preload_batch_bytes; i++) {
+    for (size_t i = 0; i < load_records / 8192; i++) {
       ds_.insert_values(std::string(data + cur_off, preload_batch_bytes));
       cur_off += preload_batch_bytes;
     }
