@@ -33,8 +33,8 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
       ds_.insert_values(std::string(data + cur_off, preload_batch_bytes));
       cur_off += preload_batch_bytes;
     }
-    std::string final_batch = std::string(data + cur_off,
-                                          load_records % preload_batch_bytes);
+    std::string final_batch = std::string(
+        data + cur_off, load_records * sizeof(data_pt) % preload_batch_bytes);
     if (!final_batch.empty()) {
       ds_.insert_values(std::string(data + cur_off, final_batch.length()));
       cur_off += final_batch.length();
