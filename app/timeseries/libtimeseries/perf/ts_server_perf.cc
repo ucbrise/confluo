@@ -20,7 +20,6 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
                       size_t batch_size, const std::string& host, int port)
       : utils::bench::benchmark<timeseries_db_client>(output_dir) {
     ds_.connect(host, port);
-    PRELOAD_RECORDS = load_records;
     BATCH_SIZE = batch_size;
     BATCH_BYTES = BATCH_SIZE * sizeof(data_pt);
     cur_off = 0;
@@ -39,7 +38,8 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
       ds_.insert_values(std::string(data + cur_off, final_batch.length()));
       cur_off += final_batch.length();
     }
-    LOG_INFO<< "Pre-load complete, loaded " << ds_.num_entries() << " data points";
+    PRELOAD_RECORDS = ds_.num_entries();
+    LOG_INFO<< "Pre-load complete, loaded " << PRELOAD_RECORDS << " data points";
   }
 
   static void insert_values(size_t i, timeseries_db_client& client) {
