@@ -81,7 +81,7 @@ TEST_F(MonoLogTest, MMapMonoLogTest) {
 }
 
 TEST_F(MonoLogTest, MonoLogBitVectorSetGetTest) {
-  monolog::monolog_bitvector bits;
+  monolog::monolog_bitvector<> bits;
 
   for (uint64_t i = 0; i < kArraySize; i++) {
     bits.set_bit(i);
@@ -95,7 +95,7 @@ TEST_F(MonoLogTest, MonoLogBitVectorSetGetTest) {
 TEST_F(MonoLogTest, MonoLogBitVectorMultiSetGetTest) {
   {
     // Aligned
-    monolog::monolog_bitvector bits;
+    monolog::monolog_bitvector<> bits;
     for (uint64_t i = 0; i < kArraySize; i += 1024) {
       bits.set_bits(i, 1024);
     }
@@ -107,7 +107,7 @@ TEST_F(MonoLogTest, MonoLogBitVectorMultiSetGetTest) {
 
   {
     // Unaligned
-    monolog::monolog_bitvector bits;
+    monolog::monolog_bitvector<> bits;
     uint64_t max = 1000 * 1000;
     for (uint64_t i = 0; i < max; i += 1000) {
       bits.set_bits(i, 1000);

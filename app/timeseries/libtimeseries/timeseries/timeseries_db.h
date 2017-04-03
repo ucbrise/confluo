@@ -57,7 +57,7 @@ struct stats {
 template<size_t branch_factor = 256, size_t depth = 4>
 class timeseries_db_base {
  public:
-  typedef monolog::monolog_relaxed_linear<data_pt> data_log;
+  typedef monolog::monolog_relaxed_linear<data_pt, 1024> data_log;
   typedef monolog::monolog_relaxed_linear<data_ptr_t, 32, 1024> ptr_log;
   typedef datastore::index::tiered_index<ptr_log, branch_factor, depth> time_index;
 
@@ -234,7 +234,8 @@ class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
   }
 
  private:
-  monolog::monolog_bitvector valid_;
+  typedef monolog::monolog_relaxed_linear<atomic::type<uint64_t>, 1024> bits;
+  monolog::monolog_bitvector<bits> valid_;
 };
 
 template<size_t branch_factor = 256, size_t depth = 4>

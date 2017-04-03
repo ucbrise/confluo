@@ -319,7 +319,7 @@ class monolog_linear_base {
   }
 
   // Gets the data at index idx.
-  T get(size_t idx) const {
+  const T& get(size_t idx) const {
     size_t bucket_idx = idx / BLOCK_SIZE;
     size_t bucket_off = idx % BLOCK_SIZE;
     return atomic::load(&buckets_[bucket_idx])[bucket_off];
@@ -451,7 +451,7 @@ class mmapped_block {
     memcpy(atomic::load(&data_) + offset, data, len * sizeof(T));
   }
 
-  T at(size_t i) const {
+  const T& at(size_t i) const {
     return atomic::load(&data_)[i];
   }
 
@@ -572,7 +572,7 @@ class mmap_monolog_base {
   }
 
   // Gets the data at index idx.
-  T get(size_t idx) const {
+  const T& get(size_t idx) const {
     return blocks_[idx / BLOCK_SIZE].at(idx % BLOCK_SIZE);
   }
 
@@ -658,7 +658,7 @@ class monolog_write_stalled : public monolog_base<T, NBUCKETS> {
   }
 
   // Get the entry at the specified index `idx'.
-  T at(size_t idx) const {
+  const T& at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -716,7 +716,7 @@ class monolog_relaxed : public monolog_base<T, NBUCKETS> {
     return idx;
   }
 
-  T at(size_t idx) const {
+  const T& at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -777,7 +777,7 @@ class monolog_relaxed_linear : public monolog_linear_base<T, NBUCKETS,
     return atomic::faa(&tail_, len);
   }
 
-  T at(size_t idx) const {
+  const T& at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -843,7 +843,7 @@ class mmap_monolog_relaxed : public mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>
     return atomic::faa(&tail_, len);
   }
 
-  T at(size_t idx) const {
+  const T& at(size_t idx) const {
     return this->get(idx);
   }
 
@@ -863,9 +863,14 @@ class mmap_monolog_relaxed : public mmap_monolog_base<T, MAX_BLOCKS, BLOCK_SIZE>
   atomic::type<size_t> tail_;
 };
 
+template<typename monolog_type = monolog_base<atomic::type<uint64_t>, 1024>>
 class monolog_bitvector {
  public:
   monolog_bitvector() = default;
+
+  void ensure_alloc(uint64_t start, uint64_t end) {
+    bits_.ensure_alloc(start / 64, end / 64);
+  }
 
   bool get_bit(uint64_t i) const {
     return utils::bit_utils::get_bit(bits_.get(i / 64), i % 64);
@@ -908,7 +913,7 @@ class monolog_bitvector {
   }
 
  private:
-  monolog_base<atomic::type<uint64_t>, 1024> bits_;
+  monolog_type bits_;
 };
 
 }
