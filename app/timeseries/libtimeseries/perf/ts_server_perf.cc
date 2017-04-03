@@ -25,9 +25,11 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     cur_off = 0;
     data_count = utils::mmap_utils::file_size(input_file) / sizeof(data_pt);
     data = (char*) utils::mmap_utils::mmap_r(input_file);
+
+    uint64_t preload_batch_bytes = 8192 * sizeof(data_pt);
     for (size_t i = 0; i < load_records; i++) {
-      ds_.insert_values(std::string(data + cur_off, BATCH_BYTES));
-      cur_off += BATCH_BYTES;
+      ds_.insert_values(std::string(data + cur_off, preload_batch_bytes));
+      cur_off += preload_batch_bytes;
     }
   }
 
@@ -134,9 +136,8 @@ int main(int argc, char** argv) {
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);
   } else if (bench_op == "throughput-get-range") {
-    assert_throw(
-        load_records >= batch_size,
-        "Must have at least " << load_records << " records pre-loaded");
+    assert_throw(load_records >= batch_size,
+                 "Must have at least " << batch_size << " records pre-loaded");
     perf.bench_throughput_get_range(num_threads);
   } else if (bench_op == "latency-insert-values") {
     perf.bench_latency_insert_values();
