@@ -23,15 +23,18 @@ namespace utils {
 
 class mmap_utils {
  public:
-  static void* mmap_r(const std::string path) {
+  static size_t file_size(const std::string& path) {
+    struct stat st;
+    stat(path.c_str(), &st);
+    return st.st_size;
+  }
+
+  static void* mmap_r(const std::string& path) {
     int fd = open(path.c_str(), O_RDONLY, (S_IRWXU | S_IRWXG | S_IRWXO));
     assert_throw(fd >= 0, "Could not open file " << path << " for mmap");
 
-    struct stat st;
-    stat(path.c_str(), &st);
-    size_t size = st.st_size;
-
-    void* data = mmap(NULL, size, PROT_READ, MAP_SHARED | MAP_POPULATE, fd, 0);
+    void* data = mmap(NULL, file_size(path), PROT_READ,
+                      MAP_SHARED | MAP_POPULATE, fd, 0);
     assert_throw(data != MAP_FAILED, "Could not mmap file " << path);
 
     return data;

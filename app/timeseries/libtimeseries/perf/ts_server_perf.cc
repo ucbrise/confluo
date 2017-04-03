@@ -23,6 +23,7 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     BATCH_SIZE = batch_size;
     BATCH_BYTES = BATCH_SIZE * sizeof(data_pt);
     cur_off = 0;
+    data_count = utils::mmap_utils::file_size(input_file) / sizeof(data_pt);
     data = (char*) utils::mmap_utils::mmap_r(input_file);
     for (size_t i = 0; i < load_records; i++) {
       ds_.insert_values(std::string(data + cur_off, BATCH_BYTES));
@@ -35,10 +36,24 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     cur_off += BATCH_BYTES;
   }
 
+  static void get_range(size_t i, timeseries_db_client& client) {
+    data_pt* first = (data_pt*) (data
+        + utils::rand_utils::rand_uint64(PRELOAD_RECORDS - BATCH_SIZE)
+            * sizeof(data_pt));
+    data_pt* last = first + BATCH_SIZE;
+    std::string res;
+    client.get_range_latest(res, first->timestamp, last->timestamp);
+    assert_throw(
+        res.size() / sizeof(data_pt) == BATCH_SIZE,
+        "#results = " << res.size() / sizeof(data_pt) << " BATCH_SIZE = " << BATCH_SIZE);
+  }
+
   DEFINE_BENCH_BATCH(insert_values, BATCH_SIZE)
+  DEFINE_BENCH_BATCH(get_range, BATCH_SIZE)
 
  private:
   static char* data;
+  static size_t data_count;
   static size_t cur_off;
   static uint64_t PRELOAD_RECORDS;
   static uint64_t BATCH_SIZE;
@@ -49,6 +64,7 @@ uint64_t ts_server_benchmark::PRELOAD_RECORDS = 0;
 uint64_t ts_server_benchmark::BATCH_SIZE = 1;
 size_t ts_server_benchmark::BATCH_BYTES = sizeof(data_pt);
 char* ts_server_benchmark::data;
+size_t ts_server_benchmark::data_count;
 size_t ts_server_benchmark::cur_off;
 
 int main(int argc, char** argv) {
@@ -117,6 +133,11 @@ int main(int argc, char** argv) {
                            server, port);
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);
+  } else if (bench_op == "throughput-get-range") {
+    assert_throw(
+        load_records >= batch_size,
+        "Must have at least " << load_records << " records pre-loaded");
+    perf.bench_throughput_get_range(num_threads);
   } else if (bench_op == "latency-insert-values") {
     perf.bench_latency_insert_values();
   } else {
