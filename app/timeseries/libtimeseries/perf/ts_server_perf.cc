@@ -144,8 +144,6 @@ int main(int argc, char** argv) {
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);
   } else if (bench_op == "throughput-get-range") {
-    assert_throw(load_records >= batch_size,
-                 "Must have at least " << batch_size << " records pre-loaded");
     perf.bench_throughput_get_range(num_threads);
   } else if (bench_op == "latency-insert-values") {
     perf.bench_latency_insert_values();
