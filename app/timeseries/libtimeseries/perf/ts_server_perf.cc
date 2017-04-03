@@ -44,7 +44,7 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
             * sizeof(data_pt));
     data_pt* last = first + BATCH_SIZE;
     std::string res;
-    client.get_range_latest(res, first->timestamp, last->timestamp);
+    client.get_range_latest(res, first->timestamp, last->timestamp - 1);
     assert_throw(
         res.size() / sizeof(data_pt) == BATCH_SIZE,
         "#results = " << res.size() / sizeof(data_pt) << " BATCH_SIZE = " << BATCH_SIZE);
