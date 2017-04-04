@@ -41,13 +41,13 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  LOG_INFO << "Sleep interval = " << sleep_us << "us";
+  LOG_INFO<< "Sleep interval = " << sleep_us << "us";
 
   std::vector<std::string> hosts;
   std::vector<int> ports;
   std::ifstream in(hosts_file);
   std::string line;
-  LOG_INFO << "Host list:";
+  LOG_INFO<< "Host list:";
   while (std::getline(in, line)) {
     std::vector<std::string> elems = utils::string_utils::split(line, ':');
     if (elems.size() == 2) {
@@ -60,16 +60,15 @@ int main(int argc, char **argv) {
       fprintf(stderr, "Could not parse hosts file\n");
       return 0;
     }
-    LOG_INFO << "Host: " << hosts.back().c_str() << " Port: " << ports.back();
+    LOG_INFO<< "Host: " << hosts.back().c_str() << " Port: " << ports.back();
   }
 
   if (hosts.empty())
-    LOG_WARN << "Not connected to any log store servers";
+    LOG_WARN<< "Not connected to any log store servers";
 
-  std::vector<datastore::log_store_client> clients;
+  std::vector<datastore::log_store_client> clients(hosts.size());
   for (size_t i = 0; i < hosts.size(); i++) {
-    clients.push_back(datastore::log_store_client());
-    clients.back().connect(hosts[i], ports[i]);
+    clients[i].connect(hosts[i], ports[i]);
   }
 
   datastore::coordinator<datastore::log_store_client> coord(clients, sleep_us);
