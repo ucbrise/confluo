@@ -67,8 +67,10 @@ int main(int argc, char **argv) {
     LOG_WARN << "Not connected to any log store servers";
 
   std::vector<datastore::log_store_client> clients;
-  for (size_t i = 0; i < hosts.size(); i++)
-    clients.push_back(datastore::log_store_client(hosts[i], ports[i]));
+  for (size_t i = 0; i < hosts.size(); i++) {
+    clients.push_back(datastore::log_store_client());
+    clients.back().connect(hosts[i], ports[i]);
+  }
 
   datastore::coordinator<datastore::log_store_client> coord(clients, sleep_us);
   coord.start();
