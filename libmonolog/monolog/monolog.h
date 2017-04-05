@@ -451,6 +451,10 @@ class mmapped_block {
     memcpy(atomic::load(&data_) + offset, data, len * sizeof(T));
   }
 
+  void flush(size_t offset, size_t len) {
+    utils::mmap_utils::mmap_flush(atomic::load(&data_) + offset, len * sizeof(T));
+  }
+
   const T& at(size_t i) const {
     return atomic::load(&data_)[i];
   }
@@ -569,6 +573,10 @@ class mmap_monolog_base {
   // memory is allocated before calling this function.
   void write_unsafe(size_t offset, const T* data, size_t len) {
     blocks_[offset / BLOCK_SIZE].write_unsafe(offset % BLOCK_SIZE, data, len);
+  }
+
+  void flush(size_t offset, size_t len) {
+    blocks_[offset / BLOCK_SIZE].flush(offset % BLOCK_SIZE, len);
   }
 
   // Gets the data at index idx.

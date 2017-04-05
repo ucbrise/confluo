@@ -27,6 +27,14 @@ struct in_memory {
     path = p;
   }
 
+  void flush_ids(uint64_t start_id, size_t count) {
+    // Do nothing
+  }
+
+  void flush_data(size_t offset, size_t len) {
+    // Do nothing
+  }
+
   std::string path;
   monolog::monolog_relaxed_linear<uint8_t, 65536, 1073741824> data_log_;
   monolog::monolog_linear_base<object_ptr_t, 65536, 16777216> ptr_log_;
@@ -39,6 +47,14 @@ struct persistent_relaxed {
     path = p;
     data_log_.init("data", path);
     ptr_log_.init("ptrs", path);
+  }
+
+  void flush_ids(uint64_t start_id, size_t count) {
+    ptr_log_.flush(start_id, count);
+  }
+
+  void flush_data(size_t offset, size_t len) {
+    data_log_.flush(offset, len);
   }
 
   std::string path;
@@ -159,6 +175,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t id = atomic::faa(&tail_, UINT64_C(1));
     object_ptr_t& p = this->write(id, data, length, version);
     cc_.init_object(p, version);
+    this->primary_.flush_ids(id, 1);
+    this->primary_.flush_data(p.offset, p.length);
     cc_.end_write_op(version);
     return id;
   }
@@ -169,6 +187,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t id = atomic::faa(&tail_, UINT64_C(1));
     object_ptr_t& p = this->write(id, data, version);
     cc_.init_object(p, version);
+    this->primary_.flush_ids(id, 1);
+    this->primary_.flush_data(p.offset, p.length);
     cc_.end_write_op(version);
     return id;
   }
@@ -178,11 +198,18 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t cnt = data_batch.size();
     uint64_t version = cc_.start_write_op(cnt);
     uint64_t id = atomic::faa(&tail_, cnt);
+    size_t size = 0;
+    size_t off = 0;
     for (size_t i = 0; i < cnt; i++) {
       object_ptr_t& p = this->write(id, data_batch[i], length_batch[i],
                                     version);
+      if (i == 0)
+        off = p.offset;
+      size += p.length;
       cc_.init_object(p, version);
     }
+    this->primary_.flush_ids(id, cnt);
+    this->primary_.flush_data(off, size);
     cc_.end_write_op(version, cnt);
     return id;
   }
@@ -192,10 +219,17 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t cnt = data_batch.size();
     uint64_t version = cc_.start_write_op(cnt);
     uint64_t id = atomic::faa(&tail_, cnt);
-    for (const T& data : data_batch) {
-      object_ptr_t& p = this->write(id, data, version);
+    size_t size = 0;
+    size_t off = 0;
+    for (size_t i = 0; i < cnt; i++) {
+      object_ptr_t& p = this->write(id, data_batch.at(i), version);
+      if (i == 0)
+        off = p.offset;
+      size += p.length;
       cc_.init_object(p, version);
     }
+    this->primary_.flush_ids(id, cnt);
+    this->primary_.flush_data(off, size);
     cc_.end_write_op(version, cnt);
     return id;
   }
@@ -306,6 +340,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t id = cc_.start_write_op();
     object_ptr_t& p = this->write(id, data, length, id);
     cc_.init_object(p, id);
+    this->primary_.flush_ids(id, 1);
+    this->primary_.flush_data(p.offset, p.length);
     cc_.end_write_op(id);
     return id;
   }
@@ -315,6 +351,8 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
     uint64_t id = cc_.start_write_op();
     object_ptr_t& p = this->write(id, data, id);
     cc_.init_object(p, id);
+    this->primary_.flush_ids(id, 1);
+    this->primary_.flush_data(p.offset, p.length);
     cc_.end_write_op(id);
     return id;
   }
@@ -323,10 +361,17 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
                         std::vector<size_t>& length_batch) {
     uint64_t cnt = data_batch.size();
     uint64_t id = cc_.start_write_op(cnt);
+    size_t size = 0;
+    size_t off = 0;
     for (size_t i = 0; i < cnt; i++) {
       object_ptr_t& p = this->write(id, data_batch[i], length_batch[i], id);
+      if (i == 0)
+        off = p.offset;
+      size += p.length;
       cc_.init_object(p, id);
     }
+    this->primary_.flush_ids(id, cnt);
+    this->primary_.flush_data(off, size);
     cc_.end_write_op(id, cnt);
     return id;
   }
@@ -335,10 +380,17 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
   uint64_t append_batch(const std::vector<T>& data_batch) {
     uint64_t cnt = data_batch.size();
     uint64_t id = cc_.start_write_op(cnt);
-    for (const T& data : data_batch) {
-      object_ptr_t& p = this->write(id, data, id);
+    size_t size = 0;
+    size_t off = 0;
+    for (size_t i = 0; i < cnt; i++) {
+      object_ptr_t& p = this->write(id, data_batch.at(i), id);
+      if (i == 0)
+        off = p.offset;
+      size += p.length;
       cc_.init_object(p, id);
     }
+    this->primary_.flush_ids(id, cnt);
+    this->primary_.flush_data(off, size);
     cc_.end_write_op(id, cnt);
     return id;
   }
