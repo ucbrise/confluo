@@ -111,25 +111,25 @@ TEST_F(LogStoreTest, AppendAndGetTest4) {
 }
 
 TEST_F(LogStoreTest, AppendAndGetTest5) {
-  datastore::log_store<persistent_relaxed, read_stalled> ls("/tmp");
+  datastore::log_store<persistent, read_stalled> ls("/tmp");
   test_append_and_get(ls);
 }
 
 TEST_F(LogStoreTest, AppendAndGetTest6) {
-  datastore::log_store<persistent_relaxed, write_stalled> ls("/tmp");
+  datastore::log_store<persistent, write_stalled> ls("/tmp");
   test_append_and_get(ls);
 }
 
 TEST_F(LogStoreTest, AppendAndGetTest7) {
   read_stalled rsctl;
-  dependent::log_store<persistent_relaxed, read_stalled> ls(rsctl, "/tmp");
+  dependent::log_store<persistent, read_stalled> ls(rsctl, "/tmp");
   test_append_and_get(ls);
   ASSERT_EQ(MAX_IDS, rsctl.get_tail());
 }
 
 TEST_F(LogStoreTest, AppendAndGetTest8) {
   write_stalled wsctl;
-  dependent::log_store<persistent_relaxed, write_stalled> ls(wsctl, "/tmp");
+  dependent::log_store<persistent, write_stalled> ls(wsctl, "/tmp");
   test_append_and_get(ls);
   ASSERT_EQ(MAX_IDS, wsctl.get_tail());
 }
@@ -159,25 +159,25 @@ TEST_F(LogStoreTest, AppendUpdateGetTest4) {
 }
 
 TEST_F(LogStoreTest, AppendUpdateGetTest5) {
-  datastore::log_store<persistent_relaxed, read_stalled> ls("/tmp");
+  datastore::log_store<persistent, read_stalled> ls("/tmp");
   test_append_update_get(ls);
 }
 
 TEST_F(LogStoreTest, AppendUpdateGetTest6) {
-  datastore::log_store<persistent_relaxed, write_stalled> ls("/tmp");
+  datastore::log_store<persistent, write_stalled> ls("/tmp");
   test_append_update_get(ls);
 }
 
 TEST_F(LogStoreTest, AppendUpdateGetTest7) {
   read_stalled rsctl;
-  dependent::log_store<persistent_relaxed, read_stalled> ls(rsctl, "/tmp");
+  dependent::log_store<persistent, read_stalled> ls(rsctl, "/tmp");
   test_append_update_get(ls);
   ASSERT_EQ(MAX_IDS * 2, rsctl.get_tail());
 }
 
 TEST_F(LogStoreTest, AppendUpdateGetTest8) {
   write_stalled wsctl;
-  dependent::log_store<persistent_relaxed, write_stalled> ls(wsctl, "/tmp");
+  dependent::log_store<persistent, write_stalled> ls(wsctl, "/tmp");
   test_append_update_get(ls);
   ASSERT_EQ(MAX_IDS * 2, wsctl.get_tail());
 }
@@ -207,25 +207,25 @@ TEST_F(LogStoreTest, AppendDeleteGetTest4) {
 }
 
 TEST_F(LogStoreTest, AppendDeleteGetTest5) {
-  datastore::log_store<persistent_relaxed, read_stalled> ls("/tmp");
+  datastore::log_store<persistent, read_stalled> ls("/tmp");
   test_append_invalidate_get(ls);
 }
 
 TEST_F(LogStoreTest, AppendDeleteGetTest6) {
-  datastore::log_store<persistent_relaxed, write_stalled> ls("/tmp");
+  datastore::log_store<persistent, write_stalled> ls("/tmp");
   test_append_invalidate_get(ls);
 }
 
 TEST_F(LogStoreTest, AppendDeleteGetTest7) {
   read_stalled rsctl;
-  dependent::log_store<persistent_relaxed, read_stalled> ls(rsctl, "/tmp");
+  dependent::log_store<persistent, read_stalled> ls(rsctl, "/tmp");
   test_append_invalidate_get(ls);
   ASSERT_EQ(MAX_IDS * 2, rsctl.get_tail());
 }
 
 TEST_F(LogStoreTest, AppendDeleteGetTest8) {
   write_stalled wsctl;
-  dependent::log_store<persistent_relaxed, write_stalled> ls(wsctl, "/tmp");
+  dependent::log_store<persistent, write_stalled> ls(wsctl, "/tmp");
   test_append_invalidate_get(ls);
   ASSERT_EQ(MAX_IDS * 2, wsctl.get_tail());
 }

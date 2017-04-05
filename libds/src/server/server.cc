@@ -59,10 +59,10 @@ int main(int argc, char **argv) {
     }
   } else if (storage_scheme == "persistent") {
     if (concurrency_control == "write-stalled") {
-      log_store<persistent_relaxed, write_stalled> store(data_path);
+      log_store<persistent, write_stalled> store(data_path);
       log_store_server::start(store, port);
     } else if (concurrency_control == "read-stalled") {
-      log_store<persistent_relaxed, read_stalled> store(data_path);
+      log_store<persistent, read_stalled> store(data_path);
       log_store_server::start(store, port);
     } else {
       fprintf(stderr, "Unknown concurrency control: %s\n",

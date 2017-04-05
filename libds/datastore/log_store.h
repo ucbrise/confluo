@@ -40,8 +40,8 @@ struct in_memory {
   monolog::monolog_linear_base<object_ptr_t, 65536, 16777216> ptr_log_;
 };
 
-struct persistent_relaxed {
-  persistent_relaxed() = default;
+struct persistent {
+  persistent() = default;
 
   void set_path(const std::string& p) {
     path = p;
