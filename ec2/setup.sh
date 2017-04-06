@@ -57,4 +57,4 @@ sudo make install
 cd ..
 
 cd ..
-rm -rf tmpdir
+sudo rm -rf tmpdir
