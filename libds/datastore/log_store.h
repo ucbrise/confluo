@@ -2,6 +2,7 @@
 #define DATASTORE_OBJECT_LOG_H_
 
 #include <functional>
+#include <numeric>
 
 #include "object.h"
 #include "monolog.h"
@@ -11,11 +12,11 @@ namespace datastore {
 
 struct empty_aux {
   template<typename T>
-  void update(const T& obj) {
+  void update(uint64_t id, const T& obj) {
     return;
   }
 
-  void update(const uint8_t* data, size_t len) {
+  void update(uint64_t id, const uint8_t* data, size_t len) {
     return;
   }
 };
@@ -40,8 +41,8 @@ struct in_memory {
   monolog::monolog_linear_base<object_ptr_t, 65536, 16777216> ptr_log_;
 };
 
-struct persistent {
-  persistent() = default;
+struct durable {
+  durable() = default;
 
   void set_path(const std::string& p) {
     path = p;
@@ -55,6 +56,28 @@ struct persistent {
 
   void flush_data(size_t offset, size_t len) {
     data_log_.flush(offset, len);
+  }
+
+  std::string path;
+  monolog::mmap_monolog_relaxed<uint8_t, 65536, 1073741824> data_log_;
+  monolog::mmap_monolog_base<object_ptr_t, 65536, 16777216> ptr_log_;
+};
+
+struct durable_relaxed {
+  durable_relaxed() = default;
+
+  void set_path(const std::string& p) {
+    path = p;
+    data_log_.init("data", path);
+    ptr_log_.init("ptrs", path);
+  }
+
+  void flush_ids(uint64_t start_id, size_t count) {
+    // Do nothing
+  }
+
+  void flush_data(size_t offset, size_t len) {
+    // Do nothing
   }
 
   std::string path;
@@ -80,7 +103,7 @@ class log_store_base {
     p.version = version;
     if (length > 0) {
       p.offset = primary_.data_log_.append(data, p.length);
-      aux_.update(data, length);
+      aux_.update(id, data, length);
     }
     return p;
   }
@@ -92,7 +115,7 @@ class log_store_base {
     p.version = version;
     p.offset = primary_.data_log_.reserve(p.length);
     serializer<T>::serialize(primary_.data_log_.ptr(p.offset), data);
-    aux_.update(data);
+    aux_.update(id, data);
     return p;
   }
 
@@ -475,6 +498,204 @@ class log_store : public log_store_base<storage, concurrency_control, aux_data> 
   bool snapshot_success_;
   concurrency_control cc_;
 };
+
+namespace append_only {
+
+struct in_memory {
+  in_memory() = default;
+
+  void set_path(const std::string& p) {
+    path = p;
+  }
+
+  void flush_data(size_t offset, size_t len) {
+    // Do nothing
+  }
+
+  std::string path;
+  monolog::monolog_linear_base<uint8_t, 65536, 1073741824> data_log_;
+};
+
+struct durable {
+  durable() = default;
+
+  void set_path(const std::string& p) {
+    path = p;
+    data_log_.init("data", path);
+  }
+
+  void flush_data(size_t offset, size_t len) {
+    data_log_.flush(offset, len);
+  }
+
+  std::string path;
+  monolog::mmap_monolog_base<uint8_t, 65536, 1073741824> data_log_;
+};
+
+struct durable_relaxed {
+  durable_relaxed() = default;
+
+  void set_path(const std::string& p) {
+    path = p;
+    data_log_.init("data", path);
+  }
+
+  void flush_ids(uint64_t start_id, size_t count) {
+    // Do nothing
+  }
+
+  void flush_data(size_t offset, size_t len) {
+    // Do nothing
+  }
+
+  std::string path;
+  monolog::mmap_monolog_base<uint8_t, 65536, 1073741824> data_log_;
+};
+
+template<typename storage, typename concurrency_control,
+    typename aux_data = empty_aux>
+class log_store {
+ public:
+  typedef concurrency_control cc;
+
+  log_store()
+      : snapshot_tail_(UINT64_C(0)),
+        snapshot_success_(false) {
+
+  }
+
+  log_store(const std::string& path)
+      : snapshot_tail_(UINT64_C(0)),
+        snapshot_success_(false) {
+    primary_.set_path(path);
+  }
+
+  uint64_t append(const uint8_t* data, size_t length) {
+    uint64_t offset = cc_.start_write_op(length);
+    primary_.data_log_.write(offset, data, length);
+    primary_.flush_data(offset, length);
+    aux_.update(offset, data, length);
+    cc_.end_write_op(offset, length);
+    return offset;
+  }
+
+  template<typename T>
+  uint64_t append(const T& data) {
+    uint64_t length = serializer<T>::size(data);
+    uint64_t offset = cc_.start_write_op(length);
+    serializer<T>::serialize(primary_.data_log_.ptr(offset), data);
+    primary_.flush_data(offset, length);
+    aux_.update(offset, data);
+    cc_.end_write_op(offset, length);
+    return offset;
+  }
+
+  uint64_t append_batch(const std::vector<uint8_t*>& batch,
+                        std::vector<size_t>& lengths) {
+    size_t length = std::accumulate(lengths.begin(), lengths.end(), 0);
+    uint64_t offset = cc_.start_write_op(length);
+    uint64_t off = offset;
+    for (size_t i = 0; i < batch.size(); i++) {
+      primary_.data_log_.write(off, batch.at(i), lengths.at(i));
+      aux_.update(off, batch.at(i), lengths.at(i));
+      off += lengths.at(i);
+    }
+    primary_.flush_data(offset, length);
+    cc_.end_write_op(offset, length);
+    return offset;
+  }
+
+  template<typename T>
+  uint64_t append_batch(const std::vector<T>& batch) {
+    size_t length = 0;
+    std::vector<size_t> batch_offsets;
+    for (size_t i = 0; i < batch.size(); i++) {
+      batch_offsets.push_back(length);
+      length += serializer<T>::size(batch.at(i));
+    }
+    uint64_t offset = cc_.start_write_op(length);
+    for (size_t i = 0; i < batch.size(); i++) {
+      serializer<T>::serialize(
+          primary_.data_log_.ptr(offset + batch_offsets.at(i)), batch.at(i));
+      aux_.update(offset + batch_offsets.at(i), batch.at(i));
+    }
+    primary_.flush_data(offset, length);
+    cc_.end_write_op(offset, length);
+    return offset;
+  }
+
+  bool get(uint64_t offset, uint8_t* data, size_t length) const {
+    uint64_t tail = cc_.get_tail();
+    if (cc_.is_valid(offset, tail)) {
+      primary_.data_log_.read(offset, data, length);
+      return true;
+    }
+    return false;
+  }
+
+  template<typename T>
+  bool get(uint64_t offset, T* data) const {
+    uint64_t tail = cc_.get_tail();
+    if (cc_.is_valid(offset, tail)) {
+      deserializer<T>::deserialize(primary_.data_log_.cptr(offset), data);
+      return true;
+    }
+    return false;
+  }
+
+  bool update(uint64_t id, const uint8_t* data, size_t length) {
+    assert_throw(0, "Not supported");
+    return false;
+  }
+
+  template<typename T>
+  bool update(uint64_t id, const T& data) {
+    assert_throw(0, "Not supported");
+    return false;
+  }
+
+  bool invalidate(uint64_t id) {
+    assert_throw(0, "Not supported");
+    return false;
+  }
+
+  uint64_t begin_snapshot() {
+    return cc_.start_snapshot_op();
+  }
+
+  bool end_snapshot(uint64_t id) {
+    return cc_.end_snapshot_op(id);
+  }
+
+  void send_begin_snapshot() {
+    snapshot_tail_ = cc_.start_snapshot_op();
+  }
+
+  uint64_t recv_begin_snapshot() const {
+    return snapshot_tail_;
+  }
+
+  void send_end_snapshot(uint64_t id) {
+    snapshot_success_ = cc_.end_snapshot_op(id);
+  }
+
+  bool recv_end_snapshot() const {
+    return snapshot_success_;
+  }
+
+  size_t num_records() const {
+    return cc_.get_tail();
+  }
+
+ protected:
+  storage primary_;
+  aux_data aux_;
+  uint64_t snapshot_tail_;
+  bool snapshot_success_;
+  concurrency_control cc_;
+};
+
+}
 
 }
 

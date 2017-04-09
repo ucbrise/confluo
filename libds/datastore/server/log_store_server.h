@@ -24,10 +24,9 @@ using boost::shared_ptr;
 
 namespace datastore {
 
-template<typename storage, typename concurrency_control, typename aux_data>
+template<typename data_store>
 class log_store_service : virtual public log_store_serviceIf {
  public:
-  typedef log_store<storage, concurrency_control, aux_data> data_store;
   log_store_service(data_store& store)
       : store_(store) {
   }
@@ -36,7 +35,8 @@ class log_store_service : virtual public log_store_serviceIf {
     return store_.append(data);
   }
 
-  void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data) {
+  void multi_append(std::vector<int64_t> & _return,
+                    const std::vector<std::string> & data) {
     uint64_t start_id = store_.append_batch(data);
     _return.resize(data.size());
     std::iota(_return.begin(), _return.end(), start_id);
@@ -74,11 +74,10 @@ class log_store_service : virtual public log_store_serviceIf {
   data_store& store_;
 };
 
-template<typename storage, typename concurrency_control, typename aux_data>
+template<typename data_store>
 class ls_processor_factory : public TProcessorFactory {
  public:
-  typedef log_store<storage, concurrency_control, aux_data> data_store;
-  typedef log_store_service<storage, concurrency_control, aux_data> data_store_service;
+  typedef log_store_service<data_store> data_store_service;
 
   ls_processor_factory(data_store& store)
       : store_(store) {
@@ -100,11 +99,9 @@ private:
 
 class log_store_server {
  public:
-  template<typename storage, typename concurrency_control, typename aux_data>
-  static void start(log_store<storage, concurrency_control, aux_data>& store,
-                    int port) {
-
-    typedef ls_processor_factory<storage, concurrency_control, aux_data> data_store_processor_factory;
+  template<typename data_store>
+  static void start(data_store& store, int port) {
+    typedef ls_processor_factory<data_store> data_store_processor_factory;
     try {
       shared_ptr<data_store_processor_factory> proc_factory(
           new data_store_processor_factory(store));
