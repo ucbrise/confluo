@@ -176,7 +176,7 @@ class cmd_parser {
   std::string parsed_values() {
     std::string parsed = "";
     for (auto kv : values_)
-      parsed += kv.first + " -> " + kv.second;
+      parsed += kv.first + " -> " + kv.second + "\n";
     return parsed;
   }
 
