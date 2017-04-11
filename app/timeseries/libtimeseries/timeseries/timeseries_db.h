@@ -58,33 +58,27 @@ template<size_t branch_factor = 256, size_t depth = 4>
 class timeseries_db_base {
  public:
   typedef monolog::monolog_relaxed_linear<data_pt, 1024> data_log;
-  typedef monolog::monolog_relaxed_linear<data_ptr_t, 32, 1024> ptr_log;
-  typedef datastore::index::tiered_index<ptr_log, branch_factor, depth> time_index;
+  typedef monolog::monolog_relaxed_linear<data_ptr_t, 32, 1024> ref_log;
+  typedef datastore::index::tiered_index<ref_log, branch_factor, depth> time_index;
 
   timeseries_db_base() = default;
 
-  version_t append(const data_pt& pt) {
-    version_t id = log_.push_back(pt);
-    timestamp_t ts_block = pt.timestamp / BLOCK_TIME_RANGE;
-    idx_[ts_block]->push_back(id);
-    return id;
-  }
-
   version_t append(const data_pt* pts, size_t len) {
-    version_t id = log_.reserve(len);
-    for (size_t i = 0; i < len; i++) {
-      log_.set(id + i, pts[i]);
-      timestamp_t ts_block = pts[i].timestamp / BLOCK_TIME_RANGE;
-      idx_[ts_block]->push_back(id + i);
+    version_t id = log_.append(pts, len);
+    uint64_t id1, id2;
+    for (size_t i = 0; i < len;) {
+      timestamp_t ts_block = get_block(pts[i].timestamp);
+      id1 = id2 = id + i;
+      while (++i < len && get_block(pts[i].timestamp) == ts_block)
+        id2++;
+      idx_[ts_block]->push_back_range(id1, id2);
     }
     return id;
   }
 
   version_t append(const data_pt* pts, size_t len, timestamp_t ts_block) {
-    version_t id = log_.reserve(len);
-    for (size_t i = 0; i < len; i++)
-      log_.set(id + i, pts[i]);
-    idx_[ts_block]->push_back_range(id, id + len);
+    version_t id = log_.append(pts, len);
+    idx_[ts_block]->push_back_range(id, id + len - 1);
     return id;
   }
 
@@ -93,21 +87,22 @@ class timeseries_db_base {
   }
 
  protected:
+  static timestamp_t get_block(timestamp_t ts) {
+    return ts / BLOCK_TIME_RANGE;
+  }
+
   template<typename validator>
-  void _get_range(std::vector<data_pt>& results, timestamp_t start_ts,
-                  timestamp_t end_ts, version_t version, validator&& validate) {
-    timestamp_t start_ts_block = start_ts / BLOCK_TIME_RANGE;
-    timestamp_t end_ts_block = end_ts / BLOCK_TIME_RANGE;
-    for (timestamp_t ts_block = start_ts_block; ts_block <= end_ts_block;
-        ts_block++) {
-      ptr_log* ptrs = idx_.at(ts_block);
+  void _get_range(std::vector<data_pt>& results, timestamp_t ts1,
+                  timestamp_t ts2, version_t version, validator&& validate) {
+    for (timestamp_t blk = get_block(ts1); blk <= get_block(ts2); blk++) {
+      ref_log* ptrs = idx_.at(blk);
       size_t size = ptrs->size();
       for (size_t i = 0; i < size; i++) {
         data_ptr_t ptr = ptrs->at(i);
         if (ptr < version) {
           validate(ptr);
           data_pt pt = log_.get(ptr);
-          if (pt.timestamp >= start_ts && pt.timestamp <= end_ts)
+          if (pt.timestamp >= ts1 && pt.timestamp <= ts2)
             results.push_back(pt);
         }
       }
@@ -117,8 +112,8 @@ class timeseries_db_base {
   template<typename validator>
   data_pt _get_nearest_value(timestamp_t ts, version_t version, bool direction,
                              validator&& validate) {
-    timestamp_t ts_block = ts / BLOCK_TIME_RANGE;
-    ptr_log* ptrs = idx_.at(ts_block);
+    timestamp_t ts_block = get_block(ts);
+    ref_log* ptrs = idx_.at(ts_block);
     if (direction)
       return _get_nearest_value_gt(ts, ptrs, version, validate);
     return _get_nearest_value_lt(ts, ptrs, version, validate);
@@ -135,7 +130,7 @@ class timeseries_db_base {
   }
 
   template<typename validator>
-  data_pt _get_nearest_value_lt(timestamp_t ts, ptr_log* ptrs,
+  data_pt _get_nearest_value_lt(timestamp_t ts, ref_log* ptrs,
                                 version_t version, validator&& validate) {
     size_t size = ptrs->size();
     timestamp_t min = std::numeric_limits<timestamp_t>::max();
@@ -155,7 +150,7 @@ class timeseries_db_base {
   }
 
   template<typename validator>
-  data_pt _get_nearest_value_gt(timestamp_t ts, ptr_log* ptrs,
+  data_pt _get_nearest_value_gt(timestamp_t ts, ref_log* ptrs,
                                 version_t version, validator&& validate) {
     size_t size = ptrs->size();
     timestamp_t min = std::numeric_limits<timestamp_t>::max();

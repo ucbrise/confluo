@@ -542,6 +542,13 @@ class tiered_index {
     return (*c)[key % CHILD_RANGE];
   }
 
+  template<typename update, typename ...update_args>
+  T* operator()(const uint64_t key, update&& u, update_args&&... args) {
+    u(stats_, std::forward<update_args>(args)...);
+    child_type* c = get_or_create_child(key / CHILD_RANGE);
+    c->update(key, u, std::forward<update_args>(args)...);
+  }
+
   T* at(const uint64_t key) const {
     child_type* c = get_child(key / CHILD_RANGE);
     return c->at(key % CHILD_RANGE);
@@ -557,6 +564,10 @@ class tiered_index {
 
   stats& get_stats() {
     return stats_;
+  }
+
+  template<typename update, typename ...update_args>
+  void update_stats(const uint64_t key, update&& u, update_args&&... args) {
   }
 
  private:
@@ -577,6 +588,12 @@ class tiered_index<T, K, 1, stats> {
   tiered_index() = default;
 
   T* operator[](const uint64_t key) {
+    return get_or_create_child(key);
+  }
+
+  template<typename update, typename ...update_args>
+  T* operator()(const uint64_t key, update&& u, update_args&&... args) {
+    u(stats_, std::forward<update_args>(args)...);
     return get_or_create_child(key);
   }
 
