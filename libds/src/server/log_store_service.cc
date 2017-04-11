@@ -476,6 +476,14 @@ uint32_t log_store_service_get_args::read(::apache::thrift::protocol::TProtocol*
           xfer += iprot->skip(ftype);
         }
         break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->len);
+          this->__isset.len = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -497,6 +505,10 @@ uint32_t log_store_service_get_args::write(::apache::thrift::protocol::TProtocol
   xfer += oprot->writeI64(this->id);
   xfer += oprot->writeFieldEnd();
 
+  xfer += oprot->writeFieldBegin("len", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->len);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -514,6 +526,10 @@ uint32_t log_store_service_get_pargs::write(::apache::thrift::protocol::TProtoco
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64((*(this->id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("len", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64((*(this->len)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -1654,19 +1670,20 @@ void log_store_serviceClient::recv_multi_append(std::vector<int64_t> & _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "multi_append failed: unknown result");
 }
 
-void log_store_serviceClient::get(std::string& _return, const int64_t id)
+void log_store_serviceClient::get(std::string& _return, const int64_t id, const int64_t len)
 {
-  send_get(id);
+  send_get(id, len);
   recv_get(_return);
 }
 
-void log_store_serviceClient::send_get(const int64_t id)
+void log_store_serviceClient::send_get(const int64_t id, const int64_t len)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
   log_store_service_get_pargs args;
   args.id = &id;
+  args.len = &len;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -2151,7 +2168,7 @@ void log_store_serviceProcessor::process_get(int32_t seqid, ::apache::thrift::pr
 
   log_store_service_get_result result;
   try {
-    iface_->get(result.success, args.id);
+    iface_->get(result.success, args.id, args.len);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2627,13 +2644,13 @@ void log_store_serviceConcurrentClient::recv_multi_append(std::vector<int64_t> &
   } // end while(true)
 }
 
-void log_store_serviceConcurrentClient::get(std::string& _return, const int64_t id)
+void log_store_serviceConcurrentClient::get(std::string& _return, const int64_t id, const int64_t len)
 {
-  int32_t seqid = send_get(id);
+  int32_t seqid = send_get(id, len);
   recv_get(_return, seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_get(const int64_t id)
+int32_t log_store_serviceConcurrentClient::send_get(const int64_t id, const int64_t len)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -2641,6 +2658,7 @@ int32_t log_store_serviceConcurrentClient::send_get(const int64_t id)
 
   log_store_service_get_pargs args;
   args.id = &id;
+  args.len = &len;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();

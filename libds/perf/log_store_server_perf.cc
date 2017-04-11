@@ -40,7 +40,7 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
 
   static void get(size_t i, log_store_client& client) {
     std::string ret;
-    client.get(ret, utils::rand_utils::rand_int64(PRELOAD_RECORDS));
+    client.get(ret, utils::rand_utils::rand_int64(PRELOAD_RECORDS), DATA_SIZE);
   }
 
   static void update(size_t i, log_store_client& client) {

@@ -23,7 +23,7 @@ class log_store_serviceIf {
   virtual ~log_store_serviceIf() {}
   virtual int64_t append(const std::string& data) = 0;
   virtual void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data) = 0;
-  virtual void get(std::string& _return, const int64_t id) = 0;
+  virtual void get(std::string& _return, const int64_t id, const int64_t len) = 0;
   virtual bool update(const int64_t id, const std::string& data) = 0;
   virtual bool invalidate(const int64_t id) = 0;
   virtual int64_t begin_snapshot() = 0;
@@ -65,7 +65,7 @@ class log_store_serviceNull : virtual public log_store_serviceIf {
   void multi_append(std::vector<int64_t> & /* _return */, const std::vector<std::string> & /* data */) {
     return;
   }
-  void get(std::string& /* _return */, const int64_t /* id */) {
+  void get(std::string& /* _return */, const int64_t /* id */, const int64_t /* len */) {
     return;
   }
   bool update(const int64_t /* id */, const std::string& /* data */) {
@@ -299,8 +299,9 @@ class log_store_service_multi_append_presult {
 };
 
 typedef struct _log_store_service_get_args__isset {
-  _log_store_service_get_args__isset() : id(false) {}
+  _log_store_service_get_args__isset() : id(false), len(false) {}
   bool id :1;
+  bool len :1;
 } _log_store_service_get_args__isset;
 
 class log_store_service_get_args {
@@ -308,19 +309,24 @@ class log_store_service_get_args {
 
   log_store_service_get_args(const log_store_service_get_args&);
   log_store_service_get_args& operator=(const log_store_service_get_args&);
-  log_store_service_get_args() : id(0) {
+  log_store_service_get_args() : id(0), len(0) {
   }
 
   virtual ~log_store_service_get_args() throw();
   int64_t id;
+  int64_t len;
 
   _log_store_service_get_args__isset __isset;
 
   void __set_id(const int64_t val);
 
+  void __set_len(const int64_t val);
+
   bool operator == (const log_store_service_get_args & rhs) const
   {
     if (!(id == rhs.id))
+      return false;
+    if (!(len == rhs.len))
       return false;
     return true;
   }
@@ -342,6 +348,7 @@ class log_store_service_get_pargs {
 
   virtual ~log_store_service_get_pargs() throw();
   const int64_t* id;
+  const int64_t* len;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -936,8 +943,8 @@ class log_store_serviceClient : virtual public log_store_serviceIf {
   void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data);
   void send_multi_append(const std::vector<std::string> & data);
   void recv_multi_append(std::vector<int64_t> & _return);
-  void get(std::string& _return, const int64_t id);
-  void send_get(const int64_t id);
+  void get(std::string& _return, const int64_t id, const int64_t len);
+  void send_get(const int64_t id, const int64_t len);
   void recv_get(std::string& _return);
   bool update(const int64_t id, const std::string& data);
   void send_update(const int64_t id, const std::string& data);
@@ -1035,13 +1042,13 @@ class log_store_serviceMultiface : virtual public log_store_serviceIf {
     return;
   }
 
-  void get(std::string& _return, const int64_t id) {
+  void get(std::string& _return, const int64_t id, const int64_t len) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get(_return, id);
+      ifaces_[i]->get(_return, id, len);
     }
-    ifaces_[i]->get(_return, id);
+    ifaces_[i]->get(_return, id, len);
     return;
   }
 
@@ -1126,8 +1133,8 @@ class log_store_serviceConcurrentClient : virtual public log_store_serviceIf {
   void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data);
   int32_t send_multi_append(const std::vector<std::string> & data);
   void recv_multi_append(std::vector<int64_t> & _return, const int32_t seqid);
-  void get(std::string& _return, const int64_t id);
-  int32_t send_get(const int64_t id);
+  void get(std::string& _return, const int64_t id, const int64_t len);
+  int32_t send_get(const int64_t id, const int64_t len);
   void recv_get(std::string& _return, const int32_t seqid);
   bool update(const int64_t id, const std::string& data);
   int32_t send_update(const int64_t id, const std::string& data);

@@ -42,9 +42,9 @@ class log_store_service : virtual public log_store_serviceIf {
     std::iota(_return.begin(), _return.end(), start_id);
   }
 
-  void get(std::string& _return, const int64_t id) {
+  void get(std::string& _return, const int64_t id, const int64_t len) {
     char buf[UINT16_MAX];
-    size_t length;
+    size_t length = len;
     bool success = store_.get(id, (uint8_t*) buf, length);
     if (success)
       _return.assign(buf, length);
