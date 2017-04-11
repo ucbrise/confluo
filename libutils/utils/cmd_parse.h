@@ -173,6 +173,13 @@ class cmd_parser {
     return msg;
   }
 
+  std::string parsed_values() {
+    std::string parsed = "";
+    for (auto kv : values_)
+      parsed += kv.first + " -> " + kv.second;
+    return parsed;
+  }
+
  private:
   void parse() {
     int c, opt_idx = -1;
