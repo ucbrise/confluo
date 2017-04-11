@@ -375,7 +375,7 @@ class monolog_linear_base {
 // succeeded in allocating the bucket, the current thread deallocates and
 // returns.
   T* try_allocate_bucket(size_t bucket_idx) {
-    T* bucket = new T[BLOCK_SIZE + BUFFER_SIZE];
+    T* bucket = new T[BLOCK_SIZE + BUFFER_SIZE]();
     T* expected = NULL;
 
     // Only one thread will be successful in replacing the NULL reference with newly
