@@ -12,11 +12,13 @@ using namespace ::datastore;
 class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  public:
   ls_server_benchmark(const std::string& output_dir, size_t load_records,
-                      size_t batch_size, const std::string& host, int port)
+                      size_t batch_size, size_t record_size,
+                      const std::string& host, int port)
       : utils::bench::benchmark<log_store_client>(output_dir) {
     ds_.connect(host, port);
     PRELOAD_RECORDS = load_records;
     BATCH_SIZE = batch_size;
+    DATA_SIZE = record_size;
     APPEND_DATA_BATCH.resize(BATCH_SIZE, APPEND_DATA);
     for (size_t i = 0; i < load_records; i++)
       ds_.append(APPEND_DATA);
@@ -134,7 +136,8 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  ls_server_benchmark perf(output_dir, load_records, batch_size, server, port);
+  ls_server_benchmark perf(output_dir, load_records, batch_size, record_size,
+                           server, port);
   if (bench_op == "throughput-append") {
     perf.bench_throughput_append(num_threads);
   } else if (bench_op == "throughput-append-async") {

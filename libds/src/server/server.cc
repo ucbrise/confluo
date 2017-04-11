@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  LOG_INFO << parser.parsed_values();
+  LOG_INFO<< parser.parsed_values();
 
   if (!append_only) {
     if (storage_scheme == "in-memory") {
@@ -73,6 +73,17 @@ int main(int argc, char **argv) {
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
         log_store<durable, read_stalled> store(data_path);
+        log_store_server::start(store, port);
+      } else {
+        fprintf(stderr, "Unknown concurrency control: %s\n",
+                concurrency_control.c_str());
+      }
+    } else if (storage_scheme == "persistent-relaxed") {
+      if (concurrency_control == "write-stalled") {
+        log_store<durable_relaxed, write_stalled> store(data_path);
+        log_store_server::start(store, port);
+      } else if (concurrency_control == "read-stalled") {
+        log_store<durable_relaxed, read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
         fprintf(stderr, "Unknown concurrency control: %s\n",
@@ -102,6 +113,21 @@ int main(int argc, char **argv) {
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
         datastore::append_only::log_store<datastore::append_only::durable,
+            datastore::append_only::read_stalled> store(data_path);
+        log_store_server::start(store, port);
+      } else {
+        fprintf(stderr, "Unknown concurrency control: %s\n",
+                concurrency_control.c_str());
+      }
+    } else if (storage_scheme == "persistent-relaxed") {
+      if (concurrency_control == "write-stalled") {
+        datastore::append_only::log_store<
+            datastore::append_only::durable_relaxed,
+            datastore::append_only::write_stalled> store(data_path);
+        log_store_server::start(store, port);
+      } else if (concurrency_control == "read-stalled") {
+        datastore::append_only::log_store<
+            datastore::append_only::durable_relaxed,
             datastore::append_only::read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
