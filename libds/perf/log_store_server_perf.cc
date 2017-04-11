@@ -9,8 +9,6 @@
 
 using namespace ::datastore;
 
-#define DATA_SIZE 64
-
 class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  public:
   ls_server_benchmark(const std::string& output_dir, size_t load_records,
@@ -63,6 +61,7 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  private:
   static uint64_t PRELOAD_RECORDS;
   static uint64_t BATCH_SIZE;
+  static size_t DATA_SIZE;
 
   static std::string APPEND_DATA;
   static std::string UPDATE_DATA;
@@ -71,15 +70,13 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
 
 uint64_t ls_server_benchmark::PRELOAD_RECORDS = 0;
 uint64_t ls_server_benchmark::BATCH_SIZE = 1;
+size_t ls_server_benchmark::DATA_SIZE = 64;
 std::string ls_server_benchmark::APPEND_DATA = std::string('x', DATA_SIZE);
 std::string ls_server_benchmark::UPDATE_DATA = std::string('y', DATA_SIZE);
 std::vector<std::string> ls_server_benchmark::APPEND_DATA_BATCH;
 
 int main(int argc, char** argv) {
   cmd_options opts;
-  opts.add(
-      cmd_option("num-threads", 't', false).set_default("1").set_description(
-          "Number of benchmark threads"));
   opts.add(
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
@@ -88,11 +85,17 @@ int main(int argc, char** argv) {
           .set_description(
           "Benchmark operation (append, get, update, invalidate)"));
   opts.add(
-      cmd_option("append-batchsize", 'a', false).set_default("1")
-          .set_description("Append batch size"));
+      cmd_option("data-size", 'd', false).set_default("64").set_description(
+          "Data record size"));
+  opts.add(
+      cmd_option("batch-size", 'B', false).set_default("1").set_description(
+          "Append batch size"));
   opts.add(
       cmd_option("preload-records", 'r', false).set_default("0").set_description(
           "#Records to pre-load the logstore with"));
+  opts.add(
+      cmd_option("num-threads", 't', false).set_default("1").set_description(
+          "Number of benchmark threads"));
   opts.add(
       cmd_option("server", 's', false).set_default("localhost").set_description(
           "Server to connect"));
@@ -111,6 +114,7 @@ int main(int argc, char** argv) {
   std::string bench_op;
   long load_records;
   long batch_size;
+  long record_size;
   std::string server;
   int port;
   try {
@@ -118,7 +122,8 @@ int main(int argc, char** argv) {
     output_dir = parser.get("output-dir");
     bench_op = parser.get("bench-op");
     load_records = parser.get_long("preload-records");
-    batch_size = parser.get_long("append-batchsize");
+    batch_size = parser.get_long("batch-size");
+    record_size = parser.get_long("data-size");
     server = parser.get("server");
     port = parser.get_int("port");
   } catch (std::exception& e) {
@@ -127,10 +132,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  const char* fmt = "#threads=%d, odir=%s, bench_op=%s,"
-      " #records=%ld, server=%s, port=%d\n";
-  fprintf(stderr, fmt, num_threads, output_dir.c_str(), bench_op.c_str(),
-          load_records, server.c_str(), port);
+  LOG_INFO<< parser.parsed_values();
 
   ls_server_benchmark perf(output_dir, load_records, batch_size, server, port);
   if (bench_op == "throughput-append") {
