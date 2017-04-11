@@ -300,22 +300,35 @@ class monolog_linear_base {
   // Write len bytes of data at offset.
   // Allocates memory if necessary.
   void write(size_t offset, const T* data, size_t len) {
-    size_t bucket_idx = offset / BLOCK_SIZE;
-    size_t bucket_off = offset % BLOCK_SIZE;
-    T* bucket;
-    if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
-      bucket = try_allocate_bucket(bucket_idx);
+    size_t remaining = len;
+    while (remaining) {
+      size_t bucket_idx = offset / BLOCK_SIZE;
+      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
+      T* bucket;
+      if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
+        bucket = try_allocate_bucket(bucket_idx);
+      }
+      memcpy(bucket + bucket_off, data + len - remaining,
+             bucket_len * sizeof(T));
+      offset += bucket_len;
+      remaining -= bucket_len;
     }
-    memcpy(bucket + bucket_off, data, len * sizeof(T));
   }
 
   // Write len bytes of data at offset. Does NOT allocate memory -- ensure
   // memory is allocated before calling this function.
   void write_unsafe(size_t offset, const T* data, size_t len) {
-    size_t bucket_idx = offset / BLOCK_SIZE;
-    size_t bucket_off = offset % BLOCK_SIZE;
-    memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off, data,
-           len * sizeof(T));
+    size_t remaining = len;
+    while (remaining) {
+      size_t bucket_idx = offset / BLOCK_SIZE;
+      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
+      memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off,
+             data + len - remaining, bucket_len * sizeof(T));
+      offset += bucket_len;
+      remaining -= bucket_len;
+    }
   }
 
   // Gets the data at index idx.
@@ -327,10 +340,17 @@ class monolog_linear_base {
 
   // Get len bytes of data at offset.
   void read(size_t offset, T* data, size_t len) const {
-    size_t bucket_idx = offset / BLOCK_SIZE;
-    size_t bucket_off = offset % BLOCK_SIZE;
-    memcpy(data, atomic::load(&buckets_[bucket_idx]) + bucket_off,
-           len * sizeof(T));
+    size_t remaining = len;
+    while (remaining) {
+      size_t bucket_idx = offset / BLOCK_SIZE;
+      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
+      memcpy(data + len - remaining,
+             atomic::load(&buckets_[bucket_idx]) + bucket_off,
+             bucket_len * sizeof(T));
+      offset += bucket_len;
+      remaining -= bucket_len;
+    }
   }
 
   T& operator[](size_t idx) {
@@ -452,7 +472,8 @@ class mmapped_block {
   }
 
   void flush(size_t offset, size_t len) {
-    utils::mmap_utils::mmap_flush(atomic::load(&data_) + offset, len * sizeof(T));
+    utils::mmap_utils::mmap_flush(atomic::load(&data_) + offset,
+                                  len * sizeof(T));
   }
 
   const T& at(size_t i) const {
@@ -566,13 +587,30 @@ class mmap_monolog_base {
   // Write len bytes of data at offset.
   // Allocates memory if necessary.
   void write(size_t offset, const T* data, size_t len) {
-    blocks_[offset / BLOCK_SIZE].write(offset % BLOCK_SIZE, data, len);
+    size_t remaining = len;
+    while (remaining) {
+      size_t bucket_idx = offset / BLOCK_SIZE;
+      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
+      blocks_[bucket_idx].write(bucket_off, data + len - remaining, bucket_len);
+      offset += bucket_len;
+      remaining -= bucket_len;
+    }
   }
 
   // Write len bytes of data at offset. Does NOT allocate memory -- ensure
   // memory is allocated before calling this function.
   void write_unsafe(size_t offset, const T* data, size_t len) {
-    blocks_[offset / BLOCK_SIZE].write_unsafe(offset % BLOCK_SIZE, data, len);
+    size_t remaining = len;
+    while (remaining) {
+      size_t bucket_idx = offset / BLOCK_SIZE;
+      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
+      blocks_[bucket_idx].write_unsafe(bucket_off, data + len - remaining,
+                                       bucket_len);
+      offset += bucket_len;
+      remaining -= bucket_len;
+    }
   }
 
   void flush(size_t offset, size_t len) {
@@ -586,7 +624,15 @@ class mmap_monolog_base {
 
   // Get len bytes of data at offset.
   void read(size_t offset, T* data, size_t len) const {
-    blocks_[offset / BLOCK_SIZE].read(offset % BLOCK_SIZE, data, len);
+    size_t remaining = len;
+    while (remaining) {
+      size_t bucket_idx = offset / BLOCK_SIZE;
+      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
+      blocks_[bucket_idx].read(bucket_off, data + len - remaining, bucket_len);
+      offset += bucket_len;
+      remaining -= bucket_len;
+    }
   }
 
   T& operator[](size_t idx) {
