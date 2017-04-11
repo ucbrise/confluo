@@ -53,6 +53,8 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  LOG_INFO << parser.parsed_values();
+
   if (!append_only) {
     if (storage_scheme == "in-memory") {
       if (concurrency_control == "write-stalled") {
