@@ -83,7 +83,14 @@ class timeseries_base {
   timeseries_base() = default;
 
   version_t append(const data_pt* pts, size_t len) {
+    static auto update_stats =
+        [](atomic::type<stats*>* s, version_t ver, const data_pt* pts, size_t len) {
+          stats* old_s = atomic::load(s);
+          atomic::store(s, (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len));
+        };
+
     version_t ver = log_.append(pts, len);
+    fprintf(stderr, "Version: %lld\n", ver);
     uint64_t id1, id2;
     for (size_t i = 0; i < len;) {
       timestamp_t ts_block = get_block(pts[i].timestamp);
@@ -91,12 +98,7 @@ class timeseries_base {
       while (++i < len && get_block(pts[i].timestamp) == ts_block)
         id2++;
 
-      static auto update_stats =
-          [](atomic::type<stats*>* s, version_t ver, const data_pt* pts, size_t len) {
-            stats* old_s = atomic::load(s);
-            atomic::store(s, (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len));
-          };
-
+      fprintf(stderr, "Block = %lld; id1 = %lld, id2 = %lld\n", ts_block, id1, id2);
       ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
       log->push_back_range(id1, id2);
     }
