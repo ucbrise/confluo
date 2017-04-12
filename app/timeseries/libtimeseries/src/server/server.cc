@@ -95,8 +95,9 @@ class ts_processor_factory : public TProcessorFactory {
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
-    LOG_INFO << "Creating new processor...";
+    LOG_INFO << "Creating new stream...";
     auto uuid = store_.add_stream();
+    LOG_INFO << "Created stream with uuid " << uuid;
     boost::shared_ptr<timeseries_db_service<tsdb>> handler(new timeseries_db_service<tsdb>(store_[uuid]));
     boost::shared_ptr<TProcessor> processor(
         new timeseries_db_serviceProcessor(handler));
