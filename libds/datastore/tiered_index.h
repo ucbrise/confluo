@@ -58,6 +58,7 @@ class indexlet {
    * @return Pointer to the value.
    */
   T* get(const uint32_t i) {
+    assert_throw(i < SIZE, "i = " << i << "; SIZE = " << size);
     T* item;
     if ((item = atomic::load(&idx_[i])) == NULL) {
       item = new T();
