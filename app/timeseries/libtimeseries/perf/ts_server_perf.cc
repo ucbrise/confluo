@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
           .set_description(
           "Benchmark operation (append, get, update, invalidate)"));
   opts.add(
-      cmd_option("append-batchsize", 'a', false).set_default("1")
+      cmd_option("batch-size", 'B', false).set_default("1")
           .set_description("Append batch size"));
   opts.add(
       cmd_option("preload-records", 'r', false).set_default("0").set_description(
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     output_dir = parser.get("output-dir");
     bench_op = parser.get("bench-op");
     load_records = parser.get_long("preload-records");
-    batch_size = parser.get_long("append-batchsize");
+    batch_size = parser.get_long("batch-size");
     server = parser.get("server");
     port = parser.get_int("port");
   } catch (std::exception& e) {
@@ -134,10 +134,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  const char* fmt = "#threads=%d, ifile=%s, odir=%s, bench_op=%s, "
-      "#records=%ld, batch-size=%ld, server=%s, port=%d\n";
-  fprintf(stderr, fmt, num_threads, input_file.c_str(), output_dir.c_str(),
-          bench_op.c_str(), load_records, batch_size, server.c_str(), port);
+  LOG_INFO << parser.parsed_values();
 
   ts_server_benchmark perf(output_dir, input_file, load_records, batch_size,
                            server, port);
