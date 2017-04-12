@@ -98,7 +98,7 @@ class timeseries_base {
       while (++i < len && get_block(pts[i].timestamp) == ts_block)
         id2++;
 
-      fprintf(stderr, "Block = %lld; id1 = %lld, id2 = %lld\n", ts_block, id1, id2);
+      fprintf(stderr, "block = %lld; id1 = %lld, id2 = %lld\n", ts_block, id1, id2);
       ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
       log->push_back_range(id1, id2);
     }
