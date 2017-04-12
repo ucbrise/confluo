@@ -92,10 +92,9 @@ class timeseries_base {
         id2++;
 
       static auto update_stats =
-          [](atomic::type<stats*>& s, version_t ver, const data_pt* pts, size_t len) {
-            stats* old_s = atomic::load(&s);
-            stats* updated_s = (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len);
-            atomic::store(&s, updated_s);
+          [](atomic::type<stats*>* s, version_t ver, const data_pt* pts, size_t len) {
+            stats* old_s = atomic::load(s);
+            atomic::store(s, (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len));
           };
 
       ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
@@ -107,11 +106,11 @@ class timeseries_base {
   version_t append(const data_pt* pts, size_t len, timestamp_t ts_block) {
     version_t ver = log_.append(pts, len);
     static auto update_stats =
-        [](atomic::type<stats*>& s, version_t ver, const data_pt* pts, size_t len) {
-          stats* old_s = atomic::load(&s);
-          stats* updated_s = (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len);
-          atomic::store(&s, updated_s);
+        [](atomic::type<stats*>* s, version_t ver, const data_pt* pts, size_t len) {
+          stats* old_s = atomic::load(s);
+          atomic::store(s, (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len));
         };
+
     ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
     log->push_back_range(ver, ver + len - 1);
     return ver;
@@ -142,6 +141,12 @@ class timeseries_base {
         }
       }
     }
+  }
+
+  template<typename validator>
+  void _get_statistical_range(version_t ver, timestamp_t ts1, timestamp_t ts2,
+                              timestamp_t resolution, version_t version,
+                              validator&& validate) {
   }
 
   template<typename validator>

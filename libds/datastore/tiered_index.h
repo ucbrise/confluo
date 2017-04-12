@@ -548,7 +548,7 @@ class tiered_index {
 
   template<typename update, typename ...update_args>
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
-    u(stats_, std::forward<update_args>(args)...);
+    u(&stats_, std::forward<update_args>(args)...);
     child_type* c = get_or_create_child(key / CHILD_RANGE);
     return (*c)(key, u, std::forward<update_args>(args)...);
   }
@@ -599,7 +599,7 @@ class tiered_index<T, K, 1, stats> {
 
   template<typename update, typename ...update_args>
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
-    u(stats_, std::forward<update_args>(args)...);
+    u(&stats_, std::forward<update_args>(args)...);
     return get_or_create_child(key);
   }
 
