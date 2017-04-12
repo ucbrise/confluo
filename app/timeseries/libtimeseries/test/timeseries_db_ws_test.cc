@@ -29,7 +29,7 @@ const uint64_t TimeseriesDBWSTest::kBatchSize;
 const uint64_t TimeseriesDBWSTest::kTSMax;
 
 TEST_F(TimeseriesDBWSTest, AddGetTest) {
-  timeseries_db_ws<> tsdb;
+  timeseries_ws<> tsdb;
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts = get_pts(i);
     tsdb.insert_values(&pts[0], pts.size());
@@ -47,7 +47,7 @@ TEST_F(TimeseriesDBWSTest, AddGetTest) {
 }
 
 TEST_F(TimeseriesDBWSTest, AddGetNearestTest) {
-  timeseries_db_ws<> tsdb;
+  timeseries_ws<> tsdb;
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts = get_pts(i);
     tsdb.insert_values(&pts[0], pts.size());

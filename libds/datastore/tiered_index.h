@@ -518,6 +518,9 @@ class __index_depth4 : public __tiered_index_base<value_type> {
 };
 
 struct empty_stats {
+  empty_stats(const empty_stats& other) {
+  }
+
 };
 
 template<typename T, size_t K, size_t D, typename stats = empty_stats>
@@ -534,6 +537,7 @@ class tiered_index {
     NUM_BITS = D * utils::bit_utils::highest_bit(K);
     NODE_RANGE = UINT64_C(1) << NUM_BITS;
     CHILD_RANGE = NODE_RANGE / K;
+    atomic::init(&stats_, static_cast<stats*>(nullptr));
     assert_throw(NUM_BITS < 64, "NUM_BITS = " << NUM_BITS);
   }
 
@@ -546,7 +550,7 @@ class tiered_index {
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
     u(stats_, std::forward<update_args>(args)...);
     child_type* c = get_or_create_child(key / CHILD_RANGE);
-    c->update(key, u, std::forward<update_args>(args)...);
+    return (*c)(key, u, std::forward<update_args>(args)...);
   }
 
   T* at(const uint64_t key) const {
@@ -563,7 +567,7 @@ class tiered_index {
   }
 
   stats& get_stats() {
-    return stats_;
+    return atomic::load(&stats_);
   }
 
   template<typename update, typename ...update_args>
@@ -572,7 +576,7 @@ class tiered_index {
 
  private:
   idx_type idx_;
-  stats stats_;
+  atomic::type<stats*> stats_;
 };
 
 template<typename T, size_t K, typename stats>
@@ -585,7 +589,9 @@ class tiered_index<T, K, 1, stats> {
   static uint64_t NODE_RANGE;
   static uint64_t CHILD_RANGE;
 
-  tiered_index() = default;
+  tiered_index() {
+    atomic::init(&stats_, static_cast<stats*>(nullptr));
+  }
 
   T* operator[](const uint64_t key) {
     return get_or_create_child(key);
@@ -609,13 +615,13 @@ class tiered_index<T, K, 1, stats> {
     return idx_.at(k);
   }
 
-  stats& get_stats() {
-    return stats_;
+  stats* get_stats() {
+    return atomic::load(&stats_);
   }
 
  private:
   idx_type idx_;
-  stats stats_;
+  atomic::type<stats*> stats_;
 };
 
 template<typename T, size_t K, size_t D, typename S>

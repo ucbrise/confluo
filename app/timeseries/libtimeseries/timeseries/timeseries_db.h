@@ -10,6 +10,7 @@
 namespace timeseries {
 
 typedef int64_t data_ptr_t;
+typedef int64_t uuid_t;
 
 struct data_pt {
   timestamp_t timestamp;
@@ -22,6 +23,7 @@ struct stats {
   value_t max;
   value_t sum;
   value_t count;
+  atomic::type<stats*> prv;
 
   stats()
       : version(UINT64_MAX),
@@ -29,7 +31,7 @@ struct stats {
         max(UINT64_C(0)),
         sum(UINT64_C(0)),
         count(UINT64_C(0)) {
-
+    atomic::init(&prv, static_cast<stats*>(nullptr));
   }
 
   stats(version_t ver, value_t mn, value_t mx, value_t sm, value_t cnt)
@@ -38,6 +40,7 @@ struct stats {
         max(mx),
         sum(sm),
         count(cnt) {
+    atomic::init(&prv, static_cast<stats*>(nullptr));
   }
 
   stats(version_t ver, const data_pt* pt, size_t len)
@@ -51,35 +54,67 @@ struct stats {
       max = std::max(max, pt[i].value);
       sum += pt[i].value;
     }
+    atomic::init(&prv, static_cast<stats*>(nullptr));
+  }
+
+  stats(stats* p, version_t ver, const data_pt* pt, size_t len)
+      : version(ver),
+        count(len + p->count) {
+    min = p->min;
+    max = p->max;
+    sum = p->sum;
+    for (size_t i = 0; i < len; i++) {
+      min = std::min(min, pt[i].value);
+      max = std::max(max, pt[i].value);
+      sum += pt[i].value;
+    }
+    atomic::init(&prv, p);
   }
 };
 
+// Single reader multi-writer timeseries
 template<size_t branch_factor = 256, size_t depth = 4>
-class timeseries_db_base {
+class timeseries_base {
  public:
   typedef monolog::monolog_relaxed_linear<data_pt, 1024> data_log;
   typedef monolog::monolog_relaxed_linear<data_ptr_t, 32, 1024> ref_log;
-  typedef datastore::index::tiered_index<ref_log, branch_factor, depth> time_index;
+  typedef datastore::index::tiered_index<ref_log, branch_factor, depth, stats> time_index;
 
-  timeseries_db_base() = default;
+  timeseries_base() = default;
 
   version_t append(const data_pt* pts, size_t len) {
-    version_t id = log_.append(pts, len);
+    version_t ver = log_.append(pts, len);
     uint64_t id1, id2;
     for (size_t i = 0; i < len;) {
       timestamp_t ts_block = get_block(pts[i].timestamp);
-      id1 = id2 = id + i;
+      id1 = id2 = ver + i;
       while (++i < len && get_block(pts[i].timestamp) == ts_block)
         id2++;
-      idx_[ts_block]->push_back_range(id1, id2);
+
+      static auto update_stats =
+          [](atomic::type<stats*>& s, version_t ver, const data_pt* pts, size_t len) {
+            stats* old_s = atomic::load(&s);
+            stats* updated_s = (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len);
+            atomic::store(&s, updated_s);
+          };
+
+      ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
+      log->push_back_range(id1, id2);
     }
-    return id;
+    return ver;
   }
 
   version_t append(const data_pt* pts, size_t len, timestamp_t ts_block) {
-    version_t id = log_.append(pts, len);
-    idx_[ts_block]->push_back_range(id, id + len - 1);
-    return id;
+    version_t ver = log_.append(pts, len);
+    static auto update_stats =
+        [](atomic::type<stats*>& s, version_t ver, const data_pt* pts, size_t len) {
+          stats* old_s = atomic::load(&s);
+          stats* updated_s = (old_s == nullptr) ? new stats(ver, pts, len) : new stats(old_s, ver, pts, len);
+          atomic::store(&s, updated_s);
+        };
+    ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
+    log->push_back_range(ver, ver + len - 1);
+    return ver;
   }
 
   uint64_t num_entries() const {
@@ -175,14 +210,14 @@ class timeseries_db_base {
 };
 
 template<size_t branch_factor, size_t depth>
-size_t timeseries_db_base<branch_factor, depth>::BLOCK_TIME_RANGE = UINT64_C(1)
+size_t timeseries_base<branch_factor, depth>::BLOCK_TIME_RANGE = UINT64_C(1)
     << (64 - (utils::bit_utils::highest_bit(branch_factor) * depth));
 
 template<size_t branch_factor = 256, size_t depth = 4>
-class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
+class timeseries_rs : public timeseries_base<branch_factor, depth> {
  public:
-  timeseries_db_rs()
-      : timeseries_db_base<branch_factor, depth>() {
+  timeseries_rs()
+      : timeseries_base<branch_factor, depth>() {
   }
 
   version_t insert_values(const data_pt* pts, size_t len) {
@@ -234,10 +269,10 @@ class timeseries_db_rs : public timeseries_db_base<branch_factor, depth> {
 };
 
 template<size_t branch_factor = 256, size_t depth = 4>
-class timeseries_db_ws : public timeseries_db_base<branch_factor, depth> {
+class timeseries_ws : public timeseries_base<branch_factor, depth> {
  public:
-  timeseries_db_ws()
-      : timeseries_db_base<branch_factor, depth>(),
+  timeseries_ws()
+      : timeseries_base<branch_factor, depth>(),
         validator_([](version_t v) {}),
         read_tail_(0) {
   }
@@ -286,15 +321,34 @@ class timeseries_db_ws : public timeseries_db_base<branch_factor, depth> {
 
  private:
   void update_read_tail(uint64_t tail, uint64_t cnt) {
-    uint64_t old_tail = tail;
-    while (!atomic::weak::cas(&read_tail_, &old_tail, tail + cnt)) {
-      old_tail = tail;
-      std::this_thread::yield();
-    }
+    atomic::store(&read_tail_, tail + cnt);
   }
 
   void (*validator_)(version_t version);
   atomic::type<uint64_t> read_tail_;
+};
+
+template<typename timeseries_t>
+class timeseries_db {
+ public:
+  typedef timeseries_t* ts_ref;
+
+  timeseries_db() = default;
+
+  uuid_t add_stream() {
+    return ts_.push_back(new timeseries_t());
+  }
+
+  const ts_ref& get(uuid_t uuid) const {
+    return ts_.at(uuid);
+  }
+
+  ts_ref& operator[](uuid_t uuid) {
+    return ts_[uuid];
+  }
+
+ private:
+  monolog::monolog_write_stalled<ts_ref> ts_;
 };
 
 }
