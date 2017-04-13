@@ -8,7 +8,7 @@
 using namespace timeseries;
 using namespace datastore;
 
-class TimeseriesDBWSTest : public testing::Test {
+class TimeseriesTest : public testing::Test {
  public:
   static const uint64_t kBatchSize = 1000;
   static const uint64_t kTSMax = 10000;
@@ -25,10 +25,10 @@ class TimeseriesDBWSTest : public testing::Test {
   }
 };
 
-const uint64_t TimeseriesDBWSTest::kBatchSize;
-const uint64_t TimeseriesDBWSTest::kTSMax;
+const uint64_t TimeseriesTest::kBatchSize;
+const uint64_t TimeseriesTest::kTSMax;
 
-TEST_F(TimeseriesDBWSTest, AddGetTest) {
+TEST_F(TimeseriesTest, AddGetTest) {
   timeseries_t<> ts;
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts = get_pts(i);
@@ -46,7 +46,7 @@ TEST_F(TimeseriesDBWSTest, AddGetTest) {
   }
 }
 
-TEST_F(TimeseriesDBWSTest, AddGetNearestTest) {
+TEST_F(TimeseriesTest, AddGetNearestTest) {
   timeseries_t<> ts;
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts = get_pts(i);
@@ -62,4 +62,40 @@ TEST_F(TimeseriesDBWSTest, AddGetNearestTest) {
     ASSERT_EQ(pt.timestamp, static_cast<timestamp_t>(i));
     ASSERT_EQ(pt.value, static_cast<version_t>(i));
   }
+}
+
+TEST_F(TimeseriesTest, AddGetStatsTest) {
+  timeseries_t<256, 7> ts;
+
+  for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
+    std::vector<data_pt> pts = get_pts(i);
+    ts.insert_values(&pts[0], pts.size());
+  }
+
+  int64_t sum = 0;
+  for (uint64_t i = 0; i < kTSMax; i++)
+    sum += i;
+
+  std::vector<stats> res1;
+  ts.get_statistical_range_latest(res1, 0, 65536, 16);
+
+  ASSERT_EQ(1U, res1.size());
+  ASSERT_EQ(static_cast<value_t>(kTSMax), res1[0].count);
+  ASSERT_EQ(static_cast<value_t>(0), res1[0].min);
+  ASSERT_EQ(static_cast<value_t>(kTSMax - 1), res1[0].max);
+  ASSERT_EQ(static_cast<value_t>(sum), res1[0].sum);
+
+  std::vector<stats> res2;
+  ts.get_statistical_range_latest(res2, 0, 65536, 15);
+
+  ASSERT_EQ(2U, res2.size());
+  ASSERT_EQ(static_cast<value_t>(kTSMax), res2[0].count);
+  ASSERT_EQ(static_cast<value_t>(0), res2[0].min);
+  ASSERT_EQ(static_cast<value_t>(kTSMax - 1), res2[0].max);
+  ASSERT_EQ(static_cast<value_t>(sum), res2[0].sum);
+
+  ASSERT_EQ(static_cast<value_t>(0), res2[1].count);
+  ASSERT_EQ(static_cast<value_t>(std::numeric_limits<value_t>::max()), res2[1].min);
+  ASSERT_EQ(static_cast<value_t>(0), res2[1].max);
+  ASSERT_EQ(static_cast<value_t>(0), res2[1].sum);
 }

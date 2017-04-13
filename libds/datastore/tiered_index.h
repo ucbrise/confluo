@@ -33,10 +33,8 @@ class indexlet {
    * null.
    */
   indexlet() {
-    T* null_ptr = nullptr;
-    for (uint32_t i = 0; i < SIZE; i++) {
-      atomic::init(&idx_[i], null_ptr);
-    }
+    for (uint32_t i = 0; i < SIZE; i++)
+      atomic::init(&idx_[i], static_cast<T*>(nullptr));
   }
 
   /**
@@ -44,9 +42,8 @@ class indexlet {
    * @details Virtual destructor for indexlet. Deletes all array references.
    */
   virtual ~indexlet() {
-    for (uint32_t i = 0; i < SIZE; i++) {
+    for (uint32_t i = 0; i < SIZE; i++)
       delete atomic::load(&idx_[i]);
-    }
   }
 
   /**
@@ -54,14 +51,14 @@ class indexlet {
    * @details Obtain the value at a given index; creates required
    * internal structure for the value if it does not exist.
    *
-   * @param index The index to lookup.
+   * @param i The index to lookup.
    * @return Pointer to the value.
    */
   T* get(const uint32_t i) {
     T* item;
-    if ((item = atomic::load(&idx_[i])) == NULL) {
+    if ((item = atomic::load(&idx_[i])) == nullptr) {
       item = new T();
-      T* current_item = NULL;
+      T* current_item = nullptr;
 
       // Only one thread will be successful in replacing the NULL reference with newly
       // allocated item.
@@ -72,6 +69,17 @@ class indexlet {
       }
     }
     return item;
+  }
+
+  /**
+   * @brief Fetches the atomic pointer at a given index.
+   * @details Obtain the atomic pointer at a given index.
+   *
+   * @param i The index to lookup.
+   * @return Atomic pointer to the value.
+   */
+  atomic_ref* get_atomic(const uint32_t i) {
+    return &idx_[i];
   }
 
   /**
@@ -114,7 +122,7 @@ class indexlet {
     size_t tot_size = SIZE * sizeof(atomic_ref);
     T* ptr;
     for (uint32_t i = 0; i < SIZE; i++)
-      if ((ptr = atomic::load(&idx_[i])) != NULL)
+      if ((ptr = atomic::load(&idx_[i])) != nullptr)
         tot_size += ptr->storage_size();
     return tot_size;
   }
@@ -528,6 +536,7 @@ class tiered_index {
  public:
   typedef tiered_index<T, K, D - 1, stats> child_type;
   typedef indexlet<child_type, K> idx_type;
+  typedef indexlet<stats, K> stats_type;
 
   static uint64_t NUM_BITS;
   static uint64_t NODE_RANGE;
@@ -537,7 +546,6 @@ class tiered_index {
     NUM_BITS = D * utils::bit_utils::highest_bit(K);
     NODE_RANGE = UINT64_C(1) << NUM_BITS;
     CHILD_RANGE = NODE_RANGE / K;
-    atomic::init(&stats_, static_cast<stats*>(nullptr));
     assert_throw(NUM_BITS < 64, "NUM_BITS = " << NUM_BITS);
   }
 
@@ -548,7 +556,7 @@ class tiered_index {
 
   template<typename update, typename ...update_args>
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
-    u(&stats_, std::forward<update_args>(args)...);
+    u(stats_.get_atomic(key), std::forward<update_args>(args)...);
     child_type* c = get_or_create_child(key / CHILD_RANGE);
     return (*c)(key % CHILD_RANGE, u, std::forward<update_args>(args)...);
   }
@@ -566,16 +574,17 @@ class tiered_index {
     return idx_.at(k);
   }
 
-  stats& get_stats(const uint64_t key, const uint64_t depth) {
-    return
-        depth == 0 ?
-            atomic::load(&stats_) :
-            get_child(key / CHILD_RANGE)->get_stats(key % CHILD_RANGE,
-                                                    depth - 1);
+  stats* get_stats(const uint64_t key, const uint64_t depth) {
+    if (depth == 1)
+      return get_stats(key % CHILD_RANGE);
+    child_type* child = get_child(key / CHILD_RANGE);
+    if (child != nullptr)
+      return child->get_stats(key % CHILD_RANGE, depth - 1);
+    return nullptr;
   }
 
-  stats& get_stats() {
-    return atomic::load(&stats_);
+  stats* get_stats(const uint64_t key) {
+    return atomic::load(stats_.get_atomic(key));
   }
 
   template<typename update, typename ...update_args>
@@ -584,7 +593,7 @@ class tiered_index {
 
  private:
   idx_type idx_;
-  atomic::type<stats*> stats_;
+  stats_type stats_;
 };
 
 template<typename T, size_t K, typename stats>
@@ -592,14 +601,13 @@ class tiered_index<T, K, 1, stats> {
  public:
   typedef T child_type;
   typedef indexlet<T, K> idx_type;
+  typedef indexlet<stats, K> stats_type;
 
   static uint64_t NUM_BITS;
   static uint64_t NODE_RANGE;
   static uint64_t CHILD_RANGE;
 
-  tiered_index() {
-    atomic::init(&stats_, static_cast<stats*>(nullptr));
-  }
+  tiered_index() = default;
 
   T* operator[](const uint64_t key) {
     return get_or_create_child(key);
@@ -607,7 +615,7 @@ class tiered_index<T, K, 1, stats> {
 
   template<typename update, typename ...update_args>
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
-    u(&stats_, std::forward<update_args>(args)...);
+    u(stats_.get_atomic(key), std::forward<update_args>(args)...);
     return get_or_create_child(key);
   }
 
@@ -623,18 +631,18 @@ class tiered_index<T, K, 1, stats> {
     return idx_.at(k);
   }
 
-  stats& get_stats(const uint64_t key, const uint64_t depth) {
-    assert_throw(depth == 0, "depth = " << depth);
-    return atomic::load(&stats_);
+  stats* get_stats(const uint64_t key, const uint64_t depth) {
+    assert_throw(depth == 1, "depth = " << depth);
+    return get_stats(key);
   }
 
-  stats* get_stats() {
-    return atomic::load(&stats_);
+  stats* get_stats(const uint64_t key) {
+    return atomic::load(stats_.get_atomic(key));
   }
 
  private:
   idx_type idx_;
-  atomic::type<stats*> stats_;
+  stats_type stats_;
 };
 
 template<typename T, size_t K, size_t D, typename S>
