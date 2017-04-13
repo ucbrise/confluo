@@ -117,7 +117,7 @@ private:
   timeseries_db<> store_;
 };
 
-void start_server(int port) {
+int start_server(int port) {
   try {
     shared_ptr<ts_processor_factory> handler_factory(
         new ts_processor_factory());
@@ -133,6 +133,8 @@ void start_server(int port) {
   } catch (std::exception& e) {
     LOG_ERROR<< "Could not start server listening on port " << port << ":" << e.what();
   }
+
+  return -1;
 }
 
 int main(int argc, char **argv) {
@@ -158,8 +160,6 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  start_server(port);
-
-  return 0;
+  return start_server(port);
 }
 
