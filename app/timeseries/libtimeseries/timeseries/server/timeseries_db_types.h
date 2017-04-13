@@ -24,7 +24,9 @@ typedef int64_t timestamp_t;
 
 typedef int64_t version_t;
 
-typedef double value_t;
+typedef int64_t value_t;
+
+typedef int64_t uuid_t;
 
 } // namespace
 

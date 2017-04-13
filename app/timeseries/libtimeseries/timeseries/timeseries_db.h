@@ -10,7 +10,6 @@
 namespace timeseries {
 
 typedef int64_t data_ptr_t;
-typedef int64_t uuid_t;
 
 struct data_pt {
   timestamp_t timestamp;
@@ -341,10 +340,6 @@ class timeseries_db {
 
   uuid_t add_stream() {
     return ts_.push_back(new timeseries_t());
-  }
-
-  const ts_ref& get(uuid_t uuid) const {
-    return ts_.at(uuid);
   }
 
   ts_ref& operator[](uuid_t uuid) {

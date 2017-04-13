@@ -21,14 +21,15 @@ namespace timeseries {
 class timeseries_db_serviceIf {
  public:
   virtual ~timeseries_db_serviceIf() {}
-  virtual version_t insert_values(const std::string& pts) = 0;
-  virtual version_t insert_values_block(const std::string& pts, const timestamp_t ts_block) = 0;
-  virtual void get_range(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version) = 0;
-  virtual void get_range_latest(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts) = 0;
-  virtual void get_nearest_value(std::string& _return, const bool direction, const timestamp_t ts, const version_t version) = 0;
-  virtual void get_nearest_value_latest(std::string& _return, const bool direction, const timestamp_t ts) = 0;
-  virtual void compute_diff(std::string& _return, const version_t from_version, const version_t to_version) = 0;
-  virtual int64_t num_entries() = 0;
+  virtual void add_stream(const uuid_t uuid) = 0;
+  virtual version_t insert_values(const uuid_t uuid, const std::string& pts) = 0;
+  virtual version_t insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block) = 0;
+  virtual void get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version) = 0;
+  virtual void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts) = 0;
+  virtual void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version) = 0;
+  virtual void get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts) = 0;
+  virtual void compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version) = 0;
+  virtual int64_t num_entries(const uuid_t uuid) = 0;
 };
 
 class timeseries_db_serviceIfFactory {
@@ -58,37 +59,127 @@ class timeseries_db_serviceIfSingletonFactory : virtual public timeseries_db_ser
 class timeseries_db_serviceNull : virtual public timeseries_db_serviceIf {
  public:
   virtual ~timeseries_db_serviceNull() {}
-  version_t insert_values(const std::string& /* pts */) {
+  void add_stream(const uuid_t /* uuid */) {
+    return;
+  }
+  version_t insert_values(const uuid_t /* uuid */, const std::string& /* pts */) {
     version_t _return = 0;
     return _return;
   }
-  version_t insert_values_block(const std::string& /* pts */, const timestamp_t /* ts_block */) {
+  version_t insert_values_block(const uuid_t /* uuid */, const std::string& /* pts */, const timestamp_t /* ts_block */) {
     version_t _return = 0;
     return _return;
   }
-  void get_range(std::string& /* _return */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */, const version_t /* version */) {
+  void get_range(std::string& /* _return */, const uuid_t /* uuid */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */, const version_t /* version */) {
     return;
   }
-  void get_range_latest(std::string& /* _return */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */) {
+  void get_range_latest(std::string& /* _return */, const uuid_t /* uuid */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */) {
     return;
   }
-  void get_nearest_value(std::string& /* _return */, const bool /* direction */, const timestamp_t /* ts */, const version_t /* version */) {
+  void get_nearest_value(std::string& /* _return */, const uuid_t /* uuid */, const bool /* direction */, const timestamp_t /* ts */, const version_t /* version */) {
     return;
   }
-  void get_nearest_value_latest(std::string& /* _return */, const bool /* direction */, const timestamp_t /* ts */) {
+  void get_nearest_value_latest(std::string& /* _return */, const uuid_t /* uuid */, const bool /* direction */, const timestamp_t /* ts */) {
     return;
   }
-  void compute_diff(std::string& /* _return */, const version_t /* from_version */, const version_t /* to_version */) {
+  void compute_diff(std::string& /* _return */, const uuid_t /* uuid */, const version_t /* from_version */, const version_t /* to_version */) {
     return;
   }
-  int64_t num_entries() {
+  int64_t num_entries(const uuid_t /* uuid */) {
     int64_t _return = 0;
     return _return;
   }
 };
 
+typedef struct _timeseries_db_service_add_stream_args__isset {
+  _timeseries_db_service_add_stream_args__isset() : uuid(false) {}
+  bool uuid :1;
+} _timeseries_db_service_add_stream_args__isset;
+
+class timeseries_db_service_add_stream_args {
+ public:
+
+  timeseries_db_service_add_stream_args(const timeseries_db_service_add_stream_args&);
+  timeseries_db_service_add_stream_args& operator=(const timeseries_db_service_add_stream_args&);
+  timeseries_db_service_add_stream_args() : uuid(0) {
+  }
+
+  virtual ~timeseries_db_service_add_stream_args() throw();
+  uuid_t uuid;
+
+  _timeseries_db_service_add_stream_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
+
+  bool operator == (const timeseries_db_service_add_stream_args & rhs) const
+  {
+    if (!(uuid == rhs.uuid))
+      return false;
+    return true;
+  }
+  bool operator != (const timeseries_db_service_add_stream_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const timeseries_db_service_add_stream_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class timeseries_db_service_add_stream_pargs {
+ public:
+
+
+  virtual ~timeseries_db_service_add_stream_pargs() throw();
+  const uuid_t* uuid;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class timeseries_db_service_add_stream_result {
+ public:
+
+  timeseries_db_service_add_stream_result(const timeseries_db_service_add_stream_result&);
+  timeseries_db_service_add_stream_result& operator=(const timeseries_db_service_add_stream_result&);
+  timeseries_db_service_add_stream_result() {
+  }
+
+  virtual ~timeseries_db_service_add_stream_result() throw();
+
+  bool operator == (const timeseries_db_service_add_stream_result & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const timeseries_db_service_add_stream_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const timeseries_db_service_add_stream_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class timeseries_db_service_add_stream_presult {
+ public:
+
+
+  virtual ~timeseries_db_service_add_stream_presult() throw();
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 typedef struct _timeseries_db_service_insert_values_args__isset {
-  _timeseries_db_service_insert_values_args__isset() : pts(false) {}
+  _timeseries_db_service_insert_values_args__isset() : uuid(false), pts(false) {}
+  bool uuid :1;
   bool pts :1;
 } _timeseries_db_service_insert_values_args__isset;
 
@@ -97,18 +188,23 @@ class timeseries_db_service_insert_values_args {
 
   timeseries_db_service_insert_values_args(const timeseries_db_service_insert_values_args&);
   timeseries_db_service_insert_values_args& operator=(const timeseries_db_service_insert_values_args&);
-  timeseries_db_service_insert_values_args() : pts() {
+  timeseries_db_service_insert_values_args() : uuid(0), pts() {
   }
 
   virtual ~timeseries_db_service_insert_values_args() throw();
+  uuid_t uuid;
   std::string pts;
 
   _timeseries_db_service_insert_values_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_pts(const std::string& val);
 
   bool operator == (const timeseries_db_service_insert_values_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(pts == rhs.pts))
       return false;
     return true;
@@ -130,6 +226,7 @@ class timeseries_db_service_insert_values_pargs {
 
 
   virtual ~timeseries_db_service_insert_values_pargs() throw();
+  const uuid_t* uuid;
   const std::string* pts;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -192,7 +289,8 @@ class timeseries_db_service_insert_values_presult {
 };
 
 typedef struct _timeseries_db_service_insert_values_block_args__isset {
-  _timeseries_db_service_insert_values_block_args__isset() : pts(false), ts_block(false) {}
+  _timeseries_db_service_insert_values_block_args__isset() : uuid(false), pts(false), ts_block(false) {}
+  bool uuid :1;
   bool pts :1;
   bool ts_block :1;
 } _timeseries_db_service_insert_values_block_args__isset;
@@ -202,14 +300,17 @@ class timeseries_db_service_insert_values_block_args {
 
   timeseries_db_service_insert_values_block_args(const timeseries_db_service_insert_values_block_args&);
   timeseries_db_service_insert_values_block_args& operator=(const timeseries_db_service_insert_values_block_args&);
-  timeseries_db_service_insert_values_block_args() : pts(), ts_block(0) {
+  timeseries_db_service_insert_values_block_args() : uuid(0), pts(), ts_block(0) {
   }
 
   virtual ~timeseries_db_service_insert_values_block_args() throw();
+  uuid_t uuid;
   std::string pts;
   timestamp_t ts_block;
 
   _timeseries_db_service_insert_values_block_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_pts(const std::string& val);
 
@@ -217,6 +318,8 @@ class timeseries_db_service_insert_values_block_args {
 
   bool operator == (const timeseries_db_service_insert_values_block_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(pts == rhs.pts))
       return false;
     if (!(ts_block == rhs.ts_block))
@@ -240,6 +343,7 @@ class timeseries_db_service_insert_values_block_pargs {
 
 
   virtual ~timeseries_db_service_insert_values_block_pargs() throw();
+  const uuid_t* uuid;
   const std::string* pts;
   const timestamp_t* ts_block;
 
@@ -303,7 +407,8 @@ class timeseries_db_service_insert_values_block_presult {
 };
 
 typedef struct _timeseries_db_service_get_range_args__isset {
-  _timeseries_db_service_get_range_args__isset() : start_ts(false), end_ts(false), version(false) {}
+  _timeseries_db_service_get_range_args__isset() : uuid(false), start_ts(false), end_ts(false), version(false) {}
+  bool uuid :1;
   bool start_ts :1;
   bool end_ts :1;
   bool version :1;
@@ -314,15 +419,18 @@ class timeseries_db_service_get_range_args {
 
   timeseries_db_service_get_range_args(const timeseries_db_service_get_range_args&);
   timeseries_db_service_get_range_args& operator=(const timeseries_db_service_get_range_args&);
-  timeseries_db_service_get_range_args() : start_ts(0), end_ts(0), version(0) {
+  timeseries_db_service_get_range_args() : uuid(0), start_ts(0), end_ts(0), version(0) {
   }
 
   virtual ~timeseries_db_service_get_range_args() throw();
+  uuid_t uuid;
   timestamp_t start_ts;
   timestamp_t end_ts;
   version_t version;
 
   _timeseries_db_service_get_range_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_start_ts(const timestamp_t val);
 
@@ -332,6 +440,8 @@ class timeseries_db_service_get_range_args {
 
   bool operator == (const timeseries_db_service_get_range_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(start_ts == rhs.start_ts))
       return false;
     if (!(end_ts == rhs.end_ts))
@@ -357,6 +467,7 @@ class timeseries_db_service_get_range_pargs {
 
 
   virtual ~timeseries_db_service_get_range_pargs() throw();
+  const uuid_t* uuid;
   const timestamp_t* start_ts;
   const timestamp_t* end_ts;
   const version_t* version;
@@ -421,7 +532,8 @@ class timeseries_db_service_get_range_presult {
 };
 
 typedef struct _timeseries_db_service_get_range_latest_args__isset {
-  _timeseries_db_service_get_range_latest_args__isset() : start_ts(false), end_ts(false) {}
+  _timeseries_db_service_get_range_latest_args__isset() : uuid(false), start_ts(false), end_ts(false) {}
+  bool uuid :1;
   bool start_ts :1;
   bool end_ts :1;
 } _timeseries_db_service_get_range_latest_args__isset;
@@ -431,14 +543,17 @@ class timeseries_db_service_get_range_latest_args {
 
   timeseries_db_service_get_range_latest_args(const timeseries_db_service_get_range_latest_args&);
   timeseries_db_service_get_range_latest_args& operator=(const timeseries_db_service_get_range_latest_args&);
-  timeseries_db_service_get_range_latest_args() : start_ts(0), end_ts(0) {
+  timeseries_db_service_get_range_latest_args() : uuid(0), start_ts(0), end_ts(0) {
   }
 
   virtual ~timeseries_db_service_get_range_latest_args() throw();
+  uuid_t uuid;
   timestamp_t start_ts;
   timestamp_t end_ts;
 
   _timeseries_db_service_get_range_latest_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_start_ts(const timestamp_t val);
 
@@ -446,6 +561,8 @@ class timeseries_db_service_get_range_latest_args {
 
   bool operator == (const timeseries_db_service_get_range_latest_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(start_ts == rhs.start_ts))
       return false;
     if (!(end_ts == rhs.end_ts))
@@ -469,6 +586,7 @@ class timeseries_db_service_get_range_latest_pargs {
 
 
   virtual ~timeseries_db_service_get_range_latest_pargs() throw();
+  const uuid_t* uuid;
   const timestamp_t* start_ts;
   const timestamp_t* end_ts;
 
@@ -532,7 +650,8 @@ class timeseries_db_service_get_range_latest_presult {
 };
 
 typedef struct _timeseries_db_service_get_nearest_value_args__isset {
-  _timeseries_db_service_get_nearest_value_args__isset() : direction(false), ts(false), version(false) {}
+  _timeseries_db_service_get_nearest_value_args__isset() : uuid(false), direction(false), ts(false), version(false) {}
+  bool uuid :1;
   bool direction :1;
   bool ts :1;
   bool version :1;
@@ -543,15 +662,18 @@ class timeseries_db_service_get_nearest_value_args {
 
   timeseries_db_service_get_nearest_value_args(const timeseries_db_service_get_nearest_value_args&);
   timeseries_db_service_get_nearest_value_args& operator=(const timeseries_db_service_get_nearest_value_args&);
-  timeseries_db_service_get_nearest_value_args() : direction(0), ts(0), version(0) {
+  timeseries_db_service_get_nearest_value_args() : uuid(0), direction(0), ts(0), version(0) {
   }
 
   virtual ~timeseries_db_service_get_nearest_value_args() throw();
+  uuid_t uuid;
   bool direction;
   timestamp_t ts;
   version_t version;
 
   _timeseries_db_service_get_nearest_value_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_direction(const bool val);
 
@@ -561,6 +683,8 @@ class timeseries_db_service_get_nearest_value_args {
 
   bool operator == (const timeseries_db_service_get_nearest_value_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(direction == rhs.direction))
       return false;
     if (!(ts == rhs.ts))
@@ -586,6 +710,7 @@ class timeseries_db_service_get_nearest_value_pargs {
 
 
   virtual ~timeseries_db_service_get_nearest_value_pargs() throw();
+  const uuid_t* uuid;
   const bool* direction;
   const timestamp_t* ts;
   const version_t* version;
@@ -650,7 +775,8 @@ class timeseries_db_service_get_nearest_value_presult {
 };
 
 typedef struct _timeseries_db_service_get_nearest_value_latest_args__isset {
-  _timeseries_db_service_get_nearest_value_latest_args__isset() : direction(false), ts(false) {}
+  _timeseries_db_service_get_nearest_value_latest_args__isset() : uuid(false), direction(false), ts(false) {}
+  bool uuid :1;
   bool direction :1;
   bool ts :1;
 } _timeseries_db_service_get_nearest_value_latest_args__isset;
@@ -660,14 +786,17 @@ class timeseries_db_service_get_nearest_value_latest_args {
 
   timeseries_db_service_get_nearest_value_latest_args(const timeseries_db_service_get_nearest_value_latest_args&);
   timeseries_db_service_get_nearest_value_latest_args& operator=(const timeseries_db_service_get_nearest_value_latest_args&);
-  timeseries_db_service_get_nearest_value_latest_args() : direction(0), ts(0) {
+  timeseries_db_service_get_nearest_value_latest_args() : uuid(0), direction(0), ts(0) {
   }
 
   virtual ~timeseries_db_service_get_nearest_value_latest_args() throw();
+  uuid_t uuid;
   bool direction;
   timestamp_t ts;
 
   _timeseries_db_service_get_nearest_value_latest_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_direction(const bool val);
 
@@ -675,6 +804,8 @@ class timeseries_db_service_get_nearest_value_latest_args {
 
   bool operator == (const timeseries_db_service_get_nearest_value_latest_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(direction == rhs.direction))
       return false;
     if (!(ts == rhs.ts))
@@ -698,6 +829,7 @@ class timeseries_db_service_get_nearest_value_latest_pargs {
 
 
   virtual ~timeseries_db_service_get_nearest_value_latest_pargs() throw();
+  const uuid_t* uuid;
   const bool* direction;
   const timestamp_t* ts;
 
@@ -761,7 +893,8 @@ class timeseries_db_service_get_nearest_value_latest_presult {
 };
 
 typedef struct _timeseries_db_service_compute_diff_args__isset {
-  _timeseries_db_service_compute_diff_args__isset() : from_version(false), to_version(false) {}
+  _timeseries_db_service_compute_diff_args__isset() : uuid(false), from_version(false), to_version(false) {}
+  bool uuid :1;
   bool from_version :1;
   bool to_version :1;
 } _timeseries_db_service_compute_diff_args__isset;
@@ -771,14 +904,17 @@ class timeseries_db_service_compute_diff_args {
 
   timeseries_db_service_compute_diff_args(const timeseries_db_service_compute_diff_args&);
   timeseries_db_service_compute_diff_args& operator=(const timeseries_db_service_compute_diff_args&);
-  timeseries_db_service_compute_diff_args() : from_version(0), to_version(0) {
+  timeseries_db_service_compute_diff_args() : uuid(0), from_version(0), to_version(0) {
   }
 
   virtual ~timeseries_db_service_compute_diff_args() throw();
+  uuid_t uuid;
   version_t from_version;
   version_t to_version;
 
   _timeseries_db_service_compute_diff_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
 
   void __set_from_version(const version_t val);
 
@@ -786,6 +922,8 @@ class timeseries_db_service_compute_diff_args {
 
   bool operator == (const timeseries_db_service_compute_diff_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     if (!(from_version == rhs.from_version))
       return false;
     if (!(to_version == rhs.to_version))
@@ -809,6 +947,7 @@ class timeseries_db_service_compute_diff_pargs {
 
 
   virtual ~timeseries_db_service_compute_diff_pargs() throw();
+  const uuid_t* uuid;
   const version_t* from_version;
   const version_t* to_version;
 
@@ -871,19 +1010,30 @@ class timeseries_db_service_compute_diff_presult {
 
 };
 
+typedef struct _timeseries_db_service_num_entries_args__isset {
+  _timeseries_db_service_num_entries_args__isset() : uuid(false) {}
+  bool uuid :1;
+} _timeseries_db_service_num_entries_args__isset;
 
 class timeseries_db_service_num_entries_args {
  public:
 
   timeseries_db_service_num_entries_args(const timeseries_db_service_num_entries_args&);
   timeseries_db_service_num_entries_args& operator=(const timeseries_db_service_num_entries_args&);
-  timeseries_db_service_num_entries_args() {
+  timeseries_db_service_num_entries_args() : uuid(0) {
   }
 
   virtual ~timeseries_db_service_num_entries_args() throw();
+  uuid_t uuid;
 
-  bool operator == (const timeseries_db_service_num_entries_args & /* rhs */) const
+  _timeseries_db_service_num_entries_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
+
+  bool operator == (const timeseries_db_service_num_entries_args & rhs) const
   {
+    if (!(uuid == rhs.uuid))
+      return false;
     return true;
   }
   bool operator != (const timeseries_db_service_num_entries_args &rhs) const {
@@ -903,6 +1053,7 @@ class timeseries_db_service_num_entries_pargs {
 
 
   virtual ~timeseries_db_service_num_entries_pargs() throw();
+  const uuid_t* uuid;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
@@ -988,29 +1139,32 @@ class timeseries_db_serviceClient : virtual public timeseries_db_serviceIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  version_t insert_values(const std::string& pts);
-  void send_insert_values(const std::string& pts);
+  void add_stream(const uuid_t uuid);
+  void send_add_stream(const uuid_t uuid);
+  void recv_add_stream();
+  version_t insert_values(const uuid_t uuid, const std::string& pts);
+  void send_insert_values(const uuid_t uuid, const std::string& pts);
   version_t recv_insert_values();
-  version_t insert_values_block(const std::string& pts, const timestamp_t ts_block);
-  void send_insert_values_block(const std::string& pts, const timestamp_t ts_block);
+  version_t insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block);
+  void send_insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block);
   version_t recv_insert_values_block();
-  void get_range(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
-  void send_get_range(const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
+  void get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
+  void send_get_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
   void recv_get_range(std::string& _return);
-  void get_range_latest(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts);
-  void send_get_range_latest(const timestamp_t start_ts, const timestamp_t end_ts);
+  void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
+  void send_get_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
   void recv_get_range_latest(std::string& _return);
-  void get_nearest_value(std::string& _return, const bool direction, const timestamp_t ts, const version_t version);
-  void send_get_nearest_value(const bool direction, const timestamp_t ts, const version_t version);
+  void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
+  void send_get_nearest_value(const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
   void recv_get_nearest_value(std::string& _return);
-  void get_nearest_value_latest(std::string& _return, const bool direction, const timestamp_t ts);
-  void send_get_nearest_value_latest(const bool direction, const timestamp_t ts);
+  void get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts);
+  void send_get_nearest_value_latest(const uuid_t uuid, const bool direction, const timestamp_t ts);
   void recv_get_nearest_value_latest(std::string& _return);
-  void compute_diff(std::string& _return, const version_t from_version, const version_t to_version);
-  void send_compute_diff(const version_t from_version, const version_t to_version);
+  void compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version);
+  void send_compute_diff(const uuid_t uuid, const version_t from_version, const version_t to_version);
   void recv_compute_diff(std::string& _return);
-  int64_t num_entries();
-  void send_num_entries();
+  int64_t num_entries(const uuid_t uuid);
+  void send_num_entries(const uuid_t uuid);
   int64_t recv_num_entries();
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
@@ -1027,6 +1181,7 @@ class timeseries_db_serviceProcessor : public ::apache::thrift::TDispatchProcess
   typedef  void (timeseries_db_serviceProcessor::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
+  void process_add_stream(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_insert_values(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_insert_values_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -1038,6 +1193,7 @@ class timeseries_db_serviceProcessor : public ::apache::thrift::TDispatchProcess
  public:
   timeseries_db_serviceProcessor(boost::shared_ptr<timeseries_db_serviceIf> iface) :
     iface_(iface) {
+    processMap_["add_stream"] = &timeseries_db_serviceProcessor::process_add_stream;
     processMap_["insert_values"] = &timeseries_db_serviceProcessor::process_insert_values;
     processMap_["insert_values_block"] = &timeseries_db_serviceProcessor::process_insert_values_block;
     processMap_["get_range"] = &timeseries_db_serviceProcessor::process_get_range;
@@ -1074,81 +1230,90 @@ class timeseries_db_serviceMultiface : virtual public timeseries_db_serviceIf {
     ifaces_.push_back(iface);
   }
  public:
-  version_t insert_values(const std::string& pts) {
+  void add_stream(const uuid_t uuid) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->insert_values(pts);
+      ifaces_[i]->add_stream(uuid);
     }
-    return ifaces_[i]->insert_values(pts);
+    ifaces_[i]->add_stream(uuid);
   }
 
-  version_t insert_values_block(const std::string& pts, const timestamp_t ts_block) {
+  version_t insert_values(const uuid_t uuid, const std::string& pts) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->insert_values_block(pts, ts_block);
+      ifaces_[i]->insert_values(uuid, pts);
     }
-    return ifaces_[i]->insert_values_block(pts, ts_block);
+    return ifaces_[i]->insert_values(uuid, pts);
   }
 
-  void get_range(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version) {
+  version_t insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_range(_return, start_ts, end_ts, version);
+      ifaces_[i]->insert_values_block(uuid, pts, ts_block);
     }
-    ifaces_[i]->get_range(_return, start_ts, end_ts, version);
+    return ifaces_[i]->insert_values_block(uuid, pts, ts_block);
+  }
+
+  void get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_range(_return, uuid, start_ts, end_ts, version);
+    }
+    ifaces_[i]->get_range(_return, uuid, start_ts, end_ts, version);
     return;
   }
 
-  void get_range_latest(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts) {
+  void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_range_latest(_return, start_ts, end_ts);
+      ifaces_[i]->get_range_latest(_return, uuid, start_ts, end_ts);
     }
-    ifaces_[i]->get_range_latest(_return, start_ts, end_ts);
+    ifaces_[i]->get_range_latest(_return, uuid, start_ts, end_ts);
     return;
   }
 
-  void get_nearest_value(std::string& _return, const bool direction, const timestamp_t ts, const version_t version) {
+  void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_nearest_value(_return, direction, ts, version);
+      ifaces_[i]->get_nearest_value(_return, uuid, direction, ts, version);
     }
-    ifaces_[i]->get_nearest_value(_return, direction, ts, version);
+    ifaces_[i]->get_nearest_value(_return, uuid, direction, ts, version);
     return;
   }
 
-  void get_nearest_value_latest(std::string& _return, const bool direction, const timestamp_t ts) {
+  void get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_nearest_value_latest(_return, direction, ts);
+      ifaces_[i]->get_nearest_value_latest(_return, uuid, direction, ts);
     }
-    ifaces_[i]->get_nearest_value_latest(_return, direction, ts);
+    ifaces_[i]->get_nearest_value_latest(_return, uuid, direction, ts);
     return;
   }
 
-  void compute_diff(std::string& _return, const version_t from_version, const version_t to_version) {
+  void compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->compute_diff(_return, from_version, to_version);
+      ifaces_[i]->compute_diff(_return, uuid, from_version, to_version);
     }
-    ifaces_[i]->compute_diff(_return, from_version, to_version);
+    ifaces_[i]->compute_diff(_return, uuid, from_version, to_version);
     return;
   }
 
-  int64_t num_entries() {
+  int64_t num_entries(const uuid_t uuid) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->num_entries();
+      ifaces_[i]->num_entries(uuid);
     }
-    return ifaces_[i]->num_entries();
+    return ifaces_[i]->num_entries(uuid);
   }
 
 };
@@ -1181,29 +1346,32 @@ class timeseries_db_serviceConcurrentClient : virtual public timeseries_db_servi
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  version_t insert_values(const std::string& pts);
-  int32_t send_insert_values(const std::string& pts);
+  void add_stream(const uuid_t uuid);
+  int32_t send_add_stream(const uuid_t uuid);
+  void recv_add_stream(const int32_t seqid);
+  version_t insert_values(const uuid_t uuid, const std::string& pts);
+  int32_t send_insert_values(const uuid_t uuid, const std::string& pts);
   version_t recv_insert_values(const int32_t seqid);
-  version_t insert_values_block(const std::string& pts, const timestamp_t ts_block);
-  int32_t send_insert_values_block(const std::string& pts, const timestamp_t ts_block);
+  version_t insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block);
+  int32_t send_insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block);
   version_t recv_insert_values_block(const int32_t seqid);
-  void get_range(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
-  int32_t send_get_range(const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
+  void get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
+  int32_t send_get_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version);
   void recv_get_range(std::string& _return, const int32_t seqid);
-  void get_range_latest(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts);
-  int32_t send_get_range_latest(const timestamp_t start_ts, const timestamp_t end_ts);
+  void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
+  int32_t send_get_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
   void recv_get_range_latest(std::string& _return, const int32_t seqid);
-  void get_nearest_value(std::string& _return, const bool direction, const timestamp_t ts, const version_t version);
-  int32_t send_get_nearest_value(const bool direction, const timestamp_t ts, const version_t version);
+  void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
+  int32_t send_get_nearest_value(const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
   void recv_get_nearest_value(std::string& _return, const int32_t seqid);
-  void get_nearest_value_latest(std::string& _return, const bool direction, const timestamp_t ts);
-  int32_t send_get_nearest_value_latest(const bool direction, const timestamp_t ts);
+  void get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts);
+  int32_t send_get_nearest_value_latest(const uuid_t uuid, const bool direction, const timestamp_t ts);
   void recv_get_nearest_value_latest(std::string& _return, const int32_t seqid);
-  void compute_diff(std::string& _return, const version_t from_version, const version_t to_version);
-  int32_t send_compute_diff(const version_t from_version, const version_t to_version);
+  void compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version);
+  int32_t send_compute_diff(const uuid_t uuid, const version_t from_version, const version_t to_version);
   void recv_compute_diff(std::string& _return, const int32_t seqid);
-  int64_t num_entries();
-  int32_t send_num_entries();
+  int64_t num_entries(const uuid_t uuid);
+  int32_t send_num_entries(const uuid_t uuid);
   int64_t recv_num_entries(const int32_t seqid);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;

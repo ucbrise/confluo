@@ -4,6 +4,7 @@
 #include <thrift/transport/TBufferTransports.h>
 
 #include "server/timeseries_db_service.h"
+#include "server/timeseries_db_types.h"
 #include "timeseries_db.h"
 #include "logger.h"
 #include "cmd_parse.h"
@@ -21,70 +22,79 @@ using namespace ::timeseries;
 template<typename tsdb>
 class timeseries_db_service : virtual public timeseries_db_serviceIf {
  public:
-  timeseries_db_service(tsdb* store)
+  typedef timeseries::uuid_t id_t;
+
+  timeseries_db_service(timeseries_db<tsdb>& store)
       : store_(store) {
   }
 
-  version_t insert_values(const std::string& pts) {
-    const data_pt* data = (const data_pt*) pts.c_str();
-    size_t len = pts.length() / sizeof(data_pt);
-    return store_->insert_values(data, len);
+  void add_stream(const id_t uuid) {
+    if (store_[uuid] == NULL)
+      store_[uuid] = new tsdb();
   }
 
-  version_t insert_values_block(const std::string& pts,
+  version_t insert_values(const id_t uuid, const std::string& pts) {
+    const data_pt* data = (const data_pt*) pts.c_str();
+    size_t len = pts.length() / sizeof(data_pt);
+    return store_[uuid]->insert_values(data, len);
+  }
+
+  version_t insert_values_block(const id_t uuid, const std::string& pts,
                                 const timestamp_t ts_block) {
     const data_pt* data = (const data_pt*) pts.c_str();
     size_t len = pts.length() / sizeof(data_pt);
-    return store_->insert_values(data, len, ts_block);
+    return store_[uuid]->insert_values(data, len, ts_block);
   }
 
-  void get_range(std::string& _return, const timestamp_t start_ts,
-                 const timestamp_t end_ts, const version_t version) {
+  void get_range(std::string& _return, const id_t uuid,
+                 const timestamp_t start_ts, const timestamp_t end_ts,
+                 const version_t version) {
     std::vector<data_pt> results;
-    store_->get_range(results, start_ts, end_ts, version);
+    store_[uuid]->get_range(results, start_ts, end_ts, version);
     const char* buf = (const char*) &results[0];
     size_t len = results.size() * sizeof(data_pt);
     _return.assign(buf, len);
   }
 
-  void get_range_latest(std::string& _return, const timestamp_t start_ts,
-                        const timestamp_t end_ts) {
+  void get_range_latest(std::string& _return, const id_t uuid,
+                        const timestamp_t start_ts, const timestamp_t end_ts) {
     std::vector<data_pt> results;
-    store_->get_range_latest(results, start_ts, end_ts);
+    store_[uuid]->get_range_latest(results, start_ts, end_ts);
     const char* buf = (const char*) &results[0];
     size_t len = results.size() * sizeof(data_pt);
     _return.assign(buf, len);
   }
 
-  void get_nearest_value(std::string& _return, const bool direction,
-                         const timestamp_t ts, const version_t version) {
+  void get_nearest_value(std::string& _return, const id_t uuid,
+                         const bool direction, const timestamp_t ts,
+                         const version_t version) {
     data_pt result;
-    result = store_->get_nearest_value(direction, ts, version);
+    result = store_[uuid]->get_nearest_value(direction, ts, version);
     _return.assign((const char*) &result, sizeof(data_pt));
   }
 
-  void get_nearest_value_latest(std::string& _return, const bool direction,
-                                const timestamp_t ts) {
+  void get_nearest_value_latest(std::string& _return, const id_t uuid,
+                                const bool direction, const timestamp_t ts) {
     data_pt result;
-    result = store_->get_nearest_value_latest(direction, ts);
+    result = store_[uuid]->get_nearest_value_latest(direction, ts);
     _return.assign((const char*) &result, sizeof(data_pt));
   }
 
-  void compute_diff(std::string& _return, const version_t from_version,
-                    const version_t to_version) {
+  void compute_diff(std::string& _return, const id_t uuid,
+                    const version_t from_version, const version_t to_version) {
     std::vector<data_pt> results;
-    store_->compute_diff(results, from_version, to_version);
+    store_[uuid]->compute_diff(results, from_version, to_version);
     const char* buf = (const char*) &results[0];
     size_t len = results.size() * sizeof(data_pt);
     _return.assign(buf, len);
   }
 
-  int64_t num_entries() {
-    return store_->num_entries();
+  int64_t num_entries(const id_t uuid) {
+    return store_[uuid]->num_entries();
   }
 
  private:
-  tsdb* store_;
+  timeseries_db<tsdb>& store_;
 };
 
 template<typename tsdb>
@@ -95,12 +105,9 @@ class ts_processor_factory : public TProcessorFactory {
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
-    LOG_INFO << "Creating new stream...";
-    auto uuid = store_.add_stream();
-    LOG_INFO << "Created stream with uuid " << uuid;
-    boost::shared_ptr<timeseries_db_service<tsdb>> handler(new timeseries_db_service<tsdb>(store_[uuid]));
-    boost::shared_ptr<TProcessor> processor(
-        new timeseries_db_serviceProcessor(handler));
+    LOG_INFO << "Creating new processor...";
+    boost::shared_ptr<timeseries_db_service<tsdb>> handler(new timeseries_db_service<tsdb>(store_));
+    boost::shared_ptr<TProcessor> processor(new timeseries_db_serviceProcessor(handler));
     return processor;
   }
 

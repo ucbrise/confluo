@@ -16,34 +16,40 @@ using namespace ::timeseries;
 class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client> {
  public:
   ts_server_benchmark(const std::string& output_dir,
-                      const std::string& input_file, size_t load_records,
-                      size_t batch_size, const std::string& host, int port)
+                      const std::string& input_file, long uuid,
+                      size_t load_records, size_t batch_size,
+                      const std::string& host, int port)
       : utils::bench::benchmark<timeseries_db_client>(output_dir) {
     ds_.connect(host, port);
+    UUID = uuid;
     BATCH_SIZE = batch_size;
     BATCH_BYTES = BATCH_SIZE * sizeof(data_pt);
     cur_off = 0;
     data_count = utils::mmap_utils::file_size(input_file) / sizeof(data_pt);
     data = (char*) utils::mmap_utils::mmap_r(input_file);
 
+    LOG_INFO<< "Creating stream " << UUID << " if it does not exist...";
+    ds_.add_stream(UUID);
+
     LOG_INFO<< "Pre-loading " << load_records << " data points...";
     uint64_t preload_batch_bytes = 8192 * sizeof(data_pt);
     for (size_t i = 0; i < load_records / 8192; i++) {
-      ds_.insert_values(std::string(data + cur_off, preload_batch_bytes));
+      ds_.insert_values(UUID, std::string(data + cur_off, preload_batch_bytes));
       cur_off += preload_batch_bytes;
     }
     std::string final_batch = std::string(
         data + cur_off, load_records * sizeof(data_pt) % preload_batch_bytes);
     if (!final_batch.empty()) {
-      ds_.insert_values(std::string(data + cur_off, final_batch.length()));
+      ds_.insert_values(UUID,
+                        std::string(data + cur_off, final_batch.length()));
       cur_off += final_batch.length();
     }
-    PRELOAD_RECORDS = ds_.num_entries();
+    PRELOAD_RECORDS = ds_.num_entries(UUID);
     LOG_INFO<< "Pre-load complete, loaded " << PRELOAD_RECORDS << " data points";
   }
 
   static void insert_values(size_t i, timeseries_db_client& client) {
-    client.insert_values(std::string(data + cur_off, BATCH_BYTES));
+    client.insert_values(UUID, std::string(data + cur_off, BATCH_BYTES));
     cur_off += BATCH_BYTES;
   }
 
@@ -53,7 +59,7 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
         * sizeof(data_pt));
     data_pt* last = first + BATCH_SIZE - 1;
     std::string res;
-    client.get_range_latest(res, first->timestamp, last->timestamp);
+    client.get_range_latest(res, UUID, first->timestamp, last->timestamp);
   }
 
   DEFINE_BENCH_BATCH(insert_values, BATCH_SIZE)
@@ -66,8 +72,10 @@ private:
   static uint64_t PRELOAD_RECORDS;
   static uint64_t BATCH_SIZE;
   static size_t BATCH_BYTES;
+  static long UUID;
 };
 
+long ts_server_benchmark::UUID = 0;
 uint64_t ts_server_benchmark::PRELOAD_RECORDS = 0;
 uint64_t ts_server_benchmark::BATCH_SIZE = 1;
 size_t ts_server_benchmark::BATCH_BYTES = sizeof(data_pt);
@@ -89,15 +97,17 @@ int main(int argc, char** argv) {
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
   opts.add(
-      cmd_option("bench-op", 'b', false).set_default("throughput-append")
-          .set_description(
-          "Benchmark operation (append, get, update, invalidate)"));
+      cmd_option("bench-op", 'b', false).set_default("throughput-insert-values")
+          .set_description("Benchmark operation (insert-values, get-range)"));
   opts.add(
-      cmd_option("batch-size", 'B', false).set_default("1")
-          .set_description("Append batch size"));
+      cmd_option("batch-size", 'B', false).set_default("1").set_description(
+          "Batch size"));
   opts.add(
-      cmd_option("preload-records", 'r', false).set_default("0").set_description(
-          "#Records to pre-load the logstore with"));
+      cmd_option("init-data-points", 'd', false).set_default("0")
+          .set_description("#Data points to initialize the stream with"));
+  opts.add(
+      cmd_option("stream-id", 'S', false).set_default("0").set_description(
+          "Stream ID for the benchmark"));
   opts.add(
       cmd_option("server", 's', false).set_default("localhost").set_description(
           "Server to connect"));
@@ -117,6 +127,7 @@ int main(int argc, char** argv) {
   std::string bench_op;
   long load_records;
   long batch_size;
+  long uuid;
   std::string server;
   int port;
   try {
@@ -124,8 +135,9 @@ int main(int argc, char** argv) {
     input_file = parser.get("input-file");
     output_dir = parser.get("output-dir");
     bench_op = parser.get("bench-op");
-    load_records = parser.get_long("preload-records");
+    load_records = parser.get_long("init-data-points");
     batch_size = parser.get_long("batch-size");
+    uuid = parser.get_long("stream-id");
     server = parser.get("server");
     port = parser.get_int("port");
   } catch (std::exception& e) {
@@ -134,10 +146,10 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  LOG_INFO << parser.parsed_values();
+  LOG_INFO<< parser.parsed_values();
 
-  ts_server_benchmark perf(output_dir, input_file, load_records, batch_size,
-                           server, port);
+  ts_server_benchmark perf(output_dir, input_file, uuid, load_records,
+                           batch_size, server, port);
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);
   } else if (bench_op == "throughput-get-range") {

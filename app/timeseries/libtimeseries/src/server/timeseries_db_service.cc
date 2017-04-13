@@ -9,6 +9,162 @@
 namespace timeseries {
 
 
+timeseries_db_service_add_stream_args::~timeseries_db_service_add_stream_args() throw() {
+}
+
+
+uint32_t timeseries_db_service_add_stream_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t timeseries_db_service_add_stream_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("timeseries_db_service_add_stream_args");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_add_stream_pargs::~timeseries_db_service_add_stream_pargs() throw() {
+}
+
+
+uint32_t timeseries_db_service_add_stream_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("timeseries_db_service_add_stream_pargs");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_add_stream_result::~timeseries_db_service_add_stream_result() throw() {
+}
+
+
+uint32_t timeseries_db_service_add_stream_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t timeseries_db_service_add_stream_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("timeseries_db_service_add_stream_result");
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_add_stream_presult::~timeseries_db_service_add_stream_presult() throw() {
+}
+
+
+uint32_t timeseries_db_service_add_stream_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
 timeseries_db_service_insert_values_args::~timeseries_db_service_insert_values_args() throw() {
 }
 
@@ -35,6 +191,14 @@ uint32_t timeseries_db_service_insert_values_args::read(::apache::thrift::protoc
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->pts);
           this->__isset.pts = true;
@@ -59,7 +223,11 @@ uint32_t timeseries_db_service_insert_values_args::write(::apache::thrift::proto
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_insert_values_args");
 
-  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->pts);
   xfer += oprot->writeFieldEnd();
 
@@ -78,7 +246,11 @@ uint32_t timeseries_db_service_insert_values_pargs::write(::apache::thrift::prot
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_insert_values_pargs");
 
-  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->pts)));
   xfer += oprot->writeFieldEnd();
 
@@ -222,6 +394,14 @@ uint32_t timeseries_db_service_insert_values_block_args::read(::apache::thrift::
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->pts);
           this->__isset.pts = true;
@@ -229,7 +409,7 @@ uint32_t timeseries_db_service_insert_values_block_args::read(::apache::thrift::
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->ts_block);
           this->__isset.ts_block = true;
@@ -254,11 +434,15 @@ uint32_t timeseries_db_service_insert_values_block_args::write(::apache::thrift:
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_insert_values_block_args");
 
-  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->pts);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ts_block", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("ts_block", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->ts_block);
   xfer += oprot->writeFieldEnd();
 
@@ -277,11 +461,15 @@ uint32_t timeseries_db_service_insert_values_block_pargs::write(::apache::thrift
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_insert_values_block_pargs");
 
-  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("pts", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->pts)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ts_block", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("ts_block", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->ts_block)));
   xfer += oprot->writeFieldEnd();
 
@@ -426,13 +614,21 @@ uint32_t timeseries_db_service_get_range_args::read(::apache::thrift::protocol::
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->start_ts);
           this->__isset.start_ts = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->end_ts);
           this->__isset.end_ts = true;
@@ -440,7 +636,7 @@ uint32_t timeseries_db_service_get_range_args::read(::apache::thrift::protocol::
           xfer += iprot->skip(ftype);
         }
         break;
-      case 3:
+      case 4:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->version);
           this->__isset.version = true;
@@ -465,15 +661,19 @@ uint32_t timeseries_db_service_get_range_args::write(::apache::thrift::protocol:
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_range_args");
 
-  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64(this->start_ts);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->end_ts);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64(this->version);
   xfer += oprot->writeFieldEnd();
 
@@ -492,15 +692,19 @@ uint32_t timeseries_db_service_get_range_pargs::write(::apache::thrift::protocol
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_range_pargs");
 
-  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64((*(this->start_ts)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->end_ts)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64((*(this->version)));
   xfer += oprot->writeFieldEnd();
 
@@ -645,13 +849,21 @@ uint32_t timeseries_db_service_get_range_latest_args::read(::apache::thrift::pro
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->start_ts);
           this->__isset.start_ts = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->end_ts);
           this->__isset.end_ts = true;
@@ -676,11 +888,15 @@ uint32_t timeseries_db_service_get_range_latest_args::write(::apache::thrift::pr
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_range_latest_args");
 
-  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64(this->start_ts);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->end_ts);
   xfer += oprot->writeFieldEnd();
 
@@ -699,11 +915,15 @@ uint32_t timeseries_db_service_get_range_latest_pargs::write(::apache::thrift::p
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_range_latest_pargs");
 
-  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64((*(this->start_ts)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->end_ts)));
   xfer += oprot->writeFieldEnd();
 
@@ -847,6 +1067,14 @@ uint32_t timeseries_db_service_get_nearest_value_args::read(::apache::thrift::pr
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool(this->direction);
           this->__isset.direction = true;
@@ -854,7 +1082,7 @@ uint32_t timeseries_db_service_get_nearest_value_args::read(::apache::thrift::pr
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->ts);
           this->__isset.ts = true;
@@ -862,7 +1090,7 @@ uint32_t timeseries_db_service_get_nearest_value_args::read(::apache::thrift::pr
           xfer += iprot->skip(ftype);
         }
         break;
-      case 3:
+      case 4:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->version);
           this->__isset.version = true;
@@ -887,15 +1115,19 @@ uint32_t timeseries_db_service_get_nearest_value_args::write(::apache::thrift::p
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_nearest_value_args");
 
-  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 2);
   xfer += oprot->writeBool(this->direction);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->ts);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64(this->version);
   xfer += oprot->writeFieldEnd();
 
@@ -914,15 +1146,19 @@ uint32_t timeseries_db_service_get_nearest_value_pargs::write(::apache::thrift::
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_nearest_value_pargs");
 
-  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 2);
   xfer += oprot->writeBool((*(this->direction)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->ts)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64((*(this->version)));
   xfer += oprot->writeFieldEnd();
 
@@ -1066,6 +1302,14 @@ uint32_t timeseries_db_service_get_nearest_value_latest_args::read(::apache::thr
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_BOOL) {
           xfer += iprot->readBool(this->direction);
           this->__isset.direction = true;
@@ -1073,7 +1317,7 @@ uint32_t timeseries_db_service_get_nearest_value_latest_args::read(::apache::thr
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->ts);
           this->__isset.ts = true;
@@ -1098,11 +1342,15 @@ uint32_t timeseries_db_service_get_nearest_value_latest_args::write(::apache::th
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_nearest_value_latest_args");
 
-  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 2);
   xfer += oprot->writeBool(this->direction);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->ts);
   xfer += oprot->writeFieldEnd();
 
@@ -1121,11 +1369,15 @@ uint32_t timeseries_db_service_get_nearest_value_latest_pargs::write(::apache::t
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_get_nearest_value_latest_pargs");
 
-  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("direction", ::apache::thrift::protocol::T_BOOL, 2);
   xfer += oprot->writeBool((*(this->direction)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("ts", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->ts)));
   xfer += oprot->writeFieldEnd();
 
@@ -1270,13 +1522,21 @@ uint32_t timeseries_db_service_compute_diff_args::read(::apache::thrift::protoco
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->from_version);
           this->__isset.from_version = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->to_version);
           this->__isset.to_version = true;
@@ -1301,11 +1561,15 @@ uint32_t timeseries_db_service_compute_diff_args::write(::apache::thrift::protoc
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_compute_diff_args");
 
-  xfer += oprot->writeFieldBegin("from_version", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("from_version", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64(this->from_version);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("to_version", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("to_version", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->to_version);
   xfer += oprot->writeFieldEnd();
 
@@ -1324,11 +1588,15 @@ uint32_t timeseries_db_service_compute_diff_pargs::write(::apache::thrift::proto
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_compute_diff_pargs");
 
-  xfer += oprot->writeFieldBegin("from_version", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("from_version", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64((*(this->from_version)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("to_version", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("to_version", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->to_version)));
   xfer += oprot->writeFieldEnd();
 
@@ -1469,7 +1737,20 @@ uint32_t timeseries_db_service_num_entries_args::read(::apache::thrift::protocol
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -1482,6 +1763,10 @@ uint32_t timeseries_db_service_num_entries_args::write(::apache::thrift::protoco
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_num_entries_args");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -1497,6 +1782,10 @@ uint32_t timeseries_db_service_num_entries_pargs::write(::apache::thrift::protoc
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("timeseries_db_service_num_entries_pargs");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -1611,18 +1900,72 @@ uint32_t timeseries_db_service_num_entries_presult::read(::apache::thrift::proto
   return xfer;
 }
 
-version_t timeseries_db_serviceClient::insert_values(const std::string& pts)
+void timeseries_db_serviceClient::add_stream(const uuid_t uuid)
 {
-  send_insert_values(pts);
+  send_add_stream(uuid);
+  recv_add_stream();
+}
+
+void timeseries_db_serviceClient::send_add_stream(const uuid_t uuid)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("add_stream", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  timeseries_db_service_add_stream_pargs args;
+  args.uuid = &uuid;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void timeseries_db_serviceClient::recv_add_stream()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("add_stream") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  timeseries_db_service_add_stream_presult result;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  return;
+}
+
+version_t timeseries_db_serviceClient::insert_values(const uuid_t uuid, const std::string& pts)
+{
+  send_insert_values(uuid, pts);
   return recv_insert_values();
 }
 
-void timeseries_db_serviceClient::send_insert_values(const std::string& pts)
+void timeseries_db_serviceClient::send_insert_values(const uuid_t uuid, const std::string& pts)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("insert_values", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_insert_values_pargs args;
+  args.uuid = &uuid;
   args.pts = &pts;
   args.write(oprot_);
 
@@ -1669,18 +2012,19 @@ version_t timeseries_db_serviceClient::recv_insert_values()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "insert_values failed: unknown result");
 }
 
-version_t timeseries_db_serviceClient::insert_values_block(const std::string& pts, const timestamp_t ts_block)
+version_t timeseries_db_serviceClient::insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block)
 {
-  send_insert_values_block(pts, ts_block);
+  send_insert_values_block(uuid, pts, ts_block);
   return recv_insert_values_block();
 }
 
-void timeseries_db_serviceClient::send_insert_values_block(const std::string& pts, const timestamp_t ts_block)
+void timeseries_db_serviceClient::send_insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("insert_values_block", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_insert_values_block_pargs args;
+  args.uuid = &uuid;
   args.pts = &pts;
   args.ts_block = &ts_block;
   args.write(oprot_);
@@ -1728,18 +2072,19 @@ version_t timeseries_db_serviceClient::recv_insert_values_block()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "insert_values_block failed: unknown result");
 }
 
-void timeseries_db_serviceClient::get_range(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
+void timeseries_db_serviceClient::get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
 {
-  send_get_range(start_ts, end_ts, version);
+  send_get_range(uuid, start_ts, end_ts, version);
   recv_get_range(_return);
 }
 
-void timeseries_db_serviceClient::send_get_range(const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
+void timeseries_db_serviceClient::send_get_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("get_range", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_range_pargs args;
+  args.uuid = &uuid;
   args.start_ts = &start_ts;
   args.end_ts = &end_ts;
   args.version = &version;
@@ -1788,18 +2133,19 @@ void timeseries_db_serviceClient::recv_get_range(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_range failed: unknown result");
 }
 
-void timeseries_db_serviceClient::get_range_latest(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts)
+void timeseries_db_serviceClient::get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts)
 {
-  send_get_range_latest(start_ts, end_ts);
+  send_get_range_latest(uuid, start_ts, end_ts);
   recv_get_range_latest(_return);
 }
 
-void timeseries_db_serviceClient::send_get_range_latest(const timestamp_t start_ts, const timestamp_t end_ts)
+void timeseries_db_serviceClient::send_get_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("get_range_latest", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_range_latest_pargs args;
+  args.uuid = &uuid;
   args.start_ts = &start_ts;
   args.end_ts = &end_ts;
   args.write(oprot_);
@@ -1847,18 +2193,19 @@ void timeseries_db_serviceClient::recv_get_range_latest(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_range_latest failed: unknown result");
 }
 
-void timeseries_db_serviceClient::get_nearest_value(std::string& _return, const bool direction, const timestamp_t ts, const version_t version)
+void timeseries_db_serviceClient::get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version)
 {
-  send_get_nearest_value(direction, ts, version);
+  send_get_nearest_value(uuid, direction, ts, version);
   recv_get_nearest_value(_return);
 }
 
-void timeseries_db_serviceClient::send_get_nearest_value(const bool direction, const timestamp_t ts, const version_t version)
+void timeseries_db_serviceClient::send_get_nearest_value(const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("get_nearest_value", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_nearest_value_pargs args;
+  args.uuid = &uuid;
   args.direction = &direction;
   args.ts = &ts;
   args.version = &version;
@@ -1907,18 +2254,19 @@ void timeseries_db_serviceClient::recv_get_nearest_value(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_nearest_value failed: unknown result");
 }
 
-void timeseries_db_serviceClient::get_nearest_value_latest(std::string& _return, const bool direction, const timestamp_t ts)
+void timeseries_db_serviceClient::get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts)
 {
-  send_get_nearest_value_latest(direction, ts);
+  send_get_nearest_value_latest(uuid, direction, ts);
   recv_get_nearest_value_latest(_return);
 }
 
-void timeseries_db_serviceClient::send_get_nearest_value_latest(const bool direction, const timestamp_t ts)
+void timeseries_db_serviceClient::send_get_nearest_value_latest(const uuid_t uuid, const bool direction, const timestamp_t ts)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("get_nearest_value_latest", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_nearest_value_latest_pargs args;
+  args.uuid = &uuid;
   args.direction = &direction;
   args.ts = &ts;
   args.write(oprot_);
@@ -1966,18 +2314,19 @@ void timeseries_db_serviceClient::recv_get_nearest_value_latest(std::string& _re
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_nearest_value_latest failed: unknown result");
 }
 
-void timeseries_db_serviceClient::compute_diff(std::string& _return, const version_t from_version, const version_t to_version)
+void timeseries_db_serviceClient::compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version)
 {
-  send_compute_diff(from_version, to_version);
+  send_compute_diff(uuid, from_version, to_version);
   recv_compute_diff(_return);
 }
 
-void timeseries_db_serviceClient::send_compute_diff(const version_t from_version, const version_t to_version)
+void timeseries_db_serviceClient::send_compute_diff(const uuid_t uuid, const version_t from_version, const version_t to_version)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("compute_diff", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_compute_diff_pargs args;
+  args.uuid = &uuid;
   args.from_version = &from_version;
   args.to_version = &to_version;
   args.write(oprot_);
@@ -2025,18 +2374,19 @@ void timeseries_db_serviceClient::recv_compute_diff(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "compute_diff failed: unknown result");
 }
 
-int64_t timeseries_db_serviceClient::num_entries()
+int64_t timeseries_db_serviceClient::num_entries(const uuid_t uuid)
 {
-  send_num_entries();
+  send_num_entries(uuid);
   return recv_num_entries();
 }
 
-void timeseries_db_serviceClient::send_num_entries()
+void timeseries_db_serviceClient::send_num_entries(const uuid_t uuid)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_num_entries_pargs args;
+  args.uuid = &uuid;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -2101,6 +2451,59 @@ bool timeseries_db_serviceProcessor::dispatchCall(::apache::thrift::protocol::TP
   return true;
 }
 
+void timeseries_db_serviceProcessor::process_add_stream(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("timeseries_db_service.add_stream", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "timeseries_db_service.add_stream");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "timeseries_db_service.add_stream");
+  }
+
+  timeseries_db_service_add_stream_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "timeseries_db_service.add_stream", bytes);
+  }
+
+  timeseries_db_service_add_stream_result result;
+  try {
+    iface_->add_stream(args.uuid);
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "timeseries_db_service.add_stream");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("add_stream", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "timeseries_db_service.add_stream");
+  }
+
+  oprot->writeMessageBegin("add_stream", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "timeseries_db_service.add_stream", bytes);
+  }
+}
+
 void timeseries_db_serviceProcessor::process_insert_values(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
@@ -2124,7 +2527,7 @@ void timeseries_db_serviceProcessor::process_insert_values(int32_t seqid, ::apac
 
   timeseries_db_service_insert_values_result result;
   try {
-    result.success = iface_->insert_values(args.pts);
+    result.success = iface_->insert_values(args.uuid, args.pts);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2178,7 +2581,7 @@ void timeseries_db_serviceProcessor::process_insert_values_block(int32_t seqid, 
 
   timeseries_db_service_insert_values_block_result result;
   try {
-    result.success = iface_->insert_values_block(args.pts, args.ts_block);
+    result.success = iface_->insert_values_block(args.uuid, args.pts, args.ts_block);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2232,7 +2635,7 @@ void timeseries_db_serviceProcessor::process_get_range(int32_t seqid, ::apache::
 
   timeseries_db_service_get_range_result result;
   try {
-    iface_->get_range(result.success, args.start_ts, args.end_ts, args.version);
+    iface_->get_range(result.success, args.uuid, args.start_ts, args.end_ts, args.version);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2286,7 +2689,7 @@ void timeseries_db_serviceProcessor::process_get_range_latest(int32_t seqid, ::a
 
   timeseries_db_service_get_range_latest_result result;
   try {
-    iface_->get_range_latest(result.success, args.start_ts, args.end_ts);
+    iface_->get_range_latest(result.success, args.uuid, args.start_ts, args.end_ts);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2340,7 +2743,7 @@ void timeseries_db_serviceProcessor::process_get_nearest_value(int32_t seqid, ::
 
   timeseries_db_service_get_nearest_value_result result;
   try {
-    iface_->get_nearest_value(result.success, args.direction, args.ts, args.version);
+    iface_->get_nearest_value(result.success, args.uuid, args.direction, args.ts, args.version);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2394,7 +2797,7 @@ void timeseries_db_serviceProcessor::process_get_nearest_value_latest(int32_t se
 
   timeseries_db_service_get_nearest_value_latest_result result;
   try {
-    iface_->get_nearest_value_latest(result.success, args.direction, args.ts);
+    iface_->get_nearest_value_latest(result.success, args.uuid, args.direction, args.ts);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2448,7 +2851,7 @@ void timeseries_db_serviceProcessor::process_compute_diff(int32_t seqid, ::apach
 
   timeseries_db_service_compute_diff_result result;
   try {
-    iface_->compute_diff(result.success, args.from_version, args.to_version);
+    iface_->compute_diff(result.success, args.uuid, args.from_version, args.to_version);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2502,7 +2905,7 @@ void timeseries_db_serviceProcessor::process_num_entries(int32_t seqid, ::apache
 
   timeseries_db_service_num_entries_result result;
   try {
-    result.success = iface_->num_entries();
+    result.success = iface_->num_entries(args.uuid);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -2540,19 +2943,98 @@ void timeseries_db_serviceProcessor::process_num_entries(int32_t seqid, ::apache
   return processor;
 }
 
-version_t timeseries_db_serviceConcurrentClient::insert_values(const std::string& pts)
+void timeseries_db_serviceConcurrentClient::add_stream(const uuid_t uuid)
 {
-  int32_t seqid = send_insert_values(pts);
+  int32_t seqid = send_add_stream(uuid);
+  recv_add_stream(seqid);
+}
+
+int32_t timeseries_db_serviceConcurrentClient::send_add_stream(const uuid_t uuid)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  oprot_->writeMessageBegin("add_stream", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  timeseries_db_service_add_stream_pargs args;
+  args.uuid = &uuid;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+void timeseries_db_serviceConcurrentClient::recv_add_stream(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(iprot_);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("add_stream") != 0) {
+        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      timeseries_db_service_add_stream_presult result;
+      result.read(iprot_);
+      iprot_->readMessageEnd();
+      iprot_->getTransport()->readEnd();
+
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+version_t timeseries_db_serviceConcurrentClient::insert_values(const uuid_t uuid, const std::string& pts)
+{
+  int32_t seqid = send_insert_values(uuid, pts);
   return recv_insert_values(seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_insert_values(const std::string& pts)
+int32_t timeseries_db_serviceConcurrentClient::send_insert_values(const uuid_t uuid, const std::string& pts)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("insert_values", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_insert_values_pargs args;
+  args.uuid = &uuid;
   args.pts = &pts;
   args.write(oprot_);
 
@@ -2624,19 +3106,20 @@ version_t timeseries_db_serviceConcurrentClient::recv_insert_values(const int32_
   } // end while(true)
 }
 
-version_t timeseries_db_serviceConcurrentClient::insert_values_block(const std::string& pts, const timestamp_t ts_block)
+version_t timeseries_db_serviceConcurrentClient::insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block)
 {
-  int32_t seqid = send_insert_values_block(pts, ts_block);
+  int32_t seqid = send_insert_values_block(uuid, pts, ts_block);
   return recv_insert_values_block(seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_insert_values_block(const std::string& pts, const timestamp_t ts_block)
+int32_t timeseries_db_serviceConcurrentClient::send_insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("insert_values_block", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_insert_values_block_pargs args;
+  args.uuid = &uuid;
   args.pts = &pts;
   args.ts_block = &ts_block;
   args.write(oprot_);
@@ -2709,19 +3192,20 @@ version_t timeseries_db_serviceConcurrentClient::recv_insert_values_block(const 
   } // end while(true)
 }
 
-void timeseries_db_serviceConcurrentClient::get_range(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
+void timeseries_db_serviceConcurrentClient::get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
 {
-  int32_t seqid = send_get_range(start_ts, end_ts, version);
+  int32_t seqid = send_get_range(uuid, start_ts, end_ts, version);
   recv_get_range(_return, seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_get_range(const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
+int32_t timeseries_db_serviceConcurrentClient::send_get_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("get_range", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_range_pargs args;
+  args.uuid = &uuid;
   args.start_ts = &start_ts;
   args.end_ts = &end_ts;
   args.version = &version;
@@ -2795,19 +3279,20 @@ void timeseries_db_serviceConcurrentClient::recv_get_range(std::string& _return,
   } // end while(true)
 }
 
-void timeseries_db_serviceConcurrentClient::get_range_latest(std::string& _return, const timestamp_t start_ts, const timestamp_t end_ts)
+void timeseries_db_serviceConcurrentClient::get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts)
 {
-  int32_t seqid = send_get_range_latest(start_ts, end_ts);
+  int32_t seqid = send_get_range_latest(uuid, start_ts, end_ts);
   recv_get_range_latest(_return, seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_get_range_latest(const timestamp_t start_ts, const timestamp_t end_ts)
+int32_t timeseries_db_serviceConcurrentClient::send_get_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("get_range_latest", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_range_latest_pargs args;
+  args.uuid = &uuid;
   args.start_ts = &start_ts;
   args.end_ts = &end_ts;
   args.write(oprot_);
@@ -2880,19 +3365,20 @@ void timeseries_db_serviceConcurrentClient::recv_get_range_latest(std::string& _
   } // end while(true)
 }
 
-void timeseries_db_serviceConcurrentClient::get_nearest_value(std::string& _return, const bool direction, const timestamp_t ts, const version_t version)
+void timeseries_db_serviceConcurrentClient::get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version)
 {
-  int32_t seqid = send_get_nearest_value(direction, ts, version);
+  int32_t seqid = send_get_nearest_value(uuid, direction, ts, version);
   recv_get_nearest_value(_return, seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_get_nearest_value(const bool direction, const timestamp_t ts, const version_t version)
+int32_t timeseries_db_serviceConcurrentClient::send_get_nearest_value(const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("get_nearest_value", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_nearest_value_pargs args;
+  args.uuid = &uuid;
   args.direction = &direction;
   args.ts = &ts;
   args.version = &version;
@@ -2966,19 +3452,20 @@ void timeseries_db_serviceConcurrentClient::recv_get_nearest_value(std::string& 
   } // end while(true)
 }
 
-void timeseries_db_serviceConcurrentClient::get_nearest_value_latest(std::string& _return, const bool direction, const timestamp_t ts)
+void timeseries_db_serviceConcurrentClient::get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts)
 {
-  int32_t seqid = send_get_nearest_value_latest(direction, ts);
+  int32_t seqid = send_get_nearest_value_latest(uuid, direction, ts);
   recv_get_nearest_value_latest(_return, seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_get_nearest_value_latest(const bool direction, const timestamp_t ts)
+int32_t timeseries_db_serviceConcurrentClient::send_get_nearest_value_latest(const uuid_t uuid, const bool direction, const timestamp_t ts)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("get_nearest_value_latest", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_get_nearest_value_latest_pargs args;
+  args.uuid = &uuid;
   args.direction = &direction;
   args.ts = &ts;
   args.write(oprot_);
@@ -3051,19 +3538,20 @@ void timeseries_db_serviceConcurrentClient::recv_get_nearest_value_latest(std::s
   } // end while(true)
 }
 
-void timeseries_db_serviceConcurrentClient::compute_diff(std::string& _return, const version_t from_version, const version_t to_version)
+void timeseries_db_serviceConcurrentClient::compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version)
 {
-  int32_t seqid = send_compute_diff(from_version, to_version);
+  int32_t seqid = send_compute_diff(uuid, from_version, to_version);
   recv_compute_diff(_return, seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_compute_diff(const version_t from_version, const version_t to_version)
+int32_t timeseries_db_serviceConcurrentClient::send_compute_diff(const uuid_t uuid, const version_t from_version, const version_t to_version)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("compute_diff", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_compute_diff_pargs args;
+  args.uuid = &uuid;
   args.from_version = &from_version;
   args.to_version = &to_version;
   args.write(oprot_);
@@ -3136,19 +3624,20 @@ void timeseries_db_serviceConcurrentClient::recv_compute_diff(std::string& _retu
   } // end while(true)
 }
 
-int64_t timeseries_db_serviceConcurrentClient::num_entries()
+int64_t timeseries_db_serviceConcurrentClient::num_entries(const uuid_t uuid)
 {
-  int32_t seqid = send_num_entries();
+  int32_t seqid = send_num_entries(uuid);
   return recv_num_entries(seqid);
 }
 
-int32_t timeseries_db_serviceConcurrentClient::send_num_entries()
+int32_t timeseries_db_serviceConcurrentClient::send_num_entries(const uuid_t uuid)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("num_entries", ::apache::thrift::protocol::T_CALL, cseqid);
 
   timeseries_db_service_num_entries_pargs args;
+  args.uuid = &uuid;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();

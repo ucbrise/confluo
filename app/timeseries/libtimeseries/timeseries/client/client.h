@@ -49,46 +49,50 @@ class timeseries_db_client {
     transport_->close();
   }
 
-  version_t insert_values(const std::string& pts) {
-    return client_->insert_values(pts);
+  void add_stream(uuid_t uuid) {
+    client_->add_stream(uuid);
   }
 
-  version_t insert_values_block(const std::string& pts,
+  version_t insert_values(const uuid_t uuid, const std::string& pts) {
+    return client_->insert_values(uuid, pts);
+  }
+
+  version_t insert_values_block(const uuid_t uuid, const std::string& pts,
       const timestamp_t ts_block) {
-    return client_->insert_values_block(pts, ts_block);
+    return client_->insert_values_block(uuid, pts, ts_block);
   }
 
-  void get_range(std::string& _return, const timestamp_t start_ts,
+  void get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts,
       const timestamp_t end_ts, const version_t version) {
-    client_->get_range(_return, start_ts, end_ts, version);
+    client_->get_range(_return, uuid, start_ts, end_ts, version);
   }
 
-  void get_range_latest(std::string& _return, const timestamp_t start_ts,
+  void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts,
       const timestamp_t end_ts) {
-    client_->get_range_latest(_return, start_ts, end_ts);
+    client_->get_range_latest(_return, uuid, start_ts, end_ts);
   }
 
-  data_pt get_nearest_value(const bool direction,
+  data_pt get_nearest_value(const uuid_t uuid, const bool direction,
       const timestamp_t ts, const version_t version) {
     std::string _return;
-    client_->get_nearest_value(_return, direction, ts, version);
+    client_->get_nearest_value(_return, uuid, direction, ts, version);
     return *((data_pt*)_return.c_str());
   }
 
-  data_pt get_nearest_value_latest(const bool direction,
+  data_pt get_nearest_value_latest(const uuid_t uuid, const bool direction,
       const timestamp_t ts) {
     std::string _return;
-    client_->get_nearest_value_latest(_return, direction, ts);
+    client_->get_nearest_value_latest(_return, uuid, direction, ts);
     return *((data_pt*)_return.c_str());
   }
 
-  void compute_diff(std::string& _return, const version_t from_version,
+  void compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version,
       const version_t to_version) {
-    client_->compute_diff(_return, from_version, to_version);
+    client_->compute_diff(_return, uuid, from_version, to_version);
   }
 
-  int64_t num_entries() {
-    return client_->num_entries();
+  int64_t num_entries(const uuid_t uuid) {
+    return client_->num_entries(uuid);
   }
 
 private:
