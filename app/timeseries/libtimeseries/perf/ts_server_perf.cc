@@ -10,13 +10,14 @@
 #include "error_handling.h"
 
 using namespace ::timeseries;
+using namespace ::utils;
 
 #define DATA_SIZE 64
 
 class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client> {
  public:
   ts_server_benchmark(const std::string& output_dir,
-                      const std::string& input_file, long uuid,
+                      const std::string& input_file, long uuid, long resolution,
                       size_t load_records, size_t batch_size,
                       const std::string& host, int port)
       : utils::bench::benchmark<timeseries_db_client>(output_dir) {
@@ -24,6 +25,7 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     UUID = uuid;
     BATCH_SIZE = batch_size;
     BATCH_BYTES = BATCH_SIZE * sizeof(data_pt);
+    RESOLUTION = resolution;
     cur_off = 0;
     data_count = utils::mmap_utils::file_size(input_file) / sizeof(data_pt);
     data = (char*) utils::mmap_utils::mmap_r(input_file);
@@ -46,6 +48,12 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     }
     PRELOAD_RECORDS = ds_.num_entries(UUID);
     LOG_INFO<< "Pre-load complete, loaded " << PRELOAD_RECORDS << " data points";
+
+    min_ts = ((data_pt*) data)[0].timestamp;
+    max_ts = ((data_pt*) data)[PRELOAD_RECORDS - 1].timestamp;
+    size_t max_resolution = bit_utils::highest_bit(max_ts - min_ts);
+
+    LOG_INFO<< "Max resolution = " << max_resolution;
   }
 
   static void insert_values(size_t i, timeseries_db_client& client) {
@@ -55,33 +63,55 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
 
   static void get_range(size_t i, timeseries_db_client& client) {
     data_pt* first = (data_pt*) (data
-        + utils::rand_utils::rand_uint64(PRELOAD_RECORDS - BATCH_SIZE)
+        + rand_utils::rand_uint64(PRELOAD_RECORDS - BATCH_SIZE)
         * sizeof(data_pt));
     data_pt* last = first + BATCH_SIZE - 1;
     std::string res;
     client.get_range_latest(res, UUID, first->timestamp, last->timestamp);
   }
 
+  static void get_statistical_range(size_t i, timeseries_db_client& client) {
+    data_pt* pt = (data_pt*) (data
+        + rand_utils::rand_uint64(PRELOAD_RECORDS / 2)
+        * sizeof(data_pt));
+    timestamp_t t = pt->timestamp;
+    // Get largest (2^RESOLUTION) multiple smaller than pt.ts
+    timestamp_t ts1 = t - (t % (1 << RESOLUTION));
+    timestamp_t ts2 = ts1 + (1 << (RESOLUTION + 11));
+    assert_throw(ts1 >= min_ts, "min_ts = " << min_ts << " ts1 = " << ts1);
+    assert_throw(ts2 <= max_ts, "max_ts = " << max_ts << " ts2 = " << ts2);
+    std::string res;
+    client.get_statistical_range_latest(res, UUID, ts1, ts2, RESOLUTION);
+  }
+
   DEFINE_BENCH_BATCH(insert_values, BATCH_SIZE)
   DEFINE_BENCH_BATCH(get_range, BATCH_SIZE)
+  DEFINE_BENCH(get_statistical_range)
 
 private:
   static char* data;
   static size_t data_count;
   static size_t cur_off;
+  static timestamp_t min_ts;
+  static timestamp_t max_ts;
+
   static uint64_t PRELOAD_RECORDS;
   static uint64_t BATCH_SIZE;
   static size_t BATCH_BYTES;
   static long UUID;
+  static size_t RESOLUTION;
 };
 
 long ts_server_benchmark::UUID = 0;
+size_t ts_server_benchmark::RESOLUTION = 32;
 uint64_t ts_server_benchmark::PRELOAD_RECORDS = 0;
 uint64_t ts_server_benchmark::BATCH_SIZE = 1;
 size_t ts_server_benchmark::BATCH_BYTES = sizeof(data_pt);
 char* ts_server_benchmark::data;
 size_t ts_server_benchmark::data_count;
 size_t ts_server_benchmark::cur_off;
+timestamp_t ts_server_benchmark::min_ts;
+timestamp_t ts_server_benchmark::max_ts;
 
 int main(int argc, char** argv) {
   utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
@@ -103,10 +133,13 @@ int main(int argc, char** argv) {
       cmd_option("batch-size", 'B', false).set_default("1").set_description(
           "Batch size"));
   opts.add(
+      cmd_option("resolution", 'r', false).set_default("32").set_description(
+          "Batch size"));
+  opts.add(
       cmd_option("init-data-points", 'd', false).set_default("0")
           .set_description("#Data points to initialize the stream with"));
   opts.add(
-      cmd_option("stream-id", 'S', false).set_default("0").set_description(
+      cmd_option("stream-id", 'S', false).set_default("1").set_description(
           "Stream ID for the benchmark"));
   opts.add(
       cmd_option("server", 's', false).set_default("localhost").set_description(
@@ -127,6 +160,7 @@ int main(int argc, char** argv) {
   std::string bench_op;
   long load_records;
   long batch_size;
+  long resolution;
   long uuid;
   std::string server;
   int port;
@@ -137,6 +171,7 @@ int main(int argc, char** argv) {
     bench_op = parser.get("bench-op");
     load_records = parser.get_long("init-data-points");
     batch_size = parser.get_long("batch-size");
+    resolution = parser.get_long("resolution");
     uuid = parser.get_long("stream-id");
     server = parser.get("server");
     port = parser.get_int("port");
@@ -148,8 +183,8 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  ts_server_benchmark perf(output_dir, input_file, uuid, load_records,
-                           batch_size, server, port);
+  ts_server_benchmark perf(output_dir, input_file, uuid, resolution,
+                           load_records, batch_size, server, port);
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);
   } else if (bench_op == "throughput-get-range") {

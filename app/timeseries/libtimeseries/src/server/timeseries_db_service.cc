@@ -1041,6 +1041,492 @@ uint32_t timeseries_db_service_get_range_latest_presult::read(::apache::thrift::
 }
 
 
+timeseries_db_service_get_statistical_range_args::~timeseries_db_service_get_statistical_range_args() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->start_ts);
+          this->__isset.start_ts = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->end_ts);
+          this->__isset.end_ts = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->resolution);
+          this->__isset.resolution = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->version);
+          this->__isset.version = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t timeseries_db_service_get_statistical_range_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("timeseries_db_service_get_statistical_range_args");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->start_ts);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64(this->end_ts);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("resolution", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64(this->resolution);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 5);
+  xfer += oprot->writeI64(this->version);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_pargs::~timeseries_db_service_get_statistical_range_pargs() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("timeseries_db_service_get_statistical_range_pargs");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64((*(this->start_ts)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64((*(this->end_ts)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("resolution", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64((*(this->resolution)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("version", ::apache::thrift::protocol::T_I64, 5);
+  xfer += oprot->writeI64((*(this->version)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_result::~timeseries_db_service_get_statistical_range_result() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readBinary(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t timeseries_db_service_get_statistical_range_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("timeseries_db_service_get_statistical_range_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRING, 0);
+    xfer += oprot->writeBinary(this->success);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_presult::~timeseries_db_service_get_statistical_range_presult() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readBinary((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_latest_args::~timeseries_db_service_get_statistical_range_latest_args() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_latest_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->uuid);
+          this->__isset.uuid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->start_ts);
+          this->__isset.start_ts = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->end_ts);
+          this->__isset.end_ts = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->resolution);
+          this->__isset.resolution = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t timeseries_db_service_get_statistical_range_latest_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("timeseries_db_service_get_statistical_range_latest_args");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->uuid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->start_ts);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64(this->end_ts);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("resolution", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64(this->resolution);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_latest_pargs::~timeseries_db_service_get_statistical_range_latest_pargs() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_latest_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("timeseries_db_service_get_statistical_range_latest_pargs");
+
+  xfer += oprot->writeFieldBegin("uuid", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->uuid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("start_ts", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64((*(this->start_ts)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("end_ts", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64((*(this->end_ts)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("resolution", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64((*(this->resolution)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_latest_result::~timeseries_db_service_get_statistical_range_latest_result() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_latest_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readBinary(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t timeseries_db_service_get_statistical_range_latest_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("timeseries_db_service_get_statistical_range_latest_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRING, 0);
+    xfer += oprot->writeBinary(this->success);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+timeseries_db_service_get_statistical_range_latest_presult::~timeseries_db_service_get_statistical_range_latest_presult() throw() {
+}
+
+
+uint32_t timeseries_db_service_get_statistical_range_latest_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readBinary((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
 timeseries_db_service_get_nearest_value_args::~timeseries_db_service_get_nearest_value_args() throw() {
 }
 
@@ -2193,6 +2679,129 @@ void timeseries_db_serviceClient::recv_get_range_latest(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_range_latest failed: unknown result");
 }
 
+void timeseries_db_serviceClient::get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version)
+{
+  send_get_statistical_range(uuid, start_ts, end_ts, resolution, version);
+  recv_get_statistical_range(_return);
+}
+
+void timeseries_db_serviceClient::send_get_statistical_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("get_statistical_range", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  timeseries_db_service_get_statistical_range_pargs args;
+  args.uuid = &uuid;
+  args.start_ts = &start_ts;
+  args.end_ts = &end_ts;
+  args.resolution = &resolution;
+  args.version = &version;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void timeseries_db_serviceClient::recv_get_statistical_range(std::string& _return)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("get_statistical_range") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  timeseries_db_service_get_statistical_range_presult result;
+  result.success = &_return;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_statistical_range failed: unknown result");
+}
+
+void timeseries_db_serviceClient::get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution)
+{
+  send_get_statistical_range_latest(uuid, start_ts, end_ts, resolution);
+  recv_get_statistical_range_latest(_return);
+}
+
+void timeseries_db_serviceClient::send_get_statistical_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("get_statistical_range_latest", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  timeseries_db_service_get_statistical_range_latest_pargs args;
+  args.uuid = &uuid;
+  args.start_ts = &start_ts;
+  args.end_ts = &end_ts;
+  args.resolution = &resolution;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void timeseries_db_serviceClient::recv_get_statistical_range_latest(std::string& _return)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("get_statistical_range_latest") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  timeseries_db_service_get_statistical_range_latest_presult result;
+  result.success = &_return;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_statistical_range_latest failed: unknown result");
+}
+
 void timeseries_db_serviceClient::get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version)
 {
   send_get_nearest_value(uuid, direction, ts, version);
@@ -2717,6 +3326,114 @@ void timeseries_db_serviceProcessor::process_get_range_latest(int32_t seqid, ::a
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->postWrite(ctx, "timeseries_db_service.get_range_latest", bytes);
+  }
+}
+
+void timeseries_db_serviceProcessor::process_get_statistical_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("timeseries_db_service.get_statistical_range", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "timeseries_db_service.get_statistical_range");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "timeseries_db_service.get_statistical_range");
+  }
+
+  timeseries_db_service_get_statistical_range_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "timeseries_db_service.get_statistical_range", bytes);
+  }
+
+  timeseries_db_service_get_statistical_range_result result;
+  try {
+    iface_->get_statistical_range(result.success, args.uuid, args.start_ts, args.end_ts, args.resolution, args.version);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "timeseries_db_service.get_statistical_range");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("get_statistical_range", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "timeseries_db_service.get_statistical_range");
+  }
+
+  oprot->writeMessageBegin("get_statistical_range", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "timeseries_db_service.get_statistical_range", bytes);
+  }
+}
+
+void timeseries_db_serviceProcessor::process_get_statistical_range_latest(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("timeseries_db_service.get_statistical_range_latest", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "timeseries_db_service.get_statistical_range_latest");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "timeseries_db_service.get_statistical_range_latest");
+  }
+
+  timeseries_db_service_get_statistical_range_latest_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "timeseries_db_service.get_statistical_range_latest", bytes);
+  }
+
+  timeseries_db_service_get_statistical_range_latest_result result;
+  try {
+    iface_->get_statistical_range_latest(result.success, args.uuid, args.start_ts, args.end_ts, args.resolution);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "timeseries_db_service.get_statistical_range_latest");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("get_statistical_range_latest", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "timeseries_db_service.get_statistical_range_latest");
+  }
+
+  oprot->writeMessageBegin("get_statistical_range_latest", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "timeseries_db_service.get_statistical_range_latest", bytes);
   }
 }
 
@@ -3356,6 +4073,181 @@ void timeseries_db_serviceConcurrentClient::recv_get_range_latest(std::string& _
       }
       // in a bad state, don't commit
       throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_range_latest failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+void timeseries_db_serviceConcurrentClient::get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version)
+{
+  int32_t seqid = send_get_statistical_range(uuid, start_ts, end_ts, resolution, version);
+  recv_get_statistical_range(_return, seqid);
+}
+
+int32_t timeseries_db_serviceConcurrentClient::send_get_statistical_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  oprot_->writeMessageBegin("get_statistical_range", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  timeseries_db_service_get_statistical_range_pargs args;
+  args.uuid = &uuid;
+  args.start_ts = &start_ts;
+  args.end_ts = &end_ts;
+  args.resolution = &resolution;
+  args.version = &version;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+void timeseries_db_serviceConcurrentClient::recv_get_statistical_range(std::string& _return, const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(iprot_);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("get_statistical_range") != 0) {
+        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      timeseries_db_service_get_statistical_range_presult result;
+      result.success = &_return;
+      result.read(iprot_);
+      iprot_->readMessageEnd();
+      iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        // _return pointer has now been filled
+        sentry.commit();
+        return;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_statistical_range failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+void timeseries_db_serviceConcurrentClient::get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution)
+{
+  int32_t seqid = send_get_statistical_range_latest(uuid, start_ts, end_ts, resolution);
+  recv_get_statistical_range_latest(_return, seqid);
+}
+
+int32_t timeseries_db_serviceConcurrentClient::send_get_statistical_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  oprot_->writeMessageBegin("get_statistical_range_latest", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  timeseries_db_service_get_statistical_range_latest_pargs args;
+  args.uuid = &uuid;
+  args.start_ts = &start_ts;
+  args.end_ts = &end_ts;
+  args.resolution = &resolution;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+void timeseries_db_serviceConcurrentClient::recv_get_statistical_range_latest(std::string& _return, const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(iprot_);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("get_statistical_range_latest") != 0) {
+        iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        iprot_->readMessageEnd();
+        iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      timeseries_db_service_get_statistical_range_latest_presult result;
+      result.success = &_return;
+      result.read(iprot_);
+      iprot_->readMessageEnd();
+      iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        // _return pointer has now been filled
+        sentry.commit();
+        return;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_statistical_range_latest failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

@@ -26,6 +26,8 @@ class timeseries_db_serviceIf {
   virtual version_t insert_values_block(const uuid_t uuid, const std::string& pts, const timestamp_t ts_block) = 0;
   virtual void get_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const version_t version) = 0;
   virtual void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts) = 0;
+  virtual void get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version) = 0;
+  virtual void get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution) = 0;
   virtual void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version) = 0;
   virtual void get_nearest_value_latest(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts) = 0;
   virtual void compute_diff(std::string& _return, const uuid_t uuid, const version_t from_version, const version_t to_version) = 0;
@@ -74,6 +76,12 @@ class timeseries_db_serviceNull : virtual public timeseries_db_serviceIf {
     return;
   }
   void get_range_latest(std::string& /* _return */, const uuid_t /* uuid */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */) {
+    return;
+  }
+  void get_statistical_range(std::string& /* _return */, const uuid_t /* uuid */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */, const timestamp_t /* resolution */, const version_t /* version */) {
+    return;
+  }
+  void get_statistical_range_latest(std::string& /* _return */, const uuid_t /* uuid */, const timestamp_t /* start_ts */, const timestamp_t /* end_ts */, const timestamp_t /* resolution */) {
     return;
   }
   void get_nearest_value(std::string& /* _return */, const uuid_t /* uuid */, const bool /* direction */, const timestamp_t /* ts */, const version_t /* version */) {
@@ -649,6 +657,263 @@ class timeseries_db_service_get_range_latest_presult {
 
 };
 
+typedef struct _timeseries_db_service_get_statistical_range_args__isset {
+  _timeseries_db_service_get_statistical_range_args__isset() : uuid(false), start_ts(false), end_ts(false), resolution(false), version(false) {}
+  bool uuid :1;
+  bool start_ts :1;
+  bool end_ts :1;
+  bool resolution :1;
+  bool version :1;
+} _timeseries_db_service_get_statistical_range_args__isset;
+
+class timeseries_db_service_get_statistical_range_args {
+ public:
+
+  timeseries_db_service_get_statistical_range_args(const timeseries_db_service_get_statistical_range_args&);
+  timeseries_db_service_get_statistical_range_args& operator=(const timeseries_db_service_get_statistical_range_args&);
+  timeseries_db_service_get_statistical_range_args() : uuid(0), start_ts(0), end_ts(0), resolution(0), version(0) {
+  }
+
+  virtual ~timeseries_db_service_get_statistical_range_args() throw();
+  uuid_t uuid;
+  timestamp_t start_ts;
+  timestamp_t end_ts;
+  timestamp_t resolution;
+  version_t version;
+
+  _timeseries_db_service_get_statistical_range_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
+
+  void __set_start_ts(const timestamp_t val);
+
+  void __set_end_ts(const timestamp_t val);
+
+  void __set_resolution(const timestamp_t val);
+
+  void __set_version(const version_t val);
+
+  bool operator == (const timeseries_db_service_get_statistical_range_args & rhs) const
+  {
+    if (!(uuid == rhs.uuid))
+      return false;
+    if (!(start_ts == rhs.start_ts))
+      return false;
+    if (!(end_ts == rhs.end_ts))
+      return false;
+    if (!(resolution == rhs.resolution))
+      return false;
+    if (!(version == rhs.version))
+      return false;
+    return true;
+  }
+  bool operator != (const timeseries_db_service_get_statistical_range_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const timeseries_db_service_get_statistical_range_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class timeseries_db_service_get_statistical_range_pargs {
+ public:
+
+
+  virtual ~timeseries_db_service_get_statistical_range_pargs() throw();
+  const uuid_t* uuid;
+  const timestamp_t* start_ts;
+  const timestamp_t* end_ts;
+  const timestamp_t* resolution;
+  const version_t* version;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _timeseries_db_service_get_statistical_range_result__isset {
+  _timeseries_db_service_get_statistical_range_result__isset() : success(false) {}
+  bool success :1;
+} _timeseries_db_service_get_statistical_range_result__isset;
+
+class timeseries_db_service_get_statistical_range_result {
+ public:
+
+  timeseries_db_service_get_statistical_range_result(const timeseries_db_service_get_statistical_range_result&);
+  timeseries_db_service_get_statistical_range_result& operator=(const timeseries_db_service_get_statistical_range_result&);
+  timeseries_db_service_get_statistical_range_result() : success() {
+  }
+
+  virtual ~timeseries_db_service_get_statistical_range_result() throw();
+  std::string success;
+
+  _timeseries_db_service_get_statistical_range_result__isset __isset;
+
+  void __set_success(const std::string& val);
+
+  bool operator == (const timeseries_db_service_get_statistical_range_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const timeseries_db_service_get_statistical_range_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const timeseries_db_service_get_statistical_range_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _timeseries_db_service_get_statistical_range_presult__isset {
+  _timeseries_db_service_get_statistical_range_presult__isset() : success(false) {}
+  bool success :1;
+} _timeseries_db_service_get_statistical_range_presult__isset;
+
+class timeseries_db_service_get_statistical_range_presult {
+ public:
+
+
+  virtual ~timeseries_db_service_get_statistical_range_presult() throw();
+  std::string* success;
+
+  _timeseries_db_service_get_statistical_range_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _timeseries_db_service_get_statistical_range_latest_args__isset {
+  _timeseries_db_service_get_statistical_range_latest_args__isset() : uuid(false), start_ts(false), end_ts(false), resolution(false) {}
+  bool uuid :1;
+  bool start_ts :1;
+  bool end_ts :1;
+  bool resolution :1;
+} _timeseries_db_service_get_statistical_range_latest_args__isset;
+
+class timeseries_db_service_get_statistical_range_latest_args {
+ public:
+
+  timeseries_db_service_get_statistical_range_latest_args(const timeseries_db_service_get_statistical_range_latest_args&);
+  timeseries_db_service_get_statistical_range_latest_args& operator=(const timeseries_db_service_get_statistical_range_latest_args&);
+  timeseries_db_service_get_statistical_range_latest_args() : uuid(0), start_ts(0), end_ts(0), resolution(0) {
+  }
+
+  virtual ~timeseries_db_service_get_statistical_range_latest_args() throw();
+  uuid_t uuid;
+  timestamp_t start_ts;
+  timestamp_t end_ts;
+  timestamp_t resolution;
+
+  _timeseries_db_service_get_statistical_range_latest_args__isset __isset;
+
+  void __set_uuid(const uuid_t val);
+
+  void __set_start_ts(const timestamp_t val);
+
+  void __set_end_ts(const timestamp_t val);
+
+  void __set_resolution(const timestamp_t val);
+
+  bool operator == (const timeseries_db_service_get_statistical_range_latest_args & rhs) const
+  {
+    if (!(uuid == rhs.uuid))
+      return false;
+    if (!(start_ts == rhs.start_ts))
+      return false;
+    if (!(end_ts == rhs.end_ts))
+      return false;
+    if (!(resolution == rhs.resolution))
+      return false;
+    return true;
+  }
+  bool operator != (const timeseries_db_service_get_statistical_range_latest_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const timeseries_db_service_get_statistical_range_latest_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class timeseries_db_service_get_statistical_range_latest_pargs {
+ public:
+
+
+  virtual ~timeseries_db_service_get_statistical_range_latest_pargs() throw();
+  const uuid_t* uuid;
+  const timestamp_t* start_ts;
+  const timestamp_t* end_ts;
+  const timestamp_t* resolution;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _timeseries_db_service_get_statistical_range_latest_result__isset {
+  _timeseries_db_service_get_statistical_range_latest_result__isset() : success(false) {}
+  bool success :1;
+} _timeseries_db_service_get_statistical_range_latest_result__isset;
+
+class timeseries_db_service_get_statistical_range_latest_result {
+ public:
+
+  timeseries_db_service_get_statistical_range_latest_result(const timeseries_db_service_get_statistical_range_latest_result&);
+  timeseries_db_service_get_statistical_range_latest_result& operator=(const timeseries_db_service_get_statistical_range_latest_result&);
+  timeseries_db_service_get_statistical_range_latest_result() : success() {
+  }
+
+  virtual ~timeseries_db_service_get_statistical_range_latest_result() throw();
+  std::string success;
+
+  _timeseries_db_service_get_statistical_range_latest_result__isset __isset;
+
+  void __set_success(const std::string& val);
+
+  bool operator == (const timeseries_db_service_get_statistical_range_latest_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const timeseries_db_service_get_statistical_range_latest_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const timeseries_db_service_get_statistical_range_latest_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _timeseries_db_service_get_statistical_range_latest_presult__isset {
+  _timeseries_db_service_get_statistical_range_latest_presult__isset() : success(false) {}
+  bool success :1;
+} _timeseries_db_service_get_statistical_range_latest_presult__isset;
+
+class timeseries_db_service_get_statistical_range_latest_presult {
+ public:
+
+
+  virtual ~timeseries_db_service_get_statistical_range_latest_presult() throw();
+  std::string* success;
+
+  _timeseries_db_service_get_statistical_range_latest_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 typedef struct _timeseries_db_service_get_nearest_value_args__isset {
   _timeseries_db_service_get_nearest_value_args__isset() : uuid(false), direction(false), ts(false), version(false) {}
   bool uuid :1;
@@ -1154,6 +1419,12 @@ class timeseries_db_serviceClient : virtual public timeseries_db_serviceIf {
   void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
   void send_get_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
   void recv_get_range_latest(std::string& _return);
+  void get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version);
+  void send_get_statistical_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version);
+  void recv_get_statistical_range(std::string& _return);
+  void get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution);
+  void send_get_statistical_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution);
+  void recv_get_statistical_range_latest(std::string& _return);
   void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
   void send_get_nearest_value(const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
   void recv_get_nearest_value(std::string& _return);
@@ -1186,6 +1457,8 @@ class timeseries_db_serviceProcessor : public ::apache::thrift::TDispatchProcess
   void process_insert_values_block(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_range_latest(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_statistical_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_statistical_range_latest(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_nearest_value(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_nearest_value_latest(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_compute_diff(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -1198,6 +1471,8 @@ class timeseries_db_serviceProcessor : public ::apache::thrift::TDispatchProcess
     processMap_["insert_values_block"] = &timeseries_db_serviceProcessor::process_insert_values_block;
     processMap_["get_range"] = &timeseries_db_serviceProcessor::process_get_range;
     processMap_["get_range_latest"] = &timeseries_db_serviceProcessor::process_get_range_latest;
+    processMap_["get_statistical_range"] = &timeseries_db_serviceProcessor::process_get_statistical_range;
+    processMap_["get_statistical_range_latest"] = &timeseries_db_serviceProcessor::process_get_statistical_range_latest;
     processMap_["get_nearest_value"] = &timeseries_db_serviceProcessor::process_get_nearest_value;
     processMap_["get_nearest_value_latest"] = &timeseries_db_serviceProcessor::process_get_nearest_value_latest;
     processMap_["compute_diff"] = &timeseries_db_serviceProcessor::process_compute_diff;
@@ -1274,6 +1549,26 @@ class timeseries_db_serviceMultiface : virtual public timeseries_db_serviceIf {
       ifaces_[i]->get_range_latest(_return, uuid, start_ts, end_ts);
     }
     ifaces_[i]->get_range_latest(_return, uuid, start_ts, end_ts);
+    return;
+  }
+
+  void get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_statistical_range(_return, uuid, start_ts, end_ts, resolution, version);
+    }
+    ifaces_[i]->get_statistical_range(_return, uuid, start_ts, end_ts, resolution, version);
+    return;
+  }
+
+  void get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_statistical_range_latest(_return, uuid, start_ts, end_ts, resolution);
+    }
+    ifaces_[i]->get_statistical_range_latest(_return, uuid, start_ts, end_ts, resolution);
     return;
   }
 
@@ -1361,6 +1656,12 @@ class timeseries_db_serviceConcurrentClient : virtual public timeseries_db_servi
   void get_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
   int32_t send_get_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts);
   void recv_get_range_latest(std::string& _return, const int32_t seqid);
+  void get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version);
+  int32_t send_get_statistical_range(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution, const version_t version);
+  void recv_get_statistical_range(std::string& _return, const int32_t seqid);
+  void get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution);
+  int32_t send_get_statistical_range_latest(const uuid_t uuid, const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution);
+  void recv_get_statistical_range_latest(std::string& _return, const int32_t seqid);
   void get_nearest_value(std::string& _return, const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
   int32_t send_get_nearest_value(const uuid_t uuid, const bool direction, const timestamp_t ts, const version_t version);
   void recv_get_nearest_value(std::string& _return, const int32_t seqid);

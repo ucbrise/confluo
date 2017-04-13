@@ -68,6 +68,25 @@ class timeseries_db_service : virtual public timeseries_db_serviceIf {
     _return.assign(buf, len);
   }
 
+  void get_statistical_range(std::string& _return, const id_t uuid,
+      const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution,
+      const version_t version) {
+    std::vector<stats> results;
+    store_[uuid]->get_statistical_range(results, start_ts, end_ts, resolution, version);
+    const char* buf = (const char*) &results[0];
+    size_t len = results.size() * sizeof(data_pt);
+    _return.assign(buf, len);
+  }
+
+  void get_statistical_range_latest(std::string& _return, const id_t uuid,
+      const timestamp_t start_ts, const timestamp_t end_ts, const timestamp_t resolution) {
+    std::vector<stats> results;
+    store_[uuid]->get_statistical_range_latest(results, start_ts, end_ts, resolution);
+    const char* buf = (const char*) &results[0];
+    size_t len = results.size() * sizeof(data_pt);
+    _return.assign(buf, len);
+  }
+
   void get_nearest_value(std::string& _return, const id_t uuid,
       const bool direction, const timestamp_t ts,
       const version_t version) {

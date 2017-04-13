@@ -72,6 +72,16 @@ class timeseries_db_client {
     client_->get_range_latest(_return, uuid, start_ts, end_ts);
   }
 
+  void get_statistical_range(std::string& _return, const uuid_t uuid, const timestamp_t start_ts,
+      const timestamp_t end_ts, const timestamp_t resolution, const version_t version) {
+    client_->get_statistical_range(_return, uuid, start_ts, end_ts, resolution, version);
+  }
+
+  void get_statistical_range_latest(std::string& _return, const uuid_t uuid, const timestamp_t start_ts,
+      const timestamp_t end_ts, const timestamp_t resolution) {
+    client_->get_statistical_range_latest(_return, uuid, start_ts, end_ts, resolution);
+  }
+
   data_pt get_nearest_value(const uuid_t uuid, const bool direction,
       const timestamp_t ts, const version_t version) {
     std::string _return;
