@@ -8,7 +8,7 @@
 using namespace timeseries;
 using namespace datastore;
 
-class TimeseriesDBRSTest : public testing::Test {
+class TimeseriesDBWSTest : public testing::Test {
  public:
   static const uint64_t kBatchSize = 1000;
   static const uint64_t kTSMax = 10000;
@@ -25,19 +25,19 @@ class TimeseriesDBRSTest : public testing::Test {
   }
 };
 
-const uint64_t TimeseriesDBRSTest::kBatchSize;
-const uint64_t TimeseriesDBRSTest::kTSMax;
+const uint64_t TimeseriesDBWSTest::kBatchSize;
+const uint64_t TimeseriesDBWSTest::kTSMax;
 
-TEST_F(TimeseriesDBRSTest, AddGetTest) {
-  timeseries_rs<> tsdb;
+TEST_F(TimeseriesDBWSTest, AddGetTest) {
+  timeseries_t<> ts;
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts = get_pts(i);
-    tsdb.insert_values(&pts[0], pts.size());
+    ts.insert_values(&pts[0], pts.size());
   }
 
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts;
-    tsdb.get_range_latest(pts, i, i + kBatchSize - 1);
+    ts.get_range_latest(pts, i, i + kBatchSize - 1);
     ASSERT_EQ(pts.size(), kBatchSize);
     for (size_t j = 0; j < pts.size(); j++) {
       ASSERT_EQ(pts[j].timestamp, static_cast<timestamp_t>(i + j));
@@ -46,19 +46,19 @@ TEST_F(TimeseriesDBRSTest, AddGetTest) {
   }
 }
 
-TEST_F(TimeseriesDBRSTest, AddGetNearestTest) {
-  timeseries_rs<> tsdb;
+TEST_F(TimeseriesDBWSTest, AddGetNearestTest) {
+  timeseries_t<> ts;
   for (uint64_t i = 0; i < kTSMax; i += kBatchSize) {
     std::vector<data_pt> pts = get_pts(i);
-    tsdb.insert_values(&pts[0], pts.size());
+    ts.insert_values(&pts[0], pts.size());
   }
 
   for (uint64_t i = 0; i < kTSMax; i++) {
-    data_pt pt = tsdb.get_nearest_value_latest(true, i);
+    data_pt pt = ts.get_nearest_value_latest(true, i);
     ASSERT_EQ(pt.timestamp, static_cast<timestamp_t>(i));
     ASSERT_EQ(pt.value, static_cast<version_t>(i));
 
-    pt = tsdb.get_nearest_value_latest(false, i);
+    pt = ts.get_nearest_value_latest(false, i);
     ASSERT_EQ(pt.timestamp, static_cast<timestamp_t>(i));
     ASSERT_EQ(pt.value, static_cast<version_t>(i));
   }

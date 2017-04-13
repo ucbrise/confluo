@@ -566,6 +566,14 @@ class tiered_index {
     return idx_.at(k);
   }
 
+  stats& get_stats(const uint64_t key, const uint64_t depth) {
+    return
+        depth == 0 ?
+            atomic::load(&stats_) :
+            get_child(key / CHILD_RANGE)->get_stats(key % CHILD_RANGE,
+                                                    depth - 1);
+  }
+
   stats& get_stats() {
     return atomic::load(&stats_);
   }
@@ -613,6 +621,11 @@ class tiered_index<T, K, 1, stats> {
 
   child_type* get_child(const uint64_t k) const {
     return idx_.at(k);
+  }
+
+  stats& get_stats(const uint64_t key, const uint64_t depth) {
+    assert_throw(depth == 0, "depth = " << depth);
+    return atomic::load(&stats_);
   }
 
   stats* get_stats() {

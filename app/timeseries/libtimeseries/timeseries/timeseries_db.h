@@ -7,6 +7,8 @@
 #include "tiered_index.h"
 #include "server/timeseries_db_types.h"
 
+using namespace ::utils;
+
 namespace timeseries {
 
 typedef int64_t data_ptr_t;
@@ -25,11 +27,11 @@ struct stats {
   atomic::type<stats*> prv;
 
   stats()
-      : version(UINT64_MAX),
-        min(UINT64_MAX),
-        max(UINT64_C(0)),
-        sum(UINT64_C(0)),
-        count(UINT64_C(0)) {
+      : version(std::numeric_limits<value_t>::max()),
+        min(std::numeric_limits<value_t>::max()),
+        max(0),
+        sum(0),
+        count(0) {
     atomic::init(&prv, static_cast<stats*>(nullptr));
   }
 
@@ -69,6 +71,13 @@ struct stats {
     }
     atomic::init(&prv, p);
   }
+
+  void reset() {
+    min = std::numeric_limits<value_t>::max();
+    max = 0;
+    sum = 0;
+    count = 0;
+  }
 };
 
 // Single reader multi-writer timeseries
@@ -79,7 +88,10 @@ class timeseries_base {
   typedef monolog::monolog_relaxed_linear<data_ptr_t, 32, 1024> ref_log;
   typedef datastore::index::tiered_index<ref_log, branch_factor, depth, stats> time_index;
 
-  timeseries_base() = default;
+  timeseries_base() {
+    LEAF_RESOLUTION = bit_utils::highest_bit(branch_factor) * depth;
+    LEAF_TIME_RANGE = UINT64_C(1) << (64 - LEAF_RESOLUTION);
+  }
 
   version_t append(const data_pt* pts, size_t len) {
     static auto update_stats =
@@ -120,7 +132,7 @@ class timeseries_base {
 
  protected:
   static timestamp_t get_block(timestamp_t ts) {
-    return ts / BLOCK_TIME_RANGE;
+    return ts / LEAF_TIME_RANGE;
   }
 
   template<typename validator>
@@ -141,10 +153,42 @@ class timeseries_base {
     }
   }
 
-  template<typename validator>
-  void _get_statistical_range(version_t ver, timestamp_t ts1, timestamp_t ts2,
-                              timestamp_t resolution, version_t version,
-                              validator&& validate) {
+  void _get_statistical_range(std::vector<stats>& results, version_t ver,
+                              timestamp_t ts1, timestamp_t ts2,
+                              timestamp_t resolution, version_t version) {
+    // For now, only support resolution upto leaf,
+    // with 2^resolution aligned end points
+    assert_throw(
+        resolution >= LEAF_RESOLUTION,
+        "resolution: " << resolution << " LEAF_RESOLUTION: " << LEAF_RESOLUTION);
+    assert_throw(ts1 % (1 << resolution) == 0,
+                 "ts1 = " << ts1 << " resolution = " << resolution);
+    assert_throw(ts2 % (1 << resolution) == 0,
+                 "ts2 = " << ts2 << " resolution = " << resolution);
+
+    size_t node_depth = depth - (resolution - LEAF_RESOLUTION) / branch_factor;
+    size_t node_resolution = bit_utils::highest_bit(branch_factor) * node_depth;
+    size_t node_time_range = UINT64_C(1) << (64 - node_resolution);
+    timestamp_t ts1_blk = ts1 / node_time_range;
+    timestamp_t ts2_blk = ts2 / node_time_range;
+    size_t agg_size = 1 << (resolution - node_resolution);
+
+    stats agg_s;
+    agg_s.version = version;
+    for (timestamp_t blk = ts1_blk; blk <= ts2_blk; blk++) {
+      stats* s = idx_.get_stats(ts1, node_depth);
+      // Get latest stats <= version
+      while (s->version > version)
+        s = atomic::load(&s->prv);
+      agg_s.count += s->count;
+      agg_s.sum += s->sum;
+      agg_s.min = std::min(agg_s.min, s->min);
+      agg_s.max = std::max(agg_s.max, s->max);
+      if (blk % agg_size == 0) {
+        results.push_back(agg_s);
+        agg_s.reset();
+      }
+    }
   }
 
   template<typename validator>
@@ -207,74 +251,22 @@ class timeseries_base {
     return min_pt;
   }
 
-  static size_t BLOCK_TIME_RANGE;
+  static uint64_t LEAF_RESOLUTION;
+  static size_t LEAF_TIME_RANGE;
   data_log log_;
   time_index idx_;
 };
 
 template<size_t branch_factor, size_t depth>
-size_t timeseries_base<branch_factor, depth>::BLOCK_TIME_RANGE = UINT64_C(1)
-    << (64 - (utils::bit_utils::highest_bit(branch_factor) * depth));
+uint64_t timeseries_base<branch_factor, depth>::LEAF_RESOLUTION;
+
+template<size_t branch_factor, size_t depth>
+size_t timeseries_base<branch_factor, depth>::LEAF_TIME_RANGE;
 
 template<size_t branch_factor = 256, size_t depth = 4>
-class timeseries_rs : public timeseries_base<branch_factor, depth> {
+class timeseries_t : public timeseries_base<branch_factor, depth> {
  public:
-  timeseries_rs()
-      : timeseries_base<branch_factor, depth>() {
-  }
-
-  version_t insert_values(const data_pt* pts, size_t len) {
-    version_t ver = this->append(pts, len);
-    valid_.set_bits(ver, len);
-    return ver + len;
-  }
-
-  version_t insert_values(const data_pt* pts, size_t len,
-                          timestamp_t ts_block) {
-    version_t ver = this->append(pts, len, ts_block);
-    valid_.set_bits(ver, len);
-    return ver + len;
-  }
-
-  void get_range(std::vector<data_pt>& results, timestamp_t start_ts,
-                 timestamp_t end_ts, version_t version) {
-    this->_get_range(results, start_ts, end_ts, version,
-                     [this](version_t v) {while (!valid_.get_bit(v));});
-  }
-
-  void get_range_latest(std::vector<data_pt>& results, timestamp_t start_ts,
-                        timestamp_t end_ts) {
-    this->_get_range(results, start_ts, end_ts, this->num_entries(),
-                     [this](version_t v) {while (!valid_.get_bit(v));});
-  }
-
-  data_pt get_nearest_value(bool direction, timestamp_t ts, version_t version) {
-    return this->_get_nearest_value(
-        ts, version, direction,
-        [this](version_t v) {while (!valid_.get_bit(v));});
-  }
-
-  data_pt get_nearest_value_latest(bool direction, timestamp_t ts) {
-    return this->_get_nearest_value(
-        ts, this->num_entries(), direction,
-        [this](version_t v) {while (!valid_.get_bit(v));});
-  }
-
-  void compute_diff(std::vector<data_pt>& pts, version_t from_version,
-                    version_t to_version) {
-    this->_compute_diff(pts, from_version, to_version,
-                        [this](version_t v) {while (!valid_.get_bit(v));});
-  }
-
- private:
-  typedef monolog::monolog_relaxed_linear<atomic::type<uint64_t>, 1024> bits;
-  monolog::monolog_bitvector<bits> valid_;
-};
-
-template<size_t branch_factor = 256, size_t depth = 4>
-class timeseries_ws : public timeseries_base<branch_factor, depth> {
- public:
-  timeseries_ws()
+  timeseries_t()
       : timeseries_base<branch_factor, depth>(),
         validator_([](version_t v) {}),
         read_tail_(0) {
@@ -331,15 +323,16 @@ class timeseries_ws : public timeseries_base<branch_factor, depth> {
   atomic::type<uint64_t> read_tail_;
 };
 
-template<typename timeseries_t>
+template<size_t branch_factor = 256, size_t depth = 4>
 class timeseries_db {
  public:
-  typedef timeseries_t* ts_ref;
+  typedef timeseries_t<branch_factor, depth> ts;
+  typedef timeseries_t<branch_factor, depth>* ts_ref;
 
   timeseries_db() = default;
 
   uuid_t add_stream() {
-    return ts_.push_back(new timeseries_t());
+    return ts_.push_back(new ts());
   }
 
   ts_ref& operator[](uuid_t uuid) {
