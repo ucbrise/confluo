@@ -195,6 +195,8 @@ int main(int argc, char** argv) {
     perf.bench_latency_get_range();
   } else if (bench_op == "latency-get-statistical-range") {
     perf.bench_latency_get_statistical_range();
+  } else if (bench_op == "none") {
+    LOG_INFO<< "Benchmark type is set to none, skipping benchmark.";
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }
