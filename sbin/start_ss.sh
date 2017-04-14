@@ -10,4 +10,4 @@ if [ "$DATA_PATH" = "" ]; then
 fi
 
 mkdir -p $LOG_PATH
-$sbin/../build/app/streaming/libstream/bin/sserver --data-path $DATA_PATH 2>$LOG_PATH/ts.stderr 1>$LOG_PATH/ts.stdout &
+$sbin/../build/app/streaming/libstream/bin/sserver --data-path $DATA_PATH 2>$LOG_PATH/ts.stderr 1>$LOG_PATH/ss.stdout &
