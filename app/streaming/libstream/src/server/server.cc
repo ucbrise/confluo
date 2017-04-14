@@ -27,6 +27,7 @@ class stream_service : virtual public stream_serviceIf {
   }
 
   void add_stream(const stream_id_t uuid) {
+    LOG_INFO << "Adding stream " << uuid << "...";
     db_.add_stream(uuid);
   }
 

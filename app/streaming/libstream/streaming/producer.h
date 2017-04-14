@@ -16,12 +16,12 @@ class producer : public ss_client {
 
   producer(uuid_t uuid, const std::string& hostname, const int port)
       : ss_client(hostname, port) {
-    uuid_ = uuid;
-    client_->add_stream(uuid_);
+    set_uuid(uuid);
   }
 
   void set_uuid(uuid_t uuid) {
     uuid_ = uuid;
+    client_->add_stream(uuid_);
   }
 
   void send(const std::vector<std::string>& batch) {
