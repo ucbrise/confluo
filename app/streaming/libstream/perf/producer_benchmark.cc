@@ -12,26 +12,23 @@ using namespace ::streaming;
 
 typedef streaming::uuid_t stream_id_t;
 
-class producer_benchmark : public utils::bench::benchmark<std::vector<producer>> {
+class producer_benchmark : public utils::bench::benchmark<producer> {
  public:
   producer_benchmark(const std::string& output_dir, stream_id_t id,
-                     size_t batch_size, size_t record_size, size_t num_threads,
+                     size_t batch_size, size_t record_size,
                      const std::string& host, int port)
-      : utils::bench::benchmark<std::vector<producer>>(output_dir) {
+      : utils::bench::benchmark<producer>(output_dir) {
 
-    ds_.resize(num_threads);
-    for (size_t i = 0; i < num_threads; i++) {
-      ds_[i].connect(host, port);
-      ds_[i].set_uuid(id);
-    }
+    ds_.connect(host, port);
+    ds_.set_uuid(id);
 
     BATCH_SIZE = batch_size;
     DATA_SIZE = record_size;
     APPEND_DATA_BATCH.resize(BATCH_SIZE, std::string('x', DATA_SIZE));
   }
 
-  static void send(size_t i, std::vector<producer>& p) {
-    p[i].send(APPEND_DATA_BATCH);
+  static void send(size_t i, producer& p) {
+    p.send(APPEND_DATA_BATCH);
   }
 
   DEFINE_BENCH_BATCH(send, BATCH_SIZE)
@@ -66,9 +63,6 @@ int main(int argc, char** argv) {
       cmd_option("batch-size", 'B', false).set_default("1").set_description(
           "Append batch size"));
   opts.add(
-      cmd_option("num-threads", 't', false).set_default("1").set_description(
-          "Number of benchmark threads"));
-  opts.add(
       cmd_option("server", 's', false).set_default("localhost").set_description(
           "Server to connect"));
   opts.add(
@@ -86,7 +80,6 @@ int main(int argc, char** argv) {
   long uuid;
   long batch_size;
   long record_size;
-  long num_threads;
   std::string type;
   std::string server;
   int port;
@@ -96,7 +89,6 @@ int main(int argc, char** argv) {
     uuid = parser.get_long("stream-id");
     batch_size = parser.get_long("batch-size");
     record_size = parser.get_long("data-size");
-    num_threads = parser.get_long("num-threads");
     server = parser.get("server");
     port = parser.get_int("port");
   } catch (std::exception& e) {
@@ -107,11 +99,11 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  producer_benchmark perf(output_dir, uuid, batch_size, record_size,
-                          num_threads, server, port);
+  producer_benchmark perf(output_dir, uuid, batch_size, record_size, server,
+                          port);
 
   if (type == "throughput") {
-    perf.bench_throughput_send(num_threads);
+    perf.bench_throughput_send(1);
   } else if (type == "latency") {
     perf.bench_latency_send();
   } else {
