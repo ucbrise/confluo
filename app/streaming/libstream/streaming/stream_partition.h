@@ -15,7 +15,7 @@ class stream_partition {
   }
 
   offset_t write(const std::string& batch) {
-    assert_throw(batch.length() >= 0U, "Empty write");
+    assert_throw(batch.length() > 0U, "Empty write");
     uint64_t tail = data_log_.append((const uint8_t*) batch.c_str(),
                                      batch.length());
     update_read_tail(tail, batch.length());
