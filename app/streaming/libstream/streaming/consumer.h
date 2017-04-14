@@ -22,7 +22,6 @@ class consumer : public ss_client {
         uuid_(uuid),
         off_(0),
         batch_bytes_(batch_bytes) {
-    client_->add_stream(uuid_);
   }
 
   void set_uuid(uuid_t uuid) {
