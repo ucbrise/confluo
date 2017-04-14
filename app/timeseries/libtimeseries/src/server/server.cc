@@ -74,7 +74,7 @@ class timeseries_db_service : virtual public timeseries_db_serviceIf {
     std::vector<stats> results;
     store_[uuid]->get_statistical_range(results, start_ts, end_ts, resolution, version);
     const char* buf = (const char*) &results[0];
-    size_t len = results.size() * sizeof(data_pt);
+    size_t len = results.size() * sizeof(stats);
     _return.assign(buf, len);
   }
 
@@ -83,7 +83,7 @@ class timeseries_db_service : virtual public timeseries_db_serviceIf {
     std::vector<stats> results;
     store_[uuid]->get_statistical_range_latest(results, start_ts, end_ts, resolution);
     const char* buf = (const char*) &results[0];
-    size_t len = results.size() * sizeof(data_pt);
+    size_t len = results.size() * sizeof(stats);
     _return.assign(buf, len);
   }
 
