@@ -193,13 +193,7 @@ class timeseries_base {
         agg_s.max = std::max(agg_s.max, s->max);
       }
     }
-
     out.push_back(agg_s);
-    fprintf(
-        stderr,
-        "node_depth=%zu, node_resolution=%zu, node_time_range=%zu, ts1=%lld, ts2=%lld, resolution=%lld, ts1_blk=%lld, ts2_blk=%lld, agg_size=%zu, result.size()=%zu\n",
-        node_depth, node_resolution, node_time_range, ts1, ts2, resolution,
-        ts1_blk, ts2_blk, agg_size, out.size());
   }
 
   data_pt get_nearest_value(timestamp_t ts, version_t version, bool direction) {

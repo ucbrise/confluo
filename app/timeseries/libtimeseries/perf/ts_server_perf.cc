@@ -82,7 +82,6 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     assert_throw(ts2 <= max_ts, "max_ts = " << max_ts << " ts2 = " << ts2);
     std::string res;
     client.get_statistical_range_latest(res, UUID, ts1, ts2, RESOLUTION);
-    fprintf(stderr, "t=%lld, ts1=%lld, ts2=%lld, resolution=%zu, result size=%zu\n", t, ts1, ts2, RESOLUTION, res.size());
   }
 
   DEFINE_BENCH_BATCH(insert_values, BATCH_SIZE)
