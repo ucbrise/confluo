@@ -193,6 +193,8 @@ int main(int argc, char** argv) {
     perf.bench_latency_insert_values();
   } else if (bench_op == "latency-get-range") {
     perf.bench_latency_get_range();
+  } else if (bench_op == "latency-get-statistical-range") {
+    perf.bench_latency_get_statistical_range();
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }
