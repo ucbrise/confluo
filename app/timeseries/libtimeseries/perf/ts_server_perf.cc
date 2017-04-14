@@ -80,6 +80,8 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     timestamp_t ts2 = ts1 + (INT64_C(1) << (RESOLUTION + 11));
     std::string res;
     client.get_statistical_range_latest(res, UUID, ts1, ts2, RESOLUTION);
+
+    assert_throw(res.length() / sizeof(stats) == 2048, "#results = " << res.length() / sizeof(stats));
   }
 
   DEFINE_BENCH_BATCH(insert_values, BATCH_SIZE)
