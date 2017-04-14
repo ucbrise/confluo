@@ -624,8 +624,8 @@ class log_store {
     return offset;
   }
 
-  bool get(uint64_t offset, uint8_t* data, size_t length) const {
-    uint64_t tail = cc_.get_tail();
+  bool read(uint64_t offset, uint8_t* data, size_t length,
+            uint64_t tail) const {
     if (cc_.is_valid(offset, tail)) {
       primary_.data_log_.read(offset, data, length);
       return true;
@@ -634,13 +634,23 @@ class log_store {
   }
 
   template<typename T>
-  bool get(uint64_t offset, T* data) const {
-    uint64_t tail = cc_.get_tail();
+  bool read(uint64_t offset, T* data, uint64_t tail) const {
     if (cc_.is_valid(offset, tail)) {
       deserializer<T>::deserialize(primary_.data_log_.cptr(offset), data);
       return true;
     }
     return false;
+  }
+
+  bool get(uint64_t offset, uint8_t* data, size_t length) const {
+    uint64_t tail = cc_.get_tail();
+    return read(offset, data, length, tail);
+  }
+
+  template<typename T>
+  bool get(uint64_t offset, T* data) const {
+    uint64_t tail = cc_.get_tail();
+    return read(offset, data, tail);
   }
 
   bool update(uint64_t id, const uint8_t* data, size_t length) {
