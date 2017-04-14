@@ -15,7 +15,7 @@ class stream_partition {
   }
 
   offset_t write(const std::string& batch) {
-    assert_throw(batch.length() >= 0, "Empty write");
+    assert_throw(batch.length() >= 0U, "Empty write");
     uint64_t tail = data_log_.append((const uint8_t*) batch.c_str(),
                                      batch.length());
     update_read_tail(tail, batch.length());
@@ -31,9 +31,9 @@ class stream_partition {
   }
 
  private:
-  void update_read_tail(uint64_t tail, uint64_t cnt) {
-    uint64_t old_tail = tail;
-    while (!atomic::weak::cas(&read_tail_, &old_tail, tail + cnt)) {
+  void update_read_tail(offset_t tail, offset_t len) {
+    offset_t old_tail = tail;
+    while (!atomic::weak::cas(&read_tail_, &old_tail, tail + len)) {
       old_tail = tail;
       std::this_thread::yield();
     }
@@ -46,7 +46,7 @@ class stream_partition {
     return data_path;
   }
 
-  atomic::type<uint64_t> read_tail_;
+  atomic::type<offset_t> read_tail_;
 
   monolog::mmap_monolog_relaxed<uint8_t, 65536, 1073741824> data_log_;
 };
