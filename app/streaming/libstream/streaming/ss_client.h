@@ -32,7 +32,7 @@ class ss_client {
   }
 
   void connect(const std::string& hostname, const int port) {
-    LOG_INFO<<"Connecting to " << hostname_ << ":" << port;
+    LOG_INFO<<"Connecting to " << hostname << ":" << port;
     hostname_ = hostname;
     port_ = port;
 
