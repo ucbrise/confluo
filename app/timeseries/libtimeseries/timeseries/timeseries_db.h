@@ -98,7 +98,8 @@ class timeseries_base {
   typedef datastore::index::tiered_index<ref_log, branch_factor, depth, stats> time_index;
 
   timeseries_base() {
-    LEAF_RESOLUTION = 64 - bit_utils::highest_bit(branch_factor) * depth;
+    NODE_RESOLUTION_SKIP = bit_utils::highest_bit(branch_factor);
+    LEAF_RESOLUTION = 64 - NODE_RESOLUTION_SKIP * depth;
     LEAF_TIME_RANGE = UINT64_C(1) << LEAF_RESOLUTION;
   }
 
@@ -166,9 +167,9 @@ class timeseries_base {
     assert_throw(ts2 % (INT64_C(1) << resolution) == 0,
                  "ts2 = " << ts2 << " resolution = " << resolution);
 
-    size_t node_depth = depth - (resolution - LEAF_RESOLUTION) / branch_factor;
-    size_t node_resolution = 64
-        - bit_utils::highest_bit(branch_factor) * node_depth;
+    size_t node_depth = depth
+        - (resolution - LEAF_RESOLUTION) / NODE_RESOLUTION_SKIP;
+    size_t node_resolution = 64 - NODE_RESOLUTION_SKIP * node_depth;
     size_t node_time_range = UINT64_C(1) << node_resolution;
     timestamp_t ts1_blk = ts1 / node_time_range;
     timestamp_t ts2_blk = ts2 / node_time_range;
@@ -258,14 +259,18 @@ class timeseries_base {
     return min_pt;
   }
 
-  static uint64_t LEAF_RESOLUTION;
+  static size_t NODE_RESOLUTION_SKIP;
+  static size_t LEAF_RESOLUTION;
   static size_t LEAF_TIME_RANGE;
   data_log log_;
   time_index idx_;
 };
 
 template<size_t branch_factor, size_t depth>
-uint64_t timeseries_base<branch_factor, depth>::LEAF_RESOLUTION;
+size_t timeseries_base<branch_factor, depth>::NODE_RESOLUTION_SKIP;
+
+template<size_t branch_factor, size_t depth>
+size_t timeseries_base<branch_factor, depth>::LEAF_RESOLUTION;
 
 template<size_t branch_factor, size_t depth>
 size_t timeseries_base<branch_factor, depth>::LEAF_TIME_RANGE;
