@@ -4,6 +4,7 @@
 #include "monolog.h"
 #include "stream_partition.h"
 #include "server/stream_service_types.h"
+#include "logger.h"
 
 namespace streaming {
 
@@ -19,6 +20,8 @@ class stream_db {
     if (partitions_[uuid] == nullptr) {
       partitions_[uuid] = new stream_partition(
           data_path_ + "part." + std::to_string(uuid));
+    } else {
+      LOG_INFO << "Stream already exists";
     }
   }
 

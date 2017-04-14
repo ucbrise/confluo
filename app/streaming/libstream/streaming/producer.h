@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ss_client.h"
+#include "assertions.h"
 
 namespace streaming {
 
@@ -38,6 +39,7 @@ class producer : public ss_client {
       buf += sizeof(uint32_t);
       memcpy(buf, record.c_str(), record_size);
     }
+    assert_throw(data.length() > 0U, "Empty write");
     client_->write(uuid_, data);
   }
 

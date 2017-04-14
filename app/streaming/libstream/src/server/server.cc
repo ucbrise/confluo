@@ -27,7 +27,7 @@ class stream_service : virtual public stream_serviceIf {
   }
 
   void add_stream(const stream_id_t uuid) {
-    LOG_INFO << "Adding stream " << uuid << "...";
+    LOG_INFO<< "Adding stream " << uuid << "...";
     db_.add_stream(uuid);
   }
 
@@ -36,38 +36,39 @@ class stream_service : virtual public stream_serviceIf {
   }
 
   void read(std::string& _return, const stream_id_t uuid, const offset_t offset,
-            const length_t length) {
+      const length_t length) {
     db_[uuid]->read(_return, offset, length);
   }
 
- private:
+private:
   stream_db& db_;
 };
 
 class ss_processor_factory : public TProcessorFactory {
  public:
-  ss_processor_factory(const std::string& data_path)
-      : store_(data_path) {
+  ss_processor_factory(stream_db& db)
+      : db_(db) {
     LOG_INFO<< "Initializing processor factory...";
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
     LOG_INFO << "Creating new processor...";
     boost::shared_ptr<stream_service> handler(
-        new stream_service(store_));
+        new stream_service(db_));
     boost::shared_ptr<TProcessor> processor(
         new stream_serviceProcessor(handler));
     return processor;
   }
 
 private:
-  stream_db store_;
+  stream_db& db_;
 };
 
 int start_server(int port, const std::string& data_path) {
   try {
+    stream_db db(data_path);
     shared_ptr<ss_processor_factory> handler_factory(
-        new ss_processor_factory(data_path));
+        new ss_processor_factory(db));
     shared_ptr<TServerSocket> server_transport(new TServerSocket(port));
     shared_ptr<TBufferedTransportFactory> transport_factory(
         new TBufferedTransportFactory());

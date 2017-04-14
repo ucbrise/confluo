@@ -15,7 +15,6 @@ class stream_partition {
   }
 
   offset_t write(const std::string& batch) {
-    assert_throw(batch.length() > 0U, "Empty write");
     uint64_t tail = data_log_.append((const uint8_t*) batch.c_str(),
                                      batch.length());
     update_read_tail(tail, batch.length());
@@ -23,7 +22,6 @@ class stream_partition {
   }
 
   void read(std::string& data, const offset_t offset, length_t length) {
-    assert_throw(length > 0, "Empty read");
     if (offset >= atomic::load(&read_tail_))
       return;
     data.resize(length);

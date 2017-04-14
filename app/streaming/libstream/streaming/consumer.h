@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ss_client.h"
+#include "assertions.h"
 
 namespace streaming {
 
