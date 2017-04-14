@@ -1,6 +1,8 @@
 #ifndef STREAMING_STREAM_DB_H_
 #define STREAMING_STREAM_DB_H_
 
+#include <mutex>
+
 #include "monolog.h"
 #include "stream_partition.h"
 #include "server/stream_service_types.h"
@@ -14,10 +16,11 @@ class stream_db {
 
   stream_db(const std::string& data_path)
       : data_path_(data_path) {
-    LOG_INFO << "Initializing stream_db...";
+    LOG_INFO<<"Initializing stream_db...";
   }
 
   void add_stream(uuid_t uuid) {
+    std::lock_guard<std::mutex> lock(m_);
     if (partitions_[uuid] == nullptr) {
       LOG_INFO << "Stream does not exist";
       partitions_[uuid] = new stream_partition(
@@ -31,7 +34,8 @@ class stream_db {
     return partitions_[uuid];
   }
 
- private:
+private:
+  std::mutex m_;
   std::string data_path_;
   monolog::monolog_base<partition_ref> partitions_;
 };
