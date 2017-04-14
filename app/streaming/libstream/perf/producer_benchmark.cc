@@ -6,6 +6,7 @@
 #include "cmd_parse.h"
 #include "time_utils.h"
 #include "rand_utils.h"
+#include "error_handling.h"
 
 using namespace ::streaming;
 
@@ -46,6 +47,8 @@ size_t producer_benchmark::DATA_SIZE;
 std::vector<std::string> producer_benchmark::APPEND_DATA_BATCH;
 
 int main(int argc, char** argv) {
+  utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
+
   cmd_options opts;
   opts.add(
       cmd_option("output-dir", 'o', false).set_default("results")
