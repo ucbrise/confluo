@@ -172,7 +172,7 @@ class timeseries_base {
     size_t node_time_range = UINT64_C(1) << node_resolution;
     timestamp_t ts1_blk = ts1 / node_time_range;
     timestamp_t ts2_blk = ts2 / node_time_range;
-    size_t agg_size = 1 << (resolution - node_resolution);
+    size_t agg_size = UINT64_C(1) << (resolution - node_resolution);
 
     stats agg_s;
     agg_s.version = version;
