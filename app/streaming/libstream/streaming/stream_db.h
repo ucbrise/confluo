@@ -14,6 +14,7 @@ class stream_db {
 
   stream_db(const std::string& data_path)
       : data_path_(data_path) {
+    LOG_INFO << "Initializing stream_db...";
   }
 
   void add_stream(uuid_t uuid) {
