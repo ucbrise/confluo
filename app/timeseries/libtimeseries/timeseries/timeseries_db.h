@@ -194,6 +194,11 @@ class timeseries_base {
       }
     }
     out.push_back(agg_s);
+    fprintf(
+        stderr,
+        "ts1=%ld, ts2=%ld, resln=%ld, node_depth=%zu, node_resln=%zu, node_time_range=%zu, ts1_blk=%ld, ts2_blk=%ld, agg_size=%zu\n",
+        ts1, ts2, resolution, node_depth, node_resolution, node_time_range,
+        ts1_blk, ts2_blk, agg_size);
   }
 
   data_pt get_nearest_value(timestamp_t ts, version_t version, bool direction) {
