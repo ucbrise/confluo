@@ -18,6 +18,7 @@ class stream_db {
 
   void add_stream(uuid_t uuid) {
     if (partitions_[uuid] == nullptr) {
+      LOG_INFO << "Stream does not exist";
       partitions_[uuid] = new stream_partition(
           data_path_ + "part." + std::to_string(uuid));
     } else {
