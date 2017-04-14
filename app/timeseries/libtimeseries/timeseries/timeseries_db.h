@@ -161,9 +161,9 @@ class timeseries_base {
     assert_throw(
         static_cast<size_t>(resolution) >= LEAF_RESOLUTION,
         "resolution: " << resolution << " LEAF_RESOLUTION: " << LEAF_RESOLUTION);
-    assert_throw(ts1 % (1 << resolution) == 0,
+    assert_throw(ts1 % (INT64_C(1) << resolution) == 0,
                  "ts1 = " << ts1 << " resolution = " << resolution);
-    assert_throw(ts2 % (1 << resolution) == 0,
+    assert_throw(ts2 % (INT64_C(1) << resolution) == 0,
                  "ts2 = " << ts2 << " resolution = " << resolution);
 
     size_t node_depth = depth - (resolution - LEAF_RESOLUTION) / branch_factor;
@@ -173,12 +173,6 @@ class timeseries_base {
     timestamp_t ts1_blk = ts1 / node_time_range;
     timestamp_t ts2_blk = ts2 / node_time_range;
     size_t agg_size = 1 << (resolution - node_resolution);
-
-    fprintf(
-        stderr,
-        "node_depth=%zu, node_resolution=%zu, node_time_range=%zu, ts1=%lld, ts2=%lld, ts1_blk=%lld, ts2_blk=%lld, agg_size=%zu",
-        node_depth, node_resolution, node_time_range, ts1, ts2, ts1_blk,
-        ts2_blk, agg_size);
 
     stats agg_s;
     agg_s.version = version;

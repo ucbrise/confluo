@@ -76,8 +76,8 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
         * sizeof(data_pt));
     timestamp_t t = pt->timestamp;
     // Get largest (2^RESOLUTION) multiple smaller than pt.ts
-    timestamp_t ts1 = t - (t % (1 << RESOLUTION));
-    timestamp_t ts2 = ts1 + (1 << (RESOLUTION + 11));
+    timestamp_t ts1 = t - (t % (INT64_C(1) << RESOLUTION));
+    timestamp_t ts2 = ts1 + (INT64_C(1) << (RESOLUTION + 11));
     assert_throw(ts1 >= min_ts, "min_ts = " << min_ts << " ts1 = " << ts1);
     assert_throw(ts2 <= max_ts, "max_ts = " << max_ts << " ts2 = " << ts2);
     std::string res;
