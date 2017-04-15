@@ -25,9 +25,10 @@ add_executable(gsserver ${server_sources})
 target_link_libraries(gsserver gs ${THRIFT_LIBRARIES})
 
 # Build perf
-file(GLOB_RECURSE perf_sources perf/*.cc)
-add_executable(gsperf ${perf_sources})
+add_executable(gsperf perf/graph_store_perf.cc)
 target_link_libraries(gsperf gs ${CMAKE_THREAD_LIBS_INIT})
+add_executable(traversal_perf perf/traversal_perf.cc)
+target_link_libraries(traversal_perf gs ${CMAKE_THREAD_LIBS_INIT})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)

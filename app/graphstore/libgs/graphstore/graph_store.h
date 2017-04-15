@@ -39,6 +39,10 @@ class graph_store {
                                   int64_t limit) const;
   size_t count_links(int64_t id1, int64_t link_type) const;
 
+  /* Traversal operation */
+  std::vector<link_op> get_links(int64_t id1, int64_t link_type,
+                                     int64_t tail) const;
+
   uint64_t begin_snapshot();
   bool end_snapshot(uint64_t id);
 

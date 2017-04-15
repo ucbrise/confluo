@@ -1,7 +1,9 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
+#include <thrift/transport/TSocket.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+#include <future>
 #include "server/graph_store_service.h"
 #include "graph_store.h"
 #include "cmd_parse.h"
@@ -21,8 +23,26 @@ using namespace ::datastore;
 template<typename tail_scheme>
 class graph_store_service : virtual public GraphStoreServiceIf {
  public:
-  graph_store_service(graph_store<tail_scheme>* store) {
-    store_ = store;
+  graph_store_service(graph_store<tail_scheme>* store,
+                      const std::vector<std::string> hostlist,
+                      uint32_t store_id)
+      : store_id_(store_id),
+        hostlist_(hostlist),
+        store_(store) {
+  }
+
+  void init_connection() {
+    for (size_t i = 0; i < hostlist_.size(); i++) {
+      if (i != store_id_)
+        add_connection(i, hostlist_[i], 9090);
+    }
+  }
+
+  void destroy_connection() {
+    for (size_t i = 0; i < hostlist_.size(); i++) {
+      if (i != store_id_ && transports_[i]->isOpen())
+        transports_[i]->close();
+    }
   }
 
   int64_t add_node(const TNode& n) {
@@ -87,7 +107,69 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     return store_->count_links(id1, link_type);
   }
 
+  int64_t begin_snapshot() {
+    return store_->begin_snapshot();
+  }
+
+  bool end_snapshot(const int64_t tail) {
+    return store_->end_snapshot(tail);
+  }
+
+  std::future<std::vector<TLink>> continue_traverse(
+      const int64_t store_id, const int64_t id, const int64_t link_type,
+      const int64_t depth, const std::vector<int64_t>& snapshot) {
+
+    if (store_id == store_id_) {
+      auto t = [id, link_type, depth, snapshot, this]() {
+        std::vector<TLink> links;
+        this->traverse(links, id, link_type, depth, snapshot);
+        return links;
+      };
+      return std::async(std::launch::async, t);
+    }
+
+    clients_[store_id]->send_traverse(id, link_type, depth, snapshot);
+    auto t = [store_id, id, link_type, depth, snapshot, this]() {
+      std::vector<TLink> links;
+      clients_[store_id]->recv_traverse(links);
+      return links;
+    };
+    return std::async(std::launch::async, t);
+  }
+
+  void traverse(std::vector<TLink>& _return, const int64_t id,
+                const int64_t link_type, const int64_t depth,
+                const std::vector<int64_t>& snapshot) {
+    if (depth == 0)
+      return;
+
+    uint64_t tail = snapshot[store_id_];
+    std::vector<link_op> links = store_->get_links(id, link_type, tail);
+    typedef std::future<std::vector<TLink>> future_t;
+    std::vector<future_t> downstream_links(links.size());
+    for (const link_op& op : links) {
+      _return.push_back(link_op_to_tlink(op));
+      downstream_links.push_back(
+          continue_traverse(op.id2 / hostlist_.size(), op.id2, link_type,
+                            depth - 1, snapshot));
+    }
+
+    for (future_t& f : downstream_links) {
+      std::vector<TLink> ret = f.get();
+      _return.insert(_return.end(), ret.begin(), ret.end());
+    }
+  }
+
  private:
+  void add_connection(uint32_t i, const std::string& hostname, int port) {
+    LOG_INFO<< "Connecting to " << hostname << ":" << port;
+    sockets_[i] = boost::shared_ptr<TSocket>(new TSocket(hostname, port));
+    transports_[i] = boost::shared_ptr<TTransport>(new TBufferedTransport(sockets_[i]));
+    protocols_[i] = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transports_[i]));
+    clients_[i] = boost::shared_ptr<GraphStoreServiceClient>(new GraphStoreServiceClient(protocols_[i]));
+    transports_[i]->open();
+  }
+
   TNode node_op_to_tnode(const node_op& op) {
     TNode n;
     n.id = op.id;
@@ -124,35 +206,49 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     return op;
   }
 
+  std::map<uint32_t, boost::shared_ptr<TSocket>> sockets_;
+  std::map<uint32_t, boost::shared_ptr<TTransport>> transports_;
+  std::map<uint32_t, boost::shared_ptr<TProtocol>> protocols_;
+  std::map<uint32_t, boost::shared_ptr<GraphStoreServiceClient>> clients_;
+  atomic::type<bool> connected_;
+  uint32_t store_id_;
+  std::vector<std::string> hostlist_;
   graph_store<tail_scheme> *store_;
 };
 
 template<typename tail_scheme>
 class gs_processor_factory : public TProcessorFactory {
  public:
-  gs_processor_factory(graph_store<tail_scheme>* store) {
-    LOG_INFO << "Initializing processor factory...";
-    store_ = store;
+  gs_processor_factory(graph_store<tail_scheme>* store,
+                       const std::vector<std::string> hostlist,
+                       uint32_t store_id)
+      : store_(store),
+        store_id_(store_id),
+        hostlist_(hostlist) {
+    LOG_INFO<< "Initializing processor factory...";
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
-    LOG_INFO << "Creating new processor...";
+    LOG_INFO<< "Creating new processor...";
     boost::shared_ptr<graph_store_service<tail_scheme>> handler(
-        new graph_store_service<tail_scheme>(store_));
+        new graph_store_service<tail_scheme>(store_, hostlist_, store_id_));
     boost::shared_ptr<TProcessor> processor(
         new GraphStoreServiceProcessor(handler));
     return processor;
   }
 
- private:
+private:
   graph_store<tail_scheme> *store_;
+  uint32_t store_id_;
+  std::vector<std::string> hostlist_;
 };
 
 template<typename tail_scheme>
-void start_server(int port, graph_store<tail_scheme>* store) {
+void start_server(int port, graph_store<tail_scheme>* store,
+                  const std::vector<std::string>& hostlist, uint32_t store_id) {
   try {
     shared_ptr<gs_processor_factory<tail_scheme>> handler_factory(
-        new gs_processor_factory<tail_scheme>(store));
+        new gs_processor_factory<tail_scheme>(store, hostlist, store_id));
     shared_ptr<TServerSocket> server_transport(new TServerSocket(port));
     shared_ptr<TBufferedTransportFactory> transport_factory(
         new TBufferedTransportFactory());
@@ -160,11 +256,19 @@ void start_server(int port, graph_store<tail_scheme>* store) {
     TThreadedServer server(handler_factory, server_transport, transport_factory,
                            protocol_factory);
 
-    LOG_INFO << "Listening for connections on port " << port;
+    LOG_INFO<< "Listening for connections on port " << port;
     server.serve();
   } catch (std::exception& e) {
-    LOG_ERROR << "Could not start server listening on port " << port << ":" << e.what();
+    LOG_ERROR<< "Could not start server listening on port " << port << ":" << e.what();
   }
+}
+
+std::vector<std::string> read_hosts(const std::string& hostfile) {
+  std::vector<std::string> hostlist;
+  std::ifstream in(hostfile);
+  std::copy(std::istream_iterator<std::string>(in),
+            std::istream_iterator<std::string>(), std::back_inserter(hostlist));
+  return hostlist;
 }
 
 int main(int argc, char **argv) {
@@ -176,8 +280,14 @@ int main(int argc, char **argv) {
       cmd_option("port", 'p', false).set_default("9090").set_description(
           "Port that server listens on"));
   opts.add(
-      cmd_option("tail-scheme", 's', false).set_default("read-stalled")
+      cmd_option("concurrency-control", 'c', false).set_default("read-stalled")
           .set_description("Scheme for graph tail"));
+  opts.add(
+      cmd_option("host-list", 'h', false).set_default("conf/hosts")
+          .set_description("File containing list of hosts"));
+  opts.add(
+      cmd_option("server-id", 's', false).set_default("0").set_description(
+          "Server ID"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -186,10 +296,14 @@ int main(int argc, char **argv) {
   }
 
   int port;
+  int server_id;
   std::string tail_scheme;
+  std::string host_file;
   try {
     port = parser.get_int("port");
     tail_scheme = parser.get("tail-scheme");
+    host_file = parser.get("host-list");
+    server_id = parser.get_int("server-id");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -198,10 +312,10 @@ int main(int argc, char **argv) {
 
   if (tail_scheme == "write-stalled") {
     graph_store<write_stalled>* store = new graph_store<write_stalled>();
-    start_server(port, store);
+    start_server(port, store, read_hosts(host_file), server_id);
   } else if (tail_scheme == "read-stalled") {
     graph_store<read_stalled>* store = new graph_store<read_stalled>();
-    start_server(port, store);
+    start_server(port, store, read_hosts(host_file), server_id);
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());
   }

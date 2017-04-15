@@ -257,5 +257,22 @@ bool graph_store<graph_tail>::end_snapshot(uint64_t id) {
   return tail_.end_snapshot_op(id);
 }
 
+template<typename graph_tail>
+std::vector<link_op> graph_store<graph_tail>::get_links(
+    int64_t id1, int64_t link_type, int64_t tail) const {
+  std::vector<link_op> l;
+  adj_list* list = (*ndata_)[id1].neighbors;
+  std::map<int64_t, link_op> links;
+  filter_link_ids(links, list, link_type, tail, [](link& l) -> bool {
+    return true;
+  });
+
+  for (const auto& entry : links)
+    if (entry.second.id1 != -1)
+      l.push_back(entry.second);
+
+  return l;
+}
+
 template class graphstore::graph_store<datastore::write_stalled>;
 template class graphstore::graph_store<datastore::read_stalled>;

@@ -9,7 +9,7 @@
 
 #include <thrift/TDispatchProcessor.h>
 #include <thrift/async/TConcurrentClientSyncInfo.h>
-#include "graph_store_types.h"
+#include "server/graph_store_types.h"
 
 namespace graphstore {
 
@@ -21,6 +21,8 @@ namespace graphstore {
 class GraphStoreServiceIf {
  public:
   virtual ~GraphStoreServiceIf() {}
+  virtual void init_connection() = 0;
+  virtual void destroy_connection() = 0;
   virtual int64_t add_node(const TNode& n) = 0;
   virtual void get_node(TNode& _return, const int64_t type, const int64_t id) = 0;
   virtual bool update_node(const TNode& n) = 0;
@@ -33,6 +35,9 @@ class GraphStoreServiceIf {
   virtual void get_link_list(std::vector<TLink> & _return, const int64_t id1, const int64_t link_type) = 0;
   virtual void get_link_list_range(std::vector<TLink> & _return, const int64_t id1, const int64_t link_type, const int64_t min_ts, const int64_t max_ts, const int64_t off, const int64_t limit) = 0;
   virtual int64_t count_links(const int64_t id1, const int64_t link_type) = 0;
+  virtual int64_t begin_snapshot() = 0;
+  virtual bool end_snapshot(const int64_t tail) = 0;
+  virtual void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot) = 0;
 };
 
 class GraphStoreServiceIfFactory {
@@ -62,6 +67,12 @@ class GraphStoreServiceIfSingletonFactory : virtual public GraphStoreServiceIfFa
 class GraphStoreServiceNull : virtual public GraphStoreServiceIf {
  public:
   virtual ~GraphStoreServiceNull() {}
+  void init_connection() {
+    return;
+  }
+  void destroy_connection() {
+    return;
+  }
   int64_t add_node(const TNode& /* n */) {
     int64_t _return = 0;
     return _return;
@@ -105,6 +116,165 @@ class GraphStoreServiceNull : virtual public GraphStoreServiceIf {
     int64_t _return = 0;
     return _return;
   }
+  int64_t begin_snapshot() {
+    int64_t _return = 0;
+    return _return;
+  }
+  bool end_snapshot(const int64_t /* tail */) {
+    bool _return = false;
+    return _return;
+  }
+  void traverse(std::vector<TLink> & /* _return */, const int64_t /* id */, const int64_t /* link_type */, const int64_t /* depth */, const std::vector<int64_t> & /* snapshot */) {
+    return;
+  }
+};
+
+
+class GraphStoreService_init_connection_args {
+ public:
+
+  GraphStoreService_init_connection_args(const GraphStoreService_init_connection_args&);
+  GraphStoreService_init_connection_args& operator=(const GraphStoreService_init_connection_args&);
+  GraphStoreService_init_connection_args() {
+  }
+
+  virtual ~GraphStoreService_init_connection_args() throw();
+
+  bool operator == (const GraphStoreService_init_connection_args & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const GraphStoreService_init_connection_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_init_connection_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_init_connection_pargs {
+ public:
+
+
+  virtual ~GraphStoreService_init_connection_pargs() throw();
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_init_connection_result {
+ public:
+
+  GraphStoreService_init_connection_result(const GraphStoreService_init_connection_result&);
+  GraphStoreService_init_connection_result& operator=(const GraphStoreService_init_connection_result&);
+  GraphStoreService_init_connection_result() {
+  }
+
+  virtual ~GraphStoreService_init_connection_result() throw();
+
+  bool operator == (const GraphStoreService_init_connection_result & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const GraphStoreService_init_connection_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_init_connection_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_init_connection_presult {
+ public:
+
+
+  virtual ~GraphStoreService_init_connection_presult() throw();
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+
+class GraphStoreService_destroy_connection_args {
+ public:
+
+  GraphStoreService_destroy_connection_args(const GraphStoreService_destroy_connection_args&);
+  GraphStoreService_destroy_connection_args& operator=(const GraphStoreService_destroy_connection_args&);
+  GraphStoreService_destroy_connection_args() {
+  }
+
+  virtual ~GraphStoreService_destroy_connection_args() throw();
+
+  bool operator == (const GraphStoreService_destroy_connection_args & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const GraphStoreService_destroy_connection_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_destroy_connection_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_destroy_connection_pargs {
+ public:
+
+
+  virtual ~GraphStoreService_destroy_connection_pargs() throw();
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_destroy_connection_result {
+ public:
+
+  GraphStoreService_destroy_connection_result(const GraphStoreService_destroy_connection_result&);
+  GraphStoreService_destroy_connection_result& operator=(const GraphStoreService_destroy_connection_result&);
+  GraphStoreService_destroy_connection_result() {
+  }
+
+  virtual ~GraphStoreService_destroy_connection_result() throw();
+
+  bool operator == (const GraphStoreService_destroy_connection_result & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const GraphStoreService_destroy_connection_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_destroy_connection_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_destroy_connection_presult {
+ public:
+
+
+  virtual ~GraphStoreService_destroy_connection_presult() throw();
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
 };
 
 typedef struct _GraphStoreService_add_node_args__isset {
@@ -1460,6 +1630,327 @@ class GraphStoreService_count_links_presult {
 
 };
 
+
+class GraphStoreService_begin_snapshot_args {
+ public:
+
+  GraphStoreService_begin_snapshot_args(const GraphStoreService_begin_snapshot_args&);
+  GraphStoreService_begin_snapshot_args& operator=(const GraphStoreService_begin_snapshot_args&);
+  GraphStoreService_begin_snapshot_args() {
+  }
+
+  virtual ~GraphStoreService_begin_snapshot_args() throw();
+
+  bool operator == (const GraphStoreService_begin_snapshot_args & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const GraphStoreService_begin_snapshot_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_begin_snapshot_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_begin_snapshot_pargs {
+ public:
+
+
+  virtual ~GraphStoreService_begin_snapshot_pargs() throw();
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _GraphStoreService_begin_snapshot_result__isset {
+  _GraphStoreService_begin_snapshot_result__isset() : success(false) {}
+  bool success :1;
+} _GraphStoreService_begin_snapshot_result__isset;
+
+class GraphStoreService_begin_snapshot_result {
+ public:
+
+  GraphStoreService_begin_snapshot_result(const GraphStoreService_begin_snapshot_result&);
+  GraphStoreService_begin_snapshot_result& operator=(const GraphStoreService_begin_snapshot_result&);
+  GraphStoreService_begin_snapshot_result() : success(0) {
+  }
+
+  virtual ~GraphStoreService_begin_snapshot_result() throw();
+  int64_t success;
+
+  _GraphStoreService_begin_snapshot_result__isset __isset;
+
+  void __set_success(const int64_t val);
+
+  bool operator == (const GraphStoreService_begin_snapshot_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const GraphStoreService_begin_snapshot_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_begin_snapshot_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _GraphStoreService_begin_snapshot_presult__isset {
+  _GraphStoreService_begin_snapshot_presult__isset() : success(false) {}
+  bool success :1;
+} _GraphStoreService_begin_snapshot_presult__isset;
+
+class GraphStoreService_begin_snapshot_presult {
+ public:
+
+
+  virtual ~GraphStoreService_begin_snapshot_presult() throw();
+  int64_t* success;
+
+  _GraphStoreService_begin_snapshot_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _GraphStoreService_end_snapshot_args__isset {
+  _GraphStoreService_end_snapshot_args__isset() : tail(false) {}
+  bool tail :1;
+} _GraphStoreService_end_snapshot_args__isset;
+
+class GraphStoreService_end_snapshot_args {
+ public:
+
+  GraphStoreService_end_snapshot_args(const GraphStoreService_end_snapshot_args&);
+  GraphStoreService_end_snapshot_args& operator=(const GraphStoreService_end_snapshot_args&);
+  GraphStoreService_end_snapshot_args() : tail(0) {
+  }
+
+  virtual ~GraphStoreService_end_snapshot_args() throw();
+  int64_t tail;
+
+  _GraphStoreService_end_snapshot_args__isset __isset;
+
+  void __set_tail(const int64_t val);
+
+  bool operator == (const GraphStoreService_end_snapshot_args & rhs) const
+  {
+    if (!(tail == rhs.tail))
+      return false;
+    return true;
+  }
+  bool operator != (const GraphStoreService_end_snapshot_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_end_snapshot_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_end_snapshot_pargs {
+ public:
+
+
+  virtual ~GraphStoreService_end_snapshot_pargs() throw();
+  const int64_t* tail;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _GraphStoreService_end_snapshot_result__isset {
+  _GraphStoreService_end_snapshot_result__isset() : success(false) {}
+  bool success :1;
+} _GraphStoreService_end_snapshot_result__isset;
+
+class GraphStoreService_end_snapshot_result {
+ public:
+
+  GraphStoreService_end_snapshot_result(const GraphStoreService_end_snapshot_result&);
+  GraphStoreService_end_snapshot_result& operator=(const GraphStoreService_end_snapshot_result&);
+  GraphStoreService_end_snapshot_result() : success(0) {
+  }
+
+  virtual ~GraphStoreService_end_snapshot_result() throw();
+  bool success;
+
+  _GraphStoreService_end_snapshot_result__isset __isset;
+
+  void __set_success(const bool val);
+
+  bool operator == (const GraphStoreService_end_snapshot_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const GraphStoreService_end_snapshot_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_end_snapshot_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _GraphStoreService_end_snapshot_presult__isset {
+  _GraphStoreService_end_snapshot_presult__isset() : success(false) {}
+  bool success :1;
+} _GraphStoreService_end_snapshot_presult__isset;
+
+class GraphStoreService_end_snapshot_presult {
+ public:
+
+
+  virtual ~GraphStoreService_end_snapshot_presult() throw();
+  bool* success;
+
+  _GraphStoreService_end_snapshot_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _GraphStoreService_traverse_args__isset {
+  _GraphStoreService_traverse_args__isset() : id(false), link_type(false), depth(false), snapshot(false) {}
+  bool id :1;
+  bool link_type :1;
+  bool depth :1;
+  bool snapshot :1;
+} _GraphStoreService_traverse_args__isset;
+
+class GraphStoreService_traverse_args {
+ public:
+
+  GraphStoreService_traverse_args(const GraphStoreService_traverse_args&);
+  GraphStoreService_traverse_args& operator=(const GraphStoreService_traverse_args&);
+  GraphStoreService_traverse_args() : id(0), link_type(0), depth(0) {
+  }
+
+  virtual ~GraphStoreService_traverse_args() throw();
+  int64_t id;
+  int64_t link_type;
+  int64_t depth;
+  std::vector<int64_t>  snapshot;
+
+  _GraphStoreService_traverse_args__isset __isset;
+
+  void __set_id(const int64_t val);
+
+  void __set_link_type(const int64_t val);
+
+  void __set_depth(const int64_t val);
+
+  void __set_snapshot(const std::vector<int64_t> & val);
+
+  bool operator == (const GraphStoreService_traverse_args & rhs) const
+  {
+    if (!(id == rhs.id))
+      return false;
+    if (!(link_type == rhs.link_type))
+      return false;
+    if (!(depth == rhs.depth))
+      return false;
+    if (!(snapshot == rhs.snapshot))
+      return false;
+    return true;
+  }
+  bool operator != (const GraphStoreService_traverse_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_traverse_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class GraphStoreService_traverse_pargs {
+ public:
+
+
+  virtual ~GraphStoreService_traverse_pargs() throw();
+  const int64_t* id;
+  const int64_t* link_type;
+  const int64_t* depth;
+  const std::vector<int64_t> * snapshot;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _GraphStoreService_traverse_result__isset {
+  _GraphStoreService_traverse_result__isset() : success(false) {}
+  bool success :1;
+} _GraphStoreService_traverse_result__isset;
+
+class GraphStoreService_traverse_result {
+ public:
+
+  GraphStoreService_traverse_result(const GraphStoreService_traverse_result&);
+  GraphStoreService_traverse_result& operator=(const GraphStoreService_traverse_result&);
+  GraphStoreService_traverse_result() {
+  }
+
+  virtual ~GraphStoreService_traverse_result() throw();
+  std::vector<TLink>  success;
+
+  _GraphStoreService_traverse_result__isset __isset;
+
+  void __set_success(const std::vector<TLink> & val);
+
+  bool operator == (const GraphStoreService_traverse_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const GraphStoreService_traverse_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const GraphStoreService_traverse_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _GraphStoreService_traverse_presult__isset {
+  _GraphStoreService_traverse_presult__isset() : success(false) {}
+  bool success :1;
+} _GraphStoreService_traverse_presult__isset;
+
+class GraphStoreService_traverse_presult {
+ public:
+
+
+  virtual ~GraphStoreService_traverse_presult() throw();
+  std::vector<TLink> * success;
+
+  _GraphStoreService_traverse_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 class GraphStoreServiceClient : virtual public GraphStoreServiceIf {
  public:
   GraphStoreServiceClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) {
@@ -1485,6 +1976,12 @@ class GraphStoreServiceClient : virtual public GraphStoreServiceIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
+  void init_connection();
+  void send_init_connection();
+  void recv_init_connection();
+  void destroy_connection();
+  void send_destroy_connection();
+  void recv_destroy_connection();
   int64_t add_node(const TNode& n);
   void send_add_node(const TNode& n);
   int64_t recv_add_node();
@@ -1521,6 +2018,15 @@ class GraphStoreServiceClient : virtual public GraphStoreServiceIf {
   int64_t count_links(const int64_t id1, const int64_t link_type);
   void send_count_links(const int64_t id1, const int64_t link_type);
   int64_t recv_count_links();
+  int64_t begin_snapshot();
+  void send_begin_snapshot();
+  int64_t recv_begin_snapshot();
+  bool end_snapshot(const int64_t tail);
+  void send_end_snapshot(const int64_t tail);
+  bool recv_end_snapshot();
+  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot);
+  void send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot);
+  void recv_traverse(std::vector<TLink> & _return);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -1536,6 +2042,8 @@ class GraphStoreServiceProcessor : public ::apache::thrift::TDispatchProcessor {
   typedef  void (GraphStoreServiceProcessor::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
+  void process_init_connection(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_destroy_connection(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_node(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_node(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_update_node(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -1548,9 +2056,14 @@ class GraphStoreServiceProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_get_link_list(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_link_list_range(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_count_links(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_begin_snapshot(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_end_snapshot(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_traverse(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   GraphStoreServiceProcessor(boost::shared_ptr<GraphStoreServiceIf> iface) :
     iface_(iface) {
+    processMap_["init_connection"] = &GraphStoreServiceProcessor::process_init_connection;
+    processMap_["destroy_connection"] = &GraphStoreServiceProcessor::process_destroy_connection;
     processMap_["add_node"] = &GraphStoreServiceProcessor::process_add_node;
     processMap_["get_node"] = &GraphStoreServiceProcessor::process_get_node;
     processMap_["update_node"] = &GraphStoreServiceProcessor::process_update_node;
@@ -1563,6 +2076,9 @@ class GraphStoreServiceProcessor : public ::apache::thrift::TDispatchProcessor {
     processMap_["get_link_list"] = &GraphStoreServiceProcessor::process_get_link_list;
     processMap_["get_link_list_range"] = &GraphStoreServiceProcessor::process_get_link_list_range;
     processMap_["count_links"] = &GraphStoreServiceProcessor::process_count_links;
+    processMap_["begin_snapshot"] = &GraphStoreServiceProcessor::process_begin_snapshot;
+    processMap_["end_snapshot"] = &GraphStoreServiceProcessor::process_end_snapshot;
+    processMap_["traverse"] = &GraphStoreServiceProcessor::process_traverse;
   }
 
   virtual ~GraphStoreServiceProcessor() {}
@@ -1591,6 +2107,24 @@ class GraphStoreServiceMultiface : virtual public GraphStoreServiceIf {
     ifaces_.push_back(iface);
   }
  public:
+  void init_connection() {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->init_connection();
+    }
+    ifaces_[i]->init_connection();
+  }
+
+  void destroy_connection() {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->destroy_connection();
+    }
+    ifaces_[i]->destroy_connection();
+  }
+
   int64_t add_node(const TNode& n) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -1704,6 +2238,34 @@ class GraphStoreServiceMultiface : virtual public GraphStoreServiceIf {
     return ifaces_[i]->count_links(id1, link_type);
   }
 
+  int64_t begin_snapshot() {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->begin_snapshot();
+    }
+    return ifaces_[i]->begin_snapshot();
+  }
+
+  bool end_snapshot(const int64_t tail) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->end_snapshot(tail);
+    }
+    return ifaces_[i]->end_snapshot(tail);
+  }
+
+  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->traverse(_return, id, link_type, depth, snapshot);
+    }
+    ifaces_[i]->traverse(_return, id, link_type, depth, snapshot);
+    return;
+  }
+
 };
 
 // The 'concurrent' client is a thread safe client that correctly handles
@@ -1734,6 +2296,12 @@ class GraphStoreServiceConcurrentClient : virtual public GraphStoreServiceIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
+  void init_connection();
+  int32_t send_init_connection();
+  void recv_init_connection(const int32_t seqid);
+  void destroy_connection();
+  int32_t send_destroy_connection();
+  void recv_destroy_connection(const int32_t seqid);
   int64_t add_node(const TNode& n);
   int32_t send_add_node(const TNode& n);
   int64_t recv_add_node(const int32_t seqid);
@@ -1770,6 +2338,15 @@ class GraphStoreServiceConcurrentClient : virtual public GraphStoreServiceIf {
   int64_t count_links(const int64_t id1, const int64_t link_type);
   int32_t send_count_links(const int64_t id1, const int64_t link_type);
   int64_t recv_count_links(const int32_t seqid);
+  int64_t begin_snapshot();
+  int32_t send_begin_snapshot();
+  int64_t recv_begin_snapshot(const int32_t seqid);
+  bool end_snapshot(const int64_t tail);
+  int32_t send_end_snapshot(const int64_t tail);
+  bool recv_end_snapshot(const int32_t seqid);
+  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot);
+  int32_t send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot);
+  void recv_traverse(std::vector<TLink> & _return, const int32_t seqid);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;

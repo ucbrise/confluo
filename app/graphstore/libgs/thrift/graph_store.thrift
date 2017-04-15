@@ -18,6 +18,10 @@ struct TLink {
 }
 
 service GraphStoreService {
+  // Management
+  void init_connection(),
+  void destroy_connection(),
+
   // Node API
   i64 add_node(1: TNode n),
   TNode get_node(1: i64 type, 2: i64 id),
@@ -34,4 +38,11 @@ service GraphStoreService {
   list<TLink> get_link_list_range(1: i64 id1, 2: i64 link_type, 3: i64 min_ts, 
                                   4: i64 max_ts, 5: i64 off, 6: i64 limit),
   i64 count_links(1: i64 id1, 2: i64 link_type),
+  
+  // Snapshot
+  i64 begin_snapshot(),
+  bool end_snapshot(1: i64 tail),
+
+  // Traverse
+  list<TLink> traverse(1: i64 id, 2: i64 link_type, 3: i64 depth, 4: list<i64> snapshot)
 }
