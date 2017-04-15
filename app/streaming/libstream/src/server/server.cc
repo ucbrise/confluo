@@ -32,21 +32,6 @@ class stream_service : virtual public stream_serviceIf {
   }
 
   offset_t write(const stream_id_t uuid, const std::string& batch) {
-    // De-serialize batch
-    size_t boff = 0;
-    size_t blen = batch.length();
-    const char* bbuf = &batch[0];
-    fprintf(stderr, "Deserializing batch...\n");
-    while (boff + sizeof(uint32_t) < blen) {
-      size_t rlen = *((uint32_t*) (bbuf + boff));
-      fprintf(stderr, "Record length = %zu\n", rlen);
-      boff += sizeof(uint32_t);
-      if (boff + rlen > blen) {
-        boff -= sizeof(uint32_t);
-        break;
-      }
-      boff += rlen;
-    }
     return db_[uuid]->write(batch);
   }
 

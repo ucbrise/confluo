@@ -40,6 +40,22 @@ class producer : public ss_client {
       memcpy(buf, record.c_str(), record_size);
       buf += record_size;
     }
+
+    // De-serialize batch
+    size_t boff = 0;
+    size_t blen = data.length();
+    const char* bbuf = &data[0];
+    fprintf(stderr, "Deserializing batch...\n");
+    while (boff + sizeof(uint32_t) < blen) {
+      size_t rlen = *((uint32_t*) (bbuf + boff));
+      fprintf(stderr, "Record length = %zu\n", rlen);
+      boff += sizeof(uint32_t);
+      if (boff + rlen > blen) {
+        boff -= sizeof(uint32_t);
+        break;
+      }
+      boff += rlen;
+    }
     assert_throw(data.length() > 0U, "Empty write");
     client_->write(uuid_, data);
   }
