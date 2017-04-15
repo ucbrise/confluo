@@ -46,11 +46,11 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   }
 
   int64_t add_node(const TNode& n) {
-    return store_->add_node(tnode_to_node_op(n));
+    return store_->add_node(tnode_to_node_op(n)) * hostlist_.size() + store_id_;
   }
 
   void get_node(TNode& _return, const int64_t type, const int64_t id) {
-    _return = node_op_to_tnode(store_->get_node(type, id));
+    _return = node_op_to_tnode(store_->get_node(type, id / hostlist_.size()));
   }
 
   bool update_node(const TNode& n) {
@@ -58,7 +58,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   }
 
   bool delete_node(const int64_t type, const int64_t id) {
-    return store_->delete_node(type, id);
+    return store_->delete_node(type, id / hostlist_.size());
   }
 
   bool add_link(const TLink& a) {
@@ -71,24 +71,25 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   bool delete_link(const int64_t id1, const int64_t link_type,
                    const int64_t id2) {
-    return store_->delete_link(id1, link_type, id2);
+    return store_->delete_link(id1 / hostlist_.size(), link_type, id2);
   }
 
   void get_link(TLink& _return, const int64_t id1, const int64_t link_type,
                 const int64_t id2) {
-    _return = link_op_to_tlink(store_->get_link(id1, link_type, id2));
+    _return = link_op_to_tlink(
+        store_->get_link(id1 / hostlist_.size(), link_type, id2));
   }
 
   void multiget_link(std::vector<TLink> & _return, const int64_t id1,
                      const int64_t link_type, const std::set<int64_t> & id2s) {
-    auto res = store_->multiget_links(id1, link_type, id2s);
+    auto res = store_->multiget_links(id1 / hostlist_.size(), link_type, id2s);
     for (const link_op& op : res)
       _return.push_back(link_op_to_tlink(op));
   }
 
   void get_link_list(std::vector<TLink> & _return, const int64_t id1,
                      const int64_t link_type) {
-    auto res = store_->get_link_list(id1, link_type);
+    auto res = store_->get_link_list(id1 / hostlist_.size(), link_type);
     for (const link_op& op : res)
       _return.push_back(link_op_to_tlink(op));
   }
@@ -97,14 +98,14 @@ class graph_store_service : virtual public GraphStoreServiceIf {
                            const int64_t link_type, const int64_t min_ts,
                            const int64_t max_ts, const int64_t off,
                            const int64_t limit) {
-    auto res = store_->get_link_list(id1, link_type, min_ts, max_ts, off,
-                                     limit);
+    auto res = store_->get_link_list(id1 / hostlist_.size(), link_type, min_ts,
+                                     max_ts, off, limit);
     for (const link_op& op : res)
       _return.push_back(link_op_to_tlink(op));
   }
 
   int64_t count_links(const int64_t id1, const int64_t link_type) {
-    return store_->count_links(id1, link_type);
+    return store_->count_links(id1 / hostlist_.size(), link_type);
   }
 
   int64_t begin_snapshot() {
@@ -116,20 +117,20 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   }
 
   std::future<std::vector<TLink>> continue_traverse(
-      const int64_t store_id, const int64_t id, const int64_t link_type,
+      const int64_t store_id, const int64_t id1, const int64_t link_type,
       const int64_t depth, const std::vector<int64_t>& snapshot) {
 
     if (store_id == store_id_) {
-      auto t = [id, link_type, depth, snapshot, this]() {
+      auto t = [id1, link_type, depth, snapshot, this]() {
         std::vector<TLink> links;
-        this->traverse(links, id, link_type, depth, snapshot);
+        this->traverse(links, id1, link_type, depth, snapshot);
         return links;
       };
       return std::async(std::launch::async, t);
     }
 
-    clients_[store_id]->send_traverse(id, link_type, depth, snapshot);
-    auto t = [store_id, id, link_type, depth, snapshot, this]() {
+    clients_[store_id]->send_traverse(id1, link_type, depth, snapshot);
+    auto t = [store_id, id1, link_type, depth, snapshot, this]() {
       std::vector<TLink> links;
       clients_[store_id]->recv_traverse(links);
       return links;
@@ -137,20 +138,21 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     return std::async(std::launch::async, t);
   }
 
-  void traverse(std::vector<TLink>& _return, const int64_t id,
+  void traverse(std::vector<TLink>& _return, const int64_t id1,
                 const int64_t link_type, const int64_t depth,
                 const std::vector<int64_t>& snapshot) {
     if (depth == 0)
       return;
 
     uint64_t tail = snapshot[store_id_];
-    std::vector<link_op> links = store_->get_links(id, link_type, tail);
+    std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
+                                                   link_type, tail);
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links(links.size());
     for (const link_op& op : links) {
       _return.push_back(link_op_to_tlink(op));
       downstream_links.push_back(
-          continue_traverse(op.id2 / hostlist_.size(), op.id2, link_type,
+          continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
                             depth - 1, snapshot));
     }
 
@@ -172,7 +174,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   TNode node_op_to_tnode(const node_op& op) {
     TNode n;
-    n.id = op.id;
+    n.id = hostlist_.size() * op.id + store_id_;
     n.type = op.type;
     n.data = op.data;
     return n;
@@ -180,7 +182,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   TLink link_op_to_tlink(const link_op& op) {
     TLink l;
-    l.id1 = op.id1;
+    l.id1 = hostlist_.size() * op.id1 + store_id_;
     l.link_type = op.link_type;
     l.id2 = op.id2;
     l.time = op.time;
@@ -190,7 +192,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   node_op tnode_to_node_op(const TNode& n) {
     node_op op;
-    op.id = n.id;
+    op.id = n.id / hostlist_.size();
     op.type = n.type;
     op.data = n.data;
     return op;
@@ -198,7 +200,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   link_op tlink_to_link_op(const TLink& l) {
     link_op op;
-    op.id1 = l.id1;
+    op.id1 = l.id1 / hostlist_.size();
     op.link_type = l.link_type;
     op.id2 = l.id2;
     op.time = l.time;
