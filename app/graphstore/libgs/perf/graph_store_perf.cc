@@ -24,8 +24,9 @@ class graph_store_perf :
   static const uint64_t INIT_DEGREE = 80;
   static const std::string DATA;
 
-  graph_store_perf(const std::string& output_dir)
-      : utils::bench::benchmark<graph_store<tail_scheme>>(output_dir) {
+  graph_store_perf(const std::string& output_dir,
+                   const utils::bench::benchmark_limits& limits)
+      : utils::bench::benchmark<graph_store<tail_scheme>>(output_dir, limits) {
     // Pre-load data
     LOG_INFO<< "Loading nodes...";
     node_op op = create_node_op();
@@ -189,7 +190,7 @@ void exec_bench(graph_store_perf<tail_scheme>& perf, int num_threads,
 }
 
 int main(int argc, char** argv) {
-  cmd_options opts;
+  cmd_options opts = utils::bench::benchmark_opts();
   opts.add(
       cmd_option("num-threads", 't', false).set_default("1").set_description(
           "Number of benchmark threads"));
@@ -213,27 +214,26 @@ int main(int argc, char** argv) {
   std::string bench_type;
   std::string output_dir;
   std::string tail_scheme;
+  utils::bench::benchmark_limits limits;
   try {
     num_threads = parser.get_int("num-threads");
     bench_type = parser.get("bench-type");
     output_dir = parser.get("output-dir");
     tail_scheme = parser.get("tail-scheme");
+    limits = utils::bench::parse_limits(parser);
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
     return 0;
   }
 
-  fprintf(stderr,
-          "bench_type=%s, num_threads=%d, output_dir=%s, tail_scheme=%s\n",
-          bench_type.c_str(), num_threads, output_dir.c_str(),
-          tail_scheme.c_str());
+  LOG_INFO<< parser.parsed_values();
 
   if (tail_scheme == "write-stalled") {
-    graph_store_perf<datastore::write_stalled> perf(output_dir);
+    graph_store_perf<datastore::write_stalled> perf(output_dir, limits);
     exec_bench(perf, num_threads, bench_type);
   } else if (tail_scheme == "read-stalled") {
-    graph_store_perf<datastore::read_stalled> perf(output_dir);
+    graph_store_perf<datastore::read_stalled> perf(output_dir, limits);
     exec_bench(perf, num_threads, bench_type);
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());

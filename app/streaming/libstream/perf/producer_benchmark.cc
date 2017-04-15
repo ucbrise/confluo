@@ -14,10 +14,11 @@ typedef streaming::uuid_t stream_id_t;
 
 class producer_benchmark : public utils::bench::benchmark<producer> {
  public:
-  producer_benchmark(const std::string& output_dir, stream_id_t id,
-                     size_t batch_size, size_t record_size,
+  producer_benchmark(const std::string& output_dir,
+                     const utils::bench::benchmark_limits& limits,
+                     stream_id_t id, size_t batch_size, size_t record_size,
                      const std::string& host, int port)
-      : utils::bench::benchmark<producer>(output_dir) {
+      : utils::bench::benchmark<producer>(output_dir, limits) {
 
     ds_.connect(host, port);
     ds_.set_uuid(id);
@@ -47,7 +48,7 @@ std::vector<std::string> producer_benchmark::APPEND_DATA_BATCH;
 int main(int argc, char** argv) {
   utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
 
-  cmd_options opts;
+  cmd_options opts = utils::bench::benchmark_opts();
   opts.add(
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
@@ -83,6 +84,7 @@ int main(int argc, char** argv) {
   long record_size;
   std::string type;
   std::string server;
+  utils::bench::benchmark_limits limits;
   int port;
   try {
     output_dir = parser.get("output-dir");
@@ -92,6 +94,7 @@ int main(int argc, char** argv) {
     record_size = parser.get_long("data-size");
     server = parser.get("server");
     port = parser.get_int("port");
+    limits = utils::bench::parse_limits(parser);
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -100,8 +103,8 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  producer_benchmark perf(output_dir, uuid, batch_size, record_size, server,
-                          port);
+  producer_benchmark perf(output_dir, limits, uuid, batch_size, record_size,
+                          server, port);
 
   if (type == "throughput") {
     perf.bench_throughput_send(1);

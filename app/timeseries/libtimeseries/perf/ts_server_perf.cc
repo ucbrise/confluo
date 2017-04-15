@@ -17,10 +17,11 @@ using namespace ::utils;
 class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client> {
  public:
   ts_server_benchmark(const std::string& output_dir,
+                      const utils::bench::benchmark_limits& limits,
                       const std::string& input_file, long uuid, long resolution,
                       size_t load_records, size_t batch_size,
                       const std::string& host, int port)
-      : utils::bench::benchmark<timeseries_db_client>(output_dir) {
+      : utils::bench::benchmark<timeseries_db_client>(output_dir, limits) {
     ds_.connect(host, port);
     UUID = uuid;
     BATCH_SIZE = batch_size;
@@ -116,7 +117,7 @@ timestamp_t ts_server_benchmark::max_ts;
 int main(int argc, char** argv) {
   utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
 
-  cmd_options opts;
+  cmd_options opts = utils::bench::benchmark_opts();
   opts.add(
       cmd_option("num-threads", 't', false).set_default("1").set_description(
           "Number of benchmark threads"));
@@ -164,6 +165,7 @@ int main(int argc, char** argv) {
   long uuid;
   std::string server;
   int port;
+  utils::bench::benchmark_limits limits;
   try {
     num_threads = parser.get_int("num-threads");
     input_file = parser.get("input-file");
@@ -175,6 +177,7 @@ int main(int argc, char** argv) {
     uuid = parser.get_long("stream-id");
     server = parser.get("server");
     port = parser.get_int("port");
+    limits = utils::bench::parse_limits(parser);
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -183,7 +186,7 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  ts_server_benchmark perf(output_dir, input_file, uuid, resolution,
+  ts_server_benchmark perf(output_dir, limits, input_file, uuid, resolution,
                            load_records, batch_size, server, port);
   if (bench_op == "throughput-insert-values") {
     perf.bench_throughput_insert_values(num_threads);

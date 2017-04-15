@@ -14,10 +14,11 @@ typedef streaming::uuid_t stream_id_t;
 
 class consumer_benchmark : public utils::bench::benchmark<consumer> {
  public:
-  consumer_benchmark(const std::string& output_dir, stream_id_t id,
-                     size_t batch_size, size_t record_size,
+  consumer_benchmark(const std::string& output_dir,
+                     const utils::bench::benchmark_limits& limits,
+                     stream_id_t id, size_t batch_size, size_t record_size,
                      const std::string& host, int port)
-      : utils::bench::benchmark<consumer>(output_dir) {
+      : utils::bench::benchmark<consumer>(output_dir, limits) {
 
     ds_.connect(host, port);
     ds_.set_uuid(id);
@@ -47,7 +48,7 @@ size_t consumer_benchmark::BATCH_BYTES;
 int main(int argc, char** argv) {
   utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
 
-  cmd_options opts;
+  cmd_options opts = utils::bench::benchmark_opts();
   opts.add(
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
@@ -87,6 +88,7 @@ int main(int argc, char** argv) {
   std::string type;
   std::string server;
   int port;
+  utils::bench::benchmark_limits limits;
   try {
     output_dir = parser.get("output-dir");
     type = parser.get("type");
@@ -95,6 +97,7 @@ int main(int argc, char** argv) {
     record_size = parser.get_long("data-size");
     server = parser.get("server");
     port = parser.get_int("port");
+    limits = utils::bench::parse_limits(parser);
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -103,8 +106,8 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  consumer_benchmark perf(output_dir, uuid, batch_size, record_size, server,
-                          port);
+  consumer_benchmark perf(output_dir, limits, uuid, batch_size, record_size,
+                          server, port);
 
   if (type == "throughput") {
     perf.bench_throughput_recv(1);

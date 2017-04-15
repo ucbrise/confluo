@@ -5,11 +5,11 @@
 using namespace ::datastore;
 
 template<typename concurrency_control>
-class concurrency_control_benchmark : public utils::bench::benchmark<
-    concurrency_control> {
+class cc_benchmark : public utils::bench::benchmark<concurrency_control> {
  public:
-  concurrency_control_benchmark(const std::string& output_dir)
-      : utils::bench::benchmark<concurrency_control>(output_dir) {
+  cc_benchmark(const std::string& output_dir,
+               const utils::bench::benchmark_limits& limits)
+      : utils::bench::benchmark<concurrency_control>(output_dir, limits) {
   }
 
   static void write(size_t i, concurrency_control& cc) {
@@ -23,7 +23,7 @@ class concurrency_control_benchmark : public utils::bench::benchmark<
 };
 
 int main(int argc, char** argv) {
-  cmd_options opts;
+  cmd_options opts = utils::bench::benchmark_opts();
   opts.add(
       cmd_option("bench-type", 'b', false).set_default("throughput-write")
           .set_description("Benchmark type"));
@@ -47,11 +47,13 @@ int main(int argc, char** argv) {
   std::string bench_type;
   std::string output_dir;
   std::string concurrency_control;
+  utils::bench::benchmark_limits limits;
   try {
     bench_type = parser.get("bench-type");
     num_threads = parser.get_int("num-threads");
     output_dir = parser.get("output-dir");
     concurrency_control = parser.get("tail-scheme");
+    limits = utils::bench::parse_limits(parser);
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -64,18 +66,18 @@ int main(int argc, char** argv) {
 
   if (concurrency_control == "write-stalled") {
     if (bench_type == "throughput-write") {
-      concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
+      cc_benchmark<datastore::write_stalled> perf(output_dir, limits);
       perf.bench_throughput_write(num_threads);
     } else if (bench_type == "latency-write") {
-      concurrency_control_benchmark<datastore::write_stalled> perf(output_dir);
+      cc_benchmark<datastore::write_stalled> perf(output_dir, limits);
       perf.bench_latency_write();
     }
   } else if (concurrency_control == "read-stalled") {
     if (bench_type == "throughput-write") {
-      concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
+      cc_benchmark<datastore::read_stalled> perf(output_dir, limits);
       perf.bench_throughput_write(num_threads);
     } else if (bench_type == "latency-write") {
-      concurrency_control_benchmark<datastore::read_stalled> perf(output_dir);
+      cc_benchmark<datastore::read_stalled> perf(output_dir, limits);
       perf.bench_latency_write();
     }
   } else {

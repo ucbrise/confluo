@@ -133,27 +133,27 @@ class cmd_parser {
     parse();
   }
 
-  std::string get(const std::string& key) {
+  std::string get(const std::string& key) const {
     return values_.at(key);
   }
 
-  int get_int(const std::string& key) {
+  int get_int(const std::string& key) const {
     return std::stoi(values_.at(key));
   }
 
-  long get_long(const std::string& key) {
+  long get_long(const std::string& key) const {
     return std::stol(values_.at(key));
   }
 
-  float get_float(const std::string& key) {
+  float get_float(const std::string& key) const {
     return std::stof(values_.at(key));
   }
 
-  double get_double(const std::string& key) {
+  double get_double(const std::string& key) const {
     return std::stod(values_.at(key));
   }
 
-  bool get_flag(const std::string& key) {
+  bool get_flag(const std::string& key) const {
     std::string val = values_.at(key);
     if (val == "true")
       return true;

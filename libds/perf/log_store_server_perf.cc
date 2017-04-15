@@ -11,10 +11,11 @@ using namespace ::datastore;
 
 class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
  public:
-  ls_server_benchmark(const std::string& output_dir, size_t load_records,
-                      size_t batch_size, size_t record_size,
-                      const std::string& host, int port)
-      : utils::bench::benchmark<log_store_client>(output_dir) {
+  ls_server_benchmark(const std::string& output_dir,
+                      const utils::bench::benchmark_limits& limits,
+                      size_t load_records, size_t batch_size,
+                      size_t record_size, const std::string& host, int port)
+      : utils::bench::benchmark<log_store_client>(output_dir, limits) {
     ds_.connect(host, port);
     PRELOAD_RECORDS = load_records;
     BATCH_SIZE = batch_size;
@@ -78,7 +79,7 @@ std::string ls_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
 std::vector<std::string> ls_server_benchmark::APPEND_DATA_BATCH;
 
 int main(int argc, char** argv) {
-  cmd_options opts;
+  cmd_options opts = utils::bench::benchmark_opts();
   opts.add(
       cmd_option("output-dir", 'o', false).set_default("results")
           .set_description("Output directory"));
@@ -119,6 +120,7 @@ int main(int argc, char** argv) {
   long record_size;
   std::string server;
   int port;
+  utils::bench::benchmark_limits limits;
   try {
     num_threads = parser.get_int("num-threads");
     output_dir = parser.get("output-dir");
@@ -128,6 +130,7 @@ int main(int argc, char** argv) {
     record_size = parser.get_long("data-size");
     server = parser.get("server");
     port = parser.get_int("port");
+    limits = utils::bench::parse_limits(parser);
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -136,8 +139,8 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  ls_server_benchmark perf(output_dir, load_records, batch_size, record_size,
-                           server, port);
+  ls_server_benchmark perf(output_dir, limits, load_records, batch_size,
+                           record_size, server, port);
   if (bench_op == "throughput-append") {
     perf.bench_throughput_append(num_threads);
   } else if (bench_op == "throughput-append-async") {
