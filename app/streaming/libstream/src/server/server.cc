@@ -35,7 +35,7 @@ class stream_service : virtual public stream_serviceIf {
     // De-serialize batch
     size_t boff = 0;
     size_t blen = batch.length();
-    char* bbuf = &batch[0];
+    const char* bbuf = &batch[0];
     fprintf(stderr, "Deserializing batch...\n");
     while (boff + sizeof(uint32_t) < blen) {
       size_t rlen = *((uint32_t*) (bbuf + boff));
