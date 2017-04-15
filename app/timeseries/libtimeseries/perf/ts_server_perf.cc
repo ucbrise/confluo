@@ -50,11 +50,15 @@ class ts_server_benchmark : public utils::bench::benchmark<timeseries_db_client>
     PRELOAD_RECORDS = ds_.num_entries(UUID);
     LOG_INFO<< "Pre-load complete, loaded " << PRELOAD_RECORDS << " data points";
 
-    min_ts = ((data_pt*) data)[0].timestamp;
-    max_ts = ((data_pt*) data)[PRELOAD_RECORDS - 1].timestamp;
-    size_t max_resolution = bit_utils::highest_bit(max_ts - min_ts);
-
-    LOG_INFO<< "Max resolution = " << max_resolution;
+    if (PRELOAD_RECORDS != 0) {
+      min_ts = ((data_pt*) data)[0].timestamp;
+      max_ts = ((data_pt*) data)[PRELOAD_RECORDS - 1].timestamp;
+      size_t max_resolution = bit_utils::highest_bit(max_ts - min_ts);
+      LOG_INFO<< "Max resolution = " << max_resolution;
+    } else {
+      min_ts = std::numeric_limits<timestamp_t>::max();
+      max_ts = 0;
+    }
   }
 
   static void insert_values(size_t i, timeseries_db_client& client) {
