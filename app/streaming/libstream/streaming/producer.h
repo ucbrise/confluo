@@ -41,6 +41,8 @@ class producer : public ss_client {
       buf += record_size;
     }
     assert_throw(data.length() > 0U, "Empty write");
+    assert_throw(data.length() != size,
+                 "data.length() = " << data.length() << " size = " << size);
     client_->write(uuid_, data);
   }
 
