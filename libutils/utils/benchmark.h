@@ -172,11 +172,13 @@ static void bench_thput_thread(op_t&& op, data_structure& ds, size_t nthreads,
   uint64_t start_time;
 
   LOG_INFO<< "Running warmup for min(" << limits.warmup_secs << "s, " << limits.warmup_count << "ops)";
-  LOOP_OPS(op, i, ds, num_ops, limits.warmup_secs, limits.warmup_count);
+  LOOP_OPS(op, i, ds, num_ops, limits.warmup_secs,
+           (limits.warmup_count / batch_size));
 
   LOG_INFO<< "Warmup complete; running measure for min(" << limits.measure_secs << "s, " << limits.measure_count << "ops)";
   auto start = timer::now();
-  LOOP_OPS(op, i, ds, num_ops, limits.measure_secs, limits.measure_count);
+  LOOP_OPS(op, i, ds, num_ops, limits.measure_secs,
+           (limits.measure_count / batch_size));
   auto end = timer::now();
 
   auto usecs = std::chrono::duration_cast<us>(end - start).count();
@@ -184,7 +186,8 @@ static void bench_thput_thread(op_t&& op, data_structure& ds, size_t nthreads,
   thput[i] = num_ops * batch_size * 1e6 / usecs;
 
   LOG_INFO<< "Measure complete; running cooldown for min(" << limits.cooldown_secs << "s, " << limits.cooldown_count << "ops)";
-  LOOP_OPS(op, i, ds, num_ops, limits.cooldown_secs, limits.cooldown_count);
+  LOOP_OPS(op, i, ds, num_ops, limits.cooldown_secs,
+           limits.cooldown_count / batch_size);
 
   LOG_INFO<< "Thread completed " << (thput[i] * usecs) / 1e6 << " ops at " << thput[i] << " ops/s";
 }
@@ -210,15 +213,17 @@ class benchmark {
     uint64_t start_time;
 
     LOG_INFO<< "Running warmup for min(" << limits_.warmup_secs << "s, " << limits_.warmup_count << "ops)";
-    LOOP_OPS(op, 0, ds_, num_ops, limits_.warmup_secs, limits_.warmup_count);
+    LOOP_OPS(op, 0, ds_, num_ops, limits_.warmup_secs,
+             limits_.warmup_count / batch_size);
 
     LOG_INFO<< "Warmup complete; running measure for min(" << limits_.measure_secs << "s, " << limits_.measure_count << "ops)";
     std::ofstream out(output_file, std::ofstream::out | std::ofstream::app);
-    TIME_OPS(op, 0, ds_, num_ops, limits_.measure_secs, limits_.measure_count,
-             out);
+    TIME_OPS(op, 0, ds_, num_ops, limits_.measure_secs,
+             limits_.measure_count / batch_size, out);
 
     LOG_INFO<< "Measure complete; running cooldown for min(" << limits_.cooldown_secs << "s, " << limits_.cooldown_count << "ops)";
-    LOOP_OPS(op, 0, ds_, num_ops, limits_.cooldown_secs, limits_.cooldown_count);
+    LOOP_OPS(op, 0, ds_, num_ops, limits_.cooldown_secs,
+             limits_.cooldown_count / batch_size);
   }
 
   template<typename op_t>
