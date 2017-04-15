@@ -34,8 +34,10 @@ class consumer : public ss_client {
   }
 
   void recv(std::vector<std::string>& batch) {
-    std::string buf;
-    client_->read(buf, uuid_, off_, batch_bytes_);
+    std::string buf = "";
+    while (buf.length() == 0) {
+      client_->read(buf, uuid_, off_, batch_bytes_);
+    }
 
     // De-serialize batch
     size_t boff = 0;
