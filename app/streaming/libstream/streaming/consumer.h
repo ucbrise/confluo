@@ -35,11 +35,8 @@ class consumer : public ss_client {
 
   void recv(std::vector<std::string>& batch) {
     std::string buf = "";
-    while (buf.length() == 0) {
+    while (buf.length() == 0)
       client_->read(buf, uuid_, off_, batch_bytes_);
-      fprintf(stderr, "Requested %zu bytes at off %ld, received %zu bytes\n",
-              batch_bytes_, off_, buf.length());
-    }
 
     // De-serialize batch
     size_t boff = 0;
@@ -47,7 +44,6 @@ class consumer : public ss_client {
     char* bbuf = &buf[0];
     while (boff + sizeof(uint32_t) < blen) {
       size_t rlen = *((uint32_t*) (bbuf + boff));
-      fprintf(stderr, "Record length = %zu\n", rlen);
       boff += sizeof(uint32_t);
       if (boff + rlen > blen) {
         boff -= sizeof(uint32_t);
@@ -56,7 +52,6 @@ class consumer : public ss_client {
       batch.push_back(std::string(bbuf + boff, rlen));
       boff += rlen;
     }
-    fprintf(stderr, "Parsed %zu bytes from buffer\n", boff);
     off_ += boff;
   }
 
