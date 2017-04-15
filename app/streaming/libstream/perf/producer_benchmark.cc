@@ -25,9 +25,6 @@ class producer_benchmark : public utils::bench::benchmark<producer> {
     BATCH_SIZE = batch_size;
     DATA_SIZE = record_size;
     std::string record(DATA_SIZE, 'x');
-    assert_throw(
-        record.length() == DATA_SIZE,
-        "Record size = " << record.length() << " DATA_SIZE = " << DATA_SIZE);
     APPEND_DATA_BATCH.resize(BATCH_SIZE, record);
   }
 
