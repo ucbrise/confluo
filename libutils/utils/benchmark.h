@@ -104,7 +104,7 @@ static cmd_options benchmark_opts() {
       cmd_option("measure-secs", 'm', false).set_default("60").set_description(
           "Measure time in seconds"));
   opts.add(
-      cmd_option("measure-secs", 'c', false).set_default("60").set_description(
+      cmd_option("cooldown-secs", 'c', false).set_default("60").set_description(
           "Measure time in seconds"));
 
   opts.add(
@@ -114,7 +114,7 @@ static cmd_options benchmark_opts() {
       cmd_option("measure-count", 'M', false).set_default("1000000")
           .set_description("#Measure ops"));
   opts.add(
-      cmd_option("measure-count", 'C', false).set_default("5000000")
+      cmd_option("cooldown-count", 'C', false).set_default("5000000")
           .set_description("#Cooldown ops"));
 
   return opts;
