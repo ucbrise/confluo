@@ -36,6 +36,7 @@ class producer : public ss_client {
     size_t boff = 0;
     for (const std::string& record : batch) {
       *((uint32_t*) (bbuf + boff)) = record.length();
+      fprintf(stderr, "Record length = %zu\n", record.length());
       boff += sizeof(uint32_t);
       memcpy(bbuf + boff, record.c_str(), record.length());
       boff += record.length();
