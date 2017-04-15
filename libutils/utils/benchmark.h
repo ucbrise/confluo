@@ -98,13 +98,13 @@ namespace bench {
 static cmd_options benchmark_opts() {
   cmd_options opts;
   opts.add(
-      cmd_option("warmup-secs", 'w', false).set_default("30").set_description(
+      cmd_option("warmup-secs", 'w', false).set_default("15").set_description(
           "Warmup time in seconds"));
   opts.add(
-      cmd_option("measure-secs", 'm', false).set_default("60").set_description(
+      cmd_option("measure-secs", 'm', false).set_default("30").set_description(
           "Measure time in seconds"));
   opts.add(
-      cmd_option("cooldown-secs", 'c', false).set_default("60").set_description(
+      cmd_option("cooldown-secs", 'c', false).set_default("15").set_description(
           "Measure time in seconds"));
 
   opts.add(
@@ -121,9 +121,9 @@ static cmd_options benchmark_opts() {
 }
 
 struct benchmark_defaults {
-  static const uint64_t WARMUP_SECS = 30;
-  static const uint64_t MEASURE_SECS = 60;
-  static const uint64_t COOLDOWN_SECS = 30;
+  static const uint64_t WARMUP_SECS = 15;
+  static const uint64_t MEASURE_SECS = 30;
+  static const uint64_t COOLDOWN_SECS = 15;
 
   static const uint64_t WARMUP_COUNT = 500000;
   static const uint64_t MEASURE_COUNT = 1000000;
