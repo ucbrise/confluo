@@ -38,6 +38,7 @@ class producer : public ss_client {
       memcpy(buf, (char*) (&record_size), sizeof(uint32_t));
       buf += sizeof(uint32_t);
       memcpy(buf, record.c_str(), record_size);
+      buf += record_size;
     }
     assert_throw(data.length() > 0U, "Empty write");
     client_->write(uuid_, data);
