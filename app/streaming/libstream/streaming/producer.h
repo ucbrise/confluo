@@ -35,11 +35,10 @@ class producer : public ss_client {
     char* bbuf = &data[0];
     size_t boff = 0;
     for (const std::string& record : batch) {
-      uint32_t record_size = record.length();
-      memcpy(bbuf + boff, (char*) (&record_size), sizeof(uint32_t));
+      *((uint32_t*) (bbuf + boff)) = record.length();
       boff += sizeof(uint32_t);
-      memcpy(bbuf + boff, record.c_str(), record_size);
-      boff += record_size;
+      memcpy(bbuf + boff, record.c_str(), record.length());
+      boff += record.length();
     }
 
     // De-serialize batch
