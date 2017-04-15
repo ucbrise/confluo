@@ -73,8 +73,8 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
 uint64_t ls_server_benchmark::PRELOAD_RECORDS = 0;
 uint64_t ls_server_benchmark::BATCH_SIZE = 1;
 size_t ls_server_benchmark::DATA_SIZE = 64;
-std::string ls_server_benchmark::APPEND_DATA = std::string('x', DATA_SIZE);
-std::string ls_server_benchmark::UPDATE_DATA = std::string('y', DATA_SIZE);
+std::string ls_server_benchmark::APPEND_DATA = std::string(DATA_SIZE, 'x');
+std::string ls_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
 std::vector<std::string> ls_server_benchmark::APPEND_DATA_BATCH;
 
 int main(int argc, char** argv) {
