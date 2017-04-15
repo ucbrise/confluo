@@ -27,24 +27,24 @@ class producer : public ss_client {
 
   void send(const std::vector<std::string>& batch) {
     // Serialize batch
-    size_t size = batch.size() * sizeof(uint32_t);
+    size_t blen = batch.size() * sizeof(uint32_t);
     for (const std::string& record : batch)
-      size += record.length();
+      blen += record.length();
 
-    std::string data(size, 0);
-    char* buf = &data[0];
+    std::string data(blen, 0);
+    char* bbuf = &data[0];
+    size_t boff = 0;
     for (const std::string& record : batch) {
       uint32_t record_size = record.length();
-      memcpy(buf, (char*) (&record_size), sizeof(uint32_t));
-      buf += sizeof(uint32_t);
-      memcpy(buf, record.c_str(), record_size);
-      buf += record_size;
+      memcpy(bbuf + boff, (char*) (&record_size), sizeof(uint32_t));
+      boff += sizeof(uint32_t);
+      memcpy(bbuf + boff, record.c_str(), record_size);
+      boff += record_size;
     }
 
     // De-serialize batch
-    size_t boff = 0;
-    size_t blen = data.length();
-    const char* bbuf = &data[0];
+    boff = 0;
+    bbuf = &data[0];
     fprintf(stderr, "Deserializing batch...\n");
     while (boff + sizeof(uint32_t) < blen) {
       size_t rlen = *((uint32_t*) (bbuf + boff));
