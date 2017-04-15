@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
       cmd_option("concurrency-control", 'c', false).set_default("read-stalled")
           .set_description("Scheme for graph tail"));
   opts.add(
-      cmd_option("host-list", 'h', false).set_default("conf/hosts")
+      cmd_option("host-list", 'H', false).set_default("conf/hosts")
           .set_description("File containing list of hosts"));
   opts.add(
       cmd_option("server-id", 's', false).set_default("0").set_description(
@@ -299,11 +299,11 @@ int main(int argc, char **argv) {
 
   int port;
   int server_id;
-  std::string tail_scheme;
+  std::string concurrency_control;
   std::string host_file;
   try {
     port = parser.get_int("port");
-    tail_scheme = parser.get("tail-scheme");
+    concurrency_control = parser.get("concurrency-control");
     host_file = parser.get("host-list");
     server_id = parser.get_int("server-id");
   } catch (std::exception& e) {
@@ -312,14 +312,14 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  if (tail_scheme == "write-stalled") {
+  if (concurrency_control == "write-stalled") {
     graph_store<write_stalled>* store = new graph_store<write_stalled>();
     start_server(port, store, read_hosts(host_file), server_id);
-  } else if (tail_scheme == "read-stalled") {
+  } else if (concurrency_control == "read-stalled") {
     graph_store<read_stalled>* store = new graph_store<read_stalled>();
     start_server(port, store, read_hosts(host_file), server_id);
   } else {
-    fprintf(stderr, "Unknown tail scheme: %s\n", tail_scheme.c_str());
+    fprintf(stderr, "Unknown tail scheme: %s\n", concurrency_control.c_str());
   }
 
   return 0;
