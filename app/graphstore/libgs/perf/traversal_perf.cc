@@ -76,8 +76,8 @@ int main(int argc, char** argv) {
       cmd_option("depth", 'd', false).set_default("5").set_description(
           "Traversal is confined to the specified depth"));
   opts.add(
-      cmd_option("depth", 'd', false).set_default("64").set_description(
-          "Traversal is confined to the specified depth"));
+      cmd_option("breadth", 'b', false).set_default("64").set_description(
+          "Traversal is confined to the specified breadth"));
   opts.add(
       cmd_option("host-list", 'H', false).set_default("conf/hosts")
           .set_description("File containing list of graph store servers"));
