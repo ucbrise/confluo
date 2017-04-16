@@ -15,7 +15,7 @@ class string_utils {
     std::string item;
     std::vector<std::string> elems;
     size_t i = 0;
-    while (std::getline(ss, item, delim) && i < count) {
+    while (std::getline(ss, item, delim) && i <= count) {
       elems.push_back(std::move(item));
       i++;
     }
