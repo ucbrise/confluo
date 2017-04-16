@@ -158,12 +158,13 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
         link_type, tail);
 
-    LOG_INFO << "Got local " << links.size() << " links";
+    LOG_INFO << "Got local " << links.size() << " links: ";
 
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
     for (const link_op& op : links) {
       if (op.id1 != op.id2) {
+        LOG_INFO << "Processing link " << op.id1 << " -> " << op.id2;
         _return.push_back(link_op_to_tlink(op));
         downstream_links.push_back(
             continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
