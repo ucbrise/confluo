@@ -296,7 +296,7 @@ void load_nodes(graph_store<tail_scheme>* store, const size_t num_stores,
   }
   std::string line;
   while (std::getline(in, line)) {
-    std::vector<std::string> node_info = utils::string_utils::split(line, ' ');
+    std::vector<std::string> node_info = utils::string_utils::split(line, ' ', 3U);
     assert_throw(node_info.size() == 3U,
         "Expected 3 attributes, got " << node_info.size() << ": " << line);
     node_op op;
@@ -321,7 +321,7 @@ void load_links(graph_store<tail_scheme>* store, const size_t num_stores,
   }
   std::string line;
   while (std::getline(in, line)) {
-    std::vector<std::string> link_info = utils::string_utils::split(line, ' ');
+    std::vector<std::string> link_info = utils::string_utils::split(line, ' ', 5U);
     assert_throw(link_info.size() == 5U,
         "Expected 5 attributes, got " << link_info.size() << ": " << line);
     link_op op;
