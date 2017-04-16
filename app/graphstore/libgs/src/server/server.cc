@@ -244,7 +244,6 @@ class gs_processor_factory : public TProcessorFactory {
   }
 
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
-    LOG_INFO<< "Creating new processor...";
     boost::shared_ptr<graph_store_service<tail_scheme>> handler(
         new graph_store_service<tail_scheme>(store_, hostlist_, store_id_));
     boost::shared_ptr<TProcessor> processor(
