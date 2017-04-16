@@ -12,14 +12,14 @@ class traversal_client {
  public:
 
   traversal_client()
-      : coord_(nullptr),
-        port_(9090) {
+      : port_(9090),
+        coord_(nullptr) {
   }
 
   traversal_client(const std::vector<std::string>& hosts, const int port,
                    const int64_t sleep_us)
-      : hosts_(hosts),
-        port_(port) {
+      : port_(port),
+        hosts_(hosts) {
     setup(hosts, port, sleep_us);
   }
 
