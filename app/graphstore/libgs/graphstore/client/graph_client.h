@@ -15,8 +15,7 @@ using namespace ::apache::thrift::transport;
 
 namespace graphstore {
 
-typedef GraphStoreServiceClient gs_client;
-
+template<typename gs_client>
 class graph_store_client {
  public:
   graph_store_client() = default;
@@ -25,7 +24,7 @@ class graph_store_client {
     connect(host, port);
   }
 
-  graph_store_client(const graph_store_client& other) {
+  graph_store_client(const graph_store_client<gs_client>& other) {
     socket_ = other.socket_;
     transport_ = other.transport_;
     protocol_ = other.protocol_;
@@ -46,6 +45,7 @@ class graph_store_client {
   }
 
   void disconnect() {
+    if (transport_->isOpen())
     transport_->close();
   }
 
@@ -62,7 +62,7 @@ class graph_store_client {
   }
 
   void get_node(TNode& _return, const int64_t type, const int64_t id) {
-    return client_->get_node(_return, type, id);
+    client_->get_node(_return, type, id);
   }
 
   bool update_node(const TNode& n) {
@@ -142,11 +142,38 @@ class graph_store_client {
     client_->traverse(_return, id, link_type, depth, snapshot);
   }
 
-private:
+protected:
   boost::shared_ptr<TSocket> socket_;
   boost::shared_ptr<TTransport> transport_;
   boost::shared_ptr<TProtocol> protocol_;
   boost::shared_ptr<gs_client> client_;
+};
+
+typedef graph_store_client<GraphStoreServiceClient> graph_client;
+class concurrent_graph_client : public graph_store_client<
+    GraphStoreServiceConcurrentClient> {
+ public:
+  concurrent_graph_client()
+      : graph_store_client<GraphStoreServiceConcurrentClient>() {
+  }
+
+  concurrent_graph_client(const std::string& host, const int port)
+      : graph_store_client<GraphStoreServiceConcurrentClient>(host, port) {
+  }
+
+  concurrent_graph_client(const concurrent_graph_client& client)
+      : graph_store_client<GraphStoreServiceConcurrentClient>(client) {
+  }
+
+  int32_t send_traverse(const int64_t id, const int64_t link_type,
+                        const int64_t depth,
+                        const std::vector<int64_t>& snapshot) {
+    return client_->send_traverse(id, link_type, depth, snapshot);
+  }
+
+  void recv_traverse(std::vector<TLink>& _return, int32_t seq_id) {
+    client_->recv_traverse(_return, seq_id);
+  }
 };
 
 }

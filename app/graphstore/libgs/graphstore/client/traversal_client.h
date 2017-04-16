@@ -38,7 +38,7 @@ class traversal_client {
       clients_[i].init_connection();
     }
     LOG_INFO << "Creating coordinator...";
-    coord_ = new coordinator<graph_store_client>(clients_, sleep_us);
+    coord_ = new coordinator<graph_client>(clients_, sleep_us);
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
@@ -58,8 +58,8 @@ class traversal_client {
 private:
   int port_;
   std::vector<std::string> hosts_;
-  std::vector<graph_store_client> clients_;
-  coordinator<graph_store_client>* coord_;
+  std::vector<graph_client> clients_;
+  coordinator<graph_client>* coord_;
 };
 
 }
