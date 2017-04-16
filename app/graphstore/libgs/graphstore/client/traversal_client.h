@@ -44,10 +44,10 @@ class traversal_client {
   void traverse(std::vector<TLink>& _return, const int64_t id,
                 const int64_t link_type, const int64_t depth) {
     LOG_INFO << "Waiting for snapshot...";
-    snapshot s = coord_->get_snapshot();
+    const snapshot& s = coord_->get_snapshot();
     LOG_INFO << "Got snapshot; snapshot size = " << s.tails.size();
     std::vector<int64_t> snapshots;
-    for (auto& t : s.tails)
+    for (const auto& t : s.tails)
       snapshots.push_back(t);
     size_t client_id = id % clients_.size();
     clients_.at(client_id).traverse(_return, id, link_type, depth, snapshots);

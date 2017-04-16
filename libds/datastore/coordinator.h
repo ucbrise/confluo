@@ -24,12 +24,12 @@ struct snapshot {
     tails = s.tails;
   }
 
-  std::string to_string() {
+  std::string to_string() const {
     std::string out = "(";
-    for (const uint64_t t : tails) {
-      out += t + ",";
-    }
-    out.pop_back();
+    for (const uint64_t t : tails)
+      out += std::to_string(t) + ",";
+    if (out.back() != '(')
+      out.pop_back();
     out += ")";
     return out;
   }
@@ -47,12 +47,12 @@ class coordinator {
         stores_(stores) {
   }
 
-  snapshot& get_snapshot() {
+  const snapshot& get_snapshot() {
     uint64_t id = snapshots_.size();
     LOG_INFO<< "Waiting for snapshot ID " << id;
     while (snapshots_.size() != id + 1)
       std::this_thread::yield();
-    snapshot& s = snapshots_.get(id);
+    const snapshot& s = snapshots_.get(id);
     LOG_INFO<< "Got snapshot ID " << id << ": " << s.to_string();
     return s;
   }
