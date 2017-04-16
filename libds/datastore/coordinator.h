@@ -49,11 +49,9 @@ class coordinator {
 
   const snapshot& get_snapshot() {
     uint64_t id = snapshots_.size();
-    LOG_INFO<< "Waiting for snapshot ID " << id;
     while (snapshots_.size() != id + 1)
       std::this_thread::yield();
     const snapshot& s = snapshots_.get(id);
-    LOG_INFO<< "Got snapshot ID " << id << ": " << s.to_string();
     return s;
   }
 

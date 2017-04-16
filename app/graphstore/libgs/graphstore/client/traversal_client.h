@@ -12,21 +12,24 @@ class traversal_client {
  public:
 
   traversal_client()
-      : coord_(nullptr) {
+      : coord_(nullptr),
+        port_(9090) {
   }
 
   traversal_client(const std::vector<std::string>& hosts, const int port,
-                   const int64_t sleep_us) {
+                   const int64_t sleep_us)
+      : hosts_(hosts),
+        port_(port) {
     setup(hosts, port, sleep_us);
   }
 
   ~traversal_client() {
-    LOG_INFO << "Stopping coordinator...";
+    LOG_INFO<<"Stopping coordinator...";
     coord_->stop();
   }
 
   void setup(const std::vector<std::string>& hosts, const int port,
-             const int64_t sleep_us) {
+      const int64_t sleep_us) {
     clients_.clear();
     clients_.resize(hosts.size());
     for (size_t i = 0; i < hosts.size(); i++) {
@@ -42,18 +45,21 @@ class traversal_client {
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
-                const int64_t link_type, const int64_t depth) {
-    LOG_INFO << "Waiting for snapshot...";
+      const int64_t link_type, const int64_t depth) {
+
     const snapshot& s = coord_->get_snapshot();
-    LOG_INFO << "Got snapshot; snapshot size = " << s.tails.size();
+    LOG_INFO << "Got snapshot: " << s.to_string();
     std::vector<int64_t> snapshots;
     for (const auto& t : s.tails)
-      snapshots.push_back(t);
+    snapshots.push_back(t);
     size_t client_id = id % clients_.size();
+    LOG_INFO << "Forwarding request to client#" << client_id << ": " << hosts_[client_id] << ":" << port_;
     clients_.at(client_id).traverse(_return, id, link_type, depth, snapshots);
   }
 
- private:
+private:
+  int port_;
+  std::vector<std::string> hosts_;
   std::vector<graph_store_client> clients_;
   coordinator<graph_store_client>* coord_;
 };
