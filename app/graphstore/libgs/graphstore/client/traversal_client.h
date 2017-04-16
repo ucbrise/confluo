@@ -45,7 +45,7 @@ class traversal_client {
                 const int64_t link_type, const int64_t depth) {
     LOG_INFO << "Waiting for snapshot...";
     snapshot s = coord_->get_snapshot();
-    LOG_INFO << "Got snapshot.";
+    LOG_INFO << "Got snapshot; snapshot size = " << s.tails.size();
     std::vector<int64_t> snapshots;
     for (auto& t : s.tails)
       snapshots.push_back(t);

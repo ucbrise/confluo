@@ -19,6 +19,16 @@ struct snapshot {
   snapshot(size_t size)
       : tails(size, UINT64_MAX) {
   }
+
+  std::string to_string() {
+    std::string out = "(";
+    for (const uint64_t t : tails) {
+      out += t + ",";
+    }
+    out.pop_back();
+    out += ")";
+    return out;
+  }
 };
 
 template<typename data_store>
@@ -35,9 +45,12 @@ class coordinator {
 
   snapshot get_snapshot() {
     uint64_t id = snapshots_.size();
+    LOG_INFO<< "Waiting for snapshot ID " << id;
     while (snapshots_.size() != id + 1)
       std::this_thread::yield();
-    return snapshots_.get(id);
+    snapshot s = snapshots_.get(id);
+    LOG_INFO<< "Got snapshot ID " << id << ": " << s.to_string();
+    return s;
   }
 
   bool start() {
@@ -80,7 +93,7 @@ class coordinator {
           size_t nsnapshots = snapshots_.size();
           double snapshot_rate = (nsnapshots * 1000.0) / (double)(now - start);
           LOG_INFO << nsnapshots << " snapshots in " << (now - start) <<
-            " ms [" << snapshot_rate << " snapshots/s]";
+          " ms [" << snapshot_rate << " snapshots/s]";
         }
       });
       return true;
