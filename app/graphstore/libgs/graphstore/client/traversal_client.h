@@ -52,8 +52,8 @@ class traversal_client {
     std::vector<int64_t> snapshots;
     for (const auto& t : s.tails)
     snapshots.push_back(t);
-    size_t client_id = id % clients_.size();
-    LOG_INFO << "Forwarding request to client#" << client_id << ": " << hosts_[client_id] << ":" << port_;
+    size_t client_id = id % hosts_.size();
+    LOG_INFO << "Forwarding request to client#" << client_id << ": " << hosts_.at(client_id) << ":" << port_;
     clients_.at(client_id).traverse(_return, id, link_type, depth, snapshots);
   }
 
