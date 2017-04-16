@@ -27,29 +27,16 @@ class graph_store_service : virtual public GraphStoreServiceIf {
  public:
   graph_store_service(graph_store<tail_scheme>* store,
                       const std::vector<std::string> hostlist,
-                      uint32_t store_id,
-                      std::map<uint32_t, concurrent_graph_client>& clients)
-      : clients_(clients),
-        store_id_(store_id),
+                      uint32_t store_id)
+      : store_id_(store_id),
         hostlist_(hostlist),
         store_(store) {
   }
 
   void init_connection() {
-    LOG_INFO<< "Initialize connection requested...";
-    for (size_t i = 0; i < hostlist_.size(); i++) {
-      if (i != store_id_)
-      add_connection(i, hostlist_[i], 9090);
-    }
-    LOG_INFO << "Initialization complete.";
   }
 
   void destroy_connection() {
-    for (size_t i = 0; i < hostlist_.size(); i++) {
-      if (i != store_id_) {
-        clients_[i].disconnect();
-      }
-    }
   }
 
   int64_t add_node(const TNode& n) {
@@ -77,38 +64,38 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   }
 
   bool delete_link(const int64_t id1, const int64_t link_type,
-      const int64_t id2) {
+                   const int64_t id2) {
     return store_->delete_link(id1 / hostlist_.size(), link_type, id2);
   }
 
   void get_link(TLink& _return, const int64_t id1, const int64_t link_type,
-      const int64_t id2) {
+                const int64_t id2) {
     _return = link_op_to_tlink(
         store_->get_link(id1 / hostlist_.size(), link_type, id2));
   }
 
   void multiget_link(std::vector<TLink> & _return, const int64_t id1,
-      const int64_t link_type, const std::set<int64_t> & id2s) {
+                     const int64_t link_type, const std::set<int64_t> & id2s) {
     auto res = store_->multiget_links(id1 / hostlist_.size(), link_type, id2s);
     for (const link_op& op : res)
-    _return.push_back(link_op_to_tlink(op));
+      _return.push_back(link_op_to_tlink(op));
   }
 
   void get_link_list(std::vector<TLink> & _return, const int64_t id1,
-      const int64_t link_type) {
+                     const int64_t link_type) {
     auto res = store_->get_link_list(id1 / hostlist_.size(), link_type);
     for (const link_op& op : res)
-    _return.push_back(link_op_to_tlink(op));
+      _return.push_back(link_op_to_tlink(op));
   }
 
   void get_link_list_range(std::vector<TLink> & _return, const int64_t id1,
-      const int64_t link_type, const int64_t min_ts,
-      const int64_t max_ts, const int64_t off,
-      const int64_t limit) {
+                           const int64_t link_type, const int64_t min_ts,
+                           const int64_t max_ts, const int64_t off,
+                           const int64_t limit) {
     auto res = store_->get_link_list(id1 / hostlist_.size(), link_type, min_ts,
-        max_ts, off, limit);
+                                     max_ts, off, limit);
     for (const link_op& op : res)
-    _return.push_back(link_op_to_tlink(op));
+      _return.push_back(link_op_to_tlink(op));
   }
 
   int64_t count_links(const int64_t id1, const int64_t link_type) {
@@ -125,7 +112,8 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   std::future<std::vector<TLink>> continue_traverse(
       const int64_t store_id, const int64_t id1, const int64_t link_type,
-      const int64_t depth, const std::vector<int64_t>& snapshot, std::set<int64_t>& visited) {
+      const int64_t depth, const std::vector<int64_t>& snapshot,
+      std::set<int64_t>& visited) {
 
     if (store_id == store_id_) {
       LOG_INFO<< "Processing request for " << id1 << " locally.";
@@ -138,10 +126,11 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     }
 
     LOG_INFO << "Forwarding request to " << store_id << " for " << id1;
-    int32_t seq_id = clients_.at(store_id).send_traverse(id1, link_type, depth, snapshot, visited);
-    auto t = [store_id, seq_id, this]() {
+
+    auto t = [store_id, id1, link_type, depth, snapshot, visited, this]() {
+      graph_client client(hostlist_.at(store_id), 9090);
       std::vector<TLink> links;
-      clients_.at(store_id).recv_traverse(links, seq_id);
+      client.traverse(links, id1, link_type, depth, snapshot, visited);
       return links;
     };
     return std::async(std::launch::async, t);
@@ -192,7 +181,6 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
 private:
   void add_connection(uint32_t i, const std::string& hostname, int port) {
-    clients_[i].connect(hostname, port);
   }
 
   TNode node_op_to_tnode(const node_op& op) {
@@ -231,7 +219,6 @@ private:
     return op;
   }
 
-  std::map<uint32_t, concurrent_graph_client>& clients_;
   atomic::type<bool> connected_;
   uint32_t store_id_;
   std::vector<std::string> hostlist_;
@@ -253,7 +240,7 @@ class gs_processor_factory : public TProcessorFactory {
   boost::shared_ptr<TProcessor> getProcessor(const TConnectionInfo&) {
     LOG_INFO<< "Creating new processor...";
     boost::shared_ptr<graph_store_service<tail_scheme>> handler(
-        new graph_store_service<tail_scheme>(store_, hostlist_, store_id_, clients_));
+        new graph_store_service<tail_scheme>(store_, hostlist_, store_id_));
     boost::shared_ptr<TProcessor> processor(
         new GraphStoreServiceProcessor(handler));
     return processor;
@@ -263,7 +250,6 @@ private:
   graph_store<tail_scheme> *store_;
   uint32_t store_id_;
   std::vector<std::string> hostlist_;
-  std::map<uint32_t, concurrent_graph_client> clients_;
 };
 
 template<typename tail_scheme>

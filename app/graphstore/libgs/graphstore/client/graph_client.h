@@ -142,6 +142,12 @@ class graph_store_client {
     client_->traverse(_return, id, link_type, depth, snapshot, {id});
   }
 
+  void traverse(std::vector<TLink>& _return, const int64_t id,
+      const int64_t link_type, const int64_t depth,
+      const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
+    client_->traverse(_return, id, link_type, depth, snapshot, visited);
+  }
+
 protected:
   boost::shared_ptr<TSocket> socket_;
   boost::shared_ptr<TTransport> transport_;
@@ -149,7 +155,31 @@ protected:
   boost::shared_ptr<gs_client> client_;
 };
 
-typedef graph_store_client<GraphStoreServiceClient> graph_client;
+class graph_client : public graph_store_client<GraphStoreServiceClient> {
+ public:
+  graph_client()
+      : graph_store_client<GraphStoreServiceClient>() {
+  }
+
+  graph_client(const std::string& host, const int port)
+      : graph_store_client<GraphStoreServiceClient>(host, port) {
+  }
+
+  graph_client(const graph_client& client)
+      : graph_store_client<GraphStoreServiceClient>(client) {
+  }
+
+  void send_traverse(const int64_t id, const int64_t link_type,
+                     const int64_t depth, const std::vector<int64_t>& snapshot,
+                     std::set<int64_t>& visited) {
+    client_->send_traverse(id, link_type, depth, snapshot, visited);
+  }
+
+  void recv_traverse(std::vector<TLink>& _return) {
+    client_->recv_traverse(_return);
+  }
+};
+
 class concurrent_graph_client : public graph_store_client<
     GraphStoreServiceConcurrentClient> {
  public:
