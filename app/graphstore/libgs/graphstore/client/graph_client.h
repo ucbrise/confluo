@@ -139,7 +139,7 @@ class graph_store_client {
   void traverse(std::vector<TLink>& _return, const int64_t id,
       const int64_t link_type, const int64_t depth,
       const std::vector<int64_t>& snapshot) {
-    client_->traverse(_return, id, link_type, depth, snapshot);
+    client_->traverse(_return, id, link_type, depth, snapshot, {id});
   }
 
 protected:
@@ -167,8 +167,9 @@ class concurrent_graph_client : public graph_store_client<
 
   int32_t send_traverse(const int64_t id, const int64_t link_type,
                         const int64_t depth,
-                        const std::vector<int64_t>& snapshot) {
-    return client_->send_traverse(id, link_type, depth, snapshot);
+                        const std::vector<int64_t>& snapshot,
+                        std::set<int64_t>& visited) {
+    return client_->send_traverse(id, link_type, depth, snapshot, visited);
   }
 
   void recv_traverse(std::vector<TLink>& _return, int32_t seq_id) {

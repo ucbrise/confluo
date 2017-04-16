@@ -125,20 +125,20 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   std::future<std::vector<TLink>> continue_traverse(
       const int64_t store_id, const int64_t id1, const int64_t link_type,
-      const int64_t depth, const std::vector<int64_t>& snapshot) {
+      const int64_t depth, const std::vector<int64_t>& snapshot, std::set<int64_t>& visited) {
 
     if (store_id == store_id_) {
       LOG_INFO<< "Processing request for " << id1 << " locally.";
-      auto t = [id1, link_type, depth, snapshot, this]() {
+      auto t = [id1, link_type, depth, snapshot, visited, this]() {
         std::vector<TLink> links;
-        this->traverse(links, id1, link_type, depth, snapshot);
+        this->traverse(links, id1, link_type, depth, snapshot, visited);
         return links;
       };
       return std::async(std::launch::async, t);
     }
 
     LOG_INFO << "Forwarding request to " << store_id << " for " << id1;
-    int32_t seq_id = clients_.at(store_id).send_traverse(id1, link_type, depth, snapshot);
+    int32_t seq_id = clients_.at(store_id).send_traverse(id1, link_type, depth, snapshot, visited);
     auto t = [store_id, seq_id, this]() {
       std::vector<TLink> links;
       clients_.at(store_id).recv_traverse(links, seq_id);
@@ -149,10 +149,12 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   void traverse(std::vector<TLink>& _return, const int64_t id1,
       const int64_t link_type, const int64_t depth,
-      const std::vector<int64_t>& snapshot) {
+      const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
     if (depth == 0) {
       return;
     }
+
+    std::set<int64_t> _visited = visited;
 
     assert_throw(
         snapshot.size() == hostlist_.size(),
@@ -166,13 +168,19 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
-    for (const link_op& op : links) {
-      if (op.id1 != op.id2) {
-        LOG_INFO << "Processing link " << op.id1 << " -> " << op.id2;
+    for (const link_op& op: links) {
+      if (visited.find(op.id2) == visited.end()) {
         _return.push_back(link_op_to_tlink(op));
+        _visited.insert(op.id2);
+      }
+    }
+
+    for (const link_op& op : links) {
+      if (visited.find(op.id2) == visited.end()) {
+        LOG_INFO << "Processing link " << op.id1 << " -> " << op.id2;
         downstream_links.push_back(
             continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
-                depth - 1, snapshot));
+                depth - 1, snapshot, _visited));
       }
     }
 

@@ -3310,6 +3310,27 @@ uint32_t GraphStoreService_traverse_args::read(::apache::thrift::protocol::TProt
           xfer += iprot->skip(ftype);
         }
         break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_SET) {
+          {
+            this->visited.clear();
+            uint32_t _size50;
+            ::apache::thrift::protocol::TType _etype53;
+            xfer += iprot->readSetBegin(_etype53, _size50);
+            uint32_t _i54;
+            for (_i54 = 0; _i54 < _size50; ++_i54)
+            {
+              int64_t _elem55;
+              xfer += iprot->readI64(_elem55);
+              this->visited.insert(_elem55);
+            }
+            xfer += iprot->readSetEnd();
+          }
+          this->__isset.visited = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -3342,12 +3363,24 @@ uint32_t GraphStoreService_traverse_args::write(::apache::thrift::protocol::TPro
   xfer += oprot->writeFieldBegin("snapshot", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>(this->snapshot.size()));
-    std::vector<int64_t> ::const_iterator _iter50;
-    for (_iter50 = this->snapshot.begin(); _iter50 != this->snapshot.end(); ++_iter50)
+    std::vector<int64_t> ::const_iterator _iter56;
+    for (_iter56 = this->snapshot.begin(); _iter56 != this->snapshot.end(); ++_iter56)
     {
-      xfer += oprot->writeI64((*_iter50));
+      xfer += oprot->writeI64((*_iter56));
     }
     xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("visited", ::apache::thrift::protocol::T_SET, 5);
+  {
+    xfer += oprot->writeSetBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>(this->visited.size()));
+    std::set<int64_t> ::const_iterator _iter57;
+    for (_iter57 = this->visited.begin(); _iter57 != this->visited.end(); ++_iter57)
+    {
+      xfer += oprot->writeI64((*_iter57));
+    }
+    xfer += oprot->writeSetEnd();
   }
   xfer += oprot->writeFieldEnd();
 
@@ -3381,12 +3414,24 @@ uint32_t GraphStoreService_traverse_pargs::write(::apache::thrift::protocol::TPr
   xfer += oprot->writeFieldBegin("snapshot", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>((*(this->snapshot)).size()));
-    std::vector<int64_t> ::const_iterator _iter51;
-    for (_iter51 = (*(this->snapshot)).begin(); _iter51 != (*(this->snapshot)).end(); ++_iter51)
+    std::vector<int64_t> ::const_iterator _iter58;
+    for (_iter58 = (*(this->snapshot)).begin(); _iter58 != (*(this->snapshot)).end(); ++_iter58)
     {
-      xfer += oprot->writeI64((*_iter51));
+      xfer += oprot->writeI64((*_iter58));
     }
     xfer += oprot->writeListEnd();
+  }
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("visited", ::apache::thrift::protocol::T_SET, 5);
+  {
+    xfer += oprot->writeSetBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>((*(this->visited)).size()));
+    std::set<int64_t> ::const_iterator _iter59;
+    for (_iter59 = (*(this->visited)).begin(); _iter59 != (*(this->visited)).end(); ++_iter59)
+    {
+      xfer += oprot->writeI64((*_iter59));
+    }
+    xfer += oprot->writeSetEnd();
   }
   xfer += oprot->writeFieldEnd();
 
@@ -3425,14 +3470,14 @@ uint32_t GraphStoreService_traverse_result::read(::apache::thrift::protocol::TPr
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->success.clear();
-            uint32_t _size52;
-            ::apache::thrift::protocol::TType _etype55;
-            xfer += iprot->readListBegin(_etype55, _size52);
-            this->success.resize(_size52);
-            uint32_t _i56;
-            for (_i56 = 0; _i56 < _size52; ++_i56)
+            uint32_t _size60;
+            ::apache::thrift::protocol::TType _etype63;
+            xfer += iprot->readListBegin(_etype63, _size60);
+            this->success.resize(_size60);
+            uint32_t _i64;
+            for (_i64 = 0; _i64 < _size60; ++_i64)
             {
-              xfer += this->success[_i56].read(iprot);
+              xfer += this->success[_i64].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -3463,10 +3508,10 @@ uint32_t GraphStoreService_traverse_result::write(::apache::thrift::protocol::TP
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->success.size()));
-      std::vector<TLink> ::const_iterator _iter57;
-      for (_iter57 = this->success.begin(); _iter57 != this->success.end(); ++_iter57)
+      std::vector<TLink> ::const_iterator _iter65;
+      for (_iter65 = this->success.begin(); _iter65 != this->success.end(); ++_iter65)
       {
-        xfer += (*_iter57).write(oprot);
+        xfer += (*_iter65).write(oprot);
       }
       xfer += oprot->writeListEnd();
     }
@@ -3507,14 +3552,14 @@ uint32_t GraphStoreService_traverse_presult::read(::apache::thrift::protocol::TP
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             (*(this->success)).clear();
-            uint32_t _size58;
-            ::apache::thrift::protocol::TType _etype61;
-            xfer += iprot->readListBegin(_etype61, _size58);
-            (*(this->success)).resize(_size58);
-            uint32_t _i62;
-            for (_i62 = 0; _i62 < _size58; ++_i62)
+            uint32_t _size66;
+            ::apache::thrift::protocol::TType _etype69;
+            xfer += iprot->readListBegin(_etype69, _size66);
+            (*(this->success)).resize(_size66);
+            uint32_t _i70;
+            for (_i70 = 0; _i70 < _size66; ++_i70)
             {
-              xfer += (*(this->success))[_i62].read(iprot);
+              xfer += (*(this->success))[_i70].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -4465,13 +4510,13 @@ bool GraphStoreServiceClient::recv_end_snapshot()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "end_snapshot failed: unknown result");
 }
 
-void GraphStoreServiceClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot)
+void GraphStoreServiceClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
-  send_traverse(id, link_type, depth, snapshot);
+  send_traverse(id, link_type, depth, snapshot, visited);
   recv_traverse(_return);
 }
 
-void GraphStoreServiceClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot)
+void GraphStoreServiceClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("traverse", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -4481,6 +4526,7 @@ void GraphStoreServiceClient::send_traverse(const int64_t id, const int64_t link
   args.link_type = &link_type;
   args.depth = &depth;
   args.snapshot = &snapshot;
+  args.visited = &visited;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -5430,7 +5476,7 @@ void GraphStoreServiceProcessor::process_traverse(int32_t seqid, ::apache::thrif
 
   GraphStoreService_traverse_result result;
   try {
-    iface_->traverse(result.success, args.id, args.link_type, args.depth, args.snapshot);
+    iface_->traverse(result.success, args.id, args.link_type, args.depth, args.snapshot, args.visited);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6812,13 +6858,13 @@ bool GraphStoreServiceConcurrentClient::recv_end_snapshot(const int32_t seqid)
   } // end while(true)
 }
 
-void GraphStoreServiceConcurrentClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot)
+void GraphStoreServiceConcurrentClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
-  int32_t seqid = send_traverse(id, link_type, depth, snapshot);
+  int32_t seqid = send_traverse(id, link_type, depth, snapshot, visited);
   recv_traverse(_return, seqid);
 }
 
-int32_t GraphStoreServiceConcurrentClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot)
+int32_t GraphStoreServiceConcurrentClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -6829,6 +6875,7 @@ int32_t GraphStoreServiceConcurrentClient::send_traverse(const int64_t id, const
   args.link_type = &link_type;
   args.depth = &depth;
   args.snapshot = &snapshot;
+  args.visited = &visited;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();

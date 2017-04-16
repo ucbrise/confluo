@@ -44,5 +44,5 @@ service GraphStoreService {
   bool end_snapshot(1: i64 tail),
 
   // Traverse
-  list<TLink> traverse(1: i64 id, 2: i64 link_type, 3: i64 depth, 4: list<i64> snapshot)
+  list<TLink> traverse(1: i64 id, 2: i64 link_type, 3: i64 depth, 4: list<i64> snapshot, 5: set<i64> visited)
 }
