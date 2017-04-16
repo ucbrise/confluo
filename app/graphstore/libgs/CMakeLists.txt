@@ -24,11 +24,16 @@ file(GLOB_RECURSE server_sources src/server/*.cc)
 add_executable(gsserver ${server_sources})
 target_link_libraries(gsserver gs ${THRIFT_LIBRARIES})
 
+# Build client library
+add_library(gsclient STATIC src/server/graph_store_constants.cc
+  src/server/graph_store_types.cc
+  src/server/graph_store_service.cc)
+
 # Build perf
 add_executable(gsperf perf/graph_store_perf.cc)
 target_link_libraries(gsperf gs ${CMAKE_THREAD_LIBS_INIT})
 add_executable(traversal_perf perf/traversal_perf.cc)
-target_link_libraries(traversal_perf gs ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(traversal_perf gs gsclient ${CMAKE_THREAD_LIBS_INIT} ${THRIFT_LIBRARIES})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)
