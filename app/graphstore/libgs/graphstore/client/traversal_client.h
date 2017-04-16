@@ -17,9 +17,7 @@ class traversal_client {
   }
 
   traversal_client(const std::vector<std::string>& hosts, const int port,
-                   const int64_t sleep_us)
-      : port_(port),
-        hosts_(hosts) {
+                   const int64_t sleep_us) {
     setup(hosts, port, sleep_us);
   }
 
@@ -30,6 +28,8 @@ class traversal_client {
 
   void setup(const std::vector<std::string>& hosts, const int port,
       const int64_t sleep_us) {
+    hosts_ = hosts;
+    port_ = port;
     clients_.clear();
     clients_.resize(hosts.size());
     for (size_t i = 0; i < hosts.size(); i++) {
@@ -50,8 +50,9 @@ class traversal_client {
     const snapshot& s = coord_->get_snapshot();
     LOG_INFO << "Got snapshot: " << s.to_string();
     std::vector<int64_t> snapshots;
-    for (const auto& t : s.tails)
-    snapshots.push_back(t);
+    for (const auto& t : s.tails) {
+      snapshots.push_back(t);
+    }
     size_t client_id = id % hosts_.size();
     LOG_INFO << "Forwarding request to client#" << client_id << ": " << hosts_.at(client_id) << ":" << port_;
     clients_.at(client_id).traverse(_return, id, link_type, depth, snapshots);
