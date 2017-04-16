@@ -43,7 +43,9 @@ class traversal_client {
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
                 const int64_t link_type, const int64_t depth) {
+    LOG_INFO << "Waiting for snapshot...";
     snapshot s = coord_->get_snapshot();
+    LOG_INFO << "Got snapshot.";
     std::vector<int64_t> snapshots;
     for (auto& t : s.tails)
       snapshots.push_back(t);
