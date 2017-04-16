@@ -33,10 +33,12 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   }
 
   void init_connection() {
+    LOG_INFO << "Initialize connection requested...";
     for (size_t i = 0; i < hostlist_.size(); i++) {
       if (i != store_id_)
         add_connection(i, hostlist_[i], 9090);
     }
+    LOG_INFO << "Initialization complete.";
   }
 
   void destroy_connection() {
@@ -155,8 +157,10 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
         link_type, tail);
 
+    LOG_INFO << "Got local " << links.size() << " links";
+
     typedef std::future<std::vector<TLink>> future_t;
-    std::vector<future_t> downstream_links(links.size());
+    std::vector<future_t> downstream_links;
     for (const link_op& op : links) {
       if (op.id1 != op.id2) {
         _return.push_back(link_op_to_tlink(op));
