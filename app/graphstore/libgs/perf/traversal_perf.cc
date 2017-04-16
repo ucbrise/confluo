@@ -21,7 +21,7 @@ class traversal_benchmark : public utils::bench::benchmark<traversal_client> {
     NODE_ID = node_id;
     LINK_TYPE = link_type;
     DEPTH = depth;
-
+    ds_.setup(hosts, port, 0);
   }
 
   static void traversal(size_t i, traversal_client& client) {
