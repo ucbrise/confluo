@@ -39,15 +39,12 @@ class traversal_client {
     }
     LOG_INFO << "Creating coordinator...";
     coord_ = new coordinator<graph_store_client>(clients_, sleep_us);
-    LOG_INFO << "Starting coordinator...";
-    coord_->start();
-    LOG_INFO << "Coordinator started.";
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
       const int64_t link_type, const int64_t depth) {
 
-    const snapshot& s = coord_->get_snapshot();
+    const snapshot& s = coord_->force_snapshot();
     LOG_INFO << "Got snapshot: " << s.to_string();
     std::vector<int64_t> snapshots;
     for (const auto& t : s.tails) {
