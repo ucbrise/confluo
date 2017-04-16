@@ -29,9 +29,7 @@ class traversal_benchmark : public utils::bench::benchmark<traversal_client> {
 
   static void traversal(size_t i, traversal_client& client) {
     std::vector<TLink> results;
-    LOG_INFO << "Issuing traversal query...";
     client.traverse(results, NODE_ID++, LINK_TYPE, DEPTH, BREADTH);
-    LOG_INFO << "Traversal query completed, found " << results.size() << " results";
   }
 
   DEFINE_BENCH(traversal)

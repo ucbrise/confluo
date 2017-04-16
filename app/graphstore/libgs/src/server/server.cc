@@ -116,7 +116,6 @@ class graph_store_service : virtual public GraphStoreServiceIf {
       std::set<int64_t>& visited) {
 
     if (store_id == store_id_) {
-      LOG_INFO<< "Processing request for " << id1 << " locally.";
       auto t = [id1, link_type, depth, breadth, snapshot, visited, this]() {
         std::vector<TLink> links;
         this->traverse(links, id1, link_type, depth, breadth, snapshot, visited);
@@ -124,8 +123,6 @@ class graph_store_service : virtual public GraphStoreServiceIf {
       };
       return std::async(std::launch::async, t);
     }
-
-    LOG_INFO << "Forwarding request to " << store_id << " for " << id1;
 
     auto t = [store_id, id1, link_type, depth, breadth, snapshot, visited, this]() {
       graph_client client(hostlist_.at(store_id), 9090);
@@ -148,12 +145,9 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     assert_throw(
         snapshot.size() == hostlist_.size(),
         "snapshot.size() = " << snapshot.size() << ", hostlist.size() = " << hostlist_.size());
-    LOG_INFO<< "id1=" << id1 << ", link_type=" << link_type;
     uint64_t tail = snapshot.at(store_id_);
     std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
         link_type, tail);
-
-    LOG_INFO << "Got local " << links.size() << " links: ";
 
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
@@ -175,7 +169,6 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     num_neighbors = 0;
     for (const link_op& op : links) {
       if (visited.find(op.id2) == visited.end()) {
-        LOG_INFO << "Processing link " << op.id1 << " -> " << op.id2;
         downstream_links.push_back(
             continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
                 depth - 1, breadth, snapshot, _visited));

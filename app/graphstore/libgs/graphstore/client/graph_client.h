@@ -36,7 +36,6 @@ class graph_store_client {
   }
 
   void connect(const std::string& host, int port) {
-    LOG_INFO<<"Connecting to " << host << ":" << port;
     socket_ = boost::shared_ptr<TSocket>(new TSocket(host, port));
     transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
     protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
