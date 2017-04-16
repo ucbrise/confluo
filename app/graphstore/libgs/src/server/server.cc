@@ -122,6 +122,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
       const int64_t depth, const std::vector<int64_t>& snapshot) {
 
     if (store_id == store_id_) {
+      LOG_INFO<< "Processing request for " << id1 << " locally.";
       auto t = [id1, link_type, depth, snapshot, this]() {
         std::vector<TLink> links;
         this->traverse(links, id1, link_type, depth, snapshot);
@@ -130,6 +131,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
       return std::async(std::launch::async, t);
     }
 
+    LOG_INFO << "Forwarding request to " << store_id << " for " << id1;
     clients_[store_id]->send_traverse(id1, link_type, depth, snapshot);
     auto t = [store_id, id1, link_type, depth, snapshot, this]() {
       std::vector<TLink> links;
@@ -140,14 +142,19 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id1,
-                const int64_t link_type, const int64_t depth,
-                const std::vector<int64_t>& snapshot) {
+      const int64_t link_type, const int64_t depth,
+      const std::vector<int64_t>& snapshot) {
     if (depth == 0)
       return;
 
-    uint64_t tail = snapshot[store_id_];
+    assert_throw(
+        snapshot.size() == hostlist_.size(),
+        "snapshot.size() = " << snapshot.size() << ", hostlist.size() = " << hostlist_.size());
+    LOG_INFO<< "id1=" << id1 << ", link_type=" << link_type;
+    uint64_t tail = snapshot.at(store_id_);
     std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
-                                                   link_type, tail);
+        link_type, tail);
+
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links(links.size());
     for (const link_op& op : links) {
@@ -155,7 +162,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
         _return.push_back(link_op_to_tlink(op));
         downstream_links.push_back(
             continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
-                              depth - 1, snapshot));
+                depth - 1, snapshot));
       }
     }
 
@@ -165,7 +172,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     }
   }
 
- private:
+private:
   void add_connection(uint32_t i, const std::string& hostname, int port) {
     LOG_INFO<< "Connecting to " << hostname << ":" << port;
     sockets_[i] = boost::shared_ptr<TSocket>(new TSocket(hostname, port));
@@ -299,7 +306,7 @@ void load_nodes(graph_store<tail_scheme>* store, const size_t num_stores,
   while (std::getline(in, line)) {
     std::vector<std::string> node_info = utils::string_utils::split(line, ' ', 3U);
     if (node_info.size() == 2U)
-      node_info.push_back("");
+    node_info.push_back("");
     assert_throw(node_info.size() == 3U,
         "Expected 3 attributes, got " << node_info.size() << ": " << line << "; line_no = " << line_no);
     node_op op;
