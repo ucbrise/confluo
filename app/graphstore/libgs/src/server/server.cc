@@ -172,6 +172,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     if (depth == 1)
     return;
 
+    num_neighbors = 0;
     for (const link_op& op : links) {
       if (visited.find(op.id2) == visited.end()) {
         LOG_INFO << "Processing link " << op.id1 << " -> " << op.id2;
