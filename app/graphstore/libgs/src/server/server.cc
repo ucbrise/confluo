@@ -29,8 +29,8 @@ class graph_store_service : virtual public GraphStoreServiceIf {
                       const std::vector<std::string> hostlist,
                       uint32_t store_id,
                       std::map<uint32_t, concurrent_graph_client>& clients)
-      : store_id_(store_id),
-        clients_(clients),
+      : clients_(clients),
+        store_id_(store_id),
         hostlist_(hostlist),
         store_(store) {
   }
