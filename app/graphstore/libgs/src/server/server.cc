@@ -146,8 +146,9 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   void traverse(std::vector<TLink>& _return, const int64_t id1,
       const int64_t link_type, const int64_t depth,
       const std::vector<int64_t>& snapshot) {
-    if (depth == 0)
+    if (depth == 0) {
       return;
+    }
 
     assert_throw(
         snapshot.size() == hostlist_.size(),
