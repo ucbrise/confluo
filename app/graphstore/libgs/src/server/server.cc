@@ -9,6 +9,7 @@
 #include "cmd_parse.h"
 #include "logger.h"
 #include "error_handling.h"
+#include "string_utils.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -150,10 +151,12 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links(links.size());
     for (const link_op& op : links) {
-      _return.push_back(link_op_to_tlink(op));
-      downstream_links.push_back(
-          continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
-                            depth - 1, snapshot));
+      if (op.id1 != op.id2) {
+        _return.push_back(link_op_to_tlink(op));
+        downstream_links.push_back(
+            continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
+                              depth - 1, snapshot));
+      }
     }
 
     for (future_t& f : downstream_links) {
@@ -270,7 +273,65 @@ std::vector<std::string> read_hosts(const std::string& hostfile) {
   std::ifstream in(hostfile);
   std::copy(std::istream_iterator<std::string>(in),
             std::istream_iterator<std::string>(), std::back_inserter(hostlist));
+
+  std::string host_info = "Host list:";
+  for (const std::string& host : hostlist)
+    host_info += ("\n" + host);
+  LOG_INFO<< host_info;
+
   return hostlist;
+}
+
+template<typename tail_scheme>
+void load_nodes(graph_store<tail_scheme>* store, const size_t num_stores,
+                const std::string& node_file) {
+  if (node_file == "") {
+    LOG_INFO<< "Node file not specified";
+    return;
+  }
+  std::ifstream in(node_file);
+  if (!in.good()) {
+    LOG_INFO << "Could not open node file: " << node_file << "; skipping.";
+    return;
+  }
+  std::string line;
+  while (std::getline(in, line)) {
+    std::vector<std::string> node_info = utils::string_utils::split(line, ' ');
+    assert_throw(node_info.size() == 3U,
+        "Expected 3 attributes, got " << node_info.size());
+    node_op op;
+    op.id = std::stoll(node_info[0]) / num_stores;
+    op.type = std::stoll(node_info[1]);
+    op.data = node_info[2];
+    store->add_node(op);
+  }
+}
+
+template<typename tail_scheme>
+void load_links(graph_store<tail_scheme>* store, const size_t num_stores,
+                const std::string& link_file) {
+  if (link_file == "") {
+    LOG_INFO<< "Link file not specified";
+    return;
+  }
+  std::ifstream in(link_file);
+  if (!in.good()) {
+    LOG_INFO << "Could not open link file: " << link_file << "; skipping.";
+    return;
+  }
+  std::string line;
+  while (std::getline(in, line)) {
+    std::vector<std::string> link_info = utils::string_utils::split(line, ' ');
+    assert_throw(link_info.size() == 5U,
+        "Expected 5 attributes, got " << link_info.size());
+    link_op op;
+    op.id1 = std::stoll(link_info[0]);
+    op.id1 = std::stoll(link_info[1]);
+    op.link_type = std::stoll(link_info[2]);
+    op.time = std::stoll(link_info[3]);
+    op.data = link_info[4];
+    store->add_link(op);
+  }
 }
 
 int main(int argc, char **argv) {
@@ -290,6 +351,12 @@ int main(int argc, char **argv) {
   opts.add(
       cmd_option("server-id", 's', false).set_default("0").set_description(
           "Server ID"));
+  opts.add(
+      cmd_option("load-nodes", 'n', false).set_description(
+          "Load nodes from file"));
+  opts.add(
+      cmd_option("load-links", 'l', false).set_description(
+          "Load links from file"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -301,23 +368,35 @@ int main(int argc, char **argv) {
   int server_id;
   std::string concurrency_control;
   std::string host_file;
+  std::string node_file;
+  std::string link_file;
   try {
     port = parser.get_int("port");
     concurrency_control = parser.get("concurrency-control");
     host_file = parser.get("host-list");
     server_id = parser.get_int("server-id");
+    node_file = parser.get("load-nodes");
+    link_file = parser.get("load-links");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
     return 0;
   }
 
+  LOG_INFO<< parser.parsed_values();
+
   if (concurrency_control == "write-stalled") {
     graph_store<write_stalled>* store = new graph_store<write_stalled>();
-    start_server(port, store, read_hosts(host_file), server_id);
+    std::vector<std::string> hostlist = read_hosts(host_file);
+    load_nodes(store, hostlist.size(), node_file);
+    load_links(store, hostlist.size(), link_file);
+    start_server(port, store, hostlist, server_id);
   } else if (concurrency_control == "read-stalled") {
     graph_store<read_stalled>* store = new graph_store<read_stalled>();
-    start_server(port, store, read_hosts(host_file), server_id);
+    std::vector<std::string> hostlist = read_hosts(host_file);
+    load_nodes(store, hostlist.size(), node_file);
+    load_links(store, hostlist.size(), link_file);
+    start_server(port, store, hostlist, server_id);
   } else {
     fprintf(stderr, "Unknown tail scheme: %s\n", concurrency_control.c_str());
   }

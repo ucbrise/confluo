@@ -24,8 +24,10 @@ class traversal_client {
              const int64_t sleep_us) {
     clients_.clear();
     clients_.resize(hosts.size());
-    for (size_t i = 0; i < hosts.size(); i++)
+    for (size_t i = 0; i < hosts.size(); i++) {
       clients_[i].connect(hosts[i], port);
+      clients_[i].init_connection();
+    }
     coord_ = new coordinator<graph_store_client>(clients_, sleep_us);
     coord_->start();
   }
