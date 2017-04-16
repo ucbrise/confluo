@@ -3291,6 +3291,14 @@ uint32_t GraphStoreService_traverse_args::read(::apache::thrift::protocol::TProt
         }
         break;
       case 4:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->breadth);
+          this->__isset.breadth = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->snapshot.clear();
@@ -3310,7 +3318,7 @@ uint32_t GraphStoreService_traverse_args::read(::apache::thrift::protocol::TProt
           xfer += iprot->skip(ftype);
         }
         break;
-      case 5:
+      case 6:
         if (ftype == ::apache::thrift::protocol::T_SET) {
           {
             this->visited.clear();
@@ -3360,7 +3368,11 @@ uint32_t GraphStoreService_traverse_args::write(::apache::thrift::protocol::TPro
   xfer += oprot->writeI64(this->depth);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("snapshot", ::apache::thrift::protocol::T_LIST, 4);
+  xfer += oprot->writeFieldBegin("breadth", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64(this->breadth);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("snapshot", ::apache::thrift::protocol::T_LIST, 5);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>(this->snapshot.size()));
     std::vector<int64_t> ::const_iterator _iter56;
@@ -3372,7 +3384,7 @@ uint32_t GraphStoreService_traverse_args::write(::apache::thrift::protocol::TPro
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("visited", ::apache::thrift::protocol::T_SET, 5);
+  xfer += oprot->writeFieldBegin("visited", ::apache::thrift::protocol::T_SET, 6);
   {
     xfer += oprot->writeSetBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>(this->visited.size()));
     std::set<int64_t> ::const_iterator _iter57;
@@ -3411,7 +3423,11 @@ uint32_t GraphStoreService_traverse_pargs::write(::apache::thrift::protocol::TPr
   xfer += oprot->writeI64((*(this->depth)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("snapshot", ::apache::thrift::protocol::T_LIST, 4);
+  xfer += oprot->writeFieldBegin("breadth", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64((*(this->breadth)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("snapshot", ::apache::thrift::protocol::T_LIST, 5);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>((*(this->snapshot)).size()));
     std::vector<int64_t> ::const_iterator _iter58;
@@ -3423,7 +3439,7 @@ uint32_t GraphStoreService_traverse_pargs::write(::apache::thrift::protocol::TPr
   }
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("visited", ::apache::thrift::protocol::T_SET, 5);
+  xfer += oprot->writeFieldBegin("visited", ::apache::thrift::protocol::T_SET, 6);
   {
     xfer += oprot->writeSetBegin(::apache::thrift::protocol::T_I64, static_cast<uint32_t>((*(this->visited)).size()));
     std::set<int64_t> ::const_iterator _iter59;
@@ -4510,13 +4526,13 @@ bool GraphStoreServiceClient::recv_end_snapshot()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "end_snapshot failed: unknown result");
 }
 
-void GraphStoreServiceClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
+void GraphStoreServiceClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
-  send_traverse(id, link_type, depth, snapshot, visited);
+  send_traverse(id, link_type, depth, breadth, snapshot, visited);
   recv_traverse(_return);
 }
 
-void GraphStoreServiceClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
+void GraphStoreServiceClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("traverse", ::apache::thrift::protocol::T_CALL, cseqid);
@@ -4525,6 +4541,7 @@ void GraphStoreServiceClient::send_traverse(const int64_t id, const int64_t link
   args.id = &id;
   args.link_type = &link_type;
   args.depth = &depth;
+  args.breadth = &breadth;
   args.snapshot = &snapshot;
   args.visited = &visited;
   args.write(oprot_);
@@ -5476,7 +5493,7 @@ void GraphStoreServiceProcessor::process_traverse(int32_t seqid, ::apache::thrif
 
   GraphStoreService_traverse_result result;
   try {
-    iface_->traverse(result.success, args.id, args.link_type, args.depth, args.snapshot, args.visited);
+    iface_->traverse(result.success, args.id, args.link_type, args.depth, args.breadth, args.snapshot, args.visited);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6858,13 +6875,13 @@ bool GraphStoreServiceConcurrentClient::recv_end_snapshot(const int32_t seqid)
   } // end while(true)
 }
 
-void GraphStoreServiceConcurrentClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
+void GraphStoreServiceConcurrentClient::traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
-  int32_t seqid = send_traverse(id, link_type, depth, snapshot, visited);
+  int32_t seqid = send_traverse(id, link_type, depth, breadth, snapshot, visited);
   recv_traverse(_return, seqid);
 }
 
-int32_t GraphStoreServiceConcurrentClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
+int32_t GraphStoreServiceConcurrentClient::send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
@@ -6874,6 +6891,7 @@ int32_t GraphStoreServiceConcurrentClient::send_traverse(const int64_t id, const
   args.id = &id;
   args.link_type = &link_type;
   args.depth = &depth;
+  args.breadth = &breadth;
   args.snapshot = &snapshot;
   args.visited = &visited;
   args.write(oprot_);

@@ -42,7 +42,7 @@ class traversal_client {
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
-      const int64_t link_type, const int64_t depth) {
+      const int64_t link_type, const int64_t depth, const int64_t breadth) {
 
     const snapshot& s = coord_->force_snapshot();
     LOG_INFO << "Got snapshot: " << s.to_string();
@@ -52,7 +52,7 @@ class traversal_client {
     }
     size_t client_id = id % hosts_.size();
     LOG_INFO << "Forwarding request to client#" << client_id << ": " << hosts_.at(client_id) << ":" << port_;
-    clients_.at(client_id).traverse(_return, id, link_type, depth, snapshots);
+    clients_.at(client_id).traverse(_return, id, link_type, depth, breadth, snapshots);
   }
 
 private:

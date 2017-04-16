@@ -137,15 +137,15 @@ class graph_store_client {
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
-      const int64_t link_type, const int64_t depth,
+      const int64_t link_type, const int64_t depth, const int64_t breadth,
       const std::vector<int64_t>& snapshot) {
-    client_->traverse(_return, id, link_type, depth, snapshot, {id});
+    client_->traverse(_return, id, link_type, depth, breadth, snapshot, {id});
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
-      const int64_t link_type, const int64_t depth,
+      const int64_t link_type, const int64_t depth, const int64_t breadth,
       const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
-    client_->traverse(_return, id, link_type, depth, snapshot, visited);
+    client_->traverse(_return, id, link_type, depth,  breadth, snapshot, visited);
   }
 
 protected:
@@ -170,9 +170,10 @@ class graph_client : public graph_store_client<GraphStoreServiceClient> {
   }
 
   void send_traverse(const int64_t id, const int64_t link_type,
-                     const int64_t depth, const std::vector<int64_t>& snapshot,
+                     const int64_t depth, const int64_t breadth,
+                     const std::vector<int64_t>& snapshot,
                      std::set<int64_t>& visited) {
-    client_->send_traverse(id, link_type, depth, snapshot, visited);
+    client_->send_traverse(id, link_type, depth, breadth, snapshot, visited);
   }
 
   void recv_traverse(std::vector<TLink>& _return) {
@@ -196,10 +197,10 @@ class concurrent_graph_client : public graph_store_client<
   }
 
   int32_t send_traverse(const int64_t id, const int64_t link_type,
-                        const int64_t depth,
+                        const int64_t depth, const int64_t breadth,
                         const std::vector<int64_t>& snapshot,
                         std::set<int64_t>& visited) {
-    return client_->send_traverse(id, link_type, depth, snapshot, visited);
+    return client_->send_traverse(id, link_type, depth, breadth, snapshot, visited);
   }
 
   void recv_traverse(std::vector<TLink>& _return, int32_t seq_id) {

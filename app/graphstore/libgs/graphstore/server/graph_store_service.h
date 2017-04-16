@@ -37,7 +37,7 @@ class GraphStoreServiceIf {
   virtual int64_t count_links(const int64_t id1, const int64_t link_type) = 0;
   virtual int64_t begin_snapshot() = 0;
   virtual bool end_snapshot(const int64_t tail) = 0;
-  virtual void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited) = 0;
+  virtual void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited) = 0;
 };
 
 class GraphStoreServiceIfFactory {
@@ -124,7 +124,7 @@ class GraphStoreServiceNull : virtual public GraphStoreServiceIf {
     bool _return = false;
     return _return;
   }
-  void traverse(std::vector<TLink> & /* _return */, const int64_t /* id */, const int64_t /* link_type */, const int64_t /* depth */, const std::vector<int64_t> & /* snapshot */, const std::set<int64_t> & /* visited */) {
+  void traverse(std::vector<TLink> & /* _return */, const int64_t /* id */, const int64_t /* link_type */, const int64_t /* depth */, const int64_t /* breadth */, const std::vector<int64_t> & /* snapshot */, const std::set<int64_t> & /* visited */) {
     return;
   }
 };
@@ -1827,10 +1827,11 @@ class GraphStoreService_end_snapshot_presult {
 };
 
 typedef struct _GraphStoreService_traverse_args__isset {
-  _GraphStoreService_traverse_args__isset() : id(false), link_type(false), depth(false), snapshot(false), visited(false) {}
+  _GraphStoreService_traverse_args__isset() : id(false), link_type(false), depth(false), breadth(false), snapshot(false), visited(false) {}
   bool id :1;
   bool link_type :1;
   bool depth :1;
+  bool breadth :1;
   bool snapshot :1;
   bool visited :1;
 } _GraphStoreService_traverse_args__isset;
@@ -1840,13 +1841,14 @@ class GraphStoreService_traverse_args {
 
   GraphStoreService_traverse_args(const GraphStoreService_traverse_args&);
   GraphStoreService_traverse_args& operator=(const GraphStoreService_traverse_args&);
-  GraphStoreService_traverse_args() : id(0), link_type(0), depth(0) {
+  GraphStoreService_traverse_args() : id(0), link_type(0), depth(0), breadth(0) {
   }
 
   virtual ~GraphStoreService_traverse_args() throw();
   int64_t id;
   int64_t link_type;
   int64_t depth;
+  int64_t breadth;
   std::vector<int64_t>  snapshot;
   std::set<int64_t>  visited;
 
@@ -1857,6 +1859,8 @@ class GraphStoreService_traverse_args {
   void __set_link_type(const int64_t val);
 
   void __set_depth(const int64_t val);
+
+  void __set_breadth(const int64_t val);
 
   void __set_snapshot(const std::vector<int64_t> & val);
 
@@ -1869,6 +1873,8 @@ class GraphStoreService_traverse_args {
     if (!(link_type == rhs.link_type))
       return false;
     if (!(depth == rhs.depth))
+      return false;
+    if (!(breadth == rhs.breadth))
       return false;
     if (!(snapshot == rhs.snapshot))
       return false;
@@ -1896,6 +1902,7 @@ class GraphStoreService_traverse_pargs {
   const int64_t* id;
   const int64_t* link_type;
   const int64_t* depth;
+  const int64_t* breadth;
   const std::vector<int64_t> * snapshot;
   const std::set<int64_t> * visited;
 
@@ -2031,8 +2038,8 @@ class GraphStoreServiceClient : virtual public GraphStoreServiceIf {
   bool end_snapshot(const int64_t tail);
   void send_end_snapshot(const int64_t tail);
   bool recv_end_snapshot();
-  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
-  void send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
+  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
+  void send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
   void recv_traverse(std::vector<TLink> & _return);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
@@ -2263,13 +2270,13 @@ class GraphStoreServiceMultiface : virtual public GraphStoreServiceIf {
     return ifaces_[i]->end_snapshot(tail);
   }
 
-  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited) {
+  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->traverse(_return, id, link_type, depth, snapshot, visited);
+      ifaces_[i]->traverse(_return, id, link_type, depth, breadth, snapshot, visited);
     }
-    ifaces_[i]->traverse(_return, id, link_type, depth, snapshot, visited);
+    ifaces_[i]->traverse(_return, id, link_type, depth, breadth, snapshot, visited);
     return;
   }
 
@@ -2351,8 +2358,8 @@ class GraphStoreServiceConcurrentClient : virtual public GraphStoreServiceIf {
   bool end_snapshot(const int64_t tail);
   int32_t send_end_snapshot(const int64_t tail);
   bool recv_end_snapshot(const int32_t seqid);
-  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
-  int32_t send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
+  void traverse(std::vector<TLink> & _return, const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
+  int32_t send_traverse(const int64_t id, const int64_t link_type, const int64_t depth, const int64_t breadth, const std::vector<int64_t> & snapshot, const std::set<int64_t> & visited);
   void recv_traverse(std::vector<TLink> & _return, const int32_t seqid);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;

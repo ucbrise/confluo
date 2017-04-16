@@ -112,14 +112,14 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   std::future<std::vector<TLink>> continue_traverse(
       const int64_t store_id, const int64_t id1, const int64_t link_type,
-      const int64_t depth, const std::vector<int64_t>& snapshot,
+      const int64_t depth, const int64_t breadth, const std::vector<int64_t>& snapshot,
       std::set<int64_t>& visited) {
 
     if (store_id == store_id_) {
       LOG_INFO<< "Processing request for " << id1 << " locally.";
-      auto t = [id1, link_type, depth, snapshot, visited, this]() {
+      auto t = [id1, link_type, depth, breadth, snapshot, visited, this]() {
         std::vector<TLink> links;
-        this->traverse(links, id1, link_type, depth, snapshot, visited);
+        this->traverse(links, id1, link_type, depth, breadth, snapshot, visited);
         return links;
       };
       return std::async(std::launch::async, t);
@@ -127,17 +127,17 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
     LOG_INFO << "Forwarding request to " << store_id << " for " << id1;
 
-    auto t = [store_id, id1, link_type, depth, snapshot, visited, this]() {
+    auto t = [store_id, id1, link_type, depth, breadth, snapshot, visited, this]() {
       graph_client client(hostlist_.at(store_id), 9090);
       std::vector<TLink> links;
-      client.traverse(links, id1, link_type, depth, snapshot, visited);
+      client.traverse(links, id1, link_type, depth, breadth, snapshot, visited);
       return links;
     };
     return std::async(std::launch::async, t);
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id1,
-      const int64_t link_type, const int64_t depth,
+      const int64_t link_type, const int64_t depth, const int64_t breadth,
       const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
     if (depth == 0) {
       return;
@@ -157,19 +157,31 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
+    uint32_t num_neighbors = 0;
     for (const link_op& op: links) {
       if (visited.find(op.id2) == visited.end()) {
         _return.push_back(link_op_to_tlink(op));
         _visited.insert(op.id2);
       }
+      num_neighbors++;
+      if (num_neighbors == breadth) {
+        break;
+      }
     }
+
+    if (depth == 1)
+    return;
 
     for (const link_op& op : links) {
       if (visited.find(op.id2) == visited.end()) {
         LOG_INFO << "Processing link " << op.id1 << " -> " << op.id2;
         downstream_links.push_back(
             continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
-                depth - 1, snapshot, _visited));
+                depth - 1, breadth, snapshot, _visited));
+      }
+      num_neighbors++;
+      if (num_neighbors == breadth) {
+        break;
       }
     }
 
