@@ -22,11 +22,14 @@ class traversal_benchmark : public utils::bench::benchmark<traversal_client> {
     LINK_TYPE = link_type;
     DEPTH = depth;
     ds_.setup(hosts, port, 0);
+    LOG_INFO << "Traversal benchmark setup complete.";
   }
 
   static void traversal(size_t i, traversal_client& client) {
     std::vector<TLink> results;
+    LOG_INFO << "Issuing traversal query...";
     client.traverse(results, NODE_ID++, LINK_TYPE, DEPTH);
+    LOG_INFO << "Traversal query completed, found " << results.size() << " results";
   }
 
   DEFINE_BENCH(traversal)

@@ -20,16 +20,25 @@ class traversal_client {
     setup(hosts, port, sleep_us);
   }
 
+  ~traversal_client() {
+    LOG_INFO << "Stopping coordinator...";
+    coord_->stop();
+  }
+
   void setup(const std::vector<std::string>& hosts, const int port,
              const int64_t sleep_us) {
     clients_.clear();
     clients_.resize(hosts.size());
     for (size_t i = 0; i < hosts.size(); i++) {
       clients_[i].connect(hosts[i], port);
+      LOG_INFO << "Initializing connection to other hosts for the session...";
       clients_[i].init_connection();
     }
+    LOG_INFO << "Creating coordinator...";
     coord_ = new coordinator<graph_store_client>(clients_, sleep_us);
+    LOG_INFO << "Starting coordinator...";
     coord_->start();
+    LOG_INFO << "Coordinator started.";
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id,
