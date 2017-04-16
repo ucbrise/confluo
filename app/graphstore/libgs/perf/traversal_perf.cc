@@ -22,7 +22,7 @@ class traversal_benchmark : public utils::bench::benchmark<traversal_client> {
     LINK_TYPE = link_type;
     DEPTH = depth;
     ds_.setup(hosts, port, 0);
-    LOG_INFO << "Traversal benchmark setup complete.";
+    LOG_INFO<< "Traversal benchmark setup complete.";
   }
 
   static void traversal(size_t i, traversal_client& client) {
@@ -34,7 +34,7 @@ class traversal_benchmark : public utils::bench::benchmark<traversal_client> {
 
   DEFINE_BENCH(traversal)
 
- private:
+private:
   static int64_t NODE_ID;
   static int64_t LINK_TYPE;
   static int64_t DEPTH;

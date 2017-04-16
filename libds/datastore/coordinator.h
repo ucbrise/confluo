@@ -20,6 +20,10 @@ struct snapshot {
       : tails(size, UINT64_MAX) {
   }
 
+  snapshot(const snapshot& s) {
+    tails = s.tails;
+  }
+
   std::string to_string() {
     std::string out = "(";
     for (const uint64_t t : tails) {
@@ -43,12 +47,12 @@ class coordinator {
         stores_(stores) {
   }
 
-  snapshot get_snapshot() {
+  snapshot& get_snapshot() {
     uint64_t id = snapshots_.size();
     LOG_INFO<< "Waiting for snapshot ID " << id;
     while (snapshots_.size() != id + 1)
       std::this_thread::yield();
-    snapshot s = snapshots_.get(id);
+    snapshot& s = snapshots_.get(id);
     LOG_INFO<< "Got snapshot ID " << id << ": " << s.to_string();
     return s;
   }
