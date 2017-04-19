@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     storage_scheme = parser.get("storage");
     data_path = parser.get("data-path");
     append_only = parser.get_flag("append-only");
-    aux = parser.get_flag("dummy-aux");
+    aux = parser.get_int("dummy-aux");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
