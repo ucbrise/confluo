@@ -11,6 +11,9 @@
 namespace datastore {
 
 struct empty_aux {
+  void set_path(const std::string& data_path) {
+  }
+
   template<typename T>
   void update(uint64_t id, const T& obj) {
     return;
@@ -94,6 +97,7 @@ class log_store_base {
 
   log_store_base(const std::string& path) {
     primary_.set_path(path);
+    aux_.set_path(path);
   }
 
   object_ptr_t& write(uint64_t id, const uint8_t* data, size_t length,
@@ -568,6 +572,7 @@ class log_store {
       : snapshot_tail_(UINT64_C(0)),
         snapshot_success_(false) {
     primary_.set_path(path);
+    aux_.set_path(path);
   }
 
   uint64_t append(const uint8_t* data, size_t length) {
