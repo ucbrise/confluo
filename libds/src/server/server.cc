@@ -11,23 +11,23 @@ void start(std::string& data_path, int port, int aux) {
     datastore::append_only::log_store<A, B> store(data_path);
     log_store_server::start(store, port);
   } else if (aux == 1) {
-    datastore::append_only::log_store<A, B, dummy_aux<1024, 1>> store(
+    datastore::append_only::log_store<A, B, dummy_aux<128, 1>> store(
         data_path);
     log_store_server::start(store, port);
   } else if (aux == 2) {
-    datastore::append_only::log_store<A, B, dummy_aux<1024, 2>> store(
+    datastore::append_only::log_store<A, B, dummy_aux<128, 2>> store(
         data_path);
     log_store_server::start(store, port);
   } else if (aux == 4) {
-    datastore::append_only::log_store<A, B, dummy_aux<1024, 4>> store(
+    datastore::append_only::log_store<A, B, dummy_aux<128, 4>> store(
         data_path);
     log_store_server::start(store, port);
   } else if (aux == 8) {
-    datastore::append_only::log_store<A, B, dummy_aux<1024, 8>> store(
+    datastore::append_only::log_store<A, B, dummy_aux<128, 8>> store(
         data_path);
     log_store_server::start(store, port);
   } else if (aux == 16) {
-    datastore::append_only::log_store<A, B, dummy_aux<1024, 16>> store(
+    datastore::append_only::log_store<A, B, dummy_aux<128, 16>> store(
         data_path);
     log_store_server::start(store, port);
   } else {
