@@ -32,7 +32,7 @@ struct dummy_aux {
 
   void set_path(const std::string& data_path) {
     path_ = data_path;
-    for (size_t i = 0; i < N; i++) {
+    for (size_t i = 0; i < data_.size(); i++) {
       data_[i] = new monolog::mmap_monolog_relaxed<uint64_t, 65536, 1048576>(
           "dummy_aux_" + std::to_string(i), path_);
     }
@@ -40,8 +40,10 @@ struct dummy_aux {
 
   template<typename T>
   void update(uint64_t id, const T& obj) {
-    for (size_t i = 0; i < M; i++)
-      data_.at(utils::rand_utils::rand_uint32(N))->push_back(id);
+    for (size_t i = 0; i < M; i++) {
+      size_t idx = utils::rand_utils::rand_uint32(N);
+      data_.at(idx)->push_back(id);
+    }
   }
 
   void update(uint64_t id, const uint8_t* data, size_t len) {
@@ -51,7 +53,7 @@ struct dummy_aux {
 
  private:
   std::string path_;
-  std::array<monolog::mmap_monolog_relaxed<uint64_t, 65536, 1048576>*, 1024> data_;
+  std::array<monolog::mmap_monolog_relaxed<uint64_t, 65536, 1048576>*, N> data_;
 };
 
 template<typename data_store>
