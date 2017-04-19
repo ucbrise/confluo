@@ -41,14 +41,16 @@ struct dummy_aux {
   template<typename T>
   void update(uint64_t id, const T& obj) {
     for (size_t i = 0; i < M; i++) {
-      size_t idx = utils::rand_utils::rand_uint32(N);
+      size_t idx = utils::rand_utils::rand_uint32(N) % N;
       data_.at(idx)->push_back(id);
     }
   }
 
   void update(uint64_t id, const uint8_t* data, size_t len) {
-    for (size_t i = 0; i < M; i++)
-      data_.at(utils::rand_utils::rand_uint32(N))->push_back(id);
+    for (size_t i = 0; i < M; i++) {
+      size_t idx = utils::rand_utils::rand_uint32(N) % N;
+      data_.at(idx)->push_back(id);
+    }
   }
 
  private:
