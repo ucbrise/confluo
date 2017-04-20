@@ -11,20 +11,16 @@ void start(std::string& data_path, int port, int aux) {
     datastore::append_only::log_store<A, B> store(data_path);
     log_store_server::start(store, port);
   } else if (aux == 1) {
-    datastore::append_only::log_store<A, B, dummy_aux<128, 1>> store(
-        data_path);
+    datastore::append_only::log_store<A, B, dummy_aux<128, 1>> store(data_path);
     log_store_server::start(store, port);
   } else if (aux == 2) {
-    datastore::append_only::log_store<A, B, dummy_aux<128, 2>> store(
-        data_path);
+    datastore::append_only::log_store<A, B, dummy_aux<128, 2>> store(data_path);
     log_store_server::start(store, port);
   } else if (aux == 4) {
-    datastore::append_only::log_store<A, B, dummy_aux<128, 4>> store(
-        data_path);
+    datastore::append_only::log_store<A, B, dummy_aux<128, 4>> store(data_path);
     log_store_server::start(store, port);
   } else if (aux == 8) {
-    datastore::append_only::log_store<A, B, dummy_aux<128, 8>> store(
-        data_path);
+    datastore::append_only::log_store<A, B, dummy_aux<128, 8>> store(data_path);
     log_store_server::start(store, port);
   } else if (aux == 16) {
     datastore::append_only::log_store<A, B, dummy_aux<128, 16>> store(
@@ -57,7 +53,7 @@ int main(int argc, char **argv) {
           .set_description("Concurrency-control scheme"));
 
   opts.add(
-      cmd_option("dummy-aux", '0', false).set_description(
+      cmd_option("dummy-aux", '0', false).set_default("0").set_description(
           "Add m dummy auxiliary reference log (for benchmark purposes)"));
 
   opts.add(
