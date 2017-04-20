@@ -338,7 +338,7 @@ void load_links(graph_store<tail_scheme>* store, const size_t num_stores,
     assert_throw(link_info.size() == 5U,
         "Expected 5 attributes, got " << link_info.size() << ": " << line << "; line_no = " << line_no);
     link_op op;
-    op.id1 = std::stoll(link_info[0]);
+    op.id1 = std::stoll(link_info[0]) / num_stores;
     op.id2 = std::stoll(link_info[1]);
     op.link_type = std::stoll(link_info[2]);
     op.time = std::stoll(link_info[3]);
