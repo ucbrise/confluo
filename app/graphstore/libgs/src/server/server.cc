@@ -113,8 +113,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
   std::future<std::vector<TLink>> continue_traverse(
       const int64_t store_id, const int64_t id1, const int64_t link_type,
       const int64_t depth, const int64_t breadth,
-      const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited,
-      std::map<int64_t, graph_client>& clients) {
+      const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
 
     if (store_id == store_id_) {
       auto t =
@@ -127,9 +126,10 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     }
 
     auto t =
-        [store_id, id1, link_type, depth, breadth, snapshot, visited, &clients, this]() {
+        [store_id, id1, link_type, depth, breadth, snapshot, visited, this]() {
           std::vector<TLink> links;
-          clients.at(store_id).traverse(links, id1, link_type, depth, breadth, snapshot, visited);
+          graph_client client(hostlist_.at(store_id), 9090);
+          client.traverse(links, id1, link_type, depth, breadth, snapshot, visited);
           return links;
         };
     return std::async(std::launch::async, t);
@@ -153,13 +153,8 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
     uint32_t num_neighbors = 0;
-    std::map<int64_t, graph_client> clients;
     for (const link_op& op : links) {
       _return.push_back(link_op_to_tlink(op));
-      if (depth != 1) {
-        clients[op.id2 % hostlist_.size()].connect(
-            hostlist_.at(op.id2 % hostlist_.size()), 9090);
-      }
       num_neighbors++;
       if (num_neighbors == breadth) {
         break;
@@ -173,7 +168,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     for (const link_op& op : links) {
       downstream_links.push_back(
           continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
-                            depth - 1, breadth, snapshot, visited, clients));
+                            depth - 1, breadth, snapshot, visited));
       num_neighbors++;
       if (num_neighbors == breadth) {
         break;
@@ -183,10 +178,6 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     for (future_t& f : downstream_links) {
       std::vector<TLink> ret = f.get();
       _return.insert(_return.end(), ret.begin(), ret.end());
-    }
-
-    for (auto& client_info: clients) {
-      client_info.second.disconnect();
     }
   }
 
