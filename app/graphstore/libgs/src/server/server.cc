@@ -150,6 +150,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
                                                    link_type, tail);
 
+    fprintf(stderr, "id1=%ld, link_type=%ld, depth=%ld, #nhbrs=%zu\n", id1, link_type, depth, links.size());
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
     uint32_t num_neighbors = 0;
