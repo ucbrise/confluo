@@ -343,7 +343,8 @@ void load_links(graph_store<tail_scheme>* store, const size_t num_stores,
     op.link_type = std::stoll(link_info[2]);
     op.time = std::stoll(link_info[3]);
     op.data = link_info[4];
-    store->add_link(op);
+    bool result = store->add_link(op);
+    assert_throw(result, "Could not add link: " << op.id1 << ", " << op.id2);
     line_no++;
   }
 }
