@@ -112,51 +112,49 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
   std::future<std::vector<TLink>> continue_traverse(
       const int64_t store_id, const int64_t id1, const int64_t link_type,
-      const int64_t depth, const int64_t breadth, const std::vector<int64_t>& snapshot,
-      std::set<int64_t>& visited) {
+      const int64_t depth, const int64_t breadth,
+      const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
 
     if (store_id == store_id_) {
-      auto t = [id1, link_type, depth, breadth, snapshot, visited, this]() {
-        std::vector<TLink> links;
-        this->traverse(links, id1, link_type, depth, breadth, snapshot, visited);
-        return links;
-      };
+      auto t =
+          [id1, link_type, depth, breadth, snapshot, visited, this]() {
+            std::vector<TLink> links;
+            this->traverse(links, id1, link_type, depth, breadth, snapshot, visited);
+            return links;
+          };
       return std::async(std::launch::async, t);
     }
 
-    auto t = [store_id, id1, link_type, depth, breadth, snapshot, visited, this]() {
-      graph_client client(hostlist_.at(store_id), 9090);
-      std::vector<TLink> links;
-      client.traverse(links, id1, link_type, depth, breadth, snapshot, visited);
-      return links;
-    };
+    auto t =
+        [store_id, id1, link_type, depth, breadth, snapshot, visited, this]() {
+          graph_client client(hostlist_.at(store_id), 9090);
+          std::vector<TLink> links;
+          client.traverse(links, id1, link_type, depth, breadth, snapshot, visited);
+          return links;
+        };
     return std::async(std::launch::async, t);
   }
 
   void traverse(std::vector<TLink>& _return, const int64_t id1,
-      const int64_t link_type, const int64_t depth, const int64_t breadth,
-      const std::vector<int64_t>& snapshot, const std::set<int64_t>& visited) {
+                const int64_t link_type, const int64_t depth,
+                const int64_t breadth, const std::vector<int64_t>& snapshot,
+                const std::set<int64_t>& visited) {
     if (depth == 0) {
       return;
     }
-
-    std::set<int64_t> _visited = visited;
 
     assert_throw(
         snapshot.size() == hostlist_.size(),
         "snapshot.size() = " << snapshot.size() << ", hostlist.size() = " << hostlist_.size());
     uint64_t tail = snapshot.at(store_id_);
     std::vector<link_op> links = store_->get_links(id1 / hostlist_.size(),
-        link_type, tail);
+                                                   link_type, tail);
 
     typedef std::future<std::vector<TLink>> future_t;
     std::vector<future_t> downstream_links;
     uint32_t num_neighbors = 0;
-    for (const link_op& op: links) {
-      if (visited.find(op.id2) == visited.end()) {
-        _return.push_back(link_op_to_tlink(op));
-        _visited.insert(op.id2);
-      }
+    for (const link_op& op : links) {
+      _return.push_back(link_op_to_tlink(op));
       num_neighbors++;
       if (num_neighbors == breadth) {
         break;
@@ -164,15 +162,13 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     }
 
     if (depth == 1)
-    return;
+      return;
 
     num_neighbors = 0;
     for (const link_op& op : links) {
-      if (visited.find(op.id2) == visited.end()) {
-        downstream_links.push_back(
-            continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
-                depth - 1, breadth, snapshot, _visited));
-      }
+      downstream_links.push_back(
+          continue_traverse(op.id2 % hostlist_.size(), op.id2, link_type,
+                            depth - 1, breadth, snapshot, visited));
       num_neighbors++;
       if (num_neighbors == breadth) {
         break;
@@ -185,7 +181,7 @@ class graph_store_service : virtual public GraphStoreServiceIf {
     }
   }
 
-private:
+ private:
   void add_connection(uint32_t i, const std::string& hostname, int port) {
   }
 
