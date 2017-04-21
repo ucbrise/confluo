@@ -17,12 +17,15 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
                       size_t record_size, const std::string& host, int port)
       : utils::bench::benchmark<log_store_client>(output_dir, limits) {
     ds_.connect(host, port);
-    PRELOAD_RECORDS = load_records;
     BATCH_SIZE = batch_size;
+    PRELOAD_RECORDS = load_records / BATCH_SIZE;
+    PRELOAD_RECORDS = PRELOAD_RECORDS * BATCH_SIZE;
     DATA_SIZE = record_size;
     APPEND_DATA_BATCH.resize(BATCH_SIZE, APPEND_DATA);
-    for (size_t i = 0; i < load_records; i++)
-      ds_.append(APPEND_DATA);
+    for (size_t i = 0; i < PRELOAD_RECORDS / BATCH_SIZE; i++) {
+      std::vector<int64_t> ids;
+      ds_.multi_append(ids, APPEND_DATA_BATCH);
+    }
   }
 
   static void append(size_t i, log_store_client& client) {
@@ -148,15 +151,10 @@ int main(int argc, char** argv) {
   } else if (bench_op == "throughput-multi-append") {
     perf.bench_throughput_multi_append(num_threads);
   } else if (bench_op == "throughput-get") {
-    assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
     perf.bench_throughput_get(num_threads);
   } else if (bench_op == "throughput-update") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for update benchmark");
     perf.bench_throughput_update(num_threads);
   } else if (bench_op == "throughput-invalidate") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for invalidate benchmark");
     perf.bench_throughput_invalidate(num_threads);
   } else if (bench_op == "latency-append") {
     perf.bench_latency_append();
@@ -165,16 +163,13 @@ int main(int argc, char** argv) {
   } else if (bench_op == "latency-multi-append") {
     perf.bench_latency_multi_append();
   } else if (bench_op == "latency-get") {
-    assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
     perf.bench_latency_get();
   } else if (bench_op == "latency-update") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for update benchmark");
     perf.bench_latency_update();
   } else if (bench_op == "latency-invalidate") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for invalidate benchmark");
     perf.bench_latency_invalidate();
+  } else if (bench_op == "load") {
+    assert_throw(load_records > 0, "Need load_records > 0");
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }
