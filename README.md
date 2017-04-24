@@ -1,6 +1,6 @@
 # DiaLog
 
-[![Build Status](https://amplab.cs.berkeley.edu/jenkins/buildStatus/icon?job=log-store)](https://amplab.cs.berkeley.edu/jenkins/job/log-store/)
+[![Build Status](https://amplab.cs.berkeley.edu/jenkins/job/dialog/badge/icon)](https://amplab.cs.berkeley.edu/jenkins/job/dialog/)
 [![License](http://img.shields.io/:license-Apache%202-red.svg)](LICENSE)
 
 DiaLog is a distributed system that achieves the three properties useful for storage and real-time analysis of machine-generated data: 
