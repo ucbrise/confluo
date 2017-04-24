@@ -127,8 +127,8 @@ class graph_store_service : virtual public GraphStoreServiceIf {
 
     auto t =
         [store_id, id1, link_type, depth, breadth, snapshot, visited, this]() {
-          graph_client client(hostlist_.at(store_id), 9090);
           std::vector<TLink> links;
+          graph_client client(hostlist_.at(store_id), 9090);
           client.traverse(links, id1, link_type, depth, breadth, snapshot, visited);
           return links;
         };
@@ -337,12 +337,13 @@ void load_links(graph_store<tail_scheme>* store, const size_t num_stores,
     assert_throw(link_info.size() == 5U,
         "Expected 5 attributes, got " << link_info.size() << ": " << line << "; line_no = " << line_no);
     link_op op;
-    op.id1 = std::stoll(link_info[0]);
+    op.id1 = std::stoll(link_info[0]) / num_stores;
     op.id2 = std::stoll(link_info[1]);
     op.link_type = std::stoll(link_info[2]);
     op.time = std::stoll(link_info[3]);
     op.data = link_info[4];
-    store->add_link(op);
+    bool result = store->add_link(op);
+    assert_throw(result, "Could not add link: " << op.id1 << ", " << op.id2);
     line_no++;
   }
 }

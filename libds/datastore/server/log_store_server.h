@@ -12,6 +12,7 @@
 #include "server/log_store_service.h"
 
 #include "logger.h"
+#include "rand_utils.h"
 
 #include "log_store.h"
 
@@ -23,6 +24,39 @@ using namespace ::apache::thrift::server;
 using boost::shared_ptr;
 
 namespace datastore {
+
+template<size_t N, size_t M>
+struct dummy_aux {
+  static_assert(N > M, "N <= M required");
+  dummy_aux() = default;
+
+  void set_path(const std::string& data_path) {
+    path_ = data_path;
+    for (size_t i = 0; i < data_.size(); i++) {
+      data_[i] = new monolog::mmap_monolog_relaxed<uint64_t, 65536, 1048576>(
+          "dummy_aux_" + std::to_string(i), path_);
+    }
+  }
+
+  template<typename T>
+  void update(uint64_t id, const T& obj) {
+    for (size_t i = 0; i < M; i++) {
+      size_t idx = utils::rand_utils::rand_uint32(N) % N;
+      data_.at(idx)->push_back(id);
+    }
+  }
+
+  void update(uint64_t id, const uint8_t* data, size_t len) {
+    for (size_t i = 0; i < M; i++) {
+      size_t idx = utils::rand_utils::rand_uint32(N) % N;
+      data_.at(idx)->push_back(id);
+    }
+  }
+
+ private:
+  std::string path_;
+  std::array<monolog::mmap_monolog_relaxed<uint64_t, 65536, 1048576>*, N> data_;
+};
 
 template<typename data_store>
 class log_store_service : virtual public log_store_serviceIf {
