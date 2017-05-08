@@ -20,6 +20,8 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
     PRELOAD_RECORDS = load_records;
     BATCH_SIZE = batch_size;
     DATA_SIZE = record_size;
+    ls_server_benchmark::APPEND_DATA = std::string(DATA_SIZE, 'x');
+    ls_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
     APPEND_DATA_BATCH.resize(BATCH_SIZE, APPEND_DATA);
     for (size_t i = 0; i < load_records; i++)
       ds_.append(APPEND_DATA);
