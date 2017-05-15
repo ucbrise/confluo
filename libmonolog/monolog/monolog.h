@@ -252,7 +252,7 @@ template<class T, size_t NBUCKETS = 1024, size_t BLOCK_SIZE = 1073741824UL>
 class monolog_linear_base {
  public:
   typedef atomic::type<T*> __atomic_bucket_ref;
-  static const size_t BUFFER_SIZE = 1024;  // 1KB buffer size
+  static const size_t BUFFER_SIZE = 1048576;  // 1KB buffer size
 
   monolog_linear_base() {
     T* null_ptr = NULL;
