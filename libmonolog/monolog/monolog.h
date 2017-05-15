@@ -419,7 +419,7 @@ class mmapped_block {
   static const block_state uninit = false;
   static const block_state init = true;
 
-  static size_t const BUFFER_SIZE = 1024;
+  static size_t const BUFFER_SIZE = 1048576;
 
   mmapped_block()
       : path_(""),
