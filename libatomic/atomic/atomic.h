@@ -10,8 +10,10 @@
 #include <stdint.h>
 #endif
 
+// Utility wrappers around all atomic primitives used in DiaLog
 namespace atomic {
 
+// Atomic type
 #ifdef CPP11_ATOMICS
 template<typename T>
 using type = std::atomic<T>;
@@ -20,7 +22,10 @@ template<typename T>
 using type = T;
 #endif
 
+// Weak atomics
 namespace weak {
+
+// Compare and swap
 template<typename T>
 static inline bool cas(type<T>* obj, T* expected, T desired) {
 #ifdef CPP11_ATOMICS
@@ -33,7 +38,10 @@ static inline bool cas(type<T>* obj, T* expected, T desired) {
 }
 }
 
+// Strong atomics
 namespace strong {
+
+// Compare and swap
 template<typename T>
 static inline bool cas(type<T>* obj, T* expected, T desired) {
 #ifdef CPP11_ATOMICS
@@ -46,6 +54,7 @@ static inline bool cas(type<T>* obj, T* expected, T desired) {
 }
 }
 
+// Fetch and add
 template<typename T>
 static inline T faa(type<T>* obj, T arg) {
 #ifdef CPP11_ATOMICS
@@ -55,6 +64,7 @@ static inline T faa(type<T>* obj, T arg) {
 #endif
 }
 
+// Atomic load
 template<typename T>
 static inline T load(const type<T>* obj) {
 #ifdef CPP11_ATOMICS
@@ -66,6 +76,7 @@ static inline T load(const type<T>* obj) {
 #endif
 }
 
+// Atomic store
 template<typename T>
 static inline void store(type<T>* obj, T arg) {
 #ifdef CPP11_ATOMICS
@@ -75,6 +86,7 @@ static inline void store(type<T>* obj, T arg) {
 #endif
 }
 
+// Atomic init
 template<typename T>
 static inline void init(type<T>* obj, T arg) {
 #ifdef CPP11_ATOMICS

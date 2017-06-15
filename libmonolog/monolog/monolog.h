@@ -13,6 +13,10 @@ using namespace utils;
 
 namespace monolog {
 
+/**
+ * Iterator for monologs.
+ */
+
 template<typename monolog_impl>
 class monolog_iterator : public std::iterator<std::input_iterator_tag,
     typename monolog_impl::value_type, typename monolog_impl::difference_type,

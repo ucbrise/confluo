@@ -24,7 +24,4 @@ add_subdirectory(external/gtest-1.7.0)
 add_subdirectory(libmonolog)
 
 # Datastore
-add_subdirectory(libds)
-
-# Applications
-add_subdirectory(app)
+add_subdirectory(libdialog)
