@@ -1,5 +1,5 @@
-#ifndef DATASTORE_SERVER_LOG_STORE_CLIENT_H_
-#define DATASTORE_SERVER_LOG_STORE_CLIENT_H_
+#ifndef DIALOG_SERVER_DIALOG_CLIENT_H_
+#define DIALOG_SERVER_DIALOG_CLIENT_H_
 
 #include <thrift/transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
@@ -84,4 +84,4 @@ class dialog_client {
 
 }
 
-#endif /* DATASTORE_SERVER_LOG_STORE_CLIENT_H_ */
+#endif /* DIALOG_SERVER_DIALOG_CLIENT_H_ */

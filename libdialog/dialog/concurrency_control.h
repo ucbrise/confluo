@@ -1,5 +1,5 @@
-#ifndef DATASTORE_TAIL_SCHEME_H_
-#define DATASTORE_TAIL_SCHEME_H_
+#ifndef DIALOG_CONCURRENCY_CONTROL_H_
+#define DIALOG_CONCURRENCY_CONTROL_H_
 
 #include <cassert>
 #include <cstdio>
@@ -13,9 +13,6 @@ namespace dialog {
 
 class write_stalled {
  public:
-  static const uint64_t HI_BIT = UINT64_C(1) << ((sizeof(uint64_t) * 8) - 1);
-  static const uint64_t RT_MASK = ~(UINT64_C(1) << ((sizeof(uint64_t) * 8) - 1));
-
   write_stalled()
       : read_tail_(UINT64_C(0)),
         write_tail_(UINT64_C(0)) {
@@ -68,7 +65,7 @@ class write_stalled {
   }
 
   uint64_t get_tail() const {
-    return atomic::load(&read_tail_) & RT_MASK;
+    return atomic::load(&read_tail_);
   }
 
  private:
@@ -169,19 +166,6 @@ class write_stalled {
     }
   }
 
-  uint64_t start_snapshot_op() {
-    uint64_t tail = get_tail();
-    while (!atomic::weak::cas(&read_tail_, &tail, tail | HI_BIT)) {
-      std::this_thread::yield();
-    }
-    return tail;
-  }
-
-  bool end_snapshot_op(uint64_t tail) {
-    uint64_t expected = tail | HI_BIT;
-    return atomic::strong::cas(&read_tail_, &expected, tail);
-  }
-
  private:
   atomic::type<uint64_t> read_tail_;
   atomic::type<uint64_t> write_tail_;
@@ -219,24 +203,15 @@ class read_stalled {
     valid_.set_bits(tail, cnt);
   }
 
-  uint64_t start_snapshot_op() {
-    atomic::store(&snapshot_, get_tail());
-    return get_tail();
-  }
-
-  bool end_snapshot_op(uint64_t tail) {
-    atomic::store(&snapshot_, UINT64_MAX);
-    return true;
-  }
-
  private:
   typedef monolog::monolog_linear_base<atomic::type<uint64_t>, 1024> bits;
   monolog::monolog_bitvector<bits> valid_;
   atomic::type<uint64_t> tail_;
   atomic::type<uint64_t> snapshot_;
 };
-}
 
 }
 
-#endif /* DATASTORE_TAIL_SCHEME_H_ */
+}
+
+#endif /* DIALOG_CONCURRENCY_CONTROL_H_ */

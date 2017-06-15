@@ -1,5 +1,5 @@
-#ifndef DATASTORE_SERVER_LOG_STORE_SERVER_H_
-#define DATASTORE_SERVER_LOG_STORE_SERVER_H_
+#ifndef DIALOG_SERVER_DIALOG_SERVER_H_
+#define DIALOG_SERVER_DIALOG_SERVER_H_
 
 #include <algorithm>
 #include <numeric>
@@ -112,4 +112,4 @@ class log_store_server {
 
 }
 
-#endif /* DATASTORE_SERVER_LOG_STORE_SERVER_H_ */
+#endif /* DIALOG_SERVER_DIALOG_SERVER_H_ */
