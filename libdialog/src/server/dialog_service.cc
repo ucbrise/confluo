@@ -4,16 +4,16 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "server/log_store_service.h"
+#include "server/dialog_service.h"
 
 namespace dialog {
 
 
-log_store_service_append_args::~log_store_service_append_args() throw() {
+dialog_service_append_args::~dialog_service_append_args() throw() {
 }
 
 
-uint32_t log_store_service_append_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_append_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -54,10 +54,10 @@ uint32_t log_store_service_append_args::read(::apache::thrift::protocol::TProtoc
   return xfer;
 }
 
-uint32_t log_store_service_append_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_append_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_append_args");
+  xfer += oprot->writeStructBegin("dialog_service_append_args");
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeBinary(this->data);
@@ -69,14 +69,14 @@ uint32_t log_store_service_append_args::write(::apache::thrift::protocol::TProto
 }
 
 
-log_store_service_append_pargs::~log_store_service_append_pargs() throw() {
+dialog_service_append_pargs::~dialog_service_append_pargs() throw() {
 }
 
 
-uint32_t log_store_service_append_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_append_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_append_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_append_pargs");
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeBinary((*(this->data)));
@@ -88,11 +88,11 @@ uint32_t log_store_service_append_pargs::write(::apache::thrift::protocol::TProt
 }
 
 
-log_store_service_append_result::~log_store_service_append_result() throw() {
+dialog_service_append_result::~dialog_service_append_result() throw() {
 }
 
 
-uint32_t log_store_service_append_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_append_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -133,11 +133,11 @@ uint32_t log_store_service_append_result::read(::apache::thrift::protocol::TProt
   return xfer;
 }
 
-uint32_t log_store_service_append_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_append_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("log_store_service_append_result");
+  xfer += oprot->writeStructBegin("dialog_service_append_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
@@ -150,11 +150,11 @@ uint32_t log_store_service_append_result::write(::apache::thrift::protocol::TPro
 }
 
 
-log_store_service_append_presult::~log_store_service_append_presult() throw() {
+dialog_service_append_presult::~dialog_service_append_presult() throw() {
 }
 
 
-uint32_t log_store_service_append_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_append_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -196,11 +196,11 @@ uint32_t log_store_service_append_presult::read(::apache::thrift::protocol::TPro
 }
 
 
-log_store_service_multi_append_args::~log_store_service_multi_append_args() throw() {
+dialog_service_multi_append_args::~dialog_service_multi_append_args() throw() {
 }
 
 
-uint32_t log_store_service_multi_append_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_multi_append_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -253,10 +253,10 @@ uint32_t log_store_service_multi_append_args::read(::apache::thrift::protocol::T
   return xfer;
 }
 
-uint32_t log_store_service_multi_append_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_multi_append_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_multi_append_args");
+  xfer += oprot->writeStructBegin("dialog_service_multi_append_args");
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -276,14 +276,14 @@ uint32_t log_store_service_multi_append_args::write(::apache::thrift::protocol::
 }
 
 
-log_store_service_multi_append_pargs::~log_store_service_multi_append_pargs() throw() {
+dialog_service_multi_append_pargs::~dialog_service_multi_append_pargs() throw() {
 }
 
 
-uint32_t log_store_service_multi_append_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_multi_append_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_multi_append_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_multi_append_pargs");
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_LIST, 1);
   {
@@ -303,11 +303,11 @@ uint32_t log_store_service_multi_append_pargs::write(::apache::thrift::protocol:
 }
 
 
-log_store_service_multi_append_result::~log_store_service_multi_append_result() throw() {
+dialog_service_multi_append_result::~dialog_service_multi_append_result() throw() {
 }
 
 
-uint32_t log_store_service_multi_append_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_multi_append_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -360,11 +360,11 @@ uint32_t log_store_service_multi_append_result::read(::apache::thrift::protocol:
   return xfer;
 }
 
-uint32_t log_store_service_multi_append_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_multi_append_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("log_store_service_multi_append_result");
+  xfer += oprot->writeStructBegin("dialog_service_multi_append_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
@@ -385,11 +385,11 @@ uint32_t log_store_service_multi_append_result::write(::apache::thrift::protocol
 }
 
 
-log_store_service_multi_append_presult::~log_store_service_multi_append_presult() throw() {
+dialog_service_multi_append_presult::~dialog_service_multi_append_presult() throw() {
 }
 
 
-uint32_t log_store_service_multi_append_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_multi_append_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -443,11 +443,11 @@ uint32_t log_store_service_multi_append_presult::read(::apache::thrift::protocol
 }
 
 
-log_store_service_get_args::~log_store_service_get_args() throw() {
+dialog_service_get_args::~dialog_service_get_args() throw() {
 }
 
 
-uint32_t log_store_service_get_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_get_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -496,10 +496,10 @@ uint32_t log_store_service_get_args::read(::apache::thrift::protocol::TProtocol*
   return xfer;
 }
 
-uint32_t log_store_service_get_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_get_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_get_args");
+  xfer += oprot->writeStructBegin("dialog_service_get_args");
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64(this->id);
@@ -515,14 +515,14 @@ uint32_t log_store_service_get_args::write(::apache::thrift::protocol::TProtocol
 }
 
 
-log_store_service_get_pargs::~log_store_service_get_pargs() throw() {
+dialog_service_get_pargs::~dialog_service_get_pargs() throw() {
 }
 
 
-uint32_t log_store_service_get_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_get_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_get_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_get_pargs");
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64((*(this->id)));
@@ -538,11 +538,11 @@ uint32_t log_store_service_get_pargs::write(::apache::thrift::protocol::TProtoco
 }
 
 
-log_store_service_get_result::~log_store_service_get_result() throw() {
+dialog_service_get_result::~dialog_service_get_result() throw() {
 }
 
 
-uint32_t log_store_service_get_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_get_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -583,11 +583,11 @@ uint32_t log_store_service_get_result::read(::apache::thrift::protocol::TProtoco
   return xfer;
 }
 
-uint32_t log_store_service_get_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_get_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("log_store_service_get_result");
+  xfer += oprot->writeStructBegin("dialog_service_get_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRING, 0);
@@ -600,11 +600,11 @@ uint32_t log_store_service_get_result::write(::apache::thrift::protocol::TProtoc
 }
 
 
-log_store_service_get_presult::~log_store_service_get_presult() throw() {
+dialog_service_get_presult::~dialog_service_get_presult() throw() {
 }
 
 
-uint32_t log_store_service_get_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_get_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -646,11 +646,11 @@ uint32_t log_store_service_get_presult::read(::apache::thrift::protocol::TProtoc
 }
 
 
-log_store_service_update_args::~log_store_service_update_args() throw() {
+dialog_service_update_args::~dialog_service_update_args() throw() {
 }
 
 
-uint32_t log_store_service_update_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_update_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -699,10 +699,10 @@ uint32_t log_store_service_update_args::read(::apache::thrift::protocol::TProtoc
   return xfer;
 }
 
-uint32_t log_store_service_update_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_update_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_update_args");
+  xfer += oprot->writeStructBegin("dialog_service_update_args");
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64(this->id);
@@ -718,14 +718,14 @@ uint32_t log_store_service_update_args::write(::apache::thrift::protocol::TProto
 }
 
 
-log_store_service_update_pargs::~log_store_service_update_pargs() throw() {
+dialog_service_update_pargs::~dialog_service_update_pargs() throw() {
 }
 
 
-uint32_t log_store_service_update_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_update_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_update_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_update_pargs");
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64((*(this->id)));
@@ -741,11 +741,11 @@ uint32_t log_store_service_update_pargs::write(::apache::thrift::protocol::TProt
 }
 
 
-log_store_service_update_result::~log_store_service_update_result() throw() {
+dialog_service_update_result::~dialog_service_update_result() throw() {
 }
 
 
-uint32_t log_store_service_update_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_update_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -786,11 +786,11 @@ uint32_t log_store_service_update_result::read(::apache::thrift::protocol::TProt
   return xfer;
 }
 
-uint32_t log_store_service_update_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_update_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("log_store_service_update_result");
+  xfer += oprot->writeStructBegin("dialog_service_update_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_BOOL, 0);
@@ -803,11 +803,11 @@ uint32_t log_store_service_update_result::write(::apache::thrift::protocol::TPro
 }
 
 
-log_store_service_update_presult::~log_store_service_update_presult() throw() {
+dialog_service_update_presult::~dialog_service_update_presult() throw() {
 }
 
 
-uint32_t log_store_service_update_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_update_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -849,11 +849,11 @@ uint32_t log_store_service_update_presult::read(::apache::thrift::protocol::TPro
 }
 
 
-log_store_service_invalidate_args::~log_store_service_invalidate_args() throw() {
+dialog_service_invalidate_args::~dialog_service_invalidate_args() throw() {
 }
 
 
-uint32_t log_store_service_invalidate_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_invalidate_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -894,10 +894,10 @@ uint32_t log_store_service_invalidate_args::read(::apache::thrift::protocol::TPr
   return xfer;
 }
 
-uint32_t log_store_service_invalidate_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_invalidate_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_invalidate_args");
+  xfer += oprot->writeStructBegin("dialog_service_invalidate_args");
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64(this->id);
@@ -909,14 +909,14 @@ uint32_t log_store_service_invalidate_args::write(::apache::thrift::protocol::TP
 }
 
 
-log_store_service_invalidate_pargs::~log_store_service_invalidate_pargs() throw() {
+dialog_service_invalidate_pargs::~dialog_service_invalidate_pargs() throw() {
 }
 
 
-uint32_t log_store_service_invalidate_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_invalidate_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_invalidate_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_invalidate_pargs");
 
   xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
   xfer += oprot->writeI64((*(this->id)));
@@ -928,11 +928,11 @@ uint32_t log_store_service_invalidate_pargs::write(::apache::thrift::protocol::T
 }
 
 
-log_store_service_invalidate_result::~log_store_service_invalidate_result() throw() {
+dialog_service_invalidate_result::~dialog_service_invalidate_result() throw() {
 }
 
 
-uint32_t log_store_service_invalidate_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_invalidate_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -973,11 +973,11 @@ uint32_t log_store_service_invalidate_result::read(::apache::thrift::protocol::T
   return xfer;
 }
 
-uint32_t log_store_service_invalidate_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_invalidate_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("log_store_service_invalidate_result");
+  xfer += oprot->writeStructBegin("dialog_service_invalidate_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_BOOL, 0);
@@ -990,11 +990,11 @@ uint32_t log_store_service_invalidate_result::write(::apache::thrift::protocol::
 }
 
 
-log_store_service_invalidate_presult::~log_store_service_invalidate_presult() throw() {
+dialog_service_invalidate_presult::~dialog_service_invalidate_presult() throw() {
 }
 
 
-uint32_t log_store_service_invalidate_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_invalidate_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1036,11 +1036,11 @@ uint32_t log_store_service_invalidate_presult::read(::apache::thrift::protocol::
 }
 
 
-log_store_service_num_records_args::~log_store_service_num_records_args() throw() {
+dialog_service_num_records_args::~dialog_service_num_records_args() throw() {
 }
 
 
-uint32_t log_store_service_num_records_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_num_records_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1068,10 +1068,10 @@ uint32_t log_store_service_num_records_args::read(::apache::thrift::protocol::TP
   return xfer;
 }
 
-uint32_t log_store_service_num_records_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_num_records_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_num_records_args");
+  xfer += oprot->writeStructBegin("dialog_service_num_records_args");
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -1079,14 +1079,14 @@ uint32_t log_store_service_num_records_args::write(::apache::thrift::protocol::T
 }
 
 
-log_store_service_num_records_pargs::~log_store_service_num_records_pargs() throw() {
+dialog_service_num_records_pargs::~dialog_service_num_records_pargs() throw() {
 }
 
 
-uint32_t log_store_service_num_records_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_num_records_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("log_store_service_num_records_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_num_records_pargs");
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -1094,11 +1094,11 @@ uint32_t log_store_service_num_records_pargs::write(::apache::thrift::protocol::
 }
 
 
-log_store_service_num_records_result::~log_store_service_num_records_result() throw() {
+dialog_service_num_records_result::~dialog_service_num_records_result() throw() {
 }
 
 
-uint32_t log_store_service_num_records_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_num_records_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1139,11 +1139,11 @@ uint32_t log_store_service_num_records_result::read(::apache::thrift::protocol::
   return xfer;
 }
 
-uint32_t log_store_service_num_records_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t dialog_service_num_records_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("log_store_service_num_records_result");
+  xfer += oprot->writeStructBegin("dialog_service_num_records_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
@@ -1156,11 +1156,11 @@ uint32_t log_store_service_num_records_result::write(::apache::thrift::protocol:
 }
 
 
-log_store_service_num_records_presult::~log_store_service_num_records_presult() throw() {
+dialog_service_num_records_presult::~dialog_service_num_records_presult() throw() {
 }
 
 
-uint32_t log_store_service_num_records_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t dialog_service_num_records_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -1201,18 +1201,18 @@ uint32_t log_store_service_num_records_presult::read(::apache::thrift::protocol:
   return xfer;
 }
 
-int64_t log_store_serviceClient::append(const std::string& data)
+int64_t dialog_serviceClient::append(const std::string& data)
 {
   send_append(data);
   return recv_append();
 }
 
-void log_store_serviceClient::send_append(const std::string& data)
+void dialog_serviceClient::send_append(const std::string& data)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("append", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_append_pargs args;
+  dialog_service_append_pargs args;
   args.data = &data;
   args.write(oprot_);
 
@@ -1221,7 +1221,7 @@ void log_store_serviceClient::send_append(const std::string& data)
   oprot_->getTransport()->flush();
 }
 
-int64_t log_store_serviceClient::recv_append()
+int64_t dialog_serviceClient::recv_append()
 {
 
   int32_t rseqid = 0;
@@ -1247,7 +1247,7 @@ int64_t log_store_serviceClient::recv_append()
     iprot_->getTransport()->readEnd();
   }
   int64_t _return;
-  log_store_service_append_presult result;
+  dialog_service_append_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1259,18 +1259,18 @@ int64_t log_store_serviceClient::recv_append()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "append failed: unknown result");
 }
 
-void log_store_serviceClient::multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data)
+void dialog_serviceClient::multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data)
 {
   send_multi_append(data);
   recv_multi_append(_return);
 }
 
-void log_store_serviceClient::send_multi_append(const std::vector<std::string> & data)
+void dialog_serviceClient::send_multi_append(const std::vector<std::string> & data)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("multi_append", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_multi_append_pargs args;
+  dialog_service_multi_append_pargs args;
   args.data = &data;
   args.write(oprot_);
 
@@ -1279,7 +1279,7 @@ void log_store_serviceClient::send_multi_append(const std::vector<std::string> &
   oprot_->getTransport()->flush();
 }
 
-void log_store_serviceClient::recv_multi_append(std::vector<int64_t> & _return)
+void dialog_serviceClient::recv_multi_append(std::vector<int64_t> & _return)
 {
 
   int32_t rseqid = 0;
@@ -1304,7 +1304,7 @@ void log_store_serviceClient::recv_multi_append(std::vector<int64_t> & _return)
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  log_store_service_multi_append_presult result;
+  dialog_service_multi_append_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1317,18 +1317,18 @@ void log_store_serviceClient::recv_multi_append(std::vector<int64_t> & _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "multi_append failed: unknown result");
 }
 
-void log_store_serviceClient::get(std::string& _return, const int64_t id, const int64_t len)
+void dialog_serviceClient::get(std::string& _return, const int64_t id, const int64_t len)
 {
   send_get(id, len);
   recv_get(_return);
 }
 
-void log_store_serviceClient::send_get(const int64_t id, const int64_t len)
+void dialog_serviceClient::send_get(const int64_t id, const int64_t len)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_get_pargs args;
+  dialog_service_get_pargs args;
   args.id = &id;
   args.len = &len;
   args.write(oprot_);
@@ -1338,7 +1338,7 @@ void log_store_serviceClient::send_get(const int64_t id, const int64_t len)
   oprot_->getTransport()->flush();
 }
 
-void log_store_serviceClient::recv_get(std::string& _return)
+void dialog_serviceClient::recv_get(std::string& _return)
 {
 
   int32_t rseqid = 0;
@@ -1363,7 +1363,7 @@ void log_store_serviceClient::recv_get(std::string& _return)
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  log_store_service_get_presult result;
+  dialog_service_get_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1376,18 +1376,18 @@ void log_store_serviceClient::recv_get(std::string& _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get failed: unknown result");
 }
 
-bool log_store_serviceClient::update(const int64_t id, const std::string& data)
+bool dialog_serviceClient::update(const int64_t id, const std::string& data)
 {
   send_update(id, data);
   return recv_update();
 }
 
-void log_store_serviceClient::send_update(const int64_t id, const std::string& data)
+void dialog_serviceClient::send_update(const int64_t id, const std::string& data)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("update", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_update_pargs args;
+  dialog_service_update_pargs args;
   args.id = &id;
   args.data = &data;
   args.write(oprot_);
@@ -1397,7 +1397,7 @@ void log_store_serviceClient::send_update(const int64_t id, const std::string& d
   oprot_->getTransport()->flush();
 }
 
-bool log_store_serviceClient::recv_update()
+bool dialog_serviceClient::recv_update()
 {
 
   int32_t rseqid = 0;
@@ -1423,7 +1423,7 @@ bool log_store_serviceClient::recv_update()
     iprot_->getTransport()->readEnd();
   }
   bool _return;
-  log_store_service_update_presult result;
+  dialog_service_update_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1435,18 +1435,18 @@ bool log_store_serviceClient::recv_update()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "update failed: unknown result");
 }
 
-bool log_store_serviceClient::invalidate(const int64_t id)
+bool dialog_serviceClient::invalidate(const int64_t id)
 {
   send_invalidate(id);
   return recv_invalidate();
 }
 
-void log_store_serviceClient::send_invalidate(const int64_t id)
+void dialog_serviceClient::send_invalidate(const int64_t id)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("invalidate", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_invalidate_pargs args;
+  dialog_service_invalidate_pargs args;
   args.id = &id;
   args.write(oprot_);
 
@@ -1455,7 +1455,7 @@ void log_store_serviceClient::send_invalidate(const int64_t id)
   oprot_->getTransport()->flush();
 }
 
-bool log_store_serviceClient::recv_invalidate()
+bool dialog_serviceClient::recv_invalidate()
 {
 
   int32_t rseqid = 0;
@@ -1481,7 +1481,7 @@ bool log_store_serviceClient::recv_invalidate()
     iprot_->getTransport()->readEnd();
   }
   bool _return;
-  log_store_service_invalidate_presult result;
+  dialog_service_invalidate_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1493,18 +1493,18 @@ bool log_store_serviceClient::recv_invalidate()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "invalidate failed: unknown result");
 }
 
-int64_t log_store_serviceClient::num_records()
+int64_t dialog_serviceClient::num_records()
 {
   send_num_records();
   return recv_num_records();
 }
 
-void log_store_serviceClient::send_num_records()
+void dialog_serviceClient::send_num_records()
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("num_records", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_num_records_pargs args;
+  dialog_service_num_records_pargs args;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -1512,7 +1512,7 @@ void log_store_serviceClient::send_num_records()
   oprot_->getTransport()->flush();
 }
 
-int64_t log_store_serviceClient::recv_num_records()
+int64_t dialog_serviceClient::recv_num_records()
 {
 
   int32_t rseqid = 0;
@@ -1538,7 +1538,7 @@ int64_t log_store_serviceClient::recv_num_records()
     iprot_->getTransport()->readEnd();
   }
   int64_t _return;
-  log_store_service_num_records_presult result;
+  dialog_service_num_records_presult result;
   result.success = &_return;
   result.read(iprot_);
   iprot_->readMessageEnd();
@@ -1550,7 +1550,7 @@ int64_t log_store_serviceClient::recv_num_records()
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "num_records failed: unknown result");
 }
 
-bool log_store_serviceProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
+bool dialog_serviceProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
   ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
   if (pfn == processMap_.end()) {
@@ -1569,34 +1569,34 @@ bool log_store_serviceProcessor::dispatchCall(::apache::thrift::protocol::TProto
   return true;
 }
 
-void log_store_serviceProcessor::process_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessor::process_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("log_store_service.append", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.append", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "log_store_service.append");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.append");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "log_store_service.append");
+    this->eventHandler_->preRead(ctx, "dialog_service.append");
   }
 
-  log_store_service_append_args args;
+  dialog_service_append_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "log_store_service.append", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.append", bytes);
   }
 
-  log_store_service_append_result result;
+  dialog_service_append_result result;
   try {
     result.success = iface_->append(args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "log_store_service.append");
+      this->eventHandler_->handlerError(ctx, "dialog_service.append");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -1609,7 +1609,7 @@ void log_store_serviceProcessor::process_append(int32_t seqid, ::apache::thrift:
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "log_store_service.append");
+    this->eventHandler_->preWrite(ctx, "dialog_service.append");
   }
 
   oprot->writeMessageBegin("append", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -1619,38 +1619,38 @@ void log_store_serviceProcessor::process_append(int32_t seqid, ::apache::thrift:
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "log_store_service.append", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.append", bytes);
   }
 }
 
-void log_store_serviceProcessor::process_multi_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessor::process_multi_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("log_store_service.multi_append", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.multi_append", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "log_store_service.multi_append");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.multi_append");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "log_store_service.multi_append");
+    this->eventHandler_->preRead(ctx, "dialog_service.multi_append");
   }
 
-  log_store_service_multi_append_args args;
+  dialog_service_multi_append_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "log_store_service.multi_append", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.multi_append", bytes);
   }
 
-  log_store_service_multi_append_result result;
+  dialog_service_multi_append_result result;
   try {
     iface_->multi_append(result.success, args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "log_store_service.multi_append");
+      this->eventHandler_->handlerError(ctx, "dialog_service.multi_append");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -1663,7 +1663,7 @@ void log_store_serviceProcessor::process_multi_append(int32_t seqid, ::apache::t
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "log_store_service.multi_append");
+    this->eventHandler_->preWrite(ctx, "dialog_service.multi_append");
   }
 
   oprot->writeMessageBegin("multi_append", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -1673,38 +1673,38 @@ void log_store_serviceProcessor::process_multi_append(int32_t seqid, ::apache::t
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "log_store_service.multi_append", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.multi_append", bytes);
   }
 }
 
-void log_store_serviceProcessor::process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessor::process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("log_store_service.get", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.get", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "log_store_service.get");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.get");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "log_store_service.get");
+    this->eventHandler_->preRead(ctx, "dialog_service.get");
   }
 
-  log_store_service_get_args args;
+  dialog_service_get_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "log_store_service.get", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.get", bytes);
   }
 
-  log_store_service_get_result result;
+  dialog_service_get_result result;
   try {
     iface_->get(result.success, args.id, args.len);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "log_store_service.get");
+      this->eventHandler_->handlerError(ctx, "dialog_service.get");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -1717,7 +1717,7 @@ void log_store_serviceProcessor::process_get(int32_t seqid, ::apache::thrift::pr
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "log_store_service.get");
+    this->eventHandler_->preWrite(ctx, "dialog_service.get");
   }
 
   oprot->writeMessageBegin("get", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -1727,38 +1727,38 @@ void log_store_serviceProcessor::process_get(int32_t seqid, ::apache::thrift::pr
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "log_store_service.get", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.get", bytes);
   }
 }
 
-void log_store_serviceProcessor::process_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessor::process_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("log_store_service.update", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.update", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "log_store_service.update");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.update");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "log_store_service.update");
+    this->eventHandler_->preRead(ctx, "dialog_service.update");
   }
 
-  log_store_service_update_args args;
+  dialog_service_update_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "log_store_service.update", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.update", bytes);
   }
 
-  log_store_service_update_result result;
+  dialog_service_update_result result;
   try {
     result.success = iface_->update(args.id, args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "log_store_service.update");
+      this->eventHandler_->handlerError(ctx, "dialog_service.update");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -1771,7 +1771,7 @@ void log_store_serviceProcessor::process_update(int32_t seqid, ::apache::thrift:
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "log_store_service.update");
+    this->eventHandler_->preWrite(ctx, "dialog_service.update");
   }
 
   oprot->writeMessageBegin("update", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -1781,38 +1781,38 @@ void log_store_serviceProcessor::process_update(int32_t seqid, ::apache::thrift:
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "log_store_service.update", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.update", bytes);
   }
 }
 
-void log_store_serviceProcessor::process_invalidate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessor::process_invalidate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("log_store_service.invalidate", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.invalidate", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "log_store_service.invalidate");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.invalidate");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "log_store_service.invalidate");
+    this->eventHandler_->preRead(ctx, "dialog_service.invalidate");
   }
 
-  log_store_service_invalidate_args args;
+  dialog_service_invalidate_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "log_store_service.invalidate", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.invalidate", bytes);
   }
 
-  log_store_service_invalidate_result result;
+  dialog_service_invalidate_result result;
   try {
     result.success = iface_->invalidate(args.id);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "log_store_service.invalidate");
+      this->eventHandler_->handlerError(ctx, "dialog_service.invalidate");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -1825,7 +1825,7 @@ void log_store_serviceProcessor::process_invalidate(int32_t seqid, ::apache::thr
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "log_store_service.invalidate");
+    this->eventHandler_->preWrite(ctx, "dialog_service.invalidate");
   }
 
   oprot->writeMessageBegin("invalidate", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -1835,38 +1835,38 @@ void log_store_serviceProcessor::process_invalidate(int32_t seqid, ::apache::thr
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "log_store_service.invalidate", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.invalidate", bytes);
   }
 }
 
-void log_store_serviceProcessor::process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessor::process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("log_store_service.num_records", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.num_records", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "log_store_service.num_records");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.num_records");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "log_store_service.num_records");
+    this->eventHandler_->preRead(ctx, "dialog_service.num_records");
   }
 
-  log_store_service_num_records_args args;
+  dialog_service_num_records_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "log_store_service.num_records", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.num_records", bytes);
   }
 
-  log_store_service_num_records_result result;
+  dialog_service_num_records_result result;
   try {
     result.success = iface_->num_records();
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "log_store_service.num_records");
+      this->eventHandler_->handlerError(ctx, "dialog_service.num_records");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
@@ -1879,7 +1879,7 @@ void log_store_serviceProcessor::process_num_records(int32_t seqid, ::apache::th
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "log_store_service.num_records");
+    this->eventHandler_->preWrite(ctx, "dialog_service.num_records");
   }
 
   oprot->writeMessageBegin("num_records", ::apache::thrift::protocol::T_REPLY, seqid);
@@ -1889,30 +1889,30 @@ void log_store_serviceProcessor::process_num_records(int32_t seqid, ::apache::th
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "log_store_service.num_records", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.num_records", bytes);
   }
 }
 
-::boost::shared_ptr< ::apache::thrift::TProcessor > log_store_serviceProcessorFactory::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
-  ::apache::thrift::ReleaseHandler< log_store_serviceIfFactory > cleanup(handlerFactory_);
-  ::boost::shared_ptr< log_store_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
-  ::boost::shared_ptr< ::apache::thrift::TProcessor > processor(new log_store_serviceProcessor(handler));
+::boost::shared_ptr< ::apache::thrift::TProcessor > dialog_serviceProcessorFactory::getProcessor(const ::apache::thrift::TConnectionInfo& connInfo) {
+  ::apache::thrift::ReleaseHandler< dialog_serviceIfFactory > cleanup(handlerFactory_);
+  ::boost::shared_ptr< dialog_serviceIf > handler(handlerFactory_->getHandler(connInfo), cleanup);
+  ::boost::shared_ptr< ::apache::thrift::TProcessor > processor(new dialog_serviceProcessor(handler));
   return processor;
 }
 
-int64_t log_store_serviceConcurrentClient::append(const std::string& data)
+int64_t dialog_serviceConcurrentClient::append(const std::string& data)
 {
   int32_t seqid = send_append(data);
   return recv_append(seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_append(const std::string& data)
+int32_t dialog_serviceConcurrentClient::send_append(const std::string& data)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("append", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_append_pargs args;
+  dialog_service_append_pargs args;
   args.data = &data;
   args.write(oprot_);
 
@@ -1924,7 +1924,7 @@ int32_t log_store_serviceConcurrentClient::send_append(const std::string& data)
   return cseqid;
 }
 
-int64_t log_store_serviceConcurrentClient::recv_append(const int32_t seqid)
+int64_t dialog_serviceConcurrentClient::recv_append(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -1963,7 +1963,7 @@ int64_t log_store_serviceConcurrentClient::recv_append(const int32_t seqid)
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       int64_t _return;
-      log_store_service_append_presult result;
+      dialog_service_append_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -1984,19 +1984,19 @@ int64_t log_store_serviceConcurrentClient::recv_append(const int32_t seqid)
   } // end while(true)
 }
 
-void log_store_serviceConcurrentClient::multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data)
+void dialog_serviceConcurrentClient::multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data)
 {
   int32_t seqid = send_multi_append(data);
   recv_multi_append(_return, seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_multi_append(const std::vector<std::string> & data)
+int32_t dialog_serviceConcurrentClient::send_multi_append(const std::vector<std::string> & data)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("multi_append", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_multi_append_pargs args;
+  dialog_service_multi_append_pargs args;
   args.data = &data;
   args.write(oprot_);
 
@@ -2008,7 +2008,7 @@ int32_t log_store_serviceConcurrentClient::send_multi_append(const std::vector<s
   return cseqid;
 }
 
-void log_store_serviceConcurrentClient::recv_multi_append(std::vector<int64_t> & _return, const int32_t seqid)
+void dialog_serviceConcurrentClient::recv_multi_append(std::vector<int64_t> & _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2046,7 +2046,7 @@ void log_store_serviceConcurrentClient::recv_multi_append(std::vector<int64_t> &
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      log_store_service_multi_append_presult result;
+      dialog_service_multi_append_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -2068,19 +2068,19 @@ void log_store_serviceConcurrentClient::recv_multi_append(std::vector<int64_t> &
   } // end while(true)
 }
 
-void log_store_serviceConcurrentClient::get(std::string& _return, const int64_t id, const int64_t len)
+void dialog_serviceConcurrentClient::get(std::string& _return, const int64_t id, const int64_t len)
 {
   int32_t seqid = send_get(id, len);
   recv_get(_return, seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_get(const int64_t id, const int64_t len)
+int32_t dialog_serviceConcurrentClient::send_get(const int64_t id, const int64_t len)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("get", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_get_pargs args;
+  dialog_service_get_pargs args;
   args.id = &id;
   args.len = &len;
   args.write(oprot_);
@@ -2093,7 +2093,7 @@ int32_t log_store_serviceConcurrentClient::send_get(const int64_t id, const int6
   return cseqid;
 }
 
-void log_store_serviceConcurrentClient::recv_get(std::string& _return, const int32_t seqid)
+void dialog_serviceConcurrentClient::recv_get(std::string& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2131,7 +2131,7 @@ void log_store_serviceConcurrentClient::recv_get(std::string& _return, const int
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      log_store_service_get_presult result;
+      dialog_service_get_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -2153,19 +2153,19 @@ void log_store_serviceConcurrentClient::recv_get(std::string& _return, const int
   } // end while(true)
 }
 
-bool log_store_serviceConcurrentClient::update(const int64_t id, const std::string& data)
+bool dialog_serviceConcurrentClient::update(const int64_t id, const std::string& data)
 {
   int32_t seqid = send_update(id, data);
   return recv_update(seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_update(const int64_t id, const std::string& data)
+int32_t dialog_serviceConcurrentClient::send_update(const int64_t id, const std::string& data)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("update", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_update_pargs args;
+  dialog_service_update_pargs args;
   args.id = &id;
   args.data = &data;
   args.write(oprot_);
@@ -2178,7 +2178,7 @@ int32_t log_store_serviceConcurrentClient::send_update(const int64_t id, const s
   return cseqid;
 }
 
-bool log_store_serviceConcurrentClient::recv_update(const int32_t seqid)
+bool dialog_serviceConcurrentClient::recv_update(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2217,7 +2217,7 @@ bool log_store_serviceConcurrentClient::recv_update(const int32_t seqid)
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       bool _return;
-      log_store_service_update_presult result;
+      dialog_service_update_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -2238,19 +2238,19 @@ bool log_store_serviceConcurrentClient::recv_update(const int32_t seqid)
   } // end while(true)
 }
 
-bool log_store_serviceConcurrentClient::invalidate(const int64_t id)
+bool dialog_serviceConcurrentClient::invalidate(const int64_t id)
 {
   int32_t seqid = send_invalidate(id);
   return recv_invalidate(seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_invalidate(const int64_t id)
+int32_t dialog_serviceConcurrentClient::send_invalidate(const int64_t id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("invalidate", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_invalidate_pargs args;
+  dialog_service_invalidate_pargs args;
   args.id = &id;
   args.write(oprot_);
 
@@ -2262,7 +2262,7 @@ int32_t log_store_serviceConcurrentClient::send_invalidate(const int64_t id)
   return cseqid;
 }
 
-bool log_store_serviceConcurrentClient::recv_invalidate(const int32_t seqid)
+bool dialog_serviceConcurrentClient::recv_invalidate(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2301,7 +2301,7 @@ bool log_store_serviceConcurrentClient::recv_invalidate(const int32_t seqid)
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       bool _return;
-      log_store_service_invalidate_presult result;
+      dialog_service_invalidate_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();
@@ -2322,19 +2322,19 @@ bool log_store_serviceConcurrentClient::recv_invalidate(const int32_t seqid)
   } // end while(true)
 }
 
-int64_t log_store_serviceConcurrentClient::num_records()
+int64_t dialog_serviceConcurrentClient::num_records()
 {
   int32_t seqid = send_num_records();
   return recv_num_records(seqid);
 }
 
-int32_t log_store_serviceConcurrentClient::send_num_records()
+int32_t dialog_serviceConcurrentClient::send_num_records()
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("num_records", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  log_store_service_num_records_pargs args;
+  dialog_service_num_records_pargs args;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -2345,7 +2345,7 @@ int32_t log_store_serviceConcurrentClient::send_num_records()
   return cseqid;
 }
 
-int64_t log_store_serviceConcurrentClient::recv_num_records(const int32_t seqid)
+int64_t dialog_serviceConcurrentClient::recv_num_records(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2384,7 +2384,7 @@ int64_t log_store_serviceConcurrentClient::recv_num_records(const int32_t seqid)
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       int64_t _return;
-      log_store_service_num_records_presult result;
+      dialog_service_num_records_presult result;
       result.success = &_return;
       result.read(iprot_);
       iprot_->readMessageEnd();

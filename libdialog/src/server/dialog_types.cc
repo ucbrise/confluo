@@ -4,14 +4,13 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "server/log_store_constants.h"
+#include "server/dialog_types.h"
+
+#include <algorithm>
+#include <ostream>
+
+#include <thrift/TToString.h>
 
 namespace dialog {
 
-const log_storeConstants g_log_store_constants;
-
-log_storeConstants::log_storeConstants() {
-}
-
 } // namespace
-

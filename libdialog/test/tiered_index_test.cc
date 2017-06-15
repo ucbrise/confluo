@@ -1,4 +1,4 @@
-#include "../dialog/tiered_index.h"
+#include "tiered_index.h"
 
 #include "gtest/gtest.h"
 

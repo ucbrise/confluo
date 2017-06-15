@@ -1,4 +1,4 @@
-#include "server/log_store_client.h"
+#include "server/dialog_client.h"
 #define NPIN_CORES
 #include "benchmark.h"
 #include "logger.h"
@@ -9,50 +9,50 @@
 
 using namespace ::dialog;
 
-class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
+class dialog_server_benchmark : public utils::bench::benchmark<dialog_client> {
  public:
-  ls_server_benchmark(const std::string& output_dir,
+  dialog_server_benchmark(const std::string& output_dir,
                       const utils::bench::benchmark_limits& limits,
                       size_t load_records, size_t batch_size,
                       size_t record_size, const std::string& host, int port)
-      : utils::bench::benchmark<log_store_client>(output_dir, limits) {
+      : utils::bench::benchmark<dialog_client>(output_dir, limits) {
     ds_.connect(host, port);
     PRELOAD_RECORDS = load_records;
     BATCH_SIZE = batch_size;
     DATA_SIZE = record_size;
-    ls_server_benchmark::APPEND_DATA = std::string(DATA_SIZE, 'x');
-    ls_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
+    dialog_server_benchmark::APPEND_DATA = std::string(DATA_SIZE, 'x');
+    dialog_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
     APPEND_DATA_BATCH.resize(BATCH_SIZE, APPEND_DATA);
     for (size_t i = 0; i < load_records; i++)
       ds_.append(APPEND_DATA);
   }
 
-  static void append(size_t i, log_store_client& client) {
+  static void append(size_t i, dialog_client& client) {
     client.append(APPEND_DATA);
   }
 
-  static void append_async(size_t i, log_store_client& client) {
+  static void append_async(size_t i, dialog_client& client) {
     for (size_t i = 0; i < BATCH_SIZE; i++)
       client.send_append(APPEND_DATA);
     for (size_t i = 0; i < BATCH_SIZE; i++)
       client.recv_append();
   }
 
-  static void multi_append(size_t i, log_store_client& client) {
+  static void multi_append(size_t i, dialog_client& client) {
     std::vector<int64_t> ids;
     client.multi_append(ids, APPEND_DATA_BATCH);
   }
 
-  static void get(size_t i, log_store_client& client) {
+  static void get(size_t i, dialog_client& client) {
     std::string ret;
     client.get(ret, utils::rand_utils::rand_int64(PRELOAD_RECORDS), DATA_SIZE);
   }
 
-  static void update(size_t i, log_store_client& client) {
+  static void update(size_t i, dialog_client& client) {
     client.update(utils::rand_utils::rand_int64(PRELOAD_RECORDS), UPDATE_DATA);
   }
 
-  static void invalidate(size_t i, log_store_client& client) {
+  static void invalidate(size_t i, dialog_client& client) {
     client.invalidate(utils::rand_utils::rand_int64(PRELOAD_RECORDS));
   }
 
@@ -73,12 +73,12 @@ class ls_server_benchmark : public utils::bench::benchmark<log_store_client> {
   static std::vector<std::string> APPEND_DATA_BATCH;
 };
 
-uint64_t ls_server_benchmark::PRELOAD_RECORDS = 0;
-uint64_t ls_server_benchmark::BATCH_SIZE = 1;
-size_t ls_server_benchmark::DATA_SIZE = 64;
-std::string ls_server_benchmark::APPEND_DATA = std::string(DATA_SIZE, 'x');
-std::string ls_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
-std::vector<std::string> ls_server_benchmark::APPEND_DATA_BATCH;
+uint64_t dialog_server_benchmark::PRELOAD_RECORDS = 0;
+uint64_t dialog_server_benchmark::BATCH_SIZE = 1;
+size_t dialog_server_benchmark::DATA_SIZE = 64;
+std::string dialog_server_benchmark::APPEND_DATA = std::string(DATA_SIZE, 'x');
+std::string dialog_server_benchmark::UPDATE_DATA = std::string(DATA_SIZE, 'y');
+std::vector<std::string> dialog_server_benchmark::APPEND_DATA_BATCH;
 
 int main(int argc, char** argv) {
   cmd_options opts = utils::bench::benchmark_opts();
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  ls_server_benchmark perf(output_dir, limits, load_records, batch_size,
+  dialog_server_benchmark perf(output_dir, limits, load_records, batch_size,
                            record_size, server, port);
   if (bench_op == "throughput-append") {
     perf.bench_throughput_append(num_threads);

@@ -1,5 +1,5 @@
-#ifndef DIALOG_REFLOG_H_
-#define DIALOG_REFLOG_H_
+#ifndef DIALOG_DIALOG_STORE_H_
+#define DIALOG_DIALOG_STORE_H_
 
 #include <functional>
 #include <numeric>
@@ -86,13 +86,13 @@ struct durable_relaxed {
 };
 
 template<typename storage, typename concurrency_control, typename aux_data>
-class log_store_base {
+class dialog_store_base {
  public:
   typedef concurrency_control cc;
 
-  log_store_base() = default;
+  dialog_store_base() = default;
 
-  log_store_base(const std::string& path) {
+  dialog_store_base(const std::string& path) {
     primary_.set_path(path);
   }
 
@@ -172,18 +172,18 @@ class log_store_base {
 
 template<typename storage = in_memory,
     typename concurrency_control = read_stalled, typename aux_data = empty_aux>
-class log_store : public log_store_base<storage, concurrency_control, aux_data> {
+class dialog_store : public dialog_store_base<storage, concurrency_control, aux_data> {
  public:
   typedef concurrency_control cc;
 
-  log_store()
+  dialog_store()
       : snapshot_tail_(UINT64_C(0)),
         snapshot_success_(false) {
 
   }
 
-  log_store(const std::string& path)
-      : log_store_base<storage, concurrency_control, aux_data>(path),
+  dialog_store(const std::string& path)
+      : dialog_store_base<storage, concurrency_control, aux_data>(path),
         snapshot_tail_(UINT64_C(0)),
         snapshot_success_(false) {
   }
@@ -359,13 +359,13 @@ struct durable_relaxed {
 
 template<typename storage, typename concurrency_control,
     typename aux_data = empty_aux>
-class log_store {
+class dialog_store {
  public:
   typedef concurrency_control cc;
 
-  log_store() = default;
+  dialog_store() = default;
 
-  log_store(const std::string& path) {
+  dialog_store(const std::string& path) {
     primary_.set_path(path);
   }
 

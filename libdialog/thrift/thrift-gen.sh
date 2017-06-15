@@ -1,7 +1,7 @@
 gen=thrift-gen.files
 rm -rf $gen
 mkdir -p $gen/
-thrift -gen cpp -out $gen/ log_store.thrift
+thrift -gen cpp -out $gen/ dialog.thrift
 
 rm -rf $gen/*skeleton*
 

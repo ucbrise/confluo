@@ -1,5 +1,4 @@
-#include "log_store.h"
-
+#include "dialog_store.h"
 #include "gtest/gtest.h"
 
 #define MAX_IDS   2560U
@@ -37,21 +36,21 @@ class AppendOnlyLogStoreTest : public testing::Test {
 };
 
 TEST_F(AppendOnlyLogStoreTest, AppendAndGetTest1) {
-  log_store<in_memory, read_stalled> ls;
+  dialog_store<in_memory, read_stalled> ls;
   test_append_and_get(ls);
 }
 
 TEST_F(AppendOnlyLogStoreTest, AppendAndGetTest2) {
-  log_store<in_memory, write_stalled> ls;
+  dialog_store<in_memory, write_stalled> ls;
   test_append_and_get(ls);
 }
 
 TEST_F(AppendOnlyLogStoreTest, AppendAndGetTest3) {
-  log_store<durable, read_stalled> ls("/tmp");
+  dialog_store<durable, read_stalled> ls("/tmp");
   test_append_and_get(ls);
 }
 
 TEST_F(AppendOnlyLogStoreTest, AppendAndGetTest4) {
-  log_store<durable, write_stalled> ls("/tmp");
+  dialog_store<durable, write_stalled> ls("/tmp");
   test_append_and_get(ls);
 }

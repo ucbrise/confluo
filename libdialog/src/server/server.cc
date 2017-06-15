@@ -1,4 +1,4 @@
-#include "server/log_store_server.h"
+#include "server/dialog_server.h"
 #include "error_handling.h"
 #include "cmd_parse.h"
 
@@ -57,10 +57,10 @@ int main(int argc, char **argv) {
   if (!append_only) {
     if (storage_scheme == "in-memory") {
       if (concurrency_control == "write-stalled") {
-        log_store<in_memory, write_stalled> store(data_path);
+        dialog_store<in_memory, write_stalled> store(data_path);
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
-        log_store<in_memory, read_stalled> store(data_path);
+        dialog_store<in_memory, read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
         fprintf(stderr, "Unknown concurrency control: %s\n",
@@ -68,10 +68,10 @@ int main(int argc, char **argv) {
       }
     } else if (storage_scheme == "persistent") {
       if (concurrency_control == "write-stalled") {
-        log_store<durable, write_stalled> store(data_path);
+        dialog_store<durable, write_stalled> store(data_path);
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
-        log_store<durable, read_stalled> store(data_path);
+        dialog_store<durable, read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
         fprintf(stderr, "Unknown concurrency control: %s\n",
@@ -79,10 +79,10 @@ int main(int argc, char **argv) {
       }
     } else if (storage_scheme == "persistent-relaxed") {
       if (concurrency_control == "write-stalled") {
-        log_store<durable_relaxed, write_stalled> store(data_path);
+        dialog_store<durable_relaxed, write_stalled> store(data_path);
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
-        log_store<durable_relaxed, read_stalled> store(data_path);
+        dialog_store<durable_relaxed, read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
         fprintf(stderr, "Unknown concurrency control: %s\n",
@@ -94,11 +94,11 @@ int main(int argc, char **argv) {
   } else {
     if (storage_scheme == "in-memory") {
       if (concurrency_control == "write-stalled") {
-        dialog::append_only::log_store<dialog::append_only::in_memory,
+        dialog::append_only::dialog_store<dialog::append_only::in_memory,
             dialog::append_only::write_stalled> store(data_path);
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
-        dialog::append_only::log_store<dialog::append_only::in_memory,
+        dialog::append_only::dialog_store<dialog::append_only::in_memory,
             dialog::append_only::read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
@@ -107,11 +107,11 @@ int main(int argc, char **argv) {
       }
     } else if (storage_scheme == "persistent") {
       if (concurrency_control == "write-stalled") {
-        dialog::append_only::log_store<dialog::append_only::durable,
+        dialog::append_only::dialog_store<dialog::append_only::durable,
             dialog::append_only::write_stalled> store(data_path);
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
-        dialog::append_only::log_store<dialog::append_only::durable,
+        dialog::append_only::dialog_store<dialog::append_only::durable,
             dialog::append_only::read_stalled> store(data_path);
         log_store_server::start(store, port);
       } else {
@@ -120,12 +120,12 @@ int main(int argc, char **argv) {
       }
     } else if (storage_scheme == "persistent-relaxed") {
       if (concurrency_control == "write-stalled") {
-        dialog::append_only::log_store<
+        dialog::append_only::dialog_store<
             dialog::append_only::durable_relaxed,
             dialog::append_only::write_stalled> store(data_path);
         log_store_server::start(store, port);
       } else if (concurrency_control == "read-stalled") {
-        dialog::append_only::log_store<
+        dialog::append_only::dialog_store<
             dialog::append_only::durable_relaxed,
             dialog::append_only::read_stalled> store(data_path);
         log_store_server::start(store, port);

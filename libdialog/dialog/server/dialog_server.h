@@ -9,10 +9,9 @@
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 
-#include "server/log_store_service.h"
-#include "log_store.h"
+#include "server/dialog_service.h"
+#include "dialog_store.h"
 #include "logger.h"
-
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -24,9 +23,9 @@ using boost::shared_ptr;
 namespace dialog {
 
 template<typename data_store>
-class log_store_service : virtual public log_store_serviceIf {
+class dialog_service : virtual public dialog_serviceIf {
  public:
-  log_store_service(data_store& store)
+  dialog_service(data_store& store)
       : store_(store) {
   }
 
@@ -68,7 +67,7 @@ class log_store_service : virtual public log_store_serviceIf {
 template<typename data_store>
 class ls_processor_factory : public TProcessorFactory {
  public:
-  typedef log_store_service<data_store> data_store_service;
+  typedef dialog_service<data_store> data_store_service;
 
   ls_processor_factory(data_store& store)
       : store_(store) {
@@ -80,7 +79,7 @@ class ls_processor_factory : public TProcessorFactory {
     boost::shared_ptr<data_store_service> handler(
         new data_store_service(store_));
     boost::shared_ptr<TProcessor> processor(
-        new log_store_serviceProcessor(handler));
+        new dialog_serviceProcessor(handler));
     return processor;
   }
 

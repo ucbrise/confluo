@@ -4,8 +4,8 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#ifndef log_store_TYPES_H
-#define log_store_TYPES_H
+#ifndef dialog_TYPES_H
+#define dialog_TYPES_H
 
 #include <iosfwd>
 

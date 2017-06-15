@@ -4,7 +4,7 @@
 #include <thrift/transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TBufferTransports.h>
-#include "log_store_service.h"
+#include "server/dialog_service.h"
 #include "logger.h"
 
 using namespace ::apache::thrift;
@@ -13,24 +13,24 @@ using namespace ::apache::thrift::transport;
 
 namespace dialog {
 
-typedef log_store_serviceClient ls_client;
+typedef dialog_serviceClient ls_client;
 
-class log_store_client {
+class dialog_client {
  public:
-  log_store_client() = default;
+  dialog_client() = default;
 
-  log_store_client(const std::string& host, int port) {
+  dialog_client(const std::string& host, int port) {
     connect(host, port);
   }
 
-  log_store_client(const log_store_client& other) {
+  dialog_client(const dialog_client& other) {
     socket_ = other.socket_;
     transport_ = other.transport_;
     protocol_ = other.protocol_;
     client_ = other.client_;
   }
 
-  ~log_store_client() {
+  ~dialog_client() {
     disconnect();
   }
 
@@ -79,7 +79,7 @@ class log_store_client {
   boost::shared_ptr<TSocket> socket_;
   boost::shared_ptr<TTransport> transport_;
   boost::shared_ptr<TProtocol> protocol_;
-  boost::shared_ptr<log_store_serviceClient> client_;
+  boost::shared_ptr<ls_client> client_;
 };
 
 }
