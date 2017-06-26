@@ -48,14 +48,6 @@ class dialog_service : virtual public dialog_serviceIf {
       _return.assign(buf, length);
   }
 
-  bool update(const int64_t id, const std::string& data) {
-    return store_.update(id, data);
-  }
-
-  bool invalidate(const int64_t id) {
-    return store_.invalidate(id);
-  }
-
   int64_t num_records() {
     return store_.num_records();
   }

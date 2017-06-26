@@ -29,10 +29,6 @@ set(client_sources src/server/dialog_constants.cc
 add_library(dclient STATIC ${client_sources})
 
 # Build perf
-file(GLOB_RECURSE ccperf_sources perf/concurrency_control_perf.cc)
-add_executable(ccperf ${ccperf_sources})
-target_link_libraries(ccperf ${CMAKE_THREAD_LIBS_INIT})
-
 file(GLOB_RECURSE dsperf_sources perf/dialog_server_perf.cc)
 add_executable(dsperf ${dsperf_sources})
 target_link_libraries(dsperf dclient ${CMAKE_THREAD_LIBS_INIT} ${THRIFT_LIBRARIES})

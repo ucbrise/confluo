@@ -67,14 +67,6 @@ class dialog_client {
     return client_->get(_return, id, len);
   }
 
-  bool update(const int64_t id, const std::string& data) {
-    return client_->update(id, data);
-  }
-
-  bool invalidate(const int64_t id) {
-    return client_->invalidate(id);
-  }
-
  private:
   boost::shared_ptr<TSocket> socket_;
   boost::shared_ptr<TTransport> transport_;

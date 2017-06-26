@@ -1,16 +1,17 @@
-#ifndef DATASTORE_LOG_STREAM_H_
-#define DATASTORE_LOG_STREAM_H_
+#ifndef DIALOG_MONITOR_H_
+#define DIALOG_MONITOR_H_
 
-#include "monolog.h"
+#include "tiered_index.h"
 
 namespace dialog {
-namespace filter {
+
+namespace monitor {
 
 /**
  * Type-definition for RefLog type -- a MonoLog of type uint64_t and
  * bucket size of 24.
  */
-typedef monolog::monolog_relaxed<uint64_t, 24> reflog_t;
+typedef monolog::monolog_exp2<uint64_t, 24> reflog;
 
 /**
  * The default filter functor: allows all data to pass.
@@ -48,7 +49,7 @@ struct default_filter {
  * the filter specific to the RefLog.
  */
 template<typename filter = default_filter>
-class reflog {
+class filter_log {
  public:
   // Default filter used to initialize filter functor if one is not provided
   // in the constructor.
@@ -57,7 +58,7 @@ class reflog {
   /**
    * Default constructor.
    */
-  reflog()
+  filter_log()
       : filter_(DEFAULT_FILTER) {
   }
 
@@ -65,7 +66,7 @@ class reflog {
    * Constructor that initializes the filter functor with the provided one.
    * @param f Provided filter functor.
    */
-  reflog(filter& f)
+  filter_log(filter& f)
       : filter_(f) {
   }
 
@@ -100,7 +101,7 @@ class reflog {
    *
    * @return A constant reference to the underlying MonoLog.
    */
-  const reflog_t& cstream() const {
+  const reflog& cstream() const {
     return rlog_;
   }
 
@@ -109,20 +110,20 @@ class reflog {
    *
    * @return A reference to the underlying MonoLog.
    */
-  reflog_t& stream() {
+  reflog& stream() {
     return rlog_;
   }
 
  private:
-  reflog_t rlog_;   // The underlying MonoLog
+  reflog rlog_;   // The underlying RefLog
   filter& filter_;  // The filter functor
 };
 
 // Initializes the default filter functor.
 template<typename filter>
-filter reflog<filter>::DEFAULT_FILTER = filter();
+filter filter_log<filter>::DEFAULT_FILTER = filter();
 
 }
 }
 
-#endif /* DATASTORE_LOG_STREAM_H_ */
+#endif /* DIALOG_MONITOR_H_ */

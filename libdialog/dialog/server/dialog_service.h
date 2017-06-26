@@ -24,8 +24,6 @@ class dialog_serviceIf {
   virtual int64_t append(const std::string& data) = 0;
   virtual void multi_append(std::vector<int64_t> & _return, const std::vector<std::string> & data) = 0;
   virtual void get(std::string& _return, const int64_t id, const int64_t len) = 0;
-  virtual bool update(const int64_t id, const std::string& data) = 0;
-  virtual bool invalidate(const int64_t id) = 0;
   virtual int64_t num_records() = 0;
 };
 
@@ -65,14 +63,6 @@ class dialog_serviceNull : virtual public dialog_serviceIf {
   }
   void get(std::string& /* _return */, const int64_t /* id */, const int64_t /* len */) {
     return;
-  }
-  bool update(const int64_t /* id */, const std::string& /* data */) {
-    bool _return = false;
-    return _return;
-  }
-  bool invalidate(const int64_t /* id */) {
-    bool _return = false;
-    return _return;
   }
   int64_t num_records() {
     int64_t _return = 0;
@@ -399,221 +389,6 @@ class dialog_service_get_presult {
 
 };
 
-typedef struct _dialog_service_update_args__isset {
-  _dialog_service_update_args__isset() : id(false), data(false) {}
-  bool id :1;
-  bool data :1;
-} _dialog_service_update_args__isset;
-
-class dialog_service_update_args {
- public:
-
-  dialog_service_update_args(const dialog_service_update_args&);
-  dialog_service_update_args& operator=(const dialog_service_update_args&);
-  dialog_service_update_args() : id(0), data() {
-  }
-
-  virtual ~dialog_service_update_args() throw();
-  int64_t id;
-  std::string data;
-
-  _dialog_service_update_args__isset __isset;
-
-  void __set_id(const int64_t val);
-
-  void __set_data(const std::string& val);
-
-  bool operator == (const dialog_service_update_args & rhs) const
-  {
-    if (!(id == rhs.id))
-      return false;
-    if (!(data == rhs.data))
-      return false;
-    return true;
-  }
-  bool operator != (const dialog_service_update_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const dialog_service_update_args & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-
-class dialog_service_update_pargs {
- public:
-
-
-  virtual ~dialog_service_update_pargs() throw();
-  const int64_t* id;
-  const std::string* data;
-
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _dialog_service_update_result__isset {
-  _dialog_service_update_result__isset() : success(false) {}
-  bool success :1;
-} _dialog_service_update_result__isset;
-
-class dialog_service_update_result {
- public:
-
-  dialog_service_update_result(const dialog_service_update_result&);
-  dialog_service_update_result& operator=(const dialog_service_update_result&);
-  dialog_service_update_result() : success(0) {
-  }
-
-  virtual ~dialog_service_update_result() throw();
-  bool success;
-
-  _dialog_service_update_result__isset __isset;
-
-  void __set_success(const bool val);
-
-  bool operator == (const dialog_service_update_result & rhs) const
-  {
-    if (!(success == rhs.success))
-      return false;
-    return true;
-  }
-  bool operator != (const dialog_service_update_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const dialog_service_update_result & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _dialog_service_update_presult__isset {
-  _dialog_service_update_presult__isset() : success(false) {}
-  bool success :1;
-} _dialog_service_update_presult__isset;
-
-class dialog_service_update_presult {
- public:
-
-
-  virtual ~dialog_service_update_presult() throw();
-  bool* success;
-
-  _dialog_service_update_presult__isset __isset;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-
-};
-
-typedef struct _dialog_service_invalidate_args__isset {
-  _dialog_service_invalidate_args__isset() : id(false) {}
-  bool id :1;
-} _dialog_service_invalidate_args__isset;
-
-class dialog_service_invalidate_args {
- public:
-
-  dialog_service_invalidate_args(const dialog_service_invalidate_args&);
-  dialog_service_invalidate_args& operator=(const dialog_service_invalidate_args&);
-  dialog_service_invalidate_args() : id(0) {
-  }
-
-  virtual ~dialog_service_invalidate_args() throw();
-  int64_t id;
-
-  _dialog_service_invalidate_args__isset __isset;
-
-  void __set_id(const int64_t val);
-
-  bool operator == (const dialog_service_invalidate_args & rhs) const
-  {
-    if (!(id == rhs.id))
-      return false;
-    return true;
-  }
-  bool operator != (const dialog_service_invalidate_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const dialog_service_invalidate_args & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-
-class dialog_service_invalidate_pargs {
- public:
-
-
-  virtual ~dialog_service_invalidate_pargs() throw();
-  const int64_t* id;
-
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _dialog_service_invalidate_result__isset {
-  _dialog_service_invalidate_result__isset() : success(false) {}
-  bool success :1;
-} _dialog_service_invalidate_result__isset;
-
-class dialog_service_invalidate_result {
- public:
-
-  dialog_service_invalidate_result(const dialog_service_invalidate_result&);
-  dialog_service_invalidate_result& operator=(const dialog_service_invalidate_result&);
-  dialog_service_invalidate_result() : success(0) {
-  }
-
-  virtual ~dialog_service_invalidate_result() throw();
-  bool success;
-
-  _dialog_service_invalidate_result__isset __isset;
-
-  void __set_success(const bool val);
-
-  bool operator == (const dialog_service_invalidate_result & rhs) const
-  {
-    if (!(success == rhs.success))
-      return false;
-    return true;
-  }
-  bool operator != (const dialog_service_invalidate_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const dialog_service_invalidate_result & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _dialog_service_invalidate_presult__isset {
-  _dialog_service_invalidate_presult__isset() : success(false) {}
-  bool success :1;
-} _dialog_service_invalidate_presult__isset;
-
-class dialog_service_invalidate_presult {
- public:
-
-
-  virtual ~dialog_service_invalidate_presult() throw();
-  bool* success;
-
-  _dialog_service_invalidate_presult__isset __isset;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-
-};
-
 
 class dialog_service_num_records_args {
  public:
@@ -740,12 +515,6 @@ class dialog_serviceClient : virtual public dialog_serviceIf {
   void get(std::string& _return, const int64_t id, const int64_t len);
   void send_get(const int64_t id, const int64_t len);
   void recv_get(std::string& _return);
-  bool update(const int64_t id, const std::string& data);
-  void send_update(const int64_t id, const std::string& data);
-  bool recv_update();
-  bool invalidate(const int64_t id);
-  void send_invalidate(const int64_t id);
-  bool recv_invalidate();
   int64_t num_records();
   void send_num_records();
   int64_t recv_num_records();
@@ -767,8 +536,6 @@ class dialog_serviceProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_multi_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_invalidate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   dialog_serviceProcessor(boost::shared_ptr<dialog_serviceIf> iface) :
@@ -776,8 +543,6 @@ class dialog_serviceProcessor : public ::apache::thrift::TDispatchProcessor {
     processMap_["append"] = &dialog_serviceProcessor::process_append;
     processMap_["multi_append"] = &dialog_serviceProcessor::process_multi_append;
     processMap_["get"] = &dialog_serviceProcessor::process_get;
-    processMap_["update"] = &dialog_serviceProcessor::process_update;
-    processMap_["invalidate"] = &dialog_serviceProcessor::process_invalidate;
     processMap_["num_records"] = &dialog_serviceProcessor::process_num_records;
   }
 
@@ -836,24 +601,6 @@ class dialog_serviceMultiface : virtual public dialog_serviceIf {
     return;
   }
 
-  bool update(const int64_t id, const std::string& data) {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->update(id, data);
-    }
-    return ifaces_[i]->update(id, data);
-  }
-
-  bool invalidate(const int64_t id) {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->invalidate(id);
-    }
-    return ifaces_[i]->invalidate(id);
-  }
-
   int64_t num_records() {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -902,12 +649,6 @@ class dialog_serviceConcurrentClient : virtual public dialog_serviceIf {
   void get(std::string& _return, const int64_t id, const int64_t len);
   int32_t send_get(const int64_t id, const int64_t len);
   void recv_get(std::string& _return, const int32_t seqid);
-  bool update(const int64_t id, const std::string& data);
-  int32_t send_update(const int64_t id, const std::string& data);
-  bool recv_update(const int32_t seqid);
-  bool invalidate(const int64_t id);
-  int32_t send_invalidate(const int64_t id);
-  bool recv_invalidate(const int32_t seqid);
   int64_t num_records();
   int32_t send_num_records();
   int64_t recv_num_records(const int32_t seqid);

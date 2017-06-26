@@ -2,9 +2,10 @@
 
 #include <thread>
 
-#include "reflog.h"
+#include "../dialog/monitor.h"
 
-using namespace ::dialog::filter;
+using namespace ::dialog::monitor;
+using namespace ::dialog::monolog;
 
 // Stateless filter
 struct filter1 {
@@ -51,14 +52,14 @@ class StreamTest : public testing::Test {
   const uint32_t kMaxEntries = 100000;
 
   template<typename filter>
-  void fill_stream(reflog<filter>& stream) {
+  void fill_stream(filter_log<filter>& stream) {
     for (uint32_t i = 0; i < kMaxEntries; i++) {
       stream.update(i, (uint8_t*) &i, sizeof(uint32_t));
     }
   }
 
   template<typename filter>
-  void fill_stream_mt(reflog<filter>& stream, uint32_t num_threads) {
+  void fill_stream_mt(filter_log<filter>& stream, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
       workers.push_back(std::thread([i, &stream, this] {
@@ -74,10 +75,10 @@ class StreamTest : public testing::Test {
 };
 
 TEST_F(StreamTest, StreamAddFetchTest1) {
-  reflog<filter1> stream;
+  filter_log<filter1> stream;
   fill_stream(stream);
 
-  const reflog_t& s = stream.cstream();
+  const reflog& s = stream.cstream();
   uint32_t size = s.size();
   ASSERT_EQ(10000U, size);
   for (uint32_t i = 0; i < size; i++) {
@@ -85,10 +86,10 @@ TEST_F(StreamTest, StreamAddFetchTest1) {
   }
 
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    reflog<filter1> stream;
+    filter_log<filter1> stream;
     fill_stream_mt(stream, num_threads);
 
-    const reflog_t& s = stream.cstream();
+    const reflog& s = stream.cstream();
     uint32_t size = s.size();
     ASSERT_EQ(10000U * num_threads, size);
     std::vector<uint32_t> counts(size);
@@ -105,10 +106,10 @@ TEST_F(StreamTest, StreamAddFetchTest1) {
 }
 
 TEST_F(StreamTest, StreamAddFetchTest2) {
-  reflog<filter2> stream;
+  filter_log<filter2> stream;
   fill_stream(stream);
 
-  const reflog_t& list = stream.cstream();
+  const reflog& list = stream.cstream();
   uint32_t size = list.size();
   ASSERT_EQ(10000U, size);
   for (uint32_t i = 0; i < size; i++) {
@@ -116,10 +117,10 @@ TEST_F(StreamTest, StreamAddFetchTest2) {
   }
 
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    reflog<filter2> stream;
+    filter_log<filter2> stream;
     fill_stream_mt(stream, num_threads);
 
-    const reflog_t& list = stream.cstream();
+    const reflog& list = stream.cstream();
     uint32_t size = list.size();
     ASSERT_EQ(10000U * num_threads, size);
     for (uint32_t i = 0; i < size; i++) {

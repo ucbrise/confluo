@@ -15,19 +15,11 @@ int main(int argc, char **argv) {
 
   opts.add(
       cmd_option("storage", 's', false).set_default("in-memory").set_description(
-          "Storage scheme (in-memory, persistent)"));
-
-  opts.add(
-      cmd_option("append-only", 'a', true).set_description(
-          "Enable append only log store (no updates, deletions)"));
-
-  opts.add(
-      cmd_option("concurrency-control", 'c', false).set_default("read-stalled")
-          .set_description("Concurrency-control scheme"));
+          "Storage scheme (in-memory, durable_relaxed, durable)"));
 
   opts.add(
       cmd_option("data-path", 'd', false).set_default(".").set_description(
-          "Data path"));
+          "Data path (used if storage mode is set to durable or durable_relaxed)"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
@@ -36,16 +28,12 @@ int main(int argc, char **argv) {
   }
 
   int port;
-  std::string concurrency_control;
   std::string storage_scheme;
   std::string data_path;
-  bool append_only;
   try {
     port = parser.get_int("port");
-    concurrency_control = parser.get("concurrency-control");
     storage_scheme = parser.get("storage");
     data_path = parser.get("data-path");
-    append_only = parser.get_flag("append-only");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
@@ -54,88 +42,17 @@ int main(int argc, char **argv) {
 
   LOG_INFO<< parser.parsed_values();
 
-  if (!append_only) {
-    if (storage_scheme == "in-memory") {
-      if (concurrency_control == "write-stalled") {
-        dialog_store<in_memory, write_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else if (concurrency_control == "read-stalled") {
-        dialog_store<in_memory, read_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else {
-        fprintf(stderr, "Unknown concurrency control: %s\n",
-                concurrency_control.c_str());
-      }
-    } else if (storage_scheme == "persistent") {
-      if (concurrency_control == "write-stalled") {
-        dialog_store<durable, write_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else if (concurrency_control == "read-stalled") {
-        dialog_store<durable, read_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else {
-        fprintf(stderr, "Unknown concurrency control: %s\n",
-                concurrency_control.c_str());
-      }
-    } else if (storage_scheme == "persistent-relaxed") {
-      if (concurrency_control == "write-stalled") {
-        dialog_store<durable_relaxed, write_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else if (concurrency_control == "read-stalled") {
-        dialog_store<durable_relaxed, read_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else {
-        fprintf(stderr, "Unknown concurrency control: %s\n",
-                concurrency_control.c_str());
-      }
-    } else {
-      fprintf(stderr, "Unknown storage scheme: %s\n", storage_scheme.c_str());
-    }
+  if (storage_scheme == "in-memory") {
+    dialog_store<storage::in_memory> store(data_path);
+    log_store_server::start(store, port);
+  } else if (storage_scheme == "durable") {
+    dialog_store<storage::durable> store(data_path);
+    log_store_server::start(store, port);
+  } else if (storage_scheme == "durable-relaxed") {
+    dialog_store<storage::durable_relaxed> store(data_path);
+    log_store_server::start(store, port);
   } else {
-    if (storage_scheme == "in-memory") {
-      if (concurrency_control == "write-stalled") {
-        dialog::append_only::dialog_store<dialog::append_only::in_memory,
-            dialog::append_only::write_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else if (concurrency_control == "read-stalled") {
-        dialog::append_only::dialog_store<dialog::append_only::in_memory,
-            dialog::append_only::read_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else {
-        fprintf(stderr, "Unknown concurrency control: %s\n",
-                concurrency_control.c_str());
-      }
-    } else if (storage_scheme == "persistent") {
-      if (concurrency_control == "write-stalled") {
-        dialog::append_only::dialog_store<dialog::append_only::durable,
-            dialog::append_only::write_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else if (concurrency_control == "read-stalled") {
-        dialog::append_only::dialog_store<dialog::append_only::durable,
-            dialog::append_only::read_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else {
-        fprintf(stderr, "Unknown concurrency control: %s\n",
-                concurrency_control.c_str());
-      }
-    } else if (storage_scheme == "persistent-relaxed") {
-      if (concurrency_control == "write-stalled") {
-        dialog::append_only::dialog_store<
-            dialog::append_only::durable_relaxed,
-            dialog::append_only::write_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else if (concurrency_control == "read-stalled") {
-        dialog::append_only::dialog_store<
-            dialog::append_only::durable_relaxed,
-            dialog::append_only::read_stalled> store(data_path);
-        log_store_server::start(store, port);
-      } else {
-        fprintf(stderr, "Unknown concurrency control: %s\n",
-                concurrency_control.c_str());
-      }
-    } else {
-      fprintf(stderr, "Unknown storage scheme: %s\n", storage_scheme.c_str());
-    }
+    fprintf(stderr, "Unknown storage scheme: %s\n", storage_scheme.c_str());
   }
 
   return 0;

@@ -48,20 +48,10 @@ class dialog_server_benchmark : public utils::bench::benchmark<dialog_client> {
     client.get(ret, utils::rand_utils::rand_int64(PRELOAD_RECORDS), DATA_SIZE);
   }
 
-  static void update(size_t i, dialog_client& client) {
-    client.update(utils::rand_utils::rand_int64(PRELOAD_RECORDS), UPDATE_DATA);
-  }
-
-  static void invalidate(size_t i, dialog_client& client) {
-    client.invalidate(utils::rand_utils::rand_int64(PRELOAD_RECORDS));
-  }
-
   DEFINE_BENCH(append)
   DEFINE_BENCH_BATCH(append_async, BATCH_SIZE)
   DEFINE_BENCH_BATCH(multi_append, BATCH_SIZE)
   DEFINE_BENCH(get)
-  DEFINE_BENCH(update)
-  DEFINE_BENCH(invalidate)
 
  private:
   static uint64_t PRELOAD_RECORDS;
@@ -152,14 +142,6 @@ int main(int argc, char** argv) {
   } else if (bench_op == "throughput-get") {
     assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
     perf.bench_throughput_get(num_threads);
-  } else if (bench_op == "throughput-update") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for update benchmark");
-    perf.bench_throughput_update(num_threads);
-  } else if (bench_op == "throughput-invalidate") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for invalidate benchmark");
-    perf.bench_throughput_invalidate(num_threads);
   } else if (bench_op == "latency-append") {
     perf.bench_latency_append();
   } else if (bench_op == "latency-append-async") {
@@ -169,14 +151,6 @@ int main(int argc, char** argv) {
   } else if (bench_op == "latency-get") {
     assert_throw(load_records > 0, "Need to pre-load data for get benchmark");
     perf.bench_latency_get();
-  } else if (bench_op == "latency-update") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for update benchmark");
-    perf.bench_latency_update();
-  } else if (bench_op == "latency-invalidate") {
-    assert_throw(load_records > 0,
-                 "Need to pre-load data for invalidate benchmark");
-    perf.bench_latency_invalidate();
   } else {
     fprintf(stderr, "Unknown benchmark op: %s\n", bench_op.c_str());
   }
