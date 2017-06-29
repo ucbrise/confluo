@@ -1,8 +1,8 @@
 #include "dialog_store.h"
 #include "gtest/gtest.h"
 
-#define MAX_IDS   2560U
-#define DATA_SIZE 64U
+#define MAX_RECORDS 2560U
+#define DATA_SIZE   64U
 
 using namespace ::dialog;
 
@@ -16,13 +16,13 @@ class DiaLogStoreTest : public testing::Test {
 
   template<typename ls_t>
   void test_append_and_get(ls_t& ls) {
-    for (uint64_t i = 0; i < MAX_IDS; i++) {
+    for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       DiaLogStoreTest::gendata(data_, DATA_SIZE, i);
       ls.append(data_, DATA_SIZE);
     }
 
     unsigned char ret[DATA_SIZE];
-    for (uint64_t i = 0; i < MAX_IDS; i++) {
+    for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       bool success = ls.get(i * DATA_SIZE, ret, DATA_SIZE);
       ASSERT_TRUE(success);
       uint8_t expected = i % 256;

@@ -9,57 +9,61 @@
 #include "monolog.h"
 #include "serde.h"
 
+#include "attributes.h"
+
+using namespace ::dialog::monolog;
+
 namespace dialog {
 
+template<typename storage_mode = storage::in_memory>
 class read_tail {
  public:
-  read_tail()
-      : read_tail_(UINT64_C(0)) {
+  read_tail() {
+    read_tail_ = nullptr;
+  }
+
+  read_tail(const std::string& data_path) {
+    init(data_path);
+  }
+
+  void init(const std::string& data_path) {
+    read_tail_ = (atomic::type<uint64_t>*) storage_mode::allocate(
+        data_path + "/read_tail", sizeof(uint64_t));
   }
 
   uint64_t get() const {
-    return atomic::load(&read_tail_);
+    return atomic::load(read_tail_);
   }
 
-  bool is_valid(uint64_t id, uint64_t tail) const {
-    return id < tail;
-  }
-
-  void update(uint64_t old_tail, uint64_t bytes) {
+  void advance(uint64_t old_tail, uint32_t bytes) {
     uint64_t expected = old_tail;
-    while (!atomic::weak::cas(&read_tail_, &expected, old_tail + bytes)) {
+    while (!atomic::weak::cas(read_tail_, &expected, old_tail + bytes)) {
       expected = old_tail;
       std::this_thread::yield();
     }
+    storage_mode::flush(read_tail_, sizeof(uint64_t));
   }
 
  private:
-  atomic::type<uint64_t> read_tail_;
+  atomic::type<uint64_t>* read_tail_;
 };
 
 template<class storage_mode = storage::in_memory>
 class dialog_store {
  public:
-  dialog_store() = default;
-
-  dialog_store(const std::string& path) {
-    data_log_.init(path, "data_log");
+  dialog_store()
+      : rt_("") {
   }
 
-  uint64_t append(const uint8_t* data, size_t bytes) {
-    uint64_t offset = data_log_.append(data, bytes);
-    data_log_.flush(offset, bytes);
-    cc_.update(offset, bytes);
-    return offset;
+  dialog_store(const std::string& path)
+      : rt_(path) {
+    data_log_.init("data_log", path);
   }
 
-  template<typename T>
-  uint64_t append(const T& data) {
-    uint64_t length = serializer<T>::size(data);
-    uint64_t offset = data_log_.reserve(length);
-    serializer<T>::serialize(data_log_.ptr(offset), data);
+  uint64_t append(const uint8_t* data, size_t length) {
+    uint64_t offset = data_log_.append(data, length);
     data_log_.flush(offset, length);
-    cc_.update(offset, length);
+    rt_.advance(offset, length);
     return offset;
   }
 
@@ -73,64 +77,40 @@ class dialog_store {
       off += lengths.at(i);
     }
     data_log_.flush(offset, length);
-    cc_.update(offset, length);
+    rt_.advance(offset, length);
     return offset;
   }
 
-  template<typename T>
-  uint64_t append_batch(const std::vector<T>& batch) {
-    size_t length = 0;
-    std::vector<size_t> batch_offsets;
-    for (size_t i = 0; i < batch.size(); i++) {
-      batch_offsets.push_back(length);
-      length += serializer<T>::size(batch.at(i));
-    }
-    uint64_t offset = data_log_.reserve(length);
-    for (size_t i = 0; i < batch.size(); i++) {
-      serializer<T>::serialize(data_log_.ptr(offset + batch_offsets.at(i)),
-                               batch.at(i));
-    }
-    data_log_.flush(offset, length);
-    cc_.update(offset, length);
-    return offset;
+  void* ptr(uint64_t offset, uint64_t tail) const {
+    if (offset < tail)
+      return data_log_.cptr(offset);
+    return nullptr;
+  }
+
+  void* ptr(uint64_t offset) const {
+    return ptr(offset, rt_.get());
   }
 
   bool read(uint64_t offset, uint8_t* data, size_t length,
             uint64_t tail) const {
-    if (cc_.is_valid(offset, tail)) {
+    if (offset < tail) {
       data_log_.read(offset, data, length);
       return true;
     }
     return false;
   }
 
-  template<typename T>
-  bool read(uint64_t offset, T* data, uint64_t tail) const {
-    if (cc_.is_valid(offset, tail)) {
-      deserializer<T>::deserialize(data_log_.cptr(offset), data);
-      return true;
-    }
-    return false;
-  }
-
   bool get(uint64_t offset, uint8_t* data, size_t length) const {
-    uint64_t tail = cc_.get();
-    return read(offset, data, length, tail);
-  }
-
-  template<typename T>
-  bool get(uint64_t offset, T* data) const {
-    uint64_t tail = cc_.get();
-    return read(offset, data, tail);
+    return read(offset, data, length, rt_.get());
   }
 
   size_t num_records() const {
-    return cc_.get();
+    return rt_.get();
   }
 
  protected:
-  dialog::monolog::monolog_linear<uint8_t, 65536, 1073741824> data_log_;
-  read_tail cc_;
+  monolog_linear<uint8_t, 65536, 1073741824, 1048576, storage_mode> data_log_;
+  read_tail<storage_mode> rt_;
 };
 
 }

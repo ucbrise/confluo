@@ -5,9 +5,12 @@
 
 #include "atomic.h"
 #include "monolog.h"
+#include "math_utils.h"
 #include "assertions.h"
 
 // TODO: Improve documentation
+
+using namespace ::utils;
 
 namespace dialog {
 
@@ -142,34 +145,27 @@ class tiered_index {
   typedef tiered_index<T, K, D - 1, stats> child_type;
   typedef indexlet<child_type, K> idx_type;
 
-  static uint64_t NUM_BITS;
-  static uint64_t NODE_RANGE;
-  static uint64_t CHILD_RANGE;
+  static uint64_t CHILD_BLOCK;
 
   tiered_index() {
-    NUM_BITS = D * utils::bit_utils::highest_bit(K);
-    NODE_RANGE = UINT64_C(1) << NUM_BITS;
-    CHILD_RANGE = NODE_RANGE / K;
-    assert_throw(NUM_BITS < 64, "NUM_BITS = " << NUM_BITS);
-
     atomic::init(&stats_, static_cast<stats*>(nullptr));
   }
 
   T* operator[](const uint64_t key) {
-    child_type* c = get_or_create_child(key / CHILD_RANGE);
-    return (*c)[key % CHILD_RANGE];
+    child_type* c = get_or_create_child(key / CHILD_BLOCK);
+    return (*c)[key % CHILD_BLOCK];
   }
 
   template<typename update, typename ...update_args>
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
     u(atomic::load(&stats_), std::forward<update_args>(args)...);
-    child_type* c = get_or_create_child(key / CHILD_RANGE);
-    return (*c)(key % CHILD_RANGE, u, std::forward<update_args>(args)...);
+    child_type* c = get_or_create_child(key / CHILD_BLOCK);
+    return (*c)(key % CHILD_BLOCK, u, std::forward<update_args>(args)...);
   }
 
   T* at(const uint64_t key) const {
-    child_type* c = get_child(key / CHILD_RANGE);
-    return c->at(key % CHILD_RANGE);
+    child_type* c = get_child(key / CHILD_BLOCK);
+    return c->at(key % CHILD_BLOCK);
   }
 
   child_type* get_or_create_child(const uint64_t k) {
@@ -183,9 +179,9 @@ class tiered_index {
   stats* get_stats(const uint64_t key, const uint64_t depth) {
     if (depth == 0)
       return get_stats();
-    child_type* child = get_child(key / CHILD_RANGE);
+    child_type* child = get_child(key / CHILD_BLOCK);
     if (child != nullptr)
-      return child->get_stats(key % CHILD_RANGE, depth - 1);
+      return child->get_stats(key % CHILD_BLOCK, depth - 1);
     return nullptr;
   }
 
@@ -207,10 +203,6 @@ class tiered_index<T, K, 1, stats> {
  public:
   typedef T child_type;
   typedef indexlet<T, K> idx_type;
-
-  static uint64_t NUM_BITS;
-  static uint64_t NODE_RANGE;
-  static uint64_t CHILD_RANGE;
 
   tiered_index() {
     atomic::init(&stats_, static_cast<stats*>(nullptr));
@@ -244,7 +236,7 @@ class tiered_index<T, K, 1, stats> {
   }
 
   stats* get_stats(const uint64_t key) {
-    return atomic::load(stats_.get_atomic(key));
+    return atomic::load(&stats_);
   }
 
  private:
@@ -253,13 +245,7 @@ class tiered_index<T, K, 1, stats> {
 };
 
 template<typename T, size_t K, size_t D, typename S>
-uint64_t tiered_index<T, K, D, S>::NUM_BITS;
-
-template<typename T, size_t K, size_t D, typename S>
-uint64_t tiered_index<T, K, D, S>::NODE_RANGE;
-
-template<typename T, size_t K, size_t D, typename S>
-uint64_t tiered_index<T, K, D, S>::CHILD_RANGE;
+uint64_t tiered_index<T, K, D, S>::CHILD_BLOCK = math_utils::pow(K, D - 1);
 
 }
 

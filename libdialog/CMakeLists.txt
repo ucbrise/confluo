@@ -17,21 +17,6 @@ include_directories(${gtest_SOURCE_DIR}/include
   ${ATOMIC_INCLUDE}
   ${MONOLOG_INCLUDE}
   ${THRIFT_INCLUDE})
-  
-# Build server executable
-file(GLOB_RECURSE server_sources src/server/*.cc)
-add_executable(dserver ${server_sources})
-target_link_libraries(dserver ${THRIFT_LIBRARIES})
-
-set(client_sources src/server/dialog_constants.cc 
-  src/server/dialog_types.cc
-  src/server/dialog_service.cc)
-add_library(dclient STATIC ${client_sources})
-
-# Build perf
-file(GLOB_RECURSE dsperf_sources perf/dialog_server_perf.cc)
-add_executable(dsperf ${dsperf_sources})
-target_link_libraries(dsperf dclient ${CMAKE_THREAD_LIBS_INIT} ${THRIFT_LIBRARIES})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)
