@@ -1,3 +1,6 @@
+#ifndef TEST_EXPRESSIONS_TEST_H_
+#define TEST_EXPRESSIONS_TEST_H_
+
 #include "expression.h"
 #include "gtest/gtest.h"
 
@@ -163,3 +166,5 @@ TEST_F(ExpressionTest, ParseAndOrTest) {
   test_predicate(d2->left, "b", relop_id::GT, "c");
   test_predicate(d2->right, "c", relop_id::EQ, "d");
 }
+
+#endif // TEST_EXPRESSIONS_TEST_H_

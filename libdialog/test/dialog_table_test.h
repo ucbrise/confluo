@@ -1,3 +1,6 @@
+#ifndef TEST_DIALOG_TABLE_TEST_H_
+#define TEST_DIALOG_TABLE_TEST_H_
+
 #include "dialog_table.h"
 #include "gtest/gtest.h"
 
@@ -52,3 +55,5 @@ TEST_F(DiaLogTableTest, AppendAndGetTest3) {
       schema_builder().add_column(string_type(DATA_SIZE), "msg"), "/tmp");
   test_append_and_get(dtable);
 }
+
+#endif /* TEST_DIALOG_TABLE_TEST_H_ */

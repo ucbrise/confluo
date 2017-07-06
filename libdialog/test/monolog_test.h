@@ -1,3 +1,6 @@
+#ifndef TEST_MONOLOG_TEST_H_
+#define TEST_MONOLOG_TEST_H_
+
 #include "gtest/gtest.h"
 
 #include <thread>
@@ -92,3 +95,5 @@ TEST_F(MonoLogTest, MonoLogLinearDTest) {
     monolog_test_mt(arr, num_threads);
   }
 }
+
+#endif // TEST_MONOLOG_TEST_H_

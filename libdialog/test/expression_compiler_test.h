@@ -1,3 +1,6 @@
+#ifndef TEST_EXPRESSION_COMPILER_TEST_H_
+#define TEST_EXPRESSION_COMPILER_TEST_H_
+
 #include "expression_compiler.h"
 
 #include "schema.h"
@@ -71,3 +74,5 @@ TEST_F(ExpressionCompilerTest, CompilerTest) {
   compile(m7, "a==true && (b<5 || c<10 || e<10 || f<1.3 || g<1.9)", s);
   print_minterms(m7);
 }
+
+#endif // TEST_EXPRESSION_COMPILER_TEST_H_

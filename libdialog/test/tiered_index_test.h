@@ -1,3 +1,6 @@
+#ifndef TEST_TIERED_INDEX_TEST_H_
+#define TEST_TIERED_INDEX_TEST_H_
+
 #include "tiered_index.h"
 
 #include "gtest/gtest.h"
@@ -108,3 +111,5 @@ TEST_F(TieredIndexTest, TieredIndexAddFetchTest) {
     index_test_tiered_mt(idx, num_threads);
   }
 }
+
+#endif // TEST_TIERED_INDEX_TEST_H_

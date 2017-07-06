@@ -50,7 +50,7 @@ struct value_t {
         break;
       }
       case type_id::D_LONG: {
-        long val = string_utils::lexical_cast<double>(str);
+        long val = string_utils::lexical_cast<long>(str);
         ret.data = valdup(val);
         break;
       }

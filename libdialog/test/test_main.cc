@@ -6,6 +6,7 @@
 #include "filter_test.h"
 #include "monolog_test.h"
 #include "tiered_index_test.h"
+#include "value_test.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

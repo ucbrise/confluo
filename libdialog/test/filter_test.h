@@ -1,3 +1,6 @@
+#ifndef TEST_FILTER_TEST_H_
+#define TEST_FILTER_TEST_H_
+
 #include "gtest/gtest.h"
 
 #include <thread>
@@ -109,3 +112,5 @@ TEST_F(FilterTest, AddFetchTest2) {
     }
   }
 }
+
+#endif // TEST_FILTER_TEST_H_

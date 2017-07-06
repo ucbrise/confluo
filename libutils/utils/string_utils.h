@@ -62,7 +62,7 @@ class string_utils {
 
 template<>
 inline bool string_utils::lexical_cast<bool>(const std::string& s) {
-  std::stringstream ss(s);
+  std::stringstream ss(to_lower(s));
 
   bool result;
   if ((ss >> std::boolalpha >> result).fail() || !(ss >> std::ws).eof()) {
