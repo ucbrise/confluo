@@ -3,12 +3,12 @@
 
 #include <cstdint>
 
-#include "attributes.h"
+#include "schema.h"
 
 namespace dialog {
-namespace trigger {
+namespace monitor {
 
-enum aggregate_type {
+enum aggregate_t {
   COUNT = 0,
   SUM = 1,
   AVERAGE = 2,
@@ -20,8 +20,8 @@ enum aggregate_type {
 struct trigger_info {
   uint32_t trigger_id;
   uint32_t filter_id;
-  attribute attr;
-  aggregate_type agg_type;
+  column_t col;
+  aggregate_t agg_type;
 };
 
 }

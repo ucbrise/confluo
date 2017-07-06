@@ -2,32 +2,35 @@
 
 #include <thread>
 
-#include "monitor.h"
-#include "attributes.h"
+#include "filter.h"
 
-using namespace ::dialog::filter;
+using namespace ::dialog::monitor;
 using namespace ::dialog::monolog;
 using namespace ::dialog;
 
 // Stateless filter
-bool filter1(uint64_t id, uint8_t* data, size_t len, attribute_list& attrs) {
-  return id % 10 == 0;
+inline bool filter1(const record_t& r) {
+  return r.timestamp % 10 == 0;
 }
 
 atomic::type<uint64_t> count(0);
 uint64_t sample_mod = 10;
-bool filter2(uint64_t ts, uint8_t* data, size_t len, attribute_list& attrs) {
+inline bool filter2(const record_t& r) {
   return atomic::faa(&count, UINT64_C(1)) % sample_mod == 0;
 }
 
 class FilterTest : public testing::Test {
  public:
   const uint32_t kMaxEntries = 100000;
-  static attribute_list attrs;
 
   void fill(filter& f) {
     for (uint32_t i = 0; i < kMaxEntries; i++) {
-      f.update(i, i, (uint8_t*) &i, sizeof(uint32_t), attrs);
+      record_t r;
+      r.timestamp = i;
+      r.log_offset = i;
+      r.data = (uint8_t*) &i;
+      r.len = sizeof(uint32_t);
+      f.update(r);
     }
   }
 
@@ -36,7 +39,12 @@ class FilterTest : public testing::Test {
     for (uint32_t i = 1; i <= num_threads; i++) {
       workers.push_back(std::thread([i, &f, this] {
         for (uint32_t j = (i - 1) * kMaxEntries; j < i * kMaxEntries; j++) {
-          f.update(j, j, (uint8_t*) &j, sizeof(uint32_t), attrs);
+          record_t r;
+          r.timestamp = j;
+          r.log_offset = j;
+          r.data = (uint8_t*) &j;
+          r.len = sizeof(uint32_t);
+          f.update(r);
         }
       }));
     }
@@ -45,8 +53,6 @@ class FilterTest : public testing::Test {
     }
   }
 };
-
-attribute_list FilterTest::attrs;
 
 TEST_F(FilterTest, AddFetchTest1) {
   filter f(filter1, 1);

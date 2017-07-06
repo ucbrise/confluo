@@ -1,20 +1,25 @@
 #ifndef DIALOG_FILTER_H_
 #define DIALOG_FILTER_H_
 
+#include "schema.h"
 #include "tiered_index.h"
-#include "attributes.h"
+#include "compiled_expression.h"
 
 // TODO: Update tests
 
 using namespace ::utils;
 
 namespace dialog {
-
-namespace filter {
+namespace monitor {
 
 struct filter_info {
   uint32_t filter_id;
-  const char* filter_expr;
+  char filter_expr[1024];
+
+  void set_expression(const std::string& expr) {
+    strcpy(filter_expr, expr.c_str());
+    filter_expr[expr.length()] = '\0';
+  }
 };
 
 /**
@@ -24,28 +29,20 @@ struct filter_info {
 typedef monolog::monolog_exp2<uint64_t, 24> reflog;
 
 /**
- * Filter function type definition for filtering data points.
+ * Filter function type definition for filtering records.
  *
- * @param ts Timestamp associated with data point.
- * @param buf Binary data for the data point.
- * @param len Length of data in buf.
- * @param attrs Attributes associated with the data point.
- * @return True if the data point passes the filter, false otherwise.
+ * @param r The record
+ * @return True if the record passes the filter, false otherwise.
  */
-typedef bool (*filter_fn)(uint64_t ts, uint8_t* buf, size_t len,
-                          attribute_list& list);
+typedef bool (*filter_fn)(const record_t& r);
 
 /**
- * Default filter function that allows all data points to pass.
+ * Default filter function that allows all records to pass.
  *
- * @param ts Timestamp associated with data point.
- * @param buf Binary data for the data point.
- * @param len Length of data in buf.
- * @param attrs Attributes associated with the data point.
- * @return True if the data point passes the filter, false otherwise.
+ * @param r The record
+ * @return True if the record passes the filter, false otherwise.
  */
-bool default_filter(uint64_t ts, uint8_t* buf, size_t len,
-                    attribute_list& list) {
+inline bool default_filter(const record_t& r) {
   return true;
 }
 
@@ -63,20 +60,20 @@ class filter {
   static const size_t DEFAULT_LEAF_RANGE_NS = 1e6;
 
   /**
-   * Default constructor.
-   */
-  filter()
-      : filter_(default_filter),
-        leaf_range_ns_(DEFAULT_LEAF_RANGE_NS) {
-  }
-
-  /**
    * Constructor that initializes the filter functor with the provided one.
    * @param f Provided filter functor.
    * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
    */
-  filter(filter_fn f, size_t monitor_granularity_ms)
-      : filter_(f),
+  filter(const compiled_expression& exp, filter_fn fn = default_filter,
+         size_t monitor_granularity_ms = 1)
+      : exp_(exp),
+        fn_(fn),
+        leaf_range_ns_(monitor_granularity_ms * 1e6) {
+  }
+
+  filter(filter_fn fn = default_filter, size_t monitor_granularity_ms = 1)
+      : exp_(),
+        fn_(fn),
         leaf_range_ns_(monitor_granularity_ms * 1e6) {
   }
 
@@ -100,10 +97,9 @@ class filter {
    * @param len Length of data in buf.
    * @param attrs List of attributes associated with the data point.
    */
-  void update(uint64_t offset, uint64_t ts, uint8_t* buf, size_t len,
-              attribute_list& attrs) {
-    if (filter_(ts, buf, len, attrs))
-      idx_[get_ts_block(ts)]->push_back(offset);
+  void update(const record_t& r) {
+    if (exp_.test(r) && fn_(r))
+      idx_[get_ts_block(r.timestamp)]->push_back(r.log_offset);
   }
 
   /**
@@ -117,9 +113,10 @@ class filter {
   }
 
  private:
-  idx_t idx_;               // The filtered data index
-  filter_fn filter_;  // The filter functor
-  size_t leaf_range_ns_;    // Time-range (nanoseconds) covered by leaf node
+  idx_t idx_;                       // The filtered data index
+  compiled_expression exp_;         // The compiled filter expression
+  filter_fn fn_;                    // Filter function
+  size_t leaf_range_ns_;            // Time-range (ns) covered by leaf node
 };
 
 }
