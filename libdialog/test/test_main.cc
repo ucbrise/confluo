@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "aggregate_test.h"
 #include "dialog_table_test.h"
 #include "expression_compiler_test.h"
 #include "expressions_test.h"

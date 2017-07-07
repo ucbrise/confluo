@@ -9,25 +9,57 @@ namespace dialog {
 enum aggregate_id {
   SUM = 0,
   MIN = 1,
-  MAX = 2
+  MAX = 2,
+  COUNT = 3
 };
 
 using aggregate_fn = numeric_t (*)(const numeric_t& v1, const numeric_t& v2);
+using zero_fn = numeric_t (*)(const data_type& type);
 
-// Standard aggregates: sum, min, max
-numeric_t sum(const numeric_t& a, const numeric_t& b) {
+struct aggregator {
+  aggregate_fn agg;
+  zero_fn zero;
+};
+
+// Standard aggregates: sum, min, max, count
+inline numeric_t sum_agg(const numeric_t& a, const numeric_t& b) {
   return a + b;
 }
 
-numeric_t min(const numeric_t& a, const numeric_t& b) {
+inline numeric_t min_agg(const numeric_t& a, const numeric_t& b) {
   return a < b ? a : b;
 }
 
-numeric_t max(const numeric_t& a, const numeric_t& b) {
+inline numeric_t max_agg(const numeric_t& a, const numeric_t& b) {
   return a < b ? b : a;
 }
 
-static std::array<aggregate_fn, 3> aggregates { { sum, min, max } };
+inline numeric_t count_agg(const numeric_t& a, const numeric_t& b) {
+  return a + numeric_t(a.get_type(), a.get_type().one);
+}
+
+inline numeric_t sum_zero(const data_type& type) {
+  return numeric_t(type, type.zero);
+}
+
+inline numeric_t min_zero(const data_type& type) {
+  return numeric_t(type, type.max);
+}
+
+inline numeric_t max_zero(const data_type& type) {
+  return numeric_t(type, type.min);
+}
+
+inline numeric_t count_zero(const data_type& type) {
+  return numeric_t(type, type.zero);
+}
+
+static aggregator sum = { sum_agg, sum_zero };
+static aggregator min = { min_agg, min_zero };
+static aggregator max = { max_agg, max_zero };
+static aggregator count = { count_agg, count_zero };
+
+static std::array<aggregator, 4> aggregators { { sum, min, max, count } };
 
 struct aggregate_node {
   aggregate_node(numeric_t agg, uint64_t version, aggregate_node *next)
@@ -61,8 +93,10 @@ class aggregate_t {
    *
    * @param agg Aggregate function pointer.
    */
-  aggregate_t(aggregate_fn agg = sum)
-      : agg_(agg) {
+  aggregate_t(data_type type, aggregator agg = sum)
+      : head_(nullptr),
+        agg_(agg),
+        type_(type) {
   }
 
   /**
@@ -70,8 +104,10 @@ class aggregate_t {
    *
    * @param id Aggregate ID.
    */
-  aggregate_t(aggregate_id id)
-      : agg_(aggregates[id]) {
+  aggregate_t(data_type type, aggregate_id id)
+      : head_(nullptr),
+        agg_(aggregators[id]),
+        type_(type) {
   }
 
   /**
@@ -87,7 +123,10 @@ class aggregate_t {
    */
   numeric_t get(uint64_t version) {
     aggregate_node *cur_head = atomic::load(&head_);
-    return get_node(cur_head, version)->value();
+    aggregate_node *req = get_node(cur_head, version);
+    if (req != nullptr)
+      return req->value();
+    return agg_.zero(type_);
   }
 
   /**
@@ -98,8 +137,9 @@ class aggregate_t {
    */
   void update(const numeric_t& value, uint64_t version) {
     aggregate_node *cur_head = atomic::load(&head_);
-    numeric_t old_agg = get_node(cur_head, version)->value();
-    aggregate_node *node = new aggregate_node(agg_(old_agg, value), version,
+    aggregate_node *req = get_node(cur_head, version);
+    numeric_t old_agg = req == nullptr ? agg_.zero(type_) : req->value();
+    aggregate_node *node = new aggregate_node(agg_.agg(old_agg, value), version,
                                               cur_head);
     atomic::store(&head_, node);
   }
@@ -112,10 +152,13 @@ class aggregate_t {
    * @return The node that satisfies the constraints above (if any), nullptr otherwise.
    */
   aggregate_node* get_node(aggregate_node *head, uint64_t version) {
+    if (head == nullptr)
+      return nullptr;
+
     aggregate_node *node = head;
     aggregate_node *ret = nullptr;
     uint64_t max_version = 0;
-    while (node) {
+    while (node != nullptr) {
       if (node->version() == version)
         return node;
 
@@ -130,7 +173,8 @@ class aggregate_t {
   }
 
   atomic::type<aggregate_node*> head_;
-  aggregate_fn agg_;
+  aggregator agg_;
+  data_type type_;
 };
 
 }

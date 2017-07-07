@@ -10,13 +10,13 @@ namespace dialog {
 
 class numeric_t {
  public:
-  numeric_t(data_type type)
+  numeric_t(const data_type& type = NONE_TYPE)
       : type_(type) {
     // Is this safe to do?
-    *(reinterpret_cast<uint64_t*>(storage_)) = 0;
+    type.unaryop(unaryop_id::ASSIGN)(storage_, type.zero);
   }
 
-  numeric_t(data_type type, const void* value)
+  numeric_t(const data_type& type, const void* value)
       : type_(type) {
     type.unaryop(unaryop_id::ASSIGN)(storage_, value);
   }
@@ -56,7 +56,7 @@ class numeric_t {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
-  data_type get_type() const {
+  const data_type& get_type() const {
     return type_;
   }
 

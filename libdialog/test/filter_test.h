@@ -16,10 +16,10 @@ inline bool filter1(const record_t& r) {
   return r.timestamp % 10 == 0;
 }
 
-atomic::type<uint64_t> count(0);
+atomic::type<uint64_t> __count(0);
 uint64_t sample_mod = 10;
 inline bool filter2(const record_t& r) {
-  return atomic::faa(&count, UINT64_C(1)) % sample_mod == 0;
+  return atomic::faa(&__count, UINT64_C(1)) % sample_mod == 0;
 }
 
 class FilterTest : public testing::Test {
