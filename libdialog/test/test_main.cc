@@ -6,7 +6,7 @@
 #include "compiled_expression_test.h"
 #include "dialog_table_test.h"
 #include "expression_compiler_test.h"
-#include "expressions_test.h"
+#include "expression_test.h"
 #include "filter_test.h"
 #include "minterm_test.h"
 #include "monolog_test.h"
