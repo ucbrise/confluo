@@ -4,6 +4,7 @@
 #include "column_test.h"
 #include "compiled_predicate_test.h"
 #include "compiled_expression_test.h"
+#include "data_types_test.h"
 #include "dialog_table_test.h"
 #include "expression_compiler_test.h"
 #include "expression_test.h"

@@ -222,7 +222,7 @@ struct data_type {
       case type_id::D_CHAR:
         return "char";
       case type_id::D_SHORT:
-        return "double";
+        return "short";
       case type_id::D_INT:
         return "int";
       case type_id::D_LONG:
@@ -233,8 +233,10 @@ struct data_type {
         return "double";
       case type_id::D_STRING:
         return "string";
+      case type_id::D_NONE:
+        return "none";
       default:
-        return "invalid_type";
+        return "invalid";
     }
   }
 
