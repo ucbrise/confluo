@@ -53,6 +53,11 @@ inline void assign<std::string>(void* res, const void* v) {
   throw unsupported_exception("= not supported for string type");
 }
 
+template<>
+inline void assign<void>(void* res, const void* v) {
+  throw unsupported_exception("= not supported for none type");
+}
+
 template<typename T>
 inline void negative(void* res, const void* v) {
   *(reinterpret_cast<T*>(res)) = -*(reinterpret_cast<const T*>(v));
@@ -63,6 +68,11 @@ inline void negative<std::string>(void* res, const void* v) {
   throw unsupported_exception("- not supported for string type");
 }
 
+template<>
+inline void negative<void>(void* res, const void* v) {
+  throw unsupported_exception("- not supported for none type");
+}
+
 template<typename T>
 inline void positive(void* res, const void* v) {
   *(reinterpret_cast<T*>(res)) = +*(reinterpret_cast<const T*>(v));
@@ -71,6 +81,11 @@ inline void positive(void* res, const void* v) {
 template<>
 inline void positive<std::string>(void* res, const void* v) {
   throw unsupported_exception("+ not supported for string type");
+}
+
+template<>
+inline void positive<void>(void* res, const void* v) {
+  throw unsupported_exception("+ not supported for none type");
 }
 
 // Binary arithmetic operators
@@ -85,6 +100,11 @@ inline void add<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("+ not supported for string type");
 }
 
+template<>
+inline void add<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("+ not supported for none type");
+}
+
 template<typename T>
 inline void subtract(void* res, const void* v1, const void* v2) {
   *(reinterpret_cast<T*>(res)) = *(reinterpret_cast<const T*>(v1))
@@ -94,6 +114,11 @@ inline void subtract(void* res, const void* v1, const void* v2) {
 template<>
 inline void subtract<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("- not supported for string type");
+}
+
+template<>
+inline void subtract<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("- not supported for none type");
 }
 
 template<typename T>
@@ -107,6 +132,11 @@ inline void multiply<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("* not supported for string type");
 }
 
+template<>
+inline void multiply<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("* not supported for none type");
+}
+
 template<typename T>
 inline void divide(void* res, const void* v1, const void* v2) {
   *(reinterpret_cast<T*>(res)) = *(reinterpret_cast<const T*>(v1))
@@ -118,6 +148,11 @@ inline void divide<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("/ not supported for string type");
 }
 
+template<>
+inline void divide<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("/ not supported for none type");
+}
+
 template<typename T>
 inline void modulo(void* res, const void* v1, const void* v2) {
   *(reinterpret_cast<T*>(res)) = *(reinterpret_cast<const T*>(v1))
@@ -127,6 +162,11 @@ inline void modulo(void* res, const void* v1, const void* v2) {
 template<>
 inline void modulo<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("% not supported for string type");
+}
+
+template<>
+inline void modulo<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("% not supported for none type");
 }
 
 template<>
@@ -151,6 +191,11 @@ inline void bw_not<std::string>(void* res, const void* v) {
 }
 
 template<>
+inline void bw_not<void>(void* res, const void* v) {
+  throw unsupported_exception("~ not supported for none type");
+}
+
+template<>
 inline void bw_not<float>(void* res, const void* v) {
   throw unsupported_exception("~ not supported for float type");
 }
@@ -169,6 +214,11 @@ inline void bw_and(void* res, const void* v1, const void* v2) {
 template<>
 inline void bw_and<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("& not supported for string type");
+}
+
+template<>
+inline void bw_and<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("& not supported for none type");
 }
 
 template<>
@@ -193,6 +243,11 @@ inline void bw_or<std::string>(void* res, const void* v1, const void* v2) {
 }
 
 template<>
+inline void bw_or<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("| not supported for none type");
+}
+
+template<>
 inline void bw_or<float>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("| not supported for float type");
 }
@@ -211,6 +266,11 @@ inline void bw_xor(void* res, const void* v1, const void* v2) {
 template<>
 inline void bw_xor<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("^ not supported for string type");
+}
+
+template<>
+inline void bw_xor<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("^ not supported for none type");
 }
 
 template<>
@@ -235,6 +295,11 @@ inline void bw_lshift<std::string>(void* res, const void* v1, const void* v2) {
 }
 
 template<>
+inline void bw_lshift<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception("<< not supported for none type");
+}
+
+template<>
 inline void bw_lshift<float>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception("<< not supported for double type");
 }
@@ -253,6 +318,11 @@ inline void bw_rshift(void* res, const void* v1, const void* v2) {
 template<>
 inline void bw_rshift<std::string>(void* res, const void* v1, const void* v2) {
   throw unsupported_exception(">> not supported for string type");
+}
+
+template<>
+inline void bw_rshift<void>(void* res, const void* v1, const void* v2) {
+  throw unsupported_exception(">> not supported for none type");
 }
 
 template<>

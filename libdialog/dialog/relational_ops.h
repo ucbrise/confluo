@@ -34,6 +34,11 @@ inline bool less_than<std::string>(const void* v1, const void* v2) {
   throw unsupported_exception("< not supported for string type");
 }
 
+template<>
+inline bool less_than<void>(const void* v1, const void* v2) {
+  throw unsupported_exception("< not supported for none type");
+}
+
 template<typename T>
 inline bool less_than_equals(const void* v1, const void* v2) {
   return *(reinterpret_cast<const T*>(v1)) <= *(reinterpret_cast<const T*>(v2));
@@ -42,6 +47,11 @@ inline bool less_than_equals(const void* v1, const void* v2) {
 template<>
 inline bool less_than_equals<std::string>(const void* v1, const void* v2) {
   throw unsupported_exception("<= not supported for string type");
+}
+
+template<>
+inline bool less_than_equals<void>(const void* v1, const void* v2) {
+  throw unsupported_exception("<= not supported for none type");
 }
 
 template<typename T>
@@ -54,6 +64,11 @@ inline bool greater_than<std::string>(const void* v1, const void* v2) {
   throw unsupported_exception("> not supported for string type");
 }
 
+template<>
+inline bool greater_than<void>(const void* v1, const void* v2) {
+  throw unsupported_exception("> not supported for none type");
+}
+
 template<typename T>
 inline bool greater_than_equals(const void* v1, const void* v2) {
   return *(reinterpret_cast<const T*>(v1)) >= *(reinterpret_cast<const T*>(v2));
@@ -62,6 +77,11 @@ inline bool greater_than_equals(const void* v1, const void* v2) {
 template<>
 inline bool greater_than_equals<std::string>(const void* v1, const void* v2) {
   throw unsupported_exception(">= not supported for string type");
+}
+
+template<>
+inline bool greater_than_equals<void>(const void* v1, const void* v2) {
+  throw unsupported_exception(">= not supported for none type");
 }
 
 template<typename T>
@@ -74,6 +94,11 @@ inline bool equals<std::string>(const void* v1, const void* v2) {
   throw unsupported_exception("== not supported for string type");
 }
 
+template<>
+inline bool equals<void>(const void* v1, const void* v2) {
+  throw unsupported_exception("== not supported for none type");
+}
+
 template<typename T>
 inline bool not_equals(const void* v1, const void* v2) {
   return *(reinterpret_cast<const T*>(v1)) != *(reinterpret_cast<const T*>(v2));
@@ -82,6 +107,11 @@ inline bool not_equals(const void* v1, const void* v2) {
 template<>
 inline bool not_equals<std::string>(const void* v1, const void* v2) {
   throw unsupported_exception("!= not supported for string type");
+}
+
+template<>
+inline bool not_equals<void>(const void* v1, const void* v2) {
+  throw unsupported_exception("!= not supported for none type");
 }
 
 template<typename T>
