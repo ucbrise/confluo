@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "record.h"
 #include "column.h"
 #include "value.h"
 #include "expression.h"
@@ -11,48 +12,61 @@
 namespace dialog {
 
 struct compiled_predicate {
-  column_t col;
-  relop_id op;
-  value_t val;
-  std::string str;
-
   compiled_predicate()
-      : op() {
+      : op_() {
   }
 
   compiled_predicate(const compiled_predicate& other) {
-    col = other.col;
-    op = other.op;
-    val = other.val;
-    str = other.str;
+    col_ = other.col_;
+    op_ = other.op_;
+    val_ = other.val_;
+    str_ = other.str_;
   }
 
   template<typename schema_t>
-  compiled_predicate(const predicate_t& p, const schema_t& schema)
-      : op(p.op) {
+  compiled_predicate(const predicate_t& p, const schema_t& s)
+      : op_(p.op) {
     try {
-      col = schema.lookup(p.attr);
+      col_ = s.lookup(p.attr);
     } catch (std::exception& e) {
       throw parse_exception("No such attribute: " + p.attr);
     }
     try {
-      val = value_t::from_string(p.value, col.type);
+      val_ = value_t::from_string(p.value, col_.type());
     } catch (std::exception& e) {
       throw parse_exception(
           "Could not parse attribute " + p.attr + " value " + p.value
-              + " to type " + col.type.to_string());
+              + " to type " + col_.type().to_string());
     }
-    str = p.to_string();
+    str_ = p.to_string();
+  }
+
+  column_t column() const {
+    return col_;
+  }
+
+  relop_id op() const {
+    return op_;
+  }
+
+  value_t value() const {
+    return val_;
   }
 
   inline bool test(const record_t& r) const {
-    const field_t& f = r.get(col.idx);
-    return f.value.relop(op, val);
+    const field_t& f = r.get(col_.idx());
+    return f.value.relop(op_, val_);
   }
 
   std::string to_string() const {
-    return str;
+    return str_;
   }
+
+ private:
+  column_t col_;
+  relop_id op_;
+  value_t val_;
+  std::string str_;
 };
 
 }

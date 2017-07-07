@@ -4,66 +4,99 @@
 #include <string>
 #include <cstdint>
 
+#include "value.h"
+#include "field.h"
 #include "index_state.h"
+#include "string_utils.h"
 
 namespace dialog {
 
 struct column_t {
-  uint16_t idx;
-  data_type type;
-  uint16_t offset;
-  index_state_t idx_state;
-  char name[256];
+ public:
+  uint16_t idx_;
+  data_type type_;
+  uint16_t offset_;
+  index_state_t idx_state_;
+  char name_[256];
 
   column_t()
-      : idx(UINT16_MAX),
-        type(),
-        offset(UINT16_MAX) {
+      : idx_(UINT16_MAX),
+        type_(),
+        offset_(UINT16_MAX) {
+  }
+
+  column_t(uint16_t idx, uint16_t offset, const data_type& type,
+           const std::string& name)
+      : idx_(idx),
+        type_(type),
+        offset_(offset) {
+    set_name(name);
   }
 
   column_t(const column_t& other) {
-    idx = other.idx;
-    type = other.type;
-    offset = other.offset;
-    idx_state = other.idx_state;
-    set_name(std::string(other.name));
+    idx_ = other.idx_;
+    type_ = other.type_;
+    offset_ = other.offset_;
+    idx_state_ = other.idx_state_;
+    set_name(std::string(other.name_));
   }
 
-  void set_name(const std::string& n) {
-    std::string tmp = string_utils::to_upper(n);
-    size_t size = std::min(n.length(), static_cast<size_t>(255));
-    strncpy(name, tmp.c_str(), size);
-    name[size] = '\0';
+  std::string name() const {
+    return std::string(name_);
+  }
+
+  const data_type& type() const {
+    return type_;
+  }
+
+  uint16_t offset() const {
+    return offset_;
+  }
+
+  uint16_t idx() const {
+    return idx_;
+  }
+
+  uint16_t index_id() const {
+    return idx_state_.get_id();
   }
 
   bool is_indexed() {
-    return idx_state.is_indexed();
+    return idx_state_.is_indexed();
   }
 
   bool set_indexing() {
-    return idx_state.set_indexing();
+    return idx_state_.set_indexing();
   }
 
   void set_indexed(uint16_t index_id) {
-    idx_state.set_indexed(index_id);
+    idx_state_.set_indexed(index_id);
   }
 
   void set_unindexed() {
-    idx_state.set_unindexed();
+    idx_state_.set_unindexed();
   }
 
   bool disable_indexing() {
-    return idx_state.disable_indexing();
+    return idx_state_.disable_indexing();
   }
 
   field_t apply(const void* data) {
     field_t f;
-    f.idx = idx;
-    f.value.type = type;
-    f.value.data = (void*) ((unsigned char*) data + offset);
+    f.idx = idx_;
+    f.value.type = type_;
+    f.value.data = (void*) ((unsigned char*) data + offset_);
     f.indexed = is_indexed();
-    f.index_id = idx_state.id;
+    f.index_id = idx_state_.id;
     return f;
+  }
+
+ private:
+  void set_name(const std::string& n) {
+    std::string tmp = string_utils::to_upper(n);
+    size_t size = std::min(n.length(), static_cast<size_t>(255));
+    strncpy(name_, tmp.c_str(), size);
+    name_[size] = '\0';
   }
 };
 

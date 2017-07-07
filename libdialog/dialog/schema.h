@@ -47,11 +47,8 @@ class schema_t {
     memcpy(columns_, &schema_in[0], schema_in.size() * sizeof(column_t));
     storage_mode::flush(data, file_size);
 
-    for (size_t i = 0; i < *num_columns_; i++) {
-      auto entry = std::make_pair(std::string(columns_[i].name),
-                                  columns_[i].idx);
-      name_map_.insert(entry);
-    }
+    for (size_t i = 0; i < *num_columns_; i++)
+      name_map_.insert(std::make_pair(columns_[i].name(), columns_[i].idx()));
   }
 
   column_t& get_column(size_t idx) {
@@ -91,19 +88,9 @@ class schema_builder {
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name) {
-    column_t col;
-    col.idx = schema_.size();
-    col.type = type;
-    col.offset = offset_;
-    col.set_name(name);
-    schema_.push_back(col);
+    schema_.push_back(column_t(schema_.size(), offset_, type, name));
     offset_ += type.size;
     return *this;
-  }
-
-  template<class storage_mode>
-  void init_schema(schema_t<storage_mode>& schema, const std::string& path) {
-    schema.init(path, schema_);
   }
 
   std::vector<column_t> get_schema() const {

@@ -25,6 +25,10 @@ struct index_state_t {
         id(other.id) {
   }
 
+  uint16_t get_id() const {
+    return id;
+  }
+
   index_state_t& operator=(const index_state_t& other) {
     atomic::init(&state, atomic::load(&other.state));
     id = other.id;

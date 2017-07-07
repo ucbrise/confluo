@@ -185,7 +185,7 @@ struct data_type {
 
   data_type(const data_type& other)
       : id(other.id),
-        size(other.id),
+        size(other.size),
         min(other.min),
         zero(other.zero),
         one(other.one),
