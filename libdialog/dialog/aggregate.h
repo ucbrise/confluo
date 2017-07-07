@@ -6,6 +6,12 @@
 
 namespace dialog {
 
+enum aggregate_id {
+  SUM = 0,
+  MIN = 1,
+  MAX = 2
+};
+
 using aggregate_fn = numeric_t (*)(const numeric_t& v1, const numeric_t& v2);
 
 // Standard aggregates: sum, min, max
@@ -20,6 +26,8 @@ numeric_t min(const numeric_t& a, const numeric_t& b) {
 numeric_t max(const numeric_t& a, const numeric_t& b) {
   return a < b ? b : a;
 }
+
+static std::array<aggregate_fn, 3> aggregates { { sum, min, max } };
 
 struct aggregate_node {
   aggregate_node(numeric_t agg, uint64_t version, aggregate_node *next)
@@ -51,12 +59,24 @@ class aggregate_t {
   /**
    * Constructor for aggregate
    *
-   * @param agg
+   * @param agg Aggregate function pointer.
    */
-  aggregate_t(aggregate_fn agg)
+  aggregate_t(aggregate_fn agg = sum)
       : agg_(agg) {
   }
 
+  /**
+   * Constructor for aggregate
+   *
+   * @param id Aggregate ID.
+   */
+  aggregate_t(aggregate_id id)
+      : agg_(aggregates[id]) {
+  }
+
+  /**
+   * Default destructor.
+   */
   ~aggregate_t() = default;
 
   /**

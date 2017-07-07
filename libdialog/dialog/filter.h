@@ -12,16 +12,6 @@ using namespace ::utils;
 namespace dialog {
 namespace monitor {
 
-struct filter_info {
-  uint32_t filter_id;
-  char filter_expr[1024];
-
-  void set_expression(const std::string& expr) {
-    strcpy(filter_expr, expr.c_str());
-    filter_expr[expr.length()] = '\0';
-  }
-};
-
 /**
  * Type-definition for RefLog type -- a MonoLog of type uint64_t and
  * bucket size of 24.

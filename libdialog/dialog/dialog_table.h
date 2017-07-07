@@ -11,9 +11,10 @@
 #include "time_utils.h"
 #include "string_utils.h"
 #include "filter.h"
+#include "filter_info.h"
+#include "trigger_info.h"
 #include "schema.h"
 #include "expression_compiler.h"
-#include "trigger.h"
 #include "read_tail.h"
 
 using namespace ::dialog::monolog;
@@ -136,7 +137,7 @@ class dialog_table {
   }
 
   uint32_t add_trigger(uint32_t filter_id, const std::string& field_name,
-                       aggregate_t agg, field_t threshold) {
+                       aggregate_id agg, field_t threshold) {
     trigger_info t_info;
     t_info.filter_id = filter_id;
     t_info.agg_type = agg;

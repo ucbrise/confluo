@@ -10,8 +10,6 @@ namespace dialog {
 
 class numeric_t {
  public:
-  using storage = typename std::aligned_storage<sizeof(uint64_t), alignof(uint64_t)>::type;
-
   numeric_t(data_type type)
       : type_(type) {
     // Is this safe to do?
@@ -23,13 +21,56 @@ class numeric_t {
     type.unaryop(unaryop_id::ASSIGN)(storage_, value);
   }
 
+  numeric_t(bool value)
+      : type_(bool_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(char value)
+      : type_(char_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(short value)
+      : type_(short_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(int value)
+      : type_(int_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(long value)
+      : type_(long_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(float value)
+      : type_(float_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(double value)
+      : type_(double_type()) {
+    type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  data_type get_type() const {
+    return type_;
+  }
+
+  const void* get_data() const {
+    return reinterpret_cast<const void*>(storage_);
+  }
+
   // Relational operators
   friend bool relop(relop_id id, const numeric_t& first,
-                    const numeric_t& second) const {
+                    const numeric_t& second) {
     if (first.type_ != second.type_)
       throw invalid_operation_exception(
           "Cannot compare values of different types");
-    return type_.relop(id)(first.storage_, second.storage_);
+    return first.type_.relop(id)(first.storage_, second.storage_);
   }
 
   friend bool operator <(const numeric_t& first, const numeric_t& second) {
@@ -37,28 +78,28 @@ class numeric_t {
   }
 
   friend bool operator <=(const numeric_t& first, const numeric_t& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(relop_id::LE, first, second);
   }
 
   friend bool operator >(const numeric_t& first, const numeric_t& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(relop_id::GT, first, second);
   }
 
   friend bool operator >=(const numeric_t& first, const numeric_t& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(relop_id::GE, first, second);
   }
 
   friend bool operator ==(const numeric_t& first, const numeric_t& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(relop_id::EQ, first, second);
   }
 
   friend bool operator !=(const numeric_t& first, const numeric_t& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(relop_id::NEQ, first, second);
   }
 
   friend numeric_t unaryop(unaryop_id id, const numeric_t& n) {
-    numeric_t result;
-    type_.unaryop(id)(result.storage_, n.storage_);
+    numeric_t result(n.type_);
+    result.type_.unaryop(id)(result.storage_, n.storage_);
     return result;
   }
 
@@ -75,12 +116,12 @@ class numeric_t {
   }
 
   friend numeric_t binaryop(binaryop_id id, const numeric_t& first,
-                          const numeric_t& second) {
-    numeric_t result;
+                            const numeric_t& second) {
     if (first.type_ != second.type_)
       throw invalid_operation_exception(
           "Cannot operate on values of different types");
-    type_.binaryop(id)(result.storage_, first.storage_, second.storage_);
+    numeric_t result(first.type_);
+    result.type_.binaryop(id)(result.storage_, first.storage_, second.storage_);
     return result;
   }
 
@@ -132,7 +173,7 @@ class numeric_t {
 
  private:
   data_type type_;
-  storage storage_;
+  unsigned char storage_[8];
 };
 
 }
