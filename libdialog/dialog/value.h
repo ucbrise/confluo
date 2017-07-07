@@ -22,62 +22,75 @@ void* valdup(const T& val) {
 }
 
 struct value_t {
-  data_type type;
-  void* data;
+  value_t()
+      : type_(NONE_TYPE),
+        data_(nullptr) {
+  }
+
+  value_t(const data_type& type, const void* data)
+      : type_(type),
+        data_(data) {
+  }
+
+  value_t(const value_t& other)
+      : type_(other.type_),
+        data_(other.data_) {
+  }
+
+  inline const data_type& type() const {
+    return type_;
+  }
+
+  inline const void* data() const {
+    return data_;
+  }
 
   static value_t from_string(const std::string& str, data_type type) {
-    value_t ret;
-    ret.type = type;
     switch (type.id) {
       case type_id::D_BOOL: {
         bool val = string_utils::lexical_cast<bool>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_CHAR: {
         char val = string_utils::lexical_cast<char>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_SHORT: {
         short val = string_utils::lexical_cast<short>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_INT: {
         int val = string_utils::lexical_cast<int>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_LONG: {
         long val = string_utils::lexical_cast<long>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_FLOAT: {
         float val = string_utils::lexical_cast<float>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_DOUBLE: {
         double val = string_utils::lexical_cast<double>(str);
-        ret.data = valdup(val);
-        break;
+        return value_t(type, valdup(val));
       }
       case type_id::D_STRING: {
-        ret.data = strdup(str.c_str());
-        break;
+        return value_t(type, strdup(str.c_str()));
       }
       default: {
         throw std::bad_cast();
       }
     }
-    return ret;
   }
 
-  bool relop(const relop_id& op, const value_t& other) const {
-    return type.relop(op)(data, other.data);
+  inline bool relop(const relop_id& op, const value_t& other) const {
+    return type_.relop(op)(data_, other.data_);
   }
+
+ private:
+  data_type type_;
+  const void* data_;
 };
 
 }

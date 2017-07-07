@@ -30,6 +30,10 @@ struct minterm {
     return *this;
   }
 
+  size_t size() const {
+    return m_.size();
+  }
+
   std::string to_string() const {
     std::string s = ";";
     for (auto& p : m_) {

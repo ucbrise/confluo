@@ -21,7 +21,7 @@ class CompiledPredicateTest : public testing::Test {
     float f;
     double g;
     char h[16];
-  };
+  }__attribute__((packed));
 
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;

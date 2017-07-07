@@ -89,7 +89,7 @@ class filter {
    */
   void update(const record_t& r) {
     if (exp_.test(r) && fn_(r))
-      idx_[get_ts_block(r.timestamp)]->push_back(r.log_offset);
+      idx_[get_ts_block(r.timestamp())]->push_back(r.log_offset());
   }
 
   /**

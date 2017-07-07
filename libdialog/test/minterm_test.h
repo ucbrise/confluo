@@ -1,5 +1,5 @@
-#ifndef LIBDIALOG_TEST_MINTERM_TEST_H_
-#define LIBDIALOG_TEST_MINTERM_TEST_H_
+#ifndef TEST_MINTERM_TEST_H_
+#define TEST_MINTERM_TEST_H_
 
 #include "minterm.h"
 #include "gtest/gtest.h"
@@ -19,7 +19,7 @@ class MintermTest : public testing::Test {
     float f;
     double g;
     char h[16];
-  };
+  }__attribute__((packed));
 
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;
@@ -69,4 +69,4 @@ TEST_F(MintermTest, TestMintermTest) {
   m.test(record(false, 'Z', 11, 0, 1000, 102.4, 182.3));
 }
 
-#endif /* LIBDIALOG_TEST_MINTERM_TEST_H_ */
+#endif /* TEST_MINTERM_TEST_H_ */

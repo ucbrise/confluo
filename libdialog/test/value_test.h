@@ -13,10 +13,10 @@ class ValueTest : public testing::Test {
 
 TEST_F(ValueTest, BoolValueTest) {
   value_t val1 = value_t::from_string("true", bool_type());
-  ASSERT_EQ(true, *reinterpret_cast<bool*>(val1.data));
+  ASSERT_EQ(true, *reinterpret_cast<const bool*>(val1.data()));
 
   value_t val2 = value_t::from_string("FALSE", bool_type());
-  ASSERT_EQ(false, *reinterpret_cast<bool*>(val2.data));
+  ASSERT_EQ(false, *reinterpret_cast<const bool*>(val2.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
     value_t::from_string("0", bool_type());
@@ -42,10 +42,10 @@ TEST_F(ValueTest, BoolValueTest) {
 
 TEST_F(ValueTest, CharValueTest) {
   value_t val1 = value_t::from_string("c", char_type());
-  ASSERT_EQ('c', *reinterpret_cast<char*>(val1.data));
+  ASSERT_EQ('c', *reinterpret_cast<const char*>(val1.data()));
 
   value_t val2 = value_t::from_string("1", char_type());
-  ASSERT_EQ('1', *reinterpret_cast<char*>(val2.data));
+  ASSERT_EQ('1', *reinterpret_cast<const char*>(val2.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
     value_t::from_string("cc", char_type());
@@ -67,10 +67,10 @@ TEST_F(ValueTest, CharValueTest) {
 
 TEST_F(ValueTest, ShortValueTest) {
   value_t val1 = value_t::from_string("10", short_type());
-  ASSERT_EQ(10, *reinterpret_cast<short*>(val1.data));
+  ASSERT_EQ(10, *reinterpret_cast<const short*>(val1.data()));
 
   value_t val2 = value_t::from_string("-100", short_type());
-  ASSERT_EQ(-100, *reinterpret_cast<short*>(val2.data));
+  ASSERT_EQ(-100, *reinterpret_cast<const short*>(val2.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     value_t::from_string("10c", short_type());
@@ -96,10 +96,10 @@ TEST_F(ValueTest, ShortValueTest) {
 
 TEST_F(ValueTest, IntValueTest) {
   value_t val1 = value_t::from_string("65536", int_type());
-  ASSERT_EQ(65536, *reinterpret_cast<int*>(val1.data));
+  ASSERT_EQ(65536, *reinterpret_cast<const int*>(val1.data()));
 
   value_t val2 = value_t::from_string("-100", int_type());
-  ASSERT_EQ(-100, *reinterpret_cast<int*>(val2.data));
+  ASSERT_EQ(-100, *reinterpret_cast<const int*>(val2.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     value_t::from_string("10c", int_type());
@@ -125,10 +125,10 @@ TEST_F(ValueTest, IntValueTest) {
 
 TEST_F(ValueTest, LongValueTest) {
   value_t val1 = value_t::from_string("2147483648", long_type());
-  ASSERT_EQ(2147483648, *reinterpret_cast<long*>(val1.data));
+  ASSERT_EQ(2147483648, *reinterpret_cast<const long*>(val1.data()));
 
   value_t val2 = value_t::from_string("-100", long_type());
-  ASSERT_EQ(-100, *reinterpret_cast<long*>(val2.data));
+  ASSERT_EQ(-100, *reinterpret_cast<const long*>(val2.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     value_t::from_string("10c", long_type());
@@ -154,13 +154,13 @@ TEST_F(ValueTest, LongValueTest) {
 
 TEST_F(ValueTest, FloatValueTest) {
   value_t val1 = value_t::from_string("10.4", float_type());
-  ASSERT_EQ(static_cast<float>(10.4), *reinterpret_cast<float*>(val1.data));
+  ASSERT_EQ(static_cast<float>(10.4), *reinterpret_cast<const float*>(val1.data()));
 
   value_t val2 = value_t::from_string("-100.3", float_type());
-  ASSERT_EQ(static_cast<float>(-100.3), *reinterpret_cast<float*>(val2.data));
+  ASSERT_EQ(static_cast<float>(-100.3), *reinterpret_cast<const float*>(val2.data()));
 
   value_t val3 = value_t::from_string("-100", float_type());
-  ASSERT_EQ(static_cast<float>(-100.0), *reinterpret_cast<float*>(val3.data));
+  ASSERT_EQ(static_cast<float>(-100.0), *reinterpret_cast<const float*>(val3.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     value_t::from_string("10.0c", float_type());
@@ -182,13 +182,13 @@ TEST_F(ValueTest, FloatValueTest) {
 
 TEST_F(ValueTest, DoubleValueTest) {
   value_t val1 = value_t::from_string("10.4", double_type());
-  ASSERT_EQ(static_cast<double>(10.4), *reinterpret_cast<double*>(val1.data));
+  ASSERT_EQ(static_cast<double>(10.4), *reinterpret_cast<const double*>(val1.data()));
 
   value_t val2 = value_t::from_string("-100.3", double_type());
-  ASSERT_EQ(static_cast<double>(-100.3), *reinterpret_cast<double*>(val2.data));
+  ASSERT_EQ(static_cast<double>(-100.3), *reinterpret_cast<const double*>(val2.data()));
 
   value_t val3 = value_t::from_string("-100", double_type());
-  ASSERT_EQ(static_cast<double>(-100.0), *reinterpret_cast<double*>(val3.data));
+  ASSERT_EQ(static_cast<double>(-100.0), *reinterpret_cast<const double*>(val3.data()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     value_t::from_string("10.0c", double_type());
@@ -210,10 +210,10 @@ TEST_F(ValueTest, DoubleValueTest) {
 
 TEST_F(ValueTest, StringValueTest) {
   value_t val1 = value_t::from_string("abc", string_type(64));
-  ASSERT_TRUE(strcmp("abc", reinterpret_cast<char*>(val1.data)) == 0);
+  ASSERT_TRUE(strcmp("abc", reinterpret_cast<const char*>(val1.data())) == 0);
 
   value_t val2 = value_t::from_string("123", string_type(64));
-  ASSERT_TRUE(strcmp("123", reinterpret_cast<char*>(val2.data)) == 0);
+  ASSERT_TRUE(strcmp("123", reinterpret_cast<const char*>(val2.data())) == 0);
 
   ASSERT_TRUE(test::test_utils::test_fail([&val1, &val2]() {
     val1.relop(relop_id::LT, val2);

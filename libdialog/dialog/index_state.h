@@ -35,7 +35,7 @@ struct index_state_t {
     return *this;
   }
 
-  bool is_indexed() {
+  bool is_indexed() const {
     return atomic::load(&state) == INDEXED;
   }
 

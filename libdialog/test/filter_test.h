@@ -13,7 +13,7 @@ using namespace ::dialog;
 
 // Stateless filter
 inline bool filter1(const record_t& r) {
-  return r.timestamp % 10 == 0;
+  return r.timestamp() % 10 == 0;
 }
 
 atomic::type<uint64_t> __count(0);
@@ -27,14 +27,8 @@ class FilterTest : public testing::Test {
   const uint32_t kMaxEntries = 100000;
 
   void fill(filter& f) {
-    for (uint32_t i = 0; i < kMaxEntries; i++) {
-      record_t r;
-      r.timestamp = i;
-      r.log_offset = i;
-      r.data = (uint8_t*) &i;
-      r.len = sizeof(uint32_t);
-      f.update(r);
-    }
+    for (uint32_t i = 0; i < kMaxEntries; i++)
+      f.update(record_t(i, i, &i, sizeof(uint32_t)));
   }
 
   void fill_mt(filter& f, uint32_t num_threads) {
@@ -42,12 +36,7 @@ class FilterTest : public testing::Test {
     for (uint32_t i = 1; i <= num_threads; i++) {
       workers.push_back(std::thread([i, &f, this] {
         for (uint32_t j = (i - 1) * kMaxEntries; j < i * kMaxEntries; j++) {
-          record_t r;
-          r.timestamp = j;
-          r.log_offset = j;
-          r.data = (uint8_t*) &j;
-          r.len = sizeof(uint32_t);
-          f.update(r);
+          f.update(record_t(j, j, &j, sizeof(uint32_t)));
         }
       }));
     }

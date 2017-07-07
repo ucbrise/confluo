@@ -9,9 +9,11 @@
 #include "expression_compiler_test.h"
 #include "expression_test.h"
 #include "filter_test.h"
+#include "index_state_test.h"
 #include "minterm_test.h"
 #include "monolog_test.h"
 #include "numeric_test.h"
+#include "schema_test.h"
 #include "tiered_index_test.h"
 #include "value_test.h"
 

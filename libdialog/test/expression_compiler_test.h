@@ -37,6 +37,36 @@ class ExpressionCompilerTest : public testing::Test {
     }
     fprintf(stderr, "\n");
   }
+
+  static void check_predicate(const compiled_predicate& c) {
+    if (c.to_string() == "a==true") {
+      ASSERT_EQ("A", c.column().name());
+      ASSERT_TRUE(BOOL_TYPE == c.column().type());
+      ASSERT_EQ(relop_id::EQ, c.op());
+    } else if (c.to_string() == "b<5") {
+      ASSERT_EQ("B", c.column().name());
+      ASSERT_TRUE(CHAR_TYPE == c.column().type());
+      ASSERT_EQ(relop_id::LT, c.op());
+    } else if (c.to_string() == "c<10") {
+      ASSERT_EQ("C", c.column().name());
+      ASSERT_TRUE(SHORT_TYPE == c.column().type());
+      ASSERT_EQ(relop_id::LT, c.op());
+    } else if (c.to_string() == "e<10") {
+      ASSERT_EQ("E", c.column().name());
+      ASSERT_TRUE(LONG_TYPE == c.column().type());
+      ASSERT_EQ(relop_id::LT, c.op());
+    } else if (c.to_string() == "f<1.3") {
+      ASSERT_EQ("F", c.column().name());
+      ASSERT_TRUE(FLOAT_TYPE == c.column().type());
+      ASSERT_EQ(relop_id::LT, c.op());
+    } else if (c.to_string() == "g<1.9") {
+      ASSERT_EQ("G", c.column().name());
+      ASSERT_TRUE(DOUBLE_TYPE == c.column().type());
+      ASSERT_EQ(relop_id::LT, c.op());
+    } else {
+      ASSERT_TRUE(false);
+    }
+  }
 };
 
 TEST_F(ExpressionCompilerTest, CompilerTest) {
@@ -54,25 +84,71 @@ TEST_F(ExpressionCompilerTest, CompilerTest) {
 
   compiled_expression m1, m2, m3, m4, m5, m6, m7;
   compile(m1, "a==true", s);
-  print_minterms(m1);
+  ASSERT_EQ(static_cast<size_t>(1), m1.size());
+  for (auto& m : m1) {
+    ASSERT_EQ(static_cast<size_t>(1), m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 
   compile(m2, "a==true && b<5", s);
-  print_minterms(m2);
+  ASSERT_EQ(static_cast<size_t>(1), m2.size());
+  for (auto& m : m2) {
+    ASSERT_EQ(static_cast<size_t>(2), m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 
   compile(m3, "a==true || b<5", s);
-  print_minterms(m3);
+  ASSERT_EQ(static_cast<size_t>(2), m3.size());
+  for (auto& m : m3) {
+    ASSERT_EQ(static_cast<size_t>(1), m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 
   compile(m4, "a==true && b<5 || c<10", s);
-  print_minterms(m4);
+  ASSERT_EQ(static_cast<size_t>(2), m4.size());
+  for (auto& m : m4) {
+    ASSERT_TRUE(
+        static_cast<size_t>(2) == m.size()
+            || static_cast<size_t>(1) == m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 
   compile(m5, "a==true && (b<5 || c<10)", s);
-  print_minterms(m5);
+  ASSERT_EQ(static_cast<size_t>(2), m5.size());
+  for (auto& m : m5) {
+    ASSERT_EQ(static_cast<size_t>(2), m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 
   compile(m6, "a==true && (b<5 || (c<10 && e<10))", s);
-  print_minterms(m6);
+  ASSERT_EQ(static_cast<size_t>(2), m6.size());
+  for (auto& m : m6) {
+    ASSERT_TRUE(
+        static_cast<size_t>(2) == m.size()
+            || static_cast<size_t>(3) == m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 
   compile(m7, "a==true && (b<5 || c<10 || e<10 || f<1.3 || g<1.9)", s);
-  print_minterms(m7);
+  ASSERT_EQ(static_cast<size_t>(5), m7.size());
+  for (auto& m : m7) {
+    ASSERT_EQ(static_cast<size_t>(2), m.size());
+    for (auto& c : m) {
+      check_predicate(c);
+    }
+  }
 }
 
 #endif // TEST_EXPRESSION_COMPILER_TEST_H_

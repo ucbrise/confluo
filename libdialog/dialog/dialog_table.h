@@ -7,7 +7,6 @@
 
 #include "storage.h"
 #include "monolog.h"
-#include "serde.h"
 #include "time_utils.h"
 #include "string_utils.h"
 #include "filter.h"
@@ -85,7 +84,7 @@ class dialog_table {
     bool success = schema_.columns[idx].set_indexing();
     if (success) {
       uint16_t index_id;
-      switch (schema_.columns[idx].type.size) {
+      switch (schema_.columns[idx].type().size) {
         case 1:
           index_id = idx1_.push_back(new idx1_t);
           break;
@@ -157,22 +156,23 @@ class dialog_table {
     for (size_t i = 0; i < nfilters; i++)
       filters_.at(i)->update(r);
 
-    for (const field_t& f : r.fields) {
-      if (f.indexed) {
-        switch (f.value.type.size) {
+    for (const field_t& f : r) {
+      if (f.is_indexed()) {
+        switch (f.type().size) {
           case 1:
-            (*idx1_.at(f.index_id))[f.get_uint64<uint8_t>()]->push_back(offset);
+            (*idx1_.at(f.index_id()))[f.get_uint64<uint8_t>()]->push_back(
+                offset);
             break;
           case 2:
-            (*idx2_.at(f.index_id))[f.get_uint64<uint16_t>()]->push_back(
+            (*idx2_.at(f.index_id()))[f.get_uint64<uint16_t>()]->push_back(
                 offset);
             break;
           case 4:
-            (*idx2_.at(f.index_id))[f.get_uint64<uint32_t>()]->push_back(
+            (*idx2_.at(f.index_id()))[f.get_uint64<uint32_t>()]->push_back(
                 offset);
             break;
           case 8:
-            (*idx8_.at(f.index_id))[f.get_uint64<uint64_t>()]->push_back(
+            (*idx8_.at(f.index_id()))[f.get_uint64<uint64_t>()]->push_back(
                 offset);
             break;
           default:

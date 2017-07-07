@@ -51,27 +51,23 @@ class schema_t {
       name_map_.insert(std::make_pair(columns_[i].name(), columns_[i].idx()));
   }
 
-  column_t& get_column(size_t idx) {
+  column_t& operator[](size_t idx) {
     return columns_[idx];
   }
 
-  size_t num_columns() {
-    return *num_columns_;
-  }
-
-  column_t lookup(const std::string& name) const {
+  column_t& operator[](const std::string& name) const {
     return columns_[name_map_.at(string_utils::to_upper(name))];
   }
 
+  size_t size() {
+    return *num_columns_;
+  }
+
   record_t apply(size_t log_offset, const void* data, size_t len, uint64_t ts) {
-    record_t r;
-    r.timestamp = ts;
-    r.data = data;
-    r.len = len;
-    r.log_offset = log_offset;
-    r.fields.reserve(*num_columns_);
+    record_t r(ts, log_offset, data, len);
+    r.reserve(*num_columns_);
     for (uint16_t i = 0; i < *num_columns_; i++)
-      r.fields.push_back(columns_[i].apply(data));
+      r.push_back(columns_[i].apply(data));
     return r;
   }
 

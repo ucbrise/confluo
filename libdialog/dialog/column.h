@@ -61,7 +61,7 @@ struct column_t {
     return idx_state_.get_id();
   }
 
-  bool is_indexed() {
+  bool is_indexed() const {
     return idx_state_.is_indexed();
   }
 
@@ -81,14 +81,10 @@ struct column_t {
     return idx_state_.disable_indexing();
   }
 
-  field_t apply(const void* data) {
-    field_t f;
-    f.idx = idx_;
-    f.value.type = type_;
-    f.value.data = (void*) ((unsigned char*) data + offset_);
-    f.indexed = is_indexed();
-    f.index_id = idx_state_.id;
-    return f;
+  field_t apply(const void* data) const {
+    return field_t(idx_, type_,
+                   reinterpret_cast<const unsigned char*>(data) + offset_,
+                   is_indexed(), idx_state_.id);
   }
 
  private:
