@@ -50,8 +50,11 @@ class filter {
   static const size_t DEFAULT_LEAF_RANGE_NS = 1e6;
 
   /**
-   * Constructor that initializes the filter functor with the provided one.
-   * @param f Provided filter functor.
+   * Constructor that initializes filter with provided compiled expression and
+   * filter function.
+   *
+   * @param exp Compiled expression.
+   * @param fn Filter function.
    * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
    */
   filter(const compiled_expression& exp, filter_fn fn = default_filter,
@@ -61,6 +64,12 @@ class filter {
         leaf_range_ns_(monitor_granularity_ms * 1e6) {
   }
 
+  /**
+   * Constructor that initializes the filter function with the provided one.
+   *
+   * @param fn Provided filter function.
+   * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
+   */
   filter(filter_fn fn = default_filter, size_t monitor_granularity_ms = 1)
       : exp_(),
         fn_(fn),

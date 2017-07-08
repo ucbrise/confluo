@@ -11,11 +11,11 @@ struct record_t {
   typedef std::vector<field_t>::iterator iterator;
   typedef std::vector<field_t>::const_iterator const_iterator;
 
-  record_t(uint64_t timestamp, size_t log_offset, const void* data, size_t len)
+  record_t(uint64_t timestamp, size_t log_offset, const void* data, uint64_t version)
       : timestamp_(timestamp),
         log_offset_(log_offset),
         data_(data),
-        len_(len) {
+        version_(version) {
   }
 
   void reserve(size_t n) {
@@ -50,8 +50,8 @@ struct record_t {
     return data_;
   }
 
-  size_t length() const {
-    return len_;
+  uint64_t version() const {
+    return version_;
   }
 
   iterator begin() {
@@ -74,7 +74,7 @@ struct record_t {
   uint64_t timestamp_;
   size_t log_offset_;
   const void* data_;
-  size_t len_;
+  uint64_t version_;
   std::vector<field_t> fields_;
 };
 

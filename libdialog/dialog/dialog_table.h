@@ -150,7 +150,7 @@ class dialog_table {
   uint64_t append(const void* data, size_t length, uint64_t ts =
                       time_utils::cur_ns()) {
     uint64_t offset = data_log_.append((const uint8_t*) data, length);
-    record_t r = schema_.apply(offset, data, length, ts);
+    record_t r = schema_.apply(offset, data, offset + length, ts);
 
     size_t nfilters = filters_.size();
     for (size_t i = 0; i < nfilters; i++)

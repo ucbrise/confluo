@@ -63,8 +63,8 @@ class schema_t {
     return *num_columns_;
   }
 
-  record_t apply(size_t log_offset, const void* data, size_t len, uint64_t ts) {
-    record_t r(ts, log_offset, data, len);
+  record_t apply(size_t offset, const void* data, uint64_t version, uint64_t ts) {
+    record_t r(ts, offset, data, version);
     r.reserve(*num_columns_);
     for (uint16_t i = 0; i < *num_columns_; i++)
       r.push_back(columns_[i].apply(data));
