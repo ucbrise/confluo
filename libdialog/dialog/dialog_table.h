@@ -7,14 +7,16 @@
 
 #include "storage.h"
 #include "monolog.h"
+#include "read_tail.h"
+#include "schema.h"
+#include "table_metadata.h"
+#include "tiered_index.h"
+#include "expression_compiler.h"
+#include "filter.h"
+#include "trigger.h"
+
 #include "time_utils.h"
 #include "string_utils.h"
-#include "filter.h"
-#include "filter_info.h"
-#include "trigger_info.h"
-#include "schema.h"
-#include "expression_compiler.h"
-#include "read_tail.h"
 
 using namespace ::dialog::monolog;
 using namespace ::dialog::monitor;
@@ -57,19 +59,17 @@ class dialog_table {
 
   dialog_table(const std::vector<column_t>& table_schema,
                const std::string& path = ".")
-      : rt_(path),
-        schema_(path, table_schema) {
-    data_log_.init("data_log", path);
-    filter_info_.init("filters", path);
-    trigger_info_.init("triggers", path);
+      : data_log_("data_log", path),
+        rt_(path),
+        schema_(path, table_schema),
+        metadata_(path) {
   }
 
   dialog_table(const schema_builder& builder, const std::string& path = ".")
-      : rt_(path),
-        schema_(path, builder.get_schema()) {
-    data_log_.init("data_log", path);
-    filter_info_.init("filters", path);
-    trigger_info_.init("triggers", path);
+      : data_log_("data_log", path),
+        rt_(path),
+        schema_(path, builder.get_schema()),
+        metadata_(path) {
   }
 
   // Management interface
@@ -102,6 +102,7 @@ class dialog_table {
           throw management_exception("Index not supported for field type");
       }
       schema_.columns[idx].set_indexed(index_id);
+      metadata_.write_index_info(index_id, field_name);
     } else {
       throw management_exception(
           "Could not add index for " + field_name
@@ -126,25 +127,19 @@ class dialog_table {
 
   uint32_t add_filter(const std::string& expression, size_t monitor_ms) {
     auto cexpr = expression_compiler::compile(expression, schema_);
-    filter_info f_info;
-    f_info.set_expression(expression);
-    f_info.filter_id = filter_info_.reserve(1);
-    filter_info_[f_info.filter_id] = f_info;
-    filter_info_.flush(f_info.filter_id, 1);
-    filters_[f_info.filter_id] = new filter(cexpr, monitor_ms);
-    return f_info.filter_id;
+    uint32_t filter_id = filters_.push_back(new filter(cexpr, monitor_ms));
+    metadata_.write_filter_info(filter_id, expression);
+    return filter_id;
   }
 
   uint32_t add_trigger(uint32_t filter_id, const std::string& field_name,
-                       aggregate_id agg, field_t threshold) {
-    trigger_info t_info;
-    t_info.filter_id = filter_id;
-    t_info.agg_type = agg;
-    t_info.col = schema_.lookup(field_name);
-    t_info.trigger_id = trigger_info_.reserve(1);
-    trigger_info_[t_info.trigger_id] = t_info;
-    trigger_info_.flush(t_info.trigger_id, 1);
-    return t_info.trigger_id;
+                       aggregate_id agg, relop_id op,
+                       const numeric_t& threshold) {
+    trigger *t = new trigger(filter_id, op, threshold);
+    uint32_t trigger_id = triggers_.push_back(t);
+    metadata_.write_trigger_info(trigger_id, filter_id, agg, field_name, op,
+                                 threshold);
+    return trigger_id;
   }
 
   uint64_t append(const void* data, size_t length, uint64_t ts =
@@ -231,9 +226,11 @@ class dialog_table {
   monolog_linear<uint8_t, 65536, 1073741824, 1048576, storage_mode> data_log_;
   read_tail<storage_mode> rt_;
   schema_t<storage_mode> schema_;
-  aux_log_t<filter_info, storage_mode> filter_info_;
-  aux_log_t<trigger_info, storage_mode> trigger_info_;
+  metadata_writer<storage_mode> metadata_;
+
+  // In memory structures
   aux_log_t<filter*, storage::in_memory> filters_;
+  aux_log_t<trigger*, storage::in_memory> triggers_;
   aux_log_t<idx_bool_t*, storage::in_memory> idx_bool_;
   aux_log_t<idx1_t*, storage::in_memory> idx1_;
   aux_log_t<idx2_t*, storage::in_memory> idx2_;

@@ -12,7 +12,6 @@ class numeric_t {
  public:
   numeric_t(const data_type& type = NONE_TYPE)
       : type_(type) {
-    // Is this safe to do?
     type.unaryop(unaryop_id::ASSIGN)(storage_, type.zero);
   }
 
@@ -62,6 +61,10 @@ class numeric_t {
 
   const void* get_data() const {
     return reinterpret_cast<const void*>(storage_);
+  }
+
+  void* get_data() {
+    return reinterpret_cast<void*>(storage_);
   }
 
   // Relational operators

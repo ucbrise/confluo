@@ -6,7 +6,7 @@
 
 namespace dialog {
 
-enum aggregate_id {
+enum aggregate_id: uint8_t {
   SUM = 0,
   MIN = 1,
   MAX = 2,
