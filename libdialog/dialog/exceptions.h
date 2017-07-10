@@ -22,6 +22,7 @@ class name : public std::exception {\
 DEFINE_EXCEPTION(parse_exception)
 DEFINE_EXCEPTION(invalid_operation_exception)
 DEFINE_EXCEPTION(unsupported_exception)
+DEFINE_EXCEPTION(management_exception)
 
 }
 

@@ -14,6 +14,7 @@
 #include "expression_compiler.h"
 #include "filter.h"
 #include "trigger.h"
+#include "exceptions.h"
 
 #include "time_utils.h"
 #include "string_utils.h"
@@ -26,23 +27,6 @@ using namespace ::utils;
 // TODO: Improve documentation
 
 namespace dialog {
-
-/**
- * Management exception.
- */
-class management_exception : public std::exception {
- public:
-  management_exception(const std::string& msg)
-      : msg_(msg) {
-  }
-
-  const char* what() const noexcept {
-    return msg_.c_str();
-  }
-
- private:
-  const std::string msg_;
-};
 
 template<class storage_mode = storage::in_memory>
 class dialog_table {
