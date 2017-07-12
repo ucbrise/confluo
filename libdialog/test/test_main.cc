@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "aggregate_test.h"
+#include "byte_string_test.h"
 #include "column_test.h"
 #include "compiled_predicate_test.h"
 #include "compiled_expression_test.h"
