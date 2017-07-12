@@ -23,6 +23,8 @@ class CompiledPredicateTest : public testing::Test {
     char h[16];
   }__attribute__((packed));
 
+  static rec r;
+
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;
     builder.add_column(bool_type(), "a");
@@ -37,8 +39,8 @@ class CompiledPredicateTest : public testing::Test {
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
-    rec r = { a, b, c, d, e, f, g, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0 } };
+    r = {a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0}};
     return s.apply(0, &r, sizeof(rec), 0);
   }
 
@@ -48,9 +50,12 @@ class CompiledPredicateTest : public testing::Test {
     p.attr = attr;
     p.op = id;
     p.value = value;
-    return compiled_predicate(p, s);
+    compiled_predicate c(p, s);
+    return c;
   }
 };
+
+CompiledPredicateTest::rec CompiledPredicateTest::r;
 
 schema_t<storage::in_memory> CompiledPredicateTest::s =
     CompiledPredicateTest::schema();

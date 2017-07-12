@@ -14,6 +14,7 @@
 #include "minterm_test.h"
 #include "monolog_test.h"
 #include "numeric_test.h"
+#include "radix_tree_test.h"
 #include "schema_test.h"
 #include "table_metadata_test.h"
 #include "tiered_index_test.h"

@@ -84,6 +84,47 @@ struct value_t {
     }
   }
 
+  std::string to_string() const {
+    switch (type_.id) {
+      case type_id::D_BOOL: {
+        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(data_))
+            + ")";
+      }
+      case type_id::D_CHAR: {
+        return "char(" + std::to_string(*reinterpret_cast<const char*>(data_))
+            + ")";
+      }
+      case type_id::D_SHORT: {
+        return "short(" + std::to_string(*reinterpret_cast<const short*>(data_))
+            + ")";
+      }
+      case type_id::D_INT: {
+        return "int(" + std::to_string(*reinterpret_cast<const int*>(data_))
+            + ")";
+      }
+      case type_id::D_LONG: {
+        return "long(" + std::to_string(*reinterpret_cast<const long*>(data_))
+            + ")";
+      }
+      case type_id::D_FLOAT: {
+        return "float(" + std::to_string(*reinterpret_cast<const float*>(data_))
+            + ")";
+      }
+      case type_id::D_DOUBLE: {
+        return "double("
+            + std::to_string(*reinterpret_cast<const double*>(data_)) + ")";
+      }
+      case type_id::D_STRING: {
+        return "string("
+            + std::string(*reinterpret_cast<const char*>(data_), type_.size)
+            + ")";
+      }
+      default: {
+        throw std::bad_cast();
+      }
+    }
+  }
+
   inline bool relop(const relop_id& op, const value_t& other) const {
     return type_.relop(op)(data_, other.data_);
   }

@@ -12,33 +12,33 @@ struct field_t {
         index_id_(index_id) {
   }
 
-  uint16_t idx() const {
+  inline uint16_t idx() const {
     return idx_;
   }
 
-  const data_type& type() const {
+  inline const data_type& type() const {
     return value_.type();
   }
 
-  const value_t& value() const {
+  inline const value_t& value() const {
     return value_;
   }
 
-  bool is_indexed() const {
+  inline bool is_indexed() const {
     return indexed_;
   }
 
-  uint16_t index_id() const {
+  inline uint16_t index_id() const {
     return index_id_;
   }
 
   template<typename T>
-  uint64_t get_uint64() const {
+  inline uint64_t get_uint64() const {
     return (uint64_t) *(reinterpret_cast<const T*>(value_.data()));
   }
 
   template<typename T>
-  T get() const {
+  inline T get() const {
     return *(reinterpret_cast<const T*>(value_.data()));
   }
 

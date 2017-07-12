@@ -65,7 +65,7 @@ class byte_string {
     delete[] data_;
   }
 
-  inline uint8_t operator[](size_t idx) {
+  inline uint8_t& operator[](size_t idx) {
     return data_[idx];
   }
 
@@ -95,6 +95,16 @@ class byte_string {
 
   inline bool operator!=(const byte_string& other) const {
     return memcmp(data_, other.data_, std::min(size_, other.size_)) != 0;
+  }
+
+  std::string to_string() const {
+    std::string str = "{";
+    size_t i;
+    for (i = 0; i < size_ - 1; i++) {
+      str += std::to_string(data_[i]) + ", ";
+    }
+    str += std::to_string(data_[i]) + "}";
+    return str;
   }
 
  private:

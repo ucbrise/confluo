@@ -21,6 +21,8 @@ class MintermTest : public testing::Test {
     char h[16];
   }__attribute__((packed));
 
+  static rec r;
+
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;
     builder.add_column(bool_type(), "a");
@@ -35,7 +37,7 @@ class MintermTest : public testing::Test {
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
-    rec r = { a, b, c, d, e, f, g, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    r = { a, b, c, d, e, f, g, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0 } };
     return s.apply(0, &r, sizeof(rec), 0);
   }
@@ -49,6 +51,8 @@ class MintermTest : public testing::Test {
     return compiled_predicate(p, s);
   }
 };
+
+MintermTest::rec MintermTest::r;
 
 schema_t<storage::in_memory> MintermTest::s = schema();
 
