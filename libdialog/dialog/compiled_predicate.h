@@ -25,12 +25,13 @@ struct compiled_predicate {
     try {
       col_ = s[p.attr];
     } catch (std::exception& e) {
-      throw parse_exception("No such attribute " + p.attr + ": " + e.what());
+      THROW(parse_exception, "No such attribute " + p.attr + ": " + e.what());
     }
     try {
       val_ = value_t::from_string(p.value, col_.type());
     } catch (std::exception& e) {
-      throw parse_exception(
+      THROW(
+          parse_exception,
           "Could not parse attribute " + p.attr + " value " + p.value
               + " to type " + col_.type().to_string());
     }

@@ -25,14 +25,14 @@ class CompiledExpressionTest : public testing::Test {
 
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;
-    builder.add_column(bool_type(), "a");
-    builder.add_column(char_type(), "b");
-    builder.add_column(short_type(), "c");
-    builder.add_column(int_type(), "d");
-    builder.add_column(long_type(), "e");
-    builder.add_column(float_type(), "f");
-    builder.add_column(double_type(), "g");
-    builder.add_column(string_type(16), "h");
+    builder.add_column(BOOL_TYPE, "a");
+    builder.add_column(CHAR_TYPE, "b");
+    builder.add_column(SHORT_TYPE, "c");
+    builder.add_column(INT_TYPE, "d");
+    builder.add_column(LONG_TYPE, "e");
+    builder.add_column(FLOAT_TYPE, "f");
+    builder.add_column(DOUBLE_TYPE, "g");
+    builder.add_column(STRING_TYPE(16), "h");
     return schema_t<storage::in_memory>(".", builder.get_columns());
   }
 

@@ -32,14 +32,14 @@ class SchemaTest : public testing::Test {
 
 TEST_F(SchemaTest, SchemaBuilderTest) {
   schema_builder builder;
-  builder.add_column(bool_type(), "a");
-  builder.add_column(char_type(), "b");
-  builder.add_column(short_type(), "c");
-  builder.add_column(int_type(), "d");
-  builder.add_column(long_type(), "e");
-  builder.add_column(float_type(), "f");
-  builder.add_column(double_type(), "g");
-  builder.add_column(string_type(16), "h");
+  builder.add_column(BOOL_TYPE, "a");
+  builder.add_column(CHAR_TYPE, "b");
+  builder.add_column(SHORT_TYPE, "c");
+  builder.add_column(INT_TYPE, "d");
+  builder.add_column(LONG_TYPE, "e");
+  builder.add_column(FLOAT_TYPE, "f");
+  builder.add_column(DOUBLE_TYPE, "g");
+  builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
 
   ASSERT_EQ(static_cast<size_t>(8), schema_vec.size());
@@ -89,20 +89,20 @@ TEST_F(SchemaTest, SchemaBuilderTest) {
   ASSERT_EQ(7, schema_vec[7].idx());
   ASSERT_EQ(28, schema_vec[7].offset());
   ASSERT_EQ("H", schema_vec[7].name());
-  ASSERT_TRUE(string_type(16) == schema_vec[7].type());
+  ASSERT_TRUE(STRING_TYPE(16) == schema_vec[7].type());
   ASSERT_FALSE(schema_vec[7].is_indexed());
 }
 
 TEST_F(SchemaTest, SchemaOpsTest) {
   schema_builder builder;
-  builder.add_column(bool_type(), "a");
-  builder.add_column(char_type(), "b");
-  builder.add_column(short_type(), "c");
-  builder.add_column(int_type(), "d");
-  builder.add_column(long_type(), "e");
-  builder.add_column(float_type(), "f");
-  builder.add_column(double_type(), "g");
-  builder.add_column(string_type(16), "h");
+  builder.add_column(BOOL_TYPE, "a");
+  builder.add_column(CHAR_TYPE, "b");
+  builder.add_column(SHORT_TYPE, "c");
+  builder.add_column(INT_TYPE, "d");
+  builder.add_column(LONG_TYPE, "e");
+  builder.add_column(FLOAT_TYPE, "f");
+  builder.add_column(DOUBLE_TYPE, "g");
+  builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
   schema_t<storage::in_memory> s(".", schema_vec);
 
@@ -153,7 +153,7 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   ASSERT_EQ(7, s[7].idx());
   ASSERT_EQ(28, s[7].offset());
   ASSERT_EQ("H", s[7].name());
-  ASSERT_TRUE(string_type(16) == s[7].type());
+  ASSERT_TRUE(STRING_TYPE(16) == s[7].type());
   ASSERT_FALSE(s[7].is_indexed());
 
   ASSERT_EQ(0, s["A"].idx());
@@ -201,20 +201,20 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   ASSERT_EQ(7, s["H"].idx());
   ASSERT_EQ(28, s["H"].offset());
   ASSERT_EQ("H", s["H"].name());
-  ASSERT_TRUE(string_type(16) == s["H"].type());
+  ASSERT_TRUE(STRING_TYPE(16) == s["H"].type());
   ASSERT_FALSE(s["H"].is_indexed());
 }
 
 TEST_F(SchemaTest, SchemaApplyTest) {
   schema_builder builder;
-  builder.add_column(bool_type(), "a");
-  builder.add_column(char_type(), "b");
-  builder.add_column(short_type(), "c");
-  builder.add_column(int_type(), "d");
-  builder.add_column(long_type(), "e");
-  builder.add_column(float_type(), "f");
-  builder.add_column(double_type(), "g");
-  builder.add_column(string_type(16), "h");
+  builder.add_column(BOOL_TYPE, "a");
+  builder.add_column(CHAR_TYPE, "b");
+  builder.add_column(SHORT_TYPE, "c");
+  builder.add_column(INT_TYPE, "d");
+  builder.add_column(LONG_TYPE, "e");
+  builder.add_column(FLOAT_TYPE, "f");
+  builder.add_column(DOUBLE_TYPE, "g");
+  builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
   schema_t<storage::in_memory> s(".", schema_vec);
 
@@ -257,7 +257,7 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   ASSERT_FALSE(r[6].is_indexed());
 
   ASSERT_EQ(7, r[7].idx());
-  ASSERT_TRUE(string_type(16) == r[7].type());
+  ASSERT_TRUE(STRING_TYPE(16) == r[7].type());
   ASSERT_FALSE(r[7].is_indexed());
 }
 

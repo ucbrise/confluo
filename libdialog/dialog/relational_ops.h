@@ -22,7 +22,7 @@ enum relop_id
 
 typedef bool (*relational_fn)(const void* v1, const void* v2);
 
-typedef std::array<relational_fn, 6> rel_ops_t;
+typedef std::vector<relational_fn> rel_ops_t;
 
 template<typename T>
 inline bool less_than(const void* v1, const void* v2) {
@@ -31,12 +31,12 @@ inline bool less_than(const void* v1, const void* v2) {
 
 template<>
 inline bool less_than<std::string>(const void* v1, const void* v2) {
-  throw unsupported_exception("< not supported for string type");
+  THROW(unsupported_exception, "< not supported for string type");
 }
 
 template<>
 inline bool less_than<void>(const void* v1, const void* v2) {
-  throw unsupported_exception("< not supported for none type");
+  THROW(unsupported_exception, "< not supported for none type");
 }
 
 template<typename T>
@@ -46,12 +46,12 @@ inline bool less_than_equals(const void* v1, const void* v2) {
 
 template<>
 inline bool less_than_equals<std::string>(const void* v1, const void* v2) {
-  throw unsupported_exception("<= not supported for string type");
+  THROW(unsupported_exception, "<= not supported for string type");
 }
 
 template<>
 inline bool less_than_equals<void>(const void* v1, const void* v2) {
-  throw unsupported_exception("<= not supported for none type");
+  THROW(unsupported_exception, "<= not supported for none type");
 }
 
 template<typename T>
@@ -61,12 +61,12 @@ inline bool greater_than(const void* v1, const void* v2) {
 
 template<>
 inline bool greater_than<std::string>(const void* v1, const void* v2) {
-  throw unsupported_exception("> not supported for string type");
+  THROW(unsupported_exception, "> not supported for string type");
 }
 
 template<>
 inline bool greater_than<void>(const void* v1, const void* v2) {
-  throw unsupported_exception("> not supported for none type");
+  THROW(unsupported_exception, "> not supported for none type");
 }
 
 template<typename T>
@@ -76,12 +76,12 @@ inline bool greater_than_equals(const void* v1, const void* v2) {
 
 template<>
 inline bool greater_than_equals<std::string>(const void* v1, const void* v2) {
-  throw unsupported_exception(">= not supported for string type");
+  THROW(unsupported_exception, ">= not supported for string type");
 }
 
 template<>
 inline bool greater_than_equals<void>(const void* v1, const void* v2) {
-  throw unsupported_exception(">= not supported for none type");
+  THROW(unsupported_exception, ">= not supported for none type");
 }
 
 template<typename T>
@@ -91,12 +91,12 @@ inline bool equals(const void* v1, const void* v2) {
 
 template<>
 inline bool equals<std::string>(const void* v1, const void* v2) {
-  throw unsupported_exception("== not supported for string type");
+  THROW(unsupported_exception, "== not supported for string type");
 }
 
 template<>
 inline bool equals<void>(const void* v1, const void* v2) {
-  throw unsupported_exception("== not supported for none type");
+  THROW(unsupported_exception, "== not supported for none type");
 }
 
 template<typename T>
@@ -106,18 +106,18 @@ inline bool not_equals(const void* v1, const void* v2) {
 
 template<>
 inline bool not_equals<std::string>(const void* v1, const void* v2) {
-  throw unsupported_exception("!= not supported for string type");
+  THROW(unsupported_exception, "!= not supported for string type");
 }
 
 template<>
 inline bool not_equals<void>(const void* v1, const void* v2) {
-  throw unsupported_exception("!= not supported for none type");
+  THROW(unsupported_exception, "!= not supported for none type");
 }
 
 template<typename T>
 static rel_ops_t init_relops() {
-  return rel_ops_t { { less_than<T>, less_than_equals<T>, greater_than<T>,
-      greater_than_equals<T>, equals<T>, not_equals<T> } };
+  return {less_than<T>, less_than_equals<T>, greater_than<T>,
+    greater_than_equals<T>, equals<T>, not_equals<T>};
 }
 
 class relop_utils {
@@ -142,7 +142,7 @@ class relop_utils {
     } else if (op == ">=") {
       return relop_id::GE;
     } else {
-      throw parse_exception("Invalid operator " + op);
+      THROW(parse_exception, "Invalid operator " + op);
     }
   }
 

@@ -66,7 +66,7 @@ class dialog_table {
     try {
       idx = schema_.name_map.at(string_utils::to_upper(field_name));
     } catch (std::exception& e) {
-      throw management_exception(
+      THROW(management_exception,
           "Could not add index for " + field_name + " : " + e.what());
     }
 
@@ -90,12 +90,12 @@ class dialog_table {
           break;
         default:
           col.set_unindexed();
-          throw management_exception("Index not supported for field type");
+          THROW(management_exception,"Index not supported for field type");
       }
       col.set_indexed(index_id, bucket_size);
       metadata_.write_index_info(index_id, field_name, bucket_size);
     } else {
-      throw management_exception(
+      THROW(management_exception,
           "Could not index " + field_name + ": already indexed/indexing");
     }
   }
@@ -105,12 +105,12 @@ class dialog_table {
     try {
       idx = schema_.name_map.at(string_utils::to_upper(field_name));
     } catch (std::exception& e) {
-      throw management_exception(
+      THROW(management_exception,
           "Could not remove index for " + field_name + " : " + e.what());
     }
 
     if (!schema_.columns[idx].disable_indexing()) {
-      throw management_exception(
+      THROW(management_exception,
           "Could not remove index for " + field_name + ": No index exists");
     }
   }

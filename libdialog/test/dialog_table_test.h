@@ -40,19 +40,19 @@ class DiaLogTableTest : public testing::Test {
 
 TEST_F(DiaLogTableTest, AppendAndGetTest1) {
   dialog_table<storage::in_memory> dtable(
-      schema_builder().add_column(string_type(DATA_SIZE), "msg"));
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg"));
   test_append_and_get(dtable);
 }
 
 TEST_F(DiaLogTableTest, AppendAndGetTest2) {
   dialog_table<storage::durable> dtable(
-      schema_builder().add_column(string_type(DATA_SIZE), "msg"), "/tmp");
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg"), "/tmp");
   test_append_and_get(dtable);
 }
 
 TEST_F(DiaLogTableTest, AppendAndGetTest3) {
   dialog_table<storage::durable_relaxed> dtable(
-      schema_builder().add_column(string_type(DATA_SIZE), "msg"), "/tmp");
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg"), "/tmp");
   test_append_and_get(dtable);
 }
 

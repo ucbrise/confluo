@@ -256,13 +256,13 @@ class lexer {
         return lex_token(END, "");
       case '|': {
         if (stream_.get() != '|')
-          throw parse_exception(
+          THROW(parse_exception,
               "Invalid token starting with |; did you mean ||?");
         return lex_token(OR, "||");
       }
       case '&': {
         if (stream_.get() != '&')
-          throw parse_exception(
+          THROW(parse_exception,
               "Invalid token starting with &; did you mean &&?");
         return lex_token(AND, "&&");
       }
@@ -284,7 +284,7 @@ class lexer {
         return lex_token(RIGHT, ")");
       case '=': {
         if (stream_.get() != '=')
-          throw parse_exception(
+          THROW(parse_exception,
               "Invalid token starting with =; did you mean ==?");
         return lex_token(OPERATOR, "==");
       }
@@ -302,7 +302,7 @@ class lexer {
       }
       default: {
         if (!opvalid(c))
-          throw parse_exception("All operands must conform to [a-zA-Z0-9_.]+");
+          THROW(parse_exception, "All operands must conform to [a-zA-Z0-9_.]+");
 
         stream_.unget();
         std::string operand = "";
@@ -346,7 +346,7 @@ class parser {
   expression_t* parse() {
     expression_t* e = exp();
     if (lex_.next_token().id != EOF)
-      throw parse_exception("Parsing ended prematurely");
+      THROW(parse_exception, "Parsing ended prematurely");
     return e;
   }
 
@@ -375,24 +375,24 @@ class parser {
       expression_t *e = exp();
       lex_token right = lex_.next_token();
       if (right.id != lexer::RIGHT)
-        throw parse_exception("Could not find matching right parenthesis");
+        THROW(parse_exception, "Could not find matching right parenthesis");
       return e;
     } else if (tok.id == lexer::OPERAND) {
       predicate_t *p = new predicate_t;
       p->attr = tok.value;
       lex_token op = lex_.next_token();
       if (op.id != lexer::OPERATOR)
-        throw parse_exception(
+        THROW(parse_exception,
             "First operand must be followed by operator in all predicates");
       p->op = relop_utils::str_to_op(op.value);
       lex_token operand = lex_.next_token();
       if (operand.id != lexer::OPERAND)
-        throw parse_exception(
+        THROW(parse_exception,
             "Operand must be followed by operator in all predicates");
       p->value = operand.value;
       return p;
     } else {
-      throw parse_exception("Unexpected token " + tok.value);
+      THROW(parse_exception, "Unexpected token " + tok.value);
     }
   }
 
@@ -441,7 +441,7 @@ class parser {
       case relop_id::GE:
         return relop_id::LT;
       default:
-        throw parse_exception("Could not negate: invalid operator");
+        THROW(parse_exception, "Could not negate: invalid operator");
     }
   }
 

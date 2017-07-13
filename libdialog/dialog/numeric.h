@@ -16,42 +16,49 @@ class numeric_t {
 
   numeric_t(const data_type& type, const void* value)
       : type_(type) {
-    type.unaryop(unaryop_id::ASSIGN)(storage_, value);
+    if (type.id != type_id::D_NONE)
+      type.unaryop(unaryop_id::ASSIGN)(storage_, value);
   }
 
   numeric_t(bool value)
-      : type_(bool_type()) {
+      : type_(BOOL_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
   numeric_t(char value)
-      : type_(char_type()) {
+      : type_(CHAR_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
   numeric_t(short value)
-      : type_(short_type()) {
+      : type_(SHORT_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
   numeric_t(int value)
-      : type_(int_type()) {
+      : type_(INT_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
   numeric_t(long value)
-      : type_(long_type()) {
+      : type_(LONG_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
   numeric_t(float value)
-      : type_(float_type()) {
+      : type_(FLOAT_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
   }
 
   numeric_t(double value)
-      : type_(double_type()) {
+      : type_(DOUBLE_TYPE) {
     type_.unaryop(unaryop_id::ASSIGN)(storage_, &value);
+  }
+
+  numeric_t(const numeric_t& other)
+      : type_(other.type_) {
+    *reinterpret_cast<uint64_t*>(storage_) =
+        *reinterpret_cast<const uint64_t*>(other.storage_);
   }
 
   const data_type& get_type() const {
@@ -70,8 +77,8 @@ class numeric_t {
   friend bool relop(relop_id id, const numeric_t& first,
                     const numeric_t& second) {
     if (first.type_ != second.type_)
-      throw invalid_operation_exception(
-          "Cannot compare values of different types");
+      THROW(invalid_operation_exception,
+            "Cannot compare values of different types");
     return first.type_.relop(id)(first.storage_, second.storage_);
   }
 
@@ -120,8 +127,8 @@ class numeric_t {
   friend numeric_t binaryop(binaryop_id id, const numeric_t& first,
                             const numeric_t& second) {
     if (first.type_ != second.type_)
-      throw invalid_operation_exception(
-          "Cannot operate on values of different types");
+      THROW(invalid_operation_exception,
+            "Cannot operate on values of different types");
     numeric_t result(first.type_);
     result.type_.binaryop(id)(result.storage_, first.storage_, second.storage_);
     return result;
@@ -167,10 +174,9 @@ class numeric_t {
     return binaryop(binaryop_id::BW_RSHIFT, first, second);
   }
 
-  // Assignment operator
   numeric_t& operator=(const numeric_t& other) {
     type_ = other.type_;
-    if (other.type_.id != type_id::D_NONE)
+    if (type_.id != type_id::D_NONE)
       type_.unaryop(unaryop_id::ASSIGN)(storage_, other.storage_);
     return *this;
   }

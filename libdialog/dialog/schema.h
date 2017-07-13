@@ -41,6 +41,14 @@ class schema_t {
     return columns_[idx];
   }
 
+  column_t const& operator[](size_t idx) const {
+    return columns_[idx];
+  }
+
+  column_t& operator[](const std::string& name) {
+    return columns_[name_map_.at(string_utils::to_upper(name))];
+  }
+
   column_t const& operator[](const std::string& name) const {
     return columns_[name_map_.at(string_utils::to_upper(name))];
   }
@@ -71,8 +79,13 @@ class schema_builder {
 
   schema_builder& add_column(const data_type& type, const std::string& name,
                              const numeric_t& min, const numeric_t& max) {
+    try {
     columns_.push_back(
         column_t(columns_.size(), offset_, type, name, min, max));
+    } catch(std::exception& e) {
+      fprintf(stderr, "%s\n", e.what());
+      abort();
+    }
     offset_ += type.size;
     return *this;
   }
@@ -81,9 +94,8 @@ class schema_builder {
                                     const std::string& name) {
     if (type.id == type_id::D_STRING)
       return add_column(type, name, numeric_t(), numeric_t());
-    return add_column(type, name, numeric_t(type, type.min),
-                      numeric_t(type, type.max));
-
+    return add_column(type, name, numeric_t(type, type.min()),
+                      numeric_t(type, type.max()));
   }
 
   std::vector<column_t> get_columns() const {

@@ -10,8 +10,8 @@ class ColumnTest : public testing::Test {
 };
 
 TEST_F(ColumnTest, GetterTest) {
-  column_t col(0, 0, INT_TYPE, "test", numeric_t(INT_TYPE, INT_TYPE.min),
-               numeric_t(INT_TYPE, INT_TYPE.max));
+  column_t col(0, 0, INT_TYPE, "test", numeric_t(INT_TYPE, INT_TYPE.min()),
+               numeric_t(INT_TYPE, INT_TYPE.max()));
 
   ASSERT_EQ(0, col.idx());
   ASSERT_EQ(0, col.offset());
@@ -21,8 +21,8 @@ TEST_F(ColumnTest, GetterTest) {
 }
 
 TEST_F(ColumnTest, IndexStateTest) {
-  column_t col(0, 0, INT_TYPE, "test", numeric_t(INT_TYPE, INT_TYPE.min),
-               numeric_t(INT_TYPE, INT_TYPE.max));
+  column_t col(0, 0, INT_TYPE, "test", numeric_t(INT_TYPE, INT_TYPE.min()),
+               numeric_t(INT_TYPE, INT_TYPE.max()));
   ASSERT_FALSE(col.is_indexed());
 
   bool success = col.set_indexing();

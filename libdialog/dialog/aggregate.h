@@ -7,10 +7,10 @@
 namespace dialog {
 
 enum aggregate_id: uint8_t {
-  SUM = 0,
-  MIN = 1,
-  MAX = 2,
-  COUNT = 3
+  D_SUM = 0,
+  D_MIN = 1,
+  D_MAX = 2,
+  D_COUNT = 3
 };
 
 using aggregate_fn = numeric_t (*)(const numeric_t& v1, const numeric_t& v2);
@@ -35,23 +35,23 @@ inline numeric_t max_agg(const numeric_t& a, const numeric_t& b) {
 }
 
 inline numeric_t count_agg(const numeric_t& a, const numeric_t& b) {
-  return a + numeric_t(a.get_type(), a.get_type().one);
+  return a + numeric_t(a.get_type(), a.get_type().one());
 }
 
 inline numeric_t sum_zero(const data_type& type) {
-  return numeric_t(type, type.zero);
+  return numeric_t(type, type.zero());
 }
 
 inline numeric_t min_zero(const data_type& type) {
-  return numeric_t(type, type.max);
+  return numeric_t(type, type.max());
 }
 
 inline numeric_t max_zero(const data_type& type) {
-  return numeric_t(type, type.min);
+  return numeric_t(type, type.min());
 }
 
 inline numeric_t count_zero(const data_type& type) {
-  return numeric_t(type, type.zero);
+  return numeric_t(type, type.zero());
 }
 
 static aggregator sum = { sum_agg, sum_zero };

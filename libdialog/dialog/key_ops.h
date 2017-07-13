@@ -28,12 +28,12 @@ byte_string key_transform<double>(const void* data, double bucket_size) {
 
 template<>
 byte_string key_transform<std::string>(const void* data, double bucket_size) {
-  throw unsupported_exception("key_transform not supported for string type");
+  THROW(unsupported_exception, "key_transform not supported for string type");
 }
 
 template<>
 byte_string key_transform<void>(const void* data, double bucket_size) {
-  throw unsupported_exception("key_transform not supported for none type");
+  THROW(unsupported_exception, "key_transform not supported for none type");
 }
 
 }

@@ -15,15 +15,15 @@ namespace dialog {
 
 enum type_id
   : uint16_t {
-    D_NONE = UINT16_MAX,
-  D_BOOL = 0,
-  D_CHAR = 1,
-  D_SHORT = 2,
-  D_INT = 3,
-  D_LONG = 4,
-  D_FLOAT = 5,
-  D_DOUBLE = 6,
-  D_STRING = 7
+    D_NONE = 0,
+  D_BOOL = 1,
+  D_CHAR = 2,
+  D_SHORT = 3,
+  D_INT = 4,
+  D_LONG = 5,
+  D_FLOAT = 6,
+  D_DOUBLE = 7,
+  D_STRING = 8
 };
 
 namespace limits {
@@ -33,25 +33,25 @@ static bool bool_zero = false;
 static bool bool_one = true;
 static bool bool_max = std::numeric_limits<bool>::max();
 
-static char char_min = std::numeric_limits<char>::lowest();
-static char char_zero = static_cast<char>(0);
-static char char_one = static_cast<char>(1);
-static char char_max = std::numeric_limits<char>::max();
+static int8_t char_min = std::numeric_limits<int8_t>::lowest();
+static int8_t char_zero = static_cast<int8_t>(0);
+static int8_t char_one = static_cast<int8_t>(1);
+static int8_t char_max = std::numeric_limits<int8_t>::max();
 
-static short short_min = std::numeric_limits<short>::lowest();
-static short short_zero = static_cast<short>(0);
-static short short_one = static_cast<short>(1);
-static short short_max = std::numeric_limits<short>::max();
+static int16_t short_min = std::numeric_limits<int16_t>::lowest();
+static int16_t short_zero = static_cast<int16_t>(0);
+static int16_t short_one = static_cast<int16_t>(1);
+static int16_t short_max = std::numeric_limits<int16_t>::max();
 
-static int int_min = std::numeric_limits<int>::lowest();
-static int int_zero = static_cast<int>(0);
-static int int_one = static_cast<int>(1);
-static int int_max = std::numeric_limits<int>::max();
+static int32_t int_min = std::numeric_limits<int32_t>::lowest();
+static int32_t int_zero = static_cast<int32_t>(0);
+static int32_t int_one = static_cast<int32_t>(1);
+static int32_t int_max = std::numeric_limits<int32_t>::max();
 
-static long long_min = std::numeric_limits<long>::lowest();
-static long long_zero = static_cast<long>(0);
-static long long_one = static_cast<long>(1);
-static long long_max = std::numeric_limits<long>::max();
+static int64_t long_min = std::numeric_limits<int64_t>::lowest();
+static int64_t long_zero = static_cast<int64_t>(0);
+static int64_t long_one = static_cast<int64_t>(1);
+static int64_t long_max = std::numeric_limits<int64_t>::max();
 
 static float float_min = std::numeric_limits<float>::lowest();
 static float float_zero = static_cast<float>(0.0);
@@ -65,26 +65,71 @@ static double double_max = std::numeric_limits<double>::max();
 
 }
 
+static std::vector<void*> init_min() {
+  return {nullptr, &limits::bool_min, &limits::char_min, &limits::short_min,
+    &limits::int_min, &limits::long_min, &limits::float_min,
+    &limits::double_min, nullptr};
+}
+
+static std::vector<void*> init_max() {
+  return {nullptr, &limits::bool_max, &limits::char_max, &limits::short_max,
+    &limits::int_max, &limits::long_max, &limits::float_max,
+    &limits::double_max, nullptr};
+}
+
+static std::vector<void*> init_one() {
+  return {nullptr, &limits::bool_one, &limits::char_one, &limits::short_one,
+    &limits::int_one, &limits::long_one, &limits::float_one,
+    &limits::double_one, nullptr};
+}
+
+static std::vector<void*> init_zero() {
+  return {nullptr, &limits::bool_zero, &limits::char_zero, &limits::short_zero,
+    &limits::int_zero, &limits::long_zero, &limits::float_zero,
+    &limits::double_zero, nullptr};
+}
+
+static std::vector<rel_ops_t> init_rops() {
+  return {init_relops<void>(), init_relops<bool>(), init_relops<int8_t>(),
+    init_relops<int16_t>(), init_relops<int32_t>(), init_relops<int64_t>(),
+    init_relops<float>(), init_relops<double>(), init_relops<std::string>()};
+}
+
+static std::vector<unary_ops_t> init_uops() {
+  return {init_unaryops<void>(), init_unaryops<bool>(), init_unaryops<int8_t>(),
+    init_unaryops<int16_t>(), init_unaryops<int32_t>(), init_unaryops<int64_t>(),
+    init_unaryops<float>(), init_unaryops<double>(), init_unaryops<std::string>()};
+}
+
+static std::vector<binary_ops_t> init_bops() {
+  return {init_binaryops<void>(), init_binaryops<bool>(), init_binaryops<int8_t>(),
+    init_binaryops<int16_t>(), init_binaryops<int32_t>(), init_binaryops<int64_t>(),
+    init_binaryops<float>(), init_binaryops<double>(), init_binaryops<std::string>()};
+}
+
+static std::vector<key_op> init_kops() {
+  return {key_transform<void>, key_transform<bool>, key_transform<int8_t>,
+    key_transform<int16_t>, key_transform<int32_t>, key_transform<int64_t>,
+    key_transform<float>, key_transform<double>, key_transform<std::string>};
+}
+
+static std::vector<void*> MIN = init_min();
+static std::vector<void*> MAX = init_max();
+static std::vector<void*> ONE = init_one();
+static std::vector<void*> ZERO = init_zero();
+static std::vector<rel_ops_t> RELOPS = init_rops();
+static std::vector<unary_ops_t> UNOPS = init_uops();
+static std::vector<binary_ops_t> BINOPS = init_bops();
+static std::vector<key_op> KEYOPS = init_kops();
+
 struct data_type {
  public:
   type_id id;
   size_t size;
-  void* min;
-  void* zero;
-  void* one;
-  void* max;
 
   data_type(size_t _size)
       : id(type_id::D_STRING),
-        size(_size),
-        min(nullptr),
-        zero(nullptr),
-        one(nullptr),
-        max(nullptr) {
-    relops_ = init_relops<std::string>();
-    unaryops_ = init_unaryops<std::string>();
-    binaryops_ = init_binaryops<std::string>();
-    key_transform_ = key_transform<std::string>;
+        size(_size) {
   }
 
   data_type(type_id _id = type_id::D_NONE)
@@ -92,102 +137,38 @@ struct data_type {
     switch (id) {
       case type_id::D_NONE: {
         size = 0;
-        relops_ = init_relops<void>();
-        unaryops_ = init_unaryops<void>();
-        binaryops_ = init_binaryops<void>();
-        key_transform_ = key_transform<void>;
-        min = nullptr;
-        zero = nullptr;
-        one = nullptr;
-        max = nullptr;
         break;
       }
       case type_id::D_BOOL: {
         size = sizeof(bool);
-        relops_ = init_relops<bool>();
-        unaryops_ = init_unaryops<bool>();
-        binaryops_ = init_binaryops<bool>();
-        key_transform_ = key_transform<bool>;
-        min = &limits::bool_min;
-        zero = &limits::bool_zero;
-        one = &limits::bool_one;
-        max = &limits::bool_max;
         break;
       }
       case type_id::D_CHAR: {
         size = sizeof(int8_t);
-        relops_ = init_relops<int8_t>();
-        unaryops_ = init_unaryops<int8_t>();
-        binaryops_ = init_binaryops<int8_t>();
-        key_transform_ = key_transform<int8_t>;
-        min = &limits::char_min;
-        zero = &limits::char_zero;
-        one = &limits::char_one;
-        max = &limits::char_max;
         break;
       }
       case type_id::D_SHORT: {
         size = sizeof(int16_t);
-        relops_ = init_relops<int16_t>();
-        unaryops_ = init_unaryops<int16_t>();
-        binaryops_ = init_binaryops<int16_t>();
-        key_transform_ = key_transform<int16_t>;
-        min = &limits::short_min;
-        zero = &limits::short_zero;
-        one = &limits::short_one;
-        max = &limits::short_max;
         break;
       }
       case type_id::D_INT: {
         size = sizeof(int32_t);
-        relops_ = init_relops<int32_t>();
-        unaryops_ = init_unaryops<int32_t>();
-        binaryops_ = init_binaryops<int32_t>();
-        key_transform_ = key_transform<int32_t>;
-        min = &limits::int_min;
-        zero = &limits::int_zero;
-        one = &limits::int_one;
-        max = &limits::int_max;
         break;
       }
       case type_id::D_LONG: {
         size = sizeof(int64_t);
-        relops_ = init_relops<int64_t>();
-        unaryops_ = init_unaryops<int64_t>();
-        binaryops_ = init_binaryops<int64_t>();
-        key_transform_ = key_transform<int64_t>;
-        min = &limits::long_min;
-        zero = &limits::long_zero;
-        one = &limits::long_one;
-        max = &limits::long_max;
         break;
       }
       case type_id::D_FLOAT: {
         size = sizeof(float);
-        relops_ = init_relops<float>();
-        unaryops_ = init_unaryops<float>();
-        binaryops_ = init_binaryops<float>();
-        key_transform_ = key_transform<float>;
-        min = &limits::float_min;
-        zero = &limits::float_zero;
-        one = &limits::float_one;
-        max = &limits::float_max;
         break;
       }
       case type_id::D_DOUBLE: {
         size = sizeof(double);
-        relops_ = init_relops<double>();
-        unaryops_ = init_unaryops<double>();
-        binaryops_ = init_binaryops<double>();
-        key_transform_ = key_transform<double>;
-        min = &limits::double_min;
-        zero = &limits::double_zero;
-        one = &limits::double_one;
-        max = &limits::double_max;
         break;
       }
       default: {
-        throw invalid_operation_exception(
+        THROW(invalid_operation_exception,
             "Must specify length for non-primitive data types");
       }
     }
@@ -195,15 +176,29 @@ struct data_type {
 
   data_type(const data_type& other)
       : id(other.id),
-        size(other.size),
-        min(other.min),
-        zero(other.zero),
-        one(other.one),
-        max(other.max),
-        relops_(other.relops_),
-        unaryops_(other.unaryops_),
-        binaryops_(other.binaryops_),
-        key_transform_(other.key_transform_) {
+        size(other.size) {
+  }
+
+  void* min() const {
+    return MIN[id];
+  }
+
+  void* max() const {
+    return MAX[id];
+  }
+
+  void* one() const {
+    return ONE[id];
+  }
+
+  void* zero() const {
+    return ZERO[id];
+  }
+
+  inline data_type& operator=(const data_type& other) {
+    id = other.id;
+    size = other.size;
+    return *this;
   }
 
   inline bool operator==(const data_type& other) const {
@@ -214,20 +209,20 @@ struct data_type {
     return id != other.id || size != other.size;
   }
 
-  inline const relational_fn& relop(relop_id id) const {
-    return relops_[id];
+  inline const relational_fn& relop(relop_id rid) const {
+    return RELOPS[id][rid];
   }
 
-  inline const unary_fn& unaryop(unaryop_id id) const {
-    return unaryops_[id];
+  inline const unary_fn& unaryop(unaryop_id uid) const {
+    return UNOPS[id][uid];
   }
 
-  inline const binary_fn& binaryop(binaryop_id id) const {
-    return binaryops_[id];
+  inline const binary_fn& binaryop(binaryop_id bid) const {
+    return BINOPS[id][bid];
   }
 
   inline const key_op& keytransform() const {
-    return key_transform_;
+    return KEYOPS[id];
   }
 
   inline std::string to_string() const {
@@ -254,12 +249,6 @@ struct data_type {
         return "invalid";
     }
   }
-
- private:
-  rel_ops_t relops_;
-  unary_ops_t unaryops_;
-  binary_ops_t binaryops_;
-  key_op key_transform_;
 };
 
 static data_type NONE_TYPE(type_id::D_NONE);
@@ -270,37 +259,8 @@ static data_type INT_TYPE(type_id::D_INT);
 static data_type LONG_TYPE(type_id::D_LONG);
 static data_type FLOAT_TYPE(type_id::D_FLOAT);
 static data_type DOUBLE_TYPE(type_id::D_DOUBLE);
-
-static data_type string_type(size_t size) {
+static data_type STRING_TYPE(size_t size) {
   return data_type(size);
-}
-
-static data_type& bool_type() {
-  return BOOL_TYPE;
-}
-
-static data_type& char_type() {
-  return CHAR_TYPE;
-}
-
-static data_type& short_type() {
-  return SHORT_TYPE;
-}
-
-static data_type& int_type() {
-  return INT_TYPE;
-}
-
-static data_type& long_type() {
-  return LONG_TYPE;
-}
-
-static data_type& float_type() {
-  return FLOAT_TYPE;
-}
-
-static data_type& double_type() {
-  return DOUBLE_TYPE;
 }
 
 }

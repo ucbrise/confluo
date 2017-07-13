@@ -50,7 +50,7 @@ class expression_compiler {
         break;
       }
       default: {
-        throw parse_exception("Unexpected node-type in compiling expression");
+        THROW(parse_exception, "Unexpected node-type in compiling expression");
       }
     }
   }
@@ -120,7 +120,7 @@ class expression_compiler {
         break;
       }
       default: {
-        throw parse_exception("Unexpected node type in compiling expression");
+        THROW(parse_exception, "Unexpected node type in compiling expression");
       }
     }
   }

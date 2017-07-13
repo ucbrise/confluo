@@ -24,10 +24,8 @@ class error_handling {
     error_handling::install_signal_handler(std::forward<int>(more)...);
   }
 
- private:
-  static inline void sighandler_stacktrace(int sig) {
+  static std::string stacktrace() {
     std::ostringstream out;
-    out << "ERROR: signal " << sig << "\n";
     out << "stack trace: \n";
 
     // storage array for stack trace address data
@@ -38,7 +36,7 @@ class error_handling {
 
     if (addrlen == 0) {
       out << "  <empty, possibly corrupt>\n";
-      return;
+      return out.str();
     }
 
     // resolve addresses into strings containing "filename(function+address)",
@@ -110,8 +108,13 @@ class error_handling {
 
     free(funcname);
     free(symbollist);
+    return out.str();
+  }
 
-    fprintf(stderr, "%s\n", out.str().c_str());
+ private:
+  static inline void sighandler_stacktrace(int sig) {
+    fprintf(stderr, "ERROR: signal %d\n", sig);
+    fprintf(stderr, "%s\n", stacktrace().c_str());
     exit(-1);
   }
 
