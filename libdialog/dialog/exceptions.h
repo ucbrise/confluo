@@ -4,6 +4,8 @@
 #include <exception>
 #include <string>
 
+#include "error_handling.h"
+
 namespace dialog {
 
 #define DEFINE_EXCEPTION(name)\

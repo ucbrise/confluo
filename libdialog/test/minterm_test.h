@@ -33,7 +33,7 @@ class MintermTest : public testing::Test {
     builder.add_column(float_type(), "f");
     builder.add_column(double_type(), "g");
     builder.add_column(string_type(16), "h");
-    return schema_t<storage::in_memory>(".", builder.get_schema());
+    return schema_t<storage::in_memory>(".", builder.get_columns());
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {

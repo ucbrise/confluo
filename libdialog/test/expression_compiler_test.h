@@ -80,7 +80,7 @@ TEST_F(ExpressionCompilerTest, CompilerTest) {
   builder.add_column(double_type(), "g");
   builder.add_column(string_type(10), "h");
 
-  schema_t<in_memory> s(".", builder.get_schema());
+  schema_t<in_memory> s(".", builder.get_columns());
 
   compiled_expression m1, m2, m3, m4, m5, m6, m7;
   compile(m1, "a==true", s);

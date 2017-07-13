@@ -13,12 +13,6 @@ namespace dialog {
 
 struct column_t {
  public:
-  uint16_t idx_;
-  data_type type_;
-  uint16_t offset_;
-  index_state_t idx_state_;
-  char name_[256];
-
   column_t()
       : idx_(UINT16_MAX),
         type_(),
@@ -26,23 +20,27 @@ struct column_t {
   }
 
   column_t(uint16_t idx, uint16_t offset, const data_type& type,
-           const std::string& name)
+           const std::string& name, const numeric_t& min, const numeric_t& max)
       : idx_(idx),
         type_(type),
-        offset_(offset) {
-    set_name(name);
+        offset_(offset),
+        name_(string_utils::to_upper(name)),
+        min_(min),
+        max_(max) {
   }
 
-  column_t(const column_t& other) {
-    idx_ = other.idx_;
-    type_ = other.type_;
-    offset_ = other.offset_;
-    idx_state_ = other.idx_state_;
-    set_name(std::string(other.name_));
+  column_t(const column_t& other)
+      : idx_(other.idx_),
+        type_(other.type_),
+        offset_(other.offset_),
+        name_(other.name_),
+        min_(other.min_),
+        max_(other.max_),
+        idx_state_(other.idx_state_) {
   }
 
   std::string name() const {
-    return std::string(name_);
+    return name_;
   }
 
   const data_type& type() const {
@@ -57,8 +55,20 @@ struct column_t {
     return idx_;
   }
 
+  numeric_t min() const {
+    return min_;
+  }
+
+  numeric_t max() const {
+    return max_;
+  }
+
   uint16_t index_id() const {
-    return idx_state_.get_id();
+    return idx_state_.id();
+  }
+
+  double index_bucket_size() const {
+    return idx_state_.bucket_size();
   }
 
   bool is_indexed() const {
@@ -69,8 +79,8 @@ struct column_t {
     return idx_state_.set_indexing();
   }
 
-  void set_indexed(uint16_t index_id) {
-    idx_state_.set_indexed(index_id);
+  void set_indexed(uint16_t index_id, double bucket_size) {
+    idx_state_.set_indexed(index_id, bucket_size);
   }
 
   void set_unindexed() {
@@ -84,16 +94,17 @@ struct column_t {
   field_t apply(const void* data) const {
     return field_t(idx_, type_,
                    reinterpret_cast<const unsigned char*>(data) + offset_,
-                   is_indexed(), idx_state_.id);
+                   is_indexed(), idx_state_.id(), idx_state_.bucket_size());
   }
 
  private:
-  void set_name(const std::string& n) {
-    std::string tmp = string_utils::to_upper(n);
-    size_t size = std::min(n.length(), static_cast<size_t>(255));
-    strncpy(name_, tmp.c_str(), size);
-    name_[size] = '\0';
-  }
+  uint16_t idx_;
+  data_type type_;
+  uint16_t offset_;
+  std::string name_;
+  numeric_t min_;
+  numeric_t max_;
+  index_state_t idx_state_;
 };
 
 }

@@ -25,7 +25,7 @@ struct compiled_predicate {
     try {
       col_ = s[p.attr];
     } catch (std::exception& e) {
-      throw parse_exception("No such attribute: " + p.attr);
+      throw parse_exception("No such attribute " + p.attr + ": " + e.what());
     }
     try {
       val_ = value_t::from_string(p.value, col_.type());

@@ -12,51 +12,60 @@ struct index_state_t {
   static const uint8_t INDEXING = 1;
   static const uint8_t INDEXED = 2;
 
-  atomic::type<uint8_t> state;
-  uint16_t id;
-
   index_state_t()
-      : state(UNINDEXED),
-        id(UINT16_MAX) {
+      : state_(UNINDEXED),
+        id_(UINT16_MAX),
+        bucket_size_(1) {
   }
 
   index_state_t(const index_state_t& other)
-      : state(atomic::load(&other.state)),
-        id(other.id) {
+      : state_(atomic::load(&other.state_)),
+        id_(other.id_),
+        bucket_size_(other.bucket_size_) {
   }
 
-  uint16_t get_id() const {
-    return id;
+  uint16_t id() const {
+    return id_;
+  }
+
+  double bucket_size() const {
+    return bucket_size_;
   }
 
   index_state_t& operator=(const index_state_t& other) {
-    atomic::init(&state, atomic::load(&other.state));
-    id = other.id;
+    atomic::init(&state_, atomic::load(&other.state_));
+    id_ = other.id_;
     return *this;
   }
 
   bool is_indexed() const {
-    return atomic::load(&state) == INDEXED;
+    return atomic::load(&state_) == INDEXED;
   }
 
   bool set_indexing() {
     uint8_t expected = UNINDEXED;
-    return atomic::strong::cas(&state, &expected, INDEXING);
+    return atomic::strong::cas(&state_, &expected, INDEXING);
   }
 
-  void set_indexed(uint16_t index_id) {
-    id = index_id;
-    atomic::store(&state, INDEXED);
+  void set_indexed(uint16_t index_id, double bucket_size) {
+    id_ = index_id;
+    bucket_size_ = bucket_size;
+    atomic::store(&state_, INDEXED);
   }
 
   void set_unindexed() {
-    atomic::store(&state, UNINDEXED);
+    atomic::store(&state_, UNINDEXED);
   }
 
   bool disable_indexing() {
     uint8_t expected = INDEXED;
-    return atomic::strong::cas(&state, &expected, UNINDEXED);
+    return atomic::strong::cas(&state_, &expected, UNINDEXED);
   }
+
+ private:
+  atomic::type<uint8_t> state_;
+  uint16_t id_;
+  double bucket_size_;
 };
 
 }

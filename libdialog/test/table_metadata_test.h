@@ -11,7 +11,7 @@ class TableMetadataTest : public testing::Test {
 
 TEST_F(TableMetadataTest, ReadWriteTest) {
   metadata_writer<storage::durable> w("/tmp");
-  w.write_index_info(0, "col1");
+  w.write_index_info(0, "col1", 0.0);
   w.write_filter_info(1, "col1>0");
   w.write_trigger_info(2, 3, aggregate_id::SUM, "col1", relop_id::LT, numeric_t(3));
 
@@ -20,6 +20,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   __index_info iinfo = r.next_index_info();
   ASSERT_EQ(0U, iinfo.index_id());
   ASSERT_EQ("col1", iinfo.name());
+  ASSERT_EQ(static_cast<double>(0.0), iinfo.bucket_size());
 
   ASSERT_EQ(metadata_type::D_FILTER_METADATA, r.next_type());
   __filter_info finfo = r.next_filter_info();

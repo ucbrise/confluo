@@ -40,7 +40,7 @@ TEST_F(SchemaTest, SchemaBuilderTest) {
   builder.add_column(float_type(), "f");
   builder.add_column(double_type(), "g");
   builder.add_column(string_type(16), "h");
-  auto schema_vec = builder.get_schema();
+  auto schema_vec = builder.get_columns();
 
   ASSERT_EQ(static_cast<size_t>(8), schema_vec.size());
 
@@ -103,7 +103,7 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   builder.add_column(float_type(), "f");
   builder.add_column(double_type(), "g");
   builder.add_column(string_type(16), "h");
-  auto schema_vec = builder.get_schema();
+  auto schema_vec = builder.get_columns();
   schema_t<storage::in_memory> s(".", schema_vec);
 
   ASSERT_EQ(static_cast<size_t>(8), s.size());
@@ -215,7 +215,7 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   builder.add_column(float_type(), "f");
   builder.add_column(double_type(), "g");
   builder.add_column(string_type(16), "h");
-  auto schema_vec = builder.get_schema();
+  auto schema_vec = builder.get_columns();
   schema_t<storage::in_memory> s(".", schema_vec);
 
   rec *tmp = new rec(true, 'a', 10, 101, 1000, 102.4, 182.3);

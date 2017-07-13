@@ -12,7 +12,6 @@ class numeric_t {
  public:
   numeric_t(const data_type& type = NONE_TYPE)
       : type_(type) {
-    type.unaryop(unaryop_id::ASSIGN)(storage_, type.zero);
   }
 
   numeric_t(const data_type& type, const void* value)
@@ -170,8 +169,15 @@ class numeric_t {
 
   // Assignment operator
   numeric_t& operator=(const numeric_t& other) {
-    type_.unaryop(unaryop_id::ASSIGN)(storage_, other.storage_);
+    type_ = other.type_;
+    if (other.type_.id != type_id::D_NONE)
+      type_.unaryop(unaryop_id::ASSIGN)(storage_, other.storage_);
     return *this;
+  }
+
+  template<typename T>
+  T as() {
+    return *reinterpret_cast<T*>(storage_);
   }
 
  private:

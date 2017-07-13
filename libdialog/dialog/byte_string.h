@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <cstdio>
+#include <type_traits>
 
 #include "byte_utils.h"
 #include "byte_string.h"
@@ -16,6 +17,12 @@ class byte_string {
   byte_string()
       : size_(0),
         data_(nullptr) {
+  }
+
+  byte_string(bool val)
+      : size_(sizeof(bool)),
+        data_(new uint8_t[size_]) {
+    memcpy(data_, &val, size_);
   }
 
   template<typename T, typename std::enable_if<

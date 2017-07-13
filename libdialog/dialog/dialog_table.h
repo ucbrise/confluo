@@ -1,6 +1,8 @@
 #ifndef DIALOG_DIALOG_STORE_H_
 #define DIALOG_DIALOG_STORE_H_
 
+#include <math.h>
+
 #include <functional>
 #include <numeric>
 #include <thread>
@@ -10,6 +12,7 @@
 #include "read_tail.h"
 #include "schema.h"
 #include "table_metadata.h"
+#include "radix_tree.h"
 #include "tiered_index.h"
 #include "expression_compiler.h"
 #include "filter.h"
@@ -20,6 +23,7 @@
 #include "string_utils.h"
 
 using namespace ::dialog::monolog;
+using namespace ::dialog::index;
 using namespace ::dialog::monitor;
 using namespace ::utils;
 
@@ -52,12 +56,12 @@ class dialog_table {
   dialog_table(const schema_builder& builder, const std::string& path = ".")
       : data_log_("data_log", path),
         rt_(path),
-        schema_(path, builder.get_schema()),
+        schema_(path, builder.get_columns()),
         metadata_(path) {
   }
 
   // Management interface
-  void add_index(const std::string& field_name) {
+  void add_index(const std::string& field_name, double bucket_size) {
     uint16_t idx;
     try {
       idx = schema_.name_map.at(string_utils::to_upper(field_name));
@@ -65,32 +69,34 @@ class dialog_table {
       throw management_exception(
           "Could not add index for " + field_name + " : " + e.what());
     }
-    bool success = schema_.columns[idx].set_indexing();
+
+    column_t& col = schema_[idx];
+    bool success = col.set_indexing();
     if (success) {
       uint16_t index_id;
-      switch (schema_.columns[idx].type().size) {
-        case 1:
-          index_id = idx1_.push_back(new idx1_t);
+      switch (col.type().id) {
+        case type_id::D_BOOL: {
+          index_id = idx_.push_back(new radix_tree(1, 2));
           break;
-        case 2:
-          index_id = idx2_.push_back(new idx2_t);
-          break;
-        case 4:
-          index_id = idx4_.push_back(new idx4_t);
-          break;
-        case 8:
-          index_id = idx8_.push_back(new idx8_t);
+        }
+        case type_id::D_CHAR:
+        case type_id::D_SHORT:
+        case type_id::D_INT:
+        case type_id::D_LONG:
+        case type_id::D_FLOAT:
+        case type_id::D_DOUBLE:
+        case type_id::D_STRING:
+          index_id = idx_.push_back(new radix_tree(col.type().size, 256));
           break;
         default:
-          schema_.columns[idx].set_unindexed();
+          col.set_unindexed();
           throw management_exception("Index not supported for field type");
       }
-      schema_.columns[idx].set_indexed(index_id);
-      metadata_.write_index_info(index_id, field_name);
+      col.set_indexed(index_id, bucket_size);
+      metadata_.write_index_info(index_id, field_name, bucket_size);
     } else {
       throw management_exception(
-          "Could not add index for " + field_name
-              + ": Already indexed or indexing");
+          "Could not index " + field_name + ": already indexed/indexing");
     }
   }
 
@@ -135,46 +141,10 @@ class dialog_table {
     for (size_t i = 0; i < nfilters; i++)
       filters_.at(i)->update(r);
 
-    for (const field_t& f : r) {
-      if (f.is_indexed()) {
-        switch (f.type().size) {
-          case 1:
-            (*idx1_.at(f.index_id()))[f.get_uint64<uint8_t>()]->push_back(
-                offset);
-            break;
-          case 2:
-            (*idx2_.at(f.index_id()))[f.get_uint64<uint16_t>()]->push_back(
-                offset);
-            break;
-          case 4:
-            (*idx2_.at(f.index_id()))[f.get_uint64<uint32_t>()]->push_back(
-                offset);
-            break;
-          case 8:
-            (*idx8_.at(f.index_id()))[f.get_uint64<uint64_t>()]->push_back(
-                offset);
-            break;
-          default:
-            throw management_exception("Field type should not be indexed");
-        }
-      }
-    }
+    for (const field_t& f : r)
+      if (f.is_indexed())
+        idx_.at(f.index_id())->insert(f.get_key(), offset);
 
-    data_log_.flush(offset, length);
-    rt_.advance(offset, length);
-    return offset;
-  }
-
-  uint64_t append_batch(const std::vector<void*>& batch,
-                        std::vector<size_t>& lengths, uint64_t ts =
-                            time_utils::cur_ns()) {
-    size_t length = std::accumulate(lengths.begin(), lengths.end(), 0);
-    uint64_t offset = data_log_.reserve(length);
-    uint64_t off = offset;
-    for (size_t i = 0; i < batch.size(); i++) {
-      data_log_.write(off, (const uint8_t*) batch.at(i), lengths.at(i));
-      off += lengths.at(i);
-    }
     data_log_.flush(offset, length);
     rt_.advance(offset, length);
     return offset;
@@ -215,7 +185,9 @@ class dialog_table {
   // In memory structures
   aux_log_t<filter*, storage::in_memory> filters_;
   aux_log_t<trigger*, storage::in_memory> triggers_;
+  aux_log_t<radix_tree*, storage::in_memory> idx_;
   aux_log_t<idx_bool_t*, storage::in_memory> idx_bool_;
+
   aux_log_t<idx1_t*, storage::in_memory> idx1_;
   aux_log_t<idx2_t*, storage::in_memory> idx2_;
   aux_log_t<idx4_t*, storage::in_memory> idx4_;

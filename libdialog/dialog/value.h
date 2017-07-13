@@ -45,6 +45,10 @@ struct value_t {
     return data_;
   }
 
+  inline byte_string to_key(double bucket_size) const {
+    return type_.keytransform()(data_, bucket_size);
+  }
+
   static value_t from_string(const std::string& str, data_type type) {
     switch (type.id) {
       case type_id::D_BOOL: {

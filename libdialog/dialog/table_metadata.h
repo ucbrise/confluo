@@ -16,14 +16,16 @@ enum metadata_type
 
 struct __index_info {
  public:
-  __index_info(uint32_t index_id, const std::string& name)
+  __index_info(uint32_t index_id, const std::string& name, double bucket_size)
       : index_id_(index_id),
-        name_(name) {
+        name_(name),
+        bucket_size_(bucket_size) {
   }
 
   __index_info(const __index_info& other)
-  : index_id_(other.index_id_),
-  name_(other.name_) {
+      : index_id_(other.index_id_),
+        name_(other.name_),
+        bucket_size_(other.bucket_size_) {
   }
 
   uint32_t index_id() const {
@@ -34,9 +36,14 @@ struct __index_info {
     return name_;
   }
 
+  double bucket_size() const {
+    return bucket_size_;
+  }
+
 private:
   uint32_t index_id_;
   const std::string name_;
+  double bucket_size_;
 };
 
 struct __filter_info {
@@ -47,8 +54,8 @@ struct __filter_info {
   }
 
   __filter_info(const __filter_info& other)
-  : filter_id_(other.filter_id_),
-  expr_(other.expr_) {
+      : filter_id_(other.filter_id_),
+        expr_(other.expr_) {
   }
 
   uint32_t filter_id() const {
@@ -126,13 +133,14 @@ class metadata_writer {
         out_(filename_) {
   }
 
-  void write_index_info(uint32_t index_id, const std::string& name) {
+  void write_index_info(uint32_t index_id, const std::string& name, double bucket_size) {
     metadata_type type = metadata_type::D_INDEX_METADATA;
     out_.write(reinterpret_cast<const char*>(&type), sizeof(metadata_type));
     out_.write(reinterpret_cast<const char*>(&index_id), sizeof(uint32_t));
     size_t expr_size = name.length();
     out_.write(reinterpret_cast<const char*>(&expr_size), sizeof(size_t));
     out_.write(name.c_str(), expr_size);
+    out_.write(reinterpret_cast<const char*>(&bucket_size), sizeof(double));
     out_.flush();
   }
 
@@ -204,10 +212,12 @@ class metadata_reader {
   __index_info next_index_info() {
     uint32_t index_id;
     size_t name_size;
+    double bucket_size;
     in_.read(reinterpret_cast<char*>(&index_id), sizeof(uint32_t));
     in_.read(reinterpret_cast<char*>(&name_size), sizeof(size_t));
     in_.read(buf_, name_size);
-    return __index_info(index_id, std::string(buf_, name_size));
+    in_.read(reinterpret_cast<char*>(&bucket_size), sizeof(double));
+    return __index_info(index_id, std::string(buf_, name_size), bucket_size);
   }
 
   __filter_info next_filter_info() {

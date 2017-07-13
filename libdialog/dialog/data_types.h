@@ -8,6 +8,7 @@
 
 #include "relational_ops.h"
 #include "arithmetic_ops.h"
+#include "key_ops.h"
 #include "exceptions.h"
 
 namespace dialog {
@@ -83,6 +84,7 @@ struct data_type {
     relops_ = init_relops<std::string>();
     unaryops_ = init_unaryops<std::string>();
     binaryops_ = init_binaryops<std::string>();
+    key_transform_ = key_transform<std::string>;
   }
 
   data_type(type_id _id = type_id::D_NONE)
@@ -93,6 +95,7 @@ struct data_type {
         relops_ = init_relops<void>();
         unaryops_ = init_unaryops<void>();
         binaryops_ = init_binaryops<void>();
+        key_transform_ = key_transform<void>;
         min = nullptr;
         zero = nullptr;
         one = nullptr;
@@ -104,6 +107,7 @@ struct data_type {
         relops_ = init_relops<bool>();
         unaryops_ = init_unaryops<bool>();
         binaryops_ = init_binaryops<bool>();
+        key_transform_ = key_transform<bool>;
         min = &limits::bool_min;
         zero = &limits::bool_zero;
         one = &limits::bool_one;
@@ -111,10 +115,11 @@ struct data_type {
         break;
       }
       case type_id::D_CHAR: {
-        size = sizeof(char);
-        relops_ = init_relops<char>();
-        unaryops_ = init_unaryops<char>();
-        binaryops_ = init_binaryops<char>();
+        size = sizeof(int8_t);
+        relops_ = init_relops<int8_t>();
+        unaryops_ = init_unaryops<int8_t>();
+        binaryops_ = init_binaryops<int8_t>();
+        key_transform_ = key_transform<int8_t>;
         min = &limits::char_min;
         zero = &limits::char_zero;
         one = &limits::char_one;
@@ -122,10 +127,11 @@ struct data_type {
         break;
       }
       case type_id::D_SHORT: {
-        size = sizeof(short);
-        relops_ = init_relops<short>();
-        unaryops_ = init_unaryops<short>();
-        binaryops_ = init_binaryops<short>();
+        size = sizeof(int16_t);
+        relops_ = init_relops<int16_t>();
+        unaryops_ = init_unaryops<int16_t>();
+        binaryops_ = init_binaryops<int16_t>();
+        key_transform_ = key_transform<int16_t>;
         min = &limits::short_min;
         zero = &limits::short_zero;
         one = &limits::short_one;
@@ -133,10 +139,11 @@ struct data_type {
         break;
       }
       case type_id::D_INT: {
-        size = sizeof(int);
-        relops_ = init_relops<int>();
-        unaryops_ = init_unaryops<int>();
-        binaryops_ = init_binaryops<int>();
+        size = sizeof(int32_t);
+        relops_ = init_relops<int32_t>();
+        unaryops_ = init_unaryops<int32_t>();
+        binaryops_ = init_binaryops<int32_t>();
+        key_transform_ = key_transform<int32_t>;
         min = &limits::int_min;
         zero = &limits::int_zero;
         one = &limits::int_one;
@@ -144,10 +151,11 @@ struct data_type {
         break;
       }
       case type_id::D_LONG: {
-        size = sizeof(long);
-        relops_ = init_relops<long>();
-        unaryops_ = init_unaryops<long>();
-        binaryops_ = init_binaryops<long>();
+        size = sizeof(int64_t);
+        relops_ = init_relops<int64_t>();
+        unaryops_ = init_unaryops<int64_t>();
+        binaryops_ = init_binaryops<int64_t>();
+        key_transform_ = key_transform<int64_t>;
         min = &limits::long_min;
         zero = &limits::long_zero;
         one = &limits::long_one;
@@ -159,6 +167,7 @@ struct data_type {
         relops_ = init_relops<float>();
         unaryops_ = init_unaryops<float>();
         binaryops_ = init_binaryops<float>();
+        key_transform_ = key_transform<float>;
         min = &limits::float_min;
         zero = &limits::float_zero;
         one = &limits::float_one;
@@ -170,6 +179,7 @@ struct data_type {
         relops_ = init_relops<double>();
         unaryops_ = init_unaryops<double>();
         binaryops_ = init_binaryops<double>();
+        key_transform_ = key_transform<double>;
         min = &limits::double_min;
         zero = &limits::double_zero;
         one = &limits::double_one;
@@ -192,7 +202,8 @@ struct data_type {
         max(other.max),
         relops_(other.relops_),
         unaryops_(other.unaryops_),
-        binaryops_(other.binaryops_) {
+        binaryops_(other.binaryops_),
+        key_transform_(other.key_transform_) {
   }
 
   inline bool operator==(const data_type& other) const {
@@ -213,6 +224,10 @@ struct data_type {
 
   inline const binary_fn& binaryop(binaryop_id id) const {
     return binaryops_[id];
+  }
+
+  inline const key_op& keytransform() const {
+    return key_transform_;
   }
 
   inline std::string to_string() const {
@@ -244,6 +259,7 @@ struct data_type {
   rel_ops_t relops_;
   unary_ops_t unaryops_;
   binary_ops_t binaryops_;
+  key_op key_transform_;
 };
 
 static data_type NONE_TYPE(type_id::D_NONE);
