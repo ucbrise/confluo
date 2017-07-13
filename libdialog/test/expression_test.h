@@ -13,11 +13,6 @@ class ExpressionTest : public testing::Test {
     return p.parse();
   }
 
-  static void print_expression(expression_t* exp) {
-    expression_utils::print_expression(exp);
-    fprintf(stderr, "\n");
-  }
-
   static void test_predicate(expression_t* exp, const std::string& op1,
                              relop_id opid, const std::string& op2) {
 

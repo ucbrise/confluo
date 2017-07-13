@@ -27,22 +27,13 @@ class CompiledPredicateTest : public testing::Test {
 
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;
-    fprintf(stderr, "a\n");
-
     builder.add_column(BOOL_TYPE, "a");
-    fprintf(stderr, "b\n");
     builder.add_column(CHAR_TYPE, "b");
-    fprintf(stderr, "c\n");
     builder.add_column(SHORT_TYPE, "c");
-    fprintf(stderr, "d\n");
     builder.add_column(INT_TYPE, "d");
-    fprintf(stderr, "e\n");
     builder.add_column(LONG_TYPE, "e");
-    fprintf(stderr, "f\n");
     builder.add_column(FLOAT_TYPE, "f");
-    fprintf(stderr, "g\n");
     builder.add_column(DOUBLE_TYPE, "g");
-    fprintf(stderr, "h\n");
     builder.add_column(STRING_TYPE(16), "h");
     return schema_t<storage::in_memory>(".", builder.get_columns());
   }

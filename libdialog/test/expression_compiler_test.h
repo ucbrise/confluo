@@ -18,24 +18,9 @@ class ExpressionCompilerTest : public testing::Test {
     return p.parse();
   }
 
-  static void print_expression(expression_t* exp) {
-    expression_utils::print_expression(exp);
-    fprintf(stderr, "\n");
-  }
-
   static void compile(compiled_expression& cexp, const std::string& exp,
                       const schema_t<storage::in_memory>& schema) {
     expression_compiler::compile(cexp, exp, schema);
-  }
-
-  static void print_minterms(const compiled_expression& cexp) {
-    for (const minterm& mterm : cexp) {
-      fprintf(stderr, "{");
-      for (auto& predicate : mterm)
-        fprintf(stderr, "[%s]", predicate.to_string().c_str());
-      fprintf(stderr, "}");
-    }
-    fprintf(stderr, "\n");
   }
 
   static void check_predicate(const compiled_predicate& c) {

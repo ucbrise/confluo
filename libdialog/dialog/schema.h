@@ -79,13 +79,8 @@ class schema_builder {
 
   schema_builder& add_column(const data_type& type, const std::string& name,
                              const numeric_t& min, const numeric_t& max) {
-    try {
     columns_.push_back(
         column_t(columns_.size(), offset_, type, name, min, max));
-    } catch(std::exception& e) {
-      fprintf(stderr, "%s\n", e.what());
-      abort();
-    }
     offset_ += type.size;
     return *this;
   }
