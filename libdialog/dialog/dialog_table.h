@@ -10,6 +10,7 @@
 #include "storage.h"
 #include "monolog.h"
 #include "read_tail.h"
+#include "auxlog.h"
 #include "schema.h"
 #include "table_metadata.h"
 #include "radix_tree.h"
@@ -35,16 +36,6 @@ namespace dialog {
 template<class storage_mode = storage::in_memory>
 class dialog_table {
  public:
-  template<typename T, class sm>
-  using aux_log_t = monolog_linear<T, 256, 65536, 0, sm>;
-
-  typedef monolog::monolog_exp2<uint64_t, 24> reflog;
-  typedef index::tiered_index<reflog, 2, 1> idx_bool_t;
-  typedef index::tiered_index<reflog, 256, 1> idx1_t;
-  typedef index::tiered_index<reflog, 256, 2> idx2_t;
-  typedef index::tiered_index<reflog, 256, 4> idx4_t;
-  typedef index::tiered_index<reflog, 256, 8> idx8_t;
-
   dialog_table(const std::vector<column_t>& table_schema,
                const std::string& path = ".")
       : data_log_("data_log", path),
@@ -124,7 +115,7 @@ class dialog_table {
 
   uint32_t add_trigger(uint32_t filter_id, const std::string& field_name,
                        aggregate_id agg, relop_id op,
-                       const numeric_t& threshold) {
+                       const mutable_value_t& threshold) {
     trigger *t = new trigger(filter_id, op, threshold);
     uint32_t trigger_id = triggers_.push_back(t);
     metadata_.write_trigger_info(trigger_id, filter_id, agg, field_name, op,
@@ -132,7 +123,7 @@ class dialog_table {
     return trigger_id;
   }
 
-  uint64_t append(const void* data, size_t length, uint64_t ts =
+  uint64_t append(void* data, size_t length, uint64_t ts =
                       time_utils::cur_ns()) {
     uint64_t offset = data_log_.append((const uint8_t*) data, length);
     record_t r = schema_.apply(offset, data, offset + length, ts);
@@ -183,15 +174,9 @@ class dialog_table {
   metadata_writer<storage_mode> metadata_;
 
   // In memory structures
-  aux_log_t<filter*, storage::in_memory> filters_;
-  aux_log_t<trigger*, storage::in_memory> triggers_;
-  aux_log_t<radix_tree*, storage::in_memory> idx_;
-  aux_log_t<idx_bool_t*, storage::in_memory> idx_bool_;
-
-  aux_log_t<idx1_t*, storage::in_memory> idx1_;
-  aux_log_t<idx2_t*, storage::in_memory> idx2_;
-  aux_log_t<idx4_t*, storage::in_memory> idx4_;
-  aux_log_t<idx8_t*, storage::in_memory> idx8_;
+  filter_list_t filters_;
+  trigger_list_t triggers_;
+  index_list_t idx_;
 };
 
 }

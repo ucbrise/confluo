@@ -8,11 +8,11 @@
 #include <string>
 #include <map>
 
-#include "value.h"
 #include "field.h"
 #include "column.h"
 #include "record.h"
 #include "data_types.h"
+#include "immutable_value.h"
 #include "string_utils.h"
 
 using namespace utils;
@@ -57,7 +57,7 @@ class schema_t {
     return columns_.size();
   }
 
-  record_t apply(size_t offset, const void* data, uint64_t version,
+  record_t apply(size_t offset, void* data, uint64_t version,
                  uint64_t ts) {
     record_t r(ts, offset, data, version);
     r.reserve(columns_.size());
@@ -78,7 +78,7 @@ class schema_builder {
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name,
-                             const numeric_t& min, const numeric_t& max) {
+                             const mutable_value_t& min, const mutable_value_t& max) {
     columns_.push_back(
         column_t(columns_.size(), offset_, type, name, min, max));
     offset_ += type.size;
@@ -88,9 +88,9 @@ class schema_builder {
   inline schema_builder& add_column(const data_type& type,
                                     const std::string& name) {
     if (type.id == type_id::D_STRING)
-      return add_column(type, name, numeric_t(), numeric_t());
-    return add_column(type, name, numeric_t(type, type.min()),
-                      numeric_t(type, type.max()));
+      return add_column(type, name, mutable_value_t(), mutable_value_t());
+    return add_column(type, name, mutable_value_t(type, type.min()),
+                      mutable_value_t(type, type.max()));
   }
 
   std::vector<column_t> get_columns() const {

@@ -104,6 +104,28 @@ class byte_string {
     return memcmp(data_, other.data_, std::min(size_, other.size_)) != 0;
   }
 
+  inline byte_string& operator++() {
+    int64_t idx = size_ - 1;
+    while (data_[idx] == UINT8_MAX) {
+      data_[idx] = 0;
+      idx--;
+    }
+    if (idx >= 0)
+      data_[idx]++;
+    return *this;
+  }
+
+  inline byte_string& operator--() {
+    int64_t idx = size_ - 1;
+    while (data_[idx] == 0) {
+      data_[idx] = UINT8_MAX;
+      idx--;
+    }
+    if (idx >= 0)
+      data_[idx]--;
+    return *this;
+  }
+
   std::string to_string() const {
     std::string str = "{";
     size_t i;

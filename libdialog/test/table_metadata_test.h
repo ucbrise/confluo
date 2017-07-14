@@ -13,7 +13,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   metadata_writer<storage::durable> w("/tmp");
   w.write_index_info(0, "col1", 0.0);
   w.write_filter_info(1, "col1>0");
-  w.write_trigger_info(2, 3, aggregate_id::D_SUM, "col1", relop_id::LT, numeric_t(3));
+  w.write_trigger_info(2, 3, aggregate_id::D_SUM, "col1", relop_id::LT, mutable_value_t(3));
 
   metadata_reader r("/tmp");
   ASSERT_EQ(metadata_type::D_INDEX_METADATA, r.next_type());
@@ -34,7 +34,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   ASSERT_EQ(aggregate_id::D_SUM, tinfo.agg_id());
   ASSERT_EQ("col1", tinfo.name());
   ASSERT_EQ(relop_id::LT, tinfo.op());
-  ASSERT_TRUE(numeric_t(3) == tinfo.threshold());
+  ASSERT_TRUE(mutable_value_t(3) == tinfo.threshold());
 
 }
 

@@ -4,7 +4,7 @@
 namespace dialog {
 
 struct field_t {
-  field_t(uint16_t idx, const data_type& type, const void* data, bool indexed,
+  field_t(uint16_t idx, const data_type& type, void* data, bool indexed,
           uint16_t index_id, double index_bucket_size)
       : idx_(idx),
         value_(type, data),
@@ -21,7 +21,7 @@ struct field_t {
     return value_.type();
   }
 
-  inline const value_t& value() const {
+  inline const immutable_value_t& value() const {
     return value_;
   }
 
@@ -49,7 +49,7 @@ struct field_t {
 
  private:
   uint16_t idx_;
-  value_t value_;
+  immutable_value_t value_;
   bool indexed_;
   double index_bucket_size_;
   uint16_t index_id_;

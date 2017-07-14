@@ -55,7 +55,7 @@ inline void assign<std::string>(void* res, const void* v) {
 
 template<>
 inline void assign<void>(void* res, const void* v) {
-  THROW(unsupported_exception, "= not supported for none type");
+  return;
 }
 
 template<typename T>

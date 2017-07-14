@@ -1,5 +1,5 @@
-#ifndef LIBDIALOG_DIALOG_MINTERM_H_
-#define LIBDIALOG_DIALOG_MINTERM_H_
+#ifndef DIALOG_MINTERM_H_
+#define DIALOG_MINTERM_H_
 
 #include <vector>
 
@@ -8,8 +8,8 @@
 namespace dialog {
 
 struct minterm {
-  typedef std::vector<compiled_predicate>::iterator iterator;
-  typedef std::vector<compiled_predicate>::const_iterator const_iterator;
+  typedef std::set<compiled_predicate>::iterator iterator;
+  typedef std::set<compiled_predicate>::const_iterator const_iterator;
 
   minterm() = default;
 
@@ -17,30 +17,8 @@ struct minterm {
       : m_(other.m_) {
   }
 
-  void add(const compiled_predicate& p) {
-    m_.push_back(p);
-  }
-
-  bool operator<(const minterm& other) const {
-    return to_string() < other.to_string();
-  }
-
-  minterm& operator=(const minterm& other) {
-    m_ = other.m_;
-    return *this;
-  }
-
-  size_t size() const {
-    return m_.size();
-  }
-
-  std::string to_string() const {
-    std::string s = ";";
-    for (auto& p : m_) {
-      s += p.to_string();
-      s += ";";
-    }
-    return s;
+  inline void add(const compiled_predicate& p) {
+    m_.insert(p);
   }
 
   inline bool test(const record_t& r) const {
@@ -48,6 +26,18 @@ struct minterm {
       if (!p.test(r))
         return false;
     return true;
+  }
+
+  std::string to_string() const {
+    std::string s = "";
+    size_t size = m_.size();
+    size_t i = 0;
+    for (auto& p : m_) {
+      s += p.to_string();
+      if (++i < size - 1)
+        s += " and ";
+    }
+    return s;
   }
 
   iterator begin() {
@@ -66,10 +56,23 @@ struct minterm {
     return m_.end();
   }
 
+  inline bool operator<(const minterm& other) const {
+    return to_string() < other.to_string();
+  }
+
+  minterm& operator=(const minterm& other) {
+    m_ = other.m_;
+    return *this;
+  }
+
+  size_t size() const {
+    return m_.size();
+  }
+
  private:
-  std::vector<compiled_predicate> m_;
+  std::set<compiled_predicate> m_;
 };
 
 }
 
-#endif /* LIBDIALOG_DIALOG_MINTERM_H_ */
+#endif /* DIALOG_MINTERM_H_ */

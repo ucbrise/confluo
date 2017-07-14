@@ -2,10 +2,10 @@
 #define DIALOG_TRIGGER_H_
 
 namespace dialog {
-
+namespace monitor {
 struct trigger {
  public:
-  trigger(uint32_t filter_id, relop_id op, const numeric_t& threshold)
+  trigger(uint32_t filter_id, relop_id op, const mutable_value_t& threshold)
       : filter_id_(filter_id),
         op_(op),
         threshold_(threshold) {
@@ -25,16 +25,16 @@ struct trigger {
     return op_;
   }
 
-  const numeric_t threshold() const {
+  const mutable_value_t threshold() const {
     return threshold_;
   }
 
  private:
   uint32_t filter_id_;
   relop_id op_;
-  numeric_t threshold_;
+  mutable_value_t threshold_;
 };
-
+}
 }
 
 #endif /* DIALOG_TRIGGER_H_ */

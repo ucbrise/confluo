@@ -74,7 +74,7 @@ private:
 struct __trigger_info {
  public:
   __trigger_info(uint32_t trigger_id, uint32_t filter_id, aggregate_id agg_id,
-                 const std::string& name, relop_id op, const numeric_t& threshold)
+                 const std::string& name, relop_id op, const mutable_value_t& threshold)
       : trigger_id_(trigger_id),
         filter_id_(filter_id),
         agg_id_(agg_id),
@@ -112,7 +112,7 @@ struct __trigger_info {
     return name_;
   }
 
-  const numeric_t& threshold() const {
+  const mutable_value_t& threshold() const {
     return threshold_;
   }
 
@@ -122,7 +122,7 @@ private:
   aggregate_id agg_id_;
   const std::string name_;
   relop_id op_;
-  numeric_t threshold_;
+  mutable_value_t threshold_;
 };
 
 template<class storage_mode>
@@ -156,7 +156,7 @@ class metadata_writer {
 
   void write_trigger_info(uint32_t trigger_id, uint32_t filter_id,
                           aggregate_id agg_id, const std::string& name,
-                          relop_id op, const numeric_t& threshold) {
+                          relop_id op, const mutable_value_t& threshold) {
     metadata_type type = metadata_type::D_TRIGGER_METADATA;
     out_.write(reinterpret_cast<const char*>(&type), sizeof(metadata_type));
     out_.write(reinterpret_cast<const char*>(&trigger_id), sizeof(uint32_t));
@@ -166,10 +166,10 @@ class metadata_writer {
     out_.write(reinterpret_cast<const char*>(&name_size), sizeof(size_t));
     out_.write(name.c_str(), name_size);
     out_.write(reinterpret_cast<const char*>(&op), sizeof(relop_id));
-    type_id id = threshold.get_type().id;
-    size_t type_size = threshold.get_type().size;
+    type_id id = threshold.type().id;
+    size_t type_size = threshold.type().size;
     out_.write(reinterpret_cast<const char*>(&id), sizeof(type_id));
-    out_.write(reinterpret_cast<const char*>(threshold.get_data()), type_size);
+    out_.write(reinterpret_cast<const char*>(threshold.data()), type_size);
     out_.flush();
   }
 
@@ -192,7 +192,7 @@ class metadata_writer<storage::in_memory> {
 
   void write_trigger_info(uint32_t trigger_id, uint32_t filter_id,
                           aggregate_id agg_id, const std::string& name,
-                          const numeric_t& threshold) {
+                          const mutable_value_t& threshold) {
   }
 };
 
@@ -245,8 +245,10 @@ class metadata_reader {
     in_.read(reinterpret_cast<char*>(&op), sizeof(relop_id));
     in_.read(reinterpret_cast<char*>(&tid), sizeof(type_id));
     data_type type(tid);
-    numeric_t threshold(type);
-    in_.read(reinterpret_cast<char*>(threshold.get_data()), type.size);
+    uint8_t* buf = new uint8_t[type.size];
+    in_.read(reinterpret_cast<char*>(buf), type.size);
+    mutable_value_t threshold(type, buf);
+    delete[] buf;
     return __trigger_info(trigger_id, filter_id, agg_id,
                           std::string(buf_, name_size), op, threshold);
   }

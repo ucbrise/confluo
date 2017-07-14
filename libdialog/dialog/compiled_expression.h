@@ -18,6 +18,18 @@ struct compiled_expression : public std::set<minterm> {
 
     return false;
   }
+
+  std::string to_string() const {
+    std::string ret = "";
+    size_t s = size();
+    size_t i = 0;
+    for (auto& p : *this) {
+      ret += p.to_string();
+      if (++i < s - 1)
+        ret += " or ";
+    }
+    return ret;
+  }
 };
 
 }
