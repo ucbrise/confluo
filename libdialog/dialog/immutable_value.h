@@ -12,70 +12,35 @@ using namespace utils;
 namespace dialog {
 
 struct immutable_value_t {
-  immutable_value_t(data_type type = NONE_TYPE)
+  immutable_value_t(const data_type& type = NONE_TYPE)
       : type_(type),
-        data_(nullptr) {
+        ptr_(nullptr) {
   }
 
   immutable_value_t(const data_type& type, void* data)
       : type_(type),
-        data_(data) {
+        ptr_(data) {
   }
 
   immutable_value_t(const immutable_value_t& other)
       : type_(other.type_),
-        data_(other.data_) {
+        ptr_(other.ptr_) {
   }
 
   inline data_type const& type() const {
     return type_;
   }
 
-  inline void const* data() const {
-    return data_;
+  inline void const* ptr() const {
+    return ptr_;
+  }
+
+  inline data to_data() const {
+    return data(ptr_, type_.size);
   }
 
   inline byte_string to_key(double bucket_size) const {
-    return type_.keytransform()(data_, bucket_size);
-  }
-
-  static immutable_value_t parse(const std::string& str, data_type type) {
-    switch (type.id) {
-      case type_id::D_BOOL: {
-        bool val = string_utils::lexical_cast<bool>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_CHAR: {
-        char val = string_utils::lexical_cast<char>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_SHORT: {
-        short val = string_utils::lexical_cast<short>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_INT: {
-        int val = string_utils::lexical_cast<int>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_LONG: {
-        long val = string_utils::lexical_cast<long>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_FLOAT: {
-        float val = string_utils::lexical_cast<float>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_DOUBLE: {
-        double val = string_utils::lexical_cast<double>(str);
-        return immutable_value_t(type, valdup(val));
-      }
-      case type_id::D_STRING: {
-        return immutable_value_t(type, strdup(str.c_str()));
-      }
-      default: {
-        throw std::bad_cast();
-      }
-    }
+    return type_.keytransform()(ptr_, bucket_size);
   }
 
   // Relational operators
@@ -83,8 +48,8 @@ struct immutable_value_t {
                     const immutable_value_t& second) {
     if (first.type_ != second.type_)
       THROW(invalid_operation_exception,
-            "Cannot compare values of different types");
-    return first.type_.relop(id)(first.data_, second.data_);
+            "Comparing values of different types");
+    return first.type_.relop(id)(first.to_data(), second.to_data());
   }
 
   friend inline bool operator <(const immutable_value_t& first,
@@ -120,36 +85,36 @@ struct immutable_value_t {
   std::string to_string() const {
     switch (type_.id) {
       case type_id::D_BOOL: {
-        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(data_))
+        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(ptr_))
             + ")";
       }
       case type_id::D_CHAR: {
-        return "char(" + std::to_string(*reinterpret_cast<const char*>(data_))
+        return "char(" + std::to_string(*reinterpret_cast<const char*>(ptr_))
             + ")";
       }
       case type_id::D_SHORT: {
-        return "short(" + std::to_string(*reinterpret_cast<const short*>(data_))
+        return "short(" + std::to_string(*reinterpret_cast<const short*>(ptr_))
             + ")";
       }
       case type_id::D_INT: {
-        return "int(" + std::to_string(*reinterpret_cast<const int*>(data_))
+        return "int(" + std::to_string(*reinterpret_cast<const int*>(ptr_))
             + ")";
       }
       case type_id::D_LONG: {
-        return "long(" + std::to_string(*reinterpret_cast<const long*>(data_))
+        return "long(" + std::to_string(*reinterpret_cast<const long*>(ptr_))
             + ")";
       }
       case type_id::D_FLOAT: {
-        return "float(" + std::to_string(*reinterpret_cast<const float*>(data_))
+        return "float(" + std::to_string(*reinterpret_cast<const float*>(ptr_))
             + ")";
       }
       case type_id::D_DOUBLE: {
         return "double("
-            + std::to_string(*reinterpret_cast<const double*>(data_)) + ")";
+            + std::to_string(*reinterpret_cast<const double*>(ptr_)) + ")";
       }
       case type_id::D_STRING: {
         return "string("
-            + std::string(*reinterpret_cast<const char*>(data_), type_.size)
+            + std::string(*reinterpret_cast<const char*>(ptr_), type_.size)
             + ")";
       }
       case type_id::D_NONE: {
@@ -162,18 +127,8 @@ struct immutable_value_t {
   }
 
  protected:
-  template<typename T>
-  static inline void* valdup(const T& val) {
-    void* out = malloc(sizeof(T));
-
-    if (out != nullptr)
-      memcpy(out, &val, sizeof(T));
-
-    return out;
-  }
-
   data_type type_;
-  void* data_;
+  void* ptr_;
 };
 
 }

@@ -169,7 +169,7 @@ class metadata_writer {
     type_id id = threshold.type().id;
     size_t type_size = threshold.type().size;
     out_.write(reinterpret_cast<const char*>(&id), sizeof(type_id));
-    out_.write(reinterpret_cast<const char*>(threshold.data()), type_size);
+    out_.write(reinterpret_cast<const char*>(threshold.ptr()), type_size);
     out_.flush();
   }
 

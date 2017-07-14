@@ -1,8 +1,9 @@
 #ifndef LIBDIALOG_DIALOG_RELATIONAL_OPS_H_
 #define LIBDIALOG_DIALOG_RELATIONAL_OPS_H_
 
-#include <array>
+#include <vector>
 
+#include "data.h"
 #include "exceptions.h"
 
 namespace dialog {
@@ -20,97 +21,67 @@ enum relop_id
   NEQ = 5  //!< NEQ
 };
 
-typedef bool (*relational_fn)(const void* v1, const void* v2);
+typedef bool (*relational_fn)(const data& v1, const data& v2);
 
 typedef std::vector<relational_fn> rel_ops_t;
 
 template<typename T>
-inline bool less_than(const void* v1, const void* v2) {
-  return *(reinterpret_cast<const T*>(v1)) < *(reinterpret_cast<const T*>(v2));
+inline bool less_than(const data& v1, const data& v2) {
+  return v1.as<T>() < v2.as<T>();
 }
 
 template<>
-inline bool less_than<std::string>(const void* v1, const void* v2) {
-  THROW(unsupported_exception, "< not supported for string type");
-}
-
-template<>
-inline bool less_than<void>(const void* v1, const void* v2) {
+inline bool less_than<void>(const data& v1, const data& v2) {
   THROW(unsupported_exception, "< not supported for none type");
 }
 
 template<typename T>
-inline bool less_than_equals(const void* v1, const void* v2) {
-  return *(reinterpret_cast<const T*>(v1)) <= *(reinterpret_cast<const T*>(v2));
+inline bool less_than_equals(const data& v1, const data& v2) {
+  return v1.as<T>() <= v2.as<T>();
 }
 
 template<>
-inline bool less_than_equals<std::string>(const void* v1, const void* v2) {
-  THROW(unsupported_exception, "<= not supported for string type");
-}
-
-template<>
-inline bool less_than_equals<void>(const void* v1, const void* v2) {
+inline bool less_than_equals<void>(const data& v1, const data& v2) {
   THROW(unsupported_exception, "<= not supported for none type");
 }
 
 template<typename T>
-inline bool greater_than(const void* v1, const void* v2) {
-  return *(reinterpret_cast<const T*>(v1)) > *(reinterpret_cast<const T*>(v2));
+inline bool greater_than(const data& v1, const data& v2) {
+  return v1.as<T>() > v2.as<T>();
 }
 
 template<>
-inline bool greater_than<std::string>(const void* v1, const void* v2) {
-  THROW(unsupported_exception, "> not supported for string type");
-}
-
-template<>
-inline bool greater_than<void>(const void* v1, const void* v2) {
+inline bool greater_than<void>(const data& v1, const data& v2) {
   THROW(unsupported_exception, "> not supported for none type");
 }
 
 template<typename T>
-inline bool greater_than_equals(const void* v1, const void* v2) {
-  return *(reinterpret_cast<const T*>(v1)) >= *(reinterpret_cast<const T*>(v2));
+inline bool greater_than_equals(const data& v1, const data& v2) {
+  return v1.as<T>() >= v2.as<T>();
 }
 
 template<>
-inline bool greater_than_equals<std::string>(const void* v1, const void* v2) {
-  THROW(unsupported_exception, ">= not supported for string type");
-}
-
-template<>
-inline bool greater_than_equals<void>(const void* v1, const void* v2) {
+inline bool greater_than_equals<void>(const data& v1, const data& v2) {
   THROW(unsupported_exception, ">= not supported for none type");
 }
 
 template<typename T>
-inline bool equals(const void* v1, const void* v2) {
-  return *(reinterpret_cast<const T*>(v1)) == *(reinterpret_cast<const T*>(v2));
+inline bool equals(const data& v1, const data& v2) {
+  return v1.as<T>() == v2.as<T>();
 }
 
 template<>
-inline bool equals<std::string>(const void* v1, const void* v2) {
-  THROW(unsupported_exception, "== not supported for string type");
-}
-
-template<>
-inline bool equals<void>(const void* v1, const void* v2) {
+inline bool equals<void>(const data& v1, const data& v2) {
   THROW(unsupported_exception, "== not supported for none type");
 }
 
 template<typename T>
-inline bool not_equals(const void* v1, const void* v2) {
-  return *(reinterpret_cast<const T*>(v1)) != *(reinterpret_cast<const T*>(v2));
+inline bool not_equals(const data& v1, const data& v2) {
+  return v1.as<T>() != v2.as<T>();
 }
 
 template<>
-inline bool not_equals<std::string>(const void* v1, const void* v2) {
-  THROW(unsupported_exception, "!= not supported for string type");
-}
-
-template<>
-inline bool not_equals<void>(const void* v1, const void* v2) {
+inline bool not_equals<void>(const data& v1, const data& v2) {
   THROW(unsupported_exception, "!= not supported for none type");
 }
 

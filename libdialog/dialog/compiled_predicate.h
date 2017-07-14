@@ -29,7 +29,7 @@ struct compiled_predicate {
       THROW(parse_exception, "No such attribute " + p.attr + ": " + e.what());
     }
     try {
-      val_ = immutable_value_t::parse(p.value, col_.type());
+      val_ = mutable_value_t::parse(p.value, col_.type());
     } catch (std::exception& e) {
       THROW(
           parse_exception,
@@ -84,7 +84,7 @@ struct compiled_predicate {
   }
 
   inline bool test(const record_t& r) const {
-    return relop(op_, r[col_.idx()].value(), val_);
+    return mutable_value_t::relop(op_, r[col_.idx()].value(), val_);
   }
 
   inline std::string to_string() const {
@@ -96,10 +96,9 @@ struct compiled_predicate {
   }
 
  private:
-
   column_t col_;
   relop_id op_;
-  immutable_value_t val_;
+  mutable_value_t val_;
   std::string str_;
 };
 

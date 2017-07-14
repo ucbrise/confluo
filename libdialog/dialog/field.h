@@ -39,12 +39,12 @@ struct field_t {
 
   template<typename T>
   inline uint64_t get_uint64() const {
-    return (uint64_t) *(reinterpret_cast<const T*>(value_.data()));
+    return (uint64_t) *(reinterpret_cast<const T*>(value_.ptr()));
   }
 
   template<typename T>
   inline T get() const {
-    return *(reinterpret_cast<const T*>(value_.data()));
+    return *(reinterpret_cast<const T*>(value_.ptr()));
   }
 
  private:
