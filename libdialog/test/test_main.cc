@@ -10,6 +10,7 @@
 #include "expression_compiler_test.h"
 #include "expression_test.h"
 #include "filter_test.h"
+#include "flatten_test.h"
 #include "immutable_value_test.h"
 #include "index_state_test.h"
 #include "minterm_test.h"

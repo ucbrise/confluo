@@ -27,13 +27,27 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   typedef typename monolog_impl::pointer pointer;
   typedef typename monolog_impl::reference reference;
 
-  monolog_iterator(monolog_impl& impl, size_t pos)
+  monolog_iterator()
+      : impl_(nullptr),
+        pos_(0) {
+  }
+
+  monolog_iterator(const monolog_impl* impl, size_t pos)
       : impl_(impl),
         pos_(pos) {
   }
 
+  monolog_iterator(const monolog_iterator& other)
+      : impl_(other.impl_),
+        pos_(other.pos_) {
+  }
+
   reference operator*() const {
-    return impl_.get(pos_);
+    return impl_->get(pos_);
+  }
+
+  pointer operator->() const {
+    return impl_->ptr(pos_);
   }
 
   monolog_iterator& operator++() {
@@ -55,8 +69,14 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
     return !(*this == other);
   }
 
+  monolog_iterator& operator=(const monolog_iterator& other) {
+    impl_ = other.impl_;
+    pos_ = other.pos_;
+    return *this;
+  }
+
  private:
-  monolog_impl& impl_;
+  const monolog_impl* impl_;
   size_t pos_;
 };
 
@@ -174,6 +194,14 @@ class monolog_exp2_base {
     }
   }
 
+  const T* ptr(size_t idx) const {
+    size_t pos = idx + FBS;
+    size_t hibit = bit_utils::highest_bit(pos);
+    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_idx = hibit - FBS_HIBIT;
+    return atomic::load(&buckets_[bucket_idx]) + bucket_off;
+  }
+
   // Gets the data at index idx.
   const T& get(size_t idx) const {
     size_t pos = idx + FBS;
@@ -269,6 +297,7 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   typedef T* pointer;
   typedef T reference;
   typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> iterator;
+  typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> const_iterator;
 
   monolog_exp2()
       : tail_(0) {

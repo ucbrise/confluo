@@ -280,6 +280,8 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   typedef T reference;
   typedef monolog_iterator<
       monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>> iterator;
+  typedef monolog_iterator<
+      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>> const_iterator;
 
   monolog_linear()
       : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>(),

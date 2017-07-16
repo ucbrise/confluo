@@ -170,9 +170,13 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   typedef radix_tree_node node_t;
   typedef byte_string key_t;
   typedef rt_reflog_it self_type;
-  typedef reflog value;
-  typedef reflog& reference;
-  typedef reflog* pointer;
+
+  rt_reflog_it()
+      : width_(0),
+        depth_(0),
+        node_(nullptr) {
+
+  }
 
   rt_reflog_it(size_t width, size_t depth, const key_t& key, const node_t* node)
       : width_(width),
@@ -196,11 +200,11 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
     return node_->refs();
   }
 
-  bool operator!=(const self_type& other) {
+  bool operator!=(const self_type& other) const {
     return node_ != other.node_;
   }
 
-  bool operator==(const self_type& other) {
+  bool operator==(const self_type& other) const {
     return node_ == other.node_;
   }
 
@@ -226,6 +230,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
 
 class rt_range_result {
  public:
+  typedef rt_reflog_it const_iterator;
   typedef rt_reflog_it iterator;
 
   rt_range_result(const iterator& lb, const iterator& ub)
