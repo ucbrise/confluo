@@ -42,12 +42,12 @@ TEST_F(RadixTreeTest, UpperLowerBoundTest) {
   ASSERT_EQ(static_cast<size_t>(32), it5->at(0));
 }
 
-TEST_F(RadixTreeTest, RangeLookupTest) {
+TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
   radix_tree tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++)
     tree.insert(byte_string(i * 8), i);
 
-  auto res1 = tree.range_lookup(byte_string(0), byte_string(16));
+  auto res1 = tree.range_lookup_reflogs(byte_string(0), byte_string(16));
   ASSERT_EQ(static_cast<size_t>(3), res1.count());
   uint64_t i = 0;
   for (reflog& refs : res1) {
@@ -55,7 +55,7 @@ TEST_F(RadixTreeTest, RangeLookupTest) {
     i++;
   }
 
-  auto res2 = tree.range_lookup(byte_string(1), byte_string(15));
+  auto res2 = tree.range_lookup_reflogs(byte_string(1), byte_string(15));
   ASSERT_EQ(static_cast<size_t>(1), res2.count());
   i = 1;
   for (reflog& refs : res2) {
@@ -77,6 +77,28 @@ TEST_F(RadixTreeTest, ApproxCountTest) {
 
   size_t res2 = tree.approx_count(byte_string(1), byte_string(31));
   ASSERT_EQ(static_cast<size_t>(6), res2);
+}
+
+TEST_F(RadixTreeTest, RangeLookupTest) {
+  radix_tree tree(sizeof(int32_t), 256);
+  for (int32_t i = 0; i < 256; i++)
+    tree.insert(byte_string(i * 8), i);
+
+  auto res1f = tree.range_lookup(byte_string(0), byte_string(16));
+  ASSERT_EQ(static_cast<size_t>(3), res1f.count());
+  uint64_t i = 0;
+  for (uint64_t val : res1f) {
+    ASSERT_EQ(i, val);
+    i++;
+  }
+
+  auto res2f = tree.range_lookup(byte_string(1), byte_string(15));
+  ASSERT_EQ(static_cast<size_t>(1), res2f.count());
+  i = 1;
+  for (uint64_t val : res2f) {
+    ASSERT_EQ(i, val);
+    i++;
+  }
 }
 
 #endif /* TEST_RADIX_TREE_TEST_H_ */

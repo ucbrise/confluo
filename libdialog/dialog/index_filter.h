@@ -23,11 +23,11 @@ class index_filter {
     return index_id_;
   }
 
-  byte_string const& key_begin() const {
+  byte_string const& kbegin() const {
     return key_begin_;
   }
 
-  byte_string const& key_end() const {
+  byte_string const& kend() const {
     return key_end_;
   }
 

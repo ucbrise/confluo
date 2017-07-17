@@ -13,9 +13,12 @@
 #include "auxlog.h"
 #include "schema.h"
 #include "table_metadata.h"
+#include "data_log.h"
+#include "expression_compiler.h"
+#include "query_planner.h"
+#include "record_stream.h"
 #include "radix_tree.h"
 #include "tiered_index.h"
-#include "expression_compiler.h"
 #include "filter.h"
 #include "trigger.h"
 #include "exceptions.h"
@@ -36,6 +39,16 @@ namespace dialog {
 template<class storage_mode = storage::in_memory>
 class dialog_table {
  public:
+  typedef data_log<storage_mode> data_log_type;
+  typedef schema_t<storage_mode> schema_type;
+  typedef read_tail<storage_mode> read_tail_type;
+  typedef metadata_writer<storage_mode> metadata_writer_type;
+  typedef radix_tree::range_iterator rt_offset_it;
+
+  typedef record_stream<rt_offset_it, schema_type, data_log_type> rstream_type;
+  typedef filtered_record_stream<rstream_type> fstream_type;
+  typedef union_record_stream<fstream_type> filter_result_type;
+
   dialog_table(const std::vector<column_t>& table_schema,
                const std::string& path = ".")
       : data_log_("data_log", path),
@@ -145,13 +158,27 @@ class dialog_table {
     return offset;
   }
 
-  bool read(uint64_t offset, record_t& rec, size_t length) const {
-    uint64_t tail = rt_.get();
-    if (offset < tail) {
-      rec = record_t(offset, data_log_.cptr(offset), length);
+  bool read(uint64_t offset, record_t& rec) const {
+    uint64_t version = rt_.get();
+    if (offset < version) {
+      rec = record_t(offset, data_log_.cptr(offset), schema_.record_size());
       return true;
     }
     return false;
+  }
+
+  filter_result_type execute_filter(const std::string& expr) const {
+    uint64_t version = rt_.get();
+    compiled_expression cexpr = expression_compiler::compile(expr, schema_);
+    query_plan plan = query_planner::plan(cexpr, idx_);
+    std::vector<fstream_type> fstreams;
+    for (minterm_plan& mplan : plan) {
+      const index_filter& f = mplan.idx_filter();
+      auto mres = idx_.at(f.index_id())->range_lookup(f.kbegin(), f.kend());
+      rstream_type rs(version, mres.begin(), mres.end(), schema_, data_log_);
+      fstreams.push_back(fstream_type(rs, mplan.data_filter()));
+    }
+    return filter_result_type(fstreams);
   }
 
   size_t num_records() const {
@@ -159,15 +186,15 @@ class dialog_table {
   }
 
  protected:
-  monolog_linear<uint8_t, 65536, 1073741824, 1048576, storage_mode> data_log_;
-  read_tail<storage_mode> rt_;
-  schema_t<storage_mode> schema_;
-  metadata_writer<storage_mode> metadata_;
+  data_log_type data_log_;
+  read_tail_type rt_;
+  schema_type schema_;
+  metadata_writer_type metadata_;
 
   // In memory structures
-  filter_list_t filters_;
-  trigger_list_t triggers_;
-  index_list_t idx_;
+  filter_list_type filters_;
+  trigger_list_type triggers_;
+  index_list_type idx_;
 };
 
 }

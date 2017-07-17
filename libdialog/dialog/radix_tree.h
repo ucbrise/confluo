@@ -4,6 +4,7 @@
 #include "atomic.h"
 #include "byte_string.h"
 #include "exceptions.h"
+#include "flatten.h"
 
 namespace dialog {
 namespace index {
@@ -228,18 +229,18 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   const radix_tree_node* node_;
 };
 
-class rt_range_result {
+class rt_reflog_range_result {
  public:
   typedef rt_reflog_it const_iterator;
   typedef rt_reflog_it iterator;
 
-  rt_range_result(const iterator& lb, const iterator& ub)
+  rt_reflog_range_result(const iterator& lb, const iterator& ub)
       : begin_(lb),
         end_(ub) {
     ++end_;
   }
 
-  rt_range_result(const rt_range_result& other)
+  rt_reflog_range_result(const rt_reflog_range_result& other)
       : begin_(other.begin_),
         end_(other.end_) {
   }
@@ -270,6 +271,8 @@ class radix_tree {
   typedef uint64_t value_t;
 
   typedef rt_reflog_it iterator;
+  typedef flattened_container<rt_reflog_range_result> rt_range_result;
+  typedef rt_range_result::iterator range_iterator;
 
   radix_tree(size_t depth, size_t width)
       : width_(width),
@@ -348,8 +351,13 @@ class radix_tree {
     return iterator(width_, depth_, lb.first, lb.second);
   }
 
+  rt_reflog_range_result range_lookup_reflogs(const key_t& begin,
+                                              const key_t& end) const {
+    return rt_reflog_range_result(upper_bound(begin), lower_bound(end));
+  }
+
   rt_range_result range_lookup(const key_t& begin, const key_t& end) const {
-    return rt_range_result(upper_bound(begin), lower_bound(end));
+    return rt_range_result(range_lookup_reflogs(begin, end));
   }
 
   size_t approx_count(const key_t& begin, const key_t& end) {

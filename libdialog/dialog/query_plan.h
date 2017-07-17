@@ -35,6 +35,7 @@ class minterm_plan {
 };
 
 class query_plan : public std::vector<minterm_plan> {
+ public:
   std::string to_string() {
     std::string ret = "union(\n";
     for (auto& m : *this) {

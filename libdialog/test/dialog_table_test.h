@@ -28,7 +28,7 @@ class DiaLogTableTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      bool success = dtable.read(offsets[i], r, DATA_SIZE);
+      bool success = dtable.read(offsets[i], r);
       const uint8_t* ret = reinterpret_cast<const uint8_t*>(r.data());
       ASSERT_TRUE(success);
       uint8_t expected = i % 256;

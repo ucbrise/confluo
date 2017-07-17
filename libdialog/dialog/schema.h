@@ -36,9 +36,9 @@ class schema_t {
   }
 
   schema_t(const schema_t<storage_mode>& other)
-      : columns_(other.columns_),
-        name_map_(other.name_map_),
-        record_size_(other.record_size_) {
+      : record_size_(other.record_size_),
+        columns_(other.columns_),
+        name_map_(other.name_map_) {
   }
 
   ~schema_t() = default;

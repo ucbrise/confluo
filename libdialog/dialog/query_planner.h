@@ -12,11 +12,12 @@ class query_planner {
  public:
   typedef std::vector<index_filter> index_filters;
   typedef index_filters::iterator if_iterator;
+  typedef index_filters::const_iterator const_if_iterator;
 
   static query_plan plan(const compiled_expression& expr,
-                         const index_list_t& idx_list) {
+                         const index_list_type& idx_list) {
     query_plan qp;
-    for (minterm& m : expr) {
+    for (const minterm& m : expr) {
       index_filters filters = get_filters(m);
       if (reduce_filters(filters))
         qp.push_back(minterm_plan(extract_min_filter(filters, idx_list), m));
@@ -25,15 +26,15 @@ class query_planner {
   }
 
  private:
-  static index_filter& extract_min_filter(const index_filters& filters,
-                                          const index_list_t& idx_list) {
-    if_iterator min_f;
+  static index_filter extract_min_filter(const index_filters& filters,
+                                         const index_list_type& idx_list) {
+    const_if_iterator min_f;
     size_t min_count = UINT64_MAX;
 
-    for (if_iterator i = filters.begin(); i != filters.end(); i++) {
+    for (auto i = filters.begin(); i != filters.end(); i++) {
       uint64_t count;
-      if ((count = idx_list.at(i->index_id())->approx_count(i->key_begin(),
-                                                            i->key_end()))) {
+      if ((count = idx_list.at(i->index_id())->approx_count(i->kbegin(),
+                                                            i->kend()))) {
         min_count = count;
         min_f = i;
       }
@@ -44,7 +45,7 @@ class query_planner {
 
   static index_filters get_filters(const minterm& m) {
     index_filters filters;
-    for (compiled_predicate& p : m) {
+    for (const compiled_predicate& p : m) {
       if (p.is_indexed()) {
         index_filters f = p.idx_filters();
         append_filters(filters, f);
@@ -53,7 +54,7 @@ class query_planner {
     return filters;
   }
 
-  void append_filters(index_filters& dst, index_filters& src) {
+  static void append_filters(index_filters& dst, index_filters& src) {
     if (dst.empty()) {
       dst = std::move(src);
     } else {
@@ -66,12 +67,12 @@ class query_planner {
   static bool reduce_filters(index_filters& filters) {
     for (if_iterator i = filters.begin(); i != filters.end(); i++) {
       uint32_t index_id = i->index_id();
-      const byte_string kbegin = i->key_begin();
-      const byte_string kend = i->key_end();
-      for (if_iterator j = i + 1; j != filters.end();) {
+      byte_string kbegin = i->kbegin();
+      byte_string kend = i->kend();
+      for (const_if_iterator j = i + 1; j != filters.end();) {
         if (index_id == j->index_id()) {
-          kbegin = std::max(kbegin, j->key_begin());
-          kend = std::min(kend, j->key_end());
+          kbegin = std::max(kbegin, j->kbegin());
+          kend = std::min(kend, j->kend());
           j = filters.erase(j);
         } else {
           j++;

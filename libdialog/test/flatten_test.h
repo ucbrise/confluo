@@ -28,8 +28,8 @@ TEST_F(FlattenTest, RadixTreeTest) {
   for (int32_t i = 0; i < 256; i++)
     tree.insert(byte_string(i * 8), i);
 
-  rt_range_result res1 = tree.range_lookup(byte_string(0), byte_string(16));
-  flattened_container<rt_range_result> res1f(res1);
+  rt_reflog_range_result res1 = tree.range_lookup_reflogs(byte_string(0), byte_string(16));
+  flattened_container<rt_reflog_range_result> res1f(res1);
   ASSERT_EQ(static_cast<size_t>(3), res1f.count());
   uint64_t i = 0;
   for (uint64_t val: res1f) {
@@ -37,8 +37,8 @@ TEST_F(FlattenTest, RadixTreeTest) {
     i++;
   }
 
-  rt_range_result res2 = tree.range_lookup(byte_string(1), byte_string(15));
-  flattened_container<rt_range_result> res2f(res2);
+  rt_reflog_range_result res2 = tree.range_lookup_reflogs(byte_string(1), byte_string(15));
+  flattened_container<rt_reflog_range_result> res2f(res2);
   ASSERT_EQ(static_cast<size_t>(1), res2f.count());
   i = 1;
   for (uint64_t val : res2f) {

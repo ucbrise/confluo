@@ -1,6 +1,8 @@
 #ifndef DIALOG_DATA_ITERATOR_H_
 #define DIALOG_DATA_ITERATOR_H_
 
+#include <unordered_set>
+
 #include "record.h"
 
 namespace dialog {
@@ -50,6 +52,10 @@ class record_stream {
     return !(a == b);
   }
 
+  bool has_more() const {
+    return it_ != end_;
+  }
+
  private:
   void advance() {
     while (it_ != end_ && *it_ < version_)
@@ -61,6 +67,90 @@ class record_stream {
   const offset_iterator& end_;
   const schema_t& schema_;
   const data_log_t& data_log_;
+};
+
+template<class rstream_t>
+class filtered_record_stream {
+ public:
+  filtered_record_stream(const rstream_t& it, const compiled_expression& exp)
+      : it_(it),
+        exp_(exp) {
+  }
+
+  record_t get() const {
+    return it_.get();
+  }
+
+  rstream_t& operator++() {
+    advance();
+    return *this;
+  }
+
+  rstream_t& operator++(int) {
+    rstream_t it(*this);
+    ++*this;
+    return it;
+  }
+
+  bool has_more() const {
+    return it_.has_more();
+  }
+
+ private:
+  void advance() {
+    while (has_more() && exp_.test(it_.get()))
+      ++it_;
+  }
+
+  rstream_t it_;
+  const compiled_expression& exp_;
+};
+
+template<typename rstream_t>
+class union_record_stream {
+ public:
+  typedef std::vector<rstream_t> stream_vector_t;
+  union_record_stream(const stream_vector_t& rstreams)
+      : cur_sid_(0),
+        rstreams_(rstreams) {
+    while (!rstreams_[cur_sid_].has_more() && has_more())
+      ++cur_sid_;
+  }
+
+  record_t get() const {
+    return rstreams_[cur_sid_].get();
+  }
+
+  union_record_stream& operator++() {
+    advance();
+    return *this;
+  }
+
+  bool has_more() const {
+    return cur_sid_ < rstreams_.size();
+  }
+
+ private:
+  void advance() {
+    while (has_more()) {
+      bool already_exists;
+      while (rstreams_[cur_sid_].has_more()
+          && (already_exists = (seen_.find(
+              rstreams_[cur_sid_].get().log_offset()) != seen_.end())))
+        ++rstreams_[cur_sid_];
+
+      if (!already_exists) {
+        seen_.insert(rstreams_[cur_sid_].get().log_offset());
+        return;
+      }
+
+      ++cur_sid_;
+    }
+  }
+
+  size_t cur_sid_;
+  std::vector<rstream_t> rstreams_;
+  std::unordered_set<uint64_t> seen_;
 };
 
 }
