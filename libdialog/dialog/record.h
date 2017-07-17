@@ -1,5 +1,5 @@
-#ifndef LIBDIALOG_DIALOG_RECORD_H_
-#define LIBDIALOG_DIALOG_RECORD_H_
+#ifndef DIALOG_RECORD_H_
+#define DIALOG_RECORD_H_
 
 #include <vector>
 #include <cstdint>
@@ -11,11 +11,20 @@ struct record_t {
   typedef std::vector<field_t>::iterator iterator;
   typedef std::vector<field_t>::const_iterator const_iterator;
 
-  record_t(uint64_t timestamp, size_t log_offset, const void* data, uint64_t version)
-      : timestamp_(timestamp),
+  record_t()
+      : timestamp_(0),
+        log_offset_(0),
+        data_(nullptr),
+        size_(0),
+        version_(0) {
+  }
+
+  record_t(size_t log_offset, void* data, size_t size)
+      : timestamp_(*reinterpret_cast<uint64_t*>(data)),
         log_offset_(log_offset),
-        data_(data),
-        version_(version) {
+        data_(reinterpret_cast<uint8_t*>(data) + sizeof(uint64_t)),
+        size_(size),
+        version_(log_offset + size + sizeof(uint64_t)) {
   }
 
   void reserve(size_t n) {
@@ -46,7 +55,7 @@ struct record_t {
     return log_offset_;
   }
 
-  const void* data() const {
+  void* data() const {
     return data_;
   }
 
@@ -73,11 +82,12 @@ struct record_t {
  private:
   uint64_t timestamp_;
   size_t log_offset_;
-  const void* data_;
+  void* data_;
+  size_t size_;
   uint64_t version_;
   std::vector<field_t> fields_;
 };
 
 }
 
-#endif /* LIBDIALOG_DIALOG_RECORD_H_ */
+#endif /* DIALOG_RECORD_H_ */

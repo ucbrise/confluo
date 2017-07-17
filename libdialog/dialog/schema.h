@@ -22,17 +22,23 @@ namespace dialog {
 template<typename storage_mode>
 class schema_t {
  public:
-  schema_t() = default;
+  schema_t()
+      : record_size_(0) {
+  }
 
   schema_t(const std::string& path, const std::vector<column_t>& columns)
       : columns_(columns) {
-    for (size_t i = 0; i < columns_.size(); i++)
+    record_size_ = 0;
+    for (size_t i = 0; i < columns_.size(); i++) {
       name_map_.insert(std::make_pair(columns_[i].name(), columns_[i].idx()));
+      record_size_ += sizeof(uint64_t) + columns_[i].type().size;
+    }
   }
 
   schema_t(const schema_t<storage_mode>& other)
       : columns_(other.columns_),
-        name_map_(other.name_map_) {
+        name_map_(other.name_map_),
+        record_size_(other.record_size_) {
   }
 
   ~schema_t() = default;
@@ -53,20 +59,24 @@ class schema_t {
     return columns_[name_map_.at(string_utils::to_upper(name))];
   }
 
-  size_t size() {
+  size_t record_size() const {
+    return record_size_;
+  }
+
+  size_t size() const {
     return columns_.size();
   }
 
-  record_t apply(size_t offset, void* data, uint64_t version,
-                 uint64_t ts) {
-    record_t r(ts, offset, data, version);
+  record_t apply(size_t offset, void* data, uint64_t size) const {
+    record_t r(offset, data, size);
     r.reserve(columns_.size());
     for (uint16_t i = 0; i < columns_.size(); i++)
-      r.push_back(columns_[i].apply(data));
+      r.push_back(columns_[i].apply(r.data()));
     return r;
   }
 
  private:
+  size_t record_size_;  // TODO: Switch to dynamically sized records at some point
   std::vector<column_t> columns_;
   std::map<std::string, uint16_t> name_map_;
 };
@@ -78,7 +88,8 @@ class schema_builder {
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name,
-                             const mutable_value_t& min, const mutable_value_t& max) {
+                             const mutable_value_t& min,
+                             const mutable_value_t& max) {
     columns_.push_back(
         column_t(columns_.size(), offset_, type, name, min, max));
     offset_ += type.size;

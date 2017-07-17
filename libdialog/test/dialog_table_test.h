@@ -19,14 +19,17 @@ class DiaLogTableTest : public testing::Test {
 
   template<typename dtable_t>
   void test_append_and_get(dtable_t& dtable) {
+    std::vector<uint64_t> offsets;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       DiaLogTableTest::gendata(data_, DATA_SIZE, i);
-      dtable.append(data_, DATA_SIZE);
+      uint64_t offset = dtable.append(data_, DATA_SIZE);
+      offsets.push_back(offset);
     }
 
-    unsigned char ret[DATA_SIZE];
+    record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      bool success = dtable.get(i * DATA_SIZE, ret, DATA_SIZE);
+      bool success = dtable.read(offsets[i], r, DATA_SIZE);
+      const uint8_t* ret = reinterpret_cast<const uint8_t*>(r.data());
       ASSERT_TRUE(success);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {

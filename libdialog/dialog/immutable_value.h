@@ -47,38 +47,37 @@ struct immutable_value_t {
   static bool relop(relop_id id, const immutable_value_t& first,
                     const immutable_value_t& second) {
     if (first.type_ != second.type_)
-      THROW(invalid_operation_exception,
-            "Comparing values of different types");
+      THROW(invalid_operation_exception, "Comparing values of different types");
     return first.type_.relop(id)(first.to_data(), second.to_data());
   }
 
   friend inline bool operator <(const immutable_value_t& first,
-                         const immutable_value_t& second) {
+                                const immutable_value_t& second) {
     return relop(relop_id::LT, first, second);
   }
 
   friend inline bool operator <=(const immutable_value_t& first,
-                          const immutable_value_t& second) {
+                                 const immutable_value_t& second) {
     return relop(relop_id::LE, first, second);
   }
 
   friend inline bool operator >(const immutable_value_t& first,
-                         const immutable_value_t& second) {
+                                const immutable_value_t& second) {
     return relop(relop_id::GT, first, second);
   }
 
   friend inline bool operator >=(const immutable_value_t& first,
-                          const immutable_value_t& second) {
+                                 const immutable_value_t& second) {
     return relop(relop_id::GE, first, second);
   }
 
   friend inline bool operator ==(const immutable_value_t& first,
-                          const immutable_value_t& second) {
+                                 const immutable_value_t& second) {
     return relop(relop_id::EQ, first, second);
   }
 
   friend inline bool operator !=(const immutable_value_t& first,
-                          const immutable_value_t& second) {
+                                 const immutable_value_t& second) {
     return relop(relop_id::NEQ, first, second);
   }
 
@@ -114,8 +113,7 @@ struct immutable_value_t {
       }
       case type_id::D_STRING: {
         return "string("
-            + std::string(*reinterpret_cast<const char*>(ptr_), type_.size)
-            + ")";
+            + std::string(reinterpret_cast<const char*>(ptr_), type_.size) + ")";
       }
       case type_id::D_NONE: {
         return "none()";

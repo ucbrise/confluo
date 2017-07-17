@@ -23,7 +23,12 @@ class CompiledPredicateTest : public testing::Test {
     char h[16];
   }__attribute__((packed));
 
-  static rec r;
+  struct ts_rec {
+    uint64_t ts;
+    struct rec r;
+  }__attribute__((packed));
+
+  static ts_rec r;
 
   static schema_t<storage::in_memory> schema() {
     schema_builder builder;
@@ -39,9 +44,9 @@ class CompiledPredicateTest : public testing::Test {
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
-    r = {a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0}};
-    return s.apply(0, &r, sizeof(rec), 0);
+    r = {0, {a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0}}};
+    return s.apply(0, &r, sizeof(rec));
   }
 
   static compiled_predicate predicate(const std::string& attr, relop_id id,
@@ -55,7 +60,7 @@ class CompiledPredicateTest : public testing::Test {
   }
 };
 
-CompiledPredicateTest::rec CompiledPredicateTest::r;
+CompiledPredicateTest::ts_rec CompiledPredicateTest::r;
 
 schema_t<storage::in_memory> CompiledPredicateTest::s =
     CompiledPredicateTest::schema();
@@ -66,26 +71,26 @@ TEST_F(CompiledPredicateTest, TestPredicateTest) {
           record(true, 0, 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("b", relop_id::LT, "c").test(record(true, 'a', 0, 0, 0, 0, 0)));
+      predicate("b", relop_id::LT, "c").test(record(false, 'a', 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("c", relop_id::LE, "10").test(record(true, 0, 10, 0, 0, 0, 0)));
+      predicate("c", relop_id::LE, "10").test(record(false, 0, 10, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
       predicate("d", relop_id::GT, "100").test(
-          record(true, 0, 0, 101, 0, 0, 0)));
+          record(false, 0, 0, 101, 0, 0, 0)));
 
   ASSERT_TRUE(
       predicate("e", relop_id::GE, "1000").test(
-          record(true, 0, 0, 0, 1000, 0, 0)));
+          record(false, 0, 0, 0, 1000, 0, 0)));
 
   ASSERT_TRUE(
       predicate("f", relop_id::NEQ, "100.3").test(
-          record(true, 0, 0, 0, 0, 102.4, 0)));
+          record(false, 0, 0, 0, 0, 102.4, 0)));
 
   ASSERT_TRUE(
       predicate("g", relop_id::LT, "194.312").test(
-          record(true, 0, 0, 0, 0, 0, 182.3)));
+          record(false, 0, 0, 0, 0, 0, 182.3)));
 }
 
 #endif /* TEST_COMPILED_PREDICATE_TEST_H_ */

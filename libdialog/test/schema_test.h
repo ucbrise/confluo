@@ -28,6 +28,11 @@ class SchemaTest : public testing::Test {
     double g;
     char h[16];
   }__attribute__((packed));
+
+  struct ts_rec {
+    uint64_t ts;
+    struct rec r;
+  }__attribute__((packed));
 };
 
 TEST_F(SchemaTest, SchemaBuilderTest) {
@@ -218,42 +223,42 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   auto schema_vec = builder.get_columns();
   schema_t<storage::in_memory> s(".", schema_vec);
 
-  rec *tmp = new rec(true, 'a', 10, 101, 1000, 102.4, 182.3);
-  record_t r = s.apply(0, tmp, sizeof(rec), 0);
+  ts_rec tmp = {0, rec(true, 'a', 10, 101, 1000, 102.4, 182.3)};
+  record_t r = s.apply(0, &tmp, sizeof(rec));
 
   ASSERT_EQ(0, r[0].idx());
-  ASSERT_EQ(tmp->a, r[0].get<bool>());
+  ASSERT_EQ(tmp.r.a, r[0].get<bool>());
   ASSERT_TRUE(BOOL_TYPE == r[0].type());
   ASSERT_FALSE(r[0].is_indexed());
 
   ASSERT_EQ(1, r[1].idx());
-  ASSERT_EQ(tmp->b, r[1].get<char>());
+  ASSERT_EQ(tmp.r.b, r[1].get<char>());
   ASSERT_TRUE(CHAR_TYPE == r[1].type());
   ASSERT_FALSE(r[1].is_indexed());
 
   ASSERT_EQ(2, r[2].idx());
-  ASSERT_EQ(tmp->c, r[2].get<short>());
+  ASSERT_EQ(tmp.r.c, r[2].get<short>());
   ASSERT_TRUE(SHORT_TYPE == r[2].type());
   ASSERT_FALSE(r[2].is_indexed());
 
   ASSERT_EQ(3, r[3].idx());
-  ASSERT_EQ(tmp->d, r[3].get<int>());
+  ASSERT_EQ(tmp.r.d, r[3].get<int>());
   ASSERT_TRUE(INT_TYPE == r[3].type());
   ASSERT_FALSE(r[3].is_indexed());
 
   ASSERT_EQ(4, r[4].idx());
-  ASSERT_EQ(tmp->e, r[4].get<long>());
+  ASSERT_EQ(tmp.r.e, r[4].get<long>());
   ASSERT_TRUE(LONG_TYPE == r[4].type());
   ASSERT_FALSE(r[4].is_indexed());
 
   ASSERT_EQ(5, r[5].idx());
-  ASSERT_EQ(tmp->f, r[5].get<float>());
+  ASSERT_EQ(tmp.r.f, r[5].get<float>());
   ASSERT_TRUE(FLOAT_TYPE == r[5].type());
   ASSERT_FALSE(r[5].is_indexed());
 
   ASSERT_EQ(6, r[6].idx());
   ASSERT_TRUE(DOUBLE_TYPE == r[6].type());
-  ASSERT_EQ(tmp->g, r[6].get<double>());
+  ASSERT_EQ(tmp.r.g, r[6].get<double>());
   ASSERT_FALSE(r[6].is_indexed());
 
   ASSERT_EQ(7, r[7].idx());

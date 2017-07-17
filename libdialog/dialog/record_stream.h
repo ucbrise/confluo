@@ -6,14 +6,12 @@
 namespace dialog {
 
 template<class offset_iterator, class schema_t, class data_log_t>
-class data_iterator {
+class record_stream {
  public:
   typedef std::forward_iterator_tag iterator_category;
-  typedef void* value_type;
-  typedef typename ptrdiff_t difference_type;
-  typedef typename value_type& reference;
+  typedef record_t value_type;
 
-  data_iterator(uint64_t version, const offset_iterator& it,
+  record_stream(uint64_t version, const offset_iterator& it,
                 const offset_iterator& end, const schema_t& schema,
                 const data_log_t& data_log)
       : version_(version),
@@ -27,27 +25,28 @@ class data_iterator {
     advance();
   }
 
-  reference operator*() const {
-    return data_log_.ptr(*it_);
+  record_t get() const {
+    uint64_t offset = *it_;
+    return schema_.apply(offset, data_log_.ptr(offset), schema_.record_size());
   }
 
-  data_iterator& operator++() {
+  record_stream& operator++() {
     if (it_ != end_)
       advance();
     return *this;
   }
 
-  data_iterator& operator++(int) {
-    data_iterator it(*this);
+  record_stream& operator++(int) {
+    record_stream it(*this);
     ++*this;
     return it;
   }
 
-  friend bool operator==(const data_iterator& a, const data_iterator& b) {
+  friend bool operator==(const record_stream& a, const record_stream& b) {
     return a.it_ == b.it_ && a.version_ == b.version_;
   }
 
-  friend bool operator!=(const data_iterator& a, const data_iterator& b) {
+  friend bool operator!=(const record_stream& a, const record_stream& b) {
     return !(a == b);
   }
 

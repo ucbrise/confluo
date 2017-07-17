@@ -58,7 +58,7 @@ class dialog_table {
       idx = schema_.name_map.at(string_utils::to_upper(field_name));
     } catch (std::exception& e) {
       THROW(management_exception,
-          "Could not add index for " + field_name + " : " + e.what());
+            "Could not add index for " + field_name + " : " + e.what());
     }
 
     column_t& col = schema_[idx];
@@ -81,13 +81,13 @@ class dialog_table {
           break;
         default:
           col.set_unindexed();
-          THROW(management_exception,"Index not supported for field type");
+          THROW(management_exception, "Index not supported for field type");
       }
       col.set_indexed(index_id, bucket_size);
       metadata_.write_index_info(index_id, field_name, bucket_size);
     } else {
       THROW(management_exception,
-          "Could not index " + field_name + ": already indexed/indexing");
+            "Could not index " + field_name + ": already indexed/indexing");
     }
   }
 
@@ -97,12 +97,12 @@ class dialog_table {
       idx = schema_.name_map.at(string_utils::to_upper(field_name));
     } catch (std::exception& e) {
       THROW(management_exception,
-          "Could not remove index for " + field_name + " : " + e.what());
+            "Could not remove index for " + field_name + " : " + e.what());
     }
 
     if (!schema_.columns[idx].disable_indexing()) {
       THROW(management_exception,
-          "Could not remove index for " + field_name + ": No index exists");
+            "Could not remove index for " + field_name + ": No index exists");
     }
   }
 
@@ -125,8 +125,12 @@ class dialog_table {
 
   uint64_t append(void* data, size_t length, uint64_t ts =
                       time_utils::cur_ns()) {
-    uint64_t offset = data_log_.append((const uint8_t*) data, length);
-    record_t r = schema_.apply(offset, data, offset + length, ts);
+    size_t record_length = length + sizeof(uint64_t);
+    uint64_t offset = data_log_.reserve(record_length);
+    data_log_.write(offset, (const uint8_t*) &ts, sizeof(uint64_t));
+    data_log_.write(offset + sizeof(uint64_t), (const uint8_t*) data, length);
+
+    record_t r = schema_.apply(offset, data_log_.ptr(offset), length);
 
     size_t nfilters = filters_.size();
     for (size_t i = 0; i < nfilters; i++)
@@ -136,31 +140,18 @@ class dialog_table {
       if (f.is_indexed())
         idx_.at(f.index_id())->insert(f.get_key(), offset);
 
-    data_log_.flush(offset, length);
-    rt_.advance(offset, length);
+    data_log_.flush(offset, record_length);
+    rt_.advance(offset, record_length);
     return offset;
   }
 
-  void* ptr(uint64_t offset, uint64_t tail) const {
-    if (offset < tail)
-      return data_log_.cptr(offset);
-    return nullptr;
-  }
-
-  void* ptr(uint64_t offset) const {
-    return ptr(offset, rt_.get());
-  }
-
-  bool read(uint64_t offset, void* data, size_t length, uint64_t tail) const {
+  bool read(uint64_t offset, record_t& rec, size_t length) const {
+    uint64_t tail = rt_.get();
     if (offset < tail) {
-      data_log_.read(offset, (uint8_t*) data, length);
+      rec = record_t(offset, data_log_.cptr(offset), length);
       return true;
     }
     return false;
-  }
-
-  bool get(uint64_t offset, uint8_t* data, size_t length) const {
-    return read(offset, (uint8_t*) data, length, rt_.get());
   }
 
   size_t num_records() const {

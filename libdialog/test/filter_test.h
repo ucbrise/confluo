@@ -26,19 +26,41 @@ class FilterTest : public testing::Test {
  public:
   const uint32_t kMaxEntries = 100000;
 
+  struct data_point {
+    uint64_t ts;
+    uint64_t val;
+
+    data_point(uint64_t _ts, uint64_t _val)
+        : ts(_ts),
+          val(_val) {
+    }
+
+    data_point(uint64_t _val)
+        : ts(0),
+          val(_val) {
+    }
+  };
+
   void fill(filter& f) {
-    for (uint32_t i = 0; i < kMaxEntries; i++)
-      f.update(record_t(i, i, &i, sizeof(uint32_t)));
+    for (uint32_t i = 0; i < kMaxEntries; i++) {
+      data_point p(i, i);
+      f.update(
+          record_t(i, reinterpret_cast<uint8_t*>(&p) + sizeof(uint64_t),
+                   sizeof(uint64_t)));
+    }
   }
 
   void fill_mt(filter& f, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
-      workers.push_back(std::thread([i, &f, this] {
-        for (uint32_t j = (i - 1) * kMaxEntries; j < i * kMaxEntries; j++) {
-          f.update(record_t(j, j, &j, sizeof(uint32_t)));
-        }
-      }));
+      workers.push_back(
+          std::thread(
+              [i, &f, this] {
+                for (uint32_t j = (i - 1) * kMaxEntries; j < i * kMaxEntries; j++) {
+                  data_point p(j, j);
+                  f.update(record_t(j, reinterpret_cast<uint8_t*>(&p) + sizeof(uint64_t), sizeof(uint64_t)));
+                }
+              }));
     }
     for (std::thread& worker : workers) {
       worker.join();

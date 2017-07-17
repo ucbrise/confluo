@@ -102,7 +102,7 @@ class monolog_block {
     return (void*) (data + offset);
   }
 
-  const void* cptr(size_t offset) const {
+  void* cptr(size_t offset) const {
     return (void*) (atomic::load(&data_) + offset);
   }
 
@@ -248,7 +248,11 @@ class monolog_linear_base {
     return blocks_[offset / BLOCK_SIZE].ptr(offset % BLOCK_SIZE);
   }
 
-  const void* cptr(size_t offset) const {
+  void* ptr(size_t offset) const {
+    return blocks_[offset / BLOCK_SIZE].ptr(offset % BLOCK_SIZE);
+  }
+
+  void* cptr(size_t offset) const {
     return blocks_[offset / BLOCK_SIZE].cptr(offset % BLOCK_SIZE);
   }
 
