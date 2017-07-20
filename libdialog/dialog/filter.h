@@ -2,7 +2,9 @@
 #define DIALOG_FILTER_H_
 
 #include "schema.h"
+#include "reflog.h"
 #include "tiered_index.h"
+#include "radix_tree.h"
 #include "compiled_expression.h"
 
 // TODO: Update tests
@@ -11,12 +13,6 @@ using namespace ::utils;
 
 namespace dialog {
 namespace monitor {
-
-/**
- * Type-definition for RefLog type -- a MonoLog of type uint64_t and
- * bucket size of 24.
- */
-typedef monolog::monolog_exp2<uint64_t, 24> reflog;
 
 /**
  * Filter function type definition for filtering records.
@@ -44,7 +40,8 @@ class filter {
  public:
   // Type definition for time partitioned index; parameters ensure all
   // nanosecond time-stamps can be handled by the index.
-  typedef index::tiered_index<reflog, 1000, 5> idx_t;
+  typedef index::radix_tree idx_t;
+  typedef idx_t::rt_range_result range_result;
 
   // Default leaf time-granularity (1ms)
   static const size_t DEFAULT_LEAF_RANGE_NS = 1e6;
@@ -61,7 +58,8 @@ class filter {
          size_t monitor_granularity_ms = 1)
       : exp_(exp),
         fn_(fn),
-        leaf_range_ns_(monitor_granularity_ms * 1e6) {
+        leaf_range_ns_(monitor_granularity_ms * 1e6),
+        idx_(8, 256) {
   }
 
   /**
@@ -73,7 +71,8 @@ class filter {
   filter(filter_fn fn = default_filter, size_t monitor_granularity_ms = 1)
       : exp_(),
         fn_(fn),
-        leaf_range_ns_(monitor_granularity_ms * 1e6) {
+        leaf_range_ns_(monitor_granularity_ms * 1e6),
+        idx_(8, 256) {
   }
 
   /**
@@ -97,8 +96,9 @@ class filter {
    * @param attrs List of attributes associated with the data point.
    */
   void update(const record_t& r) {
-    if (exp_.test(r) && fn_(r))
-      idx_[get_ts_block(r.timestamp())]->push_back(r.log_offset());
+    if (exp_.test(r) && fn_(r)) {
+      idx_.insert(byte_string(get_ts_block(r.timestamp())), r.log_offset());
+    }
   }
 
   /**
@@ -107,15 +107,28 @@ class filter {
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
-  reflog* get(uint64_t ts_block) const {
-    return idx_.at(ts_block);
+  reflog const* lookup(uint64_t ts_block) const {
+    return idx_.at(byte_string(ts_block));
+  }
+
+  /**
+   * Get the range of offsets that lie in a given time-block.
+   *
+   * @param ts_block_begin Beginning time-block
+   * @param ts_block_end End time-block.
+   * @return An iterator over log offsets in the time range.
+   */
+  range_result lookup_range(uint64_t ts_block_begin,
+                            uint64_t ts_block_end) const {
+    return idx_.range_lookup(byte_string(ts_block_begin),
+                             byte_string(ts_block_end));
   }
 
  private:
-  idx_t idx_;                       // The filtered data index
   compiled_expression exp_;         // The compiled filter expression
   filter_fn fn_;                    // Filter function
   size_t leaf_range_ns_;            // Time-range (ns) covered by leaf node
+  idx_t idx_;                       // The filtered data index
 };
 
 }

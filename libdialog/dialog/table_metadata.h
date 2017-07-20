@@ -23,9 +23,9 @@ struct __index_info {
   }
 
   __index_info(const __index_info& other)
-      : index_id_(other.index_id_),
-        name_(other.name_),
-        bucket_size_(other.bucket_size_) {
+  : index_id_(other.index_id_),
+  name_(other.name_),
+  bucket_size_(other.bucket_size_) {
   }
 
   uint32_t index_id() const {
@@ -54,8 +54,8 @@ struct __filter_info {
   }
 
   __filter_info(const __filter_info& other)
-      : filter_id_(other.filter_id_),
-        expr_(other.expr_) {
+  : filter_id_(other.filter_id_),
+  expr_(other.expr_) {
   }
 
   uint32_t filter_id() const {
@@ -74,7 +74,8 @@ private:
 struct __trigger_info {
  public:
   __trigger_info(uint32_t trigger_id, uint32_t filter_id, aggregate_id agg_id,
-                 const std::string& name, relop_id op, const mutable_value_t& threshold)
+                 const std::string& name, relop_id op,
+                 const mutable_value& threshold)
       : trigger_id_(trigger_id),
         filter_id_(filter_id),
         agg_id_(agg_id),
@@ -84,12 +85,12 @@ struct __trigger_info {
   }
 
   __trigger_info(const __trigger_info& other)
-      : trigger_id_(other.trigger_id_),
-        filter_id_(other.filter_id_),
-        agg_id_(other.agg_id_),
-        name_(other.name_),
-        op_(other.op_),
-        threshold_(other.threshold_) {
+  : trigger_id_(other.trigger_id_),
+  filter_id_(other.filter_id_),
+  agg_id_(other.agg_id_),
+  name_(other.name_),
+  op_(other.op_),
+  threshold_(other.threshold_) {
   }
 
   uint32_t trigger_id() const {
@@ -112,7 +113,7 @@ struct __trigger_info {
     return name_;
   }
 
-  const mutable_value_t& threshold() const {
+  const mutable_value& threshold() const {
     return threshold_;
   }
 
@@ -122,7 +123,7 @@ private:
   aggregate_id agg_id_;
   const std::string name_;
   relop_id op_;
-  mutable_value_t threshold_;
+  mutable_value threshold_;
 };
 
 template<class storage_mode>
@@ -133,7 +134,8 @@ class metadata_writer {
         out_(filename_) {
   }
 
-  void write_index_info(uint32_t index_id, const std::string& name, double bucket_size) {
+  void write_index_info(uint32_t index_id, const std::string& name,
+                        double bucket_size) {
     metadata_type type = metadata_type::D_INDEX_METADATA;
     out_.write(reinterpret_cast<const char*>(&type), sizeof(metadata_type));
     out_.write(reinterpret_cast<const char*>(&index_id), sizeof(uint32_t));
@@ -156,7 +158,7 @@ class metadata_writer {
 
   void write_trigger_info(uint32_t trigger_id, uint32_t filter_id,
                           aggregate_id agg_id, const std::string& name,
-                          relop_id op, const mutable_value_t& threshold) {
+                          relop_id op, const mutable_value& threshold) {
     metadata_type type = metadata_type::D_TRIGGER_METADATA;
     out_.write(reinterpret_cast<const char*>(&type), sizeof(metadata_type));
     out_.write(reinterpret_cast<const char*>(&trigger_id), sizeof(uint32_t));
@@ -184,7 +186,8 @@ class metadata_writer<storage::in_memory> {
   metadata_writer(const std::string& path) {
   }
 
-  void write_index_info(uint32_t index_id, const std::string& name) {
+  void write_index_info(uint32_t index_id, const std::string& name,
+                        double bucket_size) {
   }
 
   void write_filter_info(uint32_t filter_id, const std::string& expr) {
@@ -192,7 +195,7 @@ class metadata_writer<storage::in_memory> {
 
   void write_trigger_info(uint32_t trigger_id, uint32_t filter_id,
                           aggregate_id agg_id, const std::string& name,
-                          const mutable_value_t& threshold) {
+                          relop_id op, const mutable_value& threshold) {
   }
 };
 
@@ -247,7 +250,7 @@ class metadata_reader {
     data_type type(tid);
     uint8_t* buf = new uint8_t[type.size];
     in_.read(reinterpret_cast<char*>(buf), type.size);
-    mutable_value_t threshold(type, buf);
+    mutable_value threshold(type, buf);
     delete[] buf;
     return __trigger_info(trigger_id, filter_id, agg_id,
                           std::string(buf_, name_size), op, threshold);

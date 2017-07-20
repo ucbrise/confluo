@@ -11,18 +11,18 @@ using namespace utils;
 
 namespace dialog {
 
-struct immutable_value_t {
-  immutable_value_t(const data_type& type = NONE_TYPE)
+struct immutable_value {
+  immutable_value(const data_type& type = NONE_TYPE)
       : type_(type),
         ptr_(nullptr) {
   }
 
-  immutable_value_t(const data_type& type, void* data)
+  immutable_value(const data_type& type, void* data)
       : type_(type),
         ptr_(data) {
   }
 
-  immutable_value_t(const immutable_value_t& other)
+  immutable_value(const immutable_value& other)
       : type_(other.type_),
         ptr_(other.ptr_) {
   }
@@ -40,44 +40,44 @@ struct immutable_value_t {
   }
 
   inline byte_string to_key(double bucket_size) const {
-    return type_.keytransform()(ptr_, bucket_size);
+    return type_.keytransform()(to_data(), bucket_size);
   }
 
   // Relational operators
-  static bool relop(relop_id id, const immutable_value_t& first,
-                    const immutable_value_t& second) {
+  static bool relop(relop_id id, const immutable_value& first,
+                    const immutable_value& second) {
     if (first.type_ != second.type_)
       THROW(invalid_operation_exception, "Comparing values of different types");
     return first.type_.relop(id)(first.to_data(), second.to_data());
   }
 
-  friend inline bool operator <(const immutable_value_t& first,
-                                const immutable_value_t& second) {
+  friend inline bool operator <(const immutable_value& first,
+                                const immutable_value& second) {
     return relop(relop_id::LT, first, second);
   }
 
-  friend inline bool operator <=(const immutable_value_t& first,
-                                 const immutable_value_t& second) {
+  friend inline bool operator <=(const immutable_value& first,
+                                 const immutable_value& second) {
     return relop(relop_id::LE, first, second);
   }
 
-  friend inline bool operator >(const immutable_value_t& first,
-                                const immutable_value_t& second) {
+  friend inline bool operator >(const immutable_value& first,
+                                const immutable_value& second) {
     return relop(relop_id::GT, first, second);
   }
 
-  friend inline bool operator >=(const immutable_value_t& first,
-                                 const immutable_value_t& second) {
+  friend inline bool operator >=(const immutable_value& first,
+                                 const immutable_value& second) {
     return relop(relop_id::GE, first, second);
   }
 
-  friend inline bool operator ==(const immutable_value_t& first,
-                                 const immutable_value_t& second) {
+  friend inline bool operator ==(const immutable_value& first,
+                                 const immutable_value& second) {
     return relop(relop_id::EQ, first, second);
   }
 
-  friend inline bool operator !=(const immutable_value_t& first,
-                                 const immutable_value_t& second) {
+  friend inline bool operator !=(const immutable_value& first,
+                                 const immutable_value& second) {
     return relop(relop_id::NEQ, first, second);
   }
 

@@ -13,8 +13,8 @@ enum aggregate_id: uint8_t {
   D_COUNT = 3
 };
 
-using aggregate_fn = mutable_value_t (*)(const mutable_value_t& v1, const mutable_value_t& v2);
-using zero_fn = mutable_value_t (*)(const data_type& type);
+using aggregate_fn = mutable_value (*)(const mutable_value& v1, const mutable_value& v2);
+using zero_fn = mutable_value (*)(const data_type& type);
 
 struct aggregator {
   aggregate_fn agg;
@@ -22,36 +22,36 @@ struct aggregator {
 };
 
 // Standard aggregates: sum, min, max, count
-inline mutable_value_t sum_agg(const mutable_value_t& a, const mutable_value_t& b) {
+inline mutable_value sum_agg(const mutable_value& a, const mutable_value& b) {
   return a + b;
 }
 
-inline mutable_value_t min_agg(const mutable_value_t& a, const mutable_value_t& b) {
+inline mutable_value min_agg(const mutable_value& a, const mutable_value& b) {
   return a < b ? a : b;
 }
 
-inline mutable_value_t max_agg(const mutable_value_t& a, const mutable_value_t& b) {
+inline mutable_value max_agg(const mutable_value& a, const mutable_value& b) {
   return a < b ? b : a;
 }
 
-inline mutable_value_t count_agg(const mutable_value_t& a, const mutable_value_t& b) {
-  return a + mutable_value_t(a.type(), a.type().one());
+inline mutable_value count_agg(const mutable_value& a, const mutable_value& b) {
+  return a + mutable_value(a.type(), a.type().one());
 }
 
-inline mutable_value_t sum_zero(const data_type& type) {
-  return mutable_value_t(type, type.zero());
+inline mutable_value sum_zero(const data_type& type) {
+  return mutable_value(type, type.zero());
 }
 
-inline mutable_value_t min_zero(const data_type& type) {
-  return mutable_value_t(type, type.max());
+inline mutable_value min_zero(const data_type& type) {
+  return mutable_value(type, type.max());
 }
 
-inline mutable_value_t max_zero(const data_type& type) {
-  return mutable_value_t(type, type.min());
+inline mutable_value max_zero(const data_type& type) {
+  return mutable_value(type, type.min());
 }
 
-inline mutable_value_t count_zero(const data_type& type) {
-  return mutable_value_t(type, type.zero());
+inline mutable_value count_zero(const data_type& type) {
+  return mutable_value(type, type.zero());
 }
 
 static aggregator sum = { sum_agg, sum_zero };
@@ -62,13 +62,13 @@ static aggregator count = { count_agg, count_zero };
 static std::array<aggregator, 4> aggregators { { sum, min, max, count } };
 
 struct aggregate_node {
-  aggregate_node(mutable_value_t agg, uint64_t version, aggregate_node *next)
+  aggregate_node(mutable_value agg, uint64_t version, aggregate_node *next)
       : value_(agg),
         version_(version),
         next_(next) {
   }
 
-  inline mutable_value_t value() const {
+  inline mutable_value value() const {
     return value_;
   }
 
@@ -81,7 +81,7 @@ struct aggregate_node {
   }
 
  private:
-  mutable_value_t value_;
+  mutable_value value_;
   uint64_t version_;
   aggregate_node* next_;
 };
@@ -121,7 +121,7 @@ class aggregate_t {
    * @param version The version of the data store.
    * @return The aggregate value.
    */
-  mutable_value_t get(uint64_t version) {
+  mutable_value get(uint64_t version) {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
     if (req != nullptr)
@@ -135,10 +135,10 @@ class aggregate_t {
    * @param value The value with which the aggregate is to be updated.
    * @param version The aggregate version.
    */
-  void update(const mutable_value_t& value, uint64_t version) {
+  void update(const mutable_value& value, uint64_t version) {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
-    mutable_value_t old_agg = req == nullptr ? agg_.zero(type_) : req->value();
+    mutable_value old_agg = req == nullptr ? agg_.zero(type_) : req->value();
     aggregate_node *node = new aggregate_node(agg_.agg(old_agg, value), version,
                                               cur_head);
     atomic::store(&head_, node);

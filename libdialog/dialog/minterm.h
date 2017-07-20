@@ -60,11 +60,6 @@ struct minterm {
     return to_string() < other.to_string();
   }
 
-  minterm& operator=(const minterm& other) {
-    m_ = other.m_;
-    return *this;
-  }
-
   size_t size() const {
     return m_.size();
   }

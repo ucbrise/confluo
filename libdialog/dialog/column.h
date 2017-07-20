@@ -20,8 +20,8 @@ struct column_t {
   }
 
   column_t(uint16_t idx, uint16_t offset, const data_type& type,
-           const std::string& name, const mutable_value_t& min,
-           const mutable_value_t& max)
+           const std::string& name, const mutable_value& min,
+           const mutable_value& max)
       : idx_(idx),
         type_(type),
         offset_(offset),
@@ -66,11 +66,11 @@ struct column_t {
     return idx_;
   }
 
-  mutable_value_t min() const {
+  mutable_value min() const {
     return min_;
   }
 
-  mutable_value_t max() const {
+  mutable_value max() const {
     return max_;
   }
 
@@ -135,8 +135,8 @@ struct column_t {
   data_type type_;
   uint16_t offset_;
   std::string name_;
-  mutable_value_t min_;
-  mutable_value_t max_;
+  mutable_value min_;
+  mutable_value max_;
   index_state_t idx_state_;
 };
 

@@ -7,14 +7,15 @@ namespace dialog {
 
 class index_filter {
  public:
-  index_filter(uint32_t index_id, const byte_string& key_begin,
-               const byte_string& key_end)
+  index_filter(uint32_t index_id, const immutable_byte_string& key_begin,
+               const immutable_byte_string& key_end)
       : index_id_(index_id),
         key_begin_(key_begin),
         key_end_(key_end) {
   }
 
-  void set_keys(const byte_string& begin, const byte_string& end) {
+  void set_keys(const immutable_byte_string& begin,
+                const immutable_byte_string& end) {
     key_begin_ = begin;
     key_end_ = end;
   }
@@ -23,11 +24,11 @@ class index_filter {
     return index_id_;
   }
 
-  byte_string const& kbegin() const {
+  immutable_byte_string const& kbegin() const {
     return key_begin_;
   }
 
-  byte_string const& kend() const {
+  immutable_byte_string const& kend() const {
     return key_end_;
   }
 
@@ -38,8 +39,8 @@ class index_filter {
 
  private:
   uint32_t index_id_;
-  byte_string key_begin_;
-  byte_string key_end_;
+  immutable_byte_string key_begin_;
+  immutable_byte_string key_end_;
 };
 
 }

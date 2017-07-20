@@ -142,6 +142,12 @@ class monolog_block {
   size_t size_;
 };
 
+template<typename T, size_t BUFFER_SIZE, class storage_mode >
+const bool monolog_block<T, BUFFER_SIZE, storage_mode>::INIT;
+
+template<typename T, size_t BUFFER_SIZE, class storage_mode >
+const bool monolog_block<T, BUFFER_SIZE, storage_mode>::UNINIT;
+
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
     size_t BUFFER_SIZE = 1048576, class storage_mode = storage::in_memory>
 class monolog_linear_base {

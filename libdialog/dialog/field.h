@@ -21,7 +21,7 @@ struct field_t {
     return value_.type();
   }
 
-  inline const immutable_value_t& value() const {
+  inline const immutable_value& value() const {
     return value_;
   }
 
@@ -49,7 +49,7 @@ struct field_t {
 
  private:
   uint16_t idx_;
-  immutable_value_t value_;
+  immutable_value value_;
   bool indexed_;
   double index_bucket_size_;
   uint16_t index_id_;

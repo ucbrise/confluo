@@ -8,8 +8,8 @@ namespace dialog {
 class minterm_plan {
  public:
   minterm_plan(const index_filter& ifilter, const minterm& dfilter)
-      : idxf_(ifilter),
-        dataf_(dfilter) {
+      : idxf_(ifilter) {
+    dataf_.insert(dfilter);
   }
 
   minterm_plan(const minterm_plan& other)
@@ -21,7 +21,7 @@ class minterm_plan {
     return idxf_;
   }
 
-  minterm const& data_filter() const {
+  compiled_expression const& data_filter() const {
     return dataf_;
   }
 
@@ -31,7 +31,7 @@ class minterm_plan {
 
  private:
   index_filter idxf_;
-  minterm dataf_;
+  compiled_expression dataf_;
 };
 
 class query_plan : public std::vector<minterm_plan> {

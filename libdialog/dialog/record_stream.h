@@ -7,34 +7,37 @@
 
 namespace dialog {
 
-template<class offset_iterator, class schema_t, class data_log_t>
+template<class offset_container, class schema_t, class data_log_t>
 class record_stream {
  public:
   typedef std::forward_iterator_tag iterator_category;
   typedef record_t value_type;
 
-  record_stream(uint64_t version, const offset_iterator& it,
-                const offset_iterator& end, const schema_t& schema,
-                const data_log_t& data_log)
+  typedef typename offset_container::iterator offset_iterator;
+
+  record_stream(uint64_t version, const offset_container& offsets,
+                const schema_t& schema, const data_log_t& data_log)
       : version_(version),
-        it_(it),
-        end_(end),
+        it_(offsets.begin()),
+        end_(offsets.end()),
         schema_(schema),
         data_log_(data_log) {
     if (it_ == end_)
       return;
 
-    advance();
+    skip_invalid();
   }
 
   record_t get() const {
     uint64_t offset = *it_;
-    return schema_.apply(offset, data_log_.ptr(offset), schema_.record_size());
+    return schema_.apply(offset, data_log_.cptr(offset), schema_.record_size());
   }
 
   record_stream& operator++() {
-    if (it_ != end_)
-      advance();
+    if (has_more()) {
+      ++it_;
+      skip_invalid();
+    }
     return *this;
   }
 
@@ -57,14 +60,14 @@ class record_stream {
   }
 
  private:
-  void advance() {
-    while (it_ != end_ && *it_ < version_)
+  void skip_invalid() {
+    while (it_ != end_ && *it_ >= version_)
       ++it_;
   }
 
   uint64_t version_;
   offset_iterator it_;
-  const offset_iterator& end_;
+  offset_iterator end_;
   const schema_t& schema_;
   const data_log_t& data_log_;
 };
@@ -73,37 +76,41 @@ template<class rstream_t>
 class filtered_record_stream {
  public:
   filtered_record_stream(const rstream_t& it, const compiled_expression& exp)
-      : it_(it),
+      : stream_(it),
         exp_(exp) {
+    skip_invalid();
   }
 
   record_t get() const {
-    return it_.get();
+    return stream_.get();
   }
 
-  rstream_t& operator++() {
-    advance();
+  filtered_record_stream& operator++() {
+    if (has_more()) {
+      ++stream_;
+      skip_invalid();
+    }
     return *this;
   }
 
-  rstream_t& operator++(int) {
-    rstream_t it(*this);
+  filtered_record_stream& operator++(int) {
+    filtered_record_stream it(*this);
     ++*this;
     return it;
   }
 
   bool has_more() const {
-    return it_.has_more();
+    return stream_.has_more();
   }
 
  private:
-  void advance() {
-    while (has_more() && exp_.test(it_.get()))
-      ++it_;
+  void skip_invalid() {
+    while (has_more() && !exp_.test(get()))
+      ++stream_;
   }
 
-  rstream_t it_;
-  const compiled_expression& exp_;
+  rstream_t stream_;
+  compiled_expression exp_;
 };
 
 template<typename rstream_t>
@@ -113,8 +120,10 @@ class union_record_stream {
   union_record_stream(const stream_vector_t& rstreams)
       : cur_sid_(0),
         rstreams_(rstreams) {
-    while (!rstreams_[cur_sid_].has_more() && has_more())
+    while (cur_sid_ < rstreams_.size() && !rstreams_[cur_sid_].has_more())
       ++cur_sid_;
+    if (has_more())
+      seen_.insert(get().log_offset());
   }
 
   record_t get() const {
@@ -126,6 +135,12 @@ class union_record_stream {
     return *this;
   }
 
+  union_record_stream& operator++(int) {
+    union_record_stream it(*this);
+    ++*this;
+    return it;
+  }
+
   bool has_more() const {
     return cur_sid_ < rstreams_.size();
   }
@@ -133,14 +148,14 @@ class union_record_stream {
  private:
   void advance() {
     while (has_more()) {
-      bool already_exists;
+      bool already_exists = true;
       while (rstreams_[cur_sid_].has_more()
-          && (already_exists = (seen_.find(
-              rstreams_[cur_sid_].get().log_offset()) != seen_.end())))
+          && (already_exists = (seen_.find(get().log_offset()) != seen_.end()))) {
         ++rstreams_[cur_sid_];
+      }
 
       if (!already_exists) {
-        seen_.insert(rstreams_[cur_sid_].get().log_offset());
+        seen_.insert(get().log_offset());
         return;
       }
 

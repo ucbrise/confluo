@@ -11,7 +11,7 @@ class AggregateTest : public testing::Test {
 
 TEST_F(AggregateTest, SumTest) {
   aggregate_t agg(INT_TYPE, aggregate_id::D_SUM);
-  ASSERT_TRUE(mutable_value_t(limits::int_zero) == agg.get(0));
+  ASSERT_TRUE(mutable_value(limits::int_zero) == agg.get(0));
 
   int sum[11];
   sum[0] = limits::int_zero;
@@ -20,20 +20,20 @@ TEST_F(AggregateTest, SumTest) {
   }
 
   for (int i = 1; i <= 10; i++) {
-    mutable_value_t value(i);
+    mutable_value value(i);
     agg.update(value, i * 2);
     for (int j = 0; j <= i; j++)
-      ASSERT_TRUE(mutable_value_t(sum[j]) == agg.get(j * 2));
+      ASSERT_TRUE(mutable_value(sum[j]) == agg.get(j * 2));
   }
 
   for (int j = 0; j <= 20; j++) {
-    ASSERT_TRUE(mutable_value_t(sum[j / 2]) == agg.get(j));
+    ASSERT_TRUE(mutable_value(sum[j / 2]) == agg.get(j));
   }
 }
 
 TEST_F(AggregateTest, MinTest) {
   aggregate_t agg(INT_TYPE, aggregate_id::D_MIN);
-  ASSERT_TRUE(mutable_value_t(limits::int_max) == agg.get(0));
+  ASSERT_TRUE(mutable_value(limits::int_max) == agg.get(0));
 
   int min[11];
   min[0] = limits::int_max;
@@ -42,20 +42,20 @@ TEST_F(AggregateTest, MinTest) {
   }
 
   for (int i = 1; i <= 10; i++) {
-    mutable_value_t value(10 - i);
+    mutable_value value(10 - i);
     agg.update(value, i * 2);
     for (int j = 0; j <= i; j++)
-      ASSERT_TRUE(mutable_value_t(min[j]) == agg.get(j * 2));
+      ASSERT_TRUE(mutable_value(min[j]) == agg.get(j * 2));
   }
 
   for (int j = 0; j <= 20; j++) {
-    ASSERT_TRUE(mutable_value_t(min[j / 2]) == agg.get(j));
+    ASSERT_TRUE(mutable_value(min[j / 2]) == agg.get(j));
   }
 }
 
 TEST_F(AggregateTest, MaxTest) {
   aggregate_t agg(INT_TYPE, aggregate_id::D_MAX);
-  ASSERT_EQ(mutable_value_t(limits::int_min), agg.get(0));
+  ASSERT_EQ(mutable_value(limits::int_min), agg.get(0));
 
   int max[11];
   max[0] = limits::int_min;
@@ -64,20 +64,20 @@ TEST_F(AggregateTest, MaxTest) {
   }
 
   for (int i = 1; i <= 10; i++) {
-    mutable_value_t value(i);
+    mutable_value value(i);
     agg.update(value, i * 2);
     for (int j = 0; j <= i; j++)
-      ASSERT_TRUE(mutable_value_t(max[j]) == agg.get(j * 2));
+      ASSERT_TRUE(mutable_value(max[j]) == agg.get(j * 2));
   }
 
   for (int j = 0; j <= 20; j++) {
-    ASSERT_TRUE(mutable_value_t(max[j / 2]) == agg.get(j));
+    ASSERT_TRUE(mutable_value(max[j / 2]) == agg.get(j));
   }
 }
 
 TEST_F(AggregateTest, CountTest) {
   aggregate_t agg(INT_TYPE, aggregate_id::D_COUNT);
-  ASSERT_TRUE(mutable_value_t(limits::int_zero) == agg.get(0));
+  ASSERT_TRUE(mutable_value(limits::int_zero) == agg.get(0));
 
   int count[11];
   count[0] = limits::int_zero;
@@ -86,14 +86,14 @@ TEST_F(AggregateTest, CountTest) {
   }
 
   for (int i = 1; i <= 10; i++) {
-    mutable_value_t value(i);
+    mutable_value value(i);
     agg.update(value, i * 2);
     for (int j = 0; j <= i; j++)
-      ASSERT_TRUE(mutable_value_t(count[j]) == agg.get(j * 2));
+      ASSERT_TRUE(mutable_value(count[j]) == agg.get(j * 2));
   }
 
   for (int j = 0; j <= 20; j++) {
-    ASSERT_TRUE(mutable_value_t(count[j / 2]) == agg.get(j));
+    ASSERT_TRUE(mutable_value(count[j / 2]) == agg.get(j));
   }
 }
 

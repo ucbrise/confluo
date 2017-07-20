@@ -18,7 +18,9 @@
 #include "mutable_value_test.h"
 #include "radix_tree_test.h"
 #include "schema_test.h"
+#include "string_map_test.h"
 #include "table_metadata_test.h"
+#include "task_test.h"
 #include "tiered_index_test.h"
 
 int main(int argc, char** argv) {

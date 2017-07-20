@@ -29,7 +29,7 @@ class flattened_iterator {
       return;
 
     inner_ = outer_->begin();
-    advance();
+    skip_invalid();
   }
 
   reference operator*() const {
@@ -43,7 +43,7 @@ class flattened_iterator {
   flattened_iterator& operator++() {
     ++inner_;
     if (inner_ == outer_->end())
-      advance();
+      skip_invalid();
     return *this;
   }
 
@@ -71,7 +71,7 @@ class flattened_iterator {
   }
 
  private:
-  void advance() {
+  void skip_invalid() {
     while (outer_ != outer_end_ && inner_ == outer_->end()) {
       ++outer_;
       if (outer_ != outer_end_)
@@ -80,7 +80,7 @@ class flattened_iterator {
   }
 
   outer_iterator outer_;
-  const outer_iterator& outer_end_;
+  outer_iterator outer_end_;
   inner_iterator inner_;
 };
 

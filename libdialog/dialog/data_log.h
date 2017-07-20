@@ -6,7 +6,7 @@
 namespace dialog {
 
 template<class sm>
-using data_log = monolog::monolog_linear<uint8_t, 65536, 1073741824, 1048576, sm>;
+using data_log = monolog::monolog_linear<uint8_t, 65536, 67108864, 1048576, sm>;
 
 }
 

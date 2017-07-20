@@ -13,82 +13,110 @@
 namespace dialog {
 
 struct compiled_predicate {
-  compiled_predicate(const compiled_predicate& other)
-      : col_(other.col_),
-        op_(other.op_),
-        val_(other.val_),
-        str_(other.str_) {
-  }
-
   template<typename schema_t>
   compiled_predicate(const predicate_t& p, const schema_t& s)
       : op_(p.op) {
+    field_name_ = s[p.attr].name();
+    field_idx_ = s[p.attr].idx();
+    is_field_indexed_ = s[p.attr].is_indexed();
+    field_index_id_ = s[p.attr].index_id();
+    field_type_ = s[p.attr].type();
+    field_index_bucket_size_ = s[p.attr].index_bucket_size();
+
     try {
-      col_ = s[p.attr];
-    } catch (std::exception& e) {
-      THROW(parse_exception, "No such attribute " + p.attr + ": " + e.what());
-    }
-    try {
-      val_ = mutable_value_t::parse(p.value, col_.type());
+      val_ = mutable_value::parse(p.value, field_type_);
     } catch (std::exception& e) {
       THROW(
           parse_exception,
           "Could not parse attribute " + p.attr + " value " + p.value
-              + " to type " + col_.type().to_string());
+              + " to type " + field_type_.to_string());
     }
-    str_ = p.to_string();
+
+    switch (op_) {
+      case relop_id::EQ: {
+        rbegin_ = val_.to_key(field_index_bucket_size_);
+        rend_ = val_.to_key(field_index_bucket_size_);
+//        fprintf(stderr, "EQ Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::GE: {
+        rbegin_ = val_.to_key(field_index_bucket_size_);
+        rend_ = s[p.attr].max().to_key(field_index_bucket_size_);
+//        fprintf(stderr, "GE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::LE: {
+        rbegin_ = s[p.attr].min().to_key(field_index_bucket_size_);
+        rend_ = val_.to_key(field_index_bucket_size_);
+//        fprintf(stderr, "LE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::GT: {
+        rbegin_ = ++(val_.to_key(field_index_bucket_size_));
+        rend_ = s[p.attr].max().to_key(field_index_bucket_size_);
+//        fprintf(stderr, "GT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::LT: {
+        rbegin_ = s[p.attr].min().to_key(field_index_bucket_size_);
+        rend_ = --(val_.to_key(field_index_bucket_size_));
+//        fprintf(stderr, "LT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      default: {
+      }
+    }
   }
 
-  inline column_t column() const {
-    return col_;
+  inline data_type field_type() const {
+    return field_type_;
+  }
+
+  inline std::string field_name() const {
+    return field_name_;
+  }
+
+  inline uint32_t field_idx() const {
+    return field_idx_;
   }
 
   inline relop_id op() const {
     return op_;
   }
 
-  inline immutable_value_t value() const {
+  inline immutable_value value() const {
     return val_;
   }
 
   inline bool is_indexed() const {
-    return col_.is_indexed();
+    return is_field_indexed_;
   }
 
   inline std::vector<index_filter> idx_filters() const {
-    uint32_t id = col_.index_id();
-    double bucket_size = col_.index_bucket_size();
+    uint32_t id = field_index_id_;
     switch (op_) {
       case relop_id::EQ:
-        return {index_filter(id, val_.to_key(bucket_size),
-              val_.to_key(bucket_size))};
-      case relop_id::NEQ:
-        return {index_filter(id, col_.min().to_key(bucket_size),
-              --(val_.to_key(bucket_size))), index_filter(id, ++(val_.to_key(bucket_size)),
-              col_.max().to_key(bucket_size))};
       case relop_id::GE:
-        return {index_filter(id, val_.to_key(bucket_size),
-              col_.max().to_key(bucket_size))};
       case relop_id::LE:
-        return {index_filter(id, col_.min().to_key(bucket_size),
-              val_.to_key(bucket_size))};
       case relop_id::GT:
-        return {index_filter(id, ++(val_.to_key(bucket_size)),
-              col_.max().to_key(bucket_size))};
       case relop_id::LT:
-        return {index_filter(id, col_.min().to_key(bucket_size),
-              --(val_.to_key(bucket_size)))};
+        return {index_filter(id, rbegin_.copy(), rend_.copy())};
       default:
         return {};
     }
   }
 
   inline bool test(const record_t& r) const {
-    return mutable_value_t::relop(op_, r[col_.idx()].value(), val_);
+    return mutable_value::relop(op_, r[field_idx_].value(), val_);
   }
 
   inline std::string to_string() const {
-    return str_;
+    return field_name_ + relop_utils::op_to_str(op_) + val_.to_string();
   }
 
   inline bool operator<(const compiled_predicate& other) const {
@@ -96,10 +124,18 @@ struct compiled_predicate {
   }
 
  private:
-  column_t col_;
+  std::string field_name_;
+  uint32_t field_idx_;
+  bool is_field_indexed_;
+  uint32_t field_index_id_;
+  double field_index_bucket_size_;
+  data_type field_type_;
+
   relop_id op_;
-  mutable_value_t val_;
-  std::string str_;
+  mutable_value val_;
+
+  byte_string rbegin_;
+  byte_string rend_;
 };
 
 }

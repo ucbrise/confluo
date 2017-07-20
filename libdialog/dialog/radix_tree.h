@@ -2,14 +2,13 @@
 #define DIALOG_RADIX_TREE_H_
 
 #include "atomic.h"
+#include "reflog.h"
 #include "byte_string.h"
 #include "exceptions.h"
 #include "flatten.h"
 
 namespace dialog {
 namespace index {
-
-typedef monolog::monolog_exp2<uint64_t, 24> reflog;
 
 class radix_tree;
 
@@ -24,6 +23,7 @@ struct radix_tree_node {
         depth(node_depth),
         is_leaf(false),
         parent(node_parent) {
+    assert((parent == nullptr && depth == 0) || depth == parent->depth + 1);
     data = new child_t[node_width];
     for (size_t i = 0; i < node_width; i++)
       atomic::init(&(children()[i]), static_cast<node_t*>(nullptr));
@@ -35,6 +35,7 @@ struct radix_tree_node {
         depth(node_depth),
         is_leaf(true),
         parent(node_parent) {
+    assert(depth == parent->depth + 1);
     data = new reflog;
   }
 
@@ -72,9 +73,9 @@ struct radix_tree_node {
   }
 
   const node_t* last_child(size_t width) const {
-    int16_t cur_key = width;
+    int16_t cur_key = width - 1;
     const node_t* child = nullptr;
-    while (cur_key > 0
+    while (cur_key >= 0
         && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
       --cur_key;
     }
@@ -97,7 +98,7 @@ struct radix_tree_node {
 
     int16_t cur_key = key - 1;
     const node_t* child = nullptr;
-    while (cur_key > 0
+    while (cur_key >= 0
         && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
       --cur_key;
     }
@@ -112,7 +113,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return parent->advance(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth] = child->key;
+      t_key[depth] = child->key;
       return child->advance_descend(t_key, t_width, t_depth);
     }
   }
@@ -126,7 +127,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return advance(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth] = child->key;
+      t_key[depth] = child->key;
       return child->advance_descend(t_key, t_width, t_depth);
     }
   }
@@ -139,7 +140,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return parent->retreat(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth] = child->key;
+      t_key[depth] = child->key;
       return child->retreat_descend(t_key, t_width, t_depth);
     }
   }
@@ -154,7 +155,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return retreat(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth] = child->key;
+      t_key[depth] = child->key;
       return child->retreat_descend(t_key, t_width, t_depth);
     }
   }
@@ -212,7 +213,6 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   const self_type& operator++() {
     if (node_ != nullptr)
       node_ = node_->advance(key_, width_, depth_);
-    assert(node_->is_leaf);
     return *this;
   }
 
@@ -220,6 +220,19 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
     self_type copy(*this);
     ++(*this);
     return copy;
+  }
+
+  key_t const& key() const {
+    return key_;
+  }
+
+  const radix_tree_node* node() const {
+    return node_;
+  }
+
+  self_type& set_node(const radix_tree_node* node) {
+    node_ = node;
+    return *this;
   }
 
  private:
@@ -237,7 +250,6 @@ class rt_reflog_range_result {
   rt_reflog_range_result(const iterator& lb, const iterator& ub)
       : begin_(lb),
         end_(ub) {
-    ++end_;
   }
 
   rt_reflog_range_result(const rt_reflog_range_result& other)
@@ -294,7 +306,7 @@ class radix_tree {
       node_t* child = nullptr;
       if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
         // Try & allocate child node
-        child = new node_t(key[d], width_, d, node);
+        child = new node_t(key[d], width_, d + 1, node);
         radix_tree_node* expected = nullptr;
 
         // If thread was not successful in swapping newly allocated memory,
@@ -315,7 +327,7 @@ class radix_tree {
     node_t* child = nullptr;
     if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
       // Try & allocate child node
-      child = new node_t(key[d], d, node);
+      child = new node_t(key[d], d + 1, node);
       node_t* expected = nullptr;
 
       // If thread was not successful in swapping newly allocated memory,
@@ -329,7 +341,19 @@ class radix_tree {
     child->refs()->push_back(value);
   }
 
-  const reflog* at(const key_t& key) const {
+  reflog const* at(const key_t& key) const {
+    node_t* node = root_;
+    size_t d;
+    for (d = 0; d < depth_; d++) {
+      node_t* child = atomic::load(&(node->children()[key[d]]));
+      if (child == nullptr)
+        return nullptr;
+      node = child;
+    }
+    return node->refs();
+  }
+
+  reflog* operator[](const key_t& key) {
     node_t* node = root_;
     size_t d;
     for (d = 0; d < depth_; d++) {
@@ -353,7 +377,14 @@ class radix_tree {
 
   rt_reflog_range_result range_lookup_reflogs(const key_t& begin,
                                               const key_t& end) const {
-    return rt_reflog_range_result(upper_bound(begin), lower_bound(end));
+    iterator ibegin = upper_bound(begin);
+    iterator iend = lower_bound(end);
+    if (ibegin.node() == nullptr) {
+      return rt_reflog_range_result(ibegin, ibegin);
+    } else if (iend.node() == nullptr) {
+      return rt_reflog_range_result(iend, iend);
+    }
+    return rt_reflog_range_result(ibegin, ++iend);
   }
 
   rt_range_result range_lookup(const key_t& begin, const key_t& end) const {
@@ -371,8 +402,7 @@ class radix_tree {
  private:
   // First leaf node <= key
   std::pair<key_t, const node_t*> __lower_bound(const key_t& key) const {
-    std::pair<key_t, const node_t*> ret(key, nullptr);
-    ret.second = root_;
+    std::pair<key_t, const node_t*> ret(key, root_);
     size_t d;
     for (d = 0; d < depth_; d++) {
       node_t* child = atomic::load(&(ret.second->children()[key[d]]));
@@ -387,10 +417,10 @@ class radix_tree {
 
       // Obtain the next valid child
       const node_t* child = ret.second->prev_child(key[d], width_);
-      if (child == nullptr)  // There are no valid children of ret.second
+      if (child == nullptr){        // There are no valid children of ret.second
         ret.second = ret.second->retreat(ret.first, width_, depth_);
-      else {  // There is a valid child of ret.second
-        ret.first[child->depth] = child->key;
+      } else {  // There is a valid child of ret.second
+        ret.first[d] = child->key;
         ret.second = child->retreat_descend(ret.first, width_, depth_);
       }
     }
@@ -400,8 +430,7 @@ class radix_tree {
 
   // First leaf node >= key
   std::pair<key_t, const node_t*> __upper_bound(const key_t& key) const {
-    std::pair<key_t, const node_t*> ret(key, nullptr);
-    ret.second = root_;
+    std::pair<key_t, const node_t*> ret(key, root_);
     size_t d;
     for (d = 0; d < depth_; d++) {
       node_t* child = atomic::load(&(ret.second->children()[key[d]]));
@@ -416,10 +445,10 @@ class radix_tree {
 
       // Obtain the next valid child
       const node_t* child = ret.second->next_child(key[d], width_);
-      if (child == nullptr)  // There are no valid children of ret.second
+      if (child == nullptr)        // There are no valid children of ret.second
         ret.second = ret.second->advance(ret.first, width_, depth_);
       else {  // There is a valid child of ret.second
-        ret.first[child->depth] = child->key;
+        ret.first[d] = child->key;
         ret.second = child->advance_descend(ret.first, width_, depth_);
       }
     }
@@ -430,7 +459,8 @@ class radix_tree {
   size_t width_;
   size_t depth_;
   radix_tree_node* root_;
-};
+}
+;
 
 }
 }

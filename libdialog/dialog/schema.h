@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 
+#include "exceptions.h"
 #include "field.h"
 #include "column.h"
 #include "record.h"
@@ -43,6 +44,10 @@ class schema_t {
 
   ~schema_t() = default;
 
+  size_t get_field_index(const std::string& name) const {
+    return name_map_.at(string_utils::to_upper(name));
+  }
+
   column_t& operator[](size_t idx) {
     return columns_[idx];
   }
@@ -52,11 +57,19 @@ class schema_t {
   }
 
   column_t& operator[](const std::string& name) {
-    return columns_[name_map_.at(string_utils::to_upper(name))];
+    try {
+      return columns_[name_map_.at(string_utils::to_upper(name))];
+    } catch (std::exception& e) {
+      THROW(invalid_operation_exception, "No such attribute " + name + ": " + e.what());
+    }
   }
 
   column_t const& operator[](const std::string& name) const {
-    return columns_[name_map_.at(string_utils::to_upper(name))];
+    try {
+      return columns_[name_map_.at(string_utils::to_upper(name))];
+    } catch (std::exception& e) {
+      THROW(invalid_operation_exception, "No such attribute " + name + ": " + e.what());
+    }
   }
 
   size_t record_size() const {
@@ -88,8 +101,8 @@ class schema_builder {
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name,
-                             const mutable_value_t& min,
-                             const mutable_value_t& max) {
+                             const mutable_value& min,
+                             const mutable_value& max) {
     columns_.push_back(
         column_t(columns_.size(), offset_, type, name, min, max));
     offset_ += type.size;
@@ -99,9 +112,9 @@ class schema_builder {
   inline schema_builder& add_column(const data_type& type,
                                     const std::string& name) {
     if (type.id == type_id::D_STRING)
-      return add_column(type, name, mutable_value_t(), mutable_value_t());
-    return add_column(type, name, mutable_value_t(type, type.min()),
-                      mutable_value_t(type, type.max()));
+      return add_column(type, name, mutable_value(), mutable_value());
+    return add_column(type, name, mutable_value(type, type.min()),
+                      mutable_value(type, type.max()));
   }
 
   std::vector<column_t> get_columns() const {

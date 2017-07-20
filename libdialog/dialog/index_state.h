@@ -68,6 +68,11 @@ struct index_state_t {
   double bucket_size_;
 };
 
+const uint8_t index_state_t::UNINDEXED;
+const uint8_t index_state_t::INDEXING;
+const uint8_t index_state_t::INDEXED;
+
+
 }
 
 #endif /* DIALOG_INDEX_STATE_H_ */
