@@ -8,15 +8,10 @@ file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 set(DIALOG_INCLUDE dialog)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
-set(ATOMIC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libatomic/atomic)
-set(MONOLOG_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libmonolog/monolog)
 
 include_directories(${gtest_SOURCE_DIR}/include
   ${DIALOG_INCLUDE}
-  ${UTILS_INCLUDE}
-  ${ATOMIC_INCLUDE}
-  ${MONOLOG_INCLUDE}
-  ${THRIFT_INCLUDE})
+  ${UTILS_INCLUDE})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)

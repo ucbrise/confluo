@@ -1,1 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -std=c++11 -g -Wall -pedantic -Wextra -Wno-missing-field-initializers -Wno-unused-parameter -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/dtest.dir/test/test_main.cc.o  -o bin/dtest ../external/gtest-1.7.0/libgtest_main.a ../external/gtest-1.7.0/libgtest.a 
