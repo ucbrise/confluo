@@ -47,7 +47,15 @@ class string_map {
   };
 
   string_map()
-      : buckets_(new reflog*[MAX_BUCKETS]) {
+      : buckets_(new reflog*[MAX_BUCKETS]()) {
+  }
+
+  ~string_map() {
+    for (size_t i = 0; i < MAX_BUCKETS; i++) {
+      if (buckets_[i] == nullptr)
+        delete buckets_[i];
+    }
+    delete[] buckets_;
   }
 
   // Only one writer thread permitted, otherwise duplicates may occur
