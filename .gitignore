@@ -43,6 +43,7 @@ thrift-gen.files
 
 # Eclipse files
 .settings
+debug
 
 # Netbeans files
 nbproject
