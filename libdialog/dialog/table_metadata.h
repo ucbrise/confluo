@@ -14,18 +14,18 @@ enum metadata_type
   D_TRIGGER_METADATA
 };
 
-struct __index_info {
+struct index_info {
  public:
-  __index_info(uint32_t index_id, const std::string& name, double bucket_size)
+  index_info(uint32_t index_id, const std::string& name, double bucket_size)
       : index_id_(index_id),
         name_(name),
         bucket_size_(bucket_size) {
   }
 
-  __index_info(const __index_info& other)
-  : index_id_(other.index_id_),
-  name_(other.name_),
-  bucket_size_(other.bucket_size_) {
+  index_info(const index_info& other)
+      : index_id_(other.index_id_),
+        name_(other.name_),
+        bucket_size_(other.bucket_size_) {
   }
 
   uint32_t index_id() const {
@@ -40,22 +40,22 @@ struct __index_info {
     return bucket_size_;
   }
 
-private:
+ private:
   uint32_t index_id_;
   const std::string name_;
   double bucket_size_;
 };
 
-struct __filter_info {
+struct filter_info {
  public:
-  __filter_info(uint32_t filter_id, const std::string& expr)
+  filter_info(uint32_t filter_id, const std::string& expr)
       : filter_id_(filter_id),
         expr_(expr) {
   }
 
-  __filter_info(const __filter_info& other)
-  : filter_id_(other.filter_id_),
-  expr_(other.expr_) {
+  filter_info(const filter_info& other)
+      : filter_id_(other.filter_id_),
+        expr_(other.expr_) {
   }
 
   uint32_t filter_id() const {
@@ -66,16 +66,15 @@ struct __filter_info {
     return expr_;
   }
 
-private:
+ private:
   uint32_t filter_id_;
   const std::string expr_;
 };
 
-struct __trigger_info {
+struct trigger_info {
  public:
-  __trigger_info(uint32_t trigger_id, uint32_t filter_id, aggregate_id agg_id,
-                 const std::string& name, relop_id op,
-                 const mutable_value& threshold)
+  trigger_info(uint32_t trigger_id, uint32_t filter_id, aggregate_id agg_id,
+               const std::string& name, relop_id op, const numeric& threshold)
       : trigger_id_(trigger_id),
         filter_id_(filter_id),
         agg_id_(agg_id),
@@ -84,13 +83,13 @@ struct __trigger_info {
         threshold_(threshold) {
   }
 
-  __trigger_info(const __trigger_info& other)
-  : trigger_id_(other.trigger_id_),
-  filter_id_(other.filter_id_),
-  agg_id_(other.agg_id_),
-  name_(other.name_),
-  op_(other.op_),
-  threshold_(other.threshold_) {
+  trigger_info(const trigger_info& other)
+      : trigger_id_(other.trigger_id_),
+        filter_id_(other.filter_id_),
+        agg_id_(other.agg_id_),
+        name_(other.name_),
+        op_(other.op_),
+        threshold_(other.threshold_) {
   }
 
   uint32_t trigger_id() const {
@@ -113,17 +112,17 @@ struct __trigger_info {
     return name_;
   }
 
-  const mutable_value& threshold() const {
+  const numeric& threshold() const {
     return threshold_;
   }
 
-private:
+ private:
   uint32_t trigger_id_;
   uint32_t filter_id_;
   aggregate_id agg_id_;
   const std::string name_;
   relop_id op_;
-  mutable_value threshold_;
+  numeric threshold_;
 };
 
 template<class storage_mode>
@@ -158,7 +157,7 @@ class metadata_writer {
 
   void write_trigger_info(uint32_t trigger_id, uint32_t filter_id,
                           aggregate_id agg_id, const std::string& name,
-                          relop_id op, const mutable_value& threshold) {
+                          relop_id op, const numeric& threshold) {
     metadata_type type = metadata_type::D_TRIGGER_METADATA;
     out_.write(reinterpret_cast<const char*>(&type), sizeof(metadata_type));
     out_.write(reinterpret_cast<const char*>(&trigger_id), sizeof(uint32_t));
@@ -169,9 +168,46 @@ class metadata_writer {
     out_.write(name.c_str(), name_size);
     out_.write(reinterpret_cast<const char*>(&op), sizeof(relop_id));
     type_id id = threshold.type().id;
-    size_t type_size = threshold.type().size;
     out_.write(reinterpret_cast<const char*>(&id), sizeof(type_id));
-    out_.write(reinterpret_cast<const char*>(threshold.ptr()), type_size);
+    switch (id) {
+      case type_id::D_BOOL: {
+        bool val = threshold.as<bool>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(bool));
+        break;
+      }
+      case type_id::D_CHAR: {
+        char val = threshold.as<char>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(char));
+        break;
+      }
+      case type_id::D_SHORT: {
+        short val = threshold.as<short>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(short));
+        break;
+      }
+      case type_id::D_INT: {
+        int val = threshold.as<int>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(int));
+        break;
+      }
+      case type_id::D_LONG: {
+        long val = threshold.as<long>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(long));
+        break;
+      }
+      case type_id::D_FLOAT: {
+        float val = threshold.as<float>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(float));
+        break;
+      }
+      case type_id::D_DOUBLE: {
+        double val = threshold.as<double>();
+        out_.write(reinterpret_cast<const char*>(&val), sizeof(double));
+        break;
+      }
+      default:
+        THROW(invalid_operation_exception, "Threshold is not of numeric type");
+    }
     out_.flush();
   }
 
@@ -195,7 +231,7 @@ class metadata_writer<storage::in_memory> {
 
   void write_trigger_info(uint32_t trigger_id, uint32_t filter_id,
                           aggregate_id agg_id, const std::string& name,
-                          relop_id op, const mutable_value& threshold) {
+                          relop_id op, const numeric& threshold) {
   }
 };
 
@@ -212,7 +248,7 @@ class metadata_reader {
     return type;
   }
 
-  __index_info next_index_info() {
+  index_info next_index_info() {
     uint32_t index_id;
     size_t name_size;
     double bucket_size;
@@ -220,19 +256,19 @@ class metadata_reader {
     in_.read(reinterpret_cast<char*>(&name_size), sizeof(size_t));
     in_.read(buf_, name_size);
     in_.read(reinterpret_cast<char*>(&bucket_size), sizeof(double));
-    return __index_info(index_id, std::string(buf_, name_size), bucket_size);
+    return index_info(index_id, std::string(buf_, name_size), bucket_size);
   }
 
-  __filter_info next_filter_info() {
+  filter_info next_filter_info() {
     uint32_t filter_id;
     size_t expr_size;
     in_.read(reinterpret_cast<char*>(&filter_id), sizeof(uint32_t));
     in_.read(reinterpret_cast<char*>(&expr_size), sizeof(size_t));
     in_.read(buf_, expr_size);
-    return __filter_info(filter_id, std::string(buf_, expr_size));
+    return filter_info(filter_id, std::string(buf_, expr_size));
   }
 
-  __trigger_info next_trigger_info() {
+  trigger_info next_trigger_info() {
     uint32_t trigger_id;
     uint32_t filter_id;
     aggregate_id agg_id;
@@ -247,13 +283,55 @@ class metadata_reader {
     in_.read(buf_, name_size);
     in_.read(reinterpret_cast<char*>(&op), sizeof(relop_id));
     in_.read(reinterpret_cast<char*>(&tid), sizeof(type_id));
-    data_type type(tid);
-    uint8_t* buf = new uint8_t[type.size];
-    in_.read(reinterpret_cast<char*>(buf), type.size);
-    mutable_value threshold(type, buf);
-    delete[] buf;
-    return __trigger_info(trigger_id, filter_id, agg_id,
-                          std::string(buf_, name_size), op, threshold);
+    numeric threshold;
+    switch (tid) {
+      case type_id::D_BOOL: {
+        bool val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(bool));
+        threshold = val;
+        break;
+      }
+      case type_id::D_CHAR: {
+        char val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(char));
+        threshold = val;
+        break;
+      }
+      case type_id::D_SHORT: {
+        short val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(short));
+        threshold = val;
+        break;
+      }
+      case type_id::D_INT: {
+        int val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(int));
+        threshold = val;
+        break;
+      }
+      case type_id::D_LONG: {
+        long val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(long));
+        threshold = val;
+        break;
+      }
+      case type_id::D_FLOAT: {
+        float val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(float));
+        threshold = val;
+        break;
+      }
+      case type_id::D_DOUBLE: {
+        double val;
+        in_.read(reinterpret_cast<char*>(&val), sizeof(double));
+        threshold = val;
+        break;
+      }
+      default:
+        THROW(invalid_operation_exception, "Threshold is not of numeric type");
+    }
+    return trigger_info(trigger_id, filter_id, agg_id,
+                        std::string(buf_, name_size), op, threshold);
   }
 
  private:

@@ -4,14 +4,14 @@
 #include <cstdlib>
 
 #include "data_types.h"
-#include "relational_ops.h"
 #include "string_utils.h"
 
 using namespace utils;
 
 namespace dialog {
 
-struct immutable_value {
+class immutable_value {
+ public:
   immutable_value(const data_type& type = NONE_TYPE)
       : type_(type),
         ptr_(nullptr) {
@@ -81,6 +81,11 @@ struct immutable_value {
     return relop(relop_id::NEQ, first, second);
   }
 
+  template<typename T>
+  T& as() {
+    return *reinterpret_cast<T*>(ptr_);
+  }
+
   std::string to_string() const {
     switch (type_.id) {
       case type_id::D_BOOL: {
@@ -119,7 +124,7 @@ struct immutable_value {
         return "none()";
       }
       default: {
-        throw std::bad_cast();
+        THROW(illegal_state_exception, "Invalid type id");
       }
     }
   }

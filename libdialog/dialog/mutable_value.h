@@ -82,7 +82,7 @@ class mutable_value : public immutable_value {
       delete[] reinterpret_cast<uint8_t*>(ptr_);
   }
 
-  static mutable_value parse(const std::string& str, data_type type) {
+  static mutable_value parse(const std::string& str, const data_type& type) {
     switch (type.id) {
       case type_id::D_BOOL: {
         bool val = string_utils::lexical_cast<bool>(str);
@@ -239,11 +239,6 @@ class mutable_value : public immutable_value {
     }
 
     return *this;
-  }
-
-  template<typename T>
-  T as() {
-    return *reinterpret_cast<T*>(ptr_);
   }
 };
 

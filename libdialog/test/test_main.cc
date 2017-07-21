@@ -16,6 +16,7 @@
 #include "minterm_test.h"
 #include "monolog_test.h"
 #include "mutable_value_test.h"
+#include "periodic_task_test.h"
 #include "radix_tree_test.h"
 #include "schema_test.h"
 #include "string_map_test.h"

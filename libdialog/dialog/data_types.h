@@ -26,6 +26,7 @@ enum type_id
   D_STRING = 8
 };
 
+
 namespace limits {
 
 static bool bool_min = std::numeric_limits<bool>::lowest();
@@ -261,6 +262,12 @@ static data_type FLOAT_TYPE(type_id::D_FLOAT);
 static data_type DOUBLE_TYPE(type_id::D_DOUBLE);
 static data_type STRING_TYPE(size_t size) {
   return data_type(size);
+}
+
+// type-ids 1-7 are numeric
+static inline bool is_numeric(const data_type& type) {
+  type_id id = type.id;
+  return id >= 1 && id <= 7;
 }
 
 }

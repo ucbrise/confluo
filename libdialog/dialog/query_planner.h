@@ -8,6 +8,10 @@
 #include "auxlog.h"
 #include "query_plan.h"
 
+// FIXME: A minterm does not yield any results if:
+// (1) no index is present for any attribute
+// (2) the only indexed attribute has a != relational operation
+
 namespace dialog {
 
 class query_planner {

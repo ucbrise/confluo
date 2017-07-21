@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #include "field.h"
-#include "immutable_value.h"
+#include "mutable_value.h"
 #include "index_state.h"
 #include "string_utils.h"
 

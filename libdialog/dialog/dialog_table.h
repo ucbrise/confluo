@@ -145,7 +145,7 @@ class dialog_table {
 
   uint32_t add_trigger(uint32_t filter_id, const std::string& field_name,
                        aggregate_id agg, relop_id op,
-                       const mutable_value& threshold) {
+                       const numeric& threshold) {
     auto ret =
         mgmt_pool_.submit(
             [filter_id, field_name, agg, op, threshold, this] {
