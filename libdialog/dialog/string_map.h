@@ -1,14 +1,34 @@
 #ifndef DIALOG_STRING_MAP_H_
 #define DIALOG_STRING_MAP_H_
 
-#include "radix_tree.h"
+#include <unistd.h>
+#include "reflog.h"
 
 namespace dialog {
 
 template<typename V>
 class string_map {
  public:
-  static const size_t PREFIX_LEN = 4;
+  static const uint32_t MAX_BUCKETS;
+
+  struct string_hash {
+    static uint32_t hash(const std::string& str) {
+      uint32_t h = FIRSTH;
+      const char* s = str.c_str();
+      while (*s) {
+        h = (h * A) ^ (s[0] * B);
+        s++;
+      }
+      return h % MAX_BUCKETS;  // or return h % C;
+    }
+
+   private:
+    static const uint32_t A = 54059; /* a prime */
+    static const uint32_t B = 76963; /* another prime */
+    static const uint32_t C = 86969; /* yet another prime */
+    static const uint32_t FIRSTH = 37; /* also prime */
+
+  };
 
   struct map_entry {
     std::string key;
@@ -27,18 +47,17 @@ class string_map {
   };
 
   string_map()
-      : tree_(PREFIX_LEN, 256) {
+      : buckets_(new reflog*[MAX_BUCKETS]) {
   }
 
   // Only one writer thread permitted, otherwise duplicates may occur
   bool put(const std::string& key, const V& value) {
-    byte_string rt_key(key, PREFIX_LEN);
+    uint32_t hash_key = string_hash::hash(key);
     map_entry entry(key, value);
-    reflog* refs = tree_[rt_key];
-    if (refs == nullptr) {
-      tree_.insert(rt_key, entries_.push_back(entry));
-      return true;
-    }
+
+    reflog* refs;
+    if ((refs = buckets_[hash_key]) == nullptr)
+      refs = buckets_[hash_key] = new reflog;
 
     // Search to see if key already exists
     size_t size = refs->size();
@@ -55,15 +74,15 @@ class string_map {
       }
     }
 
-    tree_.insert(rt_key, entries_.push_back(entry));
+    refs->push_back(entries_.push_back(entry));
     return true;
   }
 
   // Multiple threads permitted
   bool get(const std::string& key, V& value) const {
-    byte_string rt_key(key, PREFIX_LEN);
-    reflog const* refs = tree_.at(rt_key);
-    if (refs == nullptr)
+    uint32_t hash_key = string_hash::hash(key);
+    reflog* refs;
+    if ((refs = buckets_[hash_key]) == nullptr)
       return false;
 
     // Search to see if key exists
@@ -81,9 +100,9 @@ class string_map {
 
   // Only one writer thread permitted, otherwise inconsistencies may occur
   bool remove(const std::string& key, V& value) {
-    byte_string rt_key(key, PREFIX_LEN);
-    reflog* refs = tree_[rt_key];
-    if (refs == nullptr)
+    uint32_t hash_key = string_hash::hash(key);
+    reflog* refs;
+    if ((refs = buckets_[hash_key]) == nullptr)
       return false;
 
     // Search to see if key exists
@@ -101,9 +120,13 @@ class string_map {
   }
 
  private:
-  index::radix_tree tree_;
+  reflog** buckets_;
   monolog::monolog_exp2<map_entry> entries_;
 };
+
+template<typename V>
+const uint32_t string_map<V>::MAX_BUCKETS = sysconf(_SC_PAGESIZE)
+    / sizeof(reflog*);
 
 }
 
