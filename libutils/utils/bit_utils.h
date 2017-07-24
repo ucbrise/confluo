@@ -3,9 +3,20 @@
 
 #include <cassert>
 
-#define BSR
-
 namespace utils {
+
+#define GETBIT(n, i)    ((n >> i) & 1UL)
+#define SETBIT(n, i)    n = (n | (1UL << i))
+#define CLRBIT(n, i)  n = (n & ~(1UL << i))
+
+#define BITS2BLOCKS(bits) \
+    (((bits) % 64 == 0) ? ((bits) / 64) : (((bits) / 64) + 1))
+
+#define GETBITVAL(data, i) GETBIT((data)[(i) / 64], (i) % 64)
+#define SETBITVAL(data, i) SETBIT((data)[(i) / 64], (i) % 64)
+#define CLRBITVAL(data, i) CLRBIT((data)[(i) / 64], (i) % 64)
+
+const uint64_t all_set = -1ULL;
 
 static constexpr uint64_t high_bits_set[65] = { 0x0000000000000000ULL,
     0x8000000000000000ULL, 0xC000000000000000ULL, 0xE000000000000000ULL,
@@ -106,7 +117,7 @@ static constexpr uint64_t low_bits_unset[65] = { 0xFFFFFFFFFFFFFFFFULL,
 class bit_utils {
  public:
 
-  static inline uint32_t highest_bit(uint32_t x) {
+  static inline uint32_t highest_bit(uint64_t x) {
     uint32_t y = 0;
 #ifdef BSR
     asm ( "\tbsr %1, %0\n"
@@ -115,7 +126,7 @@ class bit_utils {
     );
 #else
     while (x >>= 1)
-    ++y;
+      ++y;
 #endif
     return y;
   }
@@ -139,6 +150,21 @@ class bit_utils {
 
   static inline bool is_power_of_2(uint64_t n) {
     return (n != 0) && ((n & (n - 1)) == 0);
+  }
+
+  static uint32_t bit_width(uint64_t n) {
+    return highest_bit(n) + 1;
+  }
+
+  static uint8_t popcount_64(uint64_t n) {
+    return __builtin_popcountll(n);
+  }
+
+  static uint16_t popcount_512(uint64_t *data) {
+    return __builtin_popcountll(*data) + __builtin_popcountll(*(data + 1))
+        + __builtin_popcountll(*(data + 2)) + __builtin_popcountll(*(data + 3))
+        + __builtin_popcountll(*(data + 4)) + __builtin_popcountll(*(data + 5))
+        + __builtin_popcountll(*(data + 6)) + __builtin_popcountll(*(data + 7));
   }
 
 };
