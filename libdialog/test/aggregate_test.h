@@ -10,7 +10,7 @@ class AggregateTest : public testing::Test {
 };
 
 TEST_F(AggregateTest, SumTest) {
-  aggregate_t agg(INT_TYPE, aggregate_id::D_SUM);
+  aggregate_list agg(INT_TYPE, aggregate_id::D_SUM);
   ASSERT_TRUE(numeric(limits::int_zero) == agg.get(0));
 
   int sum[11];
@@ -32,7 +32,7 @@ TEST_F(AggregateTest, SumTest) {
 }
 
 TEST_F(AggregateTest, MinTest) {
-  aggregate_t agg(INT_TYPE, aggregate_id::D_MIN);
+  aggregate_list agg(INT_TYPE, aggregate_id::D_MIN);
   ASSERT_TRUE(numeric(limits::int_max) == agg.get(0));
 
   int min[11];
@@ -54,7 +54,7 @@ TEST_F(AggregateTest, MinTest) {
 }
 
 TEST_F(AggregateTest, MaxTest) {
-  aggregate_t agg(INT_TYPE, aggregate_id::D_MAX);
+  aggregate_list agg(INT_TYPE, aggregate_id::D_MAX);
   ASSERT_EQ(numeric(limits::int_min), agg.get(0));
 
   int max[11];
@@ -76,7 +76,7 @@ TEST_F(AggregateTest, MaxTest) {
 }
 
 TEST_F(AggregateTest, CountTest) {
-  aggregate_t agg(INT_TYPE, aggregate_id::D_COUNT);
+  aggregate_list agg(INT_TYPE, aggregate_id::D_COUNT);
   ASSERT_TRUE(numeric(limits::int_zero) == agg.get(0));
 
   int count[11];

@@ -28,6 +28,23 @@ namespace storage {
 
 using namespace ::utils;
 
+typedef void* (*allocate_fn)(const std::string& path, size_t size);
+typedef void (*free_fn)(void* ptr, size_t size);
+typedef void (*flush_fn)(void* ptr, size_t size);
+
+enum storage_id {
+  D_IN_MEMORY = 0,
+  D_DURABLE_RELAXED = 1,
+  D_DURABLE = 2
+};
+
+struct storage_mode {
+  storage_id id;
+  allocate_fn allocate;
+  free_fn free;
+  flush_fn flush;
+};
+
 /**
  * In memory storage, uses mmap to allocate data that is not backed by a file.
  */
@@ -39,8 +56,7 @@ struct in_memory {
    * @param size Size of requested memory.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    return mmap_utils::map(-1, nullptr, 0, size, PROT_RW,
-                           MAP_SHARED | MAP_ANONYMOUS);
+    return malloc(size);
   }
 
   /**
@@ -49,8 +65,8 @@ struct in_memory {
    * @param ptr Pointer to memory to be freed.
    * @param size Size of allocated memory.
    */
-  inline static void free(void* ptr, size_t size) {
-    return mmap_utils::unmap(ptr, size);
+  inline static void free_mem(void* ptr, size_t size) {
+    free(ptr);
   }
 
   /**
@@ -145,6 +161,15 @@ struct durable {
     mmap_utils::flush(ptr, size);
   }
 };
+
+static storage_mode IN_MEMORY = { storage_id::D_IN_MEMORY, in_memory::allocate,
+    in_memory::free_mem, in_memory::flush };
+
+static storage_mode DURABLE_RELAXED = { storage_id::D_DURABLE_RELAXED,
+    durable_relaxed::allocate, durable_relaxed::free, durable_relaxed::flush };
+
+static storage_mode DURABLE = { storage_id::D_DURABLE, durable::allocate,
+    durable::free, durable::flush };
 
 }
 }

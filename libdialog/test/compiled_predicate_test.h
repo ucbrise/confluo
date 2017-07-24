@@ -10,7 +10,7 @@ using namespace ::dialog;
 
 class CompiledPredicateTest : public testing::Test {
  public:
-  static schema_t<storage::in_memory> s;
+  static schema_t s;
 
   struct rec {
     bool a;
@@ -30,7 +30,7 @@ class CompiledPredicateTest : public testing::Test {
 
   static ts_rec r;
 
-  static schema_t<storage::in_memory> schema() {
+  static schema_t schema() {
     schema_builder builder;
     builder.add_column(BOOL_TYPE, "a");
     builder.add_column(CHAR_TYPE, "b");
@@ -40,7 +40,7 @@ class CompiledPredicateTest : public testing::Test {
     builder.add_column(FLOAT_TYPE, "f");
     builder.add_column(DOUBLE_TYPE, "g");
     builder.add_column(STRING_TYPE(16), "h");
-    return schema_t<storage::in_memory>(".", builder.get_columns());
+    return schema_t(".", builder.get_columns());
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
@@ -62,8 +62,7 @@ class CompiledPredicateTest : public testing::Test {
 
 CompiledPredicateTest::ts_rec CompiledPredicateTest::r;
 
-schema_t<storage::in_memory> CompiledPredicateTest::s =
-    CompiledPredicateTest::schema();
+schema_t CompiledPredicateTest::s = CompiledPredicateTest::schema();
 
 TEST_F(CompiledPredicateTest, TestPredicateTest) {
   ASSERT_TRUE(
@@ -71,10 +70,12 @@ TEST_F(CompiledPredicateTest, TestPredicateTest) {
           record(true, 0, 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("b", relop_id::LT, "c").test(record(false, 'a', 0, 0, 0, 0, 0)));
+      predicate("b", relop_id::LT, "c").test(
+          record(false, 'a', 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("c", relop_id::LE, "10").test(record(false, 0, 10, 0, 0, 0, 0)));
+      predicate("c", relop_id::LE, "10").test(
+          record(false, 0, 10, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
       predicate("d", relop_id::GT, "100").test(

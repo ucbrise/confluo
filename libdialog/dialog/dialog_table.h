@@ -12,6 +12,7 @@
 #include "read_tail.h"
 #include "auxlog.h"
 #include "schema.h"
+#include "string_map.h"
 #include "table_metadata.h"
 #include "data_log.h"
 #include "task_worker.h"
@@ -22,6 +23,8 @@
 #include "filter.h"
 #include "trigger.h"
 #include "exceptions.h"
+
+#include "optional.h"
 
 #include "time_utils.h"
 #include "string_utils.h"
@@ -37,13 +40,12 @@ using namespace ::utils;
 
 namespace dialog {
 
-template<class storage_mode = storage::in_memory>
 class dialog_table {
  public:
-  typedef data_log<storage_mode> data_log_type;
-  typedef schema_t<storage_mode> schema_type;
-  typedef read_tail<storage_mode> read_tail_type;
-  typedef metadata_writer<storage_mode> metadata_writer_type;
+  typedef data_log data_log_type;
+  typedef schema_t schema_type;
+  typedef read_tail read_tail_type;
+  typedef metadata_writer metadata_writer_type;
   typedef radix_tree::rt_range_result rt_offset_list;
 
   typedef record_stream<rt_offset_list, schema_type, data_log_type> rstream_type;
@@ -51,111 +53,130 @@ class dialog_table {
   typedef union_record_stream<fstream_type> filter_result_type;
 
   dialog_table(const std::vector<column_t>& table_schema,
-               const std::string& path = ".")
-      : data_log_("data_log", path),
-        rt_(path),
+               const std::string& path, const storage::storage_mode& storage,
+               task_pool& pool)
+      : data_log_("data_log", path, storage),
+        rt_(path, storage),
         schema_(path, table_schema),
-        metadata_(path),
-        filters_("filter_log", path),
-        triggers_("trigger_log", path),
-        idx_("idx_log", path) {
-  }
-
-  dialog_table(const schema_builder& builder, const std::string& path = ".")
-      : data_log_("data_log", path),
-        rt_(path),
-        schema_(path, builder.get_columns()),
-        metadata_(path) {
+        metadata_(path, storage.id),
+        mgmt_pool_(pool) {
   }
 
   // Management ops
   void add_index(const std::string& field_name, double bucket_size = 1.0) {
-    auto ret = mgmt_pool_.submit([field_name, bucket_size, this] {
+    optional<management_exception> ex;
+    auto ret =
+        mgmt_pool_.submit(
+            [field_name, bucket_size, &ex, this] {
 
-      uint16_t idx;
-      try {
-        idx = schema_.get_field_index(field_name);
-      } catch (std::exception& e) {
-        THROW(management_exception,
-            "Could not add index for " + field_name + " : " + e.what());
-      }
+              uint16_t idx;
+              try {
+                idx = schema_.get_field_index(field_name);
+              } catch (std::exception& e) {
+                ex = management_exception("Could not add index for " + field_name + " : " + e.what());
+              }
 
-      column_t& col = schema_[idx];
-      bool success = col.set_indexing();
-      if (success) {
-        uint16_t index_id;
-        switch (col.type().id) {
-          case type_id::D_BOOL: {
-            index_id = idx_.push_back(new radix_tree(1, 2));
-            break;
-          }
-          case type_id::D_CHAR:
-          case type_id::D_SHORT:
-          case type_id::D_INT:
-          case type_id::D_LONG:
-          case type_id::D_FLOAT:
-          case type_id::D_DOUBLE:
-          case type_id::D_STRING:
-          index_id = idx_.push_back(new radix_tree(col.type().size, 256));
-          break;
-          default:
-          col.set_unindexed();
-          THROW(management_exception, "Index not supported for field type");
-        }
-        col.set_indexed(index_id, bucket_size);
-        metadata_.write_index_info(index_id, field_name, bucket_size);
-      } else {
-        THROW(management_exception,
-            "Could not index " + field_name + ": already indexed/indexing");
-      }
-    });
+              column_t& col = schema_[idx];
+              bool success = col.set_indexing();
+              if (success) {
+                uint16_t index_id = UINT16_MAX;
+                switch (col.type().id) {
+                  case type_id::D_BOOL:
+                    index_id = idx_.push_back(new radix_tree(1, 2));
+                    break;
+                  case type_id::D_CHAR:
+                  case type_id::D_SHORT:
+                  case type_id::D_INT:
+                  case type_id::D_LONG:
+                  case type_id::D_FLOAT:
+                  case type_id::D_DOUBLE:
+                  case type_id::D_STRING:
+                    index_id = idx_.push_back(new radix_tree(col.type().size, 256));
+                    break;
+                  default:
+                    col.set_unindexed();
+                    ex = management_exception("Index not supported for field type");
+                }
+                col.set_indexed(index_id, bucket_size);
+                metadata_.write_index_info(field_name, bucket_size);
+              } else {
+                ex = management_exception("Could not index " + field_name + ": already indexed/indexing");
+              }
+            });
 
-    return ret.get();
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
   }
 
   void remove_index(const std::string& field_name) {
-    auto ret = mgmt_pool_.submit([field_name, this] {
-      uint16_t idx;
-      try {
-        idx = schema_.get_field_index(field_name);
-      } catch (std::exception& e) {
-        THROW(management_exception,
-            "Could not remove index for " + field_name + " : " + e.what());
-      }
-
-      if (!schema_.columns[idx].disable_indexing()) {
-        THROW(management_exception,
-            "Could not remove index for " + field_name + ": No index exists");
-      }
-    });
-
-    return ret.get();
-  }
-
-  uint32_t add_filter(const std::string& expression, size_t monitor_ms = 1) {
-    auto ret = mgmt_pool_.submit([expression, monitor_ms, this] {
-      auto cexpr = expression_compiler::compile(expression, schema_);
-      uint32_t filter_id = filters_.push_back(new filter(cexpr, default_filter, monitor_ms));
-      metadata_.write_filter_info(filter_id, expression);
-      return filter_id;
-    });
-
-    return ret.get();
-  }
-
-  uint32_t add_trigger(uint32_t filter_id, const std::string& field_name,
-                       aggregate_id agg, relop_id op,
-                       const numeric& threshold) {
+    optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [filter_id, field_name, agg, op, threshold, this] {
-              trigger *t = new trigger(filter_id, op, threshold);
-              uint32_t trigger_id = triggers_.push_back(t);
-              metadata_.write_trigger_info(trigger_id, filter_id, agg, field_name, op,
-                  threshold);
-              return trigger_id;
+            [field_name, &ex, this] {
+              uint16_t idx;
+              try {
+                idx = schema_.get_field_index(field_name);
+              } catch (std::exception& e) {
+                ex = management_exception("Could not remove index for " + field_name + " : " + e.what());
+              }
+
+              if (!schema_[idx].disable_indexing()) {
+                ex = management_exception("Could not remove index for " + field_name + ": No index exists");
+              }
             });
-    return ret.get();
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
+  }
+
+  void add_filter(const std::string& filter_name,
+                  const std::string& expression) {
+    optional<management_exception> ex;
+    auto ret =
+        mgmt_pool_.submit(
+            [filter_name, expression, &ex, this] {
+              uint32_t filter_id;
+              if (filter_map_.get(filter_name, filter_id)) {
+                ex = management_exception("Filter " + filter_name + " already exists.");
+              }
+              auto cexpr = expression_compiler::compile(expression, schema_);
+              filter_id = filters_.push_back(new filter(cexpr, default_filter));
+              metadata_.write_filter_info(filter_name, expression);
+              bool success = filter_map_.put(filter_name, filter_id);
+              if (!success) {
+                ex = management_exception("Could not add filter " + filter_name + " to filter map.");
+              }
+            });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
+  }
+
+  void add_trigger(const std::string& trigger_name,
+                   const std::string& filter_name,
+                   const std::string& field_name, aggregate_id agg, relop_id op,
+                   const numeric& threshold) {
+    optional<management_exception> ex;
+    auto ret =
+        mgmt_pool_.submit(
+            [trigger_name, filter_name, field_name, agg, op, threshold, &ex, this] {
+              uint32_t trigger_id;
+              if (trigger_map_.get(trigger_name, trigger_id)) {
+                ex = management_exception("Trigger " + trigger_name + " already exists.");
+              }
+              uint32_t filter_id;
+              if (!filter_map_.get(filter_name, filter_id)) {
+                ex = management_exception("Filter " + filter_name + " does not exist.");
+              }
+              const column_t& col = schema_[field_name];
+              trigger_id = triggers_.push_back(new trigger(agg, col.idx(), col.type(), op, threshold));
+              metadata_.write_trigger_info(trigger_name, filter_name, agg, field_name, op,
+                  threshold);
+            });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
   }
 
   // Query ops
@@ -207,17 +228,27 @@ class dialog_table {
     return filter_result_type(fstreams);
   }
 
-  rstream_type query_filter(uint32_t filter_id, uint64_t ts_block_begin,
+  rstream_type query_filter(const std::string& filter_name,
+                            uint64_t ts_block_begin,
                             uint64_t ts_block_end) const {
+
+    uint32_t filter_id;
+    if (!filter_map_.get(filter_name, filter_id)) {
+      THROW(management_exception, "Filter " + filter_name + " does not exist.");
+    }
     uint64_t version = rt_.get();
     auto res = filters_.at(filter_id)->lookup_range(ts_block_begin,
                                                     ts_block_end);
     return rstream_type(version, res, schema_, data_log_);
   }
 
-  fstream_type query_filter(uint32_t filter_id, const std::string& expr,
-                            uint64_t ts_block_begin,
+  fstream_type query_filter(const std::string& filter_name,
+                            const std::string& expr, uint64_t ts_block_begin,
                             uint64_t ts_block_end) const {
+    uint32_t filter_id;
+    if (!filter_map_.get(filter_name, filter_id)) {
+      THROW(management_exception, "Filter " + filter_name + " does not exist.");
+    }
     uint64_t version = rt_.get();
     compiled_expression cexpr = expression_compiler::compile(expr, schema_);
     auto res = filters_.at(filter_id)->lookup_range(ts_block_begin,
@@ -241,8 +272,11 @@ class dialog_table {
   trigger_list_type triggers_;
   index_list_type idx_;
 
+  string_map<uint32_t> filter_map_;
+  string_map<uint32_t> trigger_map_;
+
   // Manangement
-  task_pool mgmt_pool_;
+  task_pool& mgmt_pool_;
 };
 
 }

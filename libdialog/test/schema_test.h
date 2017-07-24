@@ -109,7 +109,7 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   builder.add_column(DOUBLE_TYPE, "g");
   builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
-  schema_t<storage::in_memory> s(".", schema_vec);
+  schema_t s(".", schema_vec);
 
   ASSERT_EQ(static_cast<size_t>(8), s.size());
 
@@ -221,9 +221,9 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   builder.add_column(DOUBLE_TYPE, "g");
   builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
-  schema_t<storage::in_memory> s(".", schema_vec);
+  schema_t s(".", schema_vec);
 
-  ts_rec tmp = {0, rec(true, 'a', 10, 101, 1000, 102.4, 182.3)};
+  ts_rec tmp = { 0, rec(true, 'a', 10, 101, 1000, 102.4, 182.3) };
   record_t r = s.apply(0, &tmp, sizeof(rec));
 
   ASSERT_EQ(0, r[0].idx());

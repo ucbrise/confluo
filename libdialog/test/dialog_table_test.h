@@ -11,14 +11,14 @@ using namespace ::dialog;
 
 class DiaLogTableTest : public testing::Test {
  public:
+  static task_pool MGMT_POOL;
   static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
     for (uint32_t i = 0; i < len; i++)
       buf[i] = val_uint8;
   }
 
-  template<typename dtable_t>
-  void test_append_and_get(dtable_t& dtable) {
+  void test_append_and_get(dialog_table& dtable) {
     std::vector<uint64_t> offsets;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       DiaLogTableTest::generate_bytes(data_, DATA_SIZE, i);
@@ -72,40 +72,37 @@ class DiaLogTableTest : public testing::Test {
     builder.add_column(STRING_TYPE(16), "h");
     return builder.get_columns();
   }
-
-  static compiled_expression compile(const std::string& exp,
-      const schema_t<storage::in_memory>& schema) {
-    return expression_compiler::compile(exp, schema);
-  }
-
 protected:
   uint8_t data_[DATA_SIZE];
 };
 
 DiaLogTableTest::rec DiaLogTableTest::r;
-
 std::vector<column_t> DiaLogTableTest::s = schema();
+task_pool DiaLogTableTest::MGMT_POOL;
 
 TEST_F(DiaLogTableTest, AppendAndGetInMemoryTest) {
-  dialog_table<storage::in_memory> dtable(
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg"));
+  dialog_table dtable(
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      "/tmp", storage::IN_MEMORY, MGMT_POOL);
   test_append_and_get(dtable);
 }
 
 TEST_F(DiaLogTableTest, AppendAndGetDurableTest) {
-  dialog_table<storage::durable> dtable(
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg"), "/tmp");
+  dialog_table dtable(
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      "/tmp", storage::DURABLE, MGMT_POOL);
   test_append_and_get(dtable);
 }
 
 TEST_F(DiaLogTableTest, AppendAndGetDurableRelaxedTest) {
-  dialog_table<storage::durable_relaxed> dtable(
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg"), "/tmp");
+  dialog_table dtable(
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      "/tmp", storage::DURABLE_RELAXED, MGMT_POOL);
   test_append_and_get(dtable);
 }
 
 TEST_F(DiaLogTableTest, IndexTest) {
-  dialog_table<storage::in_memory> dtable(s, "/tmp");
+  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   dtable.add_index("a");
   dtable.add_index("b");
   dtable.add_index("c", 10);
@@ -217,15 +214,15 @@ TEST_F(DiaLogTableTest, IndexTest) {
 }
 
 TEST_F(DiaLogTableTest, FilterTest) {
-  dialog_table<storage::in_memory> dtable(s, "/tmp");
-  dtable.add_filter("a == true");
-  dtable.add_filter("b > 4");
-  dtable.add_filter("c <= 30");
-  dtable.add_filter("d == 0");
-  dtable.add_filter("e <= 100");
-  dtable.add_filter("f > 0.1");
-  dtable.add_filter("g < 0.06");
-  dtable.add_filter("h == zzz");
+  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dtable.add_filter("filter1", "a == true");
+  dtable.add_filter("filter2", "b > 4");
+  dtable.add_filter("filter3", "c <= 30");
+  dtable.add_filter("filter4", "d == 0");
+  dtable.add_filter("filter5", "e <= 100");
+  dtable.add_filter("filter6", "f > 0.1");
+  dtable.add_filter("filter7", "g < 0.06");
+  dtable.add_filter("filter8", "h == zzz");
 
   size_t rsize = sizeof(rec);
 
@@ -239,56 +236,56 @@ TEST_F(DiaLogTableTest, FilterTest) {
   dtable.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"), rsize, 0);
 
   size_t i = 0;
-  for (auto r = dtable.query_filter(0, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter1", 0, 0); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(0).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(1, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter2", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(1).value().to_data().as<char>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(2, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter3", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<short>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(3, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter4", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(4, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter5", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<long>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(5, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter6", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(6, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter7", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(7, 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter8", 0, 0); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(7).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -297,7 +294,8 @@ TEST_F(DiaLogTableTest, FilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(0, "b > 4", 0, 0); r.has_more(); ++r) {
+  for (auto r = dtable.query_filter("filter1", "b > 4", 0, 0); r.has_more();
+      ++r) {
     ASSERT_EQ(true, r.get().at(0).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(1).value().to_data().as<char>() > '4');
     i++;
@@ -305,8 +303,8 @@ TEST_F(DiaLogTableTest, FilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(0, "b > 4 || c <= 30", 0, 0); r.has_more();
-      ++r) {
+  for (auto r = dtable.query_filter("filter1", "b > 4 || c <= 30", 0, 0);
+      r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(0).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(1).value().to_data().as<char>() > '4'
@@ -316,8 +314,8 @@ TEST_F(DiaLogTableTest, FilterTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter(0, "b > 4 || f > 0.1", 0, 0); r.has_more();
-      ++r) {
+  for (auto r = dtable.query_filter("filter1", "b > 4 || f > 0.1", 0, 0);
+      r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(0).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(1).value().to_data().as<char>() > '4'

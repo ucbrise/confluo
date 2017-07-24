@@ -8,7 +8,7 @@ using namespace ::dialog;
 
 class MintermTest : public testing::Test {
  public:
-  static schema_t<storage::in_memory> s;
+  static schema_t s;
 
   struct rec {
     bool a;
@@ -28,7 +28,7 @@ class MintermTest : public testing::Test {
 
   static ts_rec r;
 
-  static schema_t<storage::in_memory> schema() {
+  static schema_t schema() {
     schema_builder builder;
     builder.add_column(BOOL_TYPE, "a");
     builder.add_column(CHAR_TYPE, "b");
@@ -38,7 +38,7 @@ class MintermTest : public testing::Test {
     builder.add_column(FLOAT_TYPE, "f");
     builder.add_column(DOUBLE_TYPE, "g");
     builder.add_column(STRING_TYPE(16), "h");
-    return schema_t<storage::in_memory>(".", builder.get_columns());
+    return schema_t(".", builder.get_columns());
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
@@ -60,7 +60,7 @@ class MintermTest : public testing::Test {
 
 MintermTest::ts_rec MintermTest::r;
 
-schema_t<storage::in_memory> MintermTest::s = schema();
+schema_t MintermTest::s = schema();
 
 TEST_F(MintermTest, TestMintermTest) {
   minterm m1, m2, m3;

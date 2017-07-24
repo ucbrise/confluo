@@ -8,12 +8,12 @@
 
 namespace dialog {
 
-template<typename T, class sm>
-using aux_log_t = monolog::monolog_linear<T, 256, 65536, 0, sm>;
+template<typename T>
+using aux_log_t = monolog::monolog_exp2<T>;
 
-typedef aux_log_t<index::radix_tree*, storage::in_memory> index_list_type;
-typedef aux_log_t<monitor::trigger*, storage::in_memory> trigger_list_type;
-typedef aux_log_t<monitor::filter*, storage::in_memory> filter_list_type;
+typedef aux_log_t<index::radix_tree*> index_list_type;
+typedef aux_log_t<monitor::trigger*> trigger_list_type;
+typedef aux_log_t<monitor::filter*> filter_list_type;
 
 }
 

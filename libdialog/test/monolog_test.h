@@ -68,30 +68,34 @@ TEST_F(MonoLogTest, MonoLogExp2Test) {
 }
 
 TEST_F(MonoLogTest, MonoLogLinearIMTest) {
-  monolog_linear<uint64_t, 8, 1048576, 1024, in_memory> array("mlog", "/tmp");
+  monolog_linear<uint64_t, 8, 1048576, 1024> array("mlog", "/tmp",
+                                                   storage::IN_MEMORY);
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_linear<uint64_t, 8, 1048576, 1024, in_memory> arr("mlog", "/tmp");
+    monolog_linear<uint64_t, 8, 1048576, 1024> arr("mlog", "/tmp",
+                                                   storage::IN_MEMORY);
     monolog_test_mt(arr, num_threads);
   }
 }
 
 TEST_F(MonoLogTest, MonoLogLinearDRTest) {
-  monolog_linear<uint64_t, 8, 1048576, 1024, durable_relaxed> array("mlog",
-                                                                    "/tmp");
+  monolog_linear<uint64_t, 8, 1048576, 1024> array("mlog", "/tmp",
+                                                   storage::DURABLE_RELAXED);
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_linear<uint64_t, 8, 1048576, 1024, durable_relaxed> arr("mlog",
-                                                                    "/tmp");
+    monolog_linear<uint64_t, 8, 1048576, 1024> arr("mlog", "/tmp",
+                                                   storage::DURABLE_RELAXED);
     monolog_test_mt(arr, num_threads);
   }
 }
 
 TEST_F(MonoLogTest, MonoLogLinearDTest) {
-  monolog_linear<uint64_t, 8, 1048576, 1024, durable> array("mlog", "/tmp");
+  monolog_linear<uint64_t, 8, 1048576, 1024> array("mlog", "/tmp",
+                                                   storage::DURABLE);
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_linear<uint64_t, 8, 1048576, 1024, durable> arr("mlog", "/tmp");
+    monolog_linear<uint64_t, 8, 1048576, 1024> arr("mlog", "/tmp",
+                                                   storage::DURABLE);
     monolog_test_mt(arr, num_threads);
   }
 }

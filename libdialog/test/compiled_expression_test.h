@@ -8,7 +8,7 @@ using namespace ::dialog;
 
 class CompiledExpressionTest : public testing::Test {
  public:
-  static schema_t<storage::in_memory> s;
+  static schema_t s;
 
   struct rec {
     bool a;
@@ -28,7 +28,7 @@ class CompiledExpressionTest : public testing::Test {
 
   static ts_rec r;
 
-  static schema_t<storage::in_memory> schema() {
+  static schema_t schema() {
     schema_builder builder;
     builder.add_column(BOOL_TYPE, "a");
     builder.add_column(CHAR_TYPE, "b");
@@ -38,7 +38,7 @@ class CompiledExpressionTest : public testing::Test {
     builder.add_column(FLOAT_TYPE, "f");
     builder.add_column(DOUBLE_TYPE, "g");
     builder.add_column(STRING_TYPE(16), "h");
-    return schema_t<storage::in_memory>(".", builder.get_columns());
+    return schema_t(".", builder.get_columns());
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
@@ -60,7 +60,7 @@ class CompiledExpressionTest : public testing::Test {
 
 CompiledExpressionTest::ts_rec CompiledExpressionTest::r;
 
-schema_t<storage::in_memory> CompiledExpressionTest::s = schema();
+schema_t CompiledExpressionTest::s = schema();
 
 TEST_F(CompiledExpressionTest, TestRecordTest) {
   minterm m1, m2, m3;

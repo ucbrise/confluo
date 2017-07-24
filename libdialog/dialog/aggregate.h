@@ -3,6 +3,7 @@
 
 #include "atomic.h"
 #include "numeric.h"
+#include "constants.h"
 
 namespace dialog {
 
@@ -39,6 +40,10 @@ inline numeric count_agg(const numeric& a, const numeric& b) {
   return a + numeric(a.type(), a.type().one());
 }
 
+inline numeric invalid_agg(const numeric& a, const numeric& b) {
+  throw invalid_operation_exception("Invalid aggregation performed.");
+}
+
 inline numeric sum_zero(const data_type& type) {
   return numeric(type, type.zero());
 }
@@ -55,10 +60,17 @@ inline numeric count_zero(const data_type& type) {
   return numeric(type, type.zero());
 }
 
+inline numeric invalid_zero(const data_type& type) {
+  throw invalid_operation_exception("Invalid zero op.");
+}
+
 static aggregator sum_aggregator = { sum_agg, sum_zero };
 static aggregator min_aggregator = { min_agg, min_zero };
 static aggregator max_aggregator = { max_agg, max_zero };
 static aggregator count_aggregator = { count_agg, count_zero };
+static aggregator invalid_aggregator = { invalid_agg, invalid_zero };
+
+class aggregate;
 
 static std::vector<aggregator> aggregators { sum_aggregator, min_aggregator,
     max_aggregator, count_aggregator };
@@ -88,14 +100,24 @@ struct aggregate_node {
   aggregate_node* next_;
 };
 
-class aggregate_t {
+class aggregate_list {
  public:
+  /**
+   * Default constructor
+   */
+  aggregate_list()
+      : head_(nullptr),
+        agg_(invalid_aggregator),
+        type_(NONE_TYPE) {
+
+  }
+
   /**
    * Constructor for aggregate
    *
    * @param agg Aggregate function pointer.
    */
-  aggregate_t(data_type type, aggregator agg = sum_aggregator)
+  aggregate_list(data_type type, aggregator agg)
       : head_(nullptr),
         agg_(agg),
         type_(type) {
@@ -106,7 +128,7 @@ class aggregate_t {
    *
    * @param id Aggregate ID.
    */
-  aggregate_t(data_type type, aggregate_id id)
+  aggregate_list(data_type type, aggregate_id id)
       : head_(nullptr),
         agg_(aggregators[id]),
         type_(type) {
@@ -115,7 +137,21 @@ class aggregate_t {
   /**
    * Default destructor.
    */
-  ~aggregate_t() = default;
+  ~aggregate_list() = default;
+
+  void init(data_type type, aggregator agg) {
+    type_ = type;
+    agg_ = agg;
+  }
+
+  void init(data_type type, aggregate_id id) {
+    type_ = type;
+    agg_ = aggregators[id];
+  }
+
+  numeric zero() const {
+    return agg_.zero(type_);
+  }
 
   /**
    * Get the aggregate value corresponding to the given version.
@@ -177,6 +213,36 @@ class aggregate_t {
   atomic::type<aggregate_node*> head_;
   aggregator agg_;
   data_type type_;
+};
+
+class aggregate {
+ public:
+  aggregate(const data_type& type, aggregate_id id, size_t num_threads =
+                constants::HARDWARE_CONCURRENCY)
+      : num_threads_(num_threads),
+        type_(type),
+        agg_(aggregators[id]),
+        aggs_(new aggregate_list[num_threads]) {
+    for (size_t i = 0; i < num_threads; i++)
+      aggs_[i].init(type, id);
+  }
+
+  void update(size_t thread_id, const numeric& value, uint64_t version) {
+    aggs_[thread_id].update(value, version);
+  }
+
+  numeric get(uint64_t version) {
+    numeric val = agg_.zero(type_);
+    for (size_t i = 0; i < num_threads_; i++)
+      val = agg_.agg(val, aggs_[i].get(version));
+    return val;
+  }
+
+ private:
+  size_t num_threads_;
+  data_type type_;
+  aggregator agg_;
+  aggregate_list* aggs_;
 };
 
 }

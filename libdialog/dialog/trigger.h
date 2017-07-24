@@ -1,24 +1,31 @@
 #ifndef DIALOG_TRIGGER_H_
 #define DIALOG_TRIGGER_H_
 
+#include "aggregate.h"
+
 namespace dialog {
 namespace monitor {
 struct trigger {
  public:
-  trigger(uint32_t filter_id, relop_id op, const numeric& threshold)
-      : filter_id_(filter_id),
+  trigger(aggregate_id agg, size_t field_idx, const data_type& field_type,
+          relop_id op, const numeric& threshold)
+      : agg_id_(agg),
+        field_idx_(field_idx),
+        field_type_(field_type),
         op_(op),
         threshold_(threshold) {
   }
 
-  trigger(const trigger& other)
-      : filter_id_(other.filter_id_),
-        op_(other.op_),
-        threshold_(other.threshold_) {
+  aggregate create_aggregate() {
+    return aggregate(field_type_, agg_id_);
   }
 
-  uint32_t filter_id() const {
-    return filter_id_;
+  aggregate_id agg_id() const {
+    return agg_id_;
+  }
+
+  size_t field_idx() const {
+    return field_idx_;
   }
 
   relop_id op() const {
@@ -30,7 +37,9 @@ struct trigger {
   }
 
  private:
-  uint32_t filter_id_;
+  aggregate_id agg_id_;
+  uint32_t field_idx_;
+  data_type field_type_;
   relop_id op_;
   numeric threshold_;
 };

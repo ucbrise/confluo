@@ -9,20 +9,24 @@
 
 namespace dialog {
 
-template<typename storage_mode = storage::in_memory>
 class read_tail {
  public:
   read_tail() {
     read_tail_ = nullptr;
+    storage_ = storage::IN_MEMORY;
   }
 
-  read_tail(const std::string& data_path) {
-    init(data_path);
+  read_tail(const std::string& data_path,
+            const storage::storage_mode& storage) {
+    init(data_path, storage);
   }
 
-  void init(const std::string& data_path) {
-    read_tail_ = (atomic::type<uint64_t>*) storage_mode::allocate(
+  void init(const std::string& data_path,
+            const storage::storage_mode& storage) {
+    storage_ = storage;
+    read_tail_ = (atomic::type<uint64_t>*) storage_.allocate(
         data_path + "/read_tail", sizeof(uint64_t));
+    atomic::store(read_tail_, UINT64_C(0));
   }
 
   uint64_t get() const {
@@ -35,11 +39,12 @@ class read_tail {
       expected = old_tail;
       std::this_thread::yield();
     }
-    storage_mode::flush(read_tail_, sizeof(uint64_t));
+    storage_.flush(read_tail_, sizeof(uint64_t));
   }
 
  private:
   atomic::type<uint64_t>* read_tail_;
+  storage::storage_mode storage_;
 };
 
 }

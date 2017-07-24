@@ -11,14 +11,24 @@ namespace dialog {
 #define DEFINE_EXCEPTION(name)\
 class name : public std::exception {\
  public:\
-  name(const std::string& msg, const std::string& st)\
-      : msg_(msg + "\n" + st) {\
+  name(const std::string& msg)\
+      : msg_(msg) {\
+  }\
+  name()\
+      : msg_("") {\
+  }\
+  name(const name& other)\
+      : msg_(other.msg_) {\
   }\
   const char* what() const noexcept {\
     return msg_.c_str();\
   }\
+  name& operator=(const name& other) {\
+    msg_ = other.msg_;\
+    return *this;\
+  }\
  private:\
-  const std::string msg_;\
+  std::string msg_;\
 };
 
 DEFINE_EXCEPTION(parse_exception)
@@ -29,9 +39,8 @@ DEFINE_EXCEPTION(illegal_state_exception)
 DEFINE_EXCEPTION(unsupported_exception)
 DEFINE_EXCEPTION(management_exception)
 
-
 #define THROW(ex, msg)\
-    throw ex(msg, utils::error_handling::stacktrace())
+    throw ex(msg)
 
 }
 

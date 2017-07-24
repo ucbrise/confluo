@@ -12,8 +12,7 @@
 namespace dialog {
 namespace monolog {
 
-template<typename T, size_t BUFFER_SIZE = 1048576,
-    class storage_mode = storage::in_memory>
+template<typename T, size_t BUFFER_SIZE = 1048576>
 class monolog_block {
  public:
   typedef bool block_state;
@@ -25,26 +24,32 @@ class monolog_block {
       : path_(""),
         state_(UNINIT),
         data_(nullptr),
-        size_(0) {
+        size_(0),
+        storage_(storage::IN_MEMORY) {
   }
 
-  monolog_block(const std::string& path, size_t size)
+  monolog_block(const std::string& path, size_t size,
+                const storage::storage_mode& storage)
       : path_(path),
         state_(UNINIT),
         data_(nullptr),
-        size_(size) {
+        size_(size),
+        storage_(storage) {
   }
 
   monolog_block(const monolog_block& other)
       : path_(other.path_),
         state_(other.state_),
         data_(other.data_),
-        size_(other.size_) {
+        size_(other.size_),
+        storage_(other.storage_) {
   }
 
-  void init(const std::string& path, const size_t size) {
+  void init(const std::string& path, const size_t size,
+            const storage::storage_mode& storage) {
     path_ = path;
     size_ = size;
+    storage_ = storage;
   }
 
   size_t storage_size() const {
@@ -54,7 +59,7 @@ class monolog_block {
   }
 
   void flush(size_t offset, size_t len) {
-    storage_mode::flush(atomic::load(&data_) + offset, len * sizeof(T));
+    storage_.flush(atomic::load(&data_) + offset, len * sizeof(T));
   }
 
   void set(size_t i, const T& val) {
@@ -123,7 +128,7 @@ class monolog_block {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      T* data = (T*) storage_mode::allocate(path_, file_size);
+      T* data = reinterpret_cast<T*>(storage_.allocate(path_, file_size));
       atomic::store(&data_, data);
       return data;
     }
@@ -140,31 +145,34 @@ class monolog_block {
   atomic::type<block_state> state_;
   atomic::type<T*> data_;
   size_t size_;
+  storage::storage_mode storage_;
 };
 
-template<typename T, size_t BUFFER_SIZE, class storage_mode >
-const bool monolog_block<T, BUFFER_SIZE, storage_mode>::INIT;
+template<typename T, size_t BUFFER_SIZE>
+const bool monolog_block<T, BUFFER_SIZE>::INIT;
 
-template<typename T, size_t BUFFER_SIZE, class storage_mode >
-const bool monolog_block<T, BUFFER_SIZE, storage_mode>::UNINIT;
+template<typename T, size_t BUFFER_SIZE>
+const bool monolog_block<T, BUFFER_SIZE>::UNINIT;
 
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
-    size_t BUFFER_SIZE = 1048576, class storage_mode = storage::in_memory>
+    size_t BUFFER_SIZE = 1048576>
 class monolog_linear_base {
  public:
   monolog_linear_base() = default;
 
-  monolog_linear_base(const std::string& name, const std::string& data_path) {
-    init(name, data_path);
+  monolog_linear_base(const std::string& name, const std::string& data_path,
+                      const storage::storage_mode& storage) {
+    init(name, data_path, storage);
   }
 
-  void init(const std::string& name, const std::string& data_path) {
+  void init(const std::string& name, const std::string& data_path,
+            const storage::storage_mode& storage) {
     name_ = name;
     data_path_ = data_path;
     for (size_t i = 0; i < MAX_BLOCKS; i++) {
       std::string block_path = data_path + "/" + name + "_" + std::to_string(i)
           + ".dat";
-      blocks_[i].init(block_path, BLOCK_SIZE);
+      blocks_[i].init(block_path, BLOCK_SIZE, storage);
     }
     blocks_[0].ensure_alloc();
   }
@@ -273,13 +281,13 @@ class monolog_linear_base {
  protected:
   std::string name_;
   std::string data_path_;
-  std::array<monolog_block<T, BUFFER_SIZE, storage_mode>, MAX_BLOCKS> blocks_;
+  std::array<monolog_block<T, BUFFER_SIZE>, MAX_BLOCKS> blocks_;
 };
 
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
-    size_t BUFFER_SIZE = 1048576, class storage_mode = storage::in_memory>
+    size_t BUFFER_SIZE = 1048576>
 class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
-    BUFFER_SIZE, storage_mode> {
+    BUFFER_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;
@@ -289,18 +297,20 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   typedef T* pointer;
   typedef T reference;
   typedef monolog_iterator<
-      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>> iterator;
+      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>> iterator;
   typedef monolog_iterator<
-      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>> const_iterator;
+      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>> const_iterator;
 
   monolog_linear()
-      : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>(),
+      : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(),
         tail_(0UL) {
   }
 
-  monolog_linear(const std::string& name, const std::string& data_path)
-      : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE, storage_mode>(
-            name, data_path),
+  monolog_linear(const std::string& name, const std::string& data_path,
+                 const storage::storage_mode& storage = storage::IN_MEMORY)
+      : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(name,
+                                                                    data_path,
+                                                                    storage),
         tail_(0UL) {
   }
 

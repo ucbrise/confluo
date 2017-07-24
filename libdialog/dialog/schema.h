@@ -18,9 +18,10 @@
 
 using namespace utils;
 
+// FIXME: Add storage mode
+
 namespace dialog {
 
-template<typename storage_mode>
 class schema_t {
  public:
   schema_t()
@@ -36,7 +37,7 @@ class schema_t {
     }
   }
 
-  schema_t(const schema_t<storage_mode>& other)
+  schema_t(const schema_t& other)
       : record_size_(other.record_size_),
         columns_(other.columns_),
         name_map_(other.name_map_) {
@@ -60,7 +61,8 @@ class schema_t {
     try {
       return columns_[name_map_.at(string_utils::to_upper(name))];
     } catch (std::exception& e) {
-      THROW(invalid_operation_exception, "No such attribute " + name + ": " + e.what());
+      THROW(invalid_operation_exception,
+            "No such attribute " + name + ": " + e.what());
     }
   }
 
@@ -68,7 +70,8 @@ class schema_t {
     try {
       return columns_[name_map_.at(string_utils::to_upper(name))];
     } catch (std::exception& e) {
-      THROW(invalid_operation_exception, "No such attribute " + name + ": " + e.what());
+      THROW(invalid_operation_exception,
+            "No such attribute " + name + ": " + e.what());
     }
   }
 
