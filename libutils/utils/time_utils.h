@@ -14,11 +14,11 @@ class time_utils {
   static std::string current_date_time() {
     std::time_t rawtime;
     std::tm* timeinfo;
-    char buffer[80];
+    char buffer[100];
 
     std::time(&rawtime);
     timeinfo = std::localtime(&rawtime);
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d.%X", timeinfo);
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %X", timeinfo);
     return std::string(buffer);
   }
 
