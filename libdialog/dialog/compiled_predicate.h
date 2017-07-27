@@ -6,6 +6,7 @@
 #include "record.h"
 #include "column.h"
 #include "expression.h"
+#include "schema.h"
 #include "immutable_value.h"
 #include "relational_ops.h"
 #include "index_filter.h"
@@ -13,7 +14,6 @@
 namespace dialog {
 
 struct compiled_predicate {
-  template<typename schema_t>
   compiled_predicate(const predicate_t& p, const schema_t& s)
       : op_(p.op) {
     field_name_ = s[p.attr].name();
@@ -112,7 +112,11 @@ struct compiled_predicate {
   }
 
   inline bool test(const record_t& r) const {
-    return mutable_value::relop(op_, r[field_idx_].value(), val_);
+    return immutable_value::relop(op_, r[field_idx_].value(), val_);
+  }
+
+  inline bool test(const schema_snapshot& snap, void* data) const {
+    return immutable_value::relop(op_, snap.get(data, field_idx_), val_);
   }
 
   inline std::string to_string() const {

@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 
+#include "column_snapshot.h"
 #include "field.h"
 #include "mutable_value.h"
 #include "index_state.h"
@@ -11,7 +12,7 @@
 
 namespace dialog {
 
-struct column_t {
+class column_t {
  public:
   column_t()
       : idx_(UINT16_MAX),
@@ -128,6 +129,10 @@ struct column_t {
     max_ = other.max_;
     idx_state_ = other.idx_state_;
     return *this;
+  }
+
+  column_snapshot snapshot() const {
+    return {type_, offset_, is_indexed(), index_id(), index_bucket_size()};
   }
 
  private:

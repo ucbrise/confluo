@@ -20,11 +20,11 @@ struct record_t {
   }
 
   record_t(size_t log_offset, void* data, size_t size)
-      : timestamp_(*reinterpret_cast<uint64_t*>(data)),
+      : timestamp_(*reinterpret_cast<int64_t*>(data)),
         log_offset_(log_offset),
-        data_(reinterpret_cast<uint8_t*>(data) + sizeof(uint64_t)),
+        data_(reinterpret_cast<uint8_t*>(data)),
         size_(size),
-        version_(log_offset + size + sizeof(uint64_t)) {
+        version_(log_offset + size) {
   }
 
   void reserve(size_t n) {
@@ -47,7 +47,7 @@ struct record_t {
     return fields_.at(idx);
   }
 
-  uint64_t timestamp() const {
+  int64_t timestamp() const {
     return timestamp_;
   }
 
@@ -80,7 +80,7 @@ struct record_t {
   }
 
  private:
-  uint64_t timestamp_;
+  int64_t timestamp_;
   size_t log_offset_;
   void* data_;
   size_t size_;

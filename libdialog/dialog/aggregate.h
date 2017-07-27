@@ -3,7 +3,7 @@
 
 #include "atomic.h"
 #include "numeric.h"
-#include "constants.h"
+#include "thread_manager.h"
 
 namespace dialog {
 
@@ -12,7 +12,39 @@ enum aggregate_id
     D_SUM = 0,
   D_MIN = 1,
   D_MAX = 2,
-  D_COUNT = 3
+  D_CNT = 3
+};
+
+class aggregate_ops {
+ public:
+  static std::string agg_to_string(aggregate_id agg) {
+    switch (agg) {
+      case aggregate_id::D_SUM:
+        return "SUM";
+      case aggregate_id::D_MIN:
+        return "MIN";
+      case aggregate_id::D_MAX:
+        return "MAX";
+      case aggregate_id::D_CNT:
+        return "CNT";
+      default:
+        return "**INVALID**";
+    }
+  }
+
+  static aggregate_id string_to_agg(const std::string& str) {
+    if (str == "SUM") {
+      return aggregate_id::D_SUM;
+    } else if (str == "MIN") {
+      return aggregate_id::D_MIN;
+    } else if (str == "MAX") {
+      return aggregate_id::D_MAX;
+    } else if (str == "CNT") {
+      return aggregate_id::D_CNT;
+    } else {
+      THROW(invalid_operation_exception, "No such aggregate type.");
+    }
+  }
 };
 
 using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
@@ -37,7 +69,7 @@ inline numeric max_agg(const numeric& a, const numeric& b) {
 }
 
 inline numeric count_agg(const numeric& a, const numeric& b) {
-  return a + numeric(a.type(), a.type().one());
+  return a + b;
 }
 
 inline numeric invalid_agg(const numeric& a, const numeric& b) {
@@ -159,7 +191,7 @@ class aggregate_list {
    * @param version The version of the data store.
    * @return The aggregate value.
    */
-  numeric get(uint64_t version) {
+  numeric get(uint64_t version) const {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
     if (req != nullptr)
@@ -189,7 +221,7 @@ class aggregate_list {
    * @param version The expected version for the node being searched for.
    * @return The node that satisfies the constraints above (if any), nullptr otherwise.
    */
-  aggregate_node* get_node(aggregate_node *head, uint64_t version) {
+  aggregate_node* get_node(aggregate_node *head, uint64_t version) const {
     if (head == nullptr)
       return nullptr;
 
@@ -217,29 +249,32 @@ class aggregate_list {
 
 class aggregate {
  public:
-  aggregate(const data_type& type, aggregate_id id, size_t num_threads =
-                constants::HARDWARE_CONCURRENCY)
-      : num_threads_(num_threads),
-        type_(type),
+  aggregate()
+      : type_(NONE_TYPE),
+        agg_(invalid_aggregator),
+        aggs_(nullptr) {
+  }
+
+  aggregate(const data_type& type, aggregate_id id)
+      : type_(type),
         agg_(aggregators[id]),
-        aggs_(new aggregate_list[num_threads]) {
-    for (size_t i = 0; i < num_threads; i++)
+        aggs_(new aggregate_list[thread_manager::get_max_concurrency()]) {
+    for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
       aggs_[i].init(type, id);
   }
 
-  void update(size_t thread_id, const numeric& value, uint64_t version) {
+  void update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].update(value, version);
   }
 
-  numeric get(uint64_t version) {
+  numeric get(uint64_t version) const {
     numeric val = agg_.zero(type_);
-    for (size_t i = 0; i < num_threads_; i++)
+    for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
       val = agg_.agg(val, aggs_[i].get(version));
     return val;
   }
 
  private:
-  size_t num_threads_;
   data_type type_;
   aggregator agg_;
   aggregate_list* aggs_;

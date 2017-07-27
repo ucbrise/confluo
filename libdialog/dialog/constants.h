@@ -7,10 +7,10 @@ namespace dialog {
 
 class constants {
  public:
-  static const uint32_t HARDWARE_CONCURRENCY;
+  static const int HARDWARE_CONCURRENCY;
 };
 
-const uint32_t constants::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
+const int constants::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
 
 }
 

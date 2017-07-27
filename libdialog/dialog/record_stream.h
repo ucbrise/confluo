@@ -7,7 +7,7 @@
 
 namespace dialog {
 
-template<class offset_container, class schema_t, class data_log_t>
+template<class offset_container>
 class record_stream {
  public:
   typedef std::forward_iterator_tag iterator_category;
@@ -16,7 +16,7 @@ class record_stream {
   typedef typename offset_container::iterator offset_iterator;
 
   record_stream(uint64_t version, const offset_container& offsets,
-                const schema_t& schema, const data_log_t& data_log)
+                const schema_t& schema, const data_log& data_log)
       : version_(version),
         it_(offsets.begin()),
         end_(offsets.end()),
@@ -30,7 +30,7 @@ class record_stream {
 
   record_t get() const {
     uint64_t offset = *it_;
-    return schema_.apply(offset, data_log_.cptr(offset), schema_.record_size());
+    return schema_.apply(offset, data_log_.cptr(offset));
   }
 
   record_stream& operator++() {
@@ -69,7 +69,7 @@ class record_stream {
   offset_iterator it_;
   offset_iterator end_;
   const schema_t& schema_;
-  const data_log_t& data_log_;
+  const data_log& data_log_;
 };
 
 template<class rstream_t>

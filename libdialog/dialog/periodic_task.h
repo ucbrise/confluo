@@ -28,7 +28,7 @@ class periodic_task {
     return false;
   }
 
-  bool start(std::function<void(void)> task, uint64_t interval_ms) {
+  bool start(std::function<void(void)> task, uint64_t interval_ms = 1) {
     bool expected = false;
     if (atomic::strong::cas(&enabled_, &expected, true)) {
       executor_ =
@@ -44,8 +44,8 @@ class periodic_task {
                   if (elapsed < interval) {
                     std::this_thread::sleep_for(interval - elapsed);
                   } else {
-                    auto extra_ms = (elapsed - interval).count();
-                    LOG_WARN << name_ << ": Last execution overshot by " << extra_ms << "ms";
+                    auto extra_us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed - interval).count();
+                    LOG_WARN << name_ << ": Last execution overshot by " << extra_us << "us";
                   }
                 }});
       return true;

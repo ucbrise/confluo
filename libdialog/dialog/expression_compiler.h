@@ -5,9 +5,9 @@
 #include <set>
 
 #include "expression.h"
-#include "minterm.h"
 #include "compiled_predicate.h"
 #include "compiled_expression.h"
+#include "compiled_minterm.h"
 
 namespace dialog {
 
@@ -79,7 +79,7 @@ class expression_compiler {
   template<typename schema_t>
   static void exp_predicate(compiled_expression& o, predicate_t* p,
                             const schema_t& schema) {
-    minterm m;
+    compiled_minterm m;
     m.add(compiled_predicate(*p, schema));
     o.insert(m);
   }
@@ -91,8 +91,8 @@ class expression_compiler {
 
   template<typename schema_t>
   static void exp_and(compiled_expression& a, const expression_t* e,
-                      const minterm& m, const schema_t& schema) {
-    minterm right = m;
+                      const compiled_minterm& m, const schema_t& schema) {
+    compiled_minterm right = m;
     switch (e->id) {
       case expression_id::PREDICATE: {
         predicate_t *p = (predicate_t*) e;

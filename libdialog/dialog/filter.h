@@ -5,7 +5,10 @@
 #include "reflog.h"
 #include "tiered_index.h"
 #include "radix_tree.h"
+#include "aggregated_reflog.h"
 #include "compiled_expression.h"
+#include "trigger.h"
+#include "trigger_log.h"
 
 // TODO: Update tests
 
@@ -40,11 +43,11 @@ class filter {
  public:
   // Type definition for time partitioned index; parameters ensure all
   // nanosecond time-stamps can be handled by the index.
-  typedef index::radix_tree idx_t;
-  typedef idx_t::rt_range_result range_result;
+  typedef index::radix_tree<aggregated_reflog> idx_t;
+  typedef idx_t::rt_result range_result;
 
   // Default leaf time-granularity (1ms)
-  static const size_t DEFAULT_LEAF_RANGE_NS = 1e6;
+  static const size_t LEAF_RANGE_NS = 1e6;
 
   /**
    * Constructor that initializes filter with provided compiled expression and
@@ -54,12 +57,11 @@ class filter {
    * @param fn Filter function.
    * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
    */
-  filter(const compiled_expression& exp, filter_fn fn = default_filter,
-         size_t monitor_granularity_ms = 1)
+  filter(const compiled_expression& exp, filter_fn fn = default_filter)
       : exp_(exp),
         fn_(fn),
-        leaf_range_ns_(monitor_granularity_ms * 1e6),
-        idx_(8, 256) {
+        idx_(8, 256),
+        is_valid_(true) {
   }
 
   /**
@@ -68,11 +70,44 @@ class filter {
    * @param fn Provided filter function.
    * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
    */
-  filter(filter_fn fn = default_filter, size_t monitor_granularity_ms = 1)
+  filter(filter_fn fn = default_filter)
       : exp_(),
         fn_(fn),
-        leaf_range_ns_(monitor_granularity_ms * 1e6),
-        idx_(8, 256) {
+        idx_(8, 256),
+        is_valid_(true) {
+  }
+
+  /**
+   * Add a trigger to the filter
+   *
+   * @param t Pointer to trigger
+   * @return Trigger id.
+   */
+  size_t add_trigger(trigger* t) {
+    return triggers_.push_back(t);
+  }
+
+  /**
+   * Invalidate trigger identified by id.
+   *
+   * @param id ID for the trigger.
+   * @return True if invalidation was successful, false otherwise.
+   */
+  bool remove_trigger(size_t id) {
+    return triggers_.at(id)->invalidate();
+  }
+
+  trigger* get_trigger(size_t id) {
+    return triggers_.at(id);
+  }
+
+  /**
+   *
+   *
+   * @return
+   */
+  size_t num_triggers() {
+    return triggers_.size();
   }
 
   /**
@@ -82,8 +117,8 @@ class filter {
    * @param ts Given timestamp.
    * @return Corresponding time block.
    */
-  uint64_t get_ts_block(uint64_t ts) {
-    return ts / leaf_range_ns_;
+  static uint64_t get_ts_block(uint64_t ts) {
+    return ts / LEAF_RANGE_NS;
   }
 
   /**
@@ -97,7 +132,15 @@ class filter {
    */
   void update(const record_t& r) {
     if (exp_.test(r) && fn_(r)) {
-      idx_.insert(byte_string(get_ts_block(r.timestamp())), r.log_offset());
+      aggregated_reflog* refs = idx_.insert(
+          byte_string(get_ts_block(r.timestamp())), r.log_offset(), triggers_);
+      int tid = thread_manager::get_id();
+      for (size_t i = 0; i < refs->num_aggregates(); i++) {
+        if (triggers_.at(i)->is_valid()) {
+          size_t field_idx = triggers_.at(i)->field_idx();
+          refs->update_aggregate(tid, i, r[field_idx].value(), r.version());
+        }
+      }
     }
   }
 
@@ -107,7 +150,7 @@ class filter {
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
-  reflog const* lookup(uint64_t ts_block) const {
+  aggregated_reflog const* lookup(uint64_t ts_block) const {
     return idx_.at(byte_string(ts_block));
   }
 
@@ -124,11 +167,24 @@ class filter {
                              byte_string(ts_block_end));
   }
 
+  bool invalidate() {
+    bool expected = true;
+    if (atomic::strong::cas(&is_valid_, &expected, false)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool is_valid() {
+    return atomic::load(&is_valid_);
+  }
+
  private:
   compiled_expression exp_;         // The compiled filter expression
   filter_fn fn_;                    // Filter function
-  size_t leaf_range_ns_;            // Time-range (ns) covered by leaf node
   idx_t idx_;                       // The filtered data index
+  trigger_log triggers_;
+  atomic::type<bool> is_valid_;     // Is valid
 };
 
 }

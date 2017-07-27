@@ -11,6 +11,7 @@ class CompiledExpressionTest : public testing::Test {
   static schema_t s;
 
   struct rec {
+    uint64_t ts;
     bool a;
     char b;
     short c;
@@ -21,12 +22,7 @@ class CompiledExpressionTest : public testing::Test {
     char h[16];
   }__attribute__((packed));
 
-  struct ts_rec {
-    uint64_t ts;
-    struct rec r;
-  }__attribute__((packed));
-
-  static ts_rec r;
+  static rec r;
 
   static schema_t schema() {
     schema_builder builder;
@@ -42,9 +38,9 @@ class CompiledExpressionTest : public testing::Test {
   }
 
   record_t record(bool a, char b, short c, int d, long e, float f, double g) {
-    r = {0, {a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0}}};
-    return s.apply(0, &r, sizeof(rec));
+    r = {UINT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0}};
+    return s.apply(0, &r);
   }
 
   static compiled_predicate predicate(const std::string& attr, relop_id id,
@@ -58,12 +54,12 @@ class CompiledExpressionTest : public testing::Test {
   }
 };
 
-CompiledExpressionTest::ts_rec CompiledExpressionTest::r;
+CompiledExpressionTest::rec CompiledExpressionTest::r;
 
 schema_t CompiledExpressionTest::s = schema();
 
 TEST_F(CompiledExpressionTest, TestRecordTest) {
-  minterm m1, m2, m3;
+  compiled_minterm m1, m2, m3;
   m1.add(predicate("a", relop_id::EQ, "true"));
   m1.add(predicate("b", relop_id::LT, "c"));
 

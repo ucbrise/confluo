@@ -2,20 +2,29 @@
 #define DIALOG_RADIX_TREE_H_
 
 #include "atomic.h"
-#include "reflog.h"
 #include "byte_string.h"
 #include "exceptions.h"
 #include "flatten.h"
+#include "reflog.h"
 
 namespace dialog {
 namespace index {
 
-class radix_tree;
-
+template<typename reflog>
 struct radix_tree_node {
-  typedef atomic::type<radix_tree_node*> child_t;
-  typedef radix_tree_node node_t;
+  typedef radix_tree_node<reflog> node_t;
+  typedef atomic::type<node_t*> child_t;
   typedef byte_string key_t;
+
+  template<typename ... ARGS>
+  radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
+                  node_t* node_parent, bool, ARGS&& ... args)
+      : key(node_key),
+        depth(node_depth),
+        is_leaf(true),
+        parent(node_parent) {
+    data = new reflog(std::forward<ARGS>(args)...);
+  }
 
   radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
                   node_t* node_parent)
@@ -23,20 +32,9 @@ struct radix_tree_node {
         depth(node_depth),
         is_leaf(false),
         parent(node_parent) {
-    assert((parent == nullptr && depth == 0) || depth == parent->depth + 1);
     data = new child_t[node_width];
     for (size_t i = 0; i < node_width; i++)
       atomic::init(&(children()[i]), static_cast<node_t*>(nullptr));
-  }
-
-  radix_tree_node(uint8_t node_key, size_t node_depth,
-                  radix_tree_node* node_parent)
-      : key(node_key),
-        depth(node_depth),
-        is_leaf(true),
-        parent(node_parent) {
-    assert(depth == parent->depth + 1);
-    data = new reflog;
   }
 
   ~radix_tree_node() {
@@ -164,14 +162,17 @@ struct radix_tree_node {
   uint8_t depth;
   void* data;
   bool is_leaf;
-  radix_tree_node* parent;
+  node_t* parent;
 };
 
+template<typename reflog>
 class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
  public:
-  typedef radix_tree_node node_t;
+  typedef radix_tree_node<reflog> node_t;
   typedef byte_string key_t;
-  typedef rt_reflog_it self_type;
+  typedef rt_reflog_it<reflog> self_type;
+  typedef reflog& reference;
+  typedef reflog* pointer;
 
   rt_reflog_it()
       : width_(0),
@@ -226,11 +227,11 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
     return key_;
   }
 
-  const radix_tree_node* node() const {
+  const node_t* node() const {
     return node_;
   }
 
-  self_type& set_node(const radix_tree_node* node) {
+  self_type& set_node(const node_t* node) {
     node_ = node;
     return *this;
   }
@@ -239,20 +240,21 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   size_t width_;
   size_t depth_;
   key_t key_;
-  const radix_tree_node* node_;
+  const node_t* node_;
 };
 
+template<typename reflog>
 class rt_reflog_range_result {
  public:
-  typedef rt_reflog_it const_iterator;
-  typedef rt_reflog_it iterator;
+  typedef rt_reflog_it<reflog> const_iterator;
+  typedef rt_reflog_it<reflog> iterator;
 
   rt_reflog_range_result(const iterator& lb, const iterator& ub)
       : begin_(lb),
         end_(ub) {
   }
 
-  rt_reflog_range_result(const rt_reflog_range_result& other)
+  rt_reflog_range_result(const rt_reflog_range_result<reflog>& other)
       : begin_(other.begin_),
         end_(other.end_) {
   }
@@ -276,20 +278,22 @@ class rt_reflog_range_result {
   iterator end_;
 };
 
+template<typename reflog>
 class radix_tree {
  public:
-  typedef radix_tree_node node_t;
+  typedef radix_tree_node<reflog> node_t;
   typedef byte_string key_t;
   typedef uint64_t value_t;
 
-  typedef rt_reflog_it iterator;
-  typedef flattened_container<rt_reflog_range_result> rt_range_result;
-  typedef rt_range_result::iterator range_iterator;
+  typedef rt_reflog_it<reflog> iterator;
+  typedef rt_reflog_range_result<reflog> rt_reflog_result;
+  typedef flattened_container<rt_reflog_range_result<reflog>> rt_result;
+  typedef typename rt_result::iterator range_iterator;
 
   radix_tree(size_t depth, size_t width)
       : width_(width),
         depth_(depth),
-        root_(new radix_tree_node(0, width, 0, nullptr)) {
+        root_(new node_t(0, width, 0, nullptr)) {
   }
 
   inline size_t width() const {
@@ -300,14 +304,15 @@ class radix_tree {
     return depth_;
   }
 
-  void insert(const key_t& key, const value_t& value) {
+  template<typename ... ARGS>
+  reflog*& insert(const key_t& key, const value_t& value, ARGS&& ... args) {
     node_t* node = root_;
     for (size_t d = 0; d < depth_ - 1; d++) {
       node_t* child = nullptr;
       if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
         // Try & allocate child node
         child = new node_t(key[d], width_, d + 1, node);
-        radix_tree_node* expected = nullptr;
+        node_t* expected = nullptr;
 
         // If thread was not successful in swapping newly allocated memory,
         // then it should de-allocate memory, and accept whatever the
@@ -327,7 +332,8 @@ class radix_tree {
     node_t* child = nullptr;
     if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
       // Try & allocate child node
-      child = new node_t(key[d], d + 1, node);
+      child = new node_t(key[d], width_, d + 1, node, true,
+                         std::forward<ARGS>(args)...);
       node_t* expected = nullptr;
 
       // If thread was not successful in swapping newly allocated memory,
@@ -339,6 +345,7 @@ class radix_tree {
       }
     }
     child->refs()->push_back(value);
+    return child->refs();
   }
 
   reflog const* at(const key_t& key) const {
@@ -375,20 +382,20 @@ class radix_tree {
     return iterator(width_, depth_, lb.first, lb.second);
   }
 
-  rt_reflog_range_result range_lookup_reflogs(const key_t& begin,
-                                              const key_t& end) const {
+  rt_reflog_result range_lookup_reflogs(const key_t& begin,
+                                        const key_t& end) const {
     iterator ibegin = upper_bound(begin);
     iterator iend = lower_bound(end);
     if (ibegin.node() == nullptr) {
-      return rt_reflog_range_result(ibegin, ibegin);
+      return rt_reflog_result(ibegin, ibegin);
     } else if (iend.node() == nullptr) {
-      return rt_reflog_range_result(iend, iend);
+      return rt_reflog_result(iend, iend);
     }
-    return rt_reflog_range_result(ibegin, ++iend);
+    return rt_reflog_result(ibegin, ++iend);
   }
 
-  rt_range_result range_lookup(const key_t& begin, const key_t& end) const {
-    return rt_range_result(range_lookup_reflogs(begin, end));
+  rt_result range_lookup(const key_t& begin, const key_t& end) const {
+    return rt_result(range_lookup_reflogs(begin, end));
   }
 
   size_t approx_count(const key_t& begin, const key_t& end) {
@@ -417,7 +424,7 @@ class radix_tree {
 
       // Obtain the next valid child
       const node_t* child = ret.second->prev_child(key[d], width_);
-      if (child == nullptr){        // There are no valid children of ret.second
+      if (child == nullptr) {       // There are no valid children of ret.second
         ret.second = ret.second->retreat(ret.first, width_, depth_);
       } else {  // There is a valid child of ret.second
         ret.first[d] = child->key;
@@ -458,9 +465,10 @@ class radix_tree {
 
   size_t width_;
   size_t depth_;
-  radix_tree_node* root_;
-}
-;
+  node_t* root_;
+};
+
+typedef radix_tree<reflog> radix_index;
 
 }
 }

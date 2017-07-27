@@ -27,7 +27,6 @@ class string_map {
     static const uint32_t B = 76963; /* another prime */
     static const uint32_t C = 86969; /* yet another prime */
     static const uint32_t FIRSTH = 37; /* also prime */
-
   };
 
   struct map_entry {

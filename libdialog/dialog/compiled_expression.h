@@ -3,11 +3,11 @@
 
 #include <set>
 
-#include "minterm.h"
+#include "compiled_minterm.h"
 
 namespace dialog {
 
-struct compiled_expression : public std::set<minterm> {
+struct compiled_expression : public std::set<compiled_minterm> {
   inline bool test(const record_t& r) const {
     if (empty())
       return true;
@@ -18,6 +18,17 @@ struct compiled_expression : public std::set<minterm> {
 
     return false;
   }
+
+  inline bool test(const schema_snapshot& snap, void* data) const {
+      if (empty())
+        return true;
+
+      for (auto& p : *this)
+        if (p.test(snap, data))
+          return true;
+
+      return false;
+    }
 
   std::string to_string() const {
     std::string ret = "";

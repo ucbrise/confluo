@@ -1,19 +1,20 @@
-#ifndef DIALOG_MINTERM_H_
-#define DIALOG_MINTERM_H_
+#ifndef DIALOG_COMPILED_MINTERM_H_
+#define DIALOG_COMPILED_MINTERM_H_
 
 #include <vector>
 
 #include "compiled_predicate.h"
+#include "schema_snapshot.h"
 
 namespace dialog {
 
-struct minterm {
+struct compiled_minterm {
   typedef std::set<compiled_predicate>::iterator iterator;
   typedef std::set<compiled_predicate>::const_iterator const_iterator;
 
-  minterm() = default;
+  compiled_minterm() = default;
 
-  minterm(const minterm& other)
+  compiled_minterm(const compiled_minterm& other)
       : m_(other.m_) {
   }
 
@@ -24,6 +25,13 @@ struct minterm {
   inline bool test(const record_t& r) const {
     for (auto& p : m_)
       if (!p.test(r))
+        return false;
+    return true;
+  }
+
+  inline bool test(const schema_snapshot& snap, void* data) const {
+    for (auto& p : m_)
+      if (!p.test(snap, data))
         return false;
     return true;
   }
@@ -56,7 +64,7 @@ struct minterm {
     return m_.end();
   }
 
-  inline bool operator<(const minterm& other) const {
+  inline bool operator<(const compiled_minterm& other) const {
     return to_string() < other.to_string();
   }
 
@@ -70,4 +78,4 @@ struct minterm {
 
 }
 
-#endif /* DIALOG_MINTERM_H_ */
+#endif /* DIALOG_COMPILED_MINTERM_H_ */

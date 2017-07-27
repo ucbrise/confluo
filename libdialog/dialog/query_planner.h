@@ -5,7 +5,7 @@
 
 #include "compiled_expression.h"
 #include "radix_tree.h"
-#include "auxlog.h"
+#include "index_log.h"
 #include "query_plan.h"
 
 // FIXME: A minterm does not yield any results if:
@@ -21,14 +21,14 @@ class query_planner {
   typedef index_filters::const_iterator const_if_iterator;
 
   query_planner(const compiled_expression& expr,
-                const index_list_type& idx_list)
+                const index_log& idx_list)
       : expr_(expr),
         idx_list_(idx_list) {
   }
 
   query_plan plan() {
     query_plan qp;
-    for (const minterm& m : expr_) {
+    for (const compiled_minterm& m : expr_) {
       index_filters filters = reduce_filters(get_filters(m));
       if (!filters.empty()) {
         size_t min_filter_idx = min_filter(filters);
@@ -60,7 +60,7 @@ class query_planner {
     return min_idx;
   }
 
-  index_filters get_filters(const minterm& m) {
+  index_filters get_filters(const compiled_minterm& m) {
     index_filters filters;
     for (const compiled_predicate& p : m) {
       if (p.is_indexed()) {
@@ -97,7 +97,7 @@ class query_planner {
   }
 
   compiled_expression expr_;
-  const index_list_type& idx_list_;
+  const index_log& idx_list_;
 };
 
 }

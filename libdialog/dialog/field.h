@@ -33,18 +33,13 @@ struct field_t {
     return index_id_;
   }
 
-  byte_string get_key() const {
+  inline byte_string get_key() const {
     return value_.to_key(index_bucket_size_);
   }
 
   template<typename T>
-  inline uint64_t get_uint64() const {
-    return (uint64_t) *(reinterpret_cast<const T*>(value_.ptr()));
-  }
-
-  template<typename T>
-  inline T get() const {
-    return *(reinterpret_cast<const T*>(value_.ptr()));
+  inline T as() const {
+    return value_.as<T>();
   }
 
  private:

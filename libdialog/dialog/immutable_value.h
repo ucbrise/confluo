@@ -86,6 +86,11 @@ class immutable_value {
     return *reinterpret_cast<T*>(ptr_);
   }
 
+  template<typename T>
+  const T& as() const {
+    return *reinterpret_cast<const T*>(ptr_);
+  }
+
   std::string to_string() const {
     switch (type_.id) {
       case type_id::D_BOOL: {

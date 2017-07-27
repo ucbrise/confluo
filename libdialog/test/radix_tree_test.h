@@ -10,7 +10,7 @@ class RadixTreeTest : public testing::Test {
 };
 
 TEST_F(RadixTreeTest, InsertGetTest) {
-  radix_tree tree(sizeof(int32_t), 256);
+  radix_index tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++)
     tree.insert(byte_string(i * 8), i);
 
@@ -22,7 +22,7 @@ TEST_F(RadixTreeTest, InsertGetTest) {
 }
 
 TEST_F(RadixTreeTest, UpperLowerBoundTest) {
-  radix_tree tree(sizeof(int32_t), 256);
+  radix_index tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++)
     tree.insert(byte_string(i * 8), i);
 
@@ -43,7 +43,7 @@ TEST_F(RadixTreeTest, UpperLowerBoundTest) {
 }
 
 TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
-  radix_tree tree(sizeof(int32_t), 256);
+  radix_index tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++)
     tree.insert(byte_string(i * 8), i);
 
@@ -65,7 +65,7 @@ TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
 }
 
 TEST_F(RadixTreeTest, ApproxCountTest) {
-  radix_tree tree(sizeof(int32_t), 256);
+  radix_index tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++) {
     for (int32_t j = 0; j < i; j++) {
       tree.insert(byte_string(i * 8), i);
@@ -80,7 +80,7 @@ TEST_F(RadixTreeTest, ApproxCountTest) {
 }
 
 TEST_F(RadixTreeTest, RangeLookupTest) {
-  radix_tree tree(sizeof(int32_t), 256);
+  radix_index tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++)
     tree.insert(byte_string(i * 8), i);
 

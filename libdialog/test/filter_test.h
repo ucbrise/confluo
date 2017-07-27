@@ -17,29 +17,34 @@ inline bool filter1(const record_t& r) {
 }
 
 class FilterTest : public testing::Test {
- public:\
-
+ public:
   static const uint32_t kMaxEntries = 100000;
   static const uint64_t kTimeBlock = 1e3;
   static const uint64_t kMillisecs = 1e6;
 
   struct data_point {
-    uint64_t ts;
-    long val;
+    int64_t ts;
+    int64_t val;
 
-    data_point(uint64_t _ts, long _val)
+    data_point(uint64_t _ts, int64_t _val)
         : ts(_ts),
           val(_val) {
     }
-  };
+  }__attribute__((packed));
 
   void fill(filter& f) {
+    ASSERT_TRUE(thread_manager::register_thread() != -1);
     for (size_t i = 0; i < kMaxEntries; i++) {
       data_point p(i * kTimeBlock, i);
-      record_t r(i, reinterpret_cast<uint8_t*>(&p), sizeof(uint64_t));
+      record_t r(i, reinterpret_cast<uint8_t*>(&p), sizeof(data_point));
       r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
+      r.push_back(
+          field_t(1, LONG_TYPE,
+                  reinterpret_cast<char*>(r.data()) + sizeof(int64_t), false, 0,
+                  0.0));
       f.update(r);
     }
+    ASSERT_TRUE(thread_manager::deregister_thread() != -1);
   }
 
   void fill_mt(filter& f, uint32_t num_threads) {
@@ -48,13 +53,16 @@ class FilterTest : public testing::Test {
       workers.push_back(
           std::thread(
               [i, &f, this] {
+                ASSERT_TRUE(thread_manager::register_thread() != -1);
                 size_t begin = (i - 1) * kMaxEntries, end = i * kMaxEntries;
                 for (size_t j = begin; j < end; j++) {
                   data_point p((j - begin) * kTimeBlock, j);
-                  record_t r(j, reinterpret_cast<uint8_t*>(&p), sizeof(uint64_t));
+                  record_t r(j, reinterpret_cast<uint8_t*>(&p), sizeof(data_point));
                   r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
-                  f.update(record_t(j, reinterpret_cast<uint8_t*>(&p), sizeof(uint64_t)));
+                  r.push_back(field_t(1, LONG_TYPE, reinterpret_cast<char*>(r.data()) + sizeof(int64_t), false, 0, 0.0));
+                  f.update(r);
                 }
+                ASSERT_TRUE(thread_manager::deregister_thread() != -1);
               }));
     }
 
@@ -147,6 +155,42 @@ TEST_F(FilterTest, FilterExpressionTest) {
   for (const uint64_t& r : res) {
     ASSERT_EQ(i, r);
     i++;
+  }
+}
+
+TEST_F(FilterTest, TriggerTest) {
+  std::string expr("value >= 50000");
+  auto cexpr = get_expr(expr);
+  filter f(cexpr);
+  trigger *t = new trigger("filter", "trigger1", aggregate_id::D_MAX, "value",
+                           0, LONG_TYPE, relop_id::GE,
+                           numeric(static_cast<long>(90000)));
+
+  f.add_trigger(t);
+  fill(f);
+  uint64_t version = kMaxEntries + sizeof(data_point);
+  for (size_t t = 50; t < 100; t++) {
+    const aggregated_reflog* ar = f.lookup(t);
+    long expected = ((t + 1) * kTimeBlock - 1) * 1000;
+    ASSERT_TRUE(numeric(expected) == ar->get_aggregate(0, version));
+  }
+}
+
+TEST_F(FilterTest, MultiThreadedTriggerTest) {
+  std::string expr("value >= 50000");
+  auto cexpr = get_expr(expr);
+  filter f(cexpr);
+  trigger *t = new trigger("filter", "trigger1", aggregate_id::D_MAX, "value",
+                           0, LONG_TYPE, relop_id::GE,
+                           numeric(static_cast<long>(90000)));
+
+  f.add_trigger(t);
+  fill_mt(f, 4);
+  uint64_t version = 4 * kMaxEntries + sizeof(data_point);
+  for (size_t t = 50; t < 100; t++) {
+    const aggregated_reflog* ar = f.lookup(t);
+    long expected = ((t + 1) * kTimeBlock - 1) * 1000;
+    ASSERT_TRUE(numeric(expected) == ar->get_aggregate(0, version));
   }
 }
 

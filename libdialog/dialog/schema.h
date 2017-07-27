@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 
+#include "schema_snapshot.h"
 #include "exceptions.h"
 #include "field.h"
 #include "column.h"
@@ -19,6 +20,7 @@
 using namespace utils;
 
 // FIXME: Add storage mode
+// FIXME: Nullable records
 
 namespace dialog {
 
@@ -33,7 +35,7 @@ class schema_t {
     record_size_ = 0;
     for (size_t i = 0; i < columns_.size(); i++) {
       name_map_.insert(std::make_pair(columns_[i].name(), columns_[i].idx()));
-      record_size_ += sizeof(uint64_t) + columns_[i].type().size;
+      record_size_ += columns_[i].type().size;
     }
   }
 
@@ -83,12 +85,20 @@ class schema_t {
     return columns_.size();
   }
 
-  record_t apply(size_t offset, void* data, uint64_t size) const {
-    record_t r(offset, data, size);
+  record_t apply(size_t offset, void* data) const {
+    record_t r(offset, data, record_size_);
     r.reserve(columns_.size());
     for (uint16_t i = 0; i < columns_.size(); i++)
       r.push_back(columns_[i].apply(r.data()));
     return r;
+  }
+
+  schema_snapshot snapshot() const {
+    schema_snapshot snap;
+    for (const column_t& col : columns_) {
+      snap.add_column(col.snapshot());
+    }
+    return snap;
   }
 
  private:
@@ -101,6 +111,8 @@ class schema_builder {
  public:
   schema_builder()
       : offset_(0) {
+    // Every schema must have timestamp
+    add_column(LONG_TYPE, "timestamp", LONG_TYPE.zero(), LONG_TYPE.max());
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name,

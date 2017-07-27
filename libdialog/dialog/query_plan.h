@@ -1,13 +1,13 @@
 #ifndef DIALOG_QUERY_PLAN_H_
 #define DIALOG_QUERY_PLAN_H_
 
-#include "minterm.h"
+#include "compiled_minterm.h"
 
 namespace dialog {
 
 class minterm_plan {
  public:
-  minterm_plan(const index_filter& ifilter, const minterm& dfilter)
+  minterm_plan(const index_filter& ifilter, const compiled_minterm& dfilter)
       : idxf_(ifilter) {
     dataf_.insert(dfilter);
   }

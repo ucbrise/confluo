@@ -76,7 +76,7 @@ TEST_F(AggregateTest, MaxTest) {
 }
 
 TEST_F(AggregateTest, CountTest) {
-  aggregate_list agg(INT_TYPE, aggregate_id::D_COUNT);
+  aggregate_list agg(INT_TYPE, aggregate_id::D_CNT);
   ASSERT_TRUE(numeric(limits::int_zero) == agg.get(0));
 
   int count[11];
@@ -86,8 +86,7 @@ TEST_F(AggregateTest, CountTest) {
   }
 
   for (int i = 1; i <= 10; i++) {
-    numeric value(i);
-    agg.update(value, i * 2);
+    agg.update(numeric(1), i * 2);
     for (int j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(count[j]) == agg.get(j * 2));
   }
