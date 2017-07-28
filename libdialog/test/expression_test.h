@@ -9,7 +9,7 @@ using namespace ::dialog;
 class ExpressionTest : public testing::Test {
  public:
   static expression_t* build_expression(const std::string& exp) {
-    parser p(exp);
+    expression_parser p(exp);
     return p.parse();
   }
 

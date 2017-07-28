@@ -59,7 +59,7 @@ class expression_compiler {
   static compiled_expression compile(const std::string& exp,
                                      const schema_t& schema) {
     compiled_expression cexp;
-    parser p(exp);
+    expression_parser p(exp);
     expression_t *e = p.parse();
     compile(cexp, e, schema);
     expression_utils::free_expression(e);
@@ -69,7 +69,7 @@ class expression_compiler {
   template<typename schema_t>
   static void compile(compiled_expression& minterms, const std::string& exp,
                       const schema_t& schema) {
-    parser p(exp);
+    expression_parser p(exp);
     expression_t *e = p.parse();
     compile(minterms, e, schema);
     expression_utils::free_expression(e);

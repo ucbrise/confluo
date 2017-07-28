@@ -113,7 +113,7 @@ class relop_utils {
     } else if (op == ">=") {
       return relop_id::GE;
     } else {
-      THROW(parse_exception, "Invalid operator " + op);
+      THROW(parse_exception, "Invalid relational operator " + op);
     }
   }
 

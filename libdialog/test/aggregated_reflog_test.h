@@ -35,13 +35,13 @@ class AggregatedReflogTest : public testing::Test {
   static int sum[11];
   static int min[11];
   static int max[11];
-  static int cnt[11];
+  static long cnt[11];
 };
 
 int AggregatedReflogTest::sum[11];
 int AggregatedReflogTest::min[11];
 int AggregatedReflogTest::max[11];
-int AggregatedReflogTest::cnt[11];
+long AggregatedReflogTest::cnt[11];
 
 TEST_F(AggregatedReflogTest, GetSetTest) {
   trigger_log log;
@@ -56,13 +56,14 @@ TEST_F(AggregatedReflogTest, GetSetTest) {
                   relop_id::GT, numeric(10)));
   log.push_back(
       new trigger("filter", "trigger4", aggregate_id::D_CNT, "col", 0, INT_TYPE,
-                  relop_id::GT, numeric(10)));
+                  relop_id::GT, numeric(static_cast<long>(10))));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(0, 0));
   ASSERT_TRUE(numeric(limits::int_max) == ar.get_aggregate(1, 0));
   ASSERT_TRUE(numeric(limits::int_min) == ar.get_aggregate(2, 0));
-  ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(3, 0));
+  ASSERT_TRUE(
+      numeric(static_cast<long>(limits::long_zero)) == ar.get_aggregate(3, 0));
 
   for (int i = 1; i <= 10; i++) {
     numeric value(i);
@@ -86,7 +87,7 @@ TEST_F(AggregatedReflogTest, GetSetTest) {
   }
 
   for (int i = 1; i <= 10; i++) {
-    ar.update_aggregate(0, 3, numeric(1), i * 2);
+    ar.update_aggregate(0, 3, numeric(static_cast<long>(1)), i * 2);
     for (int j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(cnt[j]) == ar.get_aggregate(3, j * 2));
   }
@@ -121,13 +122,14 @@ TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
                   relop_id::GT, numeric(10)));
   log.push_back(
       new trigger("filter", "trigger4", aggregate_id::D_CNT, "col", 0, INT_TYPE,
-                  relop_id::GT, numeric(10)));
+                  relop_id::GT, numeric(static_cast<long>(10))));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(0, 0));
   ASSERT_TRUE(numeric(limits::int_max) == ar.get_aggregate(1, 0));
   ASSERT_TRUE(numeric(limits::int_min) == ar.get_aggregate(2, 0));
-  ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(3, 0));
+  ASSERT_TRUE(
+      numeric(static_cast<long>(limits::long_zero)) == ar.get_aggregate(3, 0));
 
   std::vector<std::thread> workers;
   int max_i = std::min(10, constants::HARDWARE_CONCURRENCY);
@@ -152,7 +154,7 @@ TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
 
   for (int i = 1; i <= max_i; i++) {
     workers.push_back(std::thread([i, &ar] {
-      ar.update_aggregate(i - 1, 3, numeric(1), i * 2);
+      ar.update_aggregate(i - 1, 3, numeric(static_cast<long>(1)), i * 2);
     }));
   }
 

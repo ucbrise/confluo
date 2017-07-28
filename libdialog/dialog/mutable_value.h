@@ -116,7 +116,7 @@ class mutable_value : public immutable_value {
         return mutable_value(type, str.c_str());
       }
       default: {
-        throw std::bad_cast();
+        THROW(parse_exception, "Could not parse value");
       }
     }
   }

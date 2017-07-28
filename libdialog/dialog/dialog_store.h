@@ -1,5 +1,5 @@
-#ifndef LIBDIALOG_DIALOG_DIALOG_STORE_H_
-#define LIBDIALOG_DIALOG_DIALOG_STORE_H_
+#ifndef DIALOG_DIALOG_STORE_H_
+#define DIALOG_DIALOG_STORE_H_
 
 #include <cstdint>
 
@@ -58,4 +58,4 @@ class dialog_store {
 
 }
 
-#endif /* LIBDIALOG_DIALOG_DIALOG_STORE_H_ */
+#endif /* DIALOG_DIALOG_STORE_H_ */

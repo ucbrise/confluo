@@ -22,7 +22,9 @@ struct trigger {
   }
 
   aggregate create_aggregate() {
-    return aggregate(field_type_, agg_id_);
+    return
+        agg_id_ == aggregate_id::D_CNT ?
+            aggregate(LONG_TYPE, agg_id_) : aggregate(field_type_, agg_id_);
   }
 
   std::string trigger_name() const {

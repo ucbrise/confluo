@@ -42,7 +42,7 @@ class aggregate_ops {
     } else if (str == "CNT") {
       return aggregate_id::D_CNT;
     } else {
-      THROW(invalid_operation_exception, "No such aggregate type.");
+      THROW(parse_exception, "Invalid aggregate function " + str);
     }
   }
 };

@@ -138,7 +138,13 @@ class filter {
       for (size_t i = 0; i < refs->num_aggregates(); i++) {
         if (triggers_.at(i)->is_valid()) {
           size_t field_idx = triggers_.at(i)->field_idx();
-          refs->update_aggregate(tid, i, r[field_idx].value(), r.version());
+          aggregate_id agg = triggers_.at(i)->agg_id();
+          refs->update_aggregate(
+              tid,
+              i,
+              agg == aggregate_id::D_CNT ?
+                  numeric(static_cast<long>(1)) : r[field_idx].value(),
+              r.version());
         }
       }
     }

@@ -100,7 +100,7 @@ class numeric {
         return numeric(val);
       }
       default: {
-        throw std::bad_cast();
+        THROW(parse_exception, "Could not parse numeric value");
       }
     }
   }
