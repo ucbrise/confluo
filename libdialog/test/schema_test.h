@@ -9,7 +9,8 @@ using namespace ::dialog;
 class SchemaTest : public testing::Test {
  public:
   struct rec {
-    rec(bool _a, char _b, short _c, int _d, long _e, float _f, double _g)
+    rec(bool _a, int8_t _b, int16_t _c, int32_t _d, int64_t _e, float _f,
+        double _g)
         : ts(0),
           a(_a),
           b(_b),
@@ -22,10 +23,10 @@ class SchemaTest : public testing::Test {
 
     int64_t ts;
     bool a;
-    char b;
-    short c;
-    int d;
-    long e;
+    int8_t b;
+    int16_t c;
+    int32_t d;
+    int64_t e;
     float f;
     double g;
     char h[16];
@@ -252,22 +253,22 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   ASSERT_FALSE(r[1].is_indexed());
 
   ASSERT_EQ(2, r[2].idx());
-  ASSERT_EQ(tmp.b, r[2].as<char>());
+  ASSERT_EQ(tmp.b, r[2].as<int8_t>());
   ASSERT_TRUE(CHAR_TYPE == r[2].type());
   ASSERT_FALSE(r[2].is_indexed());
 
   ASSERT_EQ(3, r[3].idx());
-  ASSERT_EQ(tmp.c, r[3].as<short>());
+  ASSERT_EQ(tmp.c, r[3].as<int16_t>());
   ASSERT_TRUE(SHORT_TYPE == r[3].type());
   ASSERT_FALSE(r[3].is_indexed());
 
   ASSERT_EQ(4, r[4].idx());
-  ASSERT_EQ(tmp.d, r[4].as<int>());
+  ASSERT_EQ(tmp.d, r[4].as<int32_t>());
   ASSERT_TRUE(INT_TYPE == r[4].type());
   ASSERT_FALSE(r[4].is_indexed());
 
   ASSERT_EQ(5, r[5].idx());
-  ASSERT_EQ(tmp.e, r[5].as<long>());
+  ASSERT_EQ(tmp.e, r[5].as<int64_t>());
   ASSERT_TRUE(LONG_TYPE == r[5].type());
   ASSERT_FALSE(r[5].is_indexed());
 

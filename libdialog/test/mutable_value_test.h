@@ -52,15 +52,15 @@ TEST_F(MutableValueTest, BoolValueTest) {
 
 TEST_F(MutableValueTest, CharValueTest) {
 
-  mutable_value n1(static_cast<char>(5)), n2(static_cast<char>(2)), n3(
-      static_cast<char>(5));
+  mutable_value n1(static_cast<int8_t>(5)), n2(static_cast<int8_t>(2)), n3(
+      static_cast<int8_t>(5));
   ASSERT_EQ(n1.type().id, type_id::D_CHAR);
   ASSERT_EQ(n2.type().id, type_id::D_CHAR);
   ASSERT_EQ(n3.type().id, type_id::D_CHAR);
 
-  ASSERT_EQ(*reinterpret_cast<const char*>(n1.ptr()), static_cast<char>(5));
-  ASSERT_EQ(*reinterpret_cast<const char*>(n2.ptr()), static_cast<char>(2));
-  ASSERT_EQ(*reinterpret_cast<const char*>(n3.ptr()), static_cast<char>(5));
+  ASSERT_EQ(*reinterpret_cast<const int8_t*>(n1.ptr()), static_cast<int8_t>(5));
+  ASSERT_EQ(*reinterpret_cast<const int8_t*>(n2.ptr()), static_cast<int8_t>(2));
+  ASSERT_EQ(*reinterpret_cast<const int8_t*>(n3.ptr()), static_cast<int8_t>(5));
 
   ASSERT_TRUE(n1 == n3);
   ASSERT_TRUE(n1 != n2);
@@ -76,32 +76,35 @@ TEST_F(MutableValueTest, CharValueTest) {
   ASSERT_FALSE(n1 < n2);
   ASSERT_FALSE(n1 <= n2);
 
-  ASSERT_TRUE(mutable_value(static_cast<char>(-5)) == (-n1));
-  ASSERT_TRUE(mutable_value(static_cast<char>(5)) == (+n1));
-  ASSERT_TRUE(mutable_value(static_cast<char>(7)) == (n1 + n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(3)) == (n1 - n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(10)) == (n1 * n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(2)) == (n1 / n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(1)) == (n1 % n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(~5)) == (~n1));
-  ASSERT_TRUE(mutable_value(static_cast<char>(5 & 2)) == (n1 & n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(5 | 2)) == (n1 | n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(5 ^ 2)) == (n1 ^ n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(5 << 2)) == (n1 << n2));
-  ASSERT_TRUE(mutable_value(static_cast<char>(5 >> 2)) == (n1 >> n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(-5)) == (-n1));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(5)) == (+n1));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(7)) == (n1 + n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(3)) == (n1 - n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(10)) == (n1 * n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(2)) == (n1 / n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(1)) == (n1 % n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(~5)) == (~n1));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(5 & 2)) == (n1 & n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(5 | 2)) == (n1 | n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(5 ^ 2)) == (n1 ^ n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(5 << 2)) == (n1 << n2));
+  ASSERT_TRUE(mutable_value(static_cast<int8_t>(5 >> 2)) == (n1 >> n2));
 }
 
 TEST_F(MutableValueTest, ShortValueTest) {
 
-  mutable_value n1(static_cast<short>(5)), n2(static_cast<short>(2)), n3(
-      static_cast<short>(5));
+  mutable_value n1(static_cast<int16_t>(5)), n2(static_cast<int16_t>(2)), n3(
+      static_cast<int16_t>(5));
   ASSERT_EQ(n1.type().id, type_id::D_SHORT);
   ASSERT_EQ(n2.type().id, type_id::D_SHORT);
   ASSERT_EQ(n3.type().id, type_id::D_SHORT);
 
-  ASSERT_EQ(*reinterpret_cast<const short*>(n1.ptr()), static_cast<short>(5));
-  ASSERT_EQ(*reinterpret_cast<const short*>(n2.ptr()), static_cast<short>(2));
-  ASSERT_EQ(*reinterpret_cast<const short*>(n3.ptr()), static_cast<short>(5));
+  ASSERT_EQ(*reinterpret_cast<const int16_t*>(n1.ptr()),
+            static_cast<int16_t>(5));
+  ASSERT_EQ(*reinterpret_cast<const int16_t*>(n2.ptr()),
+            static_cast<int16_t>(2));
+  ASSERT_EQ(*reinterpret_cast<const int16_t*>(n3.ptr()),
+            static_cast<int16_t>(5));
 
   ASSERT_TRUE(n1 == n3);
   ASSERT_TRUE(n1 != n2);
@@ -117,31 +120,34 @@ TEST_F(MutableValueTest, ShortValueTest) {
   ASSERT_FALSE(n1 < n2);
   ASSERT_FALSE(n1 <= n2);
 
-  ASSERT_TRUE(mutable_value(static_cast<short>(-5)) == (-n1));
-  ASSERT_TRUE(mutable_value(static_cast<short>(5)) == (+n1));
-  ASSERT_TRUE(mutable_value(static_cast<short>(7)) == (n1 + n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(3)) == (n1 - n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(10)) == (n1 * n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(2)) == (n1 / n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(1)) == (n1 % n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(~5)) == (~n1));
-  ASSERT_TRUE(mutable_value(static_cast<short>(5 & 2)) == (n1 & n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(5 | 2)) == (n1 | n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(5 ^ 2)) == (n1 ^ n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(5 << 2)) == (n1 << n2));
-  ASSERT_TRUE(mutable_value(static_cast<short>(5 >> 2)) == (n1 >> n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(-5)) == (-n1));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(5)) == (+n1));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(7)) == (n1 + n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(3)) == (n1 - n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(10)) == (n1 * n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(2)) == (n1 / n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(1)) == (n1 % n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(~5)) == (~n1));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(5 & 2)) == (n1 & n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(5 | 2)) == (n1 | n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(5 ^ 2)) == (n1 ^ n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(5 << 2)) == (n1 << n2));
+  ASSERT_TRUE(mutable_value(static_cast<int16_t>(5 >> 2)) == (n1 >> n2));
 }
 
 TEST_F(MutableValueTest, IntValueTest) {
-  mutable_value n1(static_cast<int>(5)), n2(static_cast<int>(2)), n3(
-      static_cast<int>(5));
+  mutable_value n1(static_cast<int32_t>(5)), n2(static_cast<int32_t>(2)), n3(
+      static_cast<int32_t>(5));
   ASSERT_EQ(n1.type().id, type_id::D_INT);
   ASSERT_EQ(n2.type().id, type_id::D_INT);
   ASSERT_EQ(n3.type().id, type_id::D_INT);
 
-  ASSERT_EQ(*reinterpret_cast<const int*>(n1.ptr()), static_cast<int>(5));
-  ASSERT_EQ(*reinterpret_cast<const int*>(n2.ptr()), static_cast<int>(2));
-  ASSERT_EQ(*reinterpret_cast<const int*>(n3.ptr()), static_cast<int>(5));
+  ASSERT_EQ(*reinterpret_cast<const int32_t*>(n1.ptr()),
+            static_cast<int32_t>(5));
+  ASSERT_EQ(*reinterpret_cast<const int32_t*>(n2.ptr()),
+            static_cast<int32_t>(2));
+  ASSERT_EQ(*reinterpret_cast<const int32_t*>(n3.ptr()),
+            static_cast<int32_t>(5));
 
   ASSERT_TRUE(n1 == n3);
   ASSERT_TRUE(n1 != n2);
@@ -157,31 +163,34 @@ TEST_F(MutableValueTest, IntValueTest) {
   ASSERT_FALSE(n1 < n2);
   ASSERT_FALSE(n1 <= n2);
 
-  ASSERT_TRUE(mutable_value(static_cast<int>(-5)) == (-n1));
-  ASSERT_TRUE(mutable_value(static_cast<int>(5)) == (+n1));
-  ASSERT_TRUE(mutable_value(static_cast<int>(7)) == (n1 + n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(3)) == (n1 - n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(10)) == (n1 * n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(2)) == (n1 / n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(1)) == (n1 % n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(~5)) == (~n1));
-  ASSERT_TRUE(mutable_value(static_cast<int>(5 & 2)) == (n1 & n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(5 | 2)) == (n1 | n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(5 ^ 2)) == (n1 ^ n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(5 << 2)) == (n1 << n2));
-  ASSERT_TRUE(mutable_value(static_cast<int>(5 >> 2)) == (n1 >> n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(-5)) == (-n1));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(5)) == (+n1));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(7)) == (n1 + n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(3)) == (n1 - n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(10)) == (n1 * n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(2)) == (n1 / n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(1)) == (n1 % n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(~5)) == (~n1));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(5 & 2)) == (n1 & n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(5 | 2)) == (n1 | n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(5 ^ 2)) == (n1 ^ n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(5 << 2)) == (n1 << n2));
+  ASSERT_TRUE(mutable_value(static_cast<int32_t>(5 >> 2)) == (n1 >> n2));
 }
 
 TEST_F(MutableValueTest, LongValueTest) {
-  mutable_value n1(static_cast<long>(5)), n2(static_cast<long>(2)), n3(
-      static_cast<long>(5));
+  mutable_value n1(static_cast<int64_t>(5)), n2(static_cast<int64_t>(2)), n3(
+      static_cast<int64_t>(5));
   ASSERT_EQ(n1.type().id, type_id::D_LONG);
   ASSERT_EQ(n2.type().id, type_id::D_LONG);
   ASSERT_EQ(n3.type().id, type_id::D_LONG);
 
-  ASSERT_EQ(*reinterpret_cast<const long*>(n1.ptr()), static_cast<long>(5));
-  ASSERT_EQ(*reinterpret_cast<const long*>(n2.ptr()), static_cast<long>(2));
-  ASSERT_EQ(*reinterpret_cast<const long*>(n3.ptr()), static_cast<long>(5));
+  ASSERT_EQ(*reinterpret_cast<const int64_t*>(n1.ptr()),
+            static_cast<int64_t>(5));
+  ASSERT_EQ(*reinterpret_cast<const int64_t*>(n2.ptr()),
+            static_cast<int64_t>(2));
+  ASSERT_EQ(*reinterpret_cast<const int64_t*>(n3.ptr()),
+            static_cast<int64_t>(5));
 
   ASSERT_TRUE(n1 == n3);
   ASSERT_TRUE(n1 != n2);
@@ -197,19 +206,19 @@ TEST_F(MutableValueTest, LongValueTest) {
   ASSERT_FALSE(n1 < n2);
   ASSERT_FALSE(n1 <= n2);
 
-  ASSERT_TRUE(mutable_value(static_cast<long>(-5)) == (-n1));
-  ASSERT_TRUE(mutable_value(static_cast<long>(5)) == (+n1));
-  ASSERT_TRUE(mutable_value(static_cast<long>(7)) == (n1 + n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(3)) == (n1 - n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(10)) == (n1 * n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(2)) == (n1 / n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(1)) == (n1 % n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(~5)) == (~n1));
-  ASSERT_TRUE(mutable_value(static_cast<long>(5 & 2)) == (n1 & n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(5 | 2)) == (n1 | n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(5 ^ 2)) == (n1 ^ n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(5 << 2)) == (n1 << n2));
-  ASSERT_TRUE(mutable_value(static_cast<long>(5 >> 2)) == (n1 >> n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(-5)) == (-n1));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(5)) == (+n1));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(7)) == (n1 + n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(3)) == (n1 - n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(10)) == (n1 * n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(2)) == (n1 / n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(1)) == (n1 % n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(~5)) == (~n1));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(5 & 2)) == (n1 & n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(5 | 2)) == (n1 | n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(5 ^ 2)) == (n1 ^ n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(5 << 2)) == (n1 << n2));
+  ASSERT_TRUE(mutable_value(static_cast<int64_t>(5 >> 2)) == (n1 >> n2));
 }
 
 TEST_F(MutableValueTest, FloatValueTest) {
@@ -240,17 +249,14 @@ TEST_F(MutableValueTest, FloatValueTest) {
   ASSERT_TRUE(mutable_value(static_cast<float>(-5.2)) == (-n1));
   ASSERT_TRUE(mutable_value(static_cast<float>(5.2)) == (+n1));
   ASSERT_TRUE(
-      approx_equals<float>(mutable_value(static_cast<float>(7.8)),
-                           (n1 + n2)));
+      approx_equals<float>(mutable_value(static_cast<float>(7.8)), (n1 + n2)));
   ASSERT_TRUE(
-      approx_equals<float>(mutable_value(static_cast<float>(2.6)),
-                           (n1 - n2)));
+      approx_equals<float>(mutable_value(static_cast<float>(2.6)), (n1 - n2)));
   ASSERT_TRUE(
       approx_equals<float>(mutable_value(static_cast<float>(13.52)),
                            (n1 * n2)));
   ASSERT_TRUE(
-      approx_equals<float>(mutable_value(static_cast<float>(2.0)),
-                           (n1 / n2)));
+      approx_equals<float>(mutable_value(static_cast<float>(2.0)), (n1 / n2)));
 
   test::test_utils::test_fail([&n1]() {(~n1);});
   test::test_utils::test_fail([&n1, &n2]() {(n1 & n2);});
@@ -261,8 +267,8 @@ TEST_F(MutableValueTest, FloatValueTest) {
 }
 
 TEST_F(MutableValueTest, DoubleValueTest) {
-  mutable_value n1(static_cast<double>(5.2)), n2(static_cast<double>(2.6)),
-      n3(static_cast<double>(5.2));
+  mutable_value n1(static_cast<double>(5.2)), n2(static_cast<double>(2.6)), n3(
+      static_cast<double>(5.2));
   ASSERT_EQ(n1.type().id, type_id::D_DOUBLE);
   ASSERT_EQ(n2.type().id, type_id::D_DOUBLE);
   ASSERT_EQ(n3.type().id, type_id::D_DOUBLE);
@@ -372,10 +378,10 @@ TEST_F(MutableValueTest, BoolParseTest) {
 
 TEST_F(MutableValueTest, CharParseTest) {
   mutable_value val1 = mutable_value::parse("c", CHAR_TYPE);
-  ASSERT_EQ('c', *reinterpret_cast<const char*>(val1.ptr()));
+  ASSERT_EQ('c', *reinterpret_cast<const int8_t*>(val1.ptr()));
 
   mutable_value val2 = mutable_value::parse("1", CHAR_TYPE);
-  ASSERT_EQ('1', *reinterpret_cast<const char*>(val2.ptr()));
+  ASSERT_EQ('1', *reinterpret_cast<const int8_t*>(val2.ptr()));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
     mutable_value::parse("cc", CHAR_TYPE);
@@ -388,10 +394,10 @@ TEST_F(MutableValueTest, CharParseTest) {
 
 TEST_F(MutableValueTest, ShortParseTest) {
   mutable_value val1 = mutable_value::parse("10", SHORT_TYPE);
-  ASSERT_EQ(10, *reinterpret_cast<const short*>(val1.ptr()));
+  ASSERT_EQ(10, *reinterpret_cast<const int16_t*>(val1.ptr()));
 
   mutable_value val2 = mutable_value::parse("-100", SHORT_TYPE);
-  ASSERT_EQ(-100, *reinterpret_cast<const short*>(val2.ptr()));
+  ASSERT_EQ(-100, *reinterpret_cast<const int16_t*>(val2.ptr()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     mutable_value::parse("10c", SHORT_TYPE);
@@ -408,10 +414,10 @@ TEST_F(MutableValueTest, ShortParseTest) {
 
 TEST_F(MutableValueTest, IntParseTest) {
   mutable_value val1 = mutable_value::parse("65536", INT_TYPE);
-  ASSERT_EQ(65536, *reinterpret_cast<const int*>(val1.ptr()));
+  ASSERT_EQ(65536, *reinterpret_cast<const int32_t*>(val1.ptr()));
 
   mutable_value val2 = mutable_value::parse("-100", INT_TYPE);
-  ASSERT_EQ(-100, *reinterpret_cast<const int*>(val2.ptr()));
+  ASSERT_EQ(-100, *reinterpret_cast<const int32_t*>(val2.ptr()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     mutable_value::parse("10c", INT_TYPE);
@@ -428,10 +434,10 @@ TEST_F(MutableValueTest, IntParseTest) {
 
 TEST_F(MutableValueTest, LongParseTest) {
   mutable_value val1 = mutable_value::parse("2147483648", LONG_TYPE);
-  ASSERT_EQ(2147483648, *reinterpret_cast<const long*>(val1.ptr()));
+  ASSERT_EQ(2147483648, *reinterpret_cast<const int64_t*>(val1.ptr()));
 
   mutable_value val2 = mutable_value::parse("-100", LONG_TYPE);
-  ASSERT_EQ(-100, *reinterpret_cast<const long*>(val2.ptr()));
+  ASSERT_EQ(-100, *reinterpret_cast<const int64_t*>(val2.ptr()));
 
   ASSERT_TRUE(test::test_utils::test_fail([] {
     mutable_value::parse("10c", LONG_TYPE);

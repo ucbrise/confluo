@@ -26,22 +26,22 @@ class mutable_value : public immutable_value {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, BOOL_TYPE.size));
   }
 
-  mutable_value(char value)
+  mutable_value(int8_t value)
       : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, CHAR_TYPE.size));
   }
 
-  mutable_value(short value)
+  mutable_value(int16_t value)
       : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, SHORT_TYPE.size));
   }
 
-  mutable_value(int value)
+  mutable_value(int32_t value)
       : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, INT_TYPE.size));
   }
 
-  mutable_value(long value)
+  mutable_value(int64_t value)
       : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, LONG_TYPE.size));
   }
@@ -89,19 +89,19 @@ class mutable_value : public immutable_value {
         return mutable_value(val);
       }
       case type_id::D_CHAR: {
-        char val = string_utils::lexical_cast<char>(str);
+        int8_t val = string_utils::lexical_cast<int8_t>(str);
         return mutable_value(val);
       }
       case type_id::D_SHORT: {
-        short val = string_utils::lexical_cast<short>(str);
+        int16_t val = string_utils::lexical_cast<int16_t>(str);
         return mutable_value(val);
       }
       case type_id::D_INT: {
-        int val = string_utils::lexical_cast<int>(str);
+        int32_t val = string_utils::lexical_cast<int32_t>(str);
         return mutable_value(val);
       }
       case type_id::D_LONG: {
-        long val = string_utils::lexical_cast<long>(str);
+        int64_t val = string_utils::lexical_cast<int64_t>(str);
         return mutable_value(val);
       }
       case type_id::D_FLOAT: {

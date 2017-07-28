@@ -143,7 +143,7 @@ class filter {
               tid,
               i,
               agg == aggregate_id::D_CNT ?
-                  numeric(static_cast<long>(1)) : r[field_idx].value(),
+                  numeric(INT64_C(1)) : r[field_idx].value(),
               r.version());
         }
       }

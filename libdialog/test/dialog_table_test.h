@@ -43,10 +43,10 @@ class DiaLogTableTest : public testing::Test {
   struct rec {
     int64_t ts;
     bool a;
-    char b;
-    short c;
-    int d;
-    long e;
+    int8_t b;
+    int16_t c;
+    int32_t d;
+    int64_t e;
     float f;
     double g;
     char h[16];
@@ -54,8 +54,8 @@ class DiaLogTableTest : public testing::Test {
 
   static rec r;
 
-  void* record(bool a, char b, short c, int d, long e, float f, double g,
-               const char* h) {
+  void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
+               double g, const char* h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     memcpy(r.h, h, std::min(static_cast<size_t>(16), strlen(h)));
@@ -74,6 +74,7 @@ class DiaLogTableTest : public testing::Test {
     builder.add_column(STRING_TYPE(16), "h");
     return builder.get_columns();
   }
+
  protected:
   uint8_t data_[DATA_SIZE];
 };
@@ -139,28 +140,28 @@ TEST_F(DiaLogTableTest, IndexTest) {
 
   i = 0;
   for (auto r = dtable.execute_filter("b > 4"); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(2).value().to_data().as<char>() > '4');
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
   for (auto r = dtable.execute_filter("c <= 30"); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(3).value().to_data().as<short>() <= 30);
+    ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
   for (auto r = dtable.execute_filter("d == 0"); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(4).value().to_data().as<int>() == 0);
+    ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
   for (auto r = dtable.execute_filter("e <= 100"); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(5).value().to_data().as<long>() <= 100);
+    ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -192,7 +193,7 @@ TEST_F(DiaLogTableTest, IndexTest) {
   for (auto r = dtable.execute_filter("a == true && b > 4"); r.has_more();
       ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
-    ASSERT_TRUE(r.get().at(2).value().to_data().as<char>() > '4');
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
@@ -202,8 +203,8 @@ TEST_F(DiaLogTableTest, IndexTest) {
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.get().at(2).value().to_data().as<char>() > '4'
-            || r.get().at(3).value().to_data().as<short>() <= 30);
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -213,7 +214,7 @@ TEST_F(DiaLogTableTest, IndexTest) {
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.get().at(2).value().to_data().as<char>() > '4'
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
             || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
@@ -269,28 +270,28 @@ TEST_F(DiaLogTableTest, FilterTest) {
 
   i = 0;
   for (auto r = dtable.query_filter("filter2", beg, end); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(2).value().to_data().as<char>() > '4');
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
   for (auto r = dtable.query_filter("filter3", beg, end); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(3).value().to_data().as<short>() <= 30);
+    ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
   for (auto r = dtable.query_filter("filter4", beg, end); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(4).value().to_data().as<int>() == 0);
+    ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
   for (auto r = dtable.query_filter("filter5", beg, end); r.has_more(); ++r) {
-    ASSERT_TRUE(r.get().at(5).value().to_data().as<long>() <= 100);
+    ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -322,7 +323,7 @@ TEST_F(DiaLogTableTest, FilterTest) {
   for (auto r = dtable.query_filter("filter1", "b > 4", beg, end); r.has_more();
       ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
-    ASSERT_TRUE(r.get().at(2).value().to_data().as<char>() > '4');
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
@@ -332,8 +333,8 @@ TEST_F(DiaLogTableTest, FilterTest) {
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.get().at(2).value().to_data().as<char>() > '4'
-            || r.get().at(3).value().to_data().as<short>() <= 30);
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -343,7 +344,7 @@ TEST_F(DiaLogTableTest, FilterTest) {
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.get().at(2).value().to_data().as<char>() > '4'
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
             || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }

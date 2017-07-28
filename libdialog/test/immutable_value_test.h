@@ -35,13 +35,13 @@ TEST_F(ImmutableValueTest, BoolValueTest) {
 }
 
 TEST_F(ImmutableValueTest, CharValueTest) {
-  char v1 = 'c', v2 = '1';
+  int8_t v1 = 'c', v2 = '1';
 
   immutable_value val1(CHAR_TYPE, &v1);
-  ASSERT_EQ(v1, *reinterpret_cast<const char*>(val1.ptr()));
+  ASSERT_EQ(v1, *reinterpret_cast<const int8_t*>(val1.ptr()));
 
   immutable_value val2(CHAR_TYPE, &v2);
-  ASSERT_EQ(v2, *reinterpret_cast<const char*>(val2.ptr()));
+  ASSERT_EQ(v2, *reinterpret_cast<const int8_t*>(val2.ptr()));
 
   ASSERT_FALSE(val1 < val2);
   ASSERT_FALSE(val1 <= val2);
@@ -54,13 +54,13 @@ TEST_F(ImmutableValueTest, CharValueTest) {
 }
 
 TEST_F(ImmutableValueTest, ShortValueTest) {
-  short v1 = 10, v2 = -100;
+  int16_t v1 = 10, v2 = -100;
 
   immutable_value val1(SHORT_TYPE, &v1);
-  ASSERT_EQ(v1, *reinterpret_cast<const short*>(val1.ptr()));
+  ASSERT_EQ(v1, *reinterpret_cast<const int16_t*>(val1.ptr()));
 
   immutable_value val2(SHORT_TYPE, &v2);
-  ASSERT_EQ(v2, *reinterpret_cast<const short*>(val2.ptr()));
+  ASSERT_EQ(v2, *reinterpret_cast<const int16_t*>(val2.ptr()));
 
   ASSERT_FALSE(val1 < val2);
   ASSERT_FALSE(val1 <= val2);
@@ -73,13 +73,13 @@ TEST_F(ImmutableValueTest, ShortValueTest) {
 }
 
 TEST_F(ImmutableValueTest, IntValueTest) {
-  int v1 = 65536, v2 = -100;
+  int32_t v1 = 65536, v2 = -100;
 
   immutable_value val1(INT_TYPE, &v1);
-  ASSERT_EQ(v1, *reinterpret_cast<const int*>(val1.ptr()));
+  ASSERT_EQ(v1, *reinterpret_cast<const int32_t*>(val1.ptr()));
 
   immutable_value val2(INT_TYPE, &v2);
-  ASSERT_EQ(v2, *reinterpret_cast<const int*>(val2.ptr()));
+  ASSERT_EQ(v2, *reinterpret_cast<const int32_t*>(val2.ptr()));
 
   ASSERT_FALSE(val1 < val2);
   ASSERT_FALSE(val1 <= val2);
@@ -92,12 +92,12 @@ TEST_F(ImmutableValueTest, IntValueTest) {
 }
 
 TEST_F(ImmutableValueTest, LongValueTest) {
-  long v1 = 2147483648, v2 = -100;
+  int64_t v1 = 2147483648, v2 = -100;
   immutable_value val1(LONG_TYPE, &v1);
-  ASSERT_EQ(v1, *reinterpret_cast<const long*>(val1.ptr()));
+  ASSERT_EQ(v1, *reinterpret_cast<const int64_t*>(val1.ptr()));
 
   immutable_value val2(LONG_TYPE, &v2);
-  ASSERT_EQ(v2, *reinterpret_cast<const long*>(val2.ptr()));
+  ASSERT_EQ(v2, *reinterpret_cast<const int64_t*>(val2.ptr()));
 
   ASSERT_FALSE(val1 < val2);
   ASSERT_FALSE(val1 <= val2);

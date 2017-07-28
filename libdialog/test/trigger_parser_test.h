@@ -32,28 +32,28 @@ TEST_F(TriggerParserTest, ParseTest) {
   ASSERT_EQ(aggregate_id::D_SUM, t1.agg);
   ASSERT_EQ("c", t1.field_name);
   ASSERT_EQ(relop_id::LT, t1.relop);
-  ASSERT_TRUE(numeric(static_cast<short>(10)) == t1.threshold);
+  ASSERT_TRUE(numeric(static_cast<int16_t>(10)) == t1.threshold);
 
   trigger_parser parser2("MIN(d) >= 200", s);
   auto t2 = parser2.parse();
   ASSERT_EQ(aggregate_id::D_MIN, t2.agg);
   ASSERT_EQ("d", t2.field_name);
   ASSERT_EQ(relop_id::GE, t2.relop);
-  ASSERT_TRUE(numeric(static_cast<int>(200)) == t2.threshold);
+  ASSERT_TRUE(numeric(static_cast<int32_t>(200)) == t2.threshold);
 
   trigger_parser parser3("MAX(e) == 4000", s);
   auto t3 = parser3.parse();
   ASSERT_EQ(aggregate_id::D_MAX, t3.agg);
   ASSERT_EQ("e", t3.field_name);
   ASSERT_EQ(relop_id::EQ, t3.relop);
-  ASSERT_TRUE(numeric(static_cast<long>(4000)) == t3.threshold);
+  ASSERT_TRUE(numeric(static_cast<int64_t>(4000)) == t3.threshold);
 
   trigger_parser parser4("CNT(d) <= 10", s);
   auto t4 = parser4.parse();
   ASSERT_EQ(aggregate_id::D_CNT, t4.agg);
   ASSERT_EQ("d", t4.field_name);
   ASSERT_EQ(relop_id::LE, t4.relop);
-  ASSERT_TRUE(numeric(static_cast<int>(10)) == t4.threshold);
+  ASSERT_TRUE(numeric(static_cast<int64_t>(10)) == t4.threshold);
 }
 
 #endif /* TEST_TRIGGER_PARSER_TEST_H_ */

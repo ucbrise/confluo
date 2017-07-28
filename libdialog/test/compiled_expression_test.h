@@ -11,12 +11,12 @@ class CompiledExpressionTest : public testing::Test {
   static schema_t s;
 
   struct rec {
-    uint64_t ts;
+    int64_t ts;
     bool a;
-    char b;
-    short c;
-    int d;
-    long e;
+    int8_t b;
+    int16_t c;
+    int32_t d;
+    int64_t e;
     float f;
     double g;
     char h[16];
@@ -37,8 +37,9 @@ class CompiledExpressionTest : public testing::Test {
     return schema_t(".", builder.get_columns());
   }
 
-  record_t record(bool a, char b, short c, int d, long e, float f, double g) {
-    r = {UINT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  record_t record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
+                  double g) {
+    r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0}};
     return s.apply(0, &r);
   }

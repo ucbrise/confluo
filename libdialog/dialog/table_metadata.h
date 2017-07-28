@@ -161,19 +161,19 @@ class metadata_writer {
           break;
         }
         case type_id::D_CHAR: {
-          io_utils::write(out_, threshold.as<char>());
+          io_utils::write(out_, threshold.as<int8_t>());
           break;
         }
         case type_id::D_SHORT: {
-          io_utils::write(out_, threshold.as<short>());
+          io_utils::write(out_, threshold.as<int16_t>());
           break;
         }
         case type_id::D_INT: {
-          io_utils::write(out_, threshold.as<int>());
+          io_utils::write(out_, threshold.as<int32_t>());
           break;
         }
         case type_id::D_LONG: {
-          io_utils::write(out_, threshold.as<long>());
+          io_utils::write(out_, threshold.as<int64_t>());
           break;
         }
         case type_id::D_FLOAT: {
@@ -235,19 +235,19 @@ class metadata_reader {
         break;
       }
       case type_id::D_CHAR: {
-        threshold = io_utils::read<char>(in_);
+        threshold = io_utils::read<int8_t>(in_);
         break;
       }
       case type_id::D_SHORT: {
-        threshold = io_utils::read<short>(in_);
+        threshold = io_utils::read<int16_t>(in_);
         break;
       }
       case type_id::D_INT: {
-        threshold = io_utils::read<int>(in_);
+        threshold = io_utils::read<int32_t>(in_);
         break;
       }
       case type_id::D_LONG: {
-        threshold = io_utils::read<long>(in_);
+        threshold = io_utils::read<int64_t>(in_);
         break;
       }
       case type_id::D_FLOAT: {

@@ -125,7 +125,8 @@ class trigger_parser {
     parsed_trigger t;
     auto tok = lex_.next_token();
     if (tok.id != trigger_lexer::OPERAND)
-      THROW(parse_exception, "Could not parse aggregate function name " + tok.value);
+      THROW(parse_exception,
+            "Could not parse aggregate function name " + tok.value);
     t.agg = aggregate_ops::string_to_agg(tok.value);
     if (lex_.next_token().id != trigger_lexer::LEFT)
       THROW(parse_exception, "Expected '(' after aggregate function name");
@@ -142,7 +143,10 @@ class trigger_parser {
     tok = lex_.next_token();
     if (tok.id != trigger_lexer::OPERAND)
       THROW(parse_exception, "Could not parse threshold value " + tok.value);
-    t.threshold = numeric::parse(tok.value, schema_[t.field_name].type());
+    t.threshold = numeric::parse(
+        tok.value,
+        t.agg == aggregate_id::D_CNT ?
+            LONG_TYPE : schema_[t.field_name].type());
     return t;
   }
 

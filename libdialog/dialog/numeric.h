@@ -25,24 +25,24 @@ class numeric {
     as<bool>() = val;
   }
 
-  numeric(char val)
+  numeric(int8_t val)
       : type_(CHAR_TYPE) {
-    as<char>() = val;
+    as<int8_t>() = val;
   }
 
-  numeric(short val)
+  numeric(int16_t val)
       : type_(SHORT_TYPE) {
-    as<short>() = val;
+    as<int16_t>() = val;
   }
 
-  numeric(int val)
+  numeric(int32_t val)
       : type_(INT_TYPE) {
-    as<int>() = val;
+    as<int32_t>() = val;
   }
 
-  numeric(long val)
+  numeric(int64_t val)
       : type_(LONG_TYPE) {
-    as<long>() = val;
+    as<int64_t>() = val;
   }
 
   numeric(float val)
@@ -76,19 +76,19 @@ class numeric {
         return numeric(val);
       }
       case type_id::D_CHAR: {
-        char val = string_utils::lexical_cast<char>(str);
+        int8_t val = string_utils::lexical_cast<int8_t>(str);
         return numeric(val);
       }
       case type_id::D_SHORT: {
-        short val = string_utils::lexical_cast<short>(str);
+        int16_t val = string_utils::lexical_cast<int16_t>(str);
         return numeric(val);
       }
       case type_id::D_INT: {
-        int val = string_utils::lexical_cast<int>(str);
+        int32_t val = string_utils::lexical_cast<int32_t>(str);
         return numeric(val);
       }
       case type_id::D_LONG: {
-        long val = string_utils::lexical_cast<long>(str);
+        int64_t val = string_utils::lexical_cast<int64_t>(str);
         return numeric(val);
       }
       case type_id::D_FLOAT: {
@@ -229,27 +229,27 @@ class numeric {
     return *this;
   }
 
-  numeric& operator=(char value) {
+  numeric& operator=(int8_t value) {
     type_ = CHAR_TYPE;
-    as<char>() = value;
+    as<int8_t>() = value;
     return *this;
   }
 
-  numeric& operator=(short value) {
+  numeric& operator=(int16_t value) {
     type_ = SHORT_TYPE;
-    as<short>() = value;
+    as<int16_t>() = value;
     return *this;
   }
 
-  numeric& operator=(int value) {
+  numeric& operator=(int32_t value) {
     type_ = INT_TYPE;
-    as<int>() = value;
+    as<int32_t>() = value;
     return *this;
   }
 
-  numeric& operator=(long value) {
+  numeric& operator=(int64_t value) {
     type_ = LONG_TYPE;
-    as<long>() = value;
+    as<int64_t>() = value;
     return *this;
   }
 
@@ -288,19 +288,19 @@ class numeric {
             + ")";
       }
       case type_id::D_CHAR: {
-        return "char(" + std::to_string(*reinterpret_cast<const char*>(data_))
+        return "char(" + std::to_string(*reinterpret_cast<const int8_t*>(data_))
             + ")";
       }
       case type_id::D_SHORT: {
-        return "short(" + std::to_string(*reinterpret_cast<const short*>(data_))
+        return "short(" + std::to_string(*reinterpret_cast<const int16_t*>(data_))
             + ")";
       }
       case type_id::D_INT: {
-        return "int(" + std::to_string(*reinterpret_cast<const int*>(data_))
+        return "int(" + std::to_string(*reinterpret_cast<const int32_t*>(data_))
             + ")";
       }
       case type_id::D_LONG: {
-        return "long(" + std::to_string(*reinterpret_cast<const long*>(data_))
+        return "long(" + std::to_string(*reinterpret_cast<const int64_t*>(data_))
             + ")";
       }
       case type_id::D_FLOAT: {
