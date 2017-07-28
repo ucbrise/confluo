@@ -127,7 +127,7 @@ class trigger_parser {
     if (tok.id != trigger_lexer::OPERAND)
       THROW(parse_exception,
             "Could not parse aggregate function name " + tok.value);
-    t.agg = aggregate_ops::string_to_agg(tok.value);
+    t.agg = aggop_utils::string_to_agg(tok.value);
     if (lex_.next_token().id != trigger_lexer::LEFT)
       THROW(parse_exception, "Expected '(' after aggregate function name");
     tok = lex_.next_token();

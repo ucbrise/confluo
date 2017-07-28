@@ -65,7 +65,7 @@ struct trigger {
 
   std::string to_string() const {
     return "Trigger Name: " + trigger_name_ + " Filter Name: " + filter_name_
-        + " Trigger Expression: " + aggregate_ops::agg_to_string(agg_id_) + "("
+        + " Trigger Expression: " + aggop_utils::agg_to_string(agg_id_) + "("
         + field_name_ + ") " + relop_utils::op_to_str(op_) + " "
         + threshold_.to_string();
   }

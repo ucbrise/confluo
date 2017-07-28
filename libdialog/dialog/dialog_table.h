@@ -25,6 +25,7 @@
 #include "radix_tree.h"
 #include "filter.h"
 #include "trigger.h"
+#include "trigger_parser.h"
 #include "exceptions.h"
 
 #include "optional.h"
@@ -217,12 +218,11 @@ class dialog_table {
 
   void add_trigger(const std::string& trigger_name,
                    const std::string& filter_name,
-                   const std::string& field_name, aggregate_id agg, relop_id op,
-                   const numeric& threshold) {
+                   const std::string& trigger_expression) {
     optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [trigger_name, filter_name, field_name, agg, op, threshold, &ex, this] {
+            [trigger_name, filter_name, trigger_expression, &ex, this] {
               trigger_id_t trigger_id;
               if (trigger_map_.get(trigger_name, trigger_id)) {
                 ex = management_exception("Trigger " + trigger_name + " already exists.");
@@ -234,11 +234,13 @@ class dialog_table {
                 return;
               }
               trigger_id.first = filter_id;
-              const column_t& col = schema_[field_name];
-              trigger* t = new trigger(trigger_name, filter_name, agg, col.name(), col.idx(), col.type(), op, threshold);
+              trigger_parser parser(trigger_expression, schema_);
+              parsed_trigger tp = parser.parse();
+              const column_t& col = schema_[tp.field_name];
+              trigger* t = new trigger(trigger_name, filter_name, tp.agg, col.name(), col.idx(), col.type(), tp.relop, tp.threshold);
               trigger_id.second = filters_.at(filter_id)->add_trigger(t);
-              metadata_.write_trigger_info(trigger_name, filter_name, agg, field_name, op,
-                  threshold);
+              metadata_.write_trigger_info(trigger_name, filter_name, tp.agg, tp.field_name, tp.relop,
+                  tp.threshold);
             });
     ret.wait();
     if (ex.has_value())

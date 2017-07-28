@@ -12,22 +12,22 @@ class AggregatedReflogTest : public testing::Test {
  public:
   AggregatedReflogTest() {
     sum[0] = limits::int_zero;
-    for (int i = 1; i <= 10; i++) {
+    for (int32_t i = 1; i <= 10; i++) {
       sum[i] = sum[i - 1] + i;
     }
 
     min[0] = limits::int_max;
-    for (int i = 1; i <= 10; i++) {
+    for (int32_t i = 1; i <= 10; i++) {
       min[i] = std::min(min[i - 1], 10 - i);
     }
 
     max[0] = limits::int_min;
-    for (int i = 1; i <= 10; i++) {
+    for (int32_t i = 1; i <= 10; i++) {
       max[i] = std::max(max[i - 1], i);
     }
 
     cnt[0] = limits::int_zero;
-    for (int i = 1; i <= 10; i++) {
+    for (int32_t i = 1; i <= 10; i++) {
       cnt[i] = i;
     }
   }

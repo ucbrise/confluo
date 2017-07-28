@@ -233,22 +233,14 @@ TEST_F(DiaLogTableTest, FilterTest) {
   dtable.add_filter("filter6", "f > 0.1");
   dtable.add_filter("filter7", "g < 0.06");
   dtable.add_filter("filter8", "h == zzz");
-  dtable.add_trigger("trigger1", "filter1", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger2", "filter2", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger3", "filter3", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger4", "filter4", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger5", "filter5", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger6", "filter6", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger7", "filter7", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
-  dtable.add_trigger("trigger8", "filter8", "d", aggregate_id::D_SUM,
-                     relop_id::GE, numeric(10));
+  dtable.add_trigger("trigger1", "filter1", "SUM(d) >= 10");
+  dtable.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
+  dtable.add_trigger("trigger3", "filter3", "SUM(d) >= 10");
+  dtable.add_trigger("trigger4", "filter4", "SUM(d) >= 10");
+  dtable.add_trigger("trigger5", "filter5", "SUM(d) >= 10");
+  dtable.add_trigger("trigger6", "filter6", "SUM(d) >= 10");
+  dtable.add_trigger("trigger7", "filter7", "SUM(d) >= 10");
+  dtable.add_trigger("trigger8", "filter8", "SUM(d) >= 10");
 
   dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t beg = filter::get_ts_block(r.ts);

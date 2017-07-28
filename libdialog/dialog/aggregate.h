@@ -15,7 +15,7 @@ enum aggregate_id
   D_CNT = 3
 };
 
-class aggregate_ops {
+class aggop_utils {
  public:
   static std::string agg_to_string(aggregate_id agg) {
     switch (agg) {
@@ -33,13 +33,14 @@ class aggregate_ops {
   }
 
   static aggregate_id string_to_agg(const std::string& str) {
-    if (str == "SUM") {
+    std::string test = utils::string_utils::to_upper(str);
+    if (test == "SUM") {
       return aggregate_id::D_SUM;
-    } else if (str == "MIN") {
+    } else if (test == "MIN") {
       return aggregate_id::D_MIN;
-    } else if (str == "MAX") {
+    } else if (test == "MAX") {
       return aggregate_id::D_MAX;
-    } else if (str == "CNT") {
+    } else if (test == "CNT") {
       return aggregate_id::D_CNT;
     } else {
       THROW(parse_exception, "Invalid aggregate function " + str);
