@@ -305,7 +305,7 @@ class radix_tree {
   }
 
   template<typename ... ARGS>
-  reflog*& insert(const key_t& key, const value_t& value, ARGS&& ... args) {
+  reflog*& get_or_create(const key_t& key, ARGS&& ... args) {
     node_t* node = root_;
     for (size_t d = 0; d < depth_ - 1; d++) {
       node_t* child = nullptr;
@@ -344,11 +344,18 @@ class radix_tree {
         child = expected;
       }
     }
-    child->refs()->push_back(value);
+
     return child->refs();
   }
 
-  reflog const* at(const key_t& key) const {
+  template<typename ... ARGS>
+  reflog*& insert(const key_t& key, const value_t& value, ARGS&& ... args) {
+    reflog*& refs = get_or_create(key, std::forward<ARGS>(args)...);
+    refs->push_back(value);
+    return refs;
+  }
+
+  reflog const* get(const key_t& key) const {
     node_t* node = root_;
     size_t d;
     for (d = 0; d < depth_; d++) {

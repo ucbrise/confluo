@@ -43,6 +43,10 @@ struct trigger {
     return field_idx_;
   }
 
+  data_type field_type() const {
+    return field_type_;
+  }
+
   relop_id op() const {
     return op_;
   }

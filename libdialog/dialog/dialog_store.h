@@ -7,13 +7,14 @@
 #include "storage.h"
 #include "exceptions.h"
 #include "dialog_table.h"
+#include "file_utils.h"
 
 namespace dialog {
 
 class dialog_store {
  public:
   dialog_store(const std::string& data_path)
-      : data_path_(data_path) {
+      : data_path_(utils::file_utils::full_path(data_path)) {
   }
 
   void add_table(const std::string& table_name,

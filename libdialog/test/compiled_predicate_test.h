@@ -39,8 +39,15 @@ class CompiledPredicateTest : public testing::Test {
     return schema_t(".", builder.get_columns());
   }
 
+  void* record_buf(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
+                   double g) {
+    r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0}};
+    return &r;
+  }
+
   record_t record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
-                  double g) {
+      double g) {
     r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0}};
     return s.apply(0, &r);
@@ -61,7 +68,7 @@ CompiledPredicateTest::rec CompiledPredicateTest::r;
 
 schema_t CompiledPredicateTest::s = CompiledPredicateTest::schema();
 
-TEST_F(CompiledPredicateTest, TestPredicateTest) {
+TEST_F(CompiledPredicateTest, TestPredicateRecordTest) {
   ASSERT_TRUE(
       predicate("a", relop_id::EQ, "true").test(
           record(true, 0, 0, 0, 0, 0, 0)));
@@ -89,6 +96,37 @@ TEST_F(CompiledPredicateTest, TestPredicateTest) {
   ASSERT_TRUE(
       predicate("g", relop_id::LT, "194.312").test(
           record(false, 0, 0, 0, 0, 0, 182.3)));
+}
+
+TEST_F(CompiledPredicateTest, TestPredicateBufferTest) {
+  auto snap = s.snapshot();
+  ASSERT_TRUE(
+      predicate("a", relop_id::EQ, "true").test(
+          snap, record_buf(true, 0, 0, 0, 0, 0, 0)));
+
+  ASSERT_TRUE(
+      predicate("b", relop_id::LT, "c").test(
+          snap, record_buf(false, 'a', 0, 0, 0, 0, 0)));
+
+  ASSERT_TRUE(
+      predicate("c", relop_id::LE, "10").test(
+          snap, record_buf(false, 0, 10, 0, 0, 0, 0)));
+
+  ASSERT_TRUE(
+      predicate("d", relop_id::GT, "100").test(
+          snap, record_buf(false, 0, 0, 101, 0, 0, 0)));
+
+  ASSERT_TRUE(
+      predicate("e", relop_id::GE, "1000").test(
+          snap, record_buf(false, 0, 0, 0, 1000, 0, 0)));
+
+  ASSERT_TRUE(
+      predicate("f", relop_id::NEQ, "100.3").test(
+          snap, record_buf(false, 0, 0, 0, 0, 102.4, 0)));
+
+  ASSERT_TRUE(
+      predicate("g", relop_id::LT, "194.312").test(
+          snap, record_buf(false, 0, 0, 0, 0, 0, 182.3)));
 }
 
 #endif /* TEST_COMPILED_PREDICATE_TEST_H_ */

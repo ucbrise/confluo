@@ -15,7 +15,7 @@ TEST_F(RadixTreeTest, InsertGetTest) {
     tree.insert(byte_string(i * 8), i);
 
   for (int32_t i = 0; i < 256; i++) {
-    const reflog* r = tree.at(byte_string(i * 8));
+    const reflog* r = tree.get(byte_string(i * 8));
     ASSERT_TRUE(r != nullptr);
     ASSERT_EQ(static_cast<size_t>(i), r->at(0));
   }

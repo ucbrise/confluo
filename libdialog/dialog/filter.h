@@ -123,12 +123,9 @@ class filter {
 
   /**
    * Updates the filter index with a new data point. If the new data point
-   * passes the filter, its reference will be stored.
+   * passes the filter, its reference is stored.
    *
-   * @param ts Timestamp associated with the data point.
-   * @param buf Binary data for the data point.
-   * @param len Length of data in buf.
-   * @param attrs List of attributes associated with the data point.
+   * @param r Record being tested.
    */
   void update(const record_t& r) {
     if (exp_.test(r) && fn_(r)) {
@@ -151,13 +148,55 @@ class filter {
   }
 
   /**
+   * Updates the filter index with new data points. If data points
+   * pass the filter, their references are stored.
+   *
+
+   */
+  void update(uint64_t ts_block, const schema_snapshot& snap, size_t log_offset,
+              void* buf, size_t record_size, size_t nrecords) {
+    int tid = thread_manager::get_id();
+    byte_string key(ts_block);
+    aggregated_reflog*& refs = idx_.get_or_create(key, triggers_);
+    size_t naggs = refs->size();
+    std::vector<numeric> local_aggs(refs->num_aggregates());
+    for (size_t i = 0; i < naggs; i++) {
+      if (triggers_.at(i)->is_valid()) {
+        local_aggs[i] = aggregators[triggers_.at(i)->agg_id()].zero(
+            triggers_.at(i)->field_type());
+      }
+    }
+    for (size_t i = 0; i < nrecords; i++) {
+      void* cur_rec = reinterpret_cast<uint8_t*>(buf) + i * record_size;
+      uint64_t rec_off = log_offset + i * record_size;
+      if (exp_.test(snap, cur_rec)) {
+        refs->push_back(rec_off);
+        for (size_t j = 0; j < naggs; j++) {
+          if (triggers_.at(j)->is_valid()) {
+            local_aggs[i] = aggregators[triggers_.at(j)->agg_id()].agg(
+                local_aggs[i], snap.get(cur_rec, triggers_.at(j)->field_idx()));
+          }
+        }
+
+      }
+    }
+
+    size_t version = log_offset + nrecords * record_size;
+    for (size_t i = 0; i < naggs; i++) {
+      if (triggers_.at(i)->is_valid()) {
+        refs->update_aggregate(tid, i, local_aggs[i], version);
+      }
+    }
+  }
+
+  /**
    * Get the RefLog corresponding to given time-block.
    *
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
   aggregated_reflog const* lookup(uint64_t ts_block) const {
-    return idx_.at(byte_string(ts_block));
+    return idx_.get(byte_string(ts_block));
   }
 
   /**

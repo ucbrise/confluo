@@ -38,8 +38,15 @@ class MintermTest : public testing::Test {
     return schema_t(".", builder.get_columns());
   }
 
+  void* record_buf(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
+                   double g) {
+    r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0}};
+    return &r;
+  }
+
   record_t record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
-                  double g) {
+      double g) {
     r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0}};
     return s.apply(0, &r);
@@ -60,7 +67,7 @@ MintermTest::rec MintermTest::r;
 
 schema_t MintermTest::s = schema();
 
-TEST_F(MintermTest, TestMintermTest) {
+TEST_F(MintermTest, TestMintermRecordTest) {
   compiled_minterm m1, m2, m3;
   m1.add(predicate("a", relop_id::EQ, "true"));
   m1.add(predicate("b", relop_id::LT, "c"));
@@ -75,6 +82,24 @@ TEST_F(MintermTest, TestMintermTest) {
   ASSERT_TRUE(m1.test(record(true, 'a', 11, 0, 0, 0.0, 0.0)));
   ASSERT_TRUE(m2.test(record(false, 'Z', 10, 101, 0, 0, 0)));
   ASSERT_TRUE(m3.test(record(false, 'Z', 11, 0, 1000, 102.4, 182.3)));
+}
+
+TEST_F(MintermTest, TestMintermBufferTest) {
+  auto snap = s.snapshot();
+  compiled_minterm m1, m2, m3;
+  m1.add(predicate("a", relop_id::EQ, "true"));
+  m1.add(predicate("b", relop_id::LT, "c"));
+
+  m2.add(predicate("c", relop_id::LE, "10"));
+  m2.add(predicate("d", relop_id::GT, "100"));
+
+  m3.add(predicate("e", relop_id::GE, "1000"));
+  m3.add(predicate("f", relop_id::NEQ, "100.3"));
+  m3.add(predicate("g", relop_id::LT, "194.312"));
+
+  ASSERT_TRUE(m1.test(snap, record_buf(true, 'a', 11, 0, 0, 0.0, 0.0)));
+  ASSERT_TRUE(m2.test(snap, record_buf(false, 'Z', 10, 101, 0, 0, 0)));
+  ASSERT_TRUE(m3.test(snap, record_buf(false, 'Z', 11, 0, 1000, 102.4, 182.3)));
 }
 
 #endif /* TEST_MINTERM_TEST_H_ */

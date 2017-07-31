@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <string>
 #include <errno.h>
+#include <climits>
 
 #include "assertions.h"
 
@@ -45,6 +46,12 @@ class file_utils {
   static void close_file(int fd) {
     int ret = close(fd);
     assert_throw(ret != -1, "close(" << fd << "): " << strerror(errno));
+  }
+
+  static std::string full_path(const std::string& path) {
+    char full_path[4096];
+    realpath(path.c_str(), full_path);
+    return std::string(full_path);
   }
 };
 

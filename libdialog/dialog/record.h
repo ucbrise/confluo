@@ -47,7 +47,7 @@ struct record_t {
     return fields_.at(idx);
   }
 
-  int64_t timestamp() const {
+  uint64_t timestamp() const {
     return timestamp_;
   }
 

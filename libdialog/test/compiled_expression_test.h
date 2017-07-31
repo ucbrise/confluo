@@ -37,8 +37,15 @@ class CompiledExpressionTest : public testing::Test {
     return schema_t(".", builder.get_columns());
   }
 
+  void* record_buf(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
+                   double g) {
+    r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0}};
+    return &r;
+  }
+
   record_t record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
-                  double g) {
+      double g) {
     r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0}};
     return s.apply(0, &r);
@@ -59,7 +66,7 @@ CompiledExpressionTest::rec CompiledExpressionTest::r;
 
 schema_t CompiledExpressionTest::s = schema();
 
-TEST_F(CompiledExpressionTest, TestRecordTest) {
+TEST_F(CompiledExpressionTest, TestCompiledExpressionRecordTest) {
   compiled_minterm m1, m2, m3;
   m1.add(predicate("a", relop_id::EQ, "true"));
   m1.add(predicate("b", relop_id::LT, "c"));
@@ -77,6 +84,27 @@ TEST_F(CompiledExpressionTest, TestRecordTest) {
   cexp.insert(m3);
 
   ASSERT_TRUE(cexp.test(record(true, 'a', 10, 101, 1000, 102.4, 182.3)));
+}
+
+TEST_F(CompiledExpressionTest, TestCompiledExpressionBufferTest) {
+  auto snap = s.snapshot();
+  compiled_minterm m1, m2, m3;
+  m1.add(predicate("a", relop_id::EQ, "true"));
+  m1.add(predicate("b", relop_id::LT, "c"));
+
+  m2.add(predicate("c", relop_id::LE, "10"));
+  m2.add(predicate("d", relop_id::GT, "100"));
+
+  m3.add(predicate("e", relop_id::GE, "1000"));
+  m3.add(predicate("f", relop_id::NEQ, "100.3"));
+  m3.add(predicate("g", relop_id::LT, "194.312"));
+
+  compiled_expression cexp;
+  cexp.insert(m1);
+  cexp.insert(m2);
+  cexp.insert(m3);
+
+  ASSERT_TRUE(cexp.test(snap, record_buf(true, 'a', 10, 101, 1000, 102.4, 182.3)));
 }
 
 #endif /* TEST_COMPILED_EXPRESSION_TEST_H_ */
