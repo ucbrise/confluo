@@ -116,7 +116,10 @@ class numeric {
   // Relational operators
   static bool relop(relop_id id, const numeric& first, const numeric& second) {
     if (first.type_ != second.type_)
-      THROW(invalid_operation_exception, "Comparing values of different types");
+      THROW(
+          invalid_operation_exception,
+          "Comparing values of different types: (" + first.type().to_string()
+              + ", " + second.type().to_string() + ")");
     return first.type_.relop(id)(first.to_data(), second.to_data());
   }
 
@@ -166,8 +169,11 @@ class numeric {
   static numeric binaryop(binaryop_id id, const numeric& first,
                           const numeric& second) {
     if (first.type() != second.type())
-      THROW(invalid_operation_exception,
-            "Cannot operate on values of different types");
+      THROW(
+          invalid_operation_exception,
+          "Cannot operate on values of different types: ("
+              + first.type().to_string() + ", " + second.type().to_string()
+              + ")");
     numeric result(first.type());
     result.type_.binaryop(id)(result.data_, first.to_data(), second.to_data());
     return result;
@@ -292,16 +298,16 @@ class numeric {
             + ")";
       }
       case type_id::D_SHORT: {
-        return "short(" + std::to_string(*reinterpret_cast<const int16_t*>(data_))
-            + ")";
+        return "short("
+            + std::to_string(*reinterpret_cast<const int16_t*>(data_)) + ")";
       }
       case type_id::D_INT: {
         return "int(" + std::to_string(*reinterpret_cast<const int32_t*>(data_))
             + ")";
       }
       case type_id::D_LONG: {
-        return "long(" + std::to_string(*reinterpret_cast<const int64_t*>(data_))
-            + ")";
+        return "long("
+            + std::to_string(*reinterpret_cast<const int64_t*>(data_)) + ")";
       }
       case type_id::D_FLOAT: {
         return "float(" + std::to_string(*reinterpret_cast<const float*>(data_))

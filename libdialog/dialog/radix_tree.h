@@ -283,7 +283,7 @@ class radix_tree {
  public:
   typedef radix_tree_node<reflog> node_t;
   typedef byte_string key_t;
-  typedef uint64_t value_t;
+  typedef typename reflog::value_type value_t;
 
   typedef rt_reflog_it<reflog> iterator;
   typedef rt_reflog_range_result<reflog> rt_reflog_result;

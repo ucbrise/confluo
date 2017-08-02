@@ -2,6 +2,7 @@
 #define DIALOG_TRIGGER_H_
 
 #include "aggregate.h"
+#include "schema_snapshot.h"
 
 namespace dialog {
 namespace monitor {
@@ -53,6 +54,17 @@ struct trigger {
 
   const numeric threshold() const {
     return threshold_;
+  }
+
+  numeric zero() {
+    return aggregators[agg_id_].zero(field_type_);
+  }
+
+  numeric agg(const numeric& a, const schema_snapshot& s, void* data) {
+    numeric b(s.get(data, field_idx_));
+    return aggregators[agg_id_].agg(
+        a.type().id == type_id::D_NONE ? zero() : a,
+        agg_id_ == aggregate_id::D_CNT ? count_one : b);
   }
 
   bool invalidate() {

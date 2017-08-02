@@ -26,7 +26,6 @@ enum type_id
   D_STRING = 8
 };
 
-
 namespace limits {
 
 static bool bool_min = std::numeric_limits<bool>::lowest();
@@ -128,13 +127,9 @@ struct data_type {
   type_id id;
   size_t size;
 
-  data_type(size_t _size)
-      : id(type_id::D_STRING),
+  data_type(type_id _id = type_id::D_NONE, size_t _size = 0)
+      : id(_id),
         size(_size) {
-  }
-
-  data_type(type_id _id = type_id::D_NONE)
-      : id(_id) {
     switch (id) {
       case type_id::D_NONE: {
         size = 0;
@@ -168,9 +163,12 @@ struct data_type {
         size = sizeof(double);
         break;
       }
+      case type_id::D_STRING: {
+        break;
+      }
       default: {
         THROW(invalid_operation_exception,
-            "Must specify length for non-primitive data types");
+              "Must specify length for non-primitive data types");
       }
     }
   }
@@ -247,7 +245,7 @@ struct data_type {
       case type_id::D_NONE:
         return "none";
       default:
-        return "invalid";
+        return "invalid(" + std::to_string(static_cast<uint16_t>(id)) + ")";
     }
   }
 };
@@ -261,7 +259,7 @@ static data_type LONG_TYPE(type_id::D_LONG);
 static data_type FLOAT_TYPE(type_id::D_FLOAT);
 static data_type DOUBLE_TYPE(type_id::D_DOUBLE);
 static data_type STRING_TYPE(size_t size) {
-  return data_type(size);
+  return data_type(type_id::D_STRING, size);
 }
 
 // type-ids 1-7 are numeric

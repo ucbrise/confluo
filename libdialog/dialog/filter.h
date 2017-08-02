@@ -5,6 +5,7 @@
 #include "reflog.h"
 #include "tiered_index.h"
 #include "radix_tree.h"
+#include "record_batch.h"
 #include "aggregated_reflog.h"
 #include "compiled_expression.h"
 #include "trigger.h"
@@ -153,40 +154,33 @@ class filter {
    *
 
    */
-  void update(uint64_t ts_block, const schema_snapshot& snap, size_t log_offset,
-              void* buf, size_t record_size, size_t nrecords) {
+  void update(size_t log_offset, const schema_snapshot& snap,
+              record_block& block, size_t record_size) {
     int tid = thread_manager::get_id();
-    byte_string key(ts_block);
-    aggregated_reflog*& refs = idx_.get_or_create(key, triggers_);
-    size_t naggs = refs->size();
-    std::vector<numeric> local_aggs(refs->num_aggregates());
-    for (size_t i = 0; i < naggs; i++) {
-      if (triggers_.at(i)->is_valid()) {
-        local_aggs[i] = aggregators[triggers_.at(i)->agg_id()].zero(
-            triggers_.at(i)->field_type());
-      }
-    }
-    for (size_t i = 0; i < nrecords; i++) {
-      void* cur_rec = reinterpret_cast<uint8_t*>(buf) + i * record_size;
+    aggregated_reflog* refs = nullptr;
+    std::vector<numeric> local_aggs;
+
+    for (size_t i = 0; i < block.nrecords; i++) {
+      void* cur_rec = reinterpret_cast<uint8_t*>(&block.data[i * record_size]);
       uint64_t rec_off = log_offset + i * record_size;
       if (exp_.test(snap, cur_rec)) {
-        refs->push_back(rec_off);
-        for (size_t j = 0; j < naggs; j++) {
-          if (triggers_.at(j)->is_valid()) {
-            local_aggs[i] = aggregators[triggers_.at(j)->agg_id()].agg(
-                local_aggs[i], snap.get(cur_rec, triggers_.at(j)->field_idx()));
-          }
+        if (refs == nullptr) {
+          refs = idx_.get_or_create(
+              byte_string(static_cast<uint64_t>(block.time_block)), triggers_);
+          local_aggs.resize(refs->num_aggregates());
         }
-
+        refs->push_back(rec_off);
+        for (size_t j = 0; j < local_aggs.size(); j++)
+          if (triggers_.at(j)->is_valid())
+            local_aggs[j] = triggers_.at(j)->agg(local_aggs[j], snap, cur_rec);
       }
     }
 
-    size_t version = log_offset + nrecords * record_size;
-    for (size_t i = 0; i < naggs; i++) {
-      if (triggers_.at(i)->is_valid()) {
-        refs->update_aggregate(tid, i, local_aggs[i], version);
-      }
-    }
+    size_t version = log_offset + block.nrecords * record_size;
+    for (size_t j = 0; j < local_aggs.size(); j++)
+      if (triggers_.at(j)->is_valid()
+          && local_aggs[j].type().id != type_id::D_NONE)
+        refs->update_aggregate(tid, j, local_aggs[j], version);
   }
 
   /**

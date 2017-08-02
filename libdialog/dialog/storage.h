@@ -171,6 +171,8 @@ static storage_mode DURABLE_RELAXED = { storage_id::D_DURABLE_RELAXED,
 static storage_mode DURABLE = { storage_id::D_DURABLE, durable::allocate,
     durable::free, durable::flush };
 
+static storage_mode STORAGE_MODES[3] = { IN_MEMORY, DURABLE_RELAXED, DURABLE };
+
 }
 }
 

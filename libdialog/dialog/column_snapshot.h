@@ -1,6 +1,10 @@
 #ifndef DIALOG_COLUMN_SNAPSHOT_H_
 #define DIALOG_COLUMN_SNAPSHOT_H_
 
+#include <cstdint>
+
+#include "data_types.h"
+
 namespace dialog {
 
 struct column_snapshot {

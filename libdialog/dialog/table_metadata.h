@@ -6,6 +6,8 @@
 #include <fstream>
 
 #include "storage.h"
+#include "numeric.h"
+#include "aggregate_types.h"
 #include "io_utils.h"
 
 using namespace utils;

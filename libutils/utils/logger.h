@@ -39,8 +39,10 @@ class logger {
 
   virtual ~logger() {
     os_ << std::endl;
-    fprintf(stderr, "%s", os_.str().c_str());
-    fflush(stderr);
+    if (msg_level_ >= LOG_LEVEL) {
+      fprintf(stderr, "%s", os_.str().c_str());
+      fflush(stderr);
+    }
   }
 
   std::ostringstream& get(const log_level level) {
@@ -74,6 +76,9 @@ class logger {
   std::ostringstream os_;
   log_level msg_level_;
 };
+
+log_level logger::LOG_LEVEL = log_level::INFO;
+
 }
 }
 

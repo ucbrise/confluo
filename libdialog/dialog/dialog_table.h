@@ -1,5 +1,5 @@
-#ifndef DIALOG_DIALOG_STORE_H_
-#define DIALOG_DIALOG_STORE_H_
+#ifndef DIALOG_DIALOG_TABLE_H_
+#define DIALOG_DIALOG_TABLE_H_
 
 #include <math.h>
 
@@ -18,7 +18,7 @@
 #include "data_log.h"
 #include "index_log.h"
 #include "filter_log.h"
-#include "alert_log.h"
+#include "alert_index.h"
 #include "task_worker.h"
 #include "periodic_task.h"
 #include "expression_compiler.h"
@@ -76,22 +76,21 @@ class dialog_table {
         monitor_task_("monitor") {
     monitor_task_.start(
         [this]() {
-          uint64_t cur_ts = time_utils::cur_ns();
-          uint64_t cur_ts_block = filter::get_ts_block(cur_ts);
+          uint64_t cur_ms = time_utils::cur_ms();
           uint64_t version = rt_.get();
           size_t nfilters = filters_.size();
           for (size_t i = 0; i < nfilters; i++) {
             filter* f = filters_.at(i);
             if (f->is_valid()) {
-              for (size_t ts_block = cur_ts_block - configuration_params::MONITOR_WINDOW_MS; ts_block <= cur_ts_block; ts_block++) {
-                const aggregated_reflog* ar = f->lookup(ts_block);
+              for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS; ms <= cur_ms; ms++) {
+                const aggregated_reflog* ar = f->lookup(ms);
                 size_t ntriggers = f->num_triggers();
                 for (size_t tid = 0; tid < ntriggers; tid++) {
                   trigger* t = f->get_trigger(tid);
                   if (t->is_valid() && ar != nullptr) {
                     numeric agg = ar->get_aggregate(tid, version);
                     if (numeric::relop(t->op(), agg, t->threshold())) {
-                      alerts_.insert(alert(ts_block, t, agg, version));
+                      alerts_.add_alert(ms, t, agg, version);
                     }
                   }
                 }
@@ -273,17 +272,18 @@ class dialog_table {
   }
 
   // Query ops
-  size_t append_batch(const record_batch& batch) {
+  size_t append_batch(record_batch& batch) {
     size_t record_size = schema_.record_size();
     size_t batch_bytes = batch.nrecords * record_size;
     size_t log_offset = data_log_.reserve(batch_bytes);
     size_t cur_offset = log_offset;
     for (size_t i = 0; i < batch.nblocks; i++) {
-      const record_block& block = batch.blocks[i];
-      data_log_.write(cur_offset, reinterpret_cast<uint8_t*>(block.data),
-                      block.nrecords * record_size);
+      record_block& block = batch.blocks[i];
+      data_log_.write(cur_offset,
+                      reinterpret_cast<const uint8_t*>(block.data.data()),
+                      block.data.length());
       update_aux_record_block(cur_offset, block, record_size);
-      cur_offset += (block.nrecords + record_size);
+      cur_offset += block.data.length();
     }
 
     data_log_.flush(log_offset, batch_bytes);
@@ -301,11 +301,9 @@ class dialog_table {
       if (filters_.at(i)->is_valid())
         filters_.at(i)->update(r);
 
-    for (const field_t& f : r) {
-      if (f.is_indexed()) {
+    for (const field_t& f : r)
+      if (f.is_indexed())
         indexes_.at(f.index_id())->insert(f.get_key(), offset);
-      }
-    }
 
     data_log_.flush(offset, record_size);
     rt_.advance(offset, record_size);
@@ -359,8 +357,9 @@ class dialog_table {
         expression_compiler::compile(expr, schema_));
   }
 
-  const std::set<alert>& get_alerts() const {
-    return alerts_;
+  alert_index::alert_list get_alerts(uint64_t ts_block_begin,
+                                     uint64_t ts_block_end) const {
+    return alerts_.get_alerts(ts_block_begin, ts_block_end);
   }
 
   size_t num_records() const {
@@ -368,23 +367,24 @@ class dialog_table {
   }
 
  protected:
-  void update_aux_record_block(uint64_t log_offset, const record_block& block,
+  void update_aux_record_block(uint64_t log_offset, record_block& block,
                                size_t record_size) {
     schema_snapshot snap = schema_.snapshot();
     for (size_t i = 0; i < filters_.size(); i++) {
       if (filters_.at(i)->is_valid()) {
-        filters_.at(i)->update(block.time_block, snap, log_offset, block.data,
-                               record_size, block.nrecords);
+        filters_.at(i)->update(log_offset, snap, block, record_size);
       }
     }
 
     for (size_t i = 0; i < schema_.size(); i++) {
       if (snap.is_indexed(i)) {
+        radix_index* idx = indexes_.at(snap.index_id(i));
         for (size_t j = 0; j < block.nrecords; j++) {
           size_t block_offset = j * record_size;
           size_t record_offset = log_offset + block_offset;
-          void* rec_ptr = reinterpret_cast<uint8_t*>(block.data) + block_offset;
-          indexes_.at(j)->insert(snap.get_key(rec_ptr, j), record_offset);
+          void* rec_ptr = reinterpret_cast<uint8_t*>(&block.data[0])
+              + block_offset;
+          idx->insert(snap.get_key(rec_ptr, i), record_offset);
         }
       }
     }
@@ -398,7 +398,7 @@ class dialog_table {
   // In memory structures
   filter_log filters_;
   index_log indexes_;
-  std::set<alert> alerts_;
+  alert_index alerts_;
 
   string_map<filter_id_t> filter_map_;
   string_map<trigger_id_t> trigger_map_;
@@ -410,4 +410,4 @@ class dialog_table {
 
 }
 
-#endif /* DIALOG_DIALOG_STORE_H_ */
+#endif /* DIALOG_DIALOG_TABLE_H_ */

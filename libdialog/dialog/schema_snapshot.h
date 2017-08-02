@@ -1,6 +1,7 @@
 #ifndef DIALOG_SCHEMA_SNAPSHOT_H_
 #define DIALOG_SCHEMA_SNAPSHOT_H_
 
+#include "immutable_value.h"
 #include "column_snapshot.h"
 #include "byte_string.h"
 #include "data.h"
@@ -40,11 +41,11 @@ class schema_snapshot {
     return snapshot_[i].indexed;
   }
 
-  bool index_id(size_t i) const {
+  uint32_t index_id(size_t i) const {
     return snapshot_[i].index_id;
   }
 
-  bool index_bucket_size(size_t i) const {
+  double index_bucket_size(size_t i) const {
     return snapshot_[i].index_bucket_size;
   }
 

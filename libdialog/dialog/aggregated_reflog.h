@@ -9,6 +9,12 @@ namespace dialog {
 
 class aggregated_reflog : public reflog {
  public:
+  typedef reflog::size_type size_type;
+  typedef reflog::pos_type pos_type;
+  typedef reflog::value_type value_type;
+  typedef reflog::difference_type difference_type;
+  typedef reflog::pointer pointer;
+  typedef reflog::reference reference;
   typedef reflog::iterator iterator;
   typedef reflog::const_iterator const_iterator;
 
@@ -21,16 +27,16 @@ class aggregated_reflog : public reflog {
     }
   }
 
-  void update_aggregate(int thread_id, size_t trigger_id, const numeric& value,
-                        uint64_t version) {
+  inline void update_aggregate(int thread_id, size_t trigger_id,
+                               const numeric& value, uint64_t version) {
     aggregates_[trigger_id].update(thread_id, value, version);
   }
 
-  numeric get_aggregate(size_t trigger_id, uint64_t version) const {
+  inline numeric get_aggregate(size_t trigger_id, uint64_t version) const {
     return aggregates_[trigger_id].get(version);
   }
 
-  size_t num_aggregates() const {
+  inline size_t num_aggregates() const {
     return num_aggregates_;
   }
 

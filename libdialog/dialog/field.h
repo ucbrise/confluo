@@ -1,5 +1,11 @@
-#ifndef LIBDIALOG_DIALOG_FIELD_H_
-#define LIBDIALOG_DIALOG_FIELD_H_
+#ifndef DIALOG_FIELD_H_
+#define DIALOG_FIELD_H_
+
+#include <cstdint>
+
+#include "data_types.h"
+#include "byte_string.h"
+#include "immutable_value.h"
 
 namespace dialog {
 

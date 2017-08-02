@@ -54,12 +54,18 @@ class DiaLogTableTest : public testing::Test {
 
   static rec r;
 
-  void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,
-               double g, const char* h) {
+  static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
+                      float f, double g, const char* h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     memcpy(r.h, h, std::min(static_cast<size_t>(16), strlen(h)));
     return reinterpret_cast<void*>(&r);
+  }
+
+  static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
+                                int64_t e, float f, double g, const char* h) {
+    void* rbuf = record(a, b, c, d, e, f, g, h);
+    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
   static std::vector<column_t> schema() {
@@ -73,6 +79,22 @@ class DiaLogTableTest : public testing::Test {
     builder.add_column(DOUBLE_TYPE, "g");
     builder.add_column(STRING_TYPE(16), "h");
     return builder.get_columns();
+  }
+
+  static record_batch get_batch() {
+    record_batch_builder builder;
+    builder.add_record(record_str(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record_str(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record_str(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record_str(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(
+        record_str(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record_str(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    builder.add_record(
+        record_str(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(
+        record_str(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+    return builder.get_batch();
   }
 
  protected:
@@ -344,16 +366,246 @@ TEST_F(DiaLogTableTest, FilterTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  const std::set<alert>& alerts = dtable.get_alerts();
-  if (!alerts.empty()) {
-    ASSERT_TRUE(static_cast<size_t>(7) <= alerts.size());
-    std::set<std::string> trigger_names;
-    for (const auto& a : alerts) {
-      trigger_names.insert(a.trig->trigger_name());
-    }
+  auto alerts = dtable.get_alerts(beg, end);
 
-    ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
+  std::set<std::string> trigger_names;
+  for (const auto& a : alerts) {
+    LOG_INFO<< "Alert: " << a.to_string();
+    trigger_names.insert(a.trig->trigger_name());
   }
+  ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
+}
+
+TEST_F(DiaLogTableTest, BatchIndexTest) {
+  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dtable.add_index("a");
+  dtable.add_index("b");
+  dtable.add_index("c", 10);
+  dtable.add_index("d", 2);
+  dtable.add_index("e", 100);
+  dtable.add_index("f", 0.1);
+  dtable.add_index("g", 0.01);
+  dtable.add_index("h");
+
+  record_batch batch = get_batch();
+
+  dtable.append_batch(batch);
+
+  size_t i = 0;
+  for (auto r = dtable.execute_filter("a == true"); r.has_more(); ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("b > 4"); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(3), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("c <= 30"); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("d == 0"); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(1), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("e <= 100"); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("f > 0.1"); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(6), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("g < 0.06"); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(5), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("h == zzz"); r.has_more(); ++r) {
+    ASSERT_TRUE(
+        r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
+            == "zzz");
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(2), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("a == true && b > 4"); r.has_more();
+      ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(2), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("a == true && (b > 4 || c <= 30)");
+      r.has_more(); ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.execute_filter("a == true && (b > 4 || f > 0.1)");
+      r.has_more(); ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(3), i);
+}
+
+TEST_F(DiaLogTableTest, BatchFilterTest) {
+  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dtable.add_filter("filter1", "a == true");
+  dtable.add_filter("filter2", "b > 4");
+  dtable.add_filter("filter3", "c <= 30");
+  dtable.add_filter("filter4", "d == 0");
+  dtable.add_filter("filter5", "e <= 100");
+  dtable.add_filter("filter6", "f > 0.1");
+  dtable.add_filter("filter7", "g < 0.06");
+  dtable.add_filter("filter8", "h == zzz");
+  dtable.add_trigger("trigger1", "filter1", "SUM(d) >= 10");
+  dtable.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
+  dtable.add_trigger("trigger3", "filter3", "SUM(d) >= 10");
+  dtable.add_trigger("trigger4", "filter4", "SUM(d) >= 10");
+  dtable.add_trigger("trigger5", "filter5", "SUM(d) >= 10");
+  dtable.add_trigger("trigger6", "filter6", "SUM(d) >= 10");
+  dtable.add_trigger("trigger7", "filter7", "SUM(d) >= 10");
+  dtable.add_trigger("trigger8", "filter8", "SUM(d) >= 10");
+
+  record_batch batch = get_batch();
+
+  dtable.append_batch(batch);
+  int64_t beg = batch.start_time_block();
+  int64_t end = batch.end_time_block();
+
+  size_t i = 0;
+  for (auto r = dtable.query_filter("filter1", beg, end); r.has_more(); ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter2", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(3), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter3", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter4", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(1), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter5", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter6", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(6), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter7", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(5), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter8", beg, end); r.has_more(); ++r) {
+    ASSERT_TRUE(
+        r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
+            == "zzz");
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(2), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter1", "b > 4", beg, end); r.has_more();
+      ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(2), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter1", "b > 4 || c <= 30", beg, end);
+      r.has_more(); ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = dtable.query_filter("filter1", "b > 4 || f > 0.1", beg, end);
+      r.has_more(); ++r) {
+    ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(
+        r.get().at(2).value().to_data().as<int8_t>() > '4'
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(3), i);
+
+  // Test triggers
+  sleep(1);  // To make sure all triggers have been evaluated
+
+  auto alerts = dtable.get_alerts(beg, end);
+
+  std::set<std::string> trigger_names;
+  for (const auto& a : alerts) {
+    LOG_INFO<< "Alert: " << a.to_string();
+    trigger_names.insert(a.trig->trigger_name());
+  }
+  ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 }
 
 #endif /* TEST_DIALOG_TABLE_TEST_H_ */

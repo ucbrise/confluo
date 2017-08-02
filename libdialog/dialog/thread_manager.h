@@ -7,7 +7,7 @@
 #include "exceptions.h"
 #include "string_map.h"
 #include "logger.h"
-#include "constants.h"
+#include "configuration_params.h"
 
 namespace dialog {
 
@@ -84,7 +84,7 @@ class thread_manager {
   static thread_info* THREAD_INFO;
 };
 
-int thread_manager::MAX_CONCURRENCY = constants::HARDWARE_CONCURRENCY;
+int thread_manager::MAX_CONCURRENCY = configuration_params::MAX_CONCURRENCY;
 thread_info* thread_manager::THREAD_INFO = thread_manager::init_thread_info();
 
 }

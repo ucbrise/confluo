@@ -7,6 +7,7 @@
 #include "storage.h"
 #include "exceptions.h"
 #include "dialog_table.h"
+#include "task_pool.h"
 #include "file_utils.h"
 
 namespace dialog {
@@ -18,10 +19,11 @@ class dialog_store {
   }
 
   void add_table(const std::string& table_name,
-                 const std::vector<column_t> schema,
-                 const storage::storage_mode& mode) {
+                 const std::vector<column_t>& schema,
+                 const storage::storage_id id) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([&ex] {
+    storage::storage_mode mode = storage::STORAGE_MODES[id];
+    auto ret = mgmt_pool_.submit([&table_name, &schema, &mode, &ex, this] {
       size_t table_id;
       if (table_map_.get(table_name, table_id)) {
         ex = management_exception("Table " + table_name + " already exists.");
