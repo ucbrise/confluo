@@ -14,11 +14,19 @@ enable_language(C)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(Threads REQUIRED)
-find_package(Thrift)
 include(CTest)
 
 # Pre-requisites
 add_subdirectory(external/gtest-1.7.0)
 
-# Datastore
+# DiaLog core
 add_subdirectory(libdialog)
+
+# RPC
+find_package(Thrift)
+if(Thrift_FOUND)
+  message(STATUS "Found Thrift, building RPC")
+  add_subdirectory(librpc)
+else()
+  message(WARNING "Apache Thrift not found, skipping rpc build")
+endif()
