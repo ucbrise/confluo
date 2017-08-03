@@ -162,8 +162,8 @@ TEST_F(FilterTest, TriggerTest) {
   std::string expr("value >= 50000");
   auto cexpr = get_expr(expr);
   filter f(cexpr);
-  trigger *t = new trigger("filter", "trigger1", aggregate_id::D_MAX, "value",
-                           0, LONG_TYPE, relop_id::GE,
+  trigger *t = new trigger("filter", "trigger1", "", aggregate_id::D_MAX,
+                           "value", 0, LONG_TYPE, relop_id::GE,
                            numeric(static_cast<int64_t>(90000)));
 
   f.add_trigger(t);
@@ -180,8 +180,8 @@ TEST_F(FilterTest, MultiThreadedTriggerTest) {
   std::string expr("value >= 50000");
   auto cexpr = get_expr(expr);
   filter f(cexpr);
-  trigger *t = new trigger("filter", "trigger1", aggregate_id::D_MAX, "value",
-                           0, LONG_TYPE, relop_id::GE,
+  trigger *t = new trigger("filter", "trigger1", "", aggregate_id::D_MAX,
+                           "value", 0, LONG_TYPE, relop_id::GE,
                            numeric(static_cast<int64_t>(90000)));
 
   f.add_trigger(t);

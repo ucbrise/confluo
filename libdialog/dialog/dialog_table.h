@@ -65,6 +65,8 @@ class dialog_table {
   typedef record_stream<filter_offset_list> filter_rstream_type;
   typedef filtered_record_stream<filter_rstream_type> ffilter_rstream_type;
 
+  typedef alert_index::alert_list alert_list;
+
   dialog_table(const std::vector<column_t>& table_schema,
                const std::string& path, const storage::storage_mode& storage,
                task_pool& pool)
@@ -90,7 +92,7 @@ class dialog_table {
                   if (t->is_valid() && ar != nullptr) {
                     numeric agg = ar->get_aggregate(tid, version);
                     if (numeric::relop(t->op(), agg, t->threshold())) {
-                      alerts_.add_alert(ms, t, agg, version);
+                      alerts_.add_alert(ms, t->trigger_name(), t->trigger_expr(), agg, version);
                     }
                   }
                 }
@@ -176,19 +178,19 @@ class dialog_table {
   }
 
   void add_filter(const std::string& filter_name,
-                  const std::string& expression) {
+                  const std::string& filter_expr) {
     optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [filter_name, expression, &ex, this] {
+            [filter_name, filter_expr, &ex, this] {
               filter_id_t filter_id;
               if (filter_map_.get(filter_name, filter_id)) {
                 ex = management_exception("Filter " + filter_name + " already exists.");
                 return;
               }
-              auto cexpr = expression_compiler::compile(expression, schema_);
+              auto cexpr = expression_compiler::compile(filter_expr, schema_);
               filter_id = filters_.push_back(new filter(cexpr, default_filter));
-              metadata_.write_filter_info(filter_name, expression);
+              metadata_.write_filter_info(filter_name, filter_expr);
               bool success = filter_map_.put(filter_name, filter_id);
               if (!success) {
                 ex = management_exception("Could not add filter " + filter_name + " to filter map.");
@@ -221,11 +223,11 @@ class dialog_table {
 
   void add_trigger(const std::string& trigger_name,
                    const std::string& filter_name,
-                   const std::string& trigger_expression) {
+                   const std::string& trigger_expr) {
     optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [trigger_name, filter_name, trigger_expression, &ex, this] {
+            [trigger_name, filter_name, trigger_expr, &ex, this] {
               trigger_id_t trigger_id;
               if (trigger_map_.get(trigger_name, trigger_id)) {
                 ex = management_exception("Trigger " + trigger_name + " already exists.");
@@ -237,10 +239,10 @@ class dialog_table {
                 return;
               }
               trigger_id.first = filter_id;
-              trigger_parser parser(trigger_expression, schema_);
+              trigger_parser parser(trigger_expr, schema_);
               parsed_trigger tp = parser.parse();
               const column_t& col = schema_[tp.field_name];
-              trigger* t = new trigger(trigger_name, filter_name, tp.agg, col.name(), col.idx(), col.type(), tp.relop, tp.threshold);
+              trigger* t = new trigger(trigger_name, filter_name, trigger_expr, tp.agg, col.name(), col.idx(), col.type(), tp.relop, tp.threshold);
               trigger_id.second = filters_.at(filter_id)->add_trigger(t);
               metadata_.write_trigger_info(trigger_name, filter_name, tp.agg, tp.field_name, tp.relop,
                   tp.threshold);
@@ -277,8 +279,7 @@ class dialog_table {
     size_t batch_bytes = batch.nrecords * record_size;
     size_t log_offset = data_log_.reserve(batch_bytes);
     size_t cur_offset = log_offset;
-    for (size_t i = 0; i < batch.nblocks; i++) {
-      record_block& block = batch.blocks[i];
+    for (record_block& block : batch.blocks) {
       data_log_.write(cur_offset,
                       reinterpret_cast<const uint8_t*>(block.data.data()),
                       block.data.length());
@@ -310,13 +311,12 @@ class dialog_table {
     return offset;
   }
 
-  bool read(uint64_t offset, record_t& rec) const {
+  void* read(uint64_t offset) const {
     uint64_t version = rt_.get();
     if (offset < version) {
-      rec = record_t(offset, data_log_.cptr(offset), schema_.record_size());
-      return true;
+      return data_log_.cptr(offset);
     }
-    return false;
+    return nullptr;
   }
 
   fri_result_type execute_filter(const std::string& expr) const {
@@ -357,13 +357,20 @@ class dialog_table {
         expression_compiler::compile(expr, schema_));
   }
 
-  alert_index::alert_list get_alerts(uint64_t ts_block_begin,
-                                     uint64_t ts_block_end) const {
+  alert_list get_alerts(uint64_t ts_block_begin, uint64_t ts_block_end) const {
     return alerts_.get_alerts(ts_block_begin, ts_block_end);
+  }
+
+  const schema_t& get_schema() const {
+    return schema_;
   }
 
   size_t num_records() const {
     return rt_.get();
+  }
+
+  size_t record_size() const {
+    return schema_.record_size();
   }
 
  protected:

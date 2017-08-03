@@ -13,16 +13,15 @@ struct record_block {
 };
 
 struct record_batch {
-  record_block* blocks;
-  size_t nblocks;
+  std::vector<record_block> blocks;
   size_t nrecords;
 
   int64_t start_time_block() const {
-    return blocks[0].time_block;
+    return blocks.front().time_block;
   }
 
   int64_t end_time_block() const {
-    return blocks[nblocks - 1].time_block;
+    return blocks.back().time_block;
   }
 };
 
@@ -31,6 +30,13 @@ class record_batch_builder {
   static const int64_t TIME_BLOCK = 1e6;
 
   record_batch_builder() = default;
+
+  void add_record(const std::string& rec) {
+    int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
+    int64_t time_block = ts / TIME_BLOCK;
+    batch_sizes_[time_block] += rec.size();
+    batch_[time_block].push_back(rec);
+  }
 
   void add_record(std::string&& rec) {
     int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
@@ -41,8 +47,7 @@ class record_batch_builder {
 
   record_batch get_batch() {
     record_batch batch;
-    batch.nblocks = batch_.size();
-    batch.blocks = new record_block[batch.nblocks];
+    batch.blocks.resize(batch_.size());
     batch.nrecords = 0;
     size_t i = 0;
     for (auto entry : batch_) {

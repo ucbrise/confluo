@@ -49,9 +49,8 @@ TEST_F(RecordBatchTest, RecordBatchBuilderTest) {
 
   auto batch = builder.get_batch();
 
-  ASSERT_EQ(static_cast<size_t>(3), batch.nblocks);
+  ASSERT_EQ(static_cast<size_t>(3), batch.blocks.size());
   ASSERT_EQ(static_cast<size_t>(7), batch.nrecords);
-  ASSERT_TRUE(batch.blocks != nullptr);
 
   ASSERT_EQ(static_cast<int64_t>(0), batch.blocks[0].time_block);
   ASSERT_EQ(static_cast<size_t>(3), batch.blocks[0].nrecords);

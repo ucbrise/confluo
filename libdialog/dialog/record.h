@@ -79,6 +79,10 @@ struct record_t {
     return fields_.end();
   }
 
+  size_t length() const {
+    return size_;
+  }
+
  private:
   int64_t timestamp_;
   size_t log_offset_;

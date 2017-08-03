@@ -28,12 +28,11 @@ class DiaLogTableTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      bool success = dtable.read(offsets[i], r);
-      const uint8_t* ret = reinterpret_cast<const uint8_t*>(r.data());
-      ASSERT_TRUE(success);
+      uint8_t* data = reinterpret_cast<uint8_t*>(dtable.read(offsets[i]));
+      ASSERT_TRUE(data != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-        ASSERT_EQ(ret[j], expected);
+        ASSERT_EQ(data[j], expected);
       }
     }
   }
@@ -371,7 +370,7 @@ TEST_F(DiaLogTableTest, FilterTest) {
   std::set<std::string> trigger_names;
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
-    trigger_names.insert(a.trig->trigger_name());
+    trigger_names.insert(a.trigger_name);
   }
   ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 }
@@ -603,7 +602,7 @@ TEST_F(DiaLogTableTest, BatchFilterTest) {
   std::set<std::string> trigger_names;
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
-    trigger_names.insert(a.trig->trigger_name());
+    trigger_names.insert(a.trigger_name);
   }
   ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 }

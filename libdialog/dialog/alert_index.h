@@ -22,11 +22,13 @@ class alert_index {
   }
 
   // Note: single threaded
-  void add_alert(uint64_t time_bucket, trigger* t, const numeric& value,
+  void add_alert(uint64_t time_bucket, const std::string& trigger_name,
+                 const std::string& trigger_expr, const numeric& value,
                  uint64_t version) {
     auto log = idx_.get_or_create(make_key(time_bucket));
-    if (find_alert(log, t, value) == -1)
-      log->push_back(alert(time_bucket, t, value, version));
+    if (find_alert(log, trigger_name, value) == -1)
+      log->push_back(
+          alert(time_bucket, trigger_name, trigger_expr, value, version));
   }
 
   alert_list get_alerts(uint64_t t1, uint64_t t2) const {
@@ -38,11 +40,12 @@ class alert_index {
     return byte_string(time_bucket);
   }
 
-  int64_t find_alert(alert_log* log, trigger* t, const numeric& value) const {
+  int64_t find_alert(alert_log* log, const std::string& trigger_name,
+                     const numeric& value) const {
     size_t nalerts = log->size();
     for (size_t i = 0; i < nalerts; i++) {
       const alert& a = log->at(i);
-      if (a.trig->trigger_name() == t->trigger_name() && a.value == value) {
+      if (a.trigger_name == trigger_name && a.value == value) {
         return i;
       }
     }

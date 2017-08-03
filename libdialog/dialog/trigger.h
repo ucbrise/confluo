@@ -9,10 +9,12 @@ namespace monitor {
 struct trigger {
  public:
   trigger(const std::string& trigger_name, const std::string& filter_name,
-          aggregate_id agg, const std::string& field_name, size_t field_idx,
+          const std::string& trigger_expr, aggregate_id agg,
+          const std::string& field_name, size_t field_idx,
           const data_type& field_type, relop_id op, const numeric& threshold)
       : trigger_name_(trigger_name),
         filter_name_(filter_name),
+        trigger_expr_(trigger_expr),
         agg_id_(agg),
         field_name_(field_name),
         field_idx_(field_idx),
@@ -34,6 +36,10 @@ struct trigger {
 
   std::string filter_name() const {
     return filter_name_;
+  }
+
+  std::string trigger_expr() const {
+    return trigger_expr_;
   }
 
   aggregate_id agg_id() const {
@@ -89,6 +95,7 @@ struct trigger {
  private:
   std::string trigger_name_;
   std::string filter_name_;
+  std::string trigger_expr_;
   aggregate_id agg_id_;
   std::string field_name_;
   uint32_t field_idx_;

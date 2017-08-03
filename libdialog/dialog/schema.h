@@ -101,6 +101,14 @@ class schema_t {
     return snap;
   }
 
+  std::vector<column_t>& columns() {
+    return columns_;
+  }
+
+  std::vector<column_t> const& columns() const {
+    return columns_;
+  }
+
  private:
   size_t record_size_;  // TODO: Switch to dynamically sized records at some point
   std::vector<column_t> columns_;
