@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(dialog CXX C)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+project(dialog VERSION 0.1.0 LANGUAGES CXX C)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -10,6 +10,13 @@ else()
 endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -pedantic -Wextra -Wno-missing-field-initializers")
 enable_language(C)
+
+if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  message(FATAL_ERROR "In-source builds are not allowed.")
+endif ()
+
+set(CMAKE_VERBOSE_MAKEFILE false
+    CACHE STRING "Show all outputs including compiler lines." FORCE)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
