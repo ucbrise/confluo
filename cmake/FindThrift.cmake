@@ -1,39 +1,56 @@
 # - Find Thrift (a cross platform RPC lib/tool)
 # This module defines
-#  THRIFT_VERSION_STRING, version string of ant if found
-#  THRIFT_LIBRARIES, libraries to link
-#  THRIFT_INCLUDE, where to find THRIFT headers
+#  THRIFT_VERSION, version string of ant if found
+#  THRIFT_INCLUDE_DIR, where to find THRIFT headers
+#  THRIFT_LIBS, THRIFT libraries
 #  THRIFT_FOUND, If false, do not try to use ant
-# Function
-#  thrift_gen_cpp(<path to thrift file> <source destination> <include destination> <source list>)
-
-# prefer the thrift version supplied in THRIFT_HOME (cmake -DTHRIFT_HOME then environment)
-find_path(THRIFT_INCLUDE
-    NAMES
-        thrift/Thrift.h
-    HINTS
-        ${THRIFT_HOME}
-        ENV THRIFT_HOME
-        /usr/local
-        /opt/local
-    PATH_SUFFIXES
-        include
-)
 
 # prefer the thrift version supplied in THRIFT_HOME
-find_library(THRIFT_LIBRARIES
-    NAMES
-        thrift libthrift
-    HINTS
-        ${THRIFT_HOME}
-        ENV THRIFT_HOME
-        /usr/local
-        /opt/local
-    PATH_SUFFIXES
-        lib lib64
+find_path(THRIFT_INCLUDE_DIR thrift/Thrift.h HINTS
+  $ENV{THRIFT_HOME}/include/
+  /usr/local/include/
+  /opt/local/include/
 )
 
-include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Thrift DEFAULT_MSG THRIFT_LIBRARIES THRIFT_INCLUDE)
+set(THRIFT_LIB_PATHS
+  $ENV{THRIFT_HOME}/lib
+  /usr/local/lib
+  /opt/local/lib)
 
-mark_as_advanced(THRIFT_LIBRARIES THRIFT_INCLUDE THRIFT_VERSION_STRING)
+find_path(THRIFT_STATIC_LIB_PATH libthrift.a PATHS ${THRIFT_LIB_PATHS})
+
+# prefer the thrift version supplied in THRIFT_HOME
+find_library(THRIFT_LIB NAMES thrift HINTS ${THRIFT_LIB_PATHS})
+
+find_program(THRIFT_COMPILER thrift
+  $ENV{THRIFT_HOME}/bin
+  /usr/local/bin
+  /usr/bin
+  NO_DEFAULT_PATH
+)
+
+if (THRIFT_LIB)
+  set(THRIFT_FOUND TRUE)
+  set(THRIFT_LIBS ${THRIFT_LIB})
+  set(THRIFT_STATIC_LIB ${THRIFT_STATIC_LIB_PATH}/libthrift.a)
+  exec_program(${THRIFT_COMPILER}
+    ARGS -version OUTPUT_VARIABLE THRIFT_VERSION RETURN_VALUE THRIFT_RETURN)
+  string(REGEX MATCH "[0-9]+.[0-9]+.[0-9]+-[a-z]+$" THRIFT_VERSION_STRING ${THRIFT_VERSION})
+else ()
+  set(THRIFT_FOUND FALSE)
+endif ()
+
+if (THRIFT_FOUND)
+  if (NOT THRIFT_FIND_QUIETLY)
+    message(STATUS "Found ${THRIFT_VERSION}")
+  endif ()
+else ()
+  message(STATUS "Thrift compiler/libraries NOT found.")
+endif ()
+
+
+mark_as_advanced(
+  THRIFT_LIB
+  THRIFT_COMPILER
+  THRIFT_INCLUDE_DIR
+)

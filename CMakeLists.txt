@@ -31,8 +31,8 @@ add_subdirectory(libdialog)
 
 # RPC
 find_package(Thrift)
-if(Thrift_FOUND)
-  message(STATUS "Found Thrift, building RPC")
+if(THRIFT_FOUND)
+  message(STATUS "Building RPC")
   add_subdirectory(librpc)
 else()
   message(WARNING "Apache Thrift not found, skipping rpc build")
