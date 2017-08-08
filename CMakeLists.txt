@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(monolog CXX)
+project(dialog CXX C)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
