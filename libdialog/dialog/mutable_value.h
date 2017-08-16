@@ -17,57 +17,57 @@ class mutable_value : public immutable_value {
   }
 
   mutable_value(const data_type& type, const void* value)
-      : immutable_value(type, new uint8_t[type.size]) {
+      : immutable_value(type, new uint8_t[type.size]()) {
     type.unaryop(unaryop_id::ASSIGN)(ptr_, data(value, type.size));
   }
 
   mutable_value(bool value)
-      : immutable_value(BOOL_TYPE, new uint8_t[BOOL_TYPE.size]) {
+      : immutable_value(BOOL_TYPE, new uint8_t[BOOL_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, BOOL_TYPE.size));
   }
 
   mutable_value(int8_t value)
-      : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]) {
+      : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, CHAR_TYPE.size));
   }
 
   mutable_value(int16_t value)
-      : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]) {
+      : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, SHORT_TYPE.size));
   }
 
   mutable_value(int32_t value)
-      : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]) {
+      : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, INT_TYPE.size));
   }
 
   mutable_value(int64_t value)
-      : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]) {
+      : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, LONG_TYPE.size));
   }
 
   mutable_value(float value)
-      : immutable_value(FLOAT_TYPE, new uint8_t[FLOAT_TYPE.size]) {
+      : immutable_value(FLOAT_TYPE, new uint8_t[FLOAT_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, FLOAT_TYPE.size));
   }
 
   mutable_value(double value)
-      : immutable_value(DOUBLE_TYPE, new uint8_t[DOUBLE_TYPE.size]) {
+      : immutable_value(DOUBLE_TYPE, new uint8_t[DOUBLE_TYPE.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, DOUBLE_TYPE.size));
   }
 
   mutable_value(const std::string& str)
-      : immutable_value(STRING_TYPE(str.length()), new char[str.length()]) {
+      : immutable_value(STRING_TYPE(str.length()), new char[str.length()]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(str.c_str(), str.length()));
   }
 
   mutable_value(const immutable_value& other)
-      : immutable_value(other.type(), new uint8_t[other.type().size]) {
+      : immutable_value(other.type(), new uint8_t[other.type().size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, other.to_data());
   }
 
   mutable_value(const mutable_value& other)
-      : immutable_value(other.type_, new uint8_t[other.type_.size]) {
+      : immutable_value(other.type_, new uint8_t[other.type_.size]()) {
     type_.unaryop(unaryop_id::ASSIGN)(ptr_, other.to_data());
   }
 

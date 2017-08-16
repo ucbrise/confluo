@@ -48,6 +48,10 @@ struct field_t {
     return value_.as<T>();
   }
 
+  std::string to_string() const {
+    return value_.to_string();
+  }
+
  private:
   uint16_t idx_;
   immutable_value value_;

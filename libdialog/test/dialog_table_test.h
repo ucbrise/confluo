@@ -52,6 +52,16 @@ class DiaLogTableTest : public testing::Test {
   }__attribute__((packed));
 
   static rec r;
+  static char test_str[16];
+
+  static char* test_string(const char* str) {
+    size_t len = std::min(static_cast<size_t>(16), strlen(str));
+    memcpy(test_str, str, len);
+    for (size_t i = len; i < 16; i++) {
+      test_str[i] = '\0';
+    }
+    return test_str;
+  }
 
   static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
                       float f, double g, const char* h) {
@@ -59,7 +69,9 @@ class DiaLogTableTest : public testing::Test {
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
     memcpy(r.h, h, len);
-    r.h[len] = '\0';
+    for (size_t i = len; i < 16; i++) {
+      r.h[i] = '\0';
+    }
     return reinterpret_cast<void*>(&r);
   }
 

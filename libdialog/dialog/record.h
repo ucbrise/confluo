@@ -83,6 +83,16 @@ struct record_t {
     return size_;
   }
 
+  std::string to_string() const {
+    std::string str = "(";
+    for (auto& f: *this) {
+      str += f.to_string() + ", ";
+    }
+    str.pop_back();
+    str += ")";
+    return str;
+  }
+
  private:
   int64_t timestamp_;
   size_t log_offset_;
