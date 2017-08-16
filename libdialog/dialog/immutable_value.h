@@ -123,7 +123,8 @@ class immutable_value {
       }
       case type_id::D_STRING: {
         return "string("
-            + std::string(reinterpret_cast<const char*>(ptr_), type_.size) + ")";
+            + immutable_byte_string(reinterpret_cast<uint8_t*>(ptr_),
+                                    type_.size).to_string() + ")";
       }
       case type_id::D_NONE: {
         return "none()";
