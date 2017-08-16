@@ -113,7 +113,9 @@ class mutable_value : public immutable_value {
         return mutable_value(val);
       }
       case type_id::D_STRING: {
-        return mutable_value(type, str.c_str());
+        std::string t_str = str;
+        t_str.resize(type.size);
+        return mutable_value(type, t_str.c_str());
       }
       default: {
         THROW(parse_exception, "Could not parse value");
