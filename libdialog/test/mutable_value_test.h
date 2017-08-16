@@ -323,8 +323,6 @@ TEST_F(MutableValueTest, StringValueTest) {
   ASSERT_EQ(n2.type().id, type_id::D_STRING);
   ASSERT_EQ(n3.type().id, type_id::D_STRING);
 
-  fprintf(stderr, "n1=[%s]\n", reinterpret_cast<const char*>(n1.ptr()));
-
   ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n1.ptr()), n1.type().size) == s1);
   ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n2.ptr()), n2.type().size) == s2);
   ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n3.ptr()), n2.type().size) == s3);

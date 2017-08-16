@@ -25,6 +25,9 @@ struct compiled_predicate {
 
     try {
       val_ = mutable_value::parse(p.value, field_type_);
+      if (field_type_.id == type_id::D_STRING) {
+        fprintf(stderr, "compiled predicate value = [%s]\n", val_.to_string().c_str());
+      }
     } catch (std::exception& e) {
       THROW(
           parse_exception,
