@@ -57,7 +57,9 @@ class DiaLogTableTest : public testing::Test {
                       float f, double g, const char* h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
-    memcpy(r.h, h, std::min(static_cast<size_t>(16), strlen(h)));
+    size_t len = std::min(static_cast<size_t>(16), strlen(h));
+    memcpy(r.h, h, len);
+    r.h[len] = '\0';
     return reinterpret_cast<void*>(&r);
   }
 
