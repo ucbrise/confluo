@@ -317,17 +317,17 @@ TEST_F(MutableValueTest, DoubleValueTest) {
 }
 
 TEST_F(MutableValueTest, StringValueTest) {
-  mutable_value n1(std::string("abc")), n2(std::string("123")), n3(
-      std::string("abc"));
+  std::string s1 = "abc", s2 = "123", s3 = "abc";
+  mutable_value n1(s1), n2(s2), n3(s3);
   ASSERT_EQ(n1.type().id, type_id::D_STRING);
   ASSERT_EQ(n2.type().id, type_id::D_STRING);
   ASSERT_EQ(n3.type().id, type_id::D_STRING);
 
   fprintf(stderr, "n1=[%s]\n", reinterpret_cast<const char*>(n1.ptr()));
 
-  ASSERT_TRUE(strcmp(reinterpret_cast<const char*>(n1.ptr()), "abc") == 0);
-  ASSERT_TRUE(strcmp(reinterpret_cast<const char*>(n2.ptr()), "123") == 0);
-  ASSERT_TRUE(strcmp(reinterpret_cast<const char*>(n3.ptr()), "abc") == 0);
+  ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n1.ptr()), n1.type().size) == s1);
+  ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n2.ptr()), n2.type().size) == s2);
+  ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n3.ptr()), n2.type().size) == s3);
 
   ASSERT_TRUE(n1 == n3);
   ASSERT_TRUE(n1 != n2);
