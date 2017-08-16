@@ -51,7 +51,6 @@ TEST_F(MutableValueTest, BoolValueTest) {
 }
 
 TEST_F(MutableValueTest, CharValueTest) {
-
   mutable_value n1(static_cast<int8_t>(5)), n2(static_cast<int8_t>(2)), n3(
       static_cast<int8_t>(5));
   ASSERT_EQ(n1.type().id, type_id::D_CHAR);
@@ -323,6 +322,8 @@ TEST_F(MutableValueTest, StringValueTest) {
   ASSERT_EQ(n1.type().id, type_id::D_STRING);
   ASSERT_EQ(n2.type().id, type_id::D_STRING);
   ASSERT_EQ(n3.type().id, type_id::D_STRING);
+
+  fprintf(stderr, "n1=[%s]\n", reinterpret_cast<const char*>(n1.ptr()));
 
   ASSERT_TRUE(strcmp(reinterpret_cast<const char*>(n1.ptr()), "abc") == 0);
   ASSERT_TRUE(strcmp(reinterpret_cast<const char*>(n2.ptr()), "123") == 0);
