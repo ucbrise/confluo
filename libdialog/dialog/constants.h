@@ -14,9 +14,9 @@ class constants {
 };
 
 const int constants::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
-const double constants::DEFAULT_INDEX_BUCKET_SIZE;
-const uint64_t constants::DEFAULT_MONITOR_WINDOW_MS;
-const uint64_t constants::DEFAULT_MONITOR_PERIODICITY_MS;
+constexpr double constants::DEFAULT_INDEX_BUCKET_SIZE;
+constexpr uint64_t constants::DEFAULT_MONITOR_WINDOW_MS;
+constexpr uint64_t constants::DEFAULT_MONITOR_PERIODICITY_MS;
 
 }
 
