@@ -24,6 +24,12 @@ set(CMAKE_VERBOSE_MAKEFILE false
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+if(APPLE)
+  # disable warnings about "ranlib: file: xxx.a(...cpp.o) has no symbols"
+  set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+  set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+endif()
+
 include(CTest)
 
 # Dependencies
@@ -45,13 +51,7 @@ add_subdirectory(external/gtest-1.7.0)
 add_subdirectory(libdialog)
 
 # RPC
-find_package(Thrift)
-if(THRIFT_FOUND)
-  message(STATUS "Building RPC")
-  add_subdirectory(librpc)
-else()
-  message(WARNING "Apache Thrift not found, skipping rpc build")
-endif()
+add_subdirectory(librpc)
 
 # CPack
 set(CPACK_PACKAGE_NAME "dialog")
