@@ -15,6 +15,11 @@ file(GLOB_RECURSE test_sources test/*.cc)
 add_executable(dtest ${test_sources})
 target_link_libraries(dtest gtest_main)
 
+# install
+install(DIRECTORY dialog/
+  DESTINATION include
+  FILES_MATCHING PATTERN "*")
+
 # Register test
 enable_testing()
 add_test(DiaLogTest ${EXECUTABLE_OUTPUT_PATH}/dtest)
