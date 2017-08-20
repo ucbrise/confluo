@@ -22,7 +22,7 @@ endif ()
 set(CMAKE_VERBOSE_MAKEFILE false
     CACHE STRING "Show all outputs including compiler lines." FORCE)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 
 if(APPLE)
   # disable warnings about "ranlib: file: xxx.a(...cpp.o) has no symbols"
