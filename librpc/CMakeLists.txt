@@ -1,5 +1,7 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
+find_package(Boost 1.60.0 REQUIRED)
+
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
@@ -14,7 +16,8 @@ include_directories(${gtest_SOURCE_DIR}/include
   ${UTILS_INCLUDE}
   ${DIALOG_INCLUDE}
   ${THRIFT_INCLUDE}
-  ${THRIFT_BUILD_INCLUDE})
+  ${THRIFT_BUILD_INCLUDE}
+  ${Boost_INCLUDE_DIR})
   
 # Build server executable
 set(SERVER_SOURCES src/dialog_constants.cc
