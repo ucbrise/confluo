@@ -7,12 +7,14 @@ set(RPC_INCLUDE rpc)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 set(DIALOG_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libdialog/dialog)
 set(THRIFT_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../external/thrift-0.10.0/lib/cpp/src)
+set(THRIFT_BUILD_INCLUDE ${PROJECT_BINARY_DIR}/external/thrift-0.10.0)
 
 include_directories(${gtest_SOURCE_DIR}/include
   ${RPC_INCLUDE}
   ${UTILS_INCLUDE}
   ${DIALOG_INCLUDE}
-  ${THRIFT_INCLUDE})
+  ${THRIFT_INCLUDE}
+  ${THRIFT_BUILD_INCLUDE})
   
 # Build server executable
 set(SERVER_SOURCES src/dialog_constants.cc
