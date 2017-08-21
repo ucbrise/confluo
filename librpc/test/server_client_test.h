@@ -19,12 +19,12 @@ TEST_F(ServerClientTest, ConcurrentConnectionsTest) {
     server->serve();
   });
 
+  sleep(1);
+
   std::vector<rpc_dialog_reader> clients(server->getConcurrentClientLimit());
   for (auto& client : clients) {
     client.connect("127.0.0.1", 9090);
   }
-
-  sleep(1);
 
   for (auto& client : clients) {
     client.disconnect();
