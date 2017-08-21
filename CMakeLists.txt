@@ -42,6 +42,11 @@ set(WITH_PYTHON ON CACHE BOOL "Build Python Thrift library" FORCE)
 set(WITH_HASKELL OFF CACHE BOOL "Build Haskell Thrift library" FORCE)
 set(WITH_SHARED_LIB ON CACHE BOOL "Build shared libraries" FORCE)
 set(WITH_STATIC_LIB ON CACHE BOOL "Build static libraries" FORCE)
+set(WITH_ZLIB OFF CACHE BOOL "Build with ZLIB support" FORCE) # For now
+set(WITH_QT4 OFF CACHE BOOL "Build with Qt4 support" FORCE)
+set(WITH_QT5 OFF CACHE BOOL "Build with Ot5 support" FORCE)
+set(WITH_SSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
+set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
 add_subdirectory(external/thrift-0.10.0)
 
 # Google Test

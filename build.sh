@@ -10,6 +10,7 @@ else
 fi
 
 START=$(date +%s)
-make && make test ARGS="-VV"
+make
+make test ARGS="-VV"
 END=$(date +%s)
 echo "Total build time (real) = $(( $END - $START )) seconds"
