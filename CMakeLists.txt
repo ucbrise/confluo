@@ -25,7 +25,7 @@ set(CMAKE_VERBOSE_MAKEFILE false
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 
 if(APPLE)
-  # disable warnings about "ranlib: file: xxx.a(...cpp.o) has no symbols"
+  # disable warnings about "ranlib: file: xxx.a(...cc.o) has no symbols"
   set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
   set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 endif()
@@ -45,7 +45,7 @@ set(WITH_STATIC_LIB ON CACHE BOOL "Build static libraries" FORCE)
 set(WITH_ZLIB OFF CACHE BOOL "Build with ZLIB support" FORCE) # For now
 set(WITH_QT4 OFF CACHE BOOL "Build with Qt4 support" FORCE)
 set(WITH_QT5 OFF CACHE BOOL "Build with Ot5 support" FORCE)
-set(WITH_SSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
+set(WITH_OPENSSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
 set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
 add_subdirectory(external/thrift-0.10.0)
 
