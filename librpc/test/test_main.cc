@@ -3,6 +3,8 @@
 #include "gtest/gtest.h"
 
 #include "server_client_test.h"
+#include "reader_test.h"
+#include "writer_test.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
