@@ -366,6 +366,8 @@ TEST_F(ReaderTest, PreDefFilterTest) {
     server->serve();
   });
 
+  sleep(1);
+
   rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT,
                                                table_name);
   size_t i = 0;
@@ -497,6 +499,8 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
   std::thread serve_thread([&server] {
     server->serve();
   });
+
+  sleep(1);
 
   rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
 
@@ -630,8 +634,9 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
     server->serve();
   });
 
-  rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT,
-                                               table_name);
+  sleep(1);
+
+  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
 
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {

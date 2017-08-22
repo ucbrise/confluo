@@ -118,8 +118,7 @@ TEST_F(WriterTest, CreateTableTest) {
 
   sleep(1);
 
-  auto client = rpc_dialog_writer();
-  client.connect(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
 
   client.create_table(
       table_name,
@@ -148,7 +147,9 @@ TEST_F(WriterTest, WriteTest) {
     server->serve();
   });
 
-  auto client = rpc_dialog_writer(SERVER_ADDRESS, SERVER_PORT);
+  sleep(1);
+
+  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.write("abc");
@@ -179,7 +180,7 @@ TEST_F(WriterTest, AddIndexTest) {
 
   sleep(1);
 
-  auto client = rpc_dialog_writer(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.add_index("a", 1);
@@ -310,7 +311,7 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
 
   sleep(1);
 
-  auto client = rpc_dialog_writer(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.add_filter("filter1", "a == true");
