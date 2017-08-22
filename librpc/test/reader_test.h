@@ -6,8 +6,8 @@
 #include "dialog_table.h"
 #include "gtest/gtest.h"
 
-#include "../rpc/rpc_dialog_reader.h"
-#include "../rpc/rpc_dialog_writer.h"
+#include "rpc_dialog_reader.h"
+#include "rpc_dialog_writer.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -16,7 +16,7 @@ using namespace ::dialog::rpc;
 using namespace ::dialog;
 
 class ReaderTest : public testing::Test {
-public:
+ public:
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
 
@@ -27,21 +27,22 @@ public:
   }
 
   void test_read(dialog_table* dtable, rpc_dialog_reader& client) {
-    std::vector<uint64_t> offsets;
+    std::vector<int64_t> offsets;
     for (int64_t i = 0; i < MAX_RECORDS; i++) {
       generate_bytes(data_, DATA_SIZE, i);
-      uint64_t offset = dtable->append(data_);
+      int64_t offset = dtable->append(data_);
       offsets.push_back(offset);
     }
 
     std::string buf;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      client.read(buf, (int64_t) offsets[i]);
+      client.read(buf, offsets[i]);
+      ASSERT_EQ(dtable->record_size(), buf.size());
       uint8_t* data = reinterpret_cast<uint8_t*>(&buf[0]);
       ASSERT_TRUE(data != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-        ASSERT_EQ(data[j], expected);
+        ASSERT_EQ(expected, data[j]);
       }
     }
   }
@@ -64,7 +65,7 @@ public:
   static char test_str[16];
 
   static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-      float f, double g, const char* h) {
+                      float f, double g, const char* h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
@@ -76,12 +77,13 @@ public:
   }
 
   static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-      int64_t e, float f, double g, const char* h) {
+                                int64_t e, float f, double g, const char* h) {
     void* rbuf = record(a, b, c, d, e, f, g, h);
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
-  static dialog_store* simple_table_store(std::string table_name, storage::storage_id id) {
+  static dialog_store* simple_table_store(const std::string& table_name,
+                                          storage::storage_id id) {
     auto store = new dialog_store("/tmp");
     store->add_table(
         table_name,
@@ -119,7 +121,7 @@ public:
     return builder.get_batch();
   }
 
-protected:
+ protected:
   uint8_t data_[DATA_SIZE];
 
   virtual void SetUp() override {
@@ -135,16 +137,16 @@ ReaderTest::rec ReaderTest::r;
 std::vector<column_t> ReaderTest::s = schema();
 
 TEST_F(ReaderTest, ReadInMemoryTest) {
-
   std::string table_name = "my_table";
-
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  auto client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
+  sleep(1);
+
+  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
   test_read(store->get_table(table_name), client);
 
   client.disconnect();
@@ -156,16 +158,16 @@ TEST_F(ReaderTest, ReadInMemoryTest) {
 }
 
 TEST_F(ReaderTest, ReadDurableTest) {
-
   std::string table_name = "my_table";
-
   auto store = simple_table_store(table_name, storage::D_DURABLE);
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  auto client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
+  sleep(1);
+
+  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
   test_read(store->get_table(table_name), client);
 
   client.disconnect();
@@ -177,16 +179,16 @@ TEST_F(ReaderTest, ReadDurableTest) {
 }
 
 TEST_F(ReaderTest, ReadDurableRelaxedTest) {
-
   std::string table_name = "my_table";
-
   auto store = simple_table_store(table_name, storage::D_DURABLE_RELAXED);
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  auto client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
+  sleep(1);
+
+  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
   test_read(store->get_table(table_name), client);
 
   client.disconnect();
@@ -198,7 +200,6 @@ TEST_F(ReaderTest, ReadDurableRelaxedTest) {
 }
 
 TEST_F(ReaderTest, AdHocFilterTest) {
-
   std::string table_name = "my_table";
   auto store = new dialog_store("/tmp");
   store->add_table(table_name, schema(), storage::D_IN_MEMORY);
@@ -227,7 +228,9 @@ TEST_F(ReaderTest, AdHocFilterTest) {
     server->serve();
   });
 
-  auto client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
+  sleep(1);
+
+  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
 
   size_t i = 0;
   for (auto r = client.adhoc_filter("a == true"); r.has_more(); ++r) {
@@ -282,14 +285,13 @@ TEST_F(ReaderTest, AdHocFilterTest) {
   for (auto r = client.adhoc_filter("h == zzz"); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
-        == "zzz");
+            == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && b > 4"); r.has_more();
-      ++r) {
+  for (auto r = client.adhoc_filter("a == true && b > 4"); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -302,7 +304,7 @@ TEST_F(ReaderTest, AdHocFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -313,7 +315,7 @@ TEST_F(ReaderTest, AdHocFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(6).value().to_data().as<float>() > 0.1);
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -323,11 +325,9 @@ TEST_F(ReaderTest, AdHocFilterTest) {
   if (serve_thread.joinable()) {
     serve_thread.join();
   }
-
 }
 
 TEST_F(ReaderTest, PreDefFilterTest) {
-
   std::string table_name = "my_table";
   auto store = new dialog_store("/tmp");
   store->add_table(table_name, schema(), storage::D_IN_MEMORY);
@@ -366,8 +366,8 @@ TEST_F(ReaderTest, PreDefFilterTest) {
     server->serve();
   });
 
-  rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
-
+  rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT,
+                                               table_name);
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
@@ -421,14 +421,14 @@ TEST_F(ReaderTest, PreDefFilterTest) {
   for (auto r = client.predef_filter("filter8", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
-        == "zzz");
+            == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4", beg, end); r.has_more();
-      ++r) {
+  for (auto r = client.combined_filter("filter1", "b > 4", beg, end);
+      r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -441,7 +441,7 @@ TEST_F(ReaderTest, PreDefFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -452,7 +452,7 @@ TEST_F(ReaderTest, PreDefFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(6).value().to_data().as<float>() > 0.1);
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -462,6 +462,7 @@ TEST_F(ReaderTest, PreDefFilterTest) {
 
   std::set<std::string> trigger_names;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
+    LOG_INFO<< "Alert: " << alerts.get();
     trigger_names.insert(alerts.get());
   }
   ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
@@ -497,7 +498,7 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
     server->serve();
   });
 
-  auto client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
 
   size_t i = 0;
   for (auto r = client.adhoc_filter("a == true"); r.has_more(); ++r) {
@@ -552,14 +553,13 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
   for (auto r = client.adhoc_filter("h == zzz"); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
-        == "zzz");
+            == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && b > 4"); r.has_more();
-      ++r) {
+  for (auto r = client.adhoc_filter("a == true && b > 4"); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -572,7 +572,7 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -583,10 +583,16 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(6).value().to_data().as<float>() > 0.1);
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
 }
 
 TEST_F(ReaderTest, BatchPreDefFilterTest) {
@@ -624,7 +630,8 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
     server->serve();
   });
 
-  rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT,
+                                               table_name);
 
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
@@ -679,14 +686,14 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
   for (auto r = client.predef_filter("filter8", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
-        == "zzz");
+            == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4", beg, end); r.has_more();
-      ++r) {
+  for (auto r = client.combined_filter("filter1", "b > 4", beg, end);
+      r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -699,7 +706,7 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -710,7 +717,7 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(6).value().to_data().as<float>() > 0.1);
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -720,9 +727,16 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
 
   std::set<std::string> trigger_names;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
+    LOG_INFO<< "Alert: " << alerts.get();
     trigger_names.insert(alerts.get());
   }
   ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
 }
 
 #endif /* TEST_READER_TEST_H_ */
