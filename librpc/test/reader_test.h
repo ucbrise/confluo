@@ -462,12 +462,9 @@ TEST_F(ReaderTest, PreDefFilterTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  std::set<std::string> trigger_names;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
     LOG_INFO<< "Alert: " << alerts.get();
-    trigger_names.insert(alerts.get());
   }
-  ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 
   client.disconnect();
   server->stop();
@@ -730,12 +727,9 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  std::set<std::string> trigger_names;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
     LOG_INFO<< "Alert: " << alerts.get();
-    trigger_names.insert(alerts.get());
   }
-  ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 
   client.disconnect();
   server->stop();

@@ -381,12 +381,9 @@ TEST_F(DiaLogTableTest, FilterTest) {
 
   auto alerts = dtable.get_alerts(beg, end);
 
-  std::set<std::string> trigger_names;
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
-    trigger_names.insert(a.trigger_name);
   }
-  ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 }
 
 TEST_F(DiaLogTableTest, BatchIndexTest) {
@@ -613,12 +610,9 @@ TEST_F(DiaLogTableTest, BatchFilterTest) {
 
   auto alerts = dtable.get_alerts(beg, end);
 
-  std::set<std::string> trigger_names;
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
-    trigger_names.insert(a.trigger_name);
   }
-  ASSERT_EQ(static_cast<size_t>(7), trigger_names.size());
 }
 
 #endif /* TEST_DIALOG_TABLE_TEST_H_ */
