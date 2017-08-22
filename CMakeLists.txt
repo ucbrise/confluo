@@ -58,6 +58,9 @@ add_subdirectory(libdialog)
 # RPC
 add_subdirectory(librpc)
 
+# Python client
+add_subdirectory(pyclient)
+
 # CPack
 set(CPACK_PACKAGE_NAME "libdialog")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DiaLog")
