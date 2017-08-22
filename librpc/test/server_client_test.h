@@ -4,7 +4,7 @@
 #include "dialog_server.h"
 #include "gtest/gtest.h"
 
-#include "../rpc/rpc_dialog_reader.h"
+#include "rpc_dialog_reader.h"
 
 using namespace ::dialog::rpc;
 using namespace ::dialog;
@@ -21,13 +21,9 @@ TEST_F(ServerClientTest, ConcurrentConnectionsTest) {
 
   sleep(1);
 
-  std::vector<rpc_dialog_reader> clients(server->getConcurrentClientLimit());
+  std::vector<rpc_dialog_client> clients(server->getConcurrentClientLimit());
   for (auto& client : clients) {
-    try {
-      client.connect("127.0.0.1", 9090);
-    } catch (std::exception& e) {
-      fprintf(stderr, "Could not connect to server!\n");
-    }
+    client.connect("127.0.0.1", 9090);
   }
 
   for (auto& client : clients) {
