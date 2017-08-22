@@ -14,7 +14,7 @@ using namespace ::dialog::rpc;
 using namespace ::dialog;
 
 class WriterTest : public testing::Test {
-public:
+ public:
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
 
@@ -51,7 +51,7 @@ public:
   }
 
   static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-      float f, double g, const char* h) {
+                      float f, double g, const char* h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
@@ -63,12 +63,13 @@ public:
   }
 
   static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-      int64_t e, float f, double g, const char* h) {
+                                int64_t e, float f, double g, const char* h) {
     void* rbuf = record(a, b, c, d, e, f, g, h);
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
-  static dialog_store* simple_table_store(std::string table_name, storage::storage_id id) {
+  static dialog_store* simple_table_store(std::string table_name,
+                                          storage::storage_id id) {
     auto store = new dialog_store("/tmp");
     store->add_table(
         table_name,
@@ -90,7 +91,7 @@ public:
     return builder.get_columns();
   }
 
-protected:
+ protected:
   uint8_t data_[DATA_SIZE];
 
   virtual void SetUp() override {
@@ -115,12 +116,16 @@ TEST_F(WriterTest, CreateTableTest) {
     server->serve();
   });
 
+  sleep(1);
+
   auto client = rpc_dialog_writer();
   client.connect(SERVER_ADDRESS, SERVER_PORT);
 
   client.create_table(
       table_name,
-      schema_t("/tmp", schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
+      schema_t(
+          "/tmp",
+          schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
       storage::D_IN_MEMORY);
   client.set_current_table(table_name);
 
@@ -149,7 +154,8 @@ TEST_F(WriterTest, WriteTest) {
   client.write("abc");
   client.flush();
 
-  std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)), DATA_SIZE);
+  std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
+  DATA_SIZE);
   ASSERT_EQ(buf.substr(0, 3), "abc");
 
   client.disconnect();
@@ -171,6 +177,8 @@ TEST_F(WriterTest, AddIndexTest) {
     server->serve();
   });
 
+  sleep(1);
+
   auto client = rpc_dialog_writer(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
@@ -191,7 +199,6 @@ TEST_F(WriterTest, AddIndexTest) {
   dtable->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
   dtable->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-  std::cout << "hi2\n";
 
   size_t i = 0;
   for (auto r = dtable->execute_filter("a == true"); r.has_more(); ++r) {
@@ -234,7 +241,6 @@ TEST_F(WriterTest, AddIndexTest) {
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
-  std::cout << "hi6\n";
 
   i = 0;
   for (auto r = dtable->execute_filter("g < 0.06"); r.has_more(); ++r) {
@@ -282,6 +288,12 @@ TEST_F(WriterTest, AddIndexTest) {
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
 }
 
 TEST_F(WriterTest, AddFilterAndTriggerTest) {
@@ -295,6 +307,8 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
   std::thread serve_thread([&server] {
     server->serve();
   });
+
+  sleep(1);
 
   auto client = rpc_dialog_writer(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
@@ -380,14 +394,14 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
   for (auto r = dtable->query_filter("filter8", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
-        == "zzz");
+            == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter1", "b > 4", beg, end); r.has_more();
-      ++r) {
+  for (auto r = dtable->query_filter("filter1", "b > 4", beg, end);
+      r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -400,7 +414,7 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(3).value().to_data().as<int16_t>() <= 30);
+            || r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
@@ -411,7 +425,7 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
-    || r.get().at(6).value().to_data().as<float>() > 0.1);
+            || r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -431,6 +445,12 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
   client.disconnect();
   server->stop();
 
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+
+  client.disconnect();
+  server->stop();
   if (serve_thread.joinable()) {
     serve_thread.join();
   }
