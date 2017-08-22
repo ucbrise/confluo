@@ -22,7 +22,7 @@ class rpc_dialog_writer : public rpc_dialog_client {
   }
 
   rpc_dialog_writer(const std::string& host, int port)
-      : table_set_(false) {
+      : rpc_dialog_client() {
     connect(host, port);
   }
 
