@@ -368,7 +368,6 @@ TEST_F(ReaderTest, PreDefFilterTest) {
 
   rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT,
                                                table_name);
-
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
