@@ -16,11 +16,12 @@ class rpc_record_stream {
                     rpc_iterator_handle&& handle)
       : schema_(schema),
         handle_(std::move(handle)),
-        cur_off_(0) {
+        cur_off_(0),
+        client_(std::move(client)) {
   }
 
   record_t get() {
-    return record_t(0, &handle_.data[cur_off_], schema_.size());
+    return schema_.apply(0, &handle_.data[cur_off_]);
   }
 
   rpc_record_stream& operator++() {
