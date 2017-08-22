@@ -311,12 +311,17 @@ class dialog_table {
     return offset;
   }
 
-  void* read(uint64_t offset) const {
-    uint64_t version = rt_.get();
+  void* read(uint64_t offset, uint64_t& version) const {
+    version = rt_.get();
     if (offset < version) {
       return data_log_.cptr(offset);
     }
     return nullptr;
+  }
+
+  void* read(uint64_t offset) const {
+    uint64_t version;
+    return read(offset, version);
   }
 
   fri_result_type execute_filter(const std::string& expr) const {
