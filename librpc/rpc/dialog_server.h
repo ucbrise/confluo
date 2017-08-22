@@ -179,8 +179,11 @@ class dialog_service_handler : virtual public dialog_serviceIf {
 
   void read(std::string& _return, const int64_t offset,
       const int64_t nrecords) {
-    char* data = reinterpret_cast<char*>(cur_table_->read(offset));
-    _return.assign(data, nrecords * cur_table_->record_size());
+    uint64_t limit;
+    char* data = reinterpret_cast<char*>(cur_table_->read(offset, limit));
+    size_t size = std::min(static_cast<size_t>(limit - offset),
+        static_cast<size_t>(nrecords * cur_table_->record_size()));
+    _return.assign(data, size);
   }
 
   void adhoc_filter(rpc_iterator_handle& _return,

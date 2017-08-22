@@ -21,6 +21,8 @@ using namespace utils;
 
 // FIXME: Add storage mode
 // FIXME: Nullable records
+// FIXME: Timestamp handling
+// FIXME: Handle non-unique field names
 
 namespace dialog {
 
@@ -118,14 +120,26 @@ class schema_t {
 class schema_builder {
  public:
   schema_builder()
-      : offset_(0) {
+      : user_provided_ts_(false),
+        offset_(0) {
     // Every schema must have timestamp
-    add_column(LONG_TYPE, "timestamp", LONG_TYPE.zero(), LONG_TYPE.max());
+    columns_.push_back(
+        column_t(0, 0, LONG_TYPE, "TIMESTAMP", LONG_TYPE.zero(),
+                 LONG_TYPE.max()));
+    offset_ += LONG_TYPE.size;
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name,
                              const mutable_value& min,
                              const mutable_value& max) {
+    if (utils::string_utils::to_upper(name) == "TIMESTAMP") {
+      user_provided_ts_ = true;
+      if (type != LONG_TYPE) {
+        THROW(invalid_operation_exception, "TIMESTAMP must be of LONG_TYPE");
+      }
+      return *this;
+    }
+
     columns_.push_back(
         column_t(columns_.size(), offset_, type, name, min, max));
     offset_ += type.size;
@@ -144,7 +158,12 @@ class schema_builder {
     return columns_;
   }
 
+  bool user_provided_ts() const {
+    return user_provided_ts_;
+  }
+
  private:
+  bool user_provided_ts_;
   uint16_t offset_;
   std::vector<column_t> columns_;
 };

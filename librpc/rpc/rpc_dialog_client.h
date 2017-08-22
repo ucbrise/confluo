@@ -60,7 +60,7 @@ class rpc_dialog_client {
   void set_current_table(const std::string& table_name) {
     rpc_schema schema;
     client_->set_current_table(schema, table_name);
-    cur_schema_.columns() = rpc_type_conversions::convert_schema(schema);
+    cur_schema_ = schema_t("", rpc_type_conversions::convert_schema(schema));
     table_set_ = true;
   }
 

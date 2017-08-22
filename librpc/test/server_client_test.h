@@ -23,7 +23,11 @@ TEST_F(ServerClientTest, ConcurrentConnectionsTest) {
 
   std::vector<rpc_dialog_reader> clients(server->getConcurrentClientLimit());
   for (auto& client : clients) {
-    client.connect("127.0.0.1", 9090);
+    try {
+      client.connect("127.0.0.1", 9090);
+    } catch (std::exception& e) {
+      fprintf(stderr, "Could not connect to server!\n");
+    }
   }
 
   for (auto& client : clients) {

@@ -16,6 +16,7 @@ class dialog_store {
  public:
   dialog_store(const std::string& data_path)
       : data_path_(utils::file_utils::full_path(data_path)) {
+    utils::file_utils::create_dir(data_path_);
   }
 
   void add_table(const std::string& table_name,
@@ -29,6 +30,7 @@ class dialog_store {
         ex = management_exception("Table " + table_name + " already exists.");
         return;
       }
+      utils::file_utils::create_dir(data_path_ + "/" + table_name);
       dialog_table* t = new dialog_table(schema, data_path_ + "/" + table_name,
           mode, mgmt_pool_);
       table_map_.put(table_name, tables_.push_back(t));

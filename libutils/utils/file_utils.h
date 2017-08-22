@@ -21,6 +21,24 @@ class file_utils {
     return st.st_size;
   }
 
+  static void create_dir(const std::string& path) {
+    char tmp[256];
+    char *p = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp), "%s", path.c_str());
+    len = strlen(tmp);
+    if (tmp[len - 1] == '/')
+      tmp[len - 1] = 0;
+    for (p = tmp + 1; *p; p++)
+      if (*p == '/') {
+        *p = 0;
+        mkdir(tmp, S_IRWXU);
+        *p = '/';
+      }
+    mkdir(tmp, S_IRWXU);
+  }
+
   static int create_file(const std::string& path, int flags) {
     int ret = open(path.c_str(), flags, PERMISSIONS);
     assert_throw(
