@@ -35,6 +35,7 @@ class DiaLogTableTest : public testing::Test {
         ASSERT_EQ(data[j], expected);
       }
     }
+    ASSERT_EQ(MAX_RECORDS, dtable.num_records());
   }
 
   static std::vector<column_t> s;

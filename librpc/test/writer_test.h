@@ -106,6 +106,8 @@ class WriterTest : public testing::Test {
 WriterTest::rec WriterTest::r;
 std::vector<column_t> WriterTest::s = schema();
 
+// TODO: test rpc_dialog_writer remove functions
+
 TEST_F(WriterTest, CreateTableTest) {
 
   std::string table_name = "my_table";
