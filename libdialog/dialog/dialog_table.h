@@ -371,7 +371,7 @@ class dialog_table {
   }
 
   size_t num_records() const {
-    return rt_.get();
+    return rt_.get() / schema_.record_size();
   }
 
   size_t record_size() const {
