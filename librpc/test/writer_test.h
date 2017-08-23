@@ -155,6 +155,36 @@ TEST_F(WriterTest, WriteTest) {
   client.set_current_table(table_name);
 
   client.write("abc");
+
+  std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
+  DATA_SIZE);
+  ASSERT_EQ(buf.substr(0, 3), "abc");
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
+// TODO: test with multiple buffer calls
+TEST_F(WriterTest, BufferTest) {
+
+  std::string table_name = "my_table";
+
+  auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
+  auto dtable = store->get_table(table_name);
+  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  sleep(1);
+
+  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
+
+  client.buffer("abc");
   client.flush();
 
   std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
