@@ -4,12 +4,12 @@ set -e
 mkdir -p build
 cd build
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  cmake .. -DCMAKE_CXX_COMPILER=g++
+  cmake .. -DCMAKE_CXX_COMPILER=g++ $@
 else
-  cmake ..
+  cmake .. $@
 fi
 
 START=$(date +%s)
-make && make test ARGS="-VV" && make install
+make install
 END=$(date +%s)
 echo "Total install time (real) = $(( $END - $START )) seconds"

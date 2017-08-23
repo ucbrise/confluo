@@ -24,6 +24,8 @@ set(CMAKE_VERBOSE_MAKEFILE false
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 
+find_program(PYTHON "python")
+
 if(APPLE)
   # disable warnings about "ranlib: file: xxx.a(...cc.o) has no symbols"
   set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
@@ -48,6 +50,10 @@ set(WITH_QT5 OFF CACHE BOOL "Build with Ot5 support" FORCE)
 set(WITH_OPENSSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
 set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
 add_subdirectory(external/thrift-0.10.0)
+set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
+set(THRIFT_PYINSTALL "${PYTHON} setup.py install")
+set(THRIFT_PYCMD "COMMAND ${THRIFT_PYINSTALL} WORKING_DIRECTORY ${THRIFT_PYDIR}")
+install(CODE "execute_process(${THRIFT_PYCMD})")
 
 # Google Test
 add_subdirectory(external/gtest-1.7.0)
