@@ -45,6 +45,7 @@ class ReaderTest : public testing::Test {
         ASSERT_EQ(expected, data[j]);
       }
     }
+    ASSERT_EQ(MAX_RECORDS, client.num_records());
   }
 
   static std::vector<column_t> s;
