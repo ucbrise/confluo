@@ -39,16 +39,6 @@ class WriterTest : public testing::Test {
   }__attribute__((packed));
 
   static rec r;
-  static char test_str[16];
-
-  static char* test_string(const char* str) {
-    size_t len = std::min(static_cast<size_t>(16), strlen(str));
-    memcpy(test_str, str, len);
-    for (size_t i = len; i < 16; i++) {
-      test_str[i] = '\0';
-    }
-    return test_str;
-  }
 
   static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
                       float f, double g, const char* h) {
@@ -66,6 +56,11 @@ class WriterTest : public testing::Test {
                                 int64_t e, float f, double g, const char* h) {
     void* rbuf = record(a, b, c, d, e, f, g, h);
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
+  }
+
+  static std::string pad_str(std::string str, size_t size) {
+    str.insert(str.end(), size - str.length(), '\0');
+    return str;
   }
 
   static dialog_store* simple_table_store(std::string table_name,
@@ -154,11 +149,13 @@ TEST_F(WriterTest, WriteTest) {
   rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
-  client.write("abc");
+  int64_t ts = utils::time_utils::cur_ns();
+  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
+  client.write(ts_str + pad_str("abc", DATA_SIZE));
 
   std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
   DATA_SIZE);
-  ASSERT_EQ(buf.substr(0, 3), "abc");
+  ASSERT_EQ(buf.substr(8, 3), "abc");
 
   client.disconnect();
   server->stop();
@@ -167,13 +164,13 @@ TEST_F(WriterTest, WriteTest) {
   }
 }
 
-// TODO: test with multiple buffer calls
 TEST_F(WriterTest, BufferTest) {
 
   std::string table_name = "my_table";
 
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
   auto dtable = store->get_table(table_name);
+  auto schema_size = dtable->get_schema().record_size();
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
@@ -184,12 +181,22 @@ TEST_F(WriterTest, BufferTest) {
   rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
-  client.buffer("abc");
+  int64_t ts = utils::time_utils::cur_ns();
+  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
+  client.buffer(ts_str + pad_str("abc", DATA_SIZE));
+  client.buffer(ts_str + pad_str("def", DATA_SIZE));
+  client.buffer(ts_str + pad_str("ghi", DATA_SIZE));
   client.flush();
 
   std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
   DATA_SIZE);
-  ASSERT_EQ(buf.substr(0, 3), "abc");
+  ASSERT_EQ(buf.substr(8, 3), "abc");
+  std::string buf2 = std::string(reinterpret_cast<const char*>(dtable->read(schema_size)),
+  DATA_SIZE);
+  ASSERT_EQ(buf2.substr(8, 3), "def");
+  std::string buf3 = std::string(reinterpret_cast<const char*>(dtable->read(schema_size*2)),
+  DATA_SIZE);
+  ASSERT_EQ(buf3.substr(8, 3), "ghi");
 
   client.disconnect();
   server->stop();

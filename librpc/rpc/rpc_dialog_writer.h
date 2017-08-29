@@ -109,6 +109,9 @@ class rpc_dialog_writer : public rpc_dialog_client {
     if (!table_set_) {
       throw illegal_state_exception("Must set table first");
     }
+    if (record.length() != cur_schema_.record_size()) {
+      throw illegal_state_exception("Record size incorrect");
+    }
     builder_.add_record(record);
     if (builder_.num_records() >= rpc_configuration_params::WRITE_BATCH_SIZE) {
       client_->append_batch(builder_.get_batch());
@@ -118,6 +121,9 @@ class rpc_dialog_writer : public rpc_dialog_client {
   void write(const std::string& record) {
     if (!table_set_) {
       throw illegal_state_exception("Must set table first");
+    }
+    if (record.length() != cur_schema_.record_size()) {
+      throw illegal_state_exception("Record size incorrect");
     }
     client_->append(record);
   }
