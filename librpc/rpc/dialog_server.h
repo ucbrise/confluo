@@ -77,6 +77,7 @@ class dialog_service_handler : virtual public dialog_serviceIf {
     try {
       store_->add_table(table_name, rpc_type_conversions::convert_schema(schema),
           rpc_type_conversions::convert_mode(mode));
+      cur_table_ = store_->get_table(table_name);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();

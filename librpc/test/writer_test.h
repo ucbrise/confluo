@@ -123,7 +123,6 @@ TEST_F(WriterTest, CreateTableTest) {
           "/tmp",
           schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
       storage::D_IN_MEMORY);
-  client.set_current_table(table_name);
 
   client.disconnect();
   server->stop();
