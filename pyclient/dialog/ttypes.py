@@ -404,7 +404,7 @@ class rpc_record_block(object):
     thrift_spec = (
         None,  # 0
         (1, TType.I64, 'time_block', None, None, ),  # 1
-        (2, TType.STRING, 'data', 'UTF8', None, ),  # 2
+        (2, TType.STRING, 'data', 'BINARY', None, ),  # 2
         (3, TType.I64, 'nrecords', None, None, ),  # 3
     )
 
@@ -429,7 +429,7 @@ class rpc_record_block(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.data = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.data = iprot.readBinary()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -453,7 +453,7 @@ class rpc_record_block(object):
             oprot.writeFieldEnd()
         if self.data is not None:
             oprot.writeFieldBegin('data', TType.STRING, 2)
-            oprot.writeString(self.data.encode('utf-8') if sys.version_info[0] == 2 else self.data)
+            oprot.writeBinary(self.data)
             oprot.writeFieldEnd()
         if self.nrecords is not None:
             oprot.writeFieldBegin('nrecords', TType.I64, 3)

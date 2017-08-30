@@ -54,7 +54,7 @@ struct rpc_iterator_handle {
 
 struct rpc_record_block {
   1: required i64 time_block,
-  2: required string data,
+  2: required binary data,
   3: required i64 nrecords,
 }
 

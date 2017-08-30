@@ -350,7 +350,7 @@ uint32_t rpc_record_block::read(Protocol_* iprot) {
         break;
       case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->data);
+          xfer += iprot->readBinary(this->data);
           isset_data = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -393,7 +393,7 @@ uint32_t rpc_record_block::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 2);
-  xfer += oprot->writeString(this->data);
+  xfer += oprot->writeBinary(this->data);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("nrecords", ::apache::thrift::protocol::T_I64, 3);
