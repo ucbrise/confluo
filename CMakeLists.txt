@@ -77,8 +77,6 @@ if(Boost_FOUND)
 
   # RPC
   add_subdirectory(librpc)
-
-  
   
   if (PYTHONINTERP_FOUND)
     set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
