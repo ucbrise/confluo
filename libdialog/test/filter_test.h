@@ -74,7 +74,7 @@ class FilterTest : public testing::Test {
   static compiled_expression get_expr(std::string& expr) {
     schema_builder builder;
     builder.add_column(LONG_TYPE, "value");
-    schema_t schema(".", builder.get_columns());
+    schema_t schema(builder.get_columns());
     return expression_compiler::compile(expr, schema);
   }
 };

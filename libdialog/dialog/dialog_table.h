@@ -72,10 +72,11 @@ class dialog_table {
                task_pool& pool)
       : data_log_("data_log", path, storage),
         rt_(path, storage),
-        schema_(path, table_schema),
+        schema_(table_schema),
         metadata_(path, storage.id),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
+    metadata_.write_schema(schema_);
     monitor_task_.start(
         [this]() {
           uint64_t cur_ms = time_utils::cur_ms();

@@ -113,7 +113,7 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   builder.add_column(DOUBLE_TYPE, "g");
   builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
-  schema_t s(".", schema_vec);
+  schema_t s(schema_vec);
 
   ASSERT_EQ(static_cast<size_t>(9), s.size());
 
@@ -237,7 +237,7 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   builder.add_column(DOUBLE_TYPE, "g");
   builder.add_column(STRING_TYPE(16), "h");
   auto schema_vec = builder.get_columns();
-  schema_t s(".", schema_vec);
+  schema_t s(schema_vec);
 
   rec tmp(true, 'a', 10, 101, 1000, 102.4, 182.3);
   record_t r = s.apply(0, &tmp);

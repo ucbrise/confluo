@@ -32,7 +32,7 @@ class schema_t {
       : record_size_(0) {
   }
 
-  schema_t(const std::string& path, const std::vector<column_t>& columns)
+  schema_t(const std::vector<column_t>& columns)
       : columns_(columns) {
     record_size_ = 0;
     for (size_t i = 0; i < columns_.size(); i++) {

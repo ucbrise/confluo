@@ -35,7 +35,7 @@ class MintermTest : public testing::Test {
     builder.add_column(FLOAT_TYPE, "f");
     builder.add_column(DOUBLE_TYPE, "g");
     builder.add_column(STRING_TYPE(16), "h");
-    return schema_t(".", builder.get_columns());
+    return schema_t(builder.get_columns());
   }
 
   void* record_buf(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f,

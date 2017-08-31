@@ -120,7 +120,6 @@ TEST_F(WriterTest, CreateTableTest) {
   client.create_table(
       table_name,
       schema_t(
-          "/tmp",
           schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
       storage::D_IN_MEMORY);
 
@@ -190,11 +189,13 @@ TEST_F(WriterTest, BufferTest) {
   std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
   DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
-  std::string buf2 = std::string(reinterpret_cast<const char*>(dtable->read(schema_size)),
-  DATA_SIZE);
+  std::string buf2 = std::string(
+      reinterpret_cast<const char*>(dtable->read(schema_size)),
+      DATA_SIZE);
   ASSERT_EQ(buf2.substr(8, 3), "def");
-  std::string buf3 = std::string(reinterpret_cast<const char*>(dtable->read(schema_size*2)),
-  DATA_SIZE);
+  std::string buf3 = std::string(
+      reinterpret_cast<const char*>(dtable->read(schema_size * 2)),
+      DATA_SIZE);
   ASSERT_EQ(buf3.substr(8, 3), "ghi");
 
   client.disconnect();

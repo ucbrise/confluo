@@ -66,7 +66,7 @@ TEST_F(ExpressionCompilerTest, CompilerTest) {
   builder.add_column(STRING_TYPE(16), "h");
   builder.add_column(STRING_TYPE(10), "h");
 
-  schema_t s(".", builder.get_columns());
+  schema_t s(builder.get_columns());
 
   compiled_expression m1, m2, m3, m4, m5, m6, m7;
   compile(m1, "a==true", s);

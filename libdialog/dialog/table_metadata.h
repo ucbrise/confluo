@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 
+#include "schema.h"
 #include "storage.h"
 #include "numeric.h"
 #include "aggregate_types.h"
@@ -16,9 +17,10 @@ namespace dialog {
 
 enum metadata_type
   : uint32_t {
-    D_INDEX_METADATA,
-  D_FILTER_METADATA,
-  D_TRIGGER_METADATA
+    D_SCHEMA_METADATA = 0,
+  D_INDEX_METADATA = 1,
+  D_FILTER_METADATA = 2,
+  D_TRIGGER_METADATA = 3
 };
 
 struct index_info {
@@ -122,6 +124,62 @@ class metadata_writer {
     }
   }
 
+  void write_schema(const schema_t& schema) {
+    if (id_ != storage::storage_id::D_IN_MEMORY) {
+      metadata_type type = metadata_type::D_SCHEMA_METADATA;
+      io_utils::write(out_, type);
+      io_utils::write(out_, schema.columns().size());
+      for (auto& col : schema.columns()) {
+        io_utils::write(out_, col.name());
+        io_utils::write(out_, col.type().id);
+        io_utils::write(out_, col.type().size);
+        switch (col.type().id) {
+          case type_id::D_BOOL: {
+            io_utils::write(out_, col.min().as<bool>());
+            io_utils::write(out_, col.max().as<bool>());
+            break;
+          }
+          case type_id::D_CHAR: {
+            io_utils::write(out_, col.min().as<int8_t>());
+            io_utils::write(out_, col.max().as<int8_t>());
+            break;
+          }
+          case type_id::D_SHORT: {
+            io_utils::write(out_, col.min().as<int16_t>());
+            io_utils::write(out_, col.max().as<int16_t>());
+            break;
+          }
+          case type_id::D_INT: {
+            io_utils::write(out_, col.min().as<int32_t>());
+            io_utils::write(out_, col.max().as<int32_t>());
+            break;
+          }
+          case type_id::D_LONG: {
+            io_utils::write(out_, col.min().as<int64_t>());
+            io_utils::write(out_, col.max().as<int64_t>());
+            break;
+          }
+          case type_id::D_FLOAT: {
+            io_utils::write(out_, col.min().as<float>());
+            io_utils::write(out_, col.max().as<float>());
+            break;
+          }
+          case type_id::D_DOUBLE: {
+            io_utils::write(out_, col.min().as<double>());
+            io_utils::write(out_, col.max().as<double>());
+            break;
+          }
+          case type_id::D_STRING: {
+            break;
+          }
+          default:
+            THROW(invalid_operation_exception, "Invalid data type");
+        }
+      }
+      io_utils::flush(out_);
+    }
+  }
+
   void write_index_info(const std::string& name, double bucket_size) {
     if (id_ != storage::storage_id::D_IN_MEMORY) {
       metadata_type type = metadata_type::D_INDEX_METADATA;
@@ -209,6 +267,68 @@ class metadata_reader {
 
   metadata_type next_type() {
     return io_utils::read<metadata_type>(in_);
+  }
+
+  schema_t next_schema() {
+    size_t ncolumns = io_utils::read<size_t>(in_);
+    schema_builder builder;
+    for (size_t i = 0; i < ncolumns; i++) {
+      std::string name = io_utils::read<std::string>(in_);
+      data_type type;
+      type.id = io_utils::read<type_id>(in_);
+      type.size = io_utils::read<size_t>(in_);
+      switch (type.id) {
+        case type_id::D_BOOL: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<bool>(in_)),
+                             mutable_value(io_utils::read<bool>(in_)));
+          break;
+        }
+        case type_id::D_CHAR: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<int8_t>(in_)),
+                             mutable_value(io_utils::read<int8_t>(in_)));
+          break;
+        }
+        case type_id::D_SHORT: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<int16_t>(in_)),
+                             mutable_value(io_utils::read<int16_t>(in_)));
+          break;
+        }
+        case type_id::D_INT: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<int32_t>(in_)),
+                             mutable_value(io_utils::read<int32_t>(in_)));
+          break;
+        }
+        case type_id::D_LONG: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<int64_t>(in_)),
+                             mutable_value(io_utils::read<int64_t>(in_)));
+          break;
+        }
+        case type_id::D_FLOAT: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<float>(in_)),
+                             mutable_value(io_utils::read<float>(in_)));
+          break;
+        }
+        case type_id::D_DOUBLE: {
+          builder.add_column(type, name,
+                             mutable_value(io_utils::read<double>(in_)),
+                             mutable_value(io_utils::read<double>(in_)));
+          break;
+        }
+        case type_id::D_STRING: {
+          builder.add_column(type, name);
+          break;
+        }
+        default:
+          THROW(invalid_operation_exception, "Invalid data type");
+      }
+    }
+    return schema_t(builder.get_columns());
   }
 
   index_info next_index_info() {

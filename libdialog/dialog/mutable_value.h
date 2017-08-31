@@ -206,6 +206,7 @@ class mutable_value : public immutable_value {
     return binaryop(binaryop_id::BW_RSHIFT, first, second);
   }
 
+  // TODO: Add more assignment operators
   mutable_value& operator=(const immutable_value& other) {
     type_ = other.type();
     if (type_.id != type_id::D_NONE) {
@@ -242,7 +243,8 @@ class mutable_value : public immutable_value {
 
     return *this;
   }
-};
+}
+;
 
 }
 
