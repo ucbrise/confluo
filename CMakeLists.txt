@@ -15,12 +15,28 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -pedantic -Wextra -fno-strict-aliasing")
 enable_language(C)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  message(STATUS "GNU compiler detected")
+  # Suppress thrift warnings
+  set(CMAKE_CXX_FLAGS 
+    "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-maybe-uninitialized")
+  # Suppress unnecessary warnings
+  set(CMAKE_CXX_FLAGS 
+    "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable -Wunused-result -Wconversion-null" )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  message(STATUS "Apple Clang compiler detected")
+  # Suppress thrift warnings
+  set(CMAKE_CXX_FLAGS 
+    "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-private-field -Wno-unused-const-variable")
+  # Suppress unnecessary warnings
+endif()
+
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not allowed.")
 endif ()
 
-set(CMAKE_VERBOSE_MAKEFILE false
-    CACHE STRING "Show all outputs including compiler lines." FORCE)
+#set(CMAKE_VERBOSE_MAKEFILE false
+#    CACHE STRING "Show all outputs including compiler lines." FORCE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -35,25 +51,32 @@ endif()
 include(CTest)
 
 # Dependencies
-# Thrift
-set(BUILD_COMPILER OFF CACHE BOOL "Build Thrift compiler" FORCE)
-set(WITH_CPP ON CACHE BOOL "Build C++ Thrift library" FORCE)
-set(WITH_C_GLIB OFF CACHE BOOL "Build C (GLib) Thrift library" FORCE)
-set(WITH_JAVA OFF CACHE BOOL "Build Java Thrift library" FORCE) # For now
-set(WITH_PYTHON ON CACHE BOOL "Build Python Thrift library" FORCE)
-set(WITH_HASKELL OFF CACHE BOOL "Build Haskell Thrift library" FORCE)
-set(WITH_SHARED_LIB ON CACHE BOOL "Build shared libraries" FORCE)
-set(WITH_STATIC_LIB ON CACHE BOOL "Build static libraries" FORCE)
-set(WITH_ZLIB OFF CACHE BOOL "Build with ZLIB support" FORCE) # For now
-set(WITH_QT4 OFF CACHE BOOL "Build with Qt4 support" FORCE)
-set(WITH_QT5 OFF CACHE BOOL "Build with Ot5 support" FORCE)
-set(WITH_OPENSSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
-set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
-add_subdirectory(external/thrift-0.10.0)
-set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
-set(THRIFT_PYINSTALL "${PYTHON} setup.py install")
-set(THRIFT_PYCMD "COMMAND ${THRIFT_PYINSTALL} WORKING_DIRECTORY ${THRIFT_PYDIR}")
-install(CODE "execute_process(${THRIFT_PYCMD})")
+# Boost
+find_package(Boost 1.55.0)
+
+if(Boost_FOUND)
+  # Thrift
+  set(BUILD_COMPILER OFF CACHE BOOL "Build Thrift compiler" FORCE)
+  set(WITH_CPP ON CACHE BOOL "Build C++ Thrift library" FORCE)
+  set(WITH_C_GLIB OFF CACHE BOOL "Build C (GLib) Thrift library" FORCE)
+  set(WITH_JAVA OFF CACHE BOOL "Build Java Thrift library" FORCE) # For now
+  set(WITH_PYTHON ON CACHE BOOL "Build Python Thrift library" FORCE)
+  set(WITH_HASKELL OFF CACHE BOOL "Build Haskell Thrift library" FORCE)
+  set(WITH_SHARED_LIB ON CACHE BOOL "Build shared libraries" FORCE)
+  set(WITH_STATIC_LIB ON CACHE BOOL "Build static libraries" FORCE)
+  set(WITH_ZLIB OFF CACHE BOOL "Build with ZLIB support" FORCE) # For now
+  set(WITH_QT4 OFF CACHE BOOL "Build with Qt4 support" FORCE)
+  set(WITH_QT5 OFF CACHE BOOL "Build with Ot5 support" FORCE)
+  set(WITH_OPENSSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
+  set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
+  add_subdirectory(external/thrift-0.10.0)
+  set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
+  set(THRIFT_PYINSTALL "${PYTHON} setup.py install")
+  set(THRIFT_PYCMD "COMMAND ${THRIFT_PYINSTALL} WORKING_DIRECTORY ${THRIFT_PYDIR}")
+  install(CODE "execute_process(${THRIFT_PYCMD})")
+else()
+  message(WARNING "Boost libraries not found, will skip RPC build")
+endif()
 
 # Google Test
 add_subdirectory(external/gtest-1.7.0)
@@ -62,7 +85,9 @@ add_subdirectory(external/gtest-1.7.0)
 add_subdirectory(libdialog)
 
 # RPC
-add_subdirectory(librpc)
+if (Boost_FOUND)
+  add_subdirectory(librpc)
+endif()
 
 # Python client
 add_subdirectory(pyclient)

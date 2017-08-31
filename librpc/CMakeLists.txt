@@ -1,7 +1,5 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
-find_package(Boost 1.60.0 REQUIRED)
-
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
