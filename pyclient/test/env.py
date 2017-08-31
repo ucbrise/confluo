@@ -5,7 +5,8 @@ import sys
 # append module root directory to sys.path
 SCRIPT_DIR = os.path.abspath(__file__)
 CLIENT_ROOT_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-sys.path.append(os.path.join(CLIENT_ROOT_DIR, 'dialog'))
+for libpath in glob.glob(os.path.join(CLIENT_ROOT_DIR, 'build', 'lib*')):
+    sys.path.append(libpath)
 
 # append thrift libraries to sys.path
 PROJECT_ROOT_DIR = os.path.dirname(CLIENT_ROOT_DIR)
