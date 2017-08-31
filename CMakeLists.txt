@@ -35,12 +35,10 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not allowed.")
 endif ()
 
-#set(CMAKE_VERBOSE_MAKEFILE false
-#    CACHE STRING "Show all outputs including compiler lines." FORCE)
+set(CMAKE_VERBOSE_MAKEFILE false
+    CACHE STRING "Show all outputs including compiler lines." FORCE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
-
-find_program(PYTHON "python")
 
 if(APPLE)
   # disable warnings about "ranlib: file: xxx.a(...cc.o) has no symbols"
@@ -50,17 +48,23 @@ endif()
 
 include(CTest)
 
-# Dependencies
 # Boost
 find_package(Boost 1.55.0)
 
+# Google Test
+add_subdirectory(external/gtest-1.7.0)
+
+# DiaLog core
+add_subdirectory(libdialog)
+
 if(Boost_FOUND)
   # Thrift
+  include(FindPythonInterp)
   set(BUILD_COMPILER OFF CACHE BOOL "Build Thrift compiler" FORCE)
   set(WITH_CPP ON CACHE BOOL "Build C++ Thrift library" FORCE)
   set(WITH_C_GLIB OFF CACHE BOOL "Build C (GLib) Thrift library" FORCE)
   set(WITH_JAVA OFF CACHE BOOL "Build Java Thrift library" FORCE) # For now
-  set(WITH_PYTHON ON CACHE BOOL "Build Python Thrift library" FORCE)
+  set(WITH_PYTHON ${PYTHONINTERP_FOUND} CACHE BOOL "Build Python Thrift library" FORCE)
   set(WITH_HASKELL OFF CACHE BOOL "Build Haskell Thrift library" FORCE)
   set(WITH_SHARED_LIB ON CACHE BOOL "Build shared libraries" FORCE)
   set(WITH_STATIC_LIB ON CACHE BOOL "Build static libraries" FORCE)
@@ -70,27 +74,24 @@ if(Boost_FOUND)
   set(WITH_OPENSSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
   set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
   add_subdirectory(external/thrift-0.10.0)
-  set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
-  set(THRIFT_PYINSTALL "${PYTHON} setup.py install")
-  set(THRIFT_PYCMD "COMMAND ${THRIFT_PYINSTALL} WORKING_DIRECTORY ${THRIFT_PYDIR}")
-  install(CODE "execute_process(${THRIFT_PYCMD})")
+
+  # RPC
+  add_subdirectory(librpc)
+
+  
+  
+  if (PYTHONINTERP_FOUND)
+    set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
+    set(THRIFT_PYINSTALL "${PYTHON_EXECUTABLE} setup.py install")
+    set(THRIFT_PYCMD "COMMAND ${THRIFT_PYINSTALL} WORKING_DIRECTORY ${THRIFT_PYDIR}")
+    install(CODE "execute_process(${THRIFT_PYCMD})")
+  
+    # Python client
+    add_subdirectory(pyclient)
+  endif()
 else()
   message(WARNING "Boost libraries not found, will skip RPC build")
 endif()
-
-# Google Test
-add_subdirectory(external/gtest-1.7.0)
-
-# DiaLog core
-add_subdirectory(libdialog)
-
-# RPC
-if (Boost_FOUND)
-  add_subdirectory(librpc)
-endif()
-
-# Python client
-add_subdirectory(pyclient)
 
 # CPack
 set(CPACK_PACKAGE_NAME "libdialog")
