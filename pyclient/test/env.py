@@ -13,3 +13,5 @@ for libpath in glob.glob(os.path.join(PROJECT_ROOT_DIR, 'external', 'thrift*', '
     if libpath.endswith('-%d.%d' % (sys.version_info[0], sys.version_info[1])):
         sys.path.append(libpath)
         break
+
+print sys.path
