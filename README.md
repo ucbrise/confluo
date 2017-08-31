@@ -9,7 +9,7 @@ DiaLog is a system for real-time monitoring and analysis of data, that supports:
 * Useful system properties: Atomicity, Distributed Snapshots, Durability,
   Archival, etc.
 
-## Building from source
+## Installing from source
 
 ### Requirements
 
@@ -20,3 +20,14 @@ DiaLog is a system for real-time monitoring and analysis of data, that supports:
 For python client, you will additionally require:
 * Python 2.7 or later
 * Python Packages: six 1.7.2 or later
+
+### Installing
+
+DiaLog only supports out of source builds:
+
+```bash
+mkdir build
+cd build
+cmake ..
+make -j && make test && make install
+```
