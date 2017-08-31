@@ -6,7 +6,7 @@ import time
 import unittest
 import struct
 from dialog import dialog_client
-from dialog import data_types
+from dialog.data_types import *
 from dialog.schema import schema
 from dialog.schema import schema_builder
 from dialog.storage import storage_id
@@ -37,7 +37,7 @@ class test_dialog_client(unittest.TestCase):
         client = dialog_client.dialog_client("127.0.0.1", 9090) 
 
         builder = schema_builder() 
-        table_schema = schema("/tmp", builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+        table_schema = schema("/tmp", builder.add_column(STRING_TYPE(8), "msg").build())
         client.create_table("table", table_schema, storage_id.IN_MEMORY)
 
         client.disconnect()
@@ -48,7 +48,7 @@ class test_dialog_client(unittest.TestCase):
         client = dialog_client.dialog_client("127.0.0.1", 9090) 
 
         builder = schema_builder() 
-        table_schema = schema("/tmp", builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+        table_schema = schema("/tmp", builder.add_column(STRING_TYPE(8), "msg").build())
         client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
 
         client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
@@ -63,7 +63,7 @@ class test_dialog_client(unittest.TestCase):
         client = dialog_client.dialog_client("127.0.0.1", 9090) 
 
         builder = schema_builder() 
-        table_schema = schema("/tmp", builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+        table_schema = schema("/tmp", builder.add_column(STRING_TYPE(8), "msg").build())
         client.create_table("my_table", table_schema, storage_id.DURABLE_RELAXED)
 
         client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
@@ -78,7 +78,7 @@ class test_dialog_client(unittest.TestCase):
         client = dialog_client.dialog_client("127.0.0.1", 9090) 
 
         builder = schema_builder() 
-        table_schema = schema("/tmp", builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+        table_schema = schema("/tmp", builder.add_column(STRING_TYPE(8), "msg").build())
         client.create_table("my_table", table_schema, storage_id.DURABLE)
 
         client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
@@ -93,7 +93,7 @@ class test_dialog_client(unittest.TestCase):
         client = dialog_client.dialog_client("127.0.0.1", 9090) 
 
         builder = schema_builder() 
-        table_schema = schema("/tmp", builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+        table_schema = schema("/tmp", builder.add_column(STRING_TYPE(8), "msg").build())
         client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
 
         client.buffer(struct.pack("l", self.now_ns()) + "abcdefgh")
@@ -312,14 +312,14 @@ class test_dialog_client(unittest.TestCase):
 
     def build_schema(self):
         builder = schema_builder()
-        builder.add_column(data_types.BOOL_TYPE, "a")
-        builder.add_column(data_types.CHAR_TYPE, "b")
-        builder.add_column(data_types.SHORT_TYPE, "c")
-        builder.add_column(data_types.INT_TYPE, "d")
-        builder.add_column(data_types.LONG_TYPE, "e")
-        builder.add_column(data_types.FLOAT_TYPE, "f")
-        builder.add_column(data_types.DOUBLE_TYPE, "g")
-        builder.add_column(data_types.STRING_TYPE(16), "h")
+        builder.add_column(BOOL_TYPE, "a")
+        builder.add_column(CHAR_TYPE, "b")
+        builder.add_column(SHORT_TYPE, "c")
+        builder.add_column(INT_TYPE, "d")
+        builder.add_column(LONG_TYPE, "e")
+        builder.add_column(FLOAT_TYPE, "f")
+        builder.add_column(DOUBLE_TYPE, "g")
+        builder.add_column(STRING_TYPE(16), "h")
         return builder.build()
 
     def pack_record(self, a, b, c, d, e, f, g, h):
