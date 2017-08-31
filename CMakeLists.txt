@@ -22,7 +22,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-maybe-uninitialized")
   # Suppress unnecessary warnings
   set(CMAKE_CXX_FLAGS 
-    "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable -Wno-unused-result -Wno-conversion-null" )
+    "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-result -Wno-conversion-null" )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   message(STATUS "Apple Clang compiler detected")
   # Suppress thrift warnings
