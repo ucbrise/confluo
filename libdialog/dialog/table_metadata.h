@@ -279,45 +279,45 @@ class metadata_reader {
       type.size = io_utils::read<size_t>(in_);
       switch (type.id) {
         case type_id::D_BOOL: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<bool>(in_)),
-                             mutable_value(io_utils::read<bool>(in_)));
+          mutable_value min(io_utils::read<bool>(in_));
+          mutable_value max(io_utils::read<bool>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_CHAR: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<int8_t>(in_)),
-                             mutable_value(io_utils::read<int8_t>(in_)));
+          mutable_value min(io_utils::read<int8_t>(in_));
+          mutable_value max(io_utils::read<int8_t>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_SHORT: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<int16_t>(in_)),
-                             mutable_value(io_utils::read<int16_t>(in_)));
+          mutable_value min(io_utils::read<int16_t>(in_));
+          mutable_value max(io_utils::read<int16_t>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_INT: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<int32_t>(in_)),
-                             mutable_value(io_utils::read<int32_t>(in_)));
+          mutable_value min(io_utils::read<int32_t>(in_));
+          mutable_value max(io_utils::read<int32_t>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_LONG: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<int64_t>(in_)),
-                             mutable_value(io_utils::read<int64_t>(in_)));
+          mutable_value min(io_utils::read<int64_t>(in_));
+          mutable_value max(io_utils::read<int64_t>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_FLOAT: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<float>(in_)),
-                             mutable_value(io_utils::read<float>(in_)));
+          mutable_value min(io_utils::read<float>(in_));
+          mutable_value max(io_utils::read<float>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_DOUBLE: {
-          builder.add_column(type, name,
-                             mutable_value(io_utils::read<double>(in_)),
-                             mutable_value(io_utils::read<double>(in_)));
+          mutable_value min(io_utils::read<double>(in_));
+          mutable_value max(io_utils::read<double>(in_));
+          builder.add_column(type, name, min, max);
           break;
         }
         case type_id::D_STRING: {
