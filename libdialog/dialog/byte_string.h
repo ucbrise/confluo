@@ -21,11 +21,6 @@ class immutable_byte_string {
         size_(size) {
   }
 
-  immutable_byte_string(const immutable_byte_string& other)
-      : data_(other.data_),
-        size_(other.size_) {
-  }
-
   inline uint8_t operator[](size_t idx) const {
     return data_[idx];
   }

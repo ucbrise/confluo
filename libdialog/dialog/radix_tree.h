@@ -188,13 +188,6 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
         node_(node) {
   }
 
-  rt_reflog_it(const self_type& other)
-      : width_(other.width_),
-        depth_(other.depth_),
-        key_(other.key_),
-        node_(other.node_) {
-  }
-
   reference operator*() const {
     return *(node_->refs());
   }

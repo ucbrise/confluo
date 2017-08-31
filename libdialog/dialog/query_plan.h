@@ -12,11 +12,6 @@ class minterm_plan {
     dataf_.insert(dfilter);
   }
 
-  minterm_plan(const minterm_plan& other)
-      : idxf_(other.idxf_),
-        dataf_(other.dataf_) {
-  }
-
   index_filter const& idx_filter() const {
     return idxf_;
   }

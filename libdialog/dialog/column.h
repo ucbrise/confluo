@@ -31,26 +31,6 @@ class column_t {
         max_(max) {
   }
 
-  column_t(const column_t& other)
-      : idx_(other.idx_),
-        type_(other.type_),
-        offset_(other.offset_),
-        name_(other.name_),
-        min_(other.min_),
-        max_(other.max_),
-        idx_state_(other.idx_state_) {
-  }
-
-  column_t(column_t&& other)
-      : idx_(other.idx_),
-        type_(other.type_),
-        offset_(other.offset_),
-        name_(other.name_),
-        min_(other.min_),
-        max_(other.max_),
-        idx_state_(other.idx_state_) {
-  }
-
   std::string name() const {
     return name_;
   }
@@ -107,28 +87,6 @@ class column_t {
     return field_t(idx_, type_,
                    reinterpret_cast<unsigned char*>(data) + offset_,
                    is_indexed(), idx_state_.id(), idx_state_.bucket_size());
-  }
-
-  column_t& operator=(const column_t& other) {
-    idx_ = other.idx_;
-    type_ = other.type_;
-    offset_ = other.offset_;
-    name_ = other.name_;
-    min_ = other.min_;
-    max_ = other.max_;
-    idx_state_ = other.idx_state_;
-    return *this;
-  }
-
-  column_t& operator=(column_t&& other) {
-    idx_ = other.idx_;
-    type_ = other.type_;
-    offset_ = other.offset_;
-    name_ = other.name_;
-    min_ = other.min_;
-    max_ = other.max_;
-    idx_state_ = other.idx_state_;
-    return *this;
   }
 
   column_snapshot snapshot() const {

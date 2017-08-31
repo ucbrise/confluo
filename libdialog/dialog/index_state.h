@@ -22,6 +22,7 @@ struct index_state_t {
       : state_(atomic::load(&other.state_)),
         id_(other.id_),
         bucket_size_(other.bucket_size_) {
+
   }
 
   uint16_t id() const {
@@ -71,7 +72,6 @@ struct index_state_t {
 const uint8_t index_state_t::UNINDEXED;
 const uint8_t index_state_t::INDEXING;
 const uint8_t index_state_t::INDEXED;
-
 
 }
 

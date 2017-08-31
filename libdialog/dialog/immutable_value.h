@@ -22,11 +22,6 @@ class immutable_value {
         ptr_(data) {
   }
 
-  immutable_value(const immutable_value& other)
-      : type_(other.type_),
-        ptr_(other.ptr_) {
-  }
-
   inline data_type const& type() const {
     return type_;
   }

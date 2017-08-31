@@ -17,9 +17,6 @@ class name : public std::exception {\
   name()\
       : msg_("") {\
   }\
-  name(const name& other)\
-      : msg_(other.msg_) {\
-  }\
   const char* what() const noexcept {\
     return msg_.c_str();\
   }\

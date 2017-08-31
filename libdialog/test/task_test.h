@@ -1,7 +1,6 @@
 #ifndef TEST_TASK_TEST_H_
 #define TEST_TASK_TEST_H_
 
-#include "task_worker.h"
 #include "gtest/gtest.h"
 #include "task_pool.h"
 

@@ -173,11 +173,6 @@ struct data_type {
     }
   }
 
-  data_type(const data_type& other)
-      : id(other.id),
-        size(other.size) {
-  }
-
   void* min() const {
     return MIN[id];
   }

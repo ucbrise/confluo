@@ -37,11 +37,6 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
         pos_(pos) {
   }
 
-  monolog_iterator(const monolog_iterator& other)
-      : impl_(other.impl_),
-        pos_(other.pos_) {
-  }
-
   reference operator*() const {
     return impl_->get(pos_);
   }

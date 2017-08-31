@@ -50,11 +50,6 @@ struct filter_info {
         expr_(expr) {
   }
 
-  filter_info(const filter_info& other)
-      : filter_name_(other.filter_name_),
-        expr_(other.expr_) {
-  }
-
   const std::string& filter_name() const {
     return filter_name_;
   }

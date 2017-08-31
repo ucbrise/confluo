@@ -19,7 +19,6 @@
 #include "index_log.h"
 #include "filter_log.h"
 #include "alert_index.h"
-#include "task_worker.h"
 #include "periodic_task.h"
 #include "expression_compiler.h"
 #include "query_planner.h"

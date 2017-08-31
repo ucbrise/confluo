@@ -41,12 +41,6 @@ class schema_t {
     }
   }
 
-  schema_t(const schema_t& other)
-      : record_size_(other.record_size_),
-        columns_(other.columns_),
-        name_map_(other.name_map_) {
-  }
-
   ~schema_t() = default;
 
   size_t get_field_index(const std::string& name) const {
