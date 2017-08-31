@@ -77,31 +77,8 @@ class dialog_table {
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     metadata_.write_schema(schema_);
-    monitor_task_.start(
-        [this]() {
-          uint64_t cur_ms = time_utils::cur_ms();
-          uint64_t version = rt_.get();
-          size_t nfilters = filters_.size();
-          for (size_t i = 0; i < nfilters; i++) {
-            filter* f = filters_.at(i);
-            if (f->is_valid()) {
-              for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS; ms <= cur_ms; ms++) {
-                const aggregated_reflog* ar = f->lookup(ms);
-                size_t ntriggers = f->num_triggers();
-                for (size_t tid = 0; tid < ntriggers; tid++) {
-                  trigger* t = f->get_trigger(tid);
-                  if (t->is_valid() && ar != nullptr) {
-                    numeric agg = ar->get_aggregate(tid, version);
-                    if (numeric::relop(t->op(), agg, t->threshold())) {
-                      alerts_.add_alert(ms, t->trigger_name(), t->trigger_expr(), agg, version);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        configuration_params::MONITOR_PERIODICITY_MS);
+    monitor_task_.start(std::bind(&dialog_table::monitor_task, this),
+                        configuration_params::MONITOR_PERIODICITY_MS);
   }
 
   // Management ops
@@ -398,6 +375,32 @@ class dialog_table {
           void* rec_ptr = reinterpret_cast<uint8_t*>(&block.data[0])
               + block_offset;
           idx->insert(snap.get_key(rec_ptr, i), record_offset);
+        }
+      }
+    }
+  }
+
+  void monitor_task() {
+    uint64_t cur_ms = time_utils::cur_ms();
+    uint64_t version = rt_.get();
+    size_t nfilters = filters_.size();
+    for (size_t i = 0; i < nfilters; i++) {
+      filter* f = filters_.at(i);
+      if (f->is_valid()) {
+        for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS;
+            ms <= cur_ms; ms++) {
+          const aggregated_reflog* ar = f->lookup(ms);
+          size_t ntriggers = f->num_triggers();
+          for (size_t tid = 0; tid < ntriggers; tid++) {
+            trigger* t = f->get_trigger(tid);
+            if (t->is_valid() && ar != nullptr) {
+              numeric agg = ar->get_aggregate(tid, version);
+              if (numeric::relop(t->op(), agg, t->threshold())) {
+                alerts_.add_alert(ms, t->trigger_name(), t->trigger_expr(), agg,
+                                  version);
+              }
+            }
+          }
         }
       }
     }
