@@ -19,32 +19,48 @@ class dialog_store {
     utils::file_utils::create_dir(data_path_);
   }
 
-  void add_table(const std::string& table_name,
-                 const std::vector<column_t>& schema,
-                 const storage::storage_id id) {
+  int64_t add_table(const std::string& table_name,
+                    const std::vector<column_t>& schema,
+                    const storage::storage_id id) {
     optional<management_exception> ex;
     storage::storage_mode mode = storage::STORAGE_MODES[id];
-    auto ret = mgmt_pool_.submit([&table_name, &schema, &mode, &ex, this] {
-      size_t table_id;
-      if (table_map_.get(table_name, table_id) != -1) {
-        ex = management_exception("Table " + table_name + " already exists.");
-        return;
-      }
-      utils::file_utils::create_dir(data_path_ + "/" + table_name);
-      dialog_table* t = new dialog_table(schema, data_path_ + "/" + table_name,
-          mode, mgmt_pool_);
-      table_map_.put(table_name, tables_.push_back(t));
-    });
+    auto ret =
+        mgmt_pool_.submit(
+            [&table_name, &schema, &mode, &ex, this] {
+              size_t table_id;
+              if (table_map_.get(table_name, table_id) != -1) {
+                ex = management_exception("Table " + table_name + " already exists.");
+                return -1;
+              }
+              utils::file_utils::create_dir(data_path_ + "/" + table_name);
+              dialog_table* t = new dialog_table(schema, data_path_ + "/" + table_name,
+                  mode, mgmt_pool_);
+              table_id = tables_.push_back(t);
+              if (table_map_.put(table_name, table_id) == -1) {
+                ex = management_exception("Could not add table " + table_name + " to table map");
+                return -1;
+              }
+              return table_id;
+            });
 
-    ret.wait();
+    int64_t table_id = ret.get();
     if (ex.has_value())
       throw ex.value();
+    return table_id;
   }
 
-  dialog_table* get_table(const std::string& table_name) {
+  dialog_table* get_table(const std::string& table_name) const {
     size_t table_id;
     if (table_map_.get(table_name, table_id) == -1) {
       throw management_exception("No such table " + table_name);
+    }
+    return tables_[table_id];
+  }
+
+  dialog_table* get_table(int64_t table_id) const {
+    if (table_id >= tables_.size()) {
+      throw management_exception(
+          "No such table with id " + std::to_string(table_id));
     }
     return tables_[table_id];
   }
