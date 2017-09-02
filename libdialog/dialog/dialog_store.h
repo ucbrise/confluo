@@ -26,19 +26,19 @@ class dialog_store {
     storage::storage_mode mode = storage::STORAGE_MODES[id];
     auto ret =
         mgmt_pool_.submit(
-            [&table_name, &schema, &mode, &ex, this] {
+            [&table_name, &schema, &mode, &ex, this]() -> int64_t {
               size_t table_id;
               if (table_map_.get(table_name, table_id) != -1) {
                 ex = management_exception("Table " + table_name + " already exists.");
-                return -1;
+                return INT64_C(-1);
               }
               utils::file_utils::create_dir(data_path_ + "/" + table_name);
-              dialog_table* t = new dialog_table(schema, data_path_ + "/" + table_name,
+              dialog_table* t = new dialog_table(table_name, schema, data_path_ + "/" + table_name,
                   mode, mgmt_pool_);
               table_id = tables_.push_back(t);
               if (table_map_.put(table_name, table_id) == -1) {
                 ex = management_exception("Could not add table " + table_name + " to table map");
-                return -1;
+                return INT64_C(-1);
               }
               return table_id;
             });
@@ -49,7 +49,7 @@ class dialog_store {
     return table_id;
   }
 
-  dialog_table* get_table(const std::string& table_name) const {
+  dialog_table* get_table(const std::string& table_name) {
     size_t table_id;
     if (table_map_.get(table_name, table_id) == -1) {
       throw management_exception("No such table " + table_name);
@@ -57,12 +57,24 @@ class dialog_store {
     return tables_[table_id];
   }
 
-  dialog_table* get_table(int64_t table_id) const {
+  dialog_table* get_table(int64_t table_id) {
     if (table_id >= tables_.size()) {
       throw management_exception(
           "No such table with id " + std::to_string(table_id));
     }
     return tables_[table_id];
+  }
+
+  int64_t remove_table(const std::string& table_name) {
+    size_t table_id;
+    if (table_map_.get(table_name, table_id) == -1) {
+      throw management_exception("No such table " + table_name);
+    }
+    return table_map_.remove(table_name, table_id);
+  }
+
+  int64_t remove_table(int64_t table_id) {
+    return remove_table(get_table(table_id)->get_name());
   }
 
  private:

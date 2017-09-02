@@ -66,12 +66,14 @@ class dialog_table {
 
   typedef alert_index::alert_list alert_list;
 
-  dialog_table(const std::vector<column_t>& table_schema,
+  dialog_table(const std::string& table_name,
+               const std::vector<column_t>& table_schema,
                const std::string& path, const storage::storage_mode& storage,
                task_pool& pool)
-      : data_log_("data_log", path, storage),
-        rt_(path, storage),
+      : table_name_(table_name),
         schema_(table_schema),
+        data_log_("data_log", path, storage),
+        rt_(path, storage),
         metadata_(path, storage.id),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
@@ -346,6 +348,10 @@ class dialog_table {
     return alerts_.get_alerts(ts_block_begin, ts_block_end);
   }
 
+  const std::string& get_name() const {
+    return table_name_;
+  }
+
   const schema_t& get_schema() const {
     return schema_;
   }
@@ -408,9 +414,11 @@ class dialog_table {
     }
   }
 
+  std::string table_name_;
+  schema_type schema_;
+
   data_log_type data_log_;
   read_tail_type rt_;
-  schema_type schema_;
   metadata_writer_type metadata_;
 
   // In memory structures
