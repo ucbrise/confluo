@@ -58,7 +58,7 @@ class string_map {
   }
 
   // Only one writer thread permitted, otherwise duplicates may occur
-  bool put(const std::string& key, const V& value) {
+  int64_t put(const std::string& key, const V& value) {
     uint32_t hash_key = string_hash::hash(key);
     map_entry entry(key, value);
 
@@ -69,61 +69,74 @@ class string_map {
     // Search to see if key already exists
     size_t size = refs->size();
     for (size_t i = 0; i < size; i++) {
-      uint64_t offset = refs->at(i);
-      if (entries_.at(offset).key == key) {
-        if (entries_.at(offset).valid)
-          return false;
-        else {
-          entries_[offset].value = value;
-          entries_[offset].valid = true;
-          return true;
+      int64_t idx = refs->at(i);
+      if (entries_.at(idx).key == key) {
+        if (entries_.at(idx).valid) {
+          return -1;
+        } else {
+          entries_[idx].value = value;
+          entries_[idx].valid = true;
+          return idx;
         }
       }
     }
 
-    refs->push_back(entries_.push_back(entry));
-    return true;
+    uint64_t idx = entries_.push_back(entry);
+    refs->push_back(idx);
+    return static_cast<int64_t>(idx);
   }
 
   // Multiple threads permitted
-  bool get(const std::string& key, V& value) const {
+  int64_t get(const std::string& key, V& value) const {
     uint32_t hash_key = string_hash::hash(key);
     reflog* refs;
-    if ((refs = buckets_[hash_key]) == nullptr)
-      return false;
+    if ((refs = buckets_[hash_key]) == nullptr) {
+      return -1;
+    }
 
     // Search to see if key exists
     size_t size = refs->size();
     for (size_t i = 0; i < size; i++) {
-      uint64_t offset = refs->at(i);
-      const map_entry& entry = entries_.at(offset);
+      int64_t idx = refs->at(i);
+      const map_entry& entry = entries_.at(idx);
       if (entry.key == key && entry.valid) {
-        value = entries_.at(offset).value;
-        return true;
+        value = entry.value;
+        return idx;
       }
     }
-    return false;
+    return -1;
+  }
+
+  int64_t get(int64_t idx, V& value) const {
+    if (idx < entries_.size()) {
+      const map_entry& entry = entries_.at(idx);
+      if (entry.valid) {
+        value = entry.value;
+        return idx;
+      }
+    }
+    return -1;
   }
 
   // Only one writer thread permitted, otherwise inconsistencies may occur
-  bool remove(const std::string& key, V& value) {
+  int64_t remove(const std::string& key, V& value) {
     uint32_t hash_key = string_hash::hash(key);
     reflog* refs;
     if ((refs = buckets_[hash_key]) == nullptr)
-      return false;
+      return -1;
 
     // Search to see if key exists
     size_t size = refs->size();
     for (size_t i = 0; i < size; i++) {
-      uint64_t offset = refs->at(i);
-      map_entry& entry = entries_[offset];
+      uint64_t idx = refs->at(i);
+      map_entry& entry = entries_[idx];
       if (entry.key == key && entry.valid) {
         entry.valid = false;
         value = entry.value;
-        return true;
+        return idx;
       }
     }
-    return false;
+    return -1;
   }
 
  private:
