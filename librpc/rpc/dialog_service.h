@@ -27,29 +27,31 @@ class dialog_serviceIf {
    */
   virtual void register_handler() = 0;
   virtual void deregister_handler() = 0;
-  virtual void create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
-  virtual void set_current_table(rpc_schema& _return, const std::string& table_name) = 0;
-  virtual void add_index(const std::string& field_name, const double bucket_size) = 0;
-  virtual void remove_index(const std::string& field_name) = 0;
-  virtual void add_filter(const std::string& filter_name, const std::string& filter_expr) = 0;
-  virtual void remove_filter(const std::string& filter_name) = 0;
-  virtual void add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr) = 0;
-  virtual void remove_trigger(const std::string& trigger_name) = 0;
+  virtual int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
+  virtual void get_table_info(rpc_table_info& _return, const std::string& table_name) = 0;
+  virtual void remove_table(const int64_t table_id) = 0;
+  virtual void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size) = 0;
+  virtual void remove_index(const int64_t table_id, const std::string& field_name) = 0;
+  virtual void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr) = 0;
+  virtual void remove_filter(const int64_t table_id, const std::string& filter_name) = 0;
+  virtual void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr) = 0;
+  virtual void remove_trigger(const int64_t table_id, const std::string& trigger_name) = 0;
 
   /**
    * Query ops *
    * 
+   * @param table_id
    * @param data
    */
-  virtual int64_t append(const std::string& data) = 0;
-  virtual int64_t append_batch(const rpc_record_batch& batch) = 0;
-  virtual void read(std::string& _return, const int64_t offset, const int64_t nrecords) = 0;
-  virtual void adhoc_filter(rpc_iterator_handle& _return, const std::string& filter_expr) = 0;
-  virtual void predef_filter(rpc_iterator_handle& _return, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void combined_filter(rpc_iterator_handle& _return, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void alerts_by_time(rpc_iterator_handle& _return, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void get_more(rpc_iterator_handle& _return, const rpc_iterator_descriptor& desc) = 0;
-  virtual int64_t num_records() = 0;
+  virtual int64_t append(const int64_t table_id, const std::string& data) = 0;
+  virtual int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) = 0;
+  virtual void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords) = 0;
+  virtual void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr) = 0;
+  virtual void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc) = 0;
+  virtual int64_t num_records(const int64_t table_id) = 0;
 };
 
 class dialog_serviceIfFactory {
@@ -85,57 +87,61 @@ class dialog_serviceNull : virtual public dialog_serviceIf {
   void deregister_handler() {
     return;
   }
-  void create_table(const std::string& /* table_name */, const rpc_schema& /* schema */, const rpc_storage_mode /* mode */) {
-    return;
-  }
-  void set_current_table(rpc_schema& /* _return */, const std::string& /* table_name */) {
-    return;
-  }
-  void add_index(const std::string& /* field_name */, const double /* bucket_size */) {
-    return;
-  }
-  void remove_index(const std::string& /* field_name */) {
-    return;
-  }
-  void add_filter(const std::string& /* filter_name */, const std::string& /* filter_expr */) {
-    return;
-  }
-  void remove_filter(const std::string& /* filter_name */) {
-    return;
-  }
-  void add_trigger(const std::string& /* trigger_name */, const std::string& /* filter_name */, const std::string& /* trigger_expr */) {
-    return;
-  }
-  void remove_trigger(const std::string& /* trigger_name */) {
-    return;
-  }
-  int64_t append(const std::string& /* data */) {
+  int64_t create_table(const std::string& /* table_name */, const rpc_schema& /* schema */, const rpc_storage_mode /* mode */) {
     int64_t _return = 0;
     return _return;
   }
-  int64_t append_batch(const rpc_record_batch& /* batch */) {
+  void get_table_info(rpc_table_info& /* _return */, const std::string& /* table_name */) {
+    return;
+  }
+  void remove_table(const int64_t /* table_id */) {
+    return;
+  }
+  void add_index(const int64_t /* table_id */, const std::string& /* field_name */, const double /* bucket_size */) {
+    return;
+  }
+  void remove_index(const int64_t /* table_id */, const std::string& /* field_name */) {
+    return;
+  }
+  void add_filter(const int64_t /* table_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */) {
+    return;
+  }
+  void remove_filter(const int64_t /* table_id */, const std::string& /* filter_name */) {
+    return;
+  }
+  void add_trigger(const int64_t /* table_id */, const std::string& /* trigger_name */, const std::string& /* filter_name */, const std::string& /* trigger_expr */) {
+    return;
+  }
+  void remove_trigger(const int64_t /* table_id */, const std::string& /* trigger_name */) {
+    return;
+  }
+  int64_t append(const int64_t /* table_id */, const std::string& /* data */) {
     int64_t _return = 0;
     return _return;
   }
-  void read(std::string& /* _return */, const int64_t /* offset */, const int64_t /* nrecords */) {
+  int64_t append_batch(const int64_t /* table_id */, const rpc_record_batch& /* batch */) {
+    int64_t _return = 0;
+    return _return;
+  }
+  void read(std::string& /* _return */, const int64_t /* table_id */, const int64_t /* offset */, const int64_t /* nrecords */) {
     return;
   }
-  void adhoc_filter(rpc_iterator_handle& /* _return */, const std::string& /* filter_expr */) {
+  void adhoc_filter(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const std::string& /* filter_expr */) {
     return;
   }
-  void predef_filter(rpc_iterator_handle& /* _return */, const std::string& /* filter_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void predef_filter(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const std::string& /* filter_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  void combined_filter(rpc_iterator_handle& /* _return */, const std::string& /* filter_name */, const std::string& /* filter_expr */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void combined_filter(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  void alerts_by_time(rpc_iterator_handle& /* _return */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void alerts_by_time(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  void get_more(rpc_iterator_handle& /* _return */, const rpc_iterator_descriptor& /* desc */) {
+  void get_more(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const rpc_iterator_descriptor& /* desc */) {
     return;
   }
-  int64_t num_records() {
+  int64_t num_records(const int64_t /* table_id */) {
     int64_t _return = 0;
     return _return;
   }
@@ -414,7 +420,8 @@ class dialog_service_create_table_pargs {
 };
 
 typedef struct _dialog_service_create_table_result__isset {
-  _dialog_service_create_table_result__isset() : ex(false) {}
+  _dialog_service_create_table_result__isset() : success(false), ex(false) {}
+  bool success :1;
   bool ex :1;
 } _dialog_service_create_table_result__isset;
 
@@ -425,18 +432,23 @@ class dialog_service_create_table_result {
   dialog_service_create_table_result(dialog_service_create_table_result&&);
   dialog_service_create_table_result& operator=(const dialog_service_create_table_result&);
   dialog_service_create_table_result& operator=(dialog_service_create_table_result&&);
-  dialog_service_create_table_result() {
+  dialog_service_create_table_result() : success(0) {
   }
 
   virtual ~dialog_service_create_table_result() throw();
+  int64_t success;
   rpc_management_exception ex;
 
   _dialog_service_create_table_result__isset __isset;
+
+  void __set_success(const int64_t val);
 
   void __set_ex(const rpc_management_exception& val);
 
   bool operator == (const dialog_service_create_table_result & rhs) const
   {
+    if (!(success == rhs.success))
+      return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
@@ -455,7 +467,8 @@ class dialog_service_create_table_result {
 };
 
 typedef struct _dialog_service_create_table_presult__isset {
-  _dialog_service_create_table_presult__isset() : ex(false) {}
+  _dialog_service_create_table_presult__isset() : success(false), ex(false) {}
+  bool success :1;
   bool ex :1;
 } _dialog_service_create_table_presult__isset;
 
@@ -464,6 +477,7 @@ class dialog_service_create_table_presult {
 
 
   virtual ~dialog_service_create_table_presult() throw();
+  int64_t* success;
   rpc_management_exception ex;
 
   _dialog_service_create_table_presult__isset __isset;
@@ -473,39 +487,39 @@ class dialog_service_create_table_presult {
 
 };
 
-typedef struct _dialog_service_set_current_table_args__isset {
-  _dialog_service_set_current_table_args__isset() : table_name(false) {}
+typedef struct _dialog_service_get_table_info_args__isset {
+  _dialog_service_get_table_info_args__isset() : table_name(false) {}
   bool table_name :1;
-} _dialog_service_set_current_table_args__isset;
+} _dialog_service_get_table_info_args__isset;
 
-class dialog_service_set_current_table_args {
+class dialog_service_get_table_info_args {
  public:
 
-  dialog_service_set_current_table_args(const dialog_service_set_current_table_args&);
-  dialog_service_set_current_table_args(dialog_service_set_current_table_args&&);
-  dialog_service_set_current_table_args& operator=(const dialog_service_set_current_table_args&);
-  dialog_service_set_current_table_args& operator=(dialog_service_set_current_table_args&&);
-  dialog_service_set_current_table_args() : table_name() {
+  dialog_service_get_table_info_args(const dialog_service_get_table_info_args&);
+  dialog_service_get_table_info_args(dialog_service_get_table_info_args&&);
+  dialog_service_get_table_info_args& operator=(const dialog_service_get_table_info_args&);
+  dialog_service_get_table_info_args& operator=(dialog_service_get_table_info_args&&);
+  dialog_service_get_table_info_args() : table_name() {
   }
 
-  virtual ~dialog_service_set_current_table_args() throw();
+  virtual ~dialog_service_get_table_info_args() throw();
   std::string table_name;
 
-  _dialog_service_set_current_table_args__isset __isset;
+  _dialog_service_get_table_info_args__isset __isset;
 
   void __set_table_name(const std::string& val);
 
-  bool operator == (const dialog_service_set_current_table_args & rhs) const
+  bool operator == (const dialog_service_get_table_info_args & rhs) const
   {
     if (!(table_name == rhs.table_name))
       return false;
     return true;
   }
-  bool operator != (const dialog_service_set_current_table_args &rhs) const {
+  bool operator != (const dialog_service_get_table_info_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const dialog_service_set_current_table_args & ) const;
+  bool operator < (const dialog_service_get_table_info_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -515,11 +529,11 @@ class dialog_service_set_current_table_args {
 };
 
 
-class dialog_service_set_current_table_pargs {
+class dialog_service_get_table_info_pargs {
  public:
 
 
-  virtual ~dialog_service_set_current_table_pargs() throw();
+  virtual ~dialog_service_get_table_info_pargs() throw();
   const std::string* table_name;
 
   template <class Protocol_>
@@ -527,45 +541,39 @@ class dialog_service_set_current_table_pargs {
 
 };
 
-typedef struct _dialog_service_set_current_table_result__isset {
-  _dialog_service_set_current_table_result__isset() : success(false), ex(false) {}
+typedef struct _dialog_service_get_table_info_result__isset {
+  _dialog_service_get_table_info_result__isset() : success(false) {}
   bool success :1;
-  bool ex :1;
-} _dialog_service_set_current_table_result__isset;
+} _dialog_service_get_table_info_result__isset;
 
-class dialog_service_set_current_table_result {
+class dialog_service_get_table_info_result {
  public:
 
-  dialog_service_set_current_table_result(const dialog_service_set_current_table_result&);
-  dialog_service_set_current_table_result(dialog_service_set_current_table_result&&);
-  dialog_service_set_current_table_result& operator=(const dialog_service_set_current_table_result&);
-  dialog_service_set_current_table_result& operator=(dialog_service_set_current_table_result&&);
-  dialog_service_set_current_table_result() {
+  dialog_service_get_table_info_result(const dialog_service_get_table_info_result&);
+  dialog_service_get_table_info_result(dialog_service_get_table_info_result&&);
+  dialog_service_get_table_info_result& operator=(const dialog_service_get_table_info_result&);
+  dialog_service_get_table_info_result& operator=(dialog_service_get_table_info_result&&);
+  dialog_service_get_table_info_result() {
   }
 
-  virtual ~dialog_service_set_current_table_result() throw();
-  rpc_schema success;
-  rpc_management_exception ex;
+  virtual ~dialog_service_get_table_info_result() throw();
+  rpc_table_info success;
 
-  _dialog_service_set_current_table_result__isset __isset;
+  _dialog_service_get_table_info_result__isset __isset;
 
-  void __set_success(const rpc_schema& val);
+  void __set_success(const rpc_table_info& val);
 
-  void __set_ex(const rpc_management_exception& val);
-
-  bool operator == (const dialog_service_set_current_table_result & rhs) const
+  bool operator == (const dialog_service_get_table_info_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
-    if (!(ex == rhs.ex))
-      return false;
     return true;
   }
-  bool operator != (const dialog_service_set_current_table_result &rhs) const {
+  bool operator != (const dialog_service_get_table_info_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const dialog_service_set_current_table_result & ) const;
+  bool operator < (const dialog_service_get_table_info_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -574,21 +582,133 @@ class dialog_service_set_current_table_result {
 
 };
 
-typedef struct _dialog_service_set_current_table_presult__isset {
-  _dialog_service_set_current_table_presult__isset() : success(false), ex(false) {}
+typedef struct _dialog_service_get_table_info_presult__isset {
+  _dialog_service_get_table_info_presult__isset() : success(false) {}
   bool success :1;
-  bool ex :1;
-} _dialog_service_set_current_table_presult__isset;
+} _dialog_service_get_table_info_presult__isset;
 
-class dialog_service_set_current_table_presult {
+class dialog_service_get_table_info_presult {
  public:
 
 
-  virtual ~dialog_service_set_current_table_presult() throw();
-  rpc_schema* success;
+  virtual ~dialog_service_get_table_info_presult() throw();
+  rpc_table_info* success;
+
+  _dialog_service_get_table_info_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _dialog_service_remove_table_args__isset {
+  _dialog_service_remove_table_args__isset() : table_id(false) {}
+  bool table_id :1;
+} _dialog_service_remove_table_args__isset;
+
+class dialog_service_remove_table_args {
+ public:
+
+  dialog_service_remove_table_args(const dialog_service_remove_table_args&);
+  dialog_service_remove_table_args(dialog_service_remove_table_args&&);
+  dialog_service_remove_table_args& operator=(const dialog_service_remove_table_args&);
+  dialog_service_remove_table_args& operator=(dialog_service_remove_table_args&&);
+  dialog_service_remove_table_args() : table_id(0) {
+  }
+
+  virtual ~dialog_service_remove_table_args() throw();
+  int64_t table_id;
+
+  _dialog_service_remove_table_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
+
+  bool operator == (const dialog_service_remove_table_args & rhs) const
+  {
+    if (!(table_id == rhs.table_id))
+      return false;
+    return true;
+  }
+  bool operator != (const dialog_service_remove_table_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const dialog_service_remove_table_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class dialog_service_remove_table_pargs {
+ public:
+
+
+  virtual ~dialog_service_remove_table_pargs() throw();
+  const int64_t* table_id;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _dialog_service_remove_table_result__isset {
+  _dialog_service_remove_table_result__isset() : ex(false) {}
+  bool ex :1;
+} _dialog_service_remove_table_result__isset;
+
+class dialog_service_remove_table_result {
+ public:
+
+  dialog_service_remove_table_result(const dialog_service_remove_table_result&);
+  dialog_service_remove_table_result(dialog_service_remove_table_result&&);
+  dialog_service_remove_table_result& operator=(const dialog_service_remove_table_result&);
+  dialog_service_remove_table_result& operator=(dialog_service_remove_table_result&&);
+  dialog_service_remove_table_result() {
+  }
+
+  virtual ~dialog_service_remove_table_result() throw();
   rpc_management_exception ex;
 
-  _dialog_service_set_current_table_presult__isset __isset;
+  _dialog_service_remove_table_result__isset __isset;
+
+  void __set_ex(const rpc_management_exception& val);
+
+  bool operator == (const dialog_service_remove_table_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const dialog_service_remove_table_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const dialog_service_remove_table_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _dialog_service_remove_table_presult__isset {
+  _dialog_service_remove_table_presult__isset() : ex(false) {}
+  bool ex :1;
+} _dialog_service_remove_table_presult__isset;
+
+class dialog_service_remove_table_presult {
+ public:
+
+
+  virtual ~dialog_service_remove_table_presult() throw();
+  rpc_management_exception ex;
+
+  _dialog_service_remove_table_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -596,7 +716,8 @@ class dialog_service_set_current_table_presult {
 };
 
 typedef struct _dialog_service_add_index_args__isset {
-  _dialog_service_add_index_args__isset() : field_name(false), bucket_size(false) {}
+  _dialog_service_add_index_args__isset() : table_id(false), field_name(false), bucket_size(false) {}
+  bool table_id :1;
   bool field_name :1;
   bool bucket_size :1;
 } _dialog_service_add_index_args__isset;
@@ -608,14 +729,17 @@ class dialog_service_add_index_args {
   dialog_service_add_index_args(dialog_service_add_index_args&&);
   dialog_service_add_index_args& operator=(const dialog_service_add_index_args&);
   dialog_service_add_index_args& operator=(dialog_service_add_index_args&&);
-  dialog_service_add_index_args() : field_name(), bucket_size(0) {
+  dialog_service_add_index_args() : table_id(0), field_name(), bucket_size(0) {
   }
 
   virtual ~dialog_service_add_index_args() throw();
+  int64_t table_id;
   std::string field_name;
   double bucket_size;
 
   _dialog_service_add_index_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_field_name(const std::string& val);
 
@@ -623,6 +747,8 @@ class dialog_service_add_index_args {
 
   bool operator == (const dialog_service_add_index_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(field_name == rhs.field_name))
       return false;
     if (!(bucket_size == rhs.bucket_size))
@@ -648,6 +774,7 @@ class dialog_service_add_index_pargs {
 
 
   virtual ~dialog_service_add_index_pargs() throw();
+  const int64_t* table_id;
   const std::string* field_name;
   const double* bucket_size;
 
@@ -717,7 +844,8 @@ class dialog_service_add_index_presult {
 };
 
 typedef struct _dialog_service_remove_index_args__isset {
-  _dialog_service_remove_index_args__isset() : field_name(false) {}
+  _dialog_service_remove_index_args__isset() : table_id(false), field_name(false) {}
+  bool table_id :1;
   bool field_name :1;
 } _dialog_service_remove_index_args__isset;
 
@@ -728,18 +856,23 @@ class dialog_service_remove_index_args {
   dialog_service_remove_index_args(dialog_service_remove_index_args&&);
   dialog_service_remove_index_args& operator=(const dialog_service_remove_index_args&);
   dialog_service_remove_index_args& operator=(dialog_service_remove_index_args&&);
-  dialog_service_remove_index_args() : field_name() {
+  dialog_service_remove_index_args() : table_id(0), field_name() {
   }
 
   virtual ~dialog_service_remove_index_args() throw();
+  int64_t table_id;
   std::string field_name;
 
   _dialog_service_remove_index_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_field_name(const std::string& val);
 
   bool operator == (const dialog_service_remove_index_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(field_name == rhs.field_name))
       return false;
     return true;
@@ -763,6 +896,7 @@ class dialog_service_remove_index_pargs {
 
 
   virtual ~dialog_service_remove_index_pargs() throw();
+  const int64_t* table_id;
   const std::string* field_name;
 
   template <class Protocol_>
@@ -831,7 +965,8 @@ class dialog_service_remove_index_presult {
 };
 
 typedef struct _dialog_service_add_filter_args__isset {
-  _dialog_service_add_filter_args__isset() : filter_name(false), filter_expr(false) {}
+  _dialog_service_add_filter_args__isset() : table_id(false), filter_name(false), filter_expr(false) {}
+  bool table_id :1;
   bool filter_name :1;
   bool filter_expr :1;
 } _dialog_service_add_filter_args__isset;
@@ -843,14 +978,17 @@ class dialog_service_add_filter_args {
   dialog_service_add_filter_args(dialog_service_add_filter_args&&);
   dialog_service_add_filter_args& operator=(const dialog_service_add_filter_args&);
   dialog_service_add_filter_args& operator=(dialog_service_add_filter_args&&);
-  dialog_service_add_filter_args() : filter_name(), filter_expr() {
+  dialog_service_add_filter_args() : table_id(0), filter_name(), filter_expr() {
   }
 
   virtual ~dialog_service_add_filter_args() throw();
+  int64_t table_id;
   std::string filter_name;
   std::string filter_expr;
 
   _dialog_service_add_filter_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
@@ -858,6 +996,8 @@ class dialog_service_add_filter_args {
 
   bool operator == (const dialog_service_add_filter_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(filter_name == rhs.filter_name))
       return false;
     if (!(filter_expr == rhs.filter_expr))
@@ -883,6 +1023,7 @@ class dialog_service_add_filter_pargs {
 
 
   virtual ~dialog_service_add_filter_pargs() throw();
+  const int64_t* table_id;
   const std::string* filter_name;
   const std::string* filter_expr;
 
@@ -952,7 +1093,8 @@ class dialog_service_add_filter_presult {
 };
 
 typedef struct _dialog_service_remove_filter_args__isset {
-  _dialog_service_remove_filter_args__isset() : filter_name(false) {}
+  _dialog_service_remove_filter_args__isset() : table_id(false), filter_name(false) {}
+  bool table_id :1;
   bool filter_name :1;
 } _dialog_service_remove_filter_args__isset;
 
@@ -963,18 +1105,23 @@ class dialog_service_remove_filter_args {
   dialog_service_remove_filter_args(dialog_service_remove_filter_args&&);
   dialog_service_remove_filter_args& operator=(const dialog_service_remove_filter_args&);
   dialog_service_remove_filter_args& operator=(dialog_service_remove_filter_args&&);
-  dialog_service_remove_filter_args() : filter_name() {
+  dialog_service_remove_filter_args() : table_id(0), filter_name() {
   }
 
   virtual ~dialog_service_remove_filter_args() throw();
+  int64_t table_id;
   std::string filter_name;
 
   _dialog_service_remove_filter_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
   bool operator == (const dialog_service_remove_filter_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(filter_name == rhs.filter_name))
       return false;
     return true;
@@ -998,6 +1145,7 @@ class dialog_service_remove_filter_pargs {
 
 
   virtual ~dialog_service_remove_filter_pargs() throw();
+  const int64_t* table_id;
   const std::string* filter_name;
 
   template <class Protocol_>
@@ -1066,7 +1214,8 @@ class dialog_service_remove_filter_presult {
 };
 
 typedef struct _dialog_service_add_trigger_args__isset {
-  _dialog_service_add_trigger_args__isset() : trigger_name(false), filter_name(false), trigger_expr(false) {}
+  _dialog_service_add_trigger_args__isset() : table_id(false), trigger_name(false), filter_name(false), trigger_expr(false) {}
+  bool table_id :1;
   bool trigger_name :1;
   bool filter_name :1;
   bool trigger_expr :1;
@@ -1079,15 +1228,18 @@ class dialog_service_add_trigger_args {
   dialog_service_add_trigger_args(dialog_service_add_trigger_args&&);
   dialog_service_add_trigger_args& operator=(const dialog_service_add_trigger_args&);
   dialog_service_add_trigger_args& operator=(dialog_service_add_trigger_args&&);
-  dialog_service_add_trigger_args() : trigger_name(), filter_name(), trigger_expr() {
+  dialog_service_add_trigger_args() : table_id(0), trigger_name(), filter_name(), trigger_expr() {
   }
 
   virtual ~dialog_service_add_trigger_args() throw();
+  int64_t table_id;
   std::string trigger_name;
   std::string filter_name;
   std::string trigger_expr;
 
   _dialog_service_add_trigger_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_trigger_name(const std::string& val);
 
@@ -1097,6 +1249,8 @@ class dialog_service_add_trigger_args {
 
   bool operator == (const dialog_service_add_trigger_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(trigger_name == rhs.trigger_name))
       return false;
     if (!(filter_name == rhs.filter_name))
@@ -1124,6 +1278,7 @@ class dialog_service_add_trigger_pargs {
 
 
   virtual ~dialog_service_add_trigger_pargs() throw();
+  const int64_t* table_id;
   const std::string* trigger_name;
   const std::string* filter_name;
   const std::string* trigger_expr;
@@ -1194,7 +1349,8 @@ class dialog_service_add_trigger_presult {
 };
 
 typedef struct _dialog_service_remove_trigger_args__isset {
-  _dialog_service_remove_trigger_args__isset() : trigger_name(false) {}
+  _dialog_service_remove_trigger_args__isset() : table_id(false), trigger_name(false) {}
+  bool table_id :1;
   bool trigger_name :1;
 } _dialog_service_remove_trigger_args__isset;
 
@@ -1205,18 +1361,23 @@ class dialog_service_remove_trigger_args {
   dialog_service_remove_trigger_args(dialog_service_remove_trigger_args&&);
   dialog_service_remove_trigger_args& operator=(const dialog_service_remove_trigger_args&);
   dialog_service_remove_trigger_args& operator=(dialog_service_remove_trigger_args&&);
-  dialog_service_remove_trigger_args() : trigger_name() {
+  dialog_service_remove_trigger_args() : table_id(0), trigger_name() {
   }
 
   virtual ~dialog_service_remove_trigger_args() throw();
+  int64_t table_id;
   std::string trigger_name;
 
   _dialog_service_remove_trigger_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_trigger_name(const std::string& val);
 
   bool operator == (const dialog_service_remove_trigger_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(trigger_name == rhs.trigger_name))
       return false;
     return true;
@@ -1240,6 +1401,7 @@ class dialog_service_remove_trigger_pargs {
 
 
   virtual ~dialog_service_remove_trigger_pargs() throw();
+  const int64_t* table_id;
   const std::string* trigger_name;
 
   template <class Protocol_>
@@ -1308,7 +1470,8 @@ class dialog_service_remove_trigger_presult {
 };
 
 typedef struct _dialog_service_append_args__isset {
-  _dialog_service_append_args__isset() : data(false) {}
+  _dialog_service_append_args__isset() : table_id(false), data(false) {}
+  bool table_id :1;
   bool data :1;
 } _dialog_service_append_args__isset;
 
@@ -1319,18 +1482,23 @@ class dialog_service_append_args {
   dialog_service_append_args(dialog_service_append_args&&);
   dialog_service_append_args& operator=(const dialog_service_append_args&);
   dialog_service_append_args& operator=(dialog_service_append_args&&);
-  dialog_service_append_args() : data() {
+  dialog_service_append_args() : table_id(0), data() {
   }
 
   virtual ~dialog_service_append_args() throw();
+  int64_t table_id;
   std::string data;
 
   _dialog_service_append_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_data(const std::string& val);
 
   bool operator == (const dialog_service_append_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(data == rhs.data))
       return false;
     return true;
@@ -1354,6 +1522,7 @@ class dialog_service_append_pargs {
 
 
   virtual ~dialog_service_append_pargs() throw();
+  const int64_t* table_id;
   const std::string* data;
 
   template <class Protocol_>
@@ -1422,7 +1591,8 @@ class dialog_service_append_presult {
 };
 
 typedef struct _dialog_service_append_batch_args__isset {
-  _dialog_service_append_batch_args__isset() : batch(false) {}
+  _dialog_service_append_batch_args__isset() : table_id(false), batch(false) {}
+  bool table_id :1;
   bool batch :1;
 } _dialog_service_append_batch_args__isset;
 
@@ -1433,18 +1603,23 @@ class dialog_service_append_batch_args {
   dialog_service_append_batch_args(dialog_service_append_batch_args&&);
   dialog_service_append_batch_args& operator=(const dialog_service_append_batch_args&);
   dialog_service_append_batch_args& operator=(dialog_service_append_batch_args&&);
-  dialog_service_append_batch_args() {
+  dialog_service_append_batch_args() : table_id(0) {
   }
 
   virtual ~dialog_service_append_batch_args() throw();
+  int64_t table_id;
   rpc_record_batch batch;
 
   _dialog_service_append_batch_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_batch(const rpc_record_batch& val);
 
   bool operator == (const dialog_service_append_batch_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(batch == rhs.batch))
       return false;
     return true;
@@ -1468,6 +1643,7 @@ class dialog_service_append_batch_pargs {
 
 
   virtual ~dialog_service_append_batch_pargs() throw();
+  const int64_t* table_id;
   const rpc_record_batch* batch;
 
   template <class Protocol_>
@@ -1536,7 +1712,8 @@ class dialog_service_append_batch_presult {
 };
 
 typedef struct _dialog_service_read_args__isset {
-  _dialog_service_read_args__isset() : offset(false), nrecords(false) {}
+  _dialog_service_read_args__isset() : table_id(false), offset(false), nrecords(false) {}
+  bool table_id :1;
   bool offset :1;
   bool nrecords :1;
 } _dialog_service_read_args__isset;
@@ -1548,14 +1725,17 @@ class dialog_service_read_args {
   dialog_service_read_args(dialog_service_read_args&&);
   dialog_service_read_args& operator=(const dialog_service_read_args&);
   dialog_service_read_args& operator=(dialog_service_read_args&&);
-  dialog_service_read_args() : offset(0), nrecords(0) {
+  dialog_service_read_args() : table_id(0), offset(0), nrecords(0) {
   }
 
   virtual ~dialog_service_read_args() throw();
+  int64_t table_id;
   int64_t offset;
   int64_t nrecords;
 
   _dialog_service_read_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_offset(const int64_t val);
 
@@ -1563,6 +1743,8 @@ class dialog_service_read_args {
 
   bool operator == (const dialog_service_read_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(offset == rhs.offset))
       return false;
     if (!(nrecords == rhs.nrecords))
@@ -1588,6 +1770,7 @@ class dialog_service_read_pargs {
 
 
   virtual ~dialog_service_read_pargs() throw();
+  const int64_t* table_id;
   const int64_t* offset;
   const int64_t* nrecords;
 
@@ -1657,7 +1840,8 @@ class dialog_service_read_presult {
 };
 
 typedef struct _dialog_service_adhoc_filter_args__isset {
-  _dialog_service_adhoc_filter_args__isset() : filter_expr(false) {}
+  _dialog_service_adhoc_filter_args__isset() : table_id(false), filter_expr(false) {}
+  bool table_id :1;
   bool filter_expr :1;
 } _dialog_service_adhoc_filter_args__isset;
 
@@ -1668,18 +1852,23 @@ class dialog_service_adhoc_filter_args {
   dialog_service_adhoc_filter_args(dialog_service_adhoc_filter_args&&);
   dialog_service_adhoc_filter_args& operator=(const dialog_service_adhoc_filter_args&);
   dialog_service_adhoc_filter_args& operator=(dialog_service_adhoc_filter_args&&);
-  dialog_service_adhoc_filter_args() : filter_expr() {
+  dialog_service_adhoc_filter_args() : table_id(0), filter_expr() {
   }
 
   virtual ~dialog_service_adhoc_filter_args() throw();
+  int64_t table_id;
   std::string filter_expr;
 
   _dialog_service_adhoc_filter_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_filter_expr(const std::string& val);
 
   bool operator == (const dialog_service_adhoc_filter_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(filter_expr == rhs.filter_expr))
       return false;
     return true;
@@ -1703,6 +1892,7 @@ class dialog_service_adhoc_filter_pargs {
 
 
   virtual ~dialog_service_adhoc_filter_pargs() throw();
+  const int64_t* table_id;
   const std::string* filter_expr;
 
   template <class Protocol_>
@@ -1779,7 +1969,8 @@ class dialog_service_adhoc_filter_presult {
 };
 
 typedef struct _dialog_service_predef_filter_args__isset {
-  _dialog_service_predef_filter_args__isset() : filter_name(false), begin_ms(false), end_ms(false) {}
+  _dialog_service_predef_filter_args__isset() : table_id(false), filter_name(false), begin_ms(false), end_ms(false) {}
+  bool table_id :1;
   bool filter_name :1;
   bool begin_ms :1;
   bool end_ms :1;
@@ -1792,15 +1983,18 @@ class dialog_service_predef_filter_args {
   dialog_service_predef_filter_args(dialog_service_predef_filter_args&&);
   dialog_service_predef_filter_args& operator=(const dialog_service_predef_filter_args&);
   dialog_service_predef_filter_args& operator=(dialog_service_predef_filter_args&&);
-  dialog_service_predef_filter_args() : filter_name(), begin_ms(0), end_ms(0) {
+  dialog_service_predef_filter_args() : table_id(0), filter_name(), begin_ms(0), end_ms(0) {
   }
 
   virtual ~dialog_service_predef_filter_args() throw();
+  int64_t table_id;
   std::string filter_name;
   int64_t begin_ms;
   int64_t end_ms;
 
   _dialog_service_predef_filter_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
@@ -1810,6 +2004,8 @@ class dialog_service_predef_filter_args {
 
   bool operator == (const dialog_service_predef_filter_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(filter_name == rhs.filter_name))
       return false;
     if (!(begin_ms == rhs.begin_ms))
@@ -1837,6 +2033,7 @@ class dialog_service_predef_filter_pargs {
 
 
   virtual ~dialog_service_predef_filter_pargs() throw();
+  const int64_t* table_id;
   const std::string* filter_name;
   const int64_t* begin_ms;
   const int64_t* end_ms;
@@ -1915,7 +2112,8 @@ class dialog_service_predef_filter_presult {
 };
 
 typedef struct _dialog_service_combined_filter_args__isset {
-  _dialog_service_combined_filter_args__isset() : filter_name(false), filter_expr(false), begin_ms(false), end_ms(false) {}
+  _dialog_service_combined_filter_args__isset() : table_id(false), filter_name(false), filter_expr(false), begin_ms(false), end_ms(false) {}
+  bool table_id :1;
   bool filter_name :1;
   bool filter_expr :1;
   bool begin_ms :1;
@@ -1929,16 +2127,19 @@ class dialog_service_combined_filter_args {
   dialog_service_combined_filter_args(dialog_service_combined_filter_args&&);
   dialog_service_combined_filter_args& operator=(const dialog_service_combined_filter_args&);
   dialog_service_combined_filter_args& operator=(dialog_service_combined_filter_args&&);
-  dialog_service_combined_filter_args() : filter_name(), filter_expr(), begin_ms(0), end_ms(0) {
+  dialog_service_combined_filter_args() : table_id(0), filter_name(), filter_expr(), begin_ms(0), end_ms(0) {
   }
 
   virtual ~dialog_service_combined_filter_args() throw();
+  int64_t table_id;
   std::string filter_name;
   std::string filter_expr;
   int64_t begin_ms;
   int64_t end_ms;
 
   _dialog_service_combined_filter_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
@@ -1950,6 +2151,8 @@ class dialog_service_combined_filter_args {
 
   bool operator == (const dialog_service_combined_filter_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(filter_name == rhs.filter_name))
       return false;
     if (!(filter_expr == rhs.filter_expr))
@@ -1979,6 +2182,7 @@ class dialog_service_combined_filter_pargs {
 
 
   virtual ~dialog_service_combined_filter_pargs() throw();
+  const int64_t* table_id;
   const std::string* filter_name;
   const std::string* filter_expr;
   const int64_t* begin_ms;
@@ -2058,7 +2262,8 @@ class dialog_service_combined_filter_presult {
 };
 
 typedef struct _dialog_service_alerts_by_time_args__isset {
-  _dialog_service_alerts_by_time_args__isset() : begin_ms(false), end_ms(false) {}
+  _dialog_service_alerts_by_time_args__isset() : table_id(false), begin_ms(false), end_ms(false) {}
+  bool table_id :1;
   bool begin_ms :1;
   bool end_ms :1;
 } _dialog_service_alerts_by_time_args__isset;
@@ -2070,14 +2275,17 @@ class dialog_service_alerts_by_time_args {
   dialog_service_alerts_by_time_args(dialog_service_alerts_by_time_args&&);
   dialog_service_alerts_by_time_args& operator=(const dialog_service_alerts_by_time_args&);
   dialog_service_alerts_by_time_args& operator=(dialog_service_alerts_by_time_args&&);
-  dialog_service_alerts_by_time_args() : begin_ms(0), end_ms(0) {
+  dialog_service_alerts_by_time_args() : table_id(0), begin_ms(0), end_ms(0) {
   }
 
   virtual ~dialog_service_alerts_by_time_args() throw();
+  int64_t table_id;
   int64_t begin_ms;
   int64_t end_ms;
 
   _dialog_service_alerts_by_time_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_begin_ms(const int64_t val);
 
@@ -2085,6 +2293,8 @@ class dialog_service_alerts_by_time_args {
 
   bool operator == (const dialog_service_alerts_by_time_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(begin_ms == rhs.begin_ms))
       return false;
     if (!(end_ms == rhs.end_ms))
@@ -2110,6 +2320,7 @@ class dialog_service_alerts_by_time_pargs {
 
 
   virtual ~dialog_service_alerts_by_time_pargs() throw();
+  const int64_t* table_id;
   const int64_t* begin_ms;
   const int64_t* end_ms;
 
@@ -2187,7 +2398,8 @@ class dialog_service_alerts_by_time_presult {
 };
 
 typedef struct _dialog_service_get_more_args__isset {
-  _dialog_service_get_more_args__isset() : desc(false) {}
+  _dialog_service_get_more_args__isset() : table_id(false), desc(false) {}
+  bool table_id :1;
   bool desc :1;
 } _dialog_service_get_more_args__isset;
 
@@ -2198,18 +2410,23 @@ class dialog_service_get_more_args {
   dialog_service_get_more_args(dialog_service_get_more_args&&);
   dialog_service_get_more_args& operator=(const dialog_service_get_more_args&);
   dialog_service_get_more_args& operator=(dialog_service_get_more_args&&);
-  dialog_service_get_more_args() {
+  dialog_service_get_more_args() : table_id(0) {
   }
 
   virtual ~dialog_service_get_more_args() throw();
+  int64_t table_id;
   rpc_iterator_descriptor desc;
 
   _dialog_service_get_more_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
 
   void __set_desc(const rpc_iterator_descriptor& val);
 
   bool operator == (const dialog_service_get_more_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     if (!(desc == rhs.desc))
       return false;
     return true;
@@ -2233,6 +2450,7 @@ class dialog_service_get_more_pargs {
 
 
   virtual ~dialog_service_get_more_pargs() throw();
+  const int64_t* table_id;
   const rpc_iterator_descriptor* desc;
 
   template <class Protocol_>
@@ -2308,6 +2526,10 @@ class dialog_service_get_more_presult {
 
 };
 
+typedef struct _dialog_service_num_records_args__isset {
+  _dialog_service_num_records_args__isset() : table_id(false) {}
+  bool table_id :1;
+} _dialog_service_num_records_args__isset;
 
 class dialog_service_num_records_args {
  public:
@@ -2316,13 +2538,20 @@ class dialog_service_num_records_args {
   dialog_service_num_records_args(dialog_service_num_records_args&&);
   dialog_service_num_records_args& operator=(const dialog_service_num_records_args&);
   dialog_service_num_records_args& operator=(dialog_service_num_records_args&&);
-  dialog_service_num_records_args() {
+  dialog_service_num_records_args() : table_id(0) {
   }
 
   virtual ~dialog_service_num_records_args() throw();
+  int64_t table_id;
 
-  bool operator == (const dialog_service_num_records_args & /* rhs */) const
+  _dialog_service_num_records_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
+
+  bool operator == (const dialog_service_num_records_args & rhs) const
   {
+    if (!(table_id == rhs.table_id))
+      return false;
     return true;
   }
   bool operator != (const dialog_service_num_records_args &rhs) const {
@@ -2344,6 +2573,7 @@ class dialog_service_num_records_pargs {
 
 
   virtual ~dialog_service_num_records_pargs() throw();
+  const int64_t* table_id;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2442,56 +2672,59 @@ class dialog_serviceClientT : virtual public dialog_serviceIf {
   void deregister_handler();
   void send_deregister_handler();
   void recv_deregister_handler();
-  void create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
   void send_create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
-  void recv_create_table();
-  void set_current_table(rpc_schema& _return, const std::string& table_name);
-  void send_set_current_table(const std::string& table_name);
-  void recv_set_current_table(rpc_schema& _return);
-  void add_index(const std::string& field_name, const double bucket_size);
-  void send_add_index(const std::string& field_name, const double bucket_size);
+  int64_t recv_create_table();
+  void get_table_info(rpc_table_info& _return, const std::string& table_name);
+  void send_get_table_info(const std::string& table_name);
+  void recv_get_table_info(rpc_table_info& _return);
+  void remove_table(const int64_t table_id);
+  void send_remove_table(const int64_t table_id);
+  void recv_remove_table();
+  void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
+  void send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
   void recv_add_index();
-  void remove_index(const std::string& field_name);
-  void send_remove_index(const std::string& field_name);
+  void remove_index(const int64_t table_id, const std::string& field_name);
+  void send_remove_index(const int64_t table_id, const std::string& field_name);
   void recv_remove_index();
-  void add_filter(const std::string& filter_name, const std::string& filter_expr);
-  void send_add_filter(const std::string& filter_name, const std::string& filter_expr);
+  void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
+  void send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
   void recv_add_filter();
-  void remove_filter(const std::string& filter_name);
-  void send_remove_filter(const std::string& filter_name);
+  void remove_filter(const int64_t table_id, const std::string& filter_name);
+  void send_remove_filter(const int64_t table_id, const std::string& filter_name);
   void recv_remove_filter();
-  void add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
-  void send_add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
+  void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
+  void send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
   void recv_add_trigger();
-  void remove_trigger(const std::string& trigger_name);
-  void send_remove_trigger(const std::string& trigger_name);
+  void remove_trigger(const int64_t table_id, const std::string& trigger_name);
+  void send_remove_trigger(const int64_t table_id, const std::string& trigger_name);
   void recv_remove_trigger();
-  int64_t append(const std::string& data);
-  void send_append(const std::string& data);
+  int64_t append(const int64_t table_id, const std::string& data);
+  void send_append(const int64_t table_id, const std::string& data);
   int64_t recv_append();
-  int64_t append_batch(const rpc_record_batch& batch);
-  void send_append_batch(const rpc_record_batch& batch);
+  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch);
+  void send_append_batch(const int64_t table_id, const rpc_record_batch& batch);
   int64_t recv_append_batch();
-  void read(std::string& _return, const int64_t offset, const int64_t nrecords);
-  void send_read(const int64_t offset, const int64_t nrecords);
+  void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords);
+  void send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return);
-  void adhoc_filter(rpc_iterator_handle& _return, const std::string& filter_expr);
-  void send_adhoc_filter(const std::string& filter_expr);
+  void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr);
+  void send_adhoc_filter(const int64_t table_id, const std::string& filter_expr);
   void recv_adhoc_filter(rpc_iterator_handle& _return);
-  void predef_filter(rpc_iterator_handle& _return, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  void send_predef_filter(const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  void send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
   void recv_predef_filter(rpc_iterator_handle& _return);
-  void combined_filter(rpc_iterator_handle& _return, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  void send_combined_filter(const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  void send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
   void recv_combined_filter(rpc_iterator_handle& _return);
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t begin_ms, const int64_t end_ms);
-  void send_alerts_by_time(const int64_t begin_ms, const int64_t end_ms);
+  void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
+  void send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
   void recv_alerts_by_time(rpc_iterator_handle& _return);
-  void get_more(rpc_iterator_handle& _return, const rpc_iterator_descriptor& desc);
-  void send_get_more(const rpc_iterator_descriptor& desc);
+  void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc);
+  void send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc);
   void recv_get_more(rpc_iterator_handle& _return);
-  int64_t num_records();
-  void send_num_records();
+  int64_t num_records(const int64_t table_id);
+  void send_num_records(const int64_t table_id);
   int64_t recv_num_records();
  protected:
   boost::shared_ptr< Protocol_> piprot_;
@@ -2527,8 +2760,10 @@ class dialog_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Pr
   void process_deregister_handler(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_create_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_create_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_set_current_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_set_current_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_get_table_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_table_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_remove_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_remove_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_add_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_index(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2571,9 +2806,12 @@ class dialog_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Pr
     processMap_["create_table"] = ProcessFunctions(
       &dialog_serviceProcessorT::process_create_table,
       &dialog_serviceProcessorT::process_create_table);
-    processMap_["set_current_table"] = ProcessFunctions(
-      &dialog_serviceProcessorT::process_set_current_table,
-      &dialog_serviceProcessorT::process_set_current_table);
+    processMap_["get_table_info"] = ProcessFunctions(
+      &dialog_serviceProcessorT::process_get_table_info,
+      &dialog_serviceProcessorT::process_get_table_info);
+    processMap_["remove_table"] = ProcessFunctions(
+      &dialog_serviceProcessorT::process_remove_table,
+      &dialog_serviceProcessorT::process_remove_table);
     processMap_["add_index"] = ProcessFunctions(
       &dialog_serviceProcessorT::process_add_index,
       &dialog_serviceProcessorT::process_add_index);
@@ -2670,164 +2908,173 @@ class dialog_serviceMultiface : virtual public dialog_serviceIf {
     ifaces_[i]->deregister_handler();
   }
 
-  void create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode) {
+  int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
       ifaces_[i]->create_table(table_name, schema, mode);
     }
-    ifaces_[i]->create_table(table_name, schema, mode);
+    return ifaces_[i]->create_table(table_name, schema, mode);
   }
 
-  void set_current_table(rpc_schema& _return, const std::string& table_name) {
+  void get_table_info(rpc_table_info& _return, const std::string& table_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->set_current_table(_return, table_name);
+      ifaces_[i]->get_table_info(_return, table_name);
     }
-    ifaces_[i]->set_current_table(_return, table_name);
+    ifaces_[i]->get_table_info(_return, table_name);
     return;
   }
 
-  void add_index(const std::string& field_name, const double bucket_size) {
+  void remove_table(const int64_t table_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_index(field_name, bucket_size);
+      ifaces_[i]->remove_table(table_id);
     }
-    ifaces_[i]->add_index(field_name, bucket_size);
+    ifaces_[i]->remove_table(table_id);
   }
 
-  void remove_index(const std::string& field_name) {
+  void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_index(field_name);
+      ifaces_[i]->add_index(table_id, field_name, bucket_size);
     }
-    ifaces_[i]->remove_index(field_name);
+    ifaces_[i]->add_index(table_id, field_name, bucket_size);
   }
 
-  void add_filter(const std::string& filter_name, const std::string& filter_expr) {
+  void remove_index(const int64_t table_id, const std::string& field_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_filter(filter_name, filter_expr);
+      ifaces_[i]->remove_index(table_id, field_name);
     }
-    ifaces_[i]->add_filter(filter_name, filter_expr);
+    ifaces_[i]->remove_index(table_id, field_name);
   }
 
-  void remove_filter(const std::string& filter_name) {
+  void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_filter(filter_name);
+      ifaces_[i]->add_filter(table_id, filter_name, filter_expr);
     }
-    ifaces_[i]->remove_filter(filter_name);
+    ifaces_[i]->add_filter(table_id, filter_name, filter_expr);
   }
 
-  void add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr) {
+  void remove_filter(const int64_t table_id, const std::string& filter_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_trigger(trigger_name, filter_name, trigger_expr);
+      ifaces_[i]->remove_filter(table_id, filter_name);
     }
-    ifaces_[i]->add_trigger(trigger_name, filter_name, trigger_expr);
+    ifaces_[i]->remove_filter(table_id, filter_name);
   }
 
-  void remove_trigger(const std::string& trigger_name) {
+  void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_trigger(trigger_name);
+      ifaces_[i]->add_trigger(table_id, trigger_name, filter_name, trigger_expr);
     }
-    ifaces_[i]->remove_trigger(trigger_name);
+    ifaces_[i]->add_trigger(table_id, trigger_name, filter_name, trigger_expr);
   }
 
-  int64_t append(const std::string& data) {
+  void remove_trigger(const int64_t table_id, const std::string& trigger_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->append(data);
+      ifaces_[i]->remove_trigger(table_id, trigger_name);
     }
-    return ifaces_[i]->append(data);
+    ifaces_[i]->remove_trigger(table_id, trigger_name);
   }
 
-  int64_t append_batch(const rpc_record_batch& batch) {
+  int64_t append(const int64_t table_id, const std::string& data) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->append_batch(batch);
+      ifaces_[i]->append(table_id, data);
     }
-    return ifaces_[i]->append_batch(batch);
+    return ifaces_[i]->append(table_id, data);
   }
 
-  void read(std::string& _return, const int64_t offset, const int64_t nrecords) {
+  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->read(_return, offset, nrecords);
+      ifaces_[i]->append_batch(table_id, batch);
     }
-    ifaces_[i]->read(_return, offset, nrecords);
+    return ifaces_[i]->append_batch(table_id, batch);
+  }
+
+  void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->read(_return, table_id, offset, nrecords);
+    }
+    ifaces_[i]->read(_return, table_id, offset, nrecords);
     return;
   }
 
-  void adhoc_filter(rpc_iterator_handle& _return, const std::string& filter_expr) {
+  void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->adhoc_filter(_return, filter_expr);
+      ifaces_[i]->adhoc_filter(_return, table_id, filter_expr);
     }
-    ifaces_[i]->adhoc_filter(_return, filter_expr);
+    ifaces_[i]->adhoc_filter(_return, table_id, filter_expr);
     return;
   }
 
-  void predef_filter(rpc_iterator_handle& _return, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) {
+  void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->predef_filter(_return, filter_name, begin_ms, end_ms);
+      ifaces_[i]->predef_filter(_return, table_id, filter_name, begin_ms, end_ms);
     }
-    ifaces_[i]->predef_filter(_return, filter_name, begin_ms, end_ms);
+    ifaces_[i]->predef_filter(_return, table_id, filter_name, begin_ms, end_ms);
     return;
   }
 
-  void combined_filter(rpc_iterator_handle& _return, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) {
+  void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->combined_filter(_return, filter_name, filter_expr, begin_ms, end_ms);
+      ifaces_[i]->combined_filter(_return, table_id, filter_name, filter_expr, begin_ms, end_ms);
     }
-    ifaces_[i]->combined_filter(_return, filter_name, filter_expr, begin_ms, end_ms);
+    ifaces_[i]->combined_filter(_return, table_id, filter_name, filter_expr, begin_ms, end_ms);
     return;
   }
 
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t begin_ms, const int64_t end_ms) {
+  void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->alerts_by_time(_return, begin_ms, end_ms);
+      ifaces_[i]->alerts_by_time(_return, table_id, begin_ms, end_ms);
     }
-    ifaces_[i]->alerts_by_time(_return, begin_ms, end_ms);
+    ifaces_[i]->alerts_by_time(_return, table_id, begin_ms, end_ms);
     return;
   }
 
-  void get_more(rpc_iterator_handle& _return, const rpc_iterator_descriptor& desc) {
+  void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_more(_return, desc);
+      ifaces_[i]->get_more(_return, table_id, desc);
     }
-    ifaces_[i]->get_more(_return, desc);
+    ifaces_[i]->get_more(_return, table_id, desc);
     return;
   }
 
-  int64_t num_records() {
+  int64_t num_records(const int64_t table_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->num_records();
+      ifaces_[i]->num_records(table_id);
     }
-    return ifaces_[i]->num_records();
+    return ifaces_[i]->num_records(table_id);
   }
 
 };
@@ -2867,56 +3114,59 @@ class dialog_serviceConcurrentClientT : virtual public dialog_serviceIf {
   void deregister_handler();
   int32_t send_deregister_handler();
   void recv_deregister_handler(const int32_t seqid);
-  void create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
   int32_t send_create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
-  void recv_create_table(const int32_t seqid);
-  void set_current_table(rpc_schema& _return, const std::string& table_name);
-  int32_t send_set_current_table(const std::string& table_name);
-  void recv_set_current_table(rpc_schema& _return, const int32_t seqid);
-  void add_index(const std::string& field_name, const double bucket_size);
-  int32_t send_add_index(const std::string& field_name, const double bucket_size);
+  int64_t recv_create_table(const int32_t seqid);
+  void get_table_info(rpc_table_info& _return, const std::string& table_name);
+  int32_t send_get_table_info(const std::string& table_name);
+  void recv_get_table_info(rpc_table_info& _return, const int32_t seqid);
+  void remove_table(const int64_t table_id);
+  int32_t send_remove_table(const int64_t table_id);
+  void recv_remove_table(const int32_t seqid);
+  void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
+  int32_t send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
   void recv_add_index(const int32_t seqid);
-  void remove_index(const std::string& field_name);
-  int32_t send_remove_index(const std::string& field_name);
+  void remove_index(const int64_t table_id, const std::string& field_name);
+  int32_t send_remove_index(const int64_t table_id, const std::string& field_name);
   void recv_remove_index(const int32_t seqid);
-  void add_filter(const std::string& filter_name, const std::string& filter_expr);
-  int32_t send_add_filter(const std::string& filter_name, const std::string& filter_expr);
+  void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
+  int32_t send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
   void recv_add_filter(const int32_t seqid);
-  void remove_filter(const std::string& filter_name);
-  int32_t send_remove_filter(const std::string& filter_name);
+  void remove_filter(const int64_t table_id, const std::string& filter_name);
+  int32_t send_remove_filter(const int64_t table_id, const std::string& filter_name);
   void recv_remove_filter(const int32_t seqid);
-  void add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
-  int32_t send_add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
+  void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
+  int32_t send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
   void recv_add_trigger(const int32_t seqid);
-  void remove_trigger(const std::string& trigger_name);
-  int32_t send_remove_trigger(const std::string& trigger_name);
+  void remove_trigger(const int64_t table_id, const std::string& trigger_name);
+  int32_t send_remove_trigger(const int64_t table_id, const std::string& trigger_name);
   void recv_remove_trigger(const int32_t seqid);
-  int64_t append(const std::string& data);
-  int32_t send_append(const std::string& data);
+  int64_t append(const int64_t table_id, const std::string& data);
+  int32_t send_append(const int64_t table_id, const std::string& data);
   int64_t recv_append(const int32_t seqid);
-  int64_t append_batch(const rpc_record_batch& batch);
-  int32_t send_append_batch(const rpc_record_batch& batch);
+  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch);
+  int32_t send_append_batch(const int64_t table_id, const rpc_record_batch& batch);
   int64_t recv_append_batch(const int32_t seqid);
-  void read(std::string& _return, const int64_t offset, const int64_t nrecords);
-  int32_t send_read(const int64_t offset, const int64_t nrecords);
+  void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords);
+  int32_t send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return, const int32_t seqid);
-  void adhoc_filter(rpc_iterator_handle& _return, const std::string& filter_expr);
-  int32_t send_adhoc_filter(const std::string& filter_expr);
+  void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr);
+  int32_t send_adhoc_filter(const int64_t table_id, const std::string& filter_expr);
   void recv_adhoc_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void predef_filter(rpc_iterator_handle& _return, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_predef_filter(const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
   void recv_predef_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void combined_filter(rpc_iterator_handle& _return, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_combined_filter(const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
   void recv_combined_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_alerts_by_time(const int64_t begin_ms, const int64_t end_ms);
+  void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
   void recv_alerts_by_time(rpc_iterator_handle& _return, const int32_t seqid);
-  void get_more(rpc_iterator_handle& _return, const rpc_iterator_descriptor& desc);
-  int32_t send_get_more(const rpc_iterator_descriptor& desc);
+  void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc);
+  int32_t send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc);
   void recv_get_more(rpc_iterator_handle& _return, const int32_t seqid);
-  int64_t num_records();
-  int32_t send_num_records();
+  int64_t num_records(const int64_t table_id);
+  int32_t send_num_records(const int64_t table_id);
   int64_t recv_num_records(const int32_t seqid);
  protected:
   boost::shared_ptr< Protocol_> piprot_;

@@ -14,8 +14,10 @@ class rpc_alert_stream {
  public:
   typedef dialog_serviceClient rpc_client;
 
-  rpc_alert_stream(shared_ptr<rpc_client> client, rpc_iterator_handle&& handle)
-      : handle_(std::move(handle)),
+  rpc_alert_stream(int64_t table_id, shared_ptr<rpc_client> client,
+                   rpc_iterator_handle&& handle)
+      : table_id_(table_id),
+        handle_(std::move(handle)),
         stream_(handle_.data) {
     if (has_more()) {
       std::getline(stream_, alert_);
@@ -29,7 +31,7 @@ class rpc_alert_stream {
   rpc_alert_stream& operator++() {
     if (has_more()) {
       if (!std::getline(stream_, alert_) && handle_.has_more) {
-        client_->get_more(handle_, handle_.desc);
+        client_->get_more(handle_, table_id_, handle_.desc);
         stream_.str(handle_.data);
       }
     }
@@ -41,6 +43,7 @@ class rpc_alert_stream {
   }
 
  private:
+  int64_t table_id_;
   rpc_iterator_handle handle_;
   std::stringstream stream_;
   std::string alert_;

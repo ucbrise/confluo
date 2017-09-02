@@ -15,7 +15,7 @@ class test_dialog_client(unittest.TestCase):
     SERVER_EXECUTABLE = "dialogd"
 
     def start_server(self):
-        self.server = subprocess.Popen([self.SERVER_EXECUTABLE])
+        self.server = subprocess.Popen([self.SERVER_EXECUTABLE, '--data-path', '/tmp'])
         time.sleep(1)
 
     def stop_server(self):

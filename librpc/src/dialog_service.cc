@@ -58,19 +58,35 @@ dialog_service_create_table_presult::~dialog_service_create_table_presult() thro
 }
 
 
-dialog_service_set_current_table_args::~dialog_service_set_current_table_args() throw() {
+dialog_service_get_table_info_args::~dialog_service_get_table_info_args() throw() {
 }
 
 
-dialog_service_set_current_table_pargs::~dialog_service_set_current_table_pargs() throw() {
+dialog_service_get_table_info_pargs::~dialog_service_get_table_info_pargs() throw() {
 }
 
 
-dialog_service_set_current_table_result::~dialog_service_set_current_table_result() throw() {
+dialog_service_get_table_info_result::~dialog_service_get_table_info_result() throw() {
 }
 
 
-dialog_service_set_current_table_presult::~dialog_service_set_current_table_presult() throw() {
+dialog_service_get_table_info_presult::~dialog_service_get_table_info_presult() throw() {
+}
+
+
+dialog_service_remove_table_args::~dialog_service_remove_table_args() throw() {
+}
+
+
+dialog_service_remove_table_pargs::~dialog_service_remove_table_pargs() throw() {
+}
+
+
+dialog_service_remove_table_result::~dialog_service_remove_table_result() throw() {
+}
+
+
+dialog_service_remove_table_presult::~dialog_service_remove_table_presult() throw() {
 }
 
 

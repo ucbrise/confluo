@@ -49,12 +49,16 @@ class dialog_store {
     return table_id;
   }
 
-  dialog_table* get_table(const std::string& table_name) {
+  int64_t get_table_id(const std::string& table_name) const {
     size_t table_id;
     if (table_map_.get(table_name, table_id) == -1) {
       throw management_exception("No such table " + table_name);
     }
-    return tables_[table_id];
+    return static_cast<int64_t>(table_id);
+  }
+
+  dialog_table* get_table(const std::string& table_name) {
+    return tables_[get_table_id(table_name)];
   }
 
   dialog_table* get_table(int64_t table_id) {

@@ -12,9 +12,10 @@ class rpc_record_stream {
  public:
   typedef dialog_serviceClient rpc_client;
 
-  rpc_record_stream(const schema_t& schema, shared_ptr<rpc_client> client,
-                    rpc_iterator_handle&& handle)
-      : schema_(schema),
+  rpc_record_stream(int64_t table_id, const schema_t& schema,
+                    shared_ptr<rpc_client> client, rpc_iterator_handle&& handle)
+      : table_id_(table_id),
+        schema_(schema),
         handle_(std::move(handle)),
         cur_off_(0),
         client_(std::move(client)) {
@@ -28,7 +29,7 @@ class rpc_record_stream {
     if (has_more()) {
       cur_off_ += schema_.record_size();
       if (cur_off_ == handle_.data.size() && handle_.has_more) {
-        client_->get_more(handle_, handle_.desc);
+        client_->get_more(handle_, table_id_, handle_.desc);
         cur_off_ = 0;
       }
     }
@@ -40,6 +41,7 @@ class rpc_record_stream {
   }
 
  private:
+  int64_t table_id_;
   schema_t schema_;
   rpc_iterator_handle handle_;
   size_t cur_off_;

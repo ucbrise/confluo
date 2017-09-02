@@ -5,7 +5,7 @@
 #include "dialog_table.h"
 #include "gtest/gtest.h"
 
-#include "../rpc/rpc_dialog_writer.h"
+#include "rpc_dialog_client.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -13,7 +13,7 @@
 using namespace ::dialog::rpc;
 using namespace ::dialog;
 
-class WriterTest : public testing::Test {
+class ClientWriteOpsTest : public testing::Test {
  public:
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
@@ -98,12 +98,12 @@ class WriterTest : public testing::Test {
   }
 };
 
-WriterTest::rec WriterTest::r;
-std::vector<column_t> WriterTest::s = schema();
+ClientWriteOpsTest::rec ClientWriteOpsTest::r;
+std::vector<column_t> ClientWriteOpsTest::s = schema();
 
-// TODO: test rpc_dialog_writer remove functions
+// TODO: test rpc_dialog_client remove functions
 
-TEST_F(WriterTest, CreateTableTest) {
+TEST_F(ClientWriteOpsTest, CreateTableTest) {
 
   std::string table_name = "my_table";
 
@@ -115,7 +115,7 @@ TEST_F(WriterTest, CreateTableTest) {
 
   sleep(1);
 
-  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
 
   client.create_table(
       table_name,
@@ -131,7 +131,7 @@ TEST_F(WriterTest, CreateTableTest) {
   }
 }
 
-TEST_F(WriterTest, WriteTest) {
+TEST_F(ClientWriteOpsTest, WriteTest) {
 
   std::string table_name = "my_table";
 
@@ -144,7 +144,7 @@ TEST_F(WriterTest, WriteTest) {
 
   sleep(1);
 
-  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   int64_t ts = utils::time_utils::cur_ns();
@@ -162,7 +162,7 @@ TEST_F(WriterTest, WriteTest) {
   }
 }
 
-TEST_F(WriterTest, BufferTest) {
+TEST_F(ClientWriteOpsTest, BufferTest) {
 
   std::string table_name = "my_table";
 
@@ -176,7 +176,7 @@ TEST_F(WriterTest, BufferTest) {
 
   sleep(1);
 
-  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   int64_t ts = utils::time_utils::cur_ns();
@@ -205,7 +205,7 @@ TEST_F(WriterTest, BufferTest) {
   }
 }
 
-TEST_F(WriterTest, AddIndexTest) {
+TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   std::string table_name = "my_table";
 
@@ -219,7 +219,7 @@ TEST_F(WriterTest, AddIndexTest) {
 
   sleep(1);
 
-  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.add_index("a", 1);
@@ -336,7 +336,7 @@ TEST_F(WriterTest, AddIndexTest) {
   }
 }
 
-TEST_F(WriterTest, AddFilterAndTriggerTest) {
+TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   std::string table_name = "my_table";
 
@@ -350,7 +350,7 @@ TEST_F(WriterTest, AddFilterAndTriggerTest) {
 
   sleep(1);
 
-  rpc_dialog_writer client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.add_filter("filter1", "a == true");

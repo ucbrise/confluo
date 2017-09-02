@@ -6,8 +6,7 @@
 #include "dialog_table.h"
 #include "gtest/gtest.h"
 
-#include "rpc_dialog_reader.h"
-#include "rpc_dialog_writer.h"
+#include "rpc_dialog_client.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -15,7 +14,7 @@
 using namespace ::dialog::rpc;
 using namespace ::dialog;
 
-class ReaderTest : public testing::Test {
+class ClientReadOpsTest : public testing::Test {
  public:
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
@@ -26,7 +25,7 @@ class ReaderTest : public testing::Test {
       buf[i] = val_uint8;
   }
 
-  void test_read(dialog_table* dtable, rpc_dialog_reader& client) {
+  void test_read(dialog_table* dtable, rpc_dialog_client& client) {
     std::vector<int64_t> offsets;
     for (int64_t i = 0; i < MAX_RECORDS; i++) {
       generate_bytes(data_, DATA_SIZE, i);
@@ -134,10 +133,10 @@ class ReaderTest : public testing::Test {
   }
 };
 
-ReaderTest::rec ReaderTest::r;
-std::vector<column_t> ReaderTest::s = schema();
+ClientReadOpsTest::rec ClientReadOpsTest::r;
+std::vector<column_t> ClientReadOpsTest::s = schema();
 
-TEST_F(ReaderTest, ReadInMemoryTest) {
+TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
   std::string table_name = "my_table";
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -147,7 +146,9 @@ TEST_F(ReaderTest, ReadInMemoryTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
+
   test_read(store->get_table(table_name), client);
 
   client.disconnect();
@@ -158,7 +159,7 @@ TEST_F(ReaderTest, ReadInMemoryTest) {
 
 }
 
-TEST_F(ReaderTest, ReadDurableTest) {
+TEST_F(ClientReadOpsTest, ReadDurableTest) {
   std::string table_name = "my_table";
   auto store = simple_table_store(table_name, storage::D_DURABLE);
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -168,7 +169,9 @@ TEST_F(ReaderTest, ReadDurableTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
+
   test_read(store->get_table(table_name), client);
 
   client.disconnect();
@@ -179,7 +182,7 @@ TEST_F(ReaderTest, ReadDurableTest) {
 
 }
 
-TEST_F(ReaderTest, ReadDurableRelaxedTest) {
+TEST_F(ClientReadOpsTest, ReadDurableRelaxedTest) {
   std::string table_name = "my_table";
   auto store = simple_table_store(table_name, storage::D_DURABLE_RELAXED);
   auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -189,7 +192,9 @@ TEST_F(ReaderTest, ReadDurableRelaxedTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
+
   test_read(store->get_table(table_name), client);
 
   client.disconnect();
@@ -200,7 +205,7 @@ TEST_F(ReaderTest, ReadDurableRelaxedTest) {
 
 }
 
-TEST_F(ReaderTest, AdHocFilterTest) {
+TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   std::string table_name = "my_table";
   auto store = new dialog_store("/tmp");
   store->add_table(table_name, schema(), storage::D_IN_MEMORY);
@@ -231,7 +236,8 @@ TEST_F(ReaderTest, AdHocFilterTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
 
   size_t i = 0;
   for (auto r = client.adhoc_filter("a == true"); r.has_more(); ++r) {
@@ -328,7 +334,7 @@ TEST_F(ReaderTest, AdHocFilterTest) {
   }
 }
 
-TEST_F(ReaderTest, PreDefFilterTest) {
+TEST_F(ClientReadOpsTest, PreDefFilterTest) {
   std::string table_name = "my_table";
   auto store = new dialog_store("/tmp");
   store->add_table(table_name, schema(), storage::D_IN_MEMORY);
@@ -369,8 +375,8 @@ TEST_F(ReaderTest, PreDefFilterTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client = rpc_dialog_reader(SERVER_ADDRESS, SERVER_PORT,
-                                               table_name);
+  rpc_dialog_client client = rpc_dialog_client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
@@ -474,7 +480,7 @@ TEST_F(ReaderTest, PreDefFilterTest) {
   }
 
 }
-TEST_F(ReaderTest, BatchAdHocFilterTest) {
+TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
 
   std::string table_name = "my_table";
   auto store = new dialog_store("/tmp");
@@ -500,7 +506,8 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
 
   size_t i = 0;
   for (auto r = client.adhoc_filter("a == true"); r.has_more(); ++r) {
@@ -597,7 +604,7 @@ TEST_F(ReaderTest, BatchAdHocFilterTest) {
   }
 }
 
-TEST_F(ReaderTest, BatchPreDefFilterTest) {
+TEST_F(ClientReadOpsTest, BatchPreDefFilterTest) {
 
   std::string table_name = "my_table";
   auto store = new dialog_store("/tmp");
@@ -634,7 +641,8 @@ TEST_F(ReaderTest, BatchPreDefFilterTest) {
 
   sleep(1);
 
-  rpc_dialog_reader client(SERVER_ADDRESS, SERVER_PORT, table_name);
+  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_table(table_name);
 
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
