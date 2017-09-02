@@ -58,7 +58,7 @@ class dialog_store {
   }
 
   dialog_table* get_table(int64_t table_id) {
-    if (table_id >= tables_.size()) {
+    if (table_id >= static_cast<int64_t>(tables_.size())) {
       throw management_exception(
           "No such table with id " + std::to_string(table_id));
     }
