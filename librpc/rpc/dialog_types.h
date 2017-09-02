@@ -69,6 +69,8 @@ class rpc_record_block;
 
 class rpc_record_batch;
 
+class rpc_table_info;
+
 class rpc_management_exception;
 
 class rpc_invalid_operation;
@@ -343,6 +345,62 @@ class rpc_record_batch {
 void swap(rpc_record_batch &a, rpc_record_batch &b);
 
 inline std::ostream& operator<<(std::ostream& out, const rpc_record_batch& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+typedef struct _rpc_table_info__isset {
+  _rpc_table_info__isset() : table_id(false), schema(false) {}
+  bool table_id :1;
+  bool schema :1;
+} _rpc_table_info__isset;
+
+class rpc_table_info {
+ public:
+
+  rpc_table_info(const rpc_table_info&);
+  rpc_table_info(rpc_table_info&&);
+  rpc_table_info& operator=(const rpc_table_info&);
+  rpc_table_info& operator=(rpc_table_info&&);
+  rpc_table_info() : table_id(0) {
+  }
+
+  virtual ~rpc_table_info() throw();
+  int64_t table_id;
+  rpc_schema schema;
+
+  _rpc_table_info__isset __isset;
+
+  void __set_table_id(const int64_t val);
+
+  void __set_schema(const rpc_schema& val);
+
+  bool operator == (const rpc_table_info & rhs) const
+  {
+    if (!(table_id == rhs.table_id))
+      return false;
+    if (!(schema == rhs.schema))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_table_info &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_table_info & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(rpc_table_info &a, rpc_table_info &b);
+
+inline std::ostream& operator<<(std::ostream& out, const rpc_table_info& obj)
 {
   obj.printTo(out);
   return out;

@@ -1,10 +1,11 @@
+
 #define GTEST_HAS_TR1_TUPLE 0
 
 #include "gtest/gtest.h"
 
-#include "server_client_test.h"
-#include "reader_test.h"
-#include "writer_test.h"
+#include "client_connection_test.h"
+#include "client_readops_test.h"
+#include "client_writeops_test.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

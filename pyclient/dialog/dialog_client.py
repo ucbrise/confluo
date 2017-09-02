@@ -9,17 +9,14 @@ from thrift.transport import TTransport, TSocket
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
 class dialog_client:
-    def __init__(self, host='localhost', port=9090, table_name=None):
-        logging.basicConfig(level=logging.INFO)  # Read from configuration file
+    def __init__(self, host='localhost', port=9090):
+        logging.basicConfig(level=logging.INFO)  # TODO: Read from configuration file
         self.LOG = logging.getLogger(__name__)
         self.connect(host, port)
         self.builder_ = rpc_record_batch_builder()
         self.read_buf = ""
         self.read_buf_offset = -1
-        if table_name is None:
-            self.table_set_ = False
-        else:
-            self.set_current_table(table_name)
+        self.cur_table_id_ = -1
 
     def close(self):
         self.disconnect()
@@ -41,89 +38,54 @@ class dialog_client:
             self.client_.deregister_handler()
             self.transport_.close()
 
-    def set_current_table(self, table_name):
-        rpc_schema = self.client_.set_current_table(table_name) 
-        self.cur_schema_ = rpc_type_conversions.convert_to_schema(rpc_schema)
-        self.table_set_ = True
-
-    def read(self, offset):
-        if not self.table_set_:
-            raise ValueError("Must set table first.")
-        rbuf_lim = self.read_buf_offset + len(self.read_buf)
-        if self.read_buf_offset == -1 or offset < self.read_buf_offset or offset >= rbuf_lim:
-            self.read_buf_offset = offset
-            self.read_buf = self.client_.read(offset, rpc_configuration_params.READ_BATCH_SIZE)
-        start = offset - self.read_buf_offset
-        stop = start + self.cur_schema_.record_size_ 
-        return self.read_buf[start : stop]
-
-    def adhoc_filter(self, filter_expr):
-        if not self.table_set_:
-            raise ValueError("Must set table first.")
-        handle = self.client_.adhoc_filter(filter_expr)
-        return record_stream(self.cur_schema_, self.client_, handle)
-
-    def predef_filter(self, filter_name, begin_ms, end_ms):
-        if not self.table_set_:
-            raise ValueError("Must set table first.")
-        handle = self.client_.predef_filter(filter_name, begin_ms, end_ms)
-        return record_stream(self.cur_schema_, self.client_, handle)
-
-    def combined_filter(self, filter_name, filter_expr, begin_ms, end_ms):
-        if not self.table_set_:
-            raise ValueError("Must set table first.")
-        handle = self.client_.combined_filter(filter_name, filter_expr, begin_ms, end_ms)
-        return record_stream(self.cur_schema_, self.client_, handle)
-
-    def get_alerts(self, begin_ms, end_ms):
-        if not self.table_set_:
-            raise ValueError("Must set table first.")
-        handle = self.client.alerts_by_time(handle, begin_ms, end_ms)
-        return alert_stream(self.cur_schema_, self.client_, handle)
-
-    def num_records(self):
-        if not self.table_set_:
-            raise ValueError("Must set table first.")
-        return self.client_.num_records()
-
     def create_table(self, table_name, schema, storage_mode):
         self.cur_schema_ = schema
         rpc_schema = rpc_type_conversions.convert_to_rpc_schema(schema)
-        self.client_.create_table(table_name, rpc_schema, storage_mode)
-        self.table_set_ = True
+        self.cur_table_id_ = self.client_.create_table(table_name, rpc_schema, storage_mode)
+        
+    def set_current_table(self, table_name):
+        info = self.client_.get_table_info(table_name) 
+        self.cur_schema_ = rpc_type_conversions.convert_to_schema(info.schema)
+        self.cur_table_id_ = info.table_id
+        
+    def remove_table(self):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        self.client_.remove_table(self.cur_table_id_)
+        self.cur_table_id_ = -1
     
     def add_index(self, field_name, bucket_size=1):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
-        self.client_.add_index(field_name, bucket_size)
+        self.client_.add_index(self.cur_table_id_, field_name, bucket_size)
 
     def remove_index(self, field_name):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
-        self.client_.remove_index(field_name)
+        self.client_.remove_index(self.cur_table_id_, field_name)
 
     def add_filter(self, filter_name, filter_expr):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
-        self.client_.add_filter(filter_name, filter_expr)
+        self.client_.add_filter(self.cur_table_id_, filter_name, filter_expr)
 
     def remove_filter(self, filter_name):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
-        self.client_.remove_filter(filter_name)
+        self.client_.remove_filter(self.cur_table_id_, filter_name)
 
     def add_trigger(self, trigger_name, filter_name, trigger_expr):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
-        self.client_.add_trigger(trigger_name, filter_name, trigger_expr)
+        self.client_.add_trigger(self.cur_table_id_, trigger_name, filter_name, trigger_expr)
 
     def remove_trigger(self, trigger_name):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
-        self.client_.remove_trigger(trigger_name)
+        self.client_.remove_trigger(self.cur_table_id_, trigger_name)
 
     def buffer(self, record):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
         schema_rec_size = self.cur_schema_.record_size_
         if len(record) != schema_rec_size:
@@ -131,15 +93,55 @@ class dialog_client:
         self.builder_.add_record(record)
         
     def write(self, record):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
         schema_rec_size = self.cur_schema_.record_size_
         if len(record) != schema_rec_size:
             raise ValueError("Record must be of length " + str(schema_rec_size))
-        self.client_.append(record)
+        self.client_.append(self.cur_table_id_, record)
 
     def flush(self):
-        if not self.table_set_:
+        if self.cur_table_id_ == -1:
             raise ValueError("Must set table first.")
         if self.builder_.num_records_ > 0:
-            self.client_.append_batch(self.builder_.get_batch())
+            self.client_.append_batch(self.cur_table_id_, self.builder_.get_batch())
+            
+    def read(self, offset):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        rbuf_lim = self.read_buf_offset + len(self.read_buf)
+        if self.read_buf_offset == -1 or offset < self.read_buf_offset or offset >= rbuf_lim:
+            self.read_buf_offset = offset
+            self.read_buf = self.client_.read(self.cur_table_id_, offset, rpc_configuration_params.READ_BATCH_SIZE)
+        start = offset - self.read_buf_offset
+        stop = start + self.cur_schema_.record_size_ 
+        return self.read_buf[start : stop]
+
+    def adhoc_filter(self, filter_expr):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        handle = self.client_.adhoc_filter(self.cur_table_id_, filter_expr)
+        return record_stream(self.cur_table_id_, self.cur_schema_, self.client_, handle)
+
+    def predef_filter(self, filter_name, begin_ms, end_ms):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        handle = self.client_.predef_filter(self.cur_table_id_, filter_name, begin_ms, end_ms)
+        return record_stream(self.cur_table_id_, self.cur_schema_, self.client_, handle)
+
+    def combined_filter(self, filter_name, filter_expr, begin_ms, end_ms):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        handle = self.client_.combined_filter(self.cur_table_id_, filter_name, filter_expr, begin_ms, end_ms)
+        return record_stream(self.cur_table_id_, self.cur_schema_, self.client_, handle)
+
+    def get_alerts(self, begin_ms, end_ms):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        handle = self.client.alerts_by_time(self.cur_table_id_, handle, begin_ms, end_ms)
+        return alert_stream(self.cur_table_id_, self.cur_schema_, self.client_, handle)
+
+    def num_records(self):
+        if self.cur_table_id_ == -1:
+            raise ValueError("Must set table first.")
+        return self.client_.num_records(self.cur_table_id_)

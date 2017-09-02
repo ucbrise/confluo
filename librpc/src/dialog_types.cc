@@ -353,6 +353,56 @@ void rpc_record_batch::printTo(std::ostream& out) const {
 }
 
 
+rpc_table_info::~rpc_table_info() throw() {
+}
+
+
+void rpc_table_info::__set_table_id(const int64_t val) {
+  this->table_id = val;
+}
+
+void rpc_table_info::__set_schema(const rpc_schema& val) {
+  this->schema = val;
+}
+
+void swap(rpc_table_info &a, rpc_table_info &b) {
+  using ::std::swap;
+  swap(a.table_id, b.table_id);
+  swap(a.schema, b.schema);
+  swap(a.__isset, b.__isset);
+}
+
+rpc_table_info::rpc_table_info(const rpc_table_info& other34) {
+  table_id = other34.table_id;
+  schema = other34.schema;
+  __isset = other34.__isset;
+}
+rpc_table_info::rpc_table_info( rpc_table_info&& other35) {
+  table_id = std::move(other35.table_id);
+  schema = std::move(other35.schema);
+  __isset = std::move(other35.__isset);
+}
+rpc_table_info& rpc_table_info::operator=(const rpc_table_info& other36) {
+  table_id = other36.table_id;
+  schema = other36.schema;
+  __isset = other36.__isset;
+  return *this;
+}
+rpc_table_info& rpc_table_info::operator=(rpc_table_info&& other37) {
+  table_id = std::move(other37.table_id);
+  schema = std::move(other37.schema);
+  __isset = std::move(other37.__isset);
+  return *this;
+}
+void rpc_table_info::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "rpc_table_info(";
+  out << "table_id=" << to_string(table_id);
+  out << ", " << "schema=" << to_string(schema);
+  out << ")";
+}
+
+
 rpc_management_exception::~rpc_management_exception() throw() {
 }
 
@@ -367,22 +417,22 @@ void swap(rpc_management_exception &a, rpc_management_exception &b) {
   swap(a.__isset, b.__isset);
 }
 
-rpc_management_exception::rpc_management_exception(const rpc_management_exception& other28) : TException() {
-  msg = other28.msg;
-  __isset = other28.__isset;
+rpc_management_exception::rpc_management_exception(const rpc_management_exception& other38) : TException() {
+  msg = other38.msg;
+  __isset = other38.__isset;
 }
-rpc_management_exception::rpc_management_exception( rpc_management_exception&& other29) : TException() {
-  msg = std::move(other29.msg);
-  __isset = std::move(other29.__isset);
+rpc_management_exception::rpc_management_exception( rpc_management_exception&& other39) : TException() {
+  msg = std::move(other39.msg);
+  __isset = std::move(other39.__isset);
 }
-rpc_management_exception& rpc_management_exception::operator=(const rpc_management_exception& other30) {
-  msg = other30.msg;
-  __isset = other30.__isset;
+rpc_management_exception& rpc_management_exception::operator=(const rpc_management_exception& other40) {
+  msg = other40.msg;
+  __isset = other40.__isset;
   return *this;
 }
-rpc_management_exception& rpc_management_exception::operator=(rpc_management_exception&& other31) {
-  msg = std::move(other31.msg);
-  __isset = std::move(other31.__isset);
+rpc_management_exception& rpc_management_exception::operator=(rpc_management_exception&& other41) {
+  msg = std::move(other41.msg);
+  __isset = std::move(other41.__isset);
   return *this;
 }
 void rpc_management_exception::printTo(std::ostream& out) const {
@@ -418,22 +468,22 @@ void swap(rpc_invalid_operation &a, rpc_invalid_operation &b) {
   swap(a.__isset, b.__isset);
 }
 
-rpc_invalid_operation::rpc_invalid_operation(const rpc_invalid_operation& other32) : TException() {
-  msg = other32.msg;
-  __isset = other32.__isset;
+rpc_invalid_operation::rpc_invalid_operation(const rpc_invalid_operation& other42) : TException() {
+  msg = other42.msg;
+  __isset = other42.__isset;
 }
-rpc_invalid_operation::rpc_invalid_operation( rpc_invalid_operation&& other33) : TException() {
-  msg = std::move(other33.msg);
-  __isset = std::move(other33.__isset);
+rpc_invalid_operation::rpc_invalid_operation( rpc_invalid_operation&& other43) : TException() {
+  msg = std::move(other43.msg);
+  __isset = std::move(other43.__isset);
 }
-rpc_invalid_operation& rpc_invalid_operation::operator=(const rpc_invalid_operation& other34) {
-  msg = other34.msg;
-  __isset = other34.__isset;
+rpc_invalid_operation& rpc_invalid_operation::operator=(const rpc_invalid_operation& other44) {
+  msg = other44.msg;
+  __isset = other44.__isset;
   return *this;
 }
-rpc_invalid_operation& rpc_invalid_operation::operator=(rpc_invalid_operation&& other35) {
-  msg = std::move(other35.msg);
-  __isset = std::move(other35.__isset);
+rpc_invalid_operation& rpc_invalid_operation::operator=(rpc_invalid_operation&& other45) {
+  msg = std::move(other45.msg);
+  __isset = std::move(other45.__isset);
   return *this;
 }
 void rpc_invalid_operation::printTo(std::ostream& out) const {

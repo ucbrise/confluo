@@ -358,14 +358,14 @@ uint32_t dialog_service_create_table_args::read(Protocol_* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->schema.clear();
-            uint32_t _size36;
-            ::apache::thrift::protocol::TType _etype39;
-            xfer += iprot->readListBegin(_etype39, _size36);
-            this->schema.resize(_size36);
-            uint32_t _i40;
-            for (_i40 = 0; _i40 < _size36; ++_i40)
+            uint32_t _size46;
+            ::apache::thrift::protocol::TType _etype49;
+            xfer += iprot->readListBegin(_etype49, _size46);
+            this->schema.resize(_size46);
+            uint32_t _i50;
+            for (_i50 = 0; _i50 < _size46; ++_i50)
             {
-              xfer += this->schema[_i40].read(iprot);
+              xfer += this->schema[_i50].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -376,9 +376,9 @@ uint32_t dialog_service_create_table_args::read(Protocol_* iprot) {
         break;
       case 3:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          int32_t ecast41;
-          xfer += iprot->readI32(ecast41);
-          this->mode = (rpc_storage_mode)ecast41;
+          int32_t ecast51;
+          xfer += iprot->readI32(ecast51);
+          this->mode = (rpc_storage_mode)ecast51;
           this->__isset.mode = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -409,10 +409,10 @@ uint32_t dialog_service_create_table_args::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldBegin("schema", ::apache::thrift::protocol::T_LIST, 2);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->schema.size()));
-    std::vector<rpc_column> ::const_iterator _iter42;
-    for (_iter42 = this->schema.begin(); _iter42 != this->schema.end(); ++_iter42)
+    std::vector<rpc_column> ::const_iterator _iter52;
+    for (_iter52 = this->schema.begin(); _iter52 != this->schema.end(); ++_iter52)
     {
-      xfer += (*_iter42).write(oprot);
+      xfer += (*_iter52).write(oprot);
     }
     xfer += oprot->writeListEnd();
   }
@@ -441,10 +441,10 @@ uint32_t dialog_service_create_table_pargs::write(Protocol_* oprot) const {
   xfer += oprot->writeFieldBegin("schema", ::apache::thrift::protocol::T_LIST, 2);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>((*(this->schema)).size()));
-    std::vector<rpc_column> ::const_iterator _iter43;
-    for (_iter43 = (*(this->schema)).begin(); _iter43 != (*(this->schema)).end(); ++_iter43)
+    std::vector<rpc_column> ::const_iterator _iter53;
+    for (_iter53 = (*(this->schema)).begin(); _iter53 != (*(this->schema)).end(); ++_iter53)
     {
-      xfer += (*_iter43).write(oprot);
+      xfer += (*_iter53).write(oprot);
     }
     xfer += oprot->writeListEnd();
   }
@@ -482,6 +482,14 @@ uint32_t dialog_service_create_table_result::read(Protocol_* iprot) {
     }
     switch (fid)
     {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -509,7 +517,11 @@ uint32_t dialog_service_create_table_result::write(Protocol_* oprot) const {
 
   xfer += oprot->writeStructBegin("dialog_service_create_table_result");
 
-  if (this->__isset.ex) {
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
+    xfer += oprot->writeI64(this->success);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
     xfer += this->ex.write(oprot);
     xfer += oprot->writeFieldEnd();
@@ -542,6 +554,14 @@ uint32_t dialog_service_create_table_presult::read(Protocol_* iprot) {
     }
     switch (fid)
     {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -564,7 +584,7 @@ uint32_t dialog_service_create_table_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t dialog_service_set_current_table_args::read(Protocol_* iprot) {
+uint32_t dialog_service_get_table_info_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -606,10 +626,10 @@ uint32_t dialog_service_set_current_table_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t dialog_service_set_current_table_args::write(Protocol_* oprot) const {
+uint32_t dialog_service_get_table_info_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("dialog_service_set_current_table_args");
+  xfer += oprot->writeStructBegin("dialog_service_get_table_info_args");
 
   xfer += oprot->writeFieldBegin("table_name", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString(this->table_name);
@@ -622,10 +642,10 @@ uint32_t dialog_service_set_current_table_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t dialog_service_set_current_table_pargs::write(Protocol_* oprot) const {
+uint32_t dialog_service_get_table_info_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("dialog_service_set_current_table_pargs");
+  xfer += oprot->writeStructBegin("dialog_service_get_table_info_pargs");
 
   xfer += oprot->writeFieldBegin("table_name", ::apache::thrift::protocol::T_STRING, 1);
   xfer += oprot->writeString((*(this->table_name)));
@@ -638,7 +658,7 @@ uint32_t dialog_service_set_current_table_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t dialog_service_set_current_table_result::read(Protocol_* iprot) {
+uint32_t dialog_service_get_table_info_result::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -660,25 +680,182 @@ uint32_t dialog_service_set_current_table_result::read(Protocol_* iprot) {
     switch (fid)
     {
       case 0:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            this->success.clear();
-            uint32_t _size44;
-            ::apache::thrift::protocol::TType _etype47;
-            xfer += iprot->readListBegin(_etype47, _size44);
-            this->success.resize(_size44);
-            uint32_t _i48;
-            for (_i48 = 0; _i48 < _size44; ++_i48)
-            {
-              xfer += this->success[_i48].read(iprot);
-            }
-            xfer += iprot->readListEnd();
-          }
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->success.read(iprot);
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t dialog_service_get_table_info_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("dialog_service_get_table_info_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
+    xfer += this->success.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_get_table_info_presult::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += (*(this->success)).read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_remove_table_args::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t dialog_service_remove_table_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("dialog_service_remove_table_args");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_remove_table_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("dialog_service_remove_table_pargs");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_remove_table_result::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -700,25 +877,13 @@ uint32_t dialog_service_set_current_table_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t dialog_service_set_current_table_result::write(Protocol_* oprot) const {
+uint32_t dialog_service_remove_table_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("dialog_service_set_current_table_result");
+  xfer += oprot->writeStructBegin("dialog_service_remove_table_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
-    {
-      xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->success.size()));
-      std::vector<rpc_column> ::const_iterator _iter49;
-      for (_iter49 = this->success.begin(); _iter49 != this->success.end(); ++_iter49)
-      {
-        xfer += (*_iter49).write(oprot);
-      }
-      xfer += oprot->writeListEnd();
-    }
-    xfer += oprot->writeFieldEnd();
-  } else if (this->__isset.ex) {
+  if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
     xfer += this->ex.write(oprot);
     xfer += oprot->writeFieldEnd();
@@ -730,7 +895,7 @@ uint32_t dialog_service_set_current_table_result::write(Protocol_* oprot) const 
 
 
 template <class Protocol_>
-uint32_t dialog_service_set_current_table_presult::read(Protocol_* iprot) {
+uint32_t dialog_service_remove_table_presult::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -751,26 +916,6 @@ uint32_t dialog_service_set_current_table_presult::read(Protocol_* iprot) {
     }
     switch (fid)
     {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_LIST) {
-          {
-            (*(this->success)).clear();
-            uint32_t _size50;
-            ::apache::thrift::protocol::TType _etype53;
-            xfer += iprot->readListBegin(_etype53, _size50);
-            (*(this->success)).resize(_size50);
-            uint32_t _i54;
-            for (_i54 = 0; _i54 < _size50; ++_i54)
-            {
-              xfer += (*(this->success))[_i54].read(iprot);
-            }
-            xfer += iprot->readListEnd();
-          }
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->ex.read(iprot);
@@ -815,6 +960,14 @@ uint32_t dialog_service_add_index_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->field_name);
           this->__isset.field_name = true;
@@ -822,7 +975,7 @@ uint32_t dialog_service_add_index_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_DOUBLE) {
           xfer += iprot->readDouble(this->bucket_size);
           this->__isset.bucket_size = true;
@@ -848,11 +1001,15 @@ uint32_t dialog_service_add_index_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_add_index_args");
 
-  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->field_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("bucket_size", ::apache::thrift::protocol::T_DOUBLE, 2);
+  xfer += oprot->writeFieldBegin("bucket_size", ::apache::thrift::protocol::T_DOUBLE, 3);
   xfer += oprot->writeDouble(this->bucket_size);
   xfer += oprot->writeFieldEnd();
 
@@ -868,11 +1025,15 @@ uint32_t dialog_service_add_index_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_add_index_pargs");
 
-  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->field_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("bucket_size", ::apache::thrift::protocol::T_DOUBLE, 2);
+  xfer += oprot->writeFieldBegin("bucket_size", ::apache::thrift::protocol::T_DOUBLE, 3);
   xfer += oprot->writeDouble((*(this->bucket_size)));
   xfer += oprot->writeFieldEnd();
 
@@ -1008,6 +1169,14 @@ uint32_t dialog_service_remove_index_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->field_name);
           this->__isset.field_name = true;
@@ -1033,7 +1202,11 @@ uint32_t dialog_service_remove_index_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_remove_index_args");
 
-  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->field_name);
   xfer += oprot->writeFieldEnd();
 
@@ -1049,7 +1222,11 @@ uint32_t dialog_service_remove_index_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_remove_index_pargs");
 
-  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->field_name)));
   xfer += oprot->writeFieldEnd();
 
@@ -1185,6 +1362,14 @@ uint32_t dialog_service_add_filter_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_name);
           this->__isset.filter_name = true;
@@ -1192,7 +1377,7 @@ uint32_t dialog_service_add_filter_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_expr);
           this->__isset.filter_expr = true;
@@ -1218,11 +1403,15 @@ uint32_t dialog_service_add_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_add_filter_args");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->filter_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString(this->filter_expr);
   xfer += oprot->writeFieldEnd();
 
@@ -1238,11 +1427,15 @@ uint32_t dialog_service_add_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_add_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->filter_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->filter_expr)));
   xfer += oprot->writeFieldEnd();
 
@@ -1378,6 +1571,14 @@ uint32_t dialog_service_remove_filter_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_name);
           this->__isset.filter_name = true;
@@ -1403,7 +1604,11 @@ uint32_t dialog_service_remove_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_remove_filter_args");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->filter_name);
   xfer += oprot->writeFieldEnd();
 
@@ -1419,7 +1624,11 @@ uint32_t dialog_service_remove_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_remove_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->filter_name)));
   xfer += oprot->writeFieldEnd();
 
@@ -1555,6 +1764,14 @@ uint32_t dialog_service_add_trigger_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->trigger_name);
           this->__isset.trigger_name = true;
@@ -1562,7 +1779,7 @@ uint32_t dialog_service_add_trigger_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_name);
           this->__isset.filter_name = true;
@@ -1570,7 +1787,7 @@ uint32_t dialog_service_add_trigger_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 3:
+      case 4:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->trigger_expr);
           this->__isset.trigger_expr = true;
@@ -1596,15 +1813,19 @@ uint32_t dialog_service_add_trigger_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_add_trigger_args");
 
-  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->trigger_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString(this->filter_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 4);
   xfer += oprot->writeString(this->trigger_expr);
   xfer += oprot->writeFieldEnd();
 
@@ -1620,15 +1841,19 @@ uint32_t dialog_service_add_trigger_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_add_trigger_pargs");
 
-  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->trigger_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->filter_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 4);
   xfer += oprot->writeString((*(this->trigger_expr)));
   xfer += oprot->writeFieldEnd();
 
@@ -1764,6 +1989,14 @@ uint32_t dialog_service_remove_trigger_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->trigger_name);
           this->__isset.trigger_name = true;
@@ -1789,7 +2022,11 @@ uint32_t dialog_service_remove_trigger_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_remove_trigger_args");
 
-  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->trigger_name);
   xfer += oprot->writeFieldEnd();
 
@@ -1805,7 +2042,11 @@ uint32_t dialog_service_remove_trigger_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_remove_trigger_pargs");
 
-  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->trigger_name)));
   xfer += oprot->writeFieldEnd();
 
@@ -1941,6 +2182,14 @@ uint32_t dialog_service_append_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readBinary(this->data);
           this->__isset.data = true;
@@ -1966,7 +2215,11 @@ uint32_t dialog_service_append_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_append_args");
 
-  xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary(this->data);
   xfer += oprot->writeFieldEnd();
 
@@ -1982,7 +2235,11 @@ uint32_t dialog_service_append_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_append_pargs");
 
-  xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeBinary((*(this->data)));
   xfer += oprot->writeFieldEnd();
 
@@ -2118,6 +2375,14 @@ uint32_t dialog_service_append_batch_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->batch.read(iprot);
           this->__isset.batch = true;
@@ -2143,7 +2408,11 @@ uint32_t dialog_service_append_batch_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_append_batch_args");
 
-  xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 2);
   xfer += this->batch.write(oprot);
   xfer += oprot->writeFieldEnd();
 
@@ -2159,7 +2428,11 @@ uint32_t dialog_service_append_batch_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_append_batch_pargs");
 
-  xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 2);
   xfer += (*(this->batch)).write(oprot);
   xfer += oprot->writeFieldEnd();
 
@@ -2296,13 +2569,21 @@ uint32_t dialog_service_read_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->offset);
           this->__isset.offset = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->nrecords);
           this->__isset.nrecords = true;
@@ -2328,11 +2609,15 @@ uint32_t dialog_service_read_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_read_args");
 
-  xfer += oprot->writeFieldBegin("offset", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("offset", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64(this->offset);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("nrecords", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("nrecords", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->nrecords);
   xfer += oprot->writeFieldEnd();
 
@@ -2348,11 +2633,15 @@ uint32_t dialog_service_read_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_read_pargs");
 
-  xfer += oprot->writeFieldBegin("offset", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("offset", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64((*(this->offset)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("nrecords", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("nrecords", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->nrecords)));
   xfer += oprot->writeFieldEnd();
 
@@ -2488,6 +2777,14 @@ uint32_t dialog_service_adhoc_filter_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_expr);
           this->__isset.filter_expr = true;
@@ -2513,7 +2810,11 @@ uint32_t dialog_service_adhoc_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_adhoc_filter_args");
 
-  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->filter_expr);
   xfer += oprot->writeFieldEnd();
 
@@ -2529,7 +2830,11 @@ uint32_t dialog_service_adhoc_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_adhoc_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->filter_expr)));
   xfer += oprot->writeFieldEnd();
 
@@ -2685,6 +2990,14 @@ uint32_t dialog_service_predef_filter_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_name);
           this->__isset.filter_name = true;
@@ -2692,7 +3005,7 @@ uint32_t dialog_service_predef_filter_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->begin_ms);
           this->__isset.begin_ms = true;
@@ -2700,7 +3013,7 @@ uint32_t dialog_service_predef_filter_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 3:
+      case 4:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->end_ms);
           this->__isset.end_ms = true;
@@ -2726,15 +3039,19 @@ uint32_t dialog_service_predef_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_predef_filter_args");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->filter_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->begin_ms);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64(this->end_ms);
   xfer += oprot->writeFieldEnd();
 
@@ -2750,15 +3067,19 @@ uint32_t dialog_service_predef_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_predef_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->filter_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->begin_ms)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64((*(this->end_ms)));
   xfer += oprot->writeFieldEnd();
 
@@ -2914,6 +3235,14 @@ uint32_t dialog_service_combined_filter_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_name);
           this->__isset.filter_name = true;
@@ -2921,7 +3250,7 @@ uint32_t dialog_service_combined_filter_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->filter_expr);
           this->__isset.filter_expr = true;
@@ -2929,7 +3258,7 @@ uint32_t dialog_service_combined_filter_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 3:
+      case 4:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->begin_ms);
           this->__isset.begin_ms = true;
@@ -2937,7 +3266,7 @@ uint32_t dialog_service_combined_filter_args::read(Protocol_* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 4:
+      case 5:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->end_ms);
           this->__isset.end_ms = true;
@@ -2963,19 +3292,23 @@ uint32_t dialog_service_combined_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_combined_filter_args");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->filter_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString(this->filter_expr);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64(this->begin_ms);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 5);
   xfer += oprot->writeI64(this->end_ms);
   xfer += oprot->writeFieldEnd();
 
@@ -2991,19 +3324,23 @@ uint32_t dialog_service_combined_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_combined_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->filter_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->filter_expr)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 4);
   xfer += oprot->writeI64((*(this->begin_ms)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 5);
   xfer += oprot->writeI64((*(this->end_ms)));
   xfer += oprot->writeFieldEnd();
 
@@ -3160,13 +3497,21 @@ uint32_t dialog_service_alerts_by_time_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->begin_ms);
           this->__isset.begin_ms = true;
         } else {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I64) {
           xfer += iprot->readI64(this->end_ms);
           this->__isset.end_ms = true;
@@ -3192,11 +3537,15 @@ uint32_t dialog_service_alerts_by_time_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_alerts_by_time_args");
 
-  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64(this->begin_ms);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64(this->end_ms);
   xfer += oprot->writeFieldEnd();
 
@@ -3212,11 +3561,15 @@ uint32_t dialog_service_alerts_by_time_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_alerts_by_time_pargs");
 
-  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 2);
   xfer += oprot->writeI64((*(this->begin_ms)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 3);
   xfer += oprot->writeI64((*(this->end_ms)));
   xfer += oprot->writeFieldEnd();
 
@@ -3372,6 +3725,14 @@ uint32_t dialog_service_get_more_args::read(Protocol_* iprot) {
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRUCT) {
           xfer += this->desc.read(iprot);
           this->__isset.desc = true;
@@ -3397,7 +3758,11 @@ uint32_t dialog_service_get_more_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_get_more_args");
 
-  xfer += oprot->writeFieldBegin("desc", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("desc", ::apache::thrift::protocol::T_STRUCT, 2);
   xfer += this->desc.write(oprot);
   xfer += oprot->writeFieldEnd();
 
@@ -3413,7 +3778,11 @@ uint32_t dialog_service_get_more_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_get_more_pargs");
 
-  xfer += oprot->writeFieldBegin("desc", ::apache::thrift::protocol::T_STRUCT, 1);
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("desc", ::apache::thrift::protocol::T_STRUCT, 2);
   xfer += (*(this->desc)).write(oprot);
   xfer += oprot->writeFieldEnd();
 
@@ -3566,7 +3935,20 @@ uint32_t dialog_service_num_records_args::read(Protocol_* iprot) {
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    xfer += iprot->skip(ftype);
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -3581,6 +3963,10 @@ uint32_t dialog_service_num_records_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_num_records_args");
 
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -3592,6 +3978,10 @@ uint32_t dialog_service_num_records_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("dialog_service_num_records_pargs");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
@@ -3818,10 +4208,10 @@ void dialog_serviceClientT<Protocol_>::recv_deregister_handler()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
+int64_t dialog_serviceClientT<Protocol_>::create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
 {
   send_create_table(table_name, schema, mode);
-  recv_create_table();
+  return recv_create_table();
 }
 
 template <class Protocol_>
@@ -3842,7 +4232,7 @@ void dialog_serviceClientT<Protocol_>::send_create_table(const std::string& tabl
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::recv_create_table()
+int64_t dialog_serviceClientT<Protocol_>::recv_create_table()
 {
 
   int32_t rseqid = 0;
@@ -3867,31 +4257,36 @@ void dialog_serviceClientT<Protocol_>::recv_create_table()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
+  int64_t _return;
   dialog_service_create_table_presult result;
+  result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
 
+  if (result.__isset.success) {
+    return _return;
+  }
   if (result.__isset.ex) {
     throw result.ex;
   }
-  return;
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "create_table failed: unknown result");
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::set_current_table(rpc_schema& _return, const std::string& table_name)
+void dialog_serviceClientT<Protocol_>::get_table_info(rpc_table_info& _return, const std::string& table_name)
 {
-  send_set_current_table(table_name);
-  recv_set_current_table(_return);
+  send_get_table_info(table_name);
+  recv_get_table_info(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_set_current_table(const std::string& table_name)
+void dialog_serviceClientT<Protocol_>::send_get_table_info(const std::string& table_name)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("set_current_table", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  dialog_service_set_current_table_pargs args;
+  dialog_service_get_table_info_pargs args;
   args.table_name = &table_name;
   args.write(this->oprot_);
 
@@ -3901,7 +4296,7 @@ void dialog_serviceClientT<Protocol_>::send_set_current_table(const std::string&
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::recv_set_current_table(rpc_schema& _return)
+void dialog_serviceClientT<Protocol_>::recv_get_table_info(rpc_table_info& _return)
 {
 
   int32_t rseqid = 0;
@@ -3921,12 +4316,12 @@ void dialog_serviceClientT<Protocol_>::recv_set_current_table(rpc_schema& _retur
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("set_current_table") != 0) {
+  if (fname.compare("get_table_info") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  dialog_service_set_current_table_presult result;
+  dialog_service_get_table_info_presult result;
   result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
@@ -3936,26 +4331,83 @@ void dialog_serviceClientT<Protocol_>::recv_set_current_table(rpc_schema& _retur
     // _return pointer has now been filled
     return;
   }
-  if (result.__isset.ex) {
-    throw result.ex;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "set_current_table failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_table_info failed: unknown result");
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::add_index(const std::string& field_name, const double bucket_size)
+void dialog_serviceClientT<Protocol_>::remove_table(const int64_t table_id)
 {
-  send_add_index(field_name, bucket_size);
+  send_remove_table(table_id);
+  recv_remove_table();
+}
+
+template <class Protocol_>
+void dialog_serviceClientT<Protocol_>::send_remove_table(const int64_t table_id)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  dialog_service_remove_table_pargs args;
+  args.table_id = &table_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void dialog_serviceClientT<Protocol_>::recv_remove_table()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("remove_table") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  dialog_service_remove_table_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void dialog_serviceClientT<Protocol_>::add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
+{
+  send_add_index(table_id, field_name, bucket_size);
   recv_add_index();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_add_index(const std::string& field_name, const double bucket_size)
+void dialog_serviceClientT<Protocol_>::send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_add_index_pargs args;
+  args.table_id = &table_id;
   args.field_name = &field_name;
   args.bucket_size = &bucket_size;
   args.write(this->oprot_);
@@ -4003,19 +4455,20 @@ void dialog_serviceClientT<Protocol_>::recv_add_index()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::remove_index(const std::string& field_name)
+void dialog_serviceClientT<Protocol_>::remove_index(const int64_t table_id, const std::string& field_name)
 {
-  send_remove_index(field_name);
+  send_remove_index(table_id, field_name);
   recv_remove_index();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_remove_index(const std::string& field_name)
+void dialog_serviceClientT<Protocol_>::send_remove_index(const int64_t table_id, const std::string& field_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_remove_index_pargs args;
+  args.table_id = &table_id;
   args.field_name = &field_name;
   args.write(this->oprot_);
 
@@ -4062,19 +4515,20 @@ void dialog_serviceClientT<Protocol_>::recv_remove_index()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::add_filter(const std::string& filter_name, const std::string& filter_expr)
+void dialog_serviceClientT<Protocol_>::add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
 {
-  send_add_filter(filter_name, filter_expr);
+  send_add_filter(table_id, filter_name, filter_expr);
   recv_add_filter();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_add_filter(const std::string& filter_name, const std::string& filter_expr)
+void dialog_serviceClientT<Protocol_>::send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_add_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
@@ -4122,19 +4576,20 @@ void dialog_serviceClientT<Protocol_>::recv_add_filter()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::remove_filter(const std::string& filter_name)
+void dialog_serviceClientT<Protocol_>::remove_filter(const int64_t table_id, const std::string& filter_name)
 {
-  send_remove_filter(filter_name);
+  send_remove_filter(table_id, filter_name);
   recv_remove_filter();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_remove_filter(const std::string& filter_name)
+void dialog_serviceClientT<Protocol_>::send_remove_filter(const int64_t table_id, const std::string& filter_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_remove_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.write(this->oprot_);
 
@@ -4181,19 +4636,20 @@ void dialog_serviceClientT<Protocol_>::recv_remove_filter()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+void dialog_serviceClientT<Protocol_>::add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
 {
-  send_add_trigger(trigger_name, filter_name, trigger_expr);
+  send_add_trigger(table_id, trigger_name, filter_name, trigger_expr);
   recv_add_trigger();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+void dialog_serviceClientT<Protocol_>::send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_add_trigger_pargs args;
+  args.table_id = &table_id;
   args.trigger_name = &trigger_name;
   args.filter_name = &filter_name;
   args.trigger_expr = &trigger_expr;
@@ -4242,19 +4698,20 @@ void dialog_serviceClientT<Protocol_>::recv_add_trigger()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::remove_trigger(const std::string& trigger_name)
+void dialog_serviceClientT<Protocol_>::remove_trigger(const int64_t table_id, const std::string& trigger_name)
 {
-  send_remove_trigger(trigger_name);
+  send_remove_trigger(table_id, trigger_name);
   recv_remove_trigger();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_remove_trigger(const std::string& trigger_name)
+void dialog_serviceClientT<Protocol_>::send_remove_trigger(const int64_t table_id, const std::string& trigger_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_remove_trigger_pargs args;
+  args.table_id = &table_id;
   args.trigger_name = &trigger_name;
   args.write(this->oprot_);
 
@@ -4301,19 +4758,20 @@ void dialog_serviceClientT<Protocol_>::recv_remove_trigger()
 }
 
 template <class Protocol_>
-int64_t dialog_serviceClientT<Protocol_>::append(const std::string& data)
+int64_t dialog_serviceClientT<Protocol_>::append(const int64_t table_id, const std::string& data)
 {
-  send_append(data);
+  send_append(table_id, data);
   return recv_append();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_append(const std::string& data)
+void dialog_serviceClientT<Protocol_>::send_append(const int64_t table_id, const std::string& data)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("append", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_append_pargs args;
+  args.table_id = &table_id;
   args.data = &data;
   args.write(this->oprot_);
 
@@ -4362,19 +4820,20 @@ int64_t dialog_serviceClientT<Protocol_>::recv_append()
 }
 
 template <class Protocol_>
-int64_t dialog_serviceClientT<Protocol_>::append_batch(const rpc_record_batch& batch)
+int64_t dialog_serviceClientT<Protocol_>::append_batch(const int64_t table_id, const rpc_record_batch& batch)
 {
-  send_append_batch(batch);
+  send_append_batch(table_id, batch);
   return recv_append_batch();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_append_batch(const rpc_record_batch& batch)
+void dialog_serviceClientT<Protocol_>::send_append_batch(const int64_t table_id, const rpc_record_batch& batch)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("append_batch", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_append_batch_pargs args;
+  args.table_id = &table_id;
   args.batch = &batch;
   args.write(this->oprot_);
 
@@ -4423,19 +4882,20 @@ int64_t dialog_serviceClientT<Protocol_>::recv_append_batch()
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::read(std::string& _return, const int64_t offset, const int64_t nrecords)
+void dialog_serviceClientT<Protocol_>::read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords)
 {
-  send_read(offset, nrecords);
+  send_read(table_id, offset, nrecords);
   recv_read(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_read(const int64_t offset, const int64_t nrecords)
+void dialog_serviceClientT<Protocol_>::send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("read", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_read_pargs args;
+  args.table_id = &table_id;
   args.offset = &offset;
   args.nrecords = &nrecords;
   args.write(this->oprot_);
@@ -4485,19 +4945,20 @@ void dialog_serviceClientT<Protocol_>::recv_read(std::string& _return)
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const std::string& filter_expr)
+void dialog_serviceClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr)
 {
-  send_adhoc_filter(filter_expr);
+  send_adhoc_filter(table_id, filter_expr);
   recv_adhoc_filter(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_adhoc_filter(const std::string& filter_expr)
+void dialog_serviceClientT<Protocol_>::send_adhoc_filter(const int64_t table_id, const std::string& filter_expr)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("adhoc_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_adhoc_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
 
@@ -4549,19 +5010,20 @@ void dialog_serviceClientT<Protocol_>::recv_adhoc_filter(rpc_iterator_handle& _r
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
-  send_predef_filter(filter_name, begin_ms, end_ms);
+  send_predef_filter(table_id, filter_name, begin_ms, end_ms);
   recv_predef_filter(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_predef_filter(const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceClientT<Protocol_>::send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("predef_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_predef_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
@@ -4615,19 +5077,20 @@ void dialog_serviceClientT<Protocol_>::recv_predef_filter(rpc_iterator_handle& _
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
-  send_combined_filter(filter_name, filter_expr, begin_ms, end_ms);
+  send_combined_filter(table_id, filter_name, filter_expr, begin_ms, end_ms);
   recv_combined_filter(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_combined_filter(const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceClientT<Protocol_>::send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("combined_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_combined_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.begin_ms = &begin_ms;
@@ -4682,19 +5145,20 @@ void dialog_serviceClientT<Protocol_>::recv_combined_filter(rpc_iterator_handle&
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
 {
-  send_alerts_by_time(begin_ms, end_ms);
+  send_alerts_by_time(table_id, begin_ms, end_ms);
   recv_alerts_by_time(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_alerts_by_time(const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceClientT<Protocol_>::send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("alerts_by_time", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_alerts_by_time_pargs args;
+  args.table_id = &table_id;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
   args.write(this->oprot_);
@@ -4747,19 +5211,20 @@ void dialog_serviceClientT<Protocol_>::recv_alerts_by_time(rpc_iterator_handle& 
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const rpc_iterator_descriptor& desc)
+void dialog_serviceClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc)
 {
-  send_get_more(desc);
+  send_get_more(table_id, desc);
   recv_get_more(_return);
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_get_more(const rpc_iterator_descriptor& desc)
+void dialog_serviceClientT<Protocol_>::send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("get_more", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_get_more_pargs args;
+  args.table_id = &table_id;
   args.desc = &desc;
   args.write(this->oprot_);
 
@@ -4811,19 +5276,20 @@ void dialog_serviceClientT<Protocol_>::recv_get_more(rpc_iterator_handle& _retur
 }
 
 template <class Protocol_>
-int64_t dialog_serviceClientT<Protocol_>::num_records()
+int64_t dialog_serviceClientT<Protocol_>::num_records(const int64_t table_id)
 {
-  send_num_records();
+  send_num_records(table_id);
   return recv_num_records();
 }
 
 template <class Protocol_>
-void dialog_serviceClientT<Protocol_>::send_num_records()
+void dialog_serviceClientT<Protocol_>::send_num_records(const int64_t table_id)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("num_records", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_num_records_pargs args;
+  args.table_id = &table_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5162,7 +5628,8 @@ void dialog_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, ::
 
   dialog_service_create_table_result result;
   try {
-    iface_->create_table(args.table_name, args.schema, args.mode);
+    result.success = iface_->create_table(args.table_name, args.schema, args.mode);
+    result.__isset.success = true;
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5219,7 +5686,8 @@ void dialog_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, Pr
 
   dialog_service_create_table_result result;
   try {
-    iface_->create_table(args.table_name, args.schema, args.mode);
+    result.success = iface_->create_table(args.table_name, args.schema, args.mode);
+    result.__isset.success = true;
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5253,41 +5721,38 @@ void dialog_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, Pr
 }
 
 template <class Protocol_>
-void dialog_serviceProcessorT<Protocol_>::process_set_current_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void dialog_serviceProcessorT<Protocol_>::process_get_table_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("dialog_service.set_current_table", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.get_table_info", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.set_current_table");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.get_table_info");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "dialog_service.set_current_table");
+    this->eventHandler_->preRead(ctx, "dialog_service.get_table_info");
   }
 
-  dialog_service_set_current_table_args args;
+  dialog_service_get_table_info_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "dialog_service.set_current_table", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.get_table_info", bytes);
   }
 
-  dialog_service_set_current_table_result result;
+  dialog_service_get_table_info_result result;
   try {
-    iface_->set_current_table(result.success, args.table_name);
+    iface_->get_table_info(result.success, args.table_name);
     result.__isset.success = true;
-  } catch (rpc_management_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "dialog_service.set_current_table");
+      this->eventHandler_->handlerError(ctx, "dialog_service.get_table_info");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("set_current_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5296,56 +5761,53 @@ void dialog_serviceProcessorT<Protocol_>::process_set_current_table(int32_t seqi
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "dialog_service.set_current_table");
+    this->eventHandler_->preWrite(ctx, "dialog_service.get_table_info");
   }
 
-  oprot->writeMessageBegin("set_current_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "dialog_service.set_current_table", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.get_table_info", bytes);
   }
 }
 
 template <class Protocol_>
-void dialog_serviceProcessorT<Protocol_>::process_set_current_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void dialog_serviceProcessorT<Protocol_>::process_get_table_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("dialog_service.set_current_table", callContext);
+    ctx = this->eventHandler_->getContext("dialog_service.get_table_info", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.set_current_table");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.get_table_info");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "dialog_service.set_current_table");
+    this->eventHandler_->preRead(ctx, "dialog_service.get_table_info");
   }
 
-  dialog_service_set_current_table_args args;
+  dialog_service_get_table_info_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "dialog_service.set_current_table", bytes);
+    this->eventHandler_->postRead(ctx, "dialog_service.get_table_info", bytes);
   }
 
-  dialog_service_set_current_table_result result;
+  dialog_service_get_table_info_result result;
   try {
-    iface_->set_current_table(result.success, args.table_name);
+    iface_->get_table_info(result.success, args.table_name);
     result.__isset.success = true;
-  } catch (rpc_management_exception &ex) {
-    result.ex = ex;
-    result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "dialog_service.set_current_table");
+      this->eventHandler_->handlerError(ctx, "dialog_service.get_table_info");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("set_current_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5354,17 +5816,131 @@ void dialog_serviceProcessorT<Protocol_>::process_set_current_table(int32_t seqi
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "dialog_service.set_current_table");
+    this->eventHandler_->preWrite(ctx, "dialog_service.get_table_info");
   }
 
-  oprot->writeMessageBegin("set_current_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "dialog_service.set_current_table", bytes);
+    this->eventHandler_->postWrite(ctx, "dialog_service.get_table_info", bytes);
+  }
+}
+
+template <class Protocol_>
+void dialog_serviceProcessorT<Protocol_>::process_remove_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("dialog_service.remove_table", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.remove_table");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "dialog_service.remove_table");
+  }
+
+  dialog_service_remove_table_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "dialog_service.remove_table", bytes);
+  }
+
+  dialog_service_remove_table_result result;
+  try {
+    iface_->remove_table(args.table_id);
+  } catch (rpc_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "dialog_service.remove_table");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "dialog_service.remove_table");
+  }
+
+  oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "dialog_service.remove_table", bytes);
+  }
+}
+
+template <class Protocol_>
+void dialog_serviceProcessorT<Protocol_>::process_remove_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("dialog_service.remove_table", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.remove_table");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "dialog_service.remove_table");
+  }
+
+  dialog_service_remove_table_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "dialog_service.remove_table", bytes);
+  }
+
+  dialog_service_remove_table_result result;
+  try {
+    iface_->remove_table(args.table_id);
+  } catch (rpc_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "dialog_service.remove_table");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "dialog_service.remove_table");
+  }
+
+  oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "dialog_service.remove_table", bytes);
   }
 }
 
@@ -5392,7 +5968,7 @@ void dialog_serviceProcessorT<Protocol_>::process_add_index(int32_t seqid, ::apa
 
   dialog_service_add_index_result result;
   try {
-    iface_->add_index(args.field_name, args.bucket_size);
+    iface_->add_index(args.table_id, args.field_name, args.bucket_size);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5449,7 +6025,7 @@ void dialog_serviceProcessorT<Protocol_>::process_add_index(int32_t seqid, Proto
 
   dialog_service_add_index_result result;
   try {
-    iface_->add_index(args.field_name, args.bucket_size);
+    iface_->add_index(args.table_id, args.field_name, args.bucket_size);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5506,7 +6082,7 @@ void dialog_serviceProcessorT<Protocol_>::process_remove_index(int32_t seqid, ::
 
   dialog_service_remove_index_result result;
   try {
-    iface_->remove_index(args.field_name);
+    iface_->remove_index(args.table_id, args.field_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5563,7 +6139,7 @@ void dialog_serviceProcessorT<Protocol_>::process_remove_index(int32_t seqid, Pr
 
   dialog_service_remove_index_result result;
   try {
-    iface_->remove_index(args.field_name);
+    iface_->remove_index(args.table_id, args.field_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5620,7 +6196,7 @@ void dialog_serviceProcessorT<Protocol_>::process_add_filter(int32_t seqid, ::ap
 
   dialog_service_add_filter_result result;
   try {
-    iface_->add_filter(args.filter_name, args.filter_expr);
+    iface_->add_filter(args.table_id, args.filter_name, args.filter_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5677,7 +6253,7 @@ void dialog_serviceProcessorT<Protocol_>::process_add_filter(int32_t seqid, Prot
 
   dialog_service_add_filter_result result;
   try {
-    iface_->add_filter(args.filter_name, args.filter_expr);
+    iface_->add_filter(args.table_id, args.filter_name, args.filter_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5734,7 +6310,7 @@ void dialog_serviceProcessorT<Protocol_>::process_remove_filter(int32_t seqid, :
 
   dialog_service_remove_filter_result result;
   try {
-    iface_->remove_filter(args.filter_name);
+    iface_->remove_filter(args.table_id, args.filter_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5791,7 +6367,7 @@ void dialog_serviceProcessorT<Protocol_>::process_remove_filter(int32_t seqid, P
 
   dialog_service_remove_filter_result result;
   try {
-    iface_->remove_filter(args.filter_name);
+    iface_->remove_filter(args.table_id, args.filter_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5848,7 +6424,7 @@ void dialog_serviceProcessorT<Protocol_>::process_add_trigger(int32_t seqid, ::a
 
   dialog_service_add_trigger_result result;
   try {
-    iface_->add_trigger(args.trigger_name, args.filter_name, args.trigger_expr);
+    iface_->add_trigger(args.table_id, args.trigger_name, args.filter_name, args.trigger_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5905,7 +6481,7 @@ void dialog_serviceProcessorT<Protocol_>::process_add_trigger(int32_t seqid, Pro
 
   dialog_service_add_trigger_result result;
   try {
-    iface_->add_trigger(args.trigger_name, args.filter_name, args.trigger_expr);
+    iface_->add_trigger(args.table_id, args.trigger_name, args.filter_name, args.trigger_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -5962,7 +6538,7 @@ void dialog_serviceProcessorT<Protocol_>::process_remove_trigger(int32_t seqid, 
 
   dialog_service_remove_trigger_result result;
   try {
-    iface_->remove_trigger(args.trigger_name);
+    iface_->remove_trigger(args.table_id, args.trigger_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6019,7 +6595,7 @@ void dialog_serviceProcessorT<Protocol_>::process_remove_trigger(int32_t seqid, 
 
   dialog_service_remove_trigger_result result;
   try {
-    iface_->remove_trigger(args.trigger_name);
+    iface_->remove_trigger(args.table_id, args.trigger_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6076,7 +6652,7 @@ void dialog_serviceProcessorT<Protocol_>::process_append(int32_t seqid, ::apache
 
   dialog_service_append_result result;
   try {
-    result.success = iface_->append(args.data);
+    result.success = iface_->append(args.table_id, args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6131,7 +6707,7 @@ void dialog_serviceProcessorT<Protocol_>::process_append(int32_t seqid, Protocol
 
   dialog_service_append_result result;
   try {
-    result.success = iface_->append(args.data);
+    result.success = iface_->append(args.table_id, args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6186,7 +6762,7 @@ void dialog_serviceProcessorT<Protocol_>::process_append_batch(int32_t seqid, ::
 
   dialog_service_append_batch_result result;
   try {
-    result.success = iface_->append_batch(args.batch);
+    result.success = iface_->append_batch(args.table_id, args.batch);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6241,7 +6817,7 @@ void dialog_serviceProcessorT<Protocol_>::process_append_batch(int32_t seqid, Pr
 
   dialog_service_append_batch_result result;
   try {
-    result.success = iface_->append_batch(args.batch);
+    result.success = iface_->append_batch(args.table_id, args.batch);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6296,7 +6872,7 @@ void dialog_serviceProcessorT<Protocol_>::process_read(int32_t seqid, ::apache::
 
   dialog_service_read_result result;
   try {
-    iface_->read(result.success, args.offset, args.nrecords);
+    iface_->read(result.success, args.table_id, args.offset, args.nrecords);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6351,7 +6927,7 @@ void dialog_serviceProcessorT<Protocol_>::process_read(int32_t seqid, Protocol_*
 
   dialog_service_read_result result;
   try {
-    iface_->read(result.success, args.offset, args.nrecords);
+    iface_->read(result.success, args.table_id, args.offset, args.nrecords);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6406,7 +6982,7 @@ void dialog_serviceProcessorT<Protocol_>::process_adhoc_filter(int32_t seqid, ::
 
   dialog_service_adhoc_filter_result result;
   try {
-    iface_->adhoc_filter(result.success, args.filter_expr);
+    iface_->adhoc_filter(result.success, args.table_id, args.filter_expr);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6464,7 +7040,7 @@ void dialog_serviceProcessorT<Protocol_>::process_adhoc_filter(int32_t seqid, Pr
 
   dialog_service_adhoc_filter_result result;
   try {
-    iface_->adhoc_filter(result.success, args.filter_expr);
+    iface_->adhoc_filter(result.success, args.table_id, args.filter_expr);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6522,7 +7098,7 @@ void dialog_serviceProcessorT<Protocol_>::process_predef_filter(int32_t seqid, :
 
   dialog_service_predef_filter_result result;
   try {
-    iface_->predef_filter(result.success, args.filter_name, args.begin_ms, args.end_ms);
+    iface_->predef_filter(result.success, args.table_id, args.filter_name, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6580,7 +7156,7 @@ void dialog_serviceProcessorT<Protocol_>::process_predef_filter(int32_t seqid, P
 
   dialog_service_predef_filter_result result;
   try {
-    iface_->predef_filter(result.success, args.filter_name, args.begin_ms, args.end_ms);
+    iface_->predef_filter(result.success, args.table_id, args.filter_name, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6638,7 +7214,7 @@ void dialog_serviceProcessorT<Protocol_>::process_combined_filter(int32_t seqid,
 
   dialog_service_combined_filter_result result;
   try {
-    iface_->combined_filter(result.success, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
+    iface_->combined_filter(result.success, args.table_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6696,7 +7272,7 @@ void dialog_serviceProcessorT<Protocol_>::process_combined_filter(int32_t seqid,
 
   dialog_service_combined_filter_result result;
   try {
-    iface_->combined_filter(result.success, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
+    iface_->combined_filter(result.success, args.table_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6754,7 +7330,7 @@ void dialog_serviceProcessorT<Protocol_>::process_alerts_by_time(int32_t seqid, 
 
   dialog_service_alerts_by_time_result result;
   try {
-    iface_->alerts_by_time(result.success, args.begin_ms, args.end_ms);
+    iface_->alerts_by_time(result.success, args.table_id, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6812,7 +7388,7 @@ void dialog_serviceProcessorT<Protocol_>::process_alerts_by_time(int32_t seqid, 
 
   dialog_service_alerts_by_time_result result;
   try {
-    iface_->alerts_by_time(result.success, args.begin_ms, args.end_ms);
+    iface_->alerts_by_time(result.success, args.table_id, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6870,7 +7446,7 @@ void dialog_serviceProcessorT<Protocol_>::process_get_more(int32_t seqid, ::apac
 
   dialog_service_get_more_result result;
   try {
-    iface_->get_more(result.success, args.desc);
+    iface_->get_more(result.success, args.table_id, args.desc);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6928,7 +7504,7 @@ void dialog_serviceProcessorT<Protocol_>::process_get_more(int32_t seqid, Protoc
 
   dialog_service_get_more_result result;
   try {
-    iface_->get_more(result.success, args.desc);
+    iface_->get_more(result.success, args.table_id, args.desc);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -6986,7 +7562,7 @@ void dialog_serviceProcessorT<Protocol_>::process_num_records(int32_t seqid, ::a
 
   dialog_service_num_records_result result;
   try {
-    result.success = iface_->num_records();
+    result.success = iface_->num_records(args.table_id);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -7041,7 +7617,7 @@ void dialog_serviceProcessorT<Protocol_>::process_num_records(int32_t seqid, Pro
 
   dialog_service_num_records_result result;
   try {
-    result.success = iface_->num_records();
+    result.success = iface_->num_records(args.table_id);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -7249,10 +7825,10 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_deregister_handler(const i
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
+int64_t dialog_serviceConcurrentClientT<Protocol_>::create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
 {
   int32_t seqid = send_create_table(table_name, schema, mode);
-  recv_create_table(seqid);
+  return recv_create_table(seqid);
 }
 
 template <class Protocol_>
@@ -7277,7 +7853,7 @@ int32_t dialog_serviceConcurrentClientT<Protocol_>::send_create_table(const std:
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t seqid)
+int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -7315,17 +7891,23 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
+      int64_t _return;
       dialog_service_create_table_presult result;
+      result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();
 
+      if (result.__isset.success) {
+        sentry.commit();
+        return _return;
+      }
       if (result.__isset.ex) {
         sentry.commit();
         throw result.ex;
       }
-      sentry.commit();
-      return;
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "create_table failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -7336,20 +7918,20 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::set_current_table(rpc_schema& _return, const std::string& table_name)
+void dialog_serviceConcurrentClientT<Protocol_>::get_table_info(rpc_table_info& _return, const std::string& table_name)
 {
-  int32_t seqid = send_set_current_table(table_name);
-  recv_set_current_table(_return, seqid);
+  int32_t seqid = send_get_table_info(table_name);
+  recv_get_table_info(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_set_current_table(const std::string& table_name)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_get_table_info(const std::string& table_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("set_current_table", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  dialog_service_set_current_table_pargs args;
+  dialog_service_get_table_info_pargs args;
   args.table_name = &table_name;
   args.write(this->oprot_);
 
@@ -7362,7 +7944,7 @@ int32_t dialog_serviceConcurrentClientT<Protocol_>::send_set_current_table(const
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::recv_set_current_table(rpc_schema& _return, const int32_t seqid)
+void dialog_serviceConcurrentClientT<Protocol_>::recv_get_table_info(rpc_table_info& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -7391,7 +7973,7 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_set_current_table(rpc_sche
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("set_current_table") != 0) {
+      if (fname.compare("get_table_info") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -7400,7 +7982,7 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_set_current_table(rpc_sche
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      dialog_service_set_current_table_presult result;
+      dialog_service_get_table_info_presult result;
       result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
@@ -7411,12 +7993,8 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_set_current_table(rpc_sche
         sentry.commit();
         return;
       }
-      if (result.__isset.ex) {
-        sentry.commit();
-        throw result.ex;
-      }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "set_current_table failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_table_info failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -7427,20 +8005,106 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_set_current_table(rpc_sche
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::add_index(const std::string& field_name, const double bucket_size)
+void dialog_serviceConcurrentClientT<Protocol_>::remove_table(const int64_t table_id)
 {
-  int32_t seqid = send_add_index(field_name, bucket_size);
+  int32_t seqid = send_remove_table(table_id);
+  recv_remove_table(seqid);
+}
+
+template <class Protocol_>
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_table(const int64_t table_id)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  dialog_service_remove_table_pargs args;
+  args.table_id = &table_id;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void dialog_serviceConcurrentClientT<Protocol_>::recv_remove_table(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("remove_table") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      dialog_service_remove_table_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void dialog_serviceConcurrentClientT<Protocol_>::add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
+{
+  int32_t seqid = send_add_index(table_id, field_name, bucket_size);
   recv_add_index(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_add_index(const std::string& field_name, const double bucket_size)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_add_index_pargs args;
+  args.table_id = &table_id;
   args.field_name = &field_name;
   args.bucket_size = &bucket_size;
   args.write(this->oprot_);
@@ -7513,20 +8177,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_add_index(const int32_t se
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::remove_index(const std::string& field_name)
+void dialog_serviceConcurrentClientT<Protocol_>::remove_index(const int64_t table_id, const std::string& field_name)
 {
-  int32_t seqid = send_remove_index(field_name);
+  int32_t seqid = send_remove_index(table_id, field_name);
   recv_remove_index(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_index(const std::string& field_name)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_index(const int64_t table_id, const std::string& field_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_remove_index_pargs args;
+  args.table_id = &table_id;
   args.field_name = &field_name;
   args.write(this->oprot_);
 
@@ -7598,20 +8263,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_remove_index(const int32_t
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::add_filter(const std::string& filter_name, const std::string& filter_expr)
+void dialog_serviceConcurrentClientT<Protocol_>::add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
 {
-  int32_t seqid = send_add_filter(filter_name, filter_expr);
+  int32_t seqid = send_add_filter(table_id, filter_name, filter_expr);
   recv_add_filter(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_add_filter(const std::string& filter_name, const std::string& filter_expr)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_add_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
@@ -7684,20 +8350,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_add_filter(const int32_t s
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::remove_filter(const std::string& filter_name)
+void dialog_serviceConcurrentClientT<Protocol_>::remove_filter(const int64_t table_id, const std::string& filter_name)
 {
-  int32_t seqid = send_remove_filter(filter_name);
+  int32_t seqid = send_remove_filter(table_id, filter_name);
   recv_remove_filter(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_filter(const std::string& filter_name)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_filter(const int64_t table_id, const std::string& filter_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_remove_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.write(this->oprot_);
 
@@ -7769,20 +8436,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_remove_filter(const int32_
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+void dialog_serviceConcurrentClientT<Protocol_>::add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
 {
-  int32_t seqid = send_add_trigger(trigger_name, filter_name, trigger_expr);
+  int32_t seqid = send_add_trigger(table_id, trigger_name, filter_name, trigger_expr);
   recv_add_trigger(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_add_trigger(const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_add_trigger_pargs args;
+  args.table_id = &table_id;
   args.trigger_name = &trigger_name;
   args.filter_name = &filter_name;
   args.trigger_expr = &trigger_expr;
@@ -7856,20 +8524,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_add_trigger(const int32_t 
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::remove_trigger(const std::string& trigger_name)
+void dialog_serviceConcurrentClientT<Protocol_>::remove_trigger(const int64_t table_id, const std::string& trigger_name)
 {
-  int32_t seqid = send_remove_trigger(trigger_name);
+  int32_t seqid = send_remove_trigger(table_id, trigger_name);
   recv_remove_trigger(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_trigger(const std::string& trigger_name)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_remove_trigger(const int64_t table_id, const std::string& trigger_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_remove_trigger_pargs args;
+  args.table_id = &table_id;
   args.trigger_name = &trigger_name;
   args.write(this->oprot_);
 
@@ -7941,20 +8610,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_remove_trigger(const int32
 }
 
 template <class Protocol_>
-int64_t dialog_serviceConcurrentClientT<Protocol_>::append(const std::string& data)
+int64_t dialog_serviceConcurrentClientT<Protocol_>::append(const int64_t table_id, const std::string& data)
 {
-  int32_t seqid = send_append(data);
+  int32_t seqid = send_append(table_id, data);
   return recv_append(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_append(const std::string& data)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_append(const int64_t table_id, const std::string& data)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("append", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_append_pargs args;
+  args.table_id = &table_id;
   args.data = &data;
   args.write(this->oprot_);
 
@@ -8028,20 +8698,21 @@ int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_append(const int32_t se
 }
 
 template <class Protocol_>
-int64_t dialog_serviceConcurrentClientT<Protocol_>::append_batch(const rpc_record_batch& batch)
+int64_t dialog_serviceConcurrentClientT<Protocol_>::append_batch(const int64_t table_id, const rpc_record_batch& batch)
 {
-  int32_t seqid = send_append_batch(batch);
+  int32_t seqid = send_append_batch(table_id, batch);
   return recv_append_batch(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_append_batch(const rpc_record_batch& batch)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_append_batch(const int64_t table_id, const rpc_record_batch& batch)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("append_batch", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_append_batch_pargs args;
+  args.table_id = &table_id;
   args.batch = &batch;
   args.write(this->oprot_);
 
@@ -8115,20 +8786,21 @@ int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_append_batch(const int3
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::read(std::string& _return, const int64_t offset, const int64_t nrecords)
+void dialog_serviceConcurrentClientT<Protocol_>::read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords)
 {
-  int32_t seqid = send_read(offset, nrecords);
+  int32_t seqid = send_read(table_id, offset, nrecords);
   recv_read(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_read(const int64_t offset, const int64_t nrecords)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("read", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_read_pargs args;
+  args.table_id = &table_id;
   args.offset = &offset;
   args.nrecords = &nrecords;
   args.write(this->oprot_);
@@ -8203,20 +8875,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_read(std::string& _return,
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const std::string& filter_expr)
+void dialog_serviceConcurrentClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr)
 {
-  int32_t seqid = send_adhoc_filter(filter_expr);
+  int32_t seqid = send_adhoc_filter(table_id, filter_expr);
   recv_adhoc_filter(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_adhoc_filter(const std::string& filter_expr)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_adhoc_filter(const int64_t table_id, const std::string& filter_expr)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("adhoc_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_adhoc_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
 
@@ -8294,20 +8967,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_adhoc_filter(rpc_iterator_
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceConcurrentClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
-  int32_t seqid = send_predef_filter(filter_name, begin_ms, end_ms);
+  int32_t seqid = send_predef_filter(table_id, filter_name, begin_ms, end_ms);
   recv_predef_filter(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_predef_filter(const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("predef_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_predef_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
@@ -8387,20 +9061,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_predef_filter(rpc_iterator
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceConcurrentClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
-  int32_t seqid = send_combined_filter(filter_name, filter_expr, begin_ms, end_ms);
+  int32_t seqid = send_combined_filter(table_id, filter_name, filter_expr, begin_ms, end_ms);
   recv_combined_filter(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_combined_filter(const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("combined_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_combined_filter_pargs args;
+  args.table_id = &table_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.begin_ms = &begin_ms;
@@ -8481,20 +9156,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_combined_filter(rpc_iterat
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t begin_ms, const int64_t end_ms)
+void dialog_serviceConcurrentClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
 {
-  int32_t seqid = send_alerts_by_time(begin_ms, end_ms);
+  int32_t seqid = send_alerts_by_time(table_id, begin_ms, end_ms);
   recv_alerts_by_time(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_alerts_by_time(const int64_t begin_ms, const int64_t end_ms)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("alerts_by_time", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_alerts_by_time_pargs args;
+  args.table_id = &table_id;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
   args.write(this->oprot_);
@@ -8573,20 +9249,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_alerts_by_time(rpc_iterato
 }
 
 template <class Protocol_>
-void dialog_serviceConcurrentClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const rpc_iterator_descriptor& desc)
+void dialog_serviceConcurrentClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc)
 {
-  int32_t seqid = send_get_more(desc);
+  int32_t seqid = send_get_more(table_id, desc);
   recv_get_more(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_get_more(const rpc_iterator_descriptor& desc)
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("get_more", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_get_more_pargs args;
+  args.table_id = &table_id;
   args.desc = &desc;
   args.write(this->oprot_);
 
@@ -8664,20 +9341,21 @@ void dialog_serviceConcurrentClientT<Protocol_>::recv_get_more(rpc_iterator_hand
 }
 
 template <class Protocol_>
-int64_t dialog_serviceConcurrentClientT<Protocol_>::num_records()
+int64_t dialog_serviceConcurrentClientT<Protocol_>::num_records(const int64_t table_id)
 {
-  int32_t seqid = send_num_records();
+  int32_t seqid = send_num_records(table_id);
   return recv_num_records(seqid);
 }
 
 template <class Protocol_>
-int32_t dialog_serviceConcurrentClientT<Protocol_>::send_num_records()
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_num_records(const int64_t table_id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("num_records", ::apache::thrift::protocol::T_CALL, cseqid);
 
   dialog_service_num_records_pargs args;
+  args.table_id = &table_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

@@ -63,6 +63,11 @@ struct rpc_record_batch {
   2: required i64 nrecords,
 }
 
+struct rpc_table_info {
+  1: i64 table_id,
+  2: rpc_schema schema,
+}
+
 exception rpc_management_exception {
   1: string msg 
 }
@@ -80,47 +85,49 @@ service dialog_service {
           throws (1: rpc_management_exception ex),
   
   // Store ops
-  void create_table(1: string table_name, 2: rpc_schema schema, 
+  i64 create_table(1: string table_name, 2: rpc_schema schema, 
                     3: rpc_storage_mode mode) 
           throws (1: rpc_management_exception ex),
-  rpc_schema set_current_table(1: string table_name) 
+  rpc_table_info get_table_info(1: string table_name),
+  void remove_table(1: i64 table_id)
           throws (1: rpc_management_exception ex),
   
   // Table ops
-  void add_index(1: string field_name, 2: double bucket_size) 
+  void add_index(1: i64 table_id, 2: string field_name, 3: double bucket_size) 
           throws (1: rpc_management_exception ex),
-  void remove_index(1: string field_name) 
+  void remove_index(1: i64 table_id, 2: string field_name) 
           throws (1: rpc_management_exception ex),
-  void add_filter(1: string filter_name, 2: string filter_expr) 
+  void add_filter(1: i64 table_id, 2: string filter_name, 3: string filter_expr)
           throws (1: rpc_management_exception ex),
-  void remove_filter(1: string filter_name) 
+  void remove_filter(1: i64 table_id, 2: string filter_name) 
           throws (1: rpc_management_exception ex),
-  void add_trigger(1: string trigger_name, 2: string filter_name, 
-                   3: string trigger_expr) 
+  void add_trigger(1: i64 table_id, 2: string trigger_name, 
+                   3: string filter_name, 4: string trigger_expr)
           throws (1: rpc_management_exception ex),
-  void remove_trigger(1: string trigger_name) 
+  void remove_trigger(1: i64 table_id, 2: string trigger_name) 
           throws (1: rpc_management_exception ex),
             
   /** Query ops **/
   // Write ops
-  i64 append(1: binary data),
-  i64 append_batch(1: rpc_record_batch batch),
+  i64 append(1: i64 table_id, 2: binary data),
+  i64 append_batch(1: i64 table_id, 2: rpc_record_batch batch),
   
   // Read ops
-  binary read(1: i64 offset, 2: i64 nrecords),
-  rpc_iterator_handle adhoc_filter(1: string filter_expr)
+  binary read(1: i64 table_id, 2: i64 offset, 3: i64 nrecords),
+  rpc_iterator_handle adhoc_filter(1: i64 table_id, 2: string filter_expr)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle predef_filter(1: string filter_name, 
-                                    2: i64 begin_ms, 3: i64 end_ms)
+  rpc_iterator_handle predef_filter(1: i64 table_id, 2: string filter_name, 
+                                    3: i64 begin_ms, 4: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle combined_filter(1: string filter_name, 
-                                      2: string filter_expr, 
-                                      3: i64 begin_ms, 4: i64 end_ms)
+  rpc_iterator_handle combined_filter(1: i64 table_id, 2: string filter_name, 
+                                      3: string filter_expr, 
+                                      4: i64 begin_ms, 5: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle alerts_by_time(1: i64 begin_ms, 2: i64 end_ms)
+  rpc_iterator_handle alerts_by_time(1: i64 table_id, 2: i64 begin_ms, 
+                                     3: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle get_more(1: rpc_iterator_descriptor desc)
+  rpc_iterator_handle get_more(1: i64 table_id, 2: rpc_iterator_descriptor desc)
           throws (1: rpc_invalid_operation ex),
 
-  i64 num_records(),  
+  i64 num_records(1: i64 table_id),  
 }

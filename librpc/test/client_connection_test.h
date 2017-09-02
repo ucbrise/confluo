@@ -4,15 +4,15 @@
 #include "dialog_server.h"
 #include "gtest/gtest.h"
 
-#include "rpc_dialog_reader.h"
+#include "rpc_dialog_client.h"
 
 using namespace ::dialog::rpc;
 using namespace ::dialog;
 
-class ServerClientTest : public testing::Test {
+class ClientConnectionTest : public testing::Test {
 };
 
-TEST_F(ServerClientTest, ConcurrentConnectionsTest) {
+TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
   auto store = new dialog_store("/tmp");
   auto server = dialog_server::create(store, "127.0.0.1", 9090);
   std::thread serve_thread([&server] {

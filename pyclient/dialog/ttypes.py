@@ -568,6 +568,87 @@ class rpc_record_batch(object):
         return not (self == other)
 
 
+class rpc_table_info(object):
+    """
+    Attributes:
+     - table_id
+     - schema
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (2, TType.LIST, 'schema', (TType.STRUCT, (rpc_column, rpc_column.thrift_spec), False), None, ),  # 2
+    )
+
+    def __init__(self, table_id=None, schema=None,):
+        self.table_id = table_id
+        self.schema = schema
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.table_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.LIST:
+                    self.schema = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = rpc_column()
+                        _elem12.read(iprot)
+                        self.schema.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('rpc_table_info')
+        if self.table_id is not None:
+            oprot.writeFieldBegin('table_id', TType.I64, 1)
+            oprot.writeI64(self.table_id)
+            oprot.writeFieldEnd()
+        if self.schema is not None:
+            oprot.writeFieldBegin('schema', TType.LIST, 2)
+            oprot.writeListBegin(TType.STRUCT, len(self.schema))
+            for iter13 in self.schema:
+                iter13.write(oprot)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class rpc_management_exception(TException):
     """
     Attributes:
