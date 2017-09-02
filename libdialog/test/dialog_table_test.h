@@ -129,6 +129,7 @@ task_pool DiaLogTableTest::MGMT_POOL;
 
 TEST_F(DiaLogTableTest, AppendAndGetInMemoryTest) {
   dialog_table dtable(
+      "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::IN_MEMORY, MGMT_POOL);
   test_append_and_get(dtable);
@@ -136,6 +137,7 @@ TEST_F(DiaLogTableTest, AppendAndGetInMemoryTest) {
 
 TEST_F(DiaLogTableTest, AppendAndGetDurableTest) {
   dialog_table dtable(
+      "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE, MGMT_POOL);
   test_append_and_get(dtable);
@@ -143,13 +145,14 @@ TEST_F(DiaLogTableTest, AppendAndGetDurableTest) {
 
 TEST_F(DiaLogTableTest, AppendAndGetDurableRelaxedTest) {
   dialog_table dtable(
+      "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE_RELAXED, MGMT_POOL);
   test_append_and_get(dtable);
 }
 
 TEST_F(DiaLogTableTest, IndexTest) {
-  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   dtable.add_index("a");
   dtable.add_index("b");
   dtable.add_index("c", 10);
@@ -259,7 +262,7 @@ TEST_F(DiaLogTableTest, IndexTest) {
 }
 
 TEST_F(DiaLogTableTest, FilterTest) {
-  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   dtable.add_filter("filter1", "a == true");
   dtable.add_filter("filter2", "b > 4");
   dtable.add_filter("filter3", "c <= 30");
@@ -388,7 +391,7 @@ TEST_F(DiaLogTableTest, FilterTest) {
 }
 
 TEST_F(DiaLogTableTest, BatchIndexTest) {
-  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   dtable.add_index("a");
   dtable.add_index("b");
   dtable.add_index("c", 10);
@@ -493,7 +496,7 @@ TEST_F(DiaLogTableTest, BatchIndexTest) {
 }
 
 TEST_F(DiaLogTableTest, BatchFilterTest) {
-  dialog_table dtable(s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   dtable.add_filter("filter1", "a == true");
   dtable.add_filter("filter2", "b > 4");
   dtable.add_filter("filter3", "c <= 30");
