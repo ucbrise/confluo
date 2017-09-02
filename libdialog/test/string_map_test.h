@@ -20,24 +20,24 @@ TEST_F(StringMapTest, PutGetTest) {
 
   int val;
 
-  ASSERT_TRUE(sm.get("abc", val));
+  ASSERT_TRUE(sm.get("abc", val) != -1);
   ASSERT_EQ(val, 1);
 
-  ASSERT_TRUE(sm.get("cdef", val));
+  ASSERT_TRUE(sm.get("cdef", val) != -1);
   ASSERT_EQ(val, 2);
 
-  ASSERT_TRUE(sm.get("cdefg", val));
+  ASSERT_TRUE(sm.get("cdefg", val) != -1);
   ASSERT_EQ(val, 3);
 
-  ASSERT_TRUE(sm.get("zzqffx", val));
+  ASSERT_TRUE(sm.get("zzqffx", val) != -1);
   ASSERT_EQ(val, 4);
 
-  ASSERT_TRUE(sm.get("zzqfxxg", val));
+  ASSERT_TRUE(sm.get("zzqfxxg", val) != -1);
   ASSERT_EQ(val, 5);
 
-  ASSERT_FALSE(sm.get("asdf", val));
-  ASSERT_FALSE(sm.get("abcd", val));
-  ASSERT_FALSE(sm.get("zzqfxxh", val));
+  ASSERT_TRUE(sm.get("asdf", val) == -1);
+  ASSERT_TRUE(sm.get("abcd", val) == -1);
+  ASSERT_TRUE(sm.get("zzqfxxh", val) == -1);
 }
 
 TEST_F(StringMapTest, PutRemoveGetTest) {
@@ -50,30 +50,30 @@ TEST_F(StringMapTest, PutRemoveGetTest) {
   sm.put("zzqfxxg", 5);
 
   int val;
-  ASSERT_TRUE(sm.remove("abc", val));
+  ASSERT_TRUE(sm.remove("abc", val) != -1);
   ASSERT_EQ(val, 1);
 
-  ASSERT_TRUE(sm.remove("cdef", val));
+  ASSERT_TRUE(sm.remove("cdef", val) != -1);
   ASSERT_EQ(val, 2);
 
-  ASSERT_TRUE(sm.remove("cdefg", val));
+  ASSERT_TRUE(sm.remove("cdefg", val) != -1);
   ASSERT_EQ(val, 3);
 
-  ASSERT_TRUE(sm.remove("zzqffx", val));
+  ASSERT_TRUE(sm.remove("zzqffx", val) != -1);
   ASSERT_EQ(val, 4);
 
-  ASSERT_TRUE(sm.remove("zzqfxxg", val));
+  ASSERT_TRUE(sm.remove("zzqfxxg", val) != -1);
   ASSERT_EQ(val, 5);
 
-  ASSERT_FALSE(sm.remove("asdf", val));
-  ASSERT_FALSE(sm.remove("abcd", val));
-  ASSERT_FALSE(sm.remove("zzqfxxh", val));
+  ASSERT_TRUE(sm.remove("asdf", val) == -1);
+  ASSERT_TRUE(sm.remove("abcd", val) == -1);
+  ASSERT_TRUE(sm.remove("zzqfxxh", val) == -1);
 
-  ASSERT_FALSE(sm.get("abc", val));
-  ASSERT_FALSE(sm.get("cdef", val));
-  ASSERT_FALSE(sm.get("cdefg", val));
-  ASSERT_FALSE(sm.get("zzqffx", val));
-  ASSERT_FALSE(sm.get("zzqfxxg", val));
+  ASSERT_TRUE(sm.get("abc", val) == -1);
+  ASSERT_TRUE(sm.get("cdef", val) == -1);
+  ASSERT_TRUE(sm.get("cdefg", val) == -1);
+  ASSERT_TRUE(sm.get("zzqffx", val) == -1);
+  ASSERT_TRUE(sm.get("zzqfxxg", val) == -1);
 
 }
 

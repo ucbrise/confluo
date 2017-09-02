@@ -66,12 +66,14 @@ class dialog_table {
 
   typedef alert_index::alert_list alert_list;
 
-  dialog_table(const std::vector<column_t>& table_schema,
+  dialog_table(const std::string& table_name,
+               const std::vector<column_t>& table_schema,
                const std::string& path, const storage::storage_mode& storage,
                task_pool& pool)
-      : data_log_("data_log", path, storage),
-        rt_(path, storage),
+      : table_name_(table_name),
         schema_(table_schema),
+        data_log_("data_log", path, storage),
+        rt_(path, storage),
         metadata_(path, storage.id),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
@@ -161,15 +163,14 @@ class dialog_table {
         mgmt_pool_.submit(
             [filter_name, filter_expr, &ex, this] {
               filter_id_t filter_id;
-              if (filter_map_.get(filter_name, filter_id)) {
+              if (filter_map_.get(filter_name, filter_id) != -1) {
                 ex = management_exception("Filter " + filter_name + " already exists.");
                 return;
               }
               auto cexpr = expression_compiler::compile(filter_expr, schema_);
               filter_id = filters_.push_back(new filter(cexpr, default_filter));
               metadata_.write_filter_info(filter_name, filter_expr);
-              bool success = filter_map_.put(filter_name, filter_id);
-              if (!success) {
+              if (filter_map_.put(filter_name, filter_id) == -1) {
                 ex = management_exception("Could not add filter " + filter_name + " to filter map.");
                 return;
               }
@@ -183,7 +184,7 @@ class dialog_table {
     optional<management_exception> ex;
     auto ret = mgmt_pool_.submit([filter_name, &ex, this] {
       filter_id_t filter_id;
-      if (!filter_map_.get(filter_name, filter_id)) {
+      if (filter_map_.get(filter_name, filter_id) == -1) {
         ex = management_exception("Filter " + filter_name + " does not exist.");
         return;
       }
@@ -206,12 +207,12 @@ class dialog_table {
         mgmt_pool_.submit(
             [trigger_name, filter_name, trigger_expr, &ex, this] {
               trigger_id_t trigger_id;
-              if (trigger_map_.get(trigger_name, trigger_id)) {
+              if (trigger_map_.get(trigger_name, trigger_id) != -1) {
                 ex = management_exception("Trigger " + trigger_name + " already exists.");
                 return;
               }
               filter_id_t filter_id;
-              if (!filter_map_.get(filter_name, filter_id)) {
+              if (filter_map_.get(filter_name, filter_id) == -1) {
                 ex = management_exception("Filter " + filter_name + " does not exist.");
                 return;
               }
@@ -223,6 +224,10 @@ class dialog_table {
               trigger_id.second = filters_.at(filter_id)->add_trigger(t);
               metadata_.write_trigger_info(trigger_name, filter_name, tp.agg, tp.field_name, tp.relop,
                   tp.threshold);
+              if (trigger_map_.put(trigger_name, trigger_id) == -1) {
+                ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
+                return;
+              }
             });
     ret.wait();
     if (ex.has_value())
@@ -235,7 +240,7 @@ class dialog_table {
         mgmt_pool_.submit(
             [trigger_name, &ex, this] {
               trigger_id_t trigger_id;
-              if (!trigger_map_.get(trigger_name, trigger_id)) {
+              if (trigger_map_.get(trigger_name, trigger_id) == -1) {
                 ex = management_exception("Trigger " + trigger_name + " does not exist.");
                 return;
               }
@@ -321,7 +326,7 @@ class dialog_table {
                                    uint64_t ts_block_end) const {
 
     size_t filter_id;
-    if (!filter_map_.get(filter_name, filter_id)) {
+    if (filter_map_.get(filter_name, filter_id) == -1) {
       THROW(invalid_operation_exception,
             "Filter " + filter_name + " does not exist.");
     }
@@ -341,6 +346,10 @@ class dialog_table {
 
   alert_list get_alerts(uint64_t ts_block_begin, uint64_t ts_block_end) const {
     return alerts_.get_alerts(ts_block_begin, ts_block_end);
+  }
+
+  const std::string& get_name() const {
+    return table_name_;
   }
 
   const schema_t& get_schema() const {
@@ -405,9 +414,11 @@ class dialog_table {
     }
   }
 
+  std::string table_name_;
+  schema_type schema_;
+
   data_log_type data_log_;
   read_tail_type rt_;
-  schema_type schema_;
   metadata_writer_type metadata_;
 
   // In memory structures
