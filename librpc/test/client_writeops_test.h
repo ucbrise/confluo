@@ -153,7 +153,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   client.write(ts_str + pad_str("abc", DATA_SIZE));
 
   std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
-  DATA_SIZE);
+                                DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
   client.disconnect();

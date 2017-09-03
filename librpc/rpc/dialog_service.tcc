@@ -2353,6 +2353,215 @@ uint32_t dialog_service_append_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
+uint32_t dialog_service_write_args::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->log_offset);
+          this->__isset.log_offset = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readBinary(this->data);
+          this->__isset.data = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t dialog_service_write_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("dialog_service_write_args");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("log_offset", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->log_offset);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeBinary(this->data);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("dialog_service_write_pargs");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("log_offset", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64((*(this->log_offset)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeBinary((*(this->data)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_result::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t dialog_service_write_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("dialog_service_write_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
+    xfer += oprot->writeI64(this->success);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_presult::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
 uint32_t dialog_service_append_batch_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
@@ -2504,6 +2713,215 @@ uint32_t dialog_service_append_batch_result::write(Protocol_* oprot) const {
 
 template <class Protocol_>
 uint32_t dialog_service_append_batch_presult::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_batch_args::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->table_id);
+          this->__isset.table_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->log_offset);
+          this->__isset.log_offset = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->batch.read(iprot);
+          this->__isset.batch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t dialog_service_write_batch_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("dialog_service_write_batch_args");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("log_offset", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64(this->log_offset);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 3);
+  xfer += this->batch.write(oprot);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_batch_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("dialog_service_write_batch_pargs");
+
+  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("log_offset", ::apache::thrift::protocol::T_I64, 2);
+  xfer += oprot->writeI64((*(this->log_offset)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 3);
+  xfer += (*(this->batch)).write(oprot);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_batch_result::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t dialog_service_write_batch_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("dialog_service_write_batch_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
+    xfer += oprot->writeI64(this->success);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t dialog_service_write_batch_presult::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -4820,6 +5238,69 @@ int64_t dialog_serviceClientT<Protocol_>::recv_append()
 }
 
 template <class Protocol_>
+int64_t dialog_serviceClientT<Protocol_>::write(const int64_t table_id, const int64_t log_offset, const std::string& data)
+{
+  send_write(table_id, log_offset, data);
+  return recv_write();
+}
+
+template <class Protocol_>
+void dialog_serviceClientT<Protocol_>::send_write(const int64_t table_id, const int64_t log_offset, const std::string& data)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("write", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  dialog_service_write_pargs args;
+  args.table_id = &table_id;
+  args.log_offset = &log_offset;
+  args.data = &data;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+int64_t dialog_serviceClientT<Protocol_>::recv_write()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("write") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  int64_t _return;
+  dialog_service_write_presult result;
+  result.success = &_return;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    return _return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "write failed: unknown result");
+}
+
+template <class Protocol_>
 int64_t dialog_serviceClientT<Protocol_>::append_batch(const int64_t table_id, const rpc_record_batch& batch)
 {
   send_append_batch(table_id, batch);
@@ -4879,6 +5360,69 @@ int64_t dialog_serviceClientT<Protocol_>::recv_append_batch()
     return _return;
   }
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "append_batch failed: unknown result");
+}
+
+template <class Protocol_>
+int64_t dialog_serviceClientT<Protocol_>::write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch)
+{
+  send_write_batch(table_id, log_offset, batch);
+  return recv_write_batch();
+}
+
+template <class Protocol_>
+void dialog_serviceClientT<Protocol_>::send_write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("write_batch", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  dialog_service_write_batch_pargs args;
+  args.table_id = &table_id;
+  args.log_offset = &log_offset;
+  args.batch = &batch;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+int64_t dialog_serviceClientT<Protocol_>::recv_write_batch()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("write_batch") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  int64_t _return;
+  dialog_service_write_batch_presult result;
+  result.success = &_return;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    return _return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "write_batch failed: unknown result");
 }
 
 template <class Protocol_>
@@ -6739,6 +7283,116 @@ void dialog_serviceProcessorT<Protocol_>::process_append(int32_t seqid, Protocol
 }
 
 template <class Protocol_>
+void dialog_serviceProcessorT<Protocol_>::process_write(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("dialog_service.write", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.write");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "dialog_service.write");
+  }
+
+  dialog_service_write_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "dialog_service.write", bytes);
+  }
+
+  dialog_service_write_result result;
+  try {
+    result.success = iface_->write(args.table_id, args.log_offset, args.data);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "dialog_service.write");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("write", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "dialog_service.write");
+  }
+
+  oprot->writeMessageBegin("write", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "dialog_service.write", bytes);
+  }
+}
+
+template <class Protocol_>
+void dialog_serviceProcessorT<Protocol_>::process_write(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("dialog_service.write", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.write");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "dialog_service.write");
+  }
+
+  dialog_service_write_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "dialog_service.write", bytes);
+  }
+
+  dialog_service_write_result result;
+  try {
+    result.success = iface_->write(args.table_id, args.log_offset, args.data);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "dialog_service.write");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("write", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "dialog_service.write");
+  }
+
+  oprot->writeMessageBegin("write", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "dialog_service.write", bytes);
+  }
+}
+
+template <class Protocol_>
 void dialog_serviceProcessorT<Protocol_>::process_append_batch(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
@@ -6845,6 +7499,116 @@ void dialog_serviceProcessorT<Protocol_>::process_append_batch(int32_t seqid, Pr
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->postWrite(ctx, "dialog_service.append_batch", bytes);
+  }
+}
+
+template <class Protocol_>
+void dialog_serviceProcessorT<Protocol_>::process_write_batch(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("dialog_service.write_batch", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.write_batch");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "dialog_service.write_batch");
+  }
+
+  dialog_service_write_batch_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "dialog_service.write_batch", bytes);
+  }
+
+  dialog_service_write_batch_result result;
+  try {
+    result.success = iface_->write_batch(args.table_id, args.log_offset, args.batch);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "dialog_service.write_batch");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("write_batch", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "dialog_service.write_batch");
+  }
+
+  oprot->writeMessageBegin("write_batch", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "dialog_service.write_batch", bytes);
+  }
+}
+
+template <class Protocol_>
+void dialog_serviceProcessorT<Protocol_>::process_write_batch(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("dialog_service.write_batch", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "dialog_service.write_batch");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "dialog_service.write_batch");
+  }
+
+  dialog_service_write_batch_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "dialog_service.write_batch", bytes);
+  }
+
+  dialog_service_write_batch_result result;
+  try {
+    result.success = iface_->write_batch(args.table_id, args.log_offset, args.batch);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "dialog_service.write_batch");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("write_batch", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "dialog_service.write_batch");
+  }
+
+  oprot->writeMessageBegin("write_batch", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "dialog_service.write_batch", bytes);
   }
 }
 
@@ -8698,6 +9462,95 @@ int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_append(const int32_t se
 }
 
 template <class Protocol_>
+int64_t dialog_serviceConcurrentClientT<Protocol_>::write(const int64_t table_id, const int64_t log_offset, const std::string& data)
+{
+  int32_t seqid = send_write(table_id, log_offset, data);
+  return recv_write(seqid);
+}
+
+template <class Protocol_>
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_write(const int64_t table_id, const int64_t log_offset, const std::string& data)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("write", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  dialog_service_write_pargs args;
+  args.table_id = &table_id;
+  args.log_offset = &log_offset;
+  args.data = &data;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_write(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("write") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      int64_t _return;
+      dialog_service_write_presult result;
+      result.success = &_return;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        sentry.commit();
+        return _return;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "write failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
 int64_t dialog_serviceConcurrentClientT<Protocol_>::append_batch(const int64_t table_id, const rpc_record_batch& batch)
 {
   int32_t seqid = send_append_batch(table_id, batch);
@@ -8776,6 +9629,95 @@ int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_append_batch(const int3
       }
       // in a bad state, don't commit
       throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "append_batch failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+int64_t dialog_serviceConcurrentClientT<Protocol_>::write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch)
+{
+  int32_t seqid = send_write_batch(table_id, log_offset, batch);
+  return recv_write_batch(seqid);
+}
+
+template <class Protocol_>
+int32_t dialog_serviceConcurrentClientT<Protocol_>::send_write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("write_batch", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  dialog_service_write_batch_pargs args;
+  args.table_id = &table_id;
+  args.log_offset = &log_offset;
+  args.batch = &batch;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+int64_t dialog_serviceConcurrentClientT<Protocol_>::recv_write_batch(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("write_batch") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      int64_t _return;
+      dialog_service_write_batch_presult result;
+      result.success = &_return;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        sentry.commit();
+        return _return;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "write_batch failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
