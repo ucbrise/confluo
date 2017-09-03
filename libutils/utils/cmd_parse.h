@@ -148,6 +148,8 @@ class cmd_parser {
   }
 
   std::string get(const std::string& key) const {
+    if (values_.find(key) == values_.end())
+      return "";
     return values_.at(key);
   }
 
