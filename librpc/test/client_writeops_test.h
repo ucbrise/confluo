@@ -17,6 +17,7 @@ class ClientWriteOpsTest : public testing::Test {
  public:
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
+  const rpc_endpoint SERVER_EP = rpc_endpoint("127.0.0.1:9090");
 
   static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
@@ -108,7 +109,7 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
   std::string table_name = "my_table";
 
   auto store = new dialog_store("/tmp");
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -137,7 +138,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
 
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
   auto dtable = store->get_table(table_name);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -169,7 +170,7 @@ TEST_F(ClientWriteOpsTest, BufferTest) {
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
   auto dtable = store->get_table(table_name);
   auto schema_size = dtable->get_schema().record_size();
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -212,7 +213,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   auto store = new dialog_store("/tmp");
   store->add_table(table_name, schema(), storage::D_IN_MEMORY);
   auto dtable = store->get_table(table_name);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -343,7 +344,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   auto store = new dialog_store("/tmp");
   store->add_table(table_name, schema(), storage::D_IN_MEMORY);
   auto dtable = store->get_table(table_name);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });

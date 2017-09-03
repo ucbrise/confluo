@@ -16,6 +16,7 @@
 
 #include "rpc_type_conversions.h"
 #include "rpc_configuration_params.h"
+#include "rpc_endpoint.h"
 #include "dialog_store.h"
 #include "dialog_table.h"
 #include "logger.h"
@@ -43,9 +44,13 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   typedef std::map<rpc_iterator_id, combined_stream> combined_map;
   typedef std::map<rpc_iterator_id, alert_entry> alerts_map;
 
-  dialog_service_handler(dialog_store* store)
-      : handler_id_(-1),
-        store_(store),
+  dialog_service_handler(dialog_store* store, const rpc_endpoint& successor_ep,
+                         const rpc_endpoint& tail_ep)
+      : store_(store),
+        handler_id_(-1),
+        successor_ep_(successor_ep),
+        tail_ep_(tail_ep),
+        is_tail_(!successor_ep.is_valid()),
         iterator_id_(0) {
   }
 
@@ -67,7 +72,7 @@ class dialog_service_handler : virtual public dialog_serviceIf {
       ex.msg = "Could not deregister handler";
       throw ex;
     } else {
-      LOG_INFO << "Deregistered handler thread " << std::this_thread::get_id() << " as " << ret;
+      LOG_INFO<< "Deregistered handler thread " << std::this_thread::get_id() << " as " << ret;
     }
   }
 
@@ -420,8 +425,14 @@ private:
     }
   }
 
-  rpc_handler_id handler_id_;
+  // Storage
   dialog_store* store_;
+
+  // Server meta-data
+  rpc_handler_id handler_id_;
+  rpc_endpoint successor_ep_;
+  rpc_endpoint tail_ep_;
+  bool is_tail_;
 
   // Iterator management
   rpc_iterator_id iterator_id_;
@@ -433,8 +444,11 @@ private:
 
 class dialog_clone_factory : public dialog_serviceIfFactory {
  public:
-  dialog_clone_factory(dialog_store* store)
-      : store_(store) {
+  dialog_clone_factory(dialog_store* store, const rpc_endpoint& successor,
+                       const rpc_endpoint& tail)
+      : store_(store),
+        successor_(successor),
+        tail_(tail) {
   }
 
   virtual ~dialog_clone_factory() {
@@ -448,7 +462,7 @@ class dialog_clone_factory : public dialog_serviceIfFactory {
     << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
     << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
     << "\t\t\tPeerPort: " << sock->getPeerPort();
-    return new dialog_service_handler(store_);
+    return new dialog_service_handler(store_, successor_, tail_);
   }
 
   virtual void releaseHandler(dialog_serviceIf* handler) {
@@ -457,27 +471,36 @@ class dialog_clone_factory : public dialog_serviceIfFactory {
 
  private:
   dialog_store* store_;
+  rpc_endpoint successor_;
+  rpc_endpoint tail_;
 };
 
 class dialog_server {
  public:
   static shared_ptr<TThreadedServer> create(dialog_store* store,
-                                            const std::string& address,
-                                            int port) {
+                                            const rpc_endpoint& server,
+                                            const rpc_endpoint& successor,
+                                            const rpc_endpoint& tail) {
     shared_ptr<dialog_clone_factory> clone_factory(
-        new dialog_clone_factory(store));
+        new dialog_clone_factory(store, successor, tail));
     shared_ptr<dialog_serviceProcessorFactory> proc_factory(
         new dialog_serviceProcessorFactory(clone_factory));
-    shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
+    shared_ptr<TServerSocket> sock(
+        new TServerSocket(server.addr(), server.port()));
     shared_ptr<TBufferedTransportFactory> transport_factory(
         new TBufferedTransportFactory());
     shared_ptr<TBinaryProtocolFactory> protocol_factory(
         new TBinaryProtocolFactory());
-    shared_ptr<TThreadedServer> server(
+    shared_ptr<TThreadedServer> tserver(
         new TThreadedServer(proc_factory, sock, transport_factory,
                             protocol_factory));
-    server->setConcurrentClientLimit(configuration_params::MAX_CONCURRENCY);
-    return server;
+    tserver->setConcurrentClientLimit(configuration_params::MAX_CONCURRENCY);
+    return tserver;
+  }
+
+  static shared_ptr<TThreadedServer> create(dialog_store* store,
+                                            const rpc_endpoint& server) {
+    return create(store, server, rpc_endpoint(), rpc_endpoint());
   }
 };
 

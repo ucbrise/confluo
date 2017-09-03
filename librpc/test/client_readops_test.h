@@ -18,6 +18,7 @@ class ClientReadOpsTest : public testing::Test {
  public:
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
+  const rpc_endpoint SERVER_EP = rpc_endpoint("127.0.0.1:9090");
 
   static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
@@ -139,7 +140,7 @@ std::vector<column_t> ClientReadOpsTest::s = schema();
 TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
   std::string table_name = "my_table";
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -162,7 +163,7 @@ TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
 TEST_F(ClientReadOpsTest, ReadDurableTest) {
   std::string table_name = "my_table";
   auto store = simple_table_store(table_name, storage::D_DURABLE);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -185,7 +186,7 @@ TEST_F(ClientReadOpsTest, ReadDurableTest) {
 TEST_F(ClientReadOpsTest, ReadDurableRelaxedTest) {
   std::string table_name = "my_table";
   auto store = simple_table_store(table_name, storage::D_DURABLE_RELAXED);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -229,7 +230,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   dtable->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -368,7 +369,7 @@ TEST_F(ClientReadOpsTest, PreDefFilterTest) {
   dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
   int64_t end = filter::get_ts_block(r.ts);
 
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -499,7 +500,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   record_batch batch = get_batch();
   dtable->append_batch(batch);
 
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -634,7 +635,7 @@ TEST_F(ClientReadOpsTest, BatchPreDefFilterTest) {
   int64_t beg = batch.start_time_block();
   int64_t end = batch.end_time_block();
 
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = dialog_server::create(store, SERVER_EP);
   std::thread serve_thread([&server] {
     server->serve();
   });

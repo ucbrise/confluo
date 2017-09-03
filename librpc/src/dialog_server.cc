@@ -18,12 +18,20 @@ int main(int argc, char **argv) {
 
   cmd_options opts;
   opts.add(
-      cmd_option("port", 'p', false).set_default("9090").set_description(
-          "Port that server listens on"));
+      cmd_option("endpoint", 'e', false).set_default("127.0.0.1:9090")
+          .set_description("Endpoint (address:port) that server listens on"));
 
   opts.add(
-      cmd_option("address", 'a', false).set_default("127.0.0.1").set_description(
-          "Address server binds to"));
+      cmd_option("successor", 's', false).set_description(
+          "Endpoint (address:port) of successor in replica chain"));
+
+  opts.add(
+      cmd_option("tail", 't', false).set_description(
+          "Endpoint (address:port) of tail in replica chain"));
+
+  opts.add(
+      cmd_option("replica-id", 'r', false).set_default("0").set_description(
+          "Position of server in replica chain"));
 
   opts.add(
       cmd_option("data-path", 'd', false).set_default(".").set_description(
@@ -35,13 +43,14 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  int port;
-  std::string address;
+  std::string host_ep, successor_ep, tail_ep;
+  int replica_id;
   std::string data_path;
-
   try {
-    port = parser.get_int("port");
-    address = parser.get("address");
+    host_ep = parser.get("endpoint");
+    successor_ep = parser.get("successor");
+    tail_ep = parser.get("tail");
+    replica_id = parser.get_int("replica-id");
     data_path = parser.get("data-path");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
@@ -49,15 +58,27 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  rpc_endpoint host(host_ep);
+  rpc_endpoint successor;
+  rpc_endpoint tail;
+
+  if (successor_ep != "") {
+    successor = rpc_endpoint(successor_ep);
+  }
+
+  if (tail_ep != "") {
+    tail = rpc_endpoint(tail_ep);
+  }
+
   LOG_INFO<< parser.parsed_values();
 
   dialog_store* store = new dialog_store(data_path);
 
   try {
-    auto server = dialog_server::create(store, address, port);
+    auto server = dialog_server::create(store, host, successor, tail);
     server->serve();
   } catch (std::exception& e) {
-    LOG_ERROR<<"Could not start server listening on " << address << ":" << port << ": " << e.what();
+    LOG_ERROR<<"Could not start server listening on " << host.addr() << ":" << host.port() << ": " << e.what();
   }
 
   return 0;
