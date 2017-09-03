@@ -256,28 +256,21 @@ class dialog_table {
   }
 
   // Query ops
-  size_t append_batch(record_batch& batch) {
-    size_t record_size = schema_.record_size();
-    size_t batch_bytes = batch.nrecords * record_size;
-    size_t log_offset = data_log_.reserve(batch_bytes);
-    size_t cur_offset = log_offset;
-    for (record_block& block : batch.blocks) {
-      data_log_.write(cur_offset,
-                      reinterpret_cast<const uint8_t*>(block.data.data()),
-                      block.data.length());
-      update_aux_record_block(cur_offset, block, record_size);
-      cur_offset += block.data.length();
-    }
-
-    data_log_.flush(log_offset, batch_bytes);
-    rt_.advance(log_offset, batch_bytes);
-    return log_offset;
+  size_t reserve(size_t nbytes) {
+    return data_log_.reserve(nbytes);
   }
 
-  size_t append(void* data) {
-    size_t record_size = schema_.record_size();
-    size_t offset = data_log_.append((const uint8_t*) data, record_size);
-    record_t r = schema_.apply(offset, data_log_.ptr(offset));
+  void advance_rt(size_t log_offset, size_t nbytes) {
+    rt_.advance(log_offset, nbytes);
+  }
+
+  void update_rt(size_t value) {
+    rt_.update(value);
+  }
+
+  void write(size_t log_offset, void* data) {
+    data_log_.write(log_offset, (const uint8_t*) data, record_size());
+    record_t r = schema_.apply(log_offset, data_log_.ptr(log_offset));
 
     size_t nfilters = filters_.size();
     for (size_t i = 0; i < nfilters; i++)
@@ -286,11 +279,36 @@ class dialog_table {
 
     for (const field_t& f : r)
       if (f.is_indexed())
-        indexes_.at(f.index_id())->insert(f.get_key(), offset);
+        indexes_.at(f.index_id())->insert(f.get_key(), log_offset);
 
-    data_log_.flush(offset, record_size);
-    rt_.advance(offset, record_size);
-    return offset;
+    data_log_.flush(log_offset, record_size());
+  }
+
+  void write_batch(size_t log_offset, record_batch& batch) {
+    size_t cur_offset = log_offset;
+    for (record_block& block : batch.blocks) {
+      data_log_.write(cur_offset,
+                      reinterpret_cast<const uint8_t*>(block.data.data()),
+                      block.data.length());
+      update_aux_record_block(cur_offset, block, record_size());
+      cur_offset += block.data.length();
+    }
+
+    data_log_.flush(log_offset, batch.nrecords * record_size());
+  }
+
+  size_t append(void* data) {
+    size_t log_offset = reserve(record_size());
+    write(log_offset, data);
+    advance_rt(log_offset, record_size());
+    return log_offset;
+  }
+
+  size_t append_batch(record_batch& batch) {
+    size_t log_offset = reserve(batch.nrecords * record_size());
+    write_batch(log_offset, batch);
+    advance_rt(log_offset, batch.nrecords * record_size());
+    return log_offset;
   }
 
   void* read(uint64_t offset, uint64_t& version) const {
