@@ -42,6 +42,12 @@ class read_tail {
     storage_.flush(read_tail_, sizeof(uint64_t));
   }
 
+  void update(uint64_t value) {
+    uint64_t old = get();
+    while (old < value && atomic::weak::cas(read_tail_, &old, value))
+      ;
+  }
+
  private:
   atomic::type<uint64_t>* read_tail_;
   storage::storage_mode storage_;
