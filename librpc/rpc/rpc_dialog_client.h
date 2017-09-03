@@ -225,6 +225,15 @@ class rpc_dialog_client {
     return client_->num_records(cur_table_id_);
   }
 
+  // Internal ops
+  int64_t get_cur_table_id() {
+    return cur_table_id_;
+  }
+
+  schema_t const& get_cur_schema() const {
+    return cur_schema_;
+  }
+
 protected:
   int64_t cur_table_id_;
   schema_t cur_schema_;

@@ -17,6 +17,8 @@
 #include "rpc_type_conversions.h"
 #include "rpc_configuration_params.h"
 #include "rpc_endpoint.h"
+#include "dialog_client.h"
+
 #include "dialog_store.h"
 #include "dialog_table.h"
 #include "logger.h"
@@ -52,6 +54,10 @@ class dialog_service_handler : virtual public dialog_serviceIf {
         tail_ep_(tail_ep),
         is_tail_(!successor_ep.is_valid()),
         iterator_id_(0) {
+    if (!is_tail_) {
+      successor_.connect(successor_ep_);
+      tail_.connect(tail_ep_);
+    }
   }
 
   void register_handler() {
@@ -62,6 +68,15 @@ class dialog_service_handler : virtual public dialog_serviceIf {
       throw ex;
     } else {
       LOG_INFO<< "Registered handler thread " << std::this_thread::get_id() << " as " << handler_id_;
+    }
+
+    if (!is_tail_) {
+      try {
+        successor_()->register_handler();
+      } catch (rpc_management_exception& ex) {
+        thread_manager::deregister_thread();
+        throw ex;
+      }
     }
   }
 
@@ -74,18 +89,27 @@ class dialog_service_handler : virtual public dialog_serviceIf {
     } else {
       LOG_INFO<< "Deregistered handler thread " << std::this_thread::get_id() << " as " << ret;
     }
+
+    if (!is_tail_) {
+      successor_()->deregister_handler();
+    }
   }
 
   int64_t create_table(const std::string& table_name, const rpc_schema& schema,
-      const rpc_storage_mode mode) {
+                       const rpc_storage_mode mode) {
     int64_t ret = -1;
     try {
-      ret = store_->add_table(table_name, rpc_type_conversions::convert_schema(schema),
-          rpc_type_conversions::convert_mode(mode));
-    } catch(management_exception& ex) {
+      ret = store_->add_table(table_name,
+                              rpc_type_conversions::convert_schema(schema),
+                              rpc_type_conversions::convert_mode(mode));
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
+    }
+
+    if (!is_tail_) {
+      successor_()->create_table(table_name, schema, mode);
     }
     return ret;
   }
@@ -99,105 +123,196 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   void remove_table(int64_t table_id) {
     try {
       store_->remove_table(table_id);
-    } catch(management_exception& ex) {
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
     }
+
+    if (!is_tail_) {
+      successor_()->remove_table(table_id);
+    }
   }
 
-  void add_index(int64_t table_id, const std::string& field_name, const double bucket_size) {
+  void add_index(int64_t table_id, const std::string& field_name,
+                 const double bucket_size) {
     try {
       store_->get_table(table_id)->add_index(field_name, bucket_size);
-    } catch(management_exception& ex) {
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
+    }
+
+    if (!is_tail_) {
+      successor_()->add_index(table_id, field_name, bucket_size);
     }
   }
 
   void remove_index(int64_t table_id, const std::string& field_name) {
     try {
       store_->get_table(table_id)->remove_index(field_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
     }
+
+    if (!is_tail_) {
+      successor_()->remove_index(table_id, field_name);
+    }
   }
 
   void add_filter(int64_t table_id, const std::string& filter_name,
-      const std::string& filter_expr) {
+                  const std::string& filter_expr) {
     try {
       store_->get_table(table_id)->add_filter(filter_name, filter_expr);
-    } catch(management_exception& ex) {
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
-    } catch(parse_exception& ex) {
+    } catch (parse_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
+    }
+
+    if (!is_tail_) {
+      successor_()->add_filter(table_id, filter_name, filter_expr);
     }
   }
 
   void remove_filter(int64_t table_id, const std::string& filter_name) {
     try {
       store_->get_table(table_id)->remove_filter(filter_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
     }
+
+    if (!is_tail_) {
+      successor_()->remove_filter(table_id, filter_name);
+    }
   }
 
   void add_trigger(int64_t table_id, const std::string& trigger_name,
-      const std::string& filter_name,
-      const std::string& trigger_expr) {
+                   const std::string& filter_name,
+                   const std::string& trigger_expr) {
     try {
-      store_->get_table(table_id)->add_trigger(trigger_name, filter_name, trigger_expr);
-    } catch(management_exception& ex) {
+      store_->get_table(table_id)->add_trigger(trigger_name, filter_name,
+                                               trigger_expr);
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
-    } catch(parse_exception& ex) {
+    } catch (parse_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
+    }
+
+    if (!is_tail_) {
+      successor_()->add_trigger(table_id, trigger_name, filter_name,
+                                trigger_expr);
     }
   }
 
   void remove_trigger(int64_t table_id, const std::string& trigger_name) {
     try {
       store_->get_table(table_id)->remove_trigger(trigger_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
     }
+
+    if (!is_tail_) {
+      successor_()->remove_trigger(table_id, trigger_name);
+    }
   }
 
-  int64_t append(int64_t table_id, const std::string& data) {
+  int64_t append(const int64_t table_id, const std::string& data) {
     void* buf = (char*) &data[0];  // XXX: Fix
-    return store_->get_table(table_id)->append(buf);
+    dialog_table* table = store_->get_table(table_id);
+    size_t nbytes = table->record_size();
+    assert(data.length() == nbytes);
+    int64_t log_offset = table->reserve(nbytes);
+    table->write(log_offset, buf);
+    if (!is_tail_) {
+      int64_t ret = successor_()->write(table_id, log_offset, data);
+      table->update_rt(ret + nbytes);
+    } else {
+      table->advance_rt(log_offset, nbytes);
+    }
+    return log_offset;
   }
 
-  int64_t append_batch(int64_t table_id, const rpc_record_batch& batch) {
+  int64_t write(const int64_t table_id, const int64_t log_offset,
+                const std::string& data) {
+    void* buf = (char*) &data[0];  // XXX: Fix
+    dialog_table* table = store_->get_table(table_id);
+    size_t nbytes = table->record_size();
+    assert(data.length() == nbytes);
+    table->write(log_offset, buf);
+    if (!is_tail_) {
+      int64_t ret = successor_()->write(table_id, log_offset, data);
+      table->update_rt(ret + nbytes);
+    } else {
+      table->advance_rt(log_offset, nbytes);
+    }
+    return log_offset;
+  }
+
+  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) {
     record_batch rbatch = rpc_type_conversions::convert_batch(batch);
-    return store_->get_table(table_id)->append_batch(rbatch);
+    dialog_table* table = store_->get_table(table_id);
+    size_t nbytes = batch.nrecords * table->record_size();
+    int64_t log_offset = table->reserve(nbytes);
+    table->write_batch(log_offset, rbatch);
+    if (!is_tail_) {
+      int64_t ret = successor_()->write_batch(table_id, log_offset, batch);
+      table->update_rt(ret + nbytes);
+    } else {
+      table->advance_rt(log_offset, nbytes);
+    }
+    return log_offset;
+  }
+
+  int64_t write_batch(const int64_t table_id, const int64_t log_offset,
+                      const rpc_record_batch& batch) {
+    record_batch rbatch = rpc_type_conversions::convert_batch(batch);
+    dialog_table* table = store_->get_table(table_id);
+    size_t nbytes = batch.nrecords * table->record_size();
+    table->write_batch(log_offset, rbatch);
+    if (!is_tail_) {
+      int64_t ret = successor_()->write_batch(table_id, log_offset, batch);
+      table->update_rt(ret + nbytes);
+    } else {
+      table->advance_rt(log_offset, nbytes);
+    }
+    return log_offset;
   }
 
   void read(std::string& _return, int64_t table_id, const int64_t offset,
-      const int64_t nrecords) {
+            const int64_t nrecords) {
+    dialog_table* table = store_->get_table(table_id);
+    int64_t rt = table->get_rt();
+    if (!is_tail_ && offset >= rt) {
+      tail_()->read(_return, table_id, offset, nrecords);
+      return;
+    }
+
     uint64_t limit;
-    char* data = reinterpret_cast<char*>(store_->get_table(table_id)->read(offset, limit));
-    size_t size = std::min(static_cast<size_t>(limit - offset),
-        static_cast<size_t>(nrecords * store_->get_table(table_id)->record_size()));
+    char* data = reinterpret_cast<char*>(table->read(offset, limit));
+    size_t size = std::min(
+        static_cast<size_t>(limit - offset),
+        static_cast<size_t>(nrecords * table->record_size()));
     _return.assign(data, size);
   }
 
-  void adhoc_filter(rpc_iterator_handle& _return,int64_t table_id,
-      const std::string& filter_expr) {
+  void adhoc_filter(rpc_iterator_handle& _return, int64_t table_id,
+                    const std::string& filter_expr) {
     bool success = false;
     rpc_iterator_id it_id = new_iterator_id();
     dialog_table* table = store_->get_table(table_id);
@@ -221,8 +336,8 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   }
 
   void predef_filter(rpc_iterator_handle& _return, int64_t table_id,
-      const std::string& filter_name, const int64_t begin_ms,
-      const int64_t end_ms) {
+                     const std::string& filter_name, const int64_t begin_ms,
+                     const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
     dialog_table* table = store_->get_table(table_id);
     auto res = table->query_filter(filter_name, begin_ms, end_ms);
@@ -237,14 +352,15 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   }
 
   void combined_filter(rpc_iterator_handle& _return, int64_t table_id,
-      const std::string& filter_name,
-      const std::string& filter_expr, const int64_t begin_ms,
-      const int64_t end_ms) {
+                       const std::string& filter_name,
+                       const std::string& filter_expr, const int64_t begin_ms,
+                       const int64_t end_ms) {
     bool success = false;
     rpc_iterator_id it_id = new_iterator_id();
     dialog_table* table = store_->get_table(table_id);
     try {
-      auto res = table->query_filter(filter_name, filter_expr, begin_ms, end_ms);
+      auto res = table->query_filter(filter_name, filter_expr, begin_ms,
+                                     end_ms);
       auto ret = combined_.insert(std::make_pair(it_id, res));
       success = ret.second;
     } catch (parse_exception& ex) {
@@ -262,10 +378,11 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   }
 
   void alerts_by_time(rpc_iterator_handle& _return, int64_t table_id,
-      const int64_t begin_ms, const int64_t end_ms) {
+                      const int64_t begin_ms, const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
     auto alerts = store_->get_table(table_id)->get_alerts(begin_ms, end_ms);
-    auto ret = alerts_.insert(std::make_pair(it_id, std::make_pair(alerts.begin(), alerts.end())));
+    auto ret = alerts_.insert(
+        std::make_pair(it_id, std::make_pair(alerts.begin(), alerts.end())));
     if (!ret.second) {
       rpc_invalid_operation e;
       e.msg = "Duplicate rpc_iterator_id assigned";
@@ -276,7 +393,7 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   }
 
   void get_more(rpc_iterator_handle& _return, int64_t table_id,
-      const rpc_iterator_descriptor& desc) {
+                const rpc_iterator_descriptor& desc) {
     if (desc.handler_id != handler_id_) {
       rpc_invalid_operation ex;
       ex.msg = "handler_id mismatch";
@@ -313,13 +430,13 @@ class dialog_service_handler : virtual public dialog_serviceIf {
     return store_->get_table(table_id)->num_records();
   }
 
-private:
+ private:
   rpc_iterator_id new_iterator_id() {
     return iterator_id_++;
   }
 
   void adhoc_more(rpc_iterator_handle& _return, size_t record_size,
-      rpc_iterator_id it_id) {
+                  rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_RECORD;
     _return.desc.handler_id = handler_id_;
@@ -334,7 +451,8 @@ private:
       size_t i = 0;
       for (; res.has_more() && i < to_read; ++i, ++res) {
         record_t rec = res.get();
-        _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
+        _return.data.append(reinterpret_cast<const char*>(rec.data()),
+                            rec.length());
       }
       _return.num_entries = i;
       _return.has_more = res.has_more();
@@ -346,7 +464,7 @@ private:
   }
 
   void predef_more(rpc_iterator_handle& _return, size_t record_size,
-      rpc_iterator_id it_id) {
+                   rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_RECORD;
     _return.desc.handler_id = handler_id_;
@@ -361,7 +479,8 @@ private:
       size_t i = 0;
       for (; res.has_more() && i < to_read; ++i, ++res) {
         record_t rec = res.get();
-        _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
+        _return.data.append(reinterpret_cast<const char*>(rec.data()),
+                            rec.length());
       }
       _return.num_entries = i;
       _return.has_more = res.has_more();
@@ -373,7 +492,7 @@ private:
   }
 
   void combined_more(rpc_iterator_handle& _return, size_t record_size,
-      rpc_iterator_id it_id) {
+                     rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_RECORD;
     _return.desc.handler_id = handler_id_;
@@ -388,7 +507,8 @@ private:
       size_t i = 0;
       for (; res.has_more() && i < to_read; ++i, ++res) {
         record_t rec = res.get();
-        _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
+        _return.data.append(reinterpret_cast<const char*>(rec.data()),
+                            rec.length());
       }
       _return.num_entries = i;
       _return.has_more = res.has_more();
@@ -432,6 +552,8 @@ private:
   rpc_handler_id handler_id_;
   rpc_endpoint successor_ep_;
   rpc_endpoint tail_ep_;
+  dialog_client successor_;
+  dialog_client tail_;
   bool is_tail_;
 
   // Iterator management

@@ -44,7 +44,9 @@ class dialog_serviceIf {
    * @param data
    */
   virtual int64_t append(const int64_t table_id, const std::string& data) = 0;
+  virtual int64_t write(const int64_t table_id, const int64_t log_offset, const std::string& data) = 0;
   virtual int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) = 0;
+  virtual int64_t write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch) = 0;
   virtual void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords) = 0;
   virtual void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr) = 0;
   virtual void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
@@ -119,7 +121,15 @@ class dialog_serviceNull : virtual public dialog_serviceIf {
     int64_t _return = 0;
     return _return;
   }
+  int64_t write(const int64_t /* table_id */, const int64_t /* log_offset */, const std::string& /* data */) {
+    int64_t _return = 0;
+    return _return;
+  }
   int64_t append_batch(const int64_t /* table_id */, const rpc_record_batch& /* batch */) {
+    int64_t _return = 0;
+    return _return;
+  }
+  int64_t write_batch(const int64_t /* table_id */, const int64_t /* log_offset */, const rpc_record_batch& /* batch */) {
     int64_t _return = 0;
     return _return;
   }
@@ -1590,6 +1600,134 @@ class dialog_service_append_presult {
 
 };
 
+typedef struct _dialog_service_write_args__isset {
+  _dialog_service_write_args__isset() : table_id(false), log_offset(false), data(false) {}
+  bool table_id :1;
+  bool log_offset :1;
+  bool data :1;
+} _dialog_service_write_args__isset;
+
+class dialog_service_write_args {
+ public:
+
+  dialog_service_write_args(const dialog_service_write_args&);
+  dialog_service_write_args(dialog_service_write_args&&);
+  dialog_service_write_args& operator=(const dialog_service_write_args&);
+  dialog_service_write_args& operator=(dialog_service_write_args&&);
+  dialog_service_write_args() : table_id(0), log_offset(0), data() {
+  }
+
+  virtual ~dialog_service_write_args() throw();
+  int64_t table_id;
+  int64_t log_offset;
+  std::string data;
+
+  _dialog_service_write_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
+
+  void __set_log_offset(const int64_t val);
+
+  void __set_data(const std::string& val);
+
+  bool operator == (const dialog_service_write_args & rhs) const
+  {
+    if (!(table_id == rhs.table_id))
+      return false;
+    if (!(log_offset == rhs.log_offset))
+      return false;
+    if (!(data == rhs.data))
+      return false;
+    return true;
+  }
+  bool operator != (const dialog_service_write_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const dialog_service_write_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class dialog_service_write_pargs {
+ public:
+
+
+  virtual ~dialog_service_write_pargs() throw();
+  const int64_t* table_id;
+  const int64_t* log_offset;
+  const std::string* data;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _dialog_service_write_result__isset {
+  _dialog_service_write_result__isset() : success(false) {}
+  bool success :1;
+} _dialog_service_write_result__isset;
+
+class dialog_service_write_result {
+ public:
+
+  dialog_service_write_result(const dialog_service_write_result&);
+  dialog_service_write_result(dialog_service_write_result&&);
+  dialog_service_write_result& operator=(const dialog_service_write_result&);
+  dialog_service_write_result& operator=(dialog_service_write_result&&);
+  dialog_service_write_result() : success(0) {
+  }
+
+  virtual ~dialog_service_write_result() throw();
+  int64_t success;
+
+  _dialog_service_write_result__isset __isset;
+
+  void __set_success(const int64_t val);
+
+  bool operator == (const dialog_service_write_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const dialog_service_write_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const dialog_service_write_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _dialog_service_write_presult__isset {
+  _dialog_service_write_presult__isset() : success(false) {}
+  bool success :1;
+} _dialog_service_write_presult__isset;
+
+class dialog_service_write_presult {
+ public:
+
+
+  virtual ~dialog_service_write_presult() throw();
+  int64_t* success;
+
+  _dialog_service_write_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _dialog_service_append_batch_args__isset {
   _dialog_service_append_batch_args__isset() : table_id(false), batch(false) {}
   bool table_id :1;
@@ -1705,6 +1843,134 @@ class dialog_service_append_batch_presult {
   int64_t* success;
 
   _dialog_service_append_batch_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _dialog_service_write_batch_args__isset {
+  _dialog_service_write_batch_args__isset() : table_id(false), log_offset(false), batch(false) {}
+  bool table_id :1;
+  bool log_offset :1;
+  bool batch :1;
+} _dialog_service_write_batch_args__isset;
+
+class dialog_service_write_batch_args {
+ public:
+
+  dialog_service_write_batch_args(const dialog_service_write_batch_args&);
+  dialog_service_write_batch_args(dialog_service_write_batch_args&&);
+  dialog_service_write_batch_args& operator=(const dialog_service_write_batch_args&);
+  dialog_service_write_batch_args& operator=(dialog_service_write_batch_args&&);
+  dialog_service_write_batch_args() : table_id(0), log_offset(0) {
+  }
+
+  virtual ~dialog_service_write_batch_args() throw();
+  int64_t table_id;
+  int64_t log_offset;
+  rpc_record_batch batch;
+
+  _dialog_service_write_batch_args__isset __isset;
+
+  void __set_table_id(const int64_t val);
+
+  void __set_log_offset(const int64_t val);
+
+  void __set_batch(const rpc_record_batch& val);
+
+  bool operator == (const dialog_service_write_batch_args & rhs) const
+  {
+    if (!(table_id == rhs.table_id))
+      return false;
+    if (!(log_offset == rhs.log_offset))
+      return false;
+    if (!(batch == rhs.batch))
+      return false;
+    return true;
+  }
+  bool operator != (const dialog_service_write_batch_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const dialog_service_write_batch_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class dialog_service_write_batch_pargs {
+ public:
+
+
+  virtual ~dialog_service_write_batch_pargs() throw();
+  const int64_t* table_id;
+  const int64_t* log_offset;
+  const rpc_record_batch* batch;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _dialog_service_write_batch_result__isset {
+  _dialog_service_write_batch_result__isset() : success(false) {}
+  bool success :1;
+} _dialog_service_write_batch_result__isset;
+
+class dialog_service_write_batch_result {
+ public:
+
+  dialog_service_write_batch_result(const dialog_service_write_batch_result&);
+  dialog_service_write_batch_result(dialog_service_write_batch_result&&);
+  dialog_service_write_batch_result& operator=(const dialog_service_write_batch_result&);
+  dialog_service_write_batch_result& operator=(dialog_service_write_batch_result&&);
+  dialog_service_write_batch_result() : success(0) {
+  }
+
+  virtual ~dialog_service_write_batch_result() throw();
+  int64_t success;
+
+  _dialog_service_write_batch_result__isset __isset;
+
+  void __set_success(const int64_t val);
+
+  bool operator == (const dialog_service_write_batch_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const dialog_service_write_batch_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const dialog_service_write_batch_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _dialog_service_write_batch_presult__isset {
+  _dialog_service_write_batch_presult__isset() : success(false) {}
+  bool success :1;
+} _dialog_service_write_batch_presult__isset;
+
+class dialog_service_write_batch_presult {
+ public:
+
+
+  virtual ~dialog_service_write_batch_presult() throw();
+  int64_t* success;
+
+  _dialog_service_write_batch_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -2702,9 +2968,15 @@ class dialog_serviceClientT : virtual public dialog_serviceIf {
   int64_t append(const int64_t table_id, const std::string& data);
   void send_append(const int64_t table_id, const std::string& data);
   int64_t recv_append();
+  int64_t write(const int64_t table_id, const int64_t log_offset, const std::string& data);
+  void send_write(const int64_t table_id, const int64_t log_offset, const std::string& data);
+  int64_t recv_write();
   int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch);
   void send_append_batch(const int64_t table_id, const rpc_record_batch& batch);
   int64_t recv_append_batch();
+  int64_t write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch);
+  void send_write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch);
+  int64_t recv_write_batch();
   void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords);
   void send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return);
@@ -2778,8 +3050,12 @@ class dialog_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Pr
   void process_remove_trigger(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_append(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_write(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_write(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_append_batch(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_append_batch(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_write_batch(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_write_batch(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_read(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_read(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_adhoc_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2833,9 +3109,15 @@ class dialog_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Pr
     processMap_["append"] = ProcessFunctions(
       &dialog_serviceProcessorT::process_append,
       &dialog_serviceProcessorT::process_append);
+    processMap_["write"] = ProcessFunctions(
+      &dialog_serviceProcessorT::process_write,
+      &dialog_serviceProcessorT::process_write);
     processMap_["append_batch"] = ProcessFunctions(
       &dialog_serviceProcessorT::process_append_batch,
       &dialog_serviceProcessorT::process_append_batch);
+    processMap_["write_batch"] = ProcessFunctions(
+      &dialog_serviceProcessorT::process_write_batch,
+      &dialog_serviceProcessorT::process_write_batch);
     processMap_["read"] = ProcessFunctions(
       &dialog_serviceProcessorT::process_read,
       &dialog_serviceProcessorT::process_read);
@@ -2999,6 +3281,15 @@ class dialog_serviceMultiface : virtual public dialog_serviceIf {
     return ifaces_[i]->append(table_id, data);
   }
 
+  int64_t write(const int64_t table_id, const int64_t log_offset, const std::string& data) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->write(table_id, log_offset, data);
+    }
+    return ifaces_[i]->write(table_id, log_offset, data);
+  }
+
   int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -3006,6 +3297,15 @@ class dialog_serviceMultiface : virtual public dialog_serviceIf {
       ifaces_[i]->append_batch(table_id, batch);
     }
     return ifaces_[i]->append_batch(table_id, batch);
+  }
+
+  int64_t write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->write_batch(table_id, log_offset, batch);
+    }
+    return ifaces_[i]->write_batch(table_id, log_offset, batch);
   }
 
   void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords) {
@@ -3144,9 +3444,15 @@ class dialog_serviceConcurrentClientT : virtual public dialog_serviceIf {
   int64_t append(const int64_t table_id, const std::string& data);
   int32_t send_append(const int64_t table_id, const std::string& data);
   int64_t recv_append(const int32_t seqid);
+  int64_t write(const int64_t table_id, const int64_t log_offset, const std::string& data);
+  int32_t send_write(const int64_t table_id, const int64_t log_offset, const std::string& data);
+  int64_t recv_write(const int32_t seqid);
   int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch);
   int32_t send_append_batch(const int64_t table_id, const rpc_record_batch& batch);
   int64_t recv_append_batch(const int32_t seqid);
+  int64_t write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch);
+  int32_t send_write_batch(const int64_t table_id, const int64_t log_offset, const rpc_record_batch& batch);
+  int64_t recv_write_batch(const int32_t seqid);
   void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords);
   int32_t send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return, const int32_t seqid);

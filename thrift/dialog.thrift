@@ -110,7 +110,10 @@ service dialog_service {
   /** Query ops **/
   // Write ops
   i64 append(1: i64 table_id, 2: binary data),
+  i64 write(1: i64 table_id, 2: i64 log_offset, 3: binary data),
   i64 append_batch(1: i64 table_id, 2: rpc_record_batch batch),
+  i64 write_batch(1: i64 table_id, 2: i64 log_offset, 
+                  3: rpc_record_batch batch),
   
   // Read ops
   binary read(1: i64 table_id, 2: i64 offset, 3: i64 nrecords),

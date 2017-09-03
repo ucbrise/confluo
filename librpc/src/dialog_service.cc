@@ -202,6 +202,22 @@ dialog_service_append_presult::~dialog_service_append_presult() throw() {
 }
 
 
+dialog_service_write_args::~dialog_service_write_args() throw() {
+}
+
+
+dialog_service_write_pargs::~dialog_service_write_pargs() throw() {
+}
+
+
+dialog_service_write_result::~dialog_service_write_result() throw() {
+}
+
+
+dialog_service_write_presult::~dialog_service_write_presult() throw() {
+}
+
+
 dialog_service_append_batch_args::~dialog_service_append_batch_args() throw() {
 }
 
@@ -215,6 +231,22 @@ dialog_service_append_batch_result::~dialog_service_append_batch_result() throw(
 
 
 dialog_service_append_batch_presult::~dialog_service_append_batch_presult() throw() {
+}
+
+
+dialog_service_write_batch_args::~dialog_service_write_batch_args() throw() {
+}
+
+
+dialog_service_write_batch_pargs::~dialog_service_write_batch_pargs() throw() {
+}
+
+
+dialog_service_write_batch_result::~dialog_service_write_batch_result() throw() {
+}
+
+
+dialog_service_write_batch_presult::~dialog_service_write_batch_presult() throw() {
 }
 
 

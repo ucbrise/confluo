@@ -34,6 +34,10 @@ class rpc_endpoint {
     return port_ >= 0;
   }
 
+  std::string to_string() const {
+    return addr_ + ":" + std::to_string(port_);
+  }
+
  private:
   std::string addr_;
   int port_;
