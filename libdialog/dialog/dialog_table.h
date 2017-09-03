@@ -374,12 +374,16 @@ class dialog_table {
     return schema_;
   }
 
-  size_t num_records() const {
-    return rt_.get() / schema_.record_size();
+  uint64_t get_rt() const {
+    return rt_.get();
   }
 
   size_t record_size() const {
     return schema_.record_size();
+  }
+
+  size_t num_records() const {
+    return get_rt() / record_size();
   }
 
  protected:
