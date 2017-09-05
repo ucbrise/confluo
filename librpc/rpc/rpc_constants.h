@@ -7,13 +7,13 @@ namespace rpc {
 class rpc_constants {
  public:
   // Iterator
-  static const size_t DEFAULT_ITERATOR_BATCH_SIZE = 128;
+  static const size_t DEFAULT_ITERATOR_BATCH_SIZE = 20;
 
   // Write batching
-  static const size_t DEFAULT_WRITE_BATCH_SIZE = 128;
+  static const size_t DEFAULT_WRITE_BATCH_SIZE = 20;
 
   // Read batching
-  static const size_t DEFAULT_READ_BATCH_SIZE = 128;
+  static const size_t DEFAULT_READ_BATCH_SIZE = 20;
 };
 
 const size_t rpc_constants::DEFAULT_ITERATOR_BATCH_SIZE;
