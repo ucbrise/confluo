@@ -34,6 +34,7 @@ external/thrift-0.10.0/lib/py/dist/
 external/thrift-0.10.0/lib/py/thrift.egg-info/
 external/thrift-0.10.0/lib/py/build/
 build
+target
 log
 thrift-gen.files
 
