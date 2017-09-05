@@ -1,4 +1,5 @@
 namespace cpp dialog.rpc
+namespace java dialog.rpc
 
 enum rpc_storage_mode {
   RPC_IN_MEMORY = 0,

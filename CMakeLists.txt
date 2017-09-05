@@ -60,10 +60,12 @@ add_subdirectory(libdialog)
 if(Boost_FOUND)
   # Thrift
   include(FindPythonInterp)
+  find_package(Java)
+  include(UseJava)
   set(BUILD_COMPILER OFF CACHE BOOL "Build Thrift compiler" FORCE)
   set(WITH_CPP ON CACHE BOOL "Build C++ Thrift library" FORCE)
   set(WITH_C_GLIB OFF CACHE BOOL "Build C (GLib) Thrift library" FORCE)
-  set(WITH_JAVA OFF CACHE BOOL "Build Java Thrift library" FORCE) # For now
+  set(WITH_JAVA ${Java_FOUND} CACHE BOOL "Build Java Thrift library" FORCE) # For now
   set(WITH_PYTHON ${PYTHONINTERP_FOUND} CACHE BOOL "Build Python Thrift library" FORCE)
   set(WITH_HASKELL OFF CACHE BOOL "Build Haskell Thrift library" FORCE)
   set(WITH_SHARED_LIB ON CACHE BOOL "Build shared libraries" FORCE)
@@ -78,8 +80,6 @@ if(Boost_FOUND)
   # RPC
   add_subdirectory(librpc)
 
-  
-  
   if (PYTHONINTERP_FOUND)
     set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
     set(THRIFT_PYINSTALL "${PYTHON_EXECUTABLE} setup.py install")
@@ -88,6 +88,11 @@ if(Boost_FOUND)
   
     # Python client
     add_subdirectory(pyclient)
+  endif()
+  
+  if (Java_FOUND)
+    # Java client
+    add_subdirectory(javaclient)
   endif()
 else()
   message(WARNING "Boost libraries not found, will skip RPC build")
