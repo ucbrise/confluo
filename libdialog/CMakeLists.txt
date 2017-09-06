@@ -6,14 +6,14 @@ file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 set(DIALOG_INCLUDE dialog)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 
-include_directories(${gtest_SOURCE_DIR}/include
+include_directories(${GTEST_INCLUDE_DIR}
   ${DIALOG_INCLUDE}
   ${UTILS_INCLUDE})
 
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)
 add_executable(dtest ${test_sources})
-target_link_libraries(dtest gtest_main)
+target_link_libraries(dtest ${TEST_LINK_LIBS})
 
 # install
 install(DIRECTORY dialog/

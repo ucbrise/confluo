@@ -37,6 +37,8 @@ build
 target
 log
 thrift-gen.files
+.eggs
+pyclient/dialog.egg-info
 
 # Eclipse files
 .settings

@@ -1,9 +1,9 @@
-import env
 import subprocess
 import sys
 import time
 import unittest
 import struct
+import os
 from dialog import dialog_client
 from dialog import data_types
 from dialog.schema import schema
@@ -11,8 +11,7 @@ from dialog.schema import schema_builder
 from dialog.storage import storage_id
 
 class test_dialog_client(unittest.TestCase):
-
-    SERVER_EXECUTABLE = "dialogd"
+    SERVER_EXECUTABLE = os.getenv('DIALOG_SERVER_EXEC', 'dialogd')
 
     def start_server(self):
         self.server = subprocess.Popen([self.SERVER_EXECUTABLE, '--data-path', '/tmp'])
@@ -378,10 +377,3 @@ class test_dialog_client(unittest.TestCase):
 
     def time_block(self, ts):
         return ts / 10**6
-
-if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        test_dialog_client.SERVER_EXECUTABLE = sys.argv.pop()
-    else:
-        raise ValueError("Must provide server executable")
-    unittest.main()
