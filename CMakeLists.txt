@@ -5,6 +5,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   message(FATAL_ERROR "Windows build not supported")
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake-modules")
+
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
 if(COMPILER_SUPPORTS_CXX11)
@@ -12,24 +14,23 @@ if(COMPILER_SUPPORTS_CXX11)
 else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -pedantic -Wextra -fno-strict-aliasing")
 enable_language(C)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  message(STATUS "GNU compiler detected")
-  # Suppress thrift warnings
-  set(CMAKE_CXX_FLAGS 
-    "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-maybe-uninitialized")
-  # Suppress unnecessary warnings
-  set(CMAKE_CXX_FLAGS 
-    "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-result -Wno-conversion-null" )
+  set(SUPPRESS_WARN_FLAGS 
+    "${SUPPRESS_WARN_FLAGS} -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-result -Wno-conversion-null" )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  message(STATUS "Apple Clang compiler detected")
-  # Suppress thrift warnings
-  set(CMAKE_CXX_FLAGS 
-    "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-private-field -Wno-unused-const-variable")
-  # Suppress unnecessary warnings
+  set(SUPPRESS_WARN_FLAGS 
+    "${SUPPRESS_WARN_FLAGS} -Wno-unused-variable -Wno-unused-parameter -Wno-missing-field-initializers -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-private-field -Wno-unused-const-variable")
 endif()
+
+# SUPPRESS_WARN_FLAGS must go **after** all flags
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -pedantic -Wextra ${SUPPRESS_WARN_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_DEBUG} -Wall -pedantic -Wextra ${SUPPRESS_WARN_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wall -pedantic -Wextra ${SUPPRESS_WARN_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not allowed.")
@@ -48,55 +49,20 @@ endif()
 
 include(CTest)
 
-# Boost
-find_package(Boost 1.55.0)
-
-# Google Test
-add_subdirectory(external/gtest-1.7.0)
+# Dependencies
+include(external)
 
 # DiaLog core
 add_subdirectory(libdialog)
 
-if(Boost_FOUND)
-  # Thrift
-  include(FindPythonInterp)
-  find_package(Java)
-  include(UseJava)
-  set(BUILD_COMPILER OFF CACHE BOOL "Build Thrift compiler" FORCE)
-  set(WITH_CPP ON CACHE BOOL "Build C++ Thrift library" FORCE)
-  set(WITH_C_GLIB OFF CACHE BOOL "Build C (GLib) Thrift library" FORCE)
-  set(WITH_JAVA ${Java_FOUND} CACHE BOOL "Build Java Thrift library" FORCE) # For now
-  set(WITH_PYTHON ${PYTHONINTERP_FOUND} CACHE BOOL "Build Python Thrift library" FORCE)
-  set(WITH_HASKELL OFF CACHE BOOL "Build Haskell Thrift library" FORCE)
-  set(WITH_SHARED_LIB ON CACHE BOOL "Build shared libraries" FORCE)
-  set(WITH_STATIC_LIB ON CACHE BOOL "Build static libraries" FORCE)
-  set(WITH_ZLIB OFF CACHE BOOL "Build with ZLIB support" FORCE) # For now
-  set(WITH_QT4 OFF CACHE BOOL "Build with Qt4 support" FORCE)
-  set(WITH_QT5 OFF CACHE BOOL "Build with Ot5 support" FORCE)
-  set(WITH_OPENSSL OFF CACHE BOOL "Build with OpenSSL support" FORCE) # For now
-  set(WITH_LIBEVENT OFF CACHE BOOL "Build with libevent support" FORCE) # For now
-  add_subdirectory(external/thrift-0.10.0)
+# RPC Framework
+add_subdirectory(librpc)
 
-  # RPC
-  add_subdirectory(librpc)
+# Python Client
+add_subdirectory(pyclient)
 
-  if (PYTHONINTERP_FOUND)
-    set(THRIFT_PYDIR ${PROJECT_SOURCE_DIR}/external/thrift-0.10.0/lib/py/)
-    set(THRIFT_PYINSTALL "${PYTHON_EXECUTABLE} setup.py install")
-    set(THRIFT_PYCMD "COMMAND ${THRIFT_PYINSTALL} WORKING_DIRECTORY ${THRIFT_PYDIR}")
-    install(CODE "execute_process(${THRIFT_PYCMD})")
-  
-    # Python client
-    add_subdirectory(pyclient)
-  endif()
-  
-  if (Java_FOUND)
-    # Java client
-    add_subdirectory(javaclient)
-  endif()
-else()
-  message(WARNING "Boost libraries not found, will skip RPC build")
-endif()
+# Java Client
+add_subdirectory(javaclient)
 
 # CPack
 set(CPACK_PACKAGE_NAME "libdialog")
