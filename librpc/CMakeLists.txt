@@ -22,7 +22,7 @@ if (THRIFT_INSTALLED)
                      src/dialog_server.cc 
                      src/dialog_types.cc)
   add_executable(dialogd ${SERVER_SOURCES})
-  target_link_libraries(dialogd thriftstatic)
+  target_link_libraries(dialogd ${CMAKE_THREAD_LIBS_INIT} thriftstatic)
   
   set(CLIENT_SOURCES src/dialog_constants.cc 
                      src/dialog_service.cc 
