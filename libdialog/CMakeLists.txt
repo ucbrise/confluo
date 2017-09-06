@@ -1,7 +1,5 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
-find_package(Threads REQUIRED)
-
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
@@ -15,7 +13,7 @@ include_directories(${GTEST_INCLUDE_DIR}
 # Build test
 file(GLOB_RECURSE test_sources test/*.cc)
 add_executable(dtest ${test_sources})
-target_link_libraries(dtest ${CMAKE_THREAD_LIBS_INIT} gtest gtest_main)
+target_link_libraries(dtest ${TEST_LINK_LIBS})
 
 # install
 install(DIRECTORY dialog/

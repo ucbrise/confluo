@@ -52,6 +52,10 @@ include(CTest)
 # Dependencies
 include(external)
 
+# Testing libraries
+find_package(Threads REQUIRED)
+set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+
 # DiaLog core
 add_subdirectory(libdialog)
 

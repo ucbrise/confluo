@@ -33,7 +33,7 @@ if (THRIFT_INSTALLED)
   # Build test
   file(GLOB_RECURSE TEST_SOURCES test/*.cc)
   add_executable(rpctest ${TEST_SOURCES})
-  target_link_libraries(rpctest gtest gtest_main dclient thriftstatic)
+  target_link_libraries(rpctest ${TEST_LINK_LIBS} dclient thriftstatic)
   
   # install
   install(DIRECTORY rpc/
