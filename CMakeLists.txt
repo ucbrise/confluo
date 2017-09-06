@@ -59,14 +59,16 @@ set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 # DiaLog core
 add_subdirectory(libdialog)
 
-# RPC Framework
-add_subdirectory(librpc)
-
-# Python Client
-add_subdirectory(pyclient)
-
-# Java Client
-add_subdirectory(javaclient)
+if (THRIFT_INSTALLED)
+  # RPC Framework
+  add_subdirectory(librpc)
+  
+  # Python Client
+  add_subdirectory(pyclient)
+  
+  # Java Client
+  add_subdirectory(javaclient)
+endif()
 
 # CPack
 set(CPACK_PACKAGE_NAME "libdialog")
