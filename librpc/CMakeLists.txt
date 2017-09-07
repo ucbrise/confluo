@@ -22,17 +22,20 @@ set(SERVER_SOURCES src/dialog_constants.cc
                    src/dialog_types.cc)
 add_executable(dialogd ${SERVER_SOURCES})
 target_link_libraries(dialogd ${CMAKE_THREAD_LIBS_INIT} thriftstatic)
+add_dependencies(dialogd thrift)
 
 set(CLIENT_SOURCES src/dialog_constants.cc 
                    src/dialog_service.cc 
                    src/dialog_types.cc)
 add_library(dclient STATIC ${CLIENT_SOURCES})
 target_link_libraries(dclient thriftstatic)
+add_dependencies(dclient thrift)
 
 # Build test
 file(GLOB_RECURSE TEST_SOURCES test/*.cc)
 add_executable(rpctest ${TEST_SOURCES})
 target_link_libraries(rpctest ${TEST_LINK_LIBS} dclient thriftstatic)
+add_dependencies(rpctest googletest thrift)
 
 # install
 install(DIRECTORY rpc/

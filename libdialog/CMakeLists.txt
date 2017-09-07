@@ -14,6 +14,7 @@ include_directories(${GTEST_INCLUDE_DIR}
 file(GLOB_RECURSE test_sources test/*.cc)
 add_executable(dtest ${test_sources})
 target_link_libraries(dtest ${TEST_LINK_LIBS})
+add_dependencies(dtest googletest)
 
 # install
 install(DIRECTORY dialog/
