@@ -59,7 +59,6 @@ if (Boost_FOUND)
   set(THRIFT_PREFIX "${PROJECT_BINARY_DIR}/external/thrift")
   set(THRIFT_HOME "${THRIFT_PREFIX}")
   set(THRIFT_INCLUDE_DIR "${THRIFT_PREFIX}/include")
-  set(ANT_FLAGS "-Dcompilerarg='-Xlint:-unchecked -source 1.7'")
   set(THRIFT_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
                         "-DCMAKE_CXX_FLAGS=${THRIFT_CXX_FLAGS}"
                         "-DCMAKE_C_FLAGS=${THRIFT_C_FLAGS}"
@@ -94,6 +93,13 @@ if (Boost_FOUND)
   message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
   add_library(thriftstatic STATIC IMPORTED GLOBAL)
   set_target_properties(thriftstatic PROPERTIES IMPORTED_LOCATION ${THRIFT_STATIC_LIB})
+  
+  install(FILES ${THRIFT_STATIC_LIB}
+      DESTINATION lib)
+      
+  install(DIRECTORY ${THRIFT_INCLUDE_DIR}/thrift
+      DESTINATION include)
+  
   set(THRIFT_INSTALLED TRUE)
 else()
   set(THRIFT_INSTALLED FALSE)

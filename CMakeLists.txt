@@ -56,6 +56,9 @@ include(external)
 find_package(Threads REQUIRED)
 set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 
+# DiaLog utils
+add_subdirectory(libutils)
+
 # DiaLog core
 add_subdirectory(libdialog)
 
