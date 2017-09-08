@@ -28,12 +28,8 @@ class timeseries_db_service : virtual public timeseries_db_serviceIf {
   }
 
   void add_stream(const id_t uuid) {
-    if (store_[uuid] == nullptr) {
-      LOG_INFO<< "Creating stream " << uuid << "...";
-      store_[uuid] = new timeseries_t<>();
-    } else {
-      LOG_INFO << "Stream already exists.";
-    }
+    store_[uuid] = new timeseries_t<>();
+    store_[uuid]->init(uuid);
   }
 
   version_t insert_values(const id_t uuid, const std::string& pts) {
