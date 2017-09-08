@@ -117,6 +117,9 @@ class timeseries_base {
         };
 
     version_t ver = log_.append(pts, len);
+    std::future<void> flush_future(
+        std::async(std::launch::async,
+                   [ver, len, this]() {log_.flush(ver, len);}));
     uint64_t id1, id2;
     for (size_t i = 0; i < len;) {
       timestamp_t ts_block = _get_block(pts[i].timestamp);
@@ -128,12 +131,15 @@ class timeseries_base {
                           id2 - id1 + 1);
       log->push_back_range(id1, id2);
     }
-    log_.flush(ver, len);
+    flush_future.wait();
     return ver;
   }
 
   version_t append(const data_pt* pts, size_t len, timestamp_t ts_block) {
     version_t ver = log_.append(pts, len);
+    std::future<void> flush_future(
+        std::async(std::launch::async,
+                   [ver, len, this]() {log_.flush(ver, len);}));
     static auto update_stats =
         [](atomic::type<stats*>* s, version_t ver, const data_pt* pts, size_t len) {
           stats* old_s = atomic::load(s);
@@ -142,7 +148,7 @@ class timeseries_base {
 
     ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
     log->push_back_range(ver, ver + len - 1);
-    log_.flush(ver, len);
+    flush_future.wait();
     return ver;
   }
 
@@ -288,7 +294,7 @@ class timeseries_t : public timeseries_base<branch_factor, depth> {
 
   version_t insert_values(const data_pt* pts, size_t len) {
     version_t ver = this->append(pts, len);
-    update_read_tail(ver, len);
+    //update_read_tail(ver, len);
     return ver + len;
   }
 
