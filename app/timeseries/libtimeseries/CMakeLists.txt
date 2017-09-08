@@ -27,7 +27,7 @@ target_link_libraries(tsserver ${THRIFT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 set(client_sources src/server/timeseries_db_constants.cc 
   src/server/timeseries_db_types.cc
   src/server/timeseries_db_service.cc)
-add_library(tsclient STATIC ${client_sources} ${CMAKE_THREAD_LIBS_INIT})
+add_library(tsclient STATIC ${client_sources})
 
 # Build perf
 file(GLOB_RECURSE perf_sources perf/*.cc)
