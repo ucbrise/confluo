@@ -47,14 +47,18 @@ if(APPLE)
   set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 endif()
 
-include(CTest)
+# Options
+include(BuildOptions)
 
 # Dependencies
-include(external)
+include(Dependencies)
 
-# Testing libraries
-find_package(Threads REQUIRED)
-set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+# Testing
+if (BUILD_TESTS)
+  include(CTest)
+  find_package(Threads REQUIRED)
+  set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 # DiaLog utils
 add_subdirectory(libutils)
@@ -62,15 +66,19 @@ add_subdirectory(libutils)
 # DiaLog core
 add_subdirectory(libdialog)
 
-if (THRIFT_INSTALLED)
+if (BUILD_RPC AND THRIFT_INSTALLED)
   # RPC Framework
   add_subdirectory(librpc)
   
   # Python Client
-  add_subdirectory(pyclient)
+  if (WITH_PY_CLIENT)
+    add_subdirectory(pyclient)
+  endif()
   
   # Java Client
-  add_subdirectory(javaclient)
+  if (WITH_JAVA_CLIENT)
+    add_subdirectory(javaclient)
+  endif()
 endif()
 
 # CPack

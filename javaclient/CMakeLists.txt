@@ -22,6 +22,10 @@ if (Java_FOUND AND Ant_FOUND)
       COMMENT "Building DiaLog Java Client library using Ant"
       DEPENDS ${DIALOG_CLIENT_ARTIFACTS}
   )
+  
+  if (BUILD_TESTS)
+    # TODO: Add tests
+  endif()
 else()
   message(WARNING "Skipping Java Client build: requirements Java >= 1.7 and/or Ant >= 1.6.2 not met")
 endif()
