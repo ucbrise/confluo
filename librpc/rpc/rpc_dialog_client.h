@@ -7,6 +7,7 @@
 
 #include "dialog_service.h"
 #include "dialog_types.h"
+#include "rpc_type_conversions.h"
 #include "rpc_record_stream.h"
 #include "rpc_record_batch_builder.h"
 #include "rpc_alert_stream.h"

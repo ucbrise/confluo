@@ -13,7 +13,7 @@ class rpc_constants {
   static const size_t DEFAULT_WRITE_BATCH_SIZE = 20;
 
   // Read batching
-  static const size_t DEFAULT_READ_BATCH_SIZE = 20;
+  static const size_t DEFAULT_READ_BATCH_SIZE = 128;
 };
 
 const size_t rpc_constants::DEFAULT_ITERATOR_BATCH_SIZE;
