@@ -2,6 +2,7 @@
 #define TIMESERIES_TIMESERIES_DB_H_
 
 #include <thread>
+#include <future>
 
 #include "monolog.h"
 #include "tiered_index.h"
