@@ -127,8 +127,8 @@ class timeseries_base {
       ref_log* log = idx_(ts_block, update_stats, id2 + 1, block_pts,
                           id2 - id1 + 1);
       log->push_back_range(id1, id2);
-      log_.flush(ver, len);
     }
+    log_.flush(ver, len);
     return ver;
   }
 
