@@ -31,11 +31,17 @@ add_library(dclient STATIC ${CLIENT_SOURCES})
 target_link_libraries(dclient thriftstatic)
 add_dependencies(dclient thrift)
 
-# Build test
-file(GLOB_RECURSE TEST_SOURCES test/*.cc)
-add_executable(rpctest ${TEST_SOURCES})
-target_link_libraries(rpctest ${TEST_LINK_LIBS} dclient thriftstatic)
-add_dependencies(rpctest googletest thrift)
+if (BUILD_TESTS)
+  # Build test
+  file(GLOB_RECURSE TEST_SOURCES test/*.cc)
+  add_executable(rpctest ${TEST_SOURCES})
+  target_link_libraries(rpctest ${TEST_LINK_LIBS} dclient thriftstatic)
+  add_dependencies(rpctest googletest thrift)
+  
+  # Register test
+  enable_testing()
+  add_test(RpcTest ${EXECUTABLE_OUTPUT_PATH}/rpctest)
+endif()
 
 # install
 install(DIRECTORY rpc/
@@ -46,7 +52,3 @@ install(TARGETS dialogd dclient
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib)
-
-# Register test
-enable_testing()
-add_test(RpcTest ${EXECUTABLE_OUTPUT_PATH}/rpctest)
