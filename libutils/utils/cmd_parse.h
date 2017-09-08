@@ -1,12 +1,14 @@
 #ifndef UTILS_CMD_PARSE_H_
 #define UTILS_CMD_PARSE_H_
 
-#include <exception>
 #include <cassert>
-#include <vector>
+#include <exception>
+#include <iomanip>
 #include <map>
 #include <getopt.h>
 #include <string.h>
+#include <sstream>
+#include <vector>
 
 class cmd_parse_exception : std::exception {
  public:
@@ -66,21 +68,27 @@ class cmd_option {
   }
 
   std::string help_line() const {
-    std::string line = "\t-" + std::string(1, (char) sopt_) + ",--" + lopt_;
+    std::stringstream stream;
+    std::string option = "\t-" + std::string(1, (char) sopt_) + ",--" + lopt_;
     if (has_arg == required_argument) {
       std::string var = lopt_;
       std::transform(var.begin(), var.end(), var.begin(), ::toupper);
-      line += "=[" + var + "]";
+      option += "=[" + var + "]";
     }
-    line += "\t\t" + desc_;
 
+    std::string desc = desc_;
     if (default_ != "" && has_arg != no_argument)
-      line += " (default: " + default_ + ")\n";
+      desc += " (default: " + default_ + ")";
 
     if (required_)
-      line += " [REQUIRED]\n";
+      desc += " [REQUIRED]";
 
-    return line;
+    desc += "\n";
+
+    stream << std::left << std::setw(40) << option << std::left << std::setw(40)
+           << desc;
+
+    return stream.str();
   }
 
   std::string lopt_;
