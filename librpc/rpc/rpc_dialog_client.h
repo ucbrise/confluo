@@ -2,6 +2,7 @@
 #define RPC_RPC_DIALOG_CLIENT_H_
 
 #include <thrift/transport/TSocket.h>
+#include <thrift/server/TServer.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TBufferTransports.h>
 
