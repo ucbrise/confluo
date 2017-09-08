@@ -36,13 +36,20 @@ class cmd_option {
   cmd_option(const std::string& lopt, char sopt, bool flag) {
     lopt_ = lopt;
     sopt_ = sopt;
-    has_arg = flag ? no_argument : required_argument;
+    has_arg_ = flag ? no_argument : required_argument;
     desc_ = "";
     if (flag)
       default_ = "false";
     else
       default_ = "";
     required_ = false;
+
+    option_str_ = "  -" + std::string(1, (char) sopt_) + ",--" + lopt_;
+    if (has_arg_ == required_argument) {
+      std::string var = lopt_;
+      std::transform(var.begin(), var.end(), var.begin(), ::toupper);
+      option_str_ += "=[" + var + "]";
+    }
   }
 
   cmd_option& set_required(const bool value) {
@@ -62,39 +69,38 @@ class cmd_option {
     return *this;
   }
 
- private:
-  option to_option() const {
-    return {strdup(lopt_.c_str()), has_arg, nullptr, sopt_};
-  }
-
-  std::string help_line() const {
-    std::stringstream stream;
-    std::string option = "\t-" + std::string(1, (char) sopt_) + ",--" + lopt_;
-    if (has_arg == required_argument) {
-      std::string var = lopt_;
-      std::transform(var.begin(), var.end(), var.begin(), ::toupper);
-      option += "=[" + var + "]";
-    }
-
+  std::string desc_str() const {
     std::string desc = desc_;
-    if (default_ != "" && has_arg != no_argument)
+    if (default_ != "" && has_arg_ != no_argument)
       desc += " (default: " + default_ + ")";
 
     if (required_)
       desc += " [REQUIRED]";
 
     desc += "\n";
+    return desc;
+  }
 
-    stream << std::left << std::setw(40) << option << std::left << std::setw(40)
-           << desc;
+  std::string opt_str() const {
+    return option_str_;
+  }
 
+  std::string help_line(size_t opt_width) const {
+    std::stringstream stream;
+    stream << std::left << std::setw(opt_width) << opt_str() << desc_str();
     return stream.str();
+  }
+
+ private:
+  option to_option() const {
+    return {strdup(lopt_.c_str()), has_arg_, nullptr, sopt_};
   }
 
   std::string lopt_;
   char sopt_;
-  int has_arg;
+  int has_arg_;
   std::string desc_;
+  std::string option_str_;
   std::string default_;
   bool required_;
 };
@@ -110,7 +116,7 @@ class cmd_options {
   void add(const cmd_option& opt) {
     copts_.push_back(opt);
     sopts_ += opt.sopt_;
-    if (opt.has_arg == required_argument)
+    if (opt.has_arg_ == required_argument)
       sopts_ += ':';
     lopts_.push_back(opt.to_option());
     sopt_to_idx_[opt.sopt_] = copts_.size() - 1;
@@ -175,8 +181,15 @@ class cmd_parser {
     msg += "OPTIONS:\n";
     std::vector<cmd_option> copts = opts_.copts_;
 
+    // Compute formatting widths
+    size_t opt_width = 0;
+    for (const cmd_option& opt : copts) {
+      opt_width = std::max(opt.opt_str().length(), opt_width);
+    }
+    opt_width += 8;
+
     for (const cmd_option& opt : copts)
-      msg += opt.help_line();
+      msg += opt.help_line(opt_width);
 
     return msg;
   }
@@ -215,7 +228,7 @@ class cmd_parser {
       parsed[opt_idx] = true;
       std::string key = std::string(copts[opt_idx].lopt_);
 
-      if (copts[opt_idx].has_arg == required_argument) {
+      if (copts[opt_idx].has_arg_ == required_argument) {
         values_[key] = std::string(optarg);
       } else {
         values_[key] = "true";
