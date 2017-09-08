@@ -93,7 +93,7 @@ struct stats {
 template<size_t branch_factor = 256, size_t depth = 4>
 class timeseries_base {
  public:
-  typedef monolog::monolog_relaxed_linear<data_pt, 1024> data_log;
+  typedef monolog::mmap_monolog_relaxed<data_pt, 1024> data_log;
   typedef monolog::monolog_relaxed_linear<data_ptr_t, 32, 1024> ref_log;
   typedef datastore::index::tiered_index<ref_log, branch_factor, depth, stats> time_index;
 
@@ -101,6 +101,12 @@ class timeseries_base {
     NODE_RESOLUTION_SKIP = bit_utils::highest_bit(branch_factor);
     LEAF_RESOLUTION = 64 - NODE_RESOLUTION_SKIP * depth;
     LEAF_TIME_RANGE = UINT64_C(1) << LEAF_RESOLUTION;
+  }
+
+  void init(size_t id) {
+    std::string log_filename = "ts" + std::to_string(id);
+    fprintf(stderr, "filename = %s\n", log_filename.c_str());
+    log_.init(log_filename, "/home/ubuntu/dialog/data");
   }
 
   version_t append(const data_pt* pts, size_t len) {
@@ -121,6 +127,7 @@ class timeseries_base {
       ref_log* log = idx_(ts_block, update_stats, id2 + 1, block_pts,
                           id2 - id1 + 1);
       log->push_back_range(id1, id2);
+      log_.flush(ver, len);
     }
     return ver;
   }
@@ -135,6 +142,7 @@ class timeseries_base {
 
     ref_log* log = idx_(ts_block, update_stats, ver + len, pts, len);
     log->push_back_range(ver, ver + len - 1);
+    log_.flush(ver, len);
     return ver;
   }
 
@@ -326,7 +334,10 @@ class timeseries_db {
   timeseries_db() = default;
 
   uuid_t add_stream() {
-    return ts_.push_back(new ts());
+    ts* t = new ts();
+    size_t pos = ts_.push_back(t);
+    t->init(pos);
+    return pos;
   }
 
   ts_ref& operator[](uuid_t uuid) {
