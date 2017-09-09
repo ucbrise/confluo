@@ -138,7 +138,9 @@ class rpc_dialog_client {
       throw illegal_state_exception("Must set table first");
     }
     if (record.length() != cur_schema_.record_size()) {
-      throw illegal_state_exception("Record size incorrect");
+      throw illegal_state_exception("Record size incorrect; expected="
+          + std::to_string(cur_schema_.record_size())
+          + ", got=" + std::to_string(record.length()));
     }
     builder_.add_record(record);
     if (builder_.num_records() >= rpc_configuration_params::WRITE_BATCH_SIZE) {
@@ -151,7 +153,9 @@ class rpc_dialog_client {
       throw illegal_state_exception("Must set table first");
     }
     if (record.length() != cur_schema_.record_size()) {
-      throw illegal_state_exception("Record size incorrect");
+      throw illegal_state_exception("Record size incorrect; expected="
+          + std::to_string(cur_schema_.record_size())
+          + ", got=" + std::to_string(record.length()));
     }
     client_->append(cur_table_id_, record);
   }
