@@ -14,8 +14,8 @@ DiaLog is a system for real-time monitoring and analysis of data, that supports:
 ### Requirements
 
 * C++ compiler that supports C++11 standard
-* CMake 3.2 or later
-* Boost 1.55 or later
+* CMake 2.8 or later
+* Boost 1.53 or later
 
 For python client, you will additionally require:
 * Python 2.7 or later
