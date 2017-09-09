@@ -6,6 +6,7 @@
 #include <string>
 #include <errno.h>
 #include <climits>
+#include <fcntl.h>
 
 #include "assertions.h"
 

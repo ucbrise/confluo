@@ -2,11 +2,13 @@
 #define RPC_RPC_DIALOG_CLIENT_H_
 
 #include <thrift/transport/TSocket.h>
+#include <thrift/server/TServer.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TBufferTransports.h>
 
 #include "dialog_service.h"
 #include "dialog_types.h"
+#include "rpc_type_conversions.h"
 #include "rpc_record_stream.h"
 #include "rpc_record_batch_builder.h"
 #include "rpc_alert_stream.h"

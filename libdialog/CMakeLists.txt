@@ -10,16 +10,19 @@ include_directories(${GTEST_INCLUDE_DIR}
   ${DIALOG_INCLUDE}
   ${UTILS_INCLUDE})
 
-# Build test
-file(GLOB_RECURSE test_sources test/*.cc)
-add_executable(dtest ${test_sources})
-target_link_libraries(dtest ${TEST_LINK_LIBS})
+if (BUILD_TESTS)
+  # Build test
+  file(GLOB_RECURSE test_sources test/*.cc)
+  add_executable(dtest ${test_sources})
+  target_link_libraries(dtest ${TEST_LINK_LIBS})
+  add_dependencies(dtest googletest)
+  
+  # Register test
+  enable_testing()
+  add_test(DiaLogTest ${EXECUTABLE_OUTPUT_PATH}/dtest)
+endif ()
 
 # install
 install(DIRECTORY dialog/
   DESTINATION include
   FILES_MATCHING PATTERN "*")
-
-# Register test
-enable_testing()
-add_test(DiaLogTest ${EXECUTABLE_OUTPUT_PATH}/dtest)

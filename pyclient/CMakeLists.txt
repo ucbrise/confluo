@@ -7,9 +7,11 @@ if (PYTHONINTERP_FOUND)
     COMMENT "Building Python client"
   )
   
-  add_test(NAME PythonClientTest 
-    COMMAND ${CMAKE_COMMAND} -E env DIALOG_SERVER_EXEC=${PROJECT_BINARY_DIR}/bin/dialogd ${PYTHON_EXECUTABLE} setup.py test 
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  if (BUILD_TESTS)
+    add_test(NAME PythonClientTest 
+      COMMAND ${CMAKE_COMMAND} -E env DIALOG_SERVER_EXEC=${PROJECT_BINARY_DIR}/bin/dialogd ${PYTHON_EXECUTABLE} setup.py test 
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  endif ()
   
   find_program(PYTHON "python")
   

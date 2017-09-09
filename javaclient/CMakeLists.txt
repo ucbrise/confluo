@@ -23,12 +23,9 @@ if (Java_FOUND AND Ant_FOUND)
       DEPENDS ${DIALOG_CLIENT_ARTIFACTS}
   )
   
-  install(CODE "execute_process(
-      COMMAND ${Ant_EXECUTABLE} ${ANT_FLAGS} install
-      -Dbuild.dir=\"${CMAKE_CURRENT_BINARY_DIR}\"
-      -Dinstall.path=\"${JAVA_INSTALL_DIR}\" -Dinstall.javadoc.path=\"${JAVA_DOC_INSTALL_DIR}\" -f build.xml
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  )")
+  if (BUILD_TESTS)
+    # TODO: Add tests
+  endif()
 else()
   message(WARNING "Skipping Java Client build: requirements Java >= 1.7 and/or Ant >= 1.6.2 not met")
 endif()
