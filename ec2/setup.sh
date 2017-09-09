@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env bash
 
 curdir="`dirname "$0"`"
@@ -14,4 +12,6 @@ mkdir build
 cd build
 cmake -DBUILD_TESTS=OFF -DWITH_JAVA_CLIENT=OFF -DWITH_PY_CLIENT=OFF ..
 make -j
-make install
+
+cd ..
+./sbin/sync .

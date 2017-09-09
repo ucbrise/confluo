@@ -3,8 +3,8 @@
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/monolog-config.sh"
-. "$MONOLOG_PREFIX/sbin/load-monolog-env.sh"
+. "$sbin/dialog-config.sh"
+. "$DIALOG_PREFIX/sbin/load-dialog-env.sh"
 
 LOG_PATH="$sbin/../log"
 mkdir -p $LOG_PATH

@@ -10,8 +10,6 @@ script="`basename "$this"`"
 config_bin="`cd "$config_bin"; pwd`"
 this="$config_bin/$script"
 
-export MONOLOG_PREFIX="`dirname "$this"`"/..
-export MONOLOG_HOME="${MONOLOG_PREFIX}"
-export MONOLOG_CONF_DIR="${MONOLOG_CONF_DIR:-"$MONOLOG_HOME/conf"}"
-export DATASTORE_BIN_DIR="${DATASTORE_BIN_DIR:-"$MONOLOG_HOME/build/libds/bin"}"
-export GRAPHSTORE_BIN_DIR="${GRAPHSTORE_BIN_DIR:-"$MONOLOG_HOME/build/app/graohstore/libgs/bin"}"
+export DIALOG_PREFIX="`dirname "$this"`"/..
+export DIALOG_HOME="${DIALOG_PREFIX}"
+export DIALOG_CONF_DIR="${DIALOG_CONF_DIR:-"$DIALOG_HOME/conf"}"
