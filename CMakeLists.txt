@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
-project(dialog VERSION 0.1.0 LANGUAGES CXX C)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+project(dialog CXX C)
+
+set(DIALOG_VERSION_MAJOR "0")
+set(DIALOG_VERSION_MINOR "1")
+set(DIALOG_VERSION_PATCH "0")
+set(DIALOG_VERSION "${DIALOG_VERSION_MAJOR}.${DIALOG_VERSION_MINOR}.${DIALOG_VERSION_PATCH}")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   message(FATAL_ERROR "Windows build not supported")
@@ -12,7 +17,7 @@ check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
 if(COMPILER_SUPPORTS_CXX11)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 else()
-  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+  message(FATAL_ERROR "${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
 enable_language(C)
 
@@ -56,7 +61,6 @@ include(Dependencies)
 # Testing
 if (BUILD_TESTS)
   include(CTest)
-  find_package(Threads REQUIRED)
   set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
@@ -66,7 +70,7 @@ add_subdirectory(libutils)
 # DiaLog core
 add_subdirectory(libdialog)
 
-if (BUILD_RPC AND THRIFT_INSTALLED)
+if (BUILD_RPC)
   # RPC Framework
   add_subdirectory(librpc)
   
@@ -89,10 +93,10 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VENDOR "RISELab")
 set(CPACK_PACKAGE_CONTACT "anuragk@berkeley.edu")
 
-set(CPACK_PACKAGE_VERSION "0.1.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VERSION ${DIALOG_VERSION})
+set(CPACK_PACKAGE_VERSION_MAJOR ${DIALOG_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${DIALOG_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${DIALOG_VERSION_PATCH})
 
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "~$;[.]swp$;/[.]svn/;/[.]git/;.gitignore;/build/;tags;cscope.*")

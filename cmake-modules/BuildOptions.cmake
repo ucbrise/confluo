@@ -7,6 +7,7 @@ CMAKE_DEPENDENT_OPTION(WITH_PY_CLIENT "Build python client" ON "BUILD_RPC" OFF)
 CMAKE_DEPENDENT_OPTION(WITH_JAVA_CLIENT "Build java client" ON "BUILD_RPC" OFF)
 
 message(STATUS "----------------------------------------------------------")
+message(STATUS "DiaLog version:                           ${DIALOG_VERSION}")
 message(STATUS "Build configuration Summary")
 message(STATUS "  Build RPC Framework:                    ${BUILD_RPC}")
 message(STATUS "    Build python client libraries:        ${WITH_PY_CLIENT}")
