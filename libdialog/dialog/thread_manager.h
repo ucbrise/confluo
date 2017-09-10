@@ -20,9 +20,9 @@ struct thread_info {
 class thread_manager {
  public:
   static int register_thread() {
-    if (find() == -1)
-      return set();
-    return -1;
+    // De-register if already registered
+    deregister_thread();
+    return set();
   }
 
   static int deregister_thread() {
