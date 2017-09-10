@@ -12,6 +12,10 @@ sbin="`cd "$sbin"; pwd`"
 
 SERVERLIST=`reverse ${DIALOG_CONF_DIR}/hosts`
 
+if [ "$DIALOG_PATH" == "" ]; then
+  DIALOG_PATH="$HOME/dialog"
+fi
+
 HOSTS=`echo "$SERVERLIST"|sed  "s/#.*$//;/^$/d"`
 SAVEIFS=$IFS
 IFS=$'\n'
