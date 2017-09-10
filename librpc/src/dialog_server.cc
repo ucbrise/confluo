@@ -30,10 +30,6 @@ int main(int argc, char **argv) {
           "Endpoint (address:port) of tail in replica chain"));
 
   opts.add(
-      cmd_option("replica-id", 'r', false).set_default("0").set_description(
-          "Position of server in replica chain"));
-
-  opts.add(
       cmd_option("data-path", 'd', false).set_default(".").set_description(
           "Data path for DiaLog"));
 
@@ -44,13 +40,11 @@ int main(int argc, char **argv) {
   }
 
   std::string host_ep, successor_ep, tail_ep;
-  int replica_id;
   std::string data_path;
   try {
     host_ep = parser.get("endpoint");
     successor_ep = parser.get("successor");
     tail_ep = parser.get("tail");
-    replica_id = parser.get_int("replica-id");
     data_path = parser.get("data-path");
   } catch (std::exception& e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
