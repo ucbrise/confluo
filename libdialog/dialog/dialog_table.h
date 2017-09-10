@@ -377,12 +377,22 @@ class dialog_table {
     for (size_t i = 0; i < schema_.size(); i++) {
       if (snap.is_indexed(i)) {
         radix_index* idx = indexes_.at(snap.index_id(i));
-        for (size_t j = 0; j < block.nrecords; j++) {
-          size_t block_offset = j * record_size;
-          size_t record_offset = log_offset + block_offset;
-          void* rec_ptr = reinterpret_cast<uint8_t*>(&block.data[0])
-              + block_offset;
-          idx->insert(snap.get_key(rec_ptr, i), record_offset);
+        // Handle timestamp differently
+        // TODO: What if requested indexing is finer granularity?
+        if (i == 0) {
+          auto& refs = idx->get_or_create(snap.get_key(&(block.time_block), i));
+          size_t idx = refs->reserve(block.nrecords);
+          for (size_t j = 0; j < block.nrecords; j++) {
+            refs->set(idx + j, log_offset + j * record_size);
+          }
+        } else {
+          for (size_t j = 0; j < block.nrecords; j++) {
+            size_t block_offset = j * record_size;
+            size_t record_offset = log_offset + block_offset;
+            void* rec_ptr = reinterpret_cast<uint8_t*>(&block.data[0])
+                + block_offset;
+            idx->insert(snap.get_key(rec_ptr, i), record_offset);
+          }
         }
       }
     }

@@ -298,6 +298,10 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
       : tail_(0) {
   }
 
+  size_t reserve(size_t count) {
+    return atomic::faa(&tail_, count);
+  }
+
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
