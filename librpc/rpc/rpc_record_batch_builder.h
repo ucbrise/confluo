@@ -48,9 +48,14 @@ class rpc_record_batch_builder {
       }
       i++;
     }
+    clear();
+    return batch;
+  }
+
+  void clear() {
     batch_sizes_.clear();
     batch_.clear();
-    return batch;
+    nrecords_ = 0;
   }
 
   size_t num_records() const {
