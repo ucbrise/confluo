@@ -87,7 +87,7 @@ class rpc_dialog_client {
     cur_table_id_ = -1;
   }
 
-  void add_index(const std::string& field_name, const double bucket_size) {
+  void add_index(const std::string& field_name, const double bucket_size = 1.0) {
     if (cur_table_id_ == -1) {
       throw illegal_state_exception("Must set table first");
     }

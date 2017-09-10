@@ -3,11 +3,7 @@ set -e
 
 mkdir -p build
 cd build
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  cmake .. -DCMAKE_CXX_COMPILER=g++
-else
-  cmake ..
-fi
+cmake ..
 
 START=$(date +%s)
 make
