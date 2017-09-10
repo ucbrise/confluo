@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 
+#include "configuration_params.h"
+
 namespace dialog {
 namespace rpc {
 
