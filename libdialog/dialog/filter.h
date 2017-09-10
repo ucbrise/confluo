@@ -47,9 +47,6 @@ class filter {
   typedef index::radix_tree<aggregated_reflog> idx_t;
   typedef idx_t::rt_result range_result;
 
-  // Default leaf time-granularity (1ms)
-  static const size_t LEAF_RANGE_NS = 1e6;
-
   /**
    * Constructor that initializes filter with provided compiled expression and
    * filter function.
@@ -112,17 +109,6 @@ class filter {
   }
 
   /**
-   * Convert given timestamp into time block (finest time granularity for the
-   * filter)
-   *
-   * @param ts Given timestamp.
-   * @return Corresponding time block.
-   */
-  static uint64_t get_ts_block(uint64_t ts) {
-    return ts / LEAF_RANGE_NS;
-  }
-
-  /**
    * Updates the filter index with a new data point. If the new data point
    * passes the filter, its reference is stored.
    *
@@ -131,7 +117,8 @@ class filter {
   void update(const record_t& r) {
     if (exp_.test(r) && fn_(r)) {
       aggregated_reflog* refs = idx_.insert(
-          byte_string(get_ts_block(r.timestamp())), r.log_offset(), triggers_);
+          byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS),
+          r.log_offset(), triggers_);
       int tid = thread_manager::get_id();
       for (size_t i = 0; i < refs->num_aggregates(); i++) {
         if (triggers_.at(i)->is_valid()) {
@@ -151,8 +138,6 @@ class filter {
   /**
    * Updates the filter index with new data points. If data points
    * pass the filter, their references are stored.
-   *
-
    */
   void update(size_t log_offset, const schema_snapshot& snap,
               record_block& block, size_t record_size) {
