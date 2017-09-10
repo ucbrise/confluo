@@ -23,6 +23,7 @@ HOSTS=($HOSTS)
 IFS=$SAVEIFS
 
 for (( i=0; i<${#HOSTS[@]}; i++ )); do
+  HOST=${HOSTS[$i]}
   echo "Taking down ${HOSTS[$i]}"
   ssh $DIALOG_SSH_OPTS $HOST $DIALOG_PATH/sbin/stop-dialog.sh \
     2>&1 | sed "s/^/$host: /"
