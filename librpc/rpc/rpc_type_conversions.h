@@ -20,6 +20,7 @@ class rpc_type_conversions {
       batch.blocks[i].time_block = rpc_block.time_block;
       batch.blocks[i].nrecords = rpc_block.nrecords;
       batch.blocks[i].data = std::move(rpc_block.data);
+      i++;
     }
     return batch;
   }
