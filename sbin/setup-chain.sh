@@ -44,5 +44,5 @@ for (( i=1; i<${#HOSTS[@]}; i++ )); do
     --endpoint "0.0.0.0:$DIALOG_PORT" \
     --successor "$SUCCESSOR:$DIALOG_PORT" \
     --tail "$TAIL:$DIALOG_PORT" \
-    2>&1 | sed "s/^/$host: /"
+    2>&1 | sed "s/^/$HOST: /"
 done
