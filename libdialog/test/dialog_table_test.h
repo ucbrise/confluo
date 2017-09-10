@@ -281,7 +281,7 @@ TEST_F(DiaLogTableTest, FilterTest) {
   dtable.add_trigger("trigger8", "filter8", "SUM(d) >= 10");
 
   dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  int64_t beg = filter::get_ts_block(r.ts);
+  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
   dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
   dtable.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
   dtable.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
@@ -289,7 +289,7 @@ TEST_F(DiaLogTableTest, FilterTest) {
   dtable.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
   dtable.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   dtable.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-  int64_t end = filter::get_ts_block(r.ts);
+  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
   for (auto r = dtable.query_filter("filter1", beg, end); r.has_more(); ++r) {

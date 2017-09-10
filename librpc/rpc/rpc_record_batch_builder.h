@@ -9,15 +9,13 @@ namespace rpc {
 
 class rpc_record_batch_builder {
  public:
-  static const int64_t TIME_BLOCK = 1e6;
-
   rpc_record_batch_builder()
       : nrecords_(0) {
   }
 
   void add_record(const std::string& rec) {
     int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
-    int64_t time_block = ts / TIME_BLOCK;
+    int64_t time_block = ts / configuration_params::TIME_RESOLUTION_NS;
     batch_sizes_[time_block] += rec.size();
     batch_[time_block].push_back(rec);
     nrecords_++;
@@ -25,7 +23,7 @@ class rpc_record_batch_builder {
 
   void add_record(std::string&& rec) {
     int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
-    int64_t time_block = ts / TIME_BLOCK;
+    int64_t time_block = ts / configuration_params::TIME_RESOLUTION_NS;
     batch_sizes_[time_block] += rec.size();
     batch_[time_block].push_back(std::move(rec));
   }
