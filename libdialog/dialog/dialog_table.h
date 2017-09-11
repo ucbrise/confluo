@@ -400,9 +400,9 @@ class dialog_table {
       if (snap.is_indexed(i)) {
         radix_index* idx = indexes_.at(snap.index_id(i));
         // Handle timestamp differently
-        // TODO: What if requested indexing is finer granularity?
-        if (i == 0) {
-          auto& refs = idx->get_or_create(snap.get_key(&(block.time_block), i));
+        // TODO: What if indexing requested for finer granularity?
+        if (i == 0) { // Timestamp
+          auto& refs = idx->get_or_create(snap.time_key(block.time_block));
           size_t idx = refs->reserve(block.nrecords);
           for (size_t j = 0; j < block.nrecords; j++) {
             refs->set(idx + j, log_offset + j * record_size);
