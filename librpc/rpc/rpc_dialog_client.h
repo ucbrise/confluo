@@ -148,6 +148,12 @@ class rpc_dialog_client {
     }
   }
 
+  void flush() {
+    if (builder_.num_records() > 0) {
+      client_->append_batch(cur_table_id_, builder_.get_batch());
+    }
+  }
+
   void write(const std::string& record) {
     if (cur_table_id_ == -1) {
       throw illegal_state_exception("Must set table first");
@@ -160,26 +166,17 @@ class rpc_dialog_client {
     client_->append(cur_table_id_, record);
   }
 
-  void flush() {
-    if (builder_.num_records() > 0) {
-      client_->append_batch(cur_table_id_, builder_.get_batch());
-    }
-  }
-
   /** Query ops **/
   // Read op
   void read(std::string& _return, int64_t offset) {
+    read_batch(_return, offset, 1);
+  }
+
+  void read_batch(std::string& _return, int64_t offset, size_t nrecords) {
     if (cur_table_id_ == -1) {
       throw illegal_state_exception("Must set table first");
     }
-    int64_t& buf_off = read_buffer_.first;
-    std::string& buf = read_buffer_.second;
-    int64_t rbuf_lim = buf_off + buf.size();
-    if (buf_off == -1 || offset < buf_off || offset >= rbuf_lim) {
-      read_buffer_.first = offset;
-      client_->read(buf, cur_table_id_, buf_off, rpc_configuration_params::READ_BATCH_SIZE);
-    }
-    _return = buf.substr(offset - buf_off, cur_schema_.record_size());
+    client_->read(_return, cur_table_id_, offset, nrecords);
   }
 
   rpc_record_stream adhoc_filter(const std::string& filter_expr) {
@@ -232,6 +229,21 @@ class rpc_dialog_client {
   }
 
 protected:
+  // TODO: Move to sequential reader client (e.g., streaming application)
+  void read_seq(std::string& _return, int64_t offset) {
+    if (cur_table_id_ == -1) {
+      throw illegal_state_exception("Must set table first");
+    }
+    int64_t& buf_off = read_buffer_.first;
+    std::string& buf = read_buffer_.second;
+    int64_t rbuf_lim = buf_off + buf.size();
+    if (buf_off == -1 || offset < buf_off || offset >= rbuf_lim) {
+      read_buffer_.first = offset;
+      client_->read(buf, cur_table_id_, buf_off, rpc_configuration_params::READ_BATCH_SIZE);
+    }
+    _return = buf.substr(offset - buf_off, cur_schema_.record_size());
+  }
+
   int64_t cur_table_id_;
   schema_t cur_schema_;
 
