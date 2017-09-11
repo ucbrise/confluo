@@ -3,7 +3,7 @@
 
 #include "dialog_server.h"
 #include "gtest/gtest.h"
-
+#include "configuration_params.h"
 #include "rpc_dialog_client.h"
 
 using namespace ::dialog::rpc;
@@ -21,7 +21,7 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
 
   sleep(1);
 
-  std::vector<rpc_dialog_client> clients(server->getConcurrentClientLimit());
+  std::vector<rpc_dialog_client> clients(configuration_params::MAX_CONCURRENCY);
   for (auto& client : clients) {
     client.connect("127.0.0.1", 9090);
   }
