@@ -616,7 +616,6 @@ class dialog_server {
     shared_ptr<TThreadedServer> tserver(
         new TThreadedServer(proc_factory, sock, transport_factory,
                             protocol_factory));
-    tserver->setConcurrentClientLimit(configuration_params::MAX_CONCURRENCY);
     return tserver;
   }
 

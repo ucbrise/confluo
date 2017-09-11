@@ -1,6 +1,7 @@
 #ifndef TEST_SERVER_CLIENT_TEST_H_
 #define TEST_SERVER_CLIENT_TEST_H_
 
+#include "configuration_params.h"
 #include "dialog_server.h"
 #include "gtest/gtest.h"
 
@@ -25,7 +26,7 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
 
   sleep(1);
 
-  std::vector<rpc_dialog_client> clients(server->getConcurrentClientLimit());
+  std::vector<rpc_dialog_client> clients(configuration_params::MAX_CONCURRENCY);
   for (auto& client : clients) {
     client.connect(SERVER_ADDRESS, SERVER_PORT);
   }
