@@ -4,7 +4,7 @@
 #include "configuration_params.h"
 #include "dialog_server.h"
 #include "gtest/gtest.h"
-
+#include "configuration_params.h"
 #include "rpc_dialog_client.h"
 
 using namespace ::dialog::rpc;
