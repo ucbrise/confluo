@@ -2,6 +2,9 @@
 #define UTILS_THREAD_UTILS_H_
 
 #include <thread>
+#include <sched.h>
+#include <unistd.h>
+#include <pthread.h>
 
 namespace utils {
 
