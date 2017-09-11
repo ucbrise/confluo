@@ -7,15 +7,15 @@ namespace utils {
 
 class thread_utils {
  public:
-  static inline int set_self_core_affinity(size_t core_id) {
+  static inline int set_self_core_affinity(int core_id) {
     return set_core_affinity(pthread_self(), core_id);
   }
 
-  static inline int set_core_affinity(std::thread& t, size_t core_id) {
+  static inline int set_core_affinity(std::thread& t, int core_id) {
     return set_core_affinity(t.native_handle(), core_id);
   }
 
-  static inline int set_core_affinity(pthread_t thread_handle, size_t core_id) {
+  static inline int set_core_affinity(pthread_t thread_handle, int core_id) {
     int ret = 0;
 #ifdef _GNU_SOURCE
     int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
