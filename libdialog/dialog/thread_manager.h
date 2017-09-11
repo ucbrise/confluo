@@ -7,6 +7,7 @@
 #include "exceptions.h"
 #include "string_map.h"
 #include "logger.h"
+#include "thread_utils.h"
 #include "configuration_params.h"
 
 namespace dialog {
@@ -22,14 +23,16 @@ class thread_manager {
   static int register_thread() {
     // De-register if already registered
     deregister_thread();
-    return set();
+    int core_id = set();
+    utils::thread_utils::set_self_core_affinity(core_id);
+    return core_id;
   }
 
   static int deregister_thread() {
-    int id;
-    if ((id = find()) != -1)
-      unset(id);
-    return id;
+    int core_id;
+    if ((core_id = find()) != -1)
+      unset(core_id);
+    return core_id;
   }
 
   static int get_id() {
