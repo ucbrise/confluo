@@ -9,7 +9,7 @@ namespace dialog {
  * Type-definition for RefLog type -- a MonoLog of type uint64_t and
  * bucket size of 24.
  */
-typedef monolog::monolog_exp2<uint64_t, 24> reflog;
+typedef monolog::monolog_exp2_linear<uint64_t, 24> reflog;
 
 }
 

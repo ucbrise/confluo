@@ -7,5 +7,6 @@
 
 #include "monolog_exp2.h"
 #include "monolog_linear.h"
+#include "monolog_exp2_linear.h"
 
 #endif /* DIALOG_MONOLOG_H_ */
