@@ -67,6 +67,20 @@ TEST_F(MonoLogTest, MonoLogExp2Test) {
   }
 }
 
+TEST_F(MonoLogTest, MonoLogExp2LinearBaseBaseTest) {
+  monolog_exp2_linear_base<uint64_t> array;
+  monolog_test(array);
+}
+
+TEST_F(MonoLogTest, MonoLogExp2LinearTest) {
+  monolog_exp2_linear<uint64_t> array;
+  monolog_test(array);
+  for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
+    monolog_exp2_linear<uint64_t> arr;
+    monolog_test_mt(arr, num_threads);
+  }
+}
+
 TEST_F(MonoLogTest, MonoLogLinearIMTest) {
   monolog_linear<uint64_t, 8, 1048576, 1024> array("mlog", "/tmp",
                                                    storage::IN_MEMORY);
