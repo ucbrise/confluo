@@ -6,7 +6,7 @@
 
 namespace dialog {
 
-typedef monolog::monolog_exp2<index::radix_index*> index_log;
+typedef monolog::monolog_exp2_linear<index::radix_index*> index_log;
 
 }
 
