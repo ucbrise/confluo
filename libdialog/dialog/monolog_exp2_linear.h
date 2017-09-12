@@ -7,8 +7,6 @@
 #include "atomic.h"
 #include "bit_utils.h"
 
-// TODO: Improve documentation
-
 using namespace utils;
 
 namespace dialog {
@@ -25,9 +23,9 @@ namespace monolog {
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
-  static const size_t FBS = 16;
-  static const size_t FBS_HIBIT = 4;
-  static const size_t FCS = FBS * BUCKET_SIZE;
+  static const size_t FCB = 16;
+  static const size_t FCB_HIBIT = 4;
+  static const size_t FCS = FCB * BUCKET_SIZE;
   const size_t FCS_HIBIT;
 
   typedef atomic::type<T*> __atomic_bucket_ref;
@@ -39,13 +37,13 @@ class monolog_exp2_linear_base {
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
     }
-    __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FBS]();
+    __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
     atomic::init(&first_container[0], new T[BUCKET_SIZE]());
     atomic::init(&bucket_containers_[0], first_container);
   }
 
   ~monolog_exp2_linear_base() {
-    size_t num_buckets = FBS;
+    size_t num_buckets = FCB;
     for (auto& x : bucket_containers_) {
       __atomic_bucket_ref* container = atomic::load(&x);
       if (container != nullptr) {
@@ -141,6 +139,7 @@ class monolog_exp2_linear_base {
 
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
+    size_t bucket_remaining = BUCKET_SIZE * sizeof(T);
     while (data_remaining) {
       __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
       if (container == nullptr) {
@@ -151,12 +150,15 @@ class monolog_exp2_linear_base {
         bucket = try_allocate_bucket(container, bucket_idx);
       }
 
-      size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T); // todo check
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
       memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       bucket_idx++;
+      if (bucket_idx > (1U << (container_idx + FCB_HIBIT))) {
+        container_idx++;
+        bucket_idx = 0;
+      }
       bucket_off = 0;
     }
   }
@@ -178,14 +180,18 @@ class monolog_exp2_linear_base {
 
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
+    size_t bucket_remaining = BUCKET_SIZE * sizeof(T);
     while (data_remaining) {
-      size_t bucket_remaining = ((1U << (container_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
       T* bucket = atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]);
       memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
-      container_idx++;
+      bucket_idx++;
+      if (bucket_idx > (1U << (container_idx + FCB_HIBIT))) {
+        container_idx++;
+        bucket_idx = 0;
+      }
       bucket_off = 0;
     }
   }
@@ -243,9 +249,9 @@ class monolog_exp2_linear_base {
    * Copies a contiguous region of the MonoLog base into the provided buffer.
    * The buffer should have sufficient space to hold the data requested, otherwise
    * undefined behavior may result.
-   * @param data
-   * @param idx
-   * @param len
+   * @param data buffer to read into
+   * @param idx start index
+   * @param len bytes to read
    */
   void get(T* data, size_t idx, size_t len) const {
     size_t pos = idx + FCS;
@@ -257,14 +263,18 @@ class monolog_exp2_linear_base {
 
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
+    size_t bucket_remaining = BUCKET_SIZE * sizeof(T);
     while (data_remaining) {
-      size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off) * sizeof(T);
       size_t bytes_to_read = std::min(bucket_remaining, data_remaining);
       data_remaining -= bytes_to_read;
       data_off += bytes_to_read;
       T* bucket = atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]);
       memcpy(data + data_off, &bucket[bucket_off], bytes_to_read);
-      container_idx++;
+      bucket_idx++;
+      if (bucket_idx > (1U << (container_idx + FCB_HIBIT))) {
+        container_idx++;
+        bucket_idx = 0;
+      }
       bucket_off = 0;
     }
   }
@@ -276,7 +286,7 @@ class monolog_exp2_linear_base {
     size_t container_size = bucket_containers_.size() * sizeof(__atomic_bucket_container_ref);
     size_t bucket_size = 0;
     size_t data_size = 0;
-    size_t num_buckets = FBS;
+    size_t num_buckets = FCB;
     for (size_t i = 0; i < bucket_containers_.size(); i++) {
       __atomic_bucket_ref* container = atomic::load(&bucket_containers_[i]);
       if (container != nullptr) {
@@ -301,7 +311,7 @@ class monolog_exp2_linear_base {
    * @return allocated container
    */
   __atomic_bucket_ref* try_allocate_container(size_t container_idx) {
-    size_t num_buckets = (1U << (container_idx + FBS_HIBIT));
+    size_t num_buckets = 1U << (container_idx + FCB_HIBIT);
     __atomic_bucket_ref* new_container = new __atomic_bucket_ref[num_buckets]();
     __atomic_bucket_ref* expected = nullptr;
 
@@ -365,7 +375,6 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
 
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
-//    std::cerr << "push back " << val << "\n";
     this->set(idx, val);
     return idx;
   }
