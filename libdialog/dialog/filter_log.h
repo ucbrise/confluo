@@ -6,7 +6,7 @@
 
 namespace dialog {
 
-typedef monolog::monolog_exp2<monitor::filter*> filter_log;
+typedef monolog::monolog_exp2_linear<monitor::filter*> filter_log;
 
 }
 

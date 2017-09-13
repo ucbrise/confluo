@@ -141,7 +141,7 @@ class string_map {
 
  private:
   reflog** buckets_;
-  monolog::monolog_exp2<map_entry> entries_;
+  monolog::monolog_exp2_linear<map_entry> entries_;
 };
 
 template<typename V>
