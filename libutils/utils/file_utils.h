@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <climits>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #include "assertions.h"
 
@@ -38,6 +39,11 @@ class file_utils {
         *p = '/';
       }
     mkdir(tmp, S_IRWXU);
+  }
+
+  static bool exists_file(const std::string& path) {
+    struct stat buf;
+    return stat(path.c_str(), &buf) == 0;
   }
 
   static int create_file(const std::string& path, int flags) {
