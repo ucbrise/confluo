@@ -13,7 +13,7 @@ namespace utils {
 class string_utils {
  public:
   inline static std::vector<std::string> split(const std::string &s, char delim,
-                                        size_t count) {
+                                               size_t count) {
     std::stringstream ss(s);
     std::string item;
     std::vector<std::string> elems;
@@ -27,8 +27,19 @@ class string_utils {
     return elems;
   }
 
-  inline static std::vector<std::string> split(const std::string &s, char delim) {
+  inline static std::vector<std::string> split(const std::string &s,
+                                               char delim) {
     return split(s, delim, UINT64_MAX);
+  }
+
+  inline static std::string mk_string(const std::vector<std::string>& v,
+                                      const std::string& delim) {
+    std::string str = "";
+    size_t i = 0;
+    for (; i < v.size() - 1; i++) {
+      str += v[i] + delim;
+    }
+    return str + v[i];
   }
 
   template<typename functor>

@@ -23,7 +23,8 @@ class configuration_params {
 };
 
 static utils::configuration_map dialog_conf(
-    utils::config_utils::read_from_env("DIALOG_CONF", "conf/dialog.conf"));
+    utils::config_utils::read_from_env(
+        "DIALOG_CONF", "/etc/conf/dialog.conf:./conf/dialog.conf"));
 
 int configuration_params::MAX_CONCURRENCY = dialog_conf.get<int>(
     "max_concurrency", constants::HARDWARE_CONCURRENCY);
