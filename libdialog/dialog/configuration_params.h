@@ -26,11 +26,11 @@ static utils::configuration_map dialog_conf(
     utils::config_utils::read_from_env("DIALOG_CONF", "conf/dialog.conf"));
 
 int configuration_params::MAX_CONCURRENCY = dialog_conf.get<int>(
-    "max_write_concurrency", constants::HARDWARE_CONCURRENCY);
+    "max_concurrency", constants::HARDWARE_CONCURRENCY);
 double configuration_params::INDEX_BUCKET_SIZE = dialog_conf.get<double>(
     "index_block_size", constants::DEFAULT_INDEX_BUCKET_SIZE);
 uint64_t configuration_params::TIME_RESOLUTION_NS = dialog_conf.get<uint64_t>(
-    "time_resolution", constants::DEFAULT_TIME_RESOLUTION_NS);
+    "time_resolution_ns", constants::DEFAULT_TIME_RESOLUTION_NS);
 uint64_t configuration_params::MONITOR_WINDOW_MS = dialog_conf.get<uint64_t>(
     "monitor_window_ms", constants::DEFAULT_MONITOR_WINDOW_MS);
 uint64_t configuration_params::MONITOR_PERIODICITY_MS = dialog_conf
