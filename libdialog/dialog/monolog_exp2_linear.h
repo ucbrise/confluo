@@ -23,16 +23,12 @@ namespace monolog {
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
-  static const size_t FCB = 16;
-  static const size_t FCB_HIBIT = 4;
-  static const size_t FCS = FCB * BUCKET_SIZE;
-  const size_t FCS_HIBIT;
 
   typedef atomic::type<T*> __atomic_bucket_ref;
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
   monolog_exp2_linear_base()
-      : FCS_HIBIT(bit_utils::highest_bit(FCS)) {
+      : fcs_hibit_(bit_utils::highest_bit(fcs_)) {
     __atomic_bucket_ref* null_ptr = nullptr;
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
@@ -64,16 +60,16 @@ class monolog_exp2_linear_base {
    * @param end_idx end index
    */
   void ensure_alloc(size_t start_idx, size_t end_idx) {
-    size_t pos1 = start_idx + FCS;
-    size_t pos2 = end_idx + FCS;
+    size_t pos1 = start_idx + fcs_;
+    size_t pos2 = end_idx + fcs_;
     size_t hibit1 = bit_utils::highest_bit(pos1);
     size_t hibit2 = bit_utils::highest_bit(pos2);
     size_t highest_cleared1 = pos1 ^ (1 << hibit1);
     size_t highest_cleared2 = pos2 ^ (1 << hibit2);
     size_t bucket_idx1 = highest_cleared1 / BUCKET_SIZE;
     size_t bucket_idx2 = highest_cleared2 / BUCKET_SIZE;
-    size_t container_idx1 = hibit1 - FCS_HIBIT;
-    size_t container_idx2 = hibit2 - FCS_HIBIT;
+    size_t container_idx1 = hibit1 - fcs_hibit_;
+    size_t container_idx2 = hibit2 - fcs_hibit_;
 
     for (size_t i = container_idx1; i <= container_idx2; i++) {
       __atomic_bucket_ref* container = atomic::load(&bucket_containers_[i]);
@@ -89,12 +85,12 @@ class monolog_exp2_linear_base {
    * @param val value to set
    */
   void set(size_t idx, const T val) {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
 
     __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
     if (container == nullptr) {
@@ -114,12 +110,12 @@ class monolog_exp2_linear_base {
    * @param val value to set
    */
   void set_unsafe(size_t idx, const T val) {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
     atomic::load(&(atomic::load(&bucket_containers_[container_idx])[bucket_idx]))[bucket_off] = val;
   }
 
@@ -130,12 +126,12 @@ class monolog_exp2_linear_base {
    * @param len length of data
    */
   void set(size_t idx, const T* data, size_t len) {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
 
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
@@ -155,7 +151,7 @@ class monolog_exp2_linear_base {
       data_off += bytes_to_write;
       memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       bucket_idx++;
-      if (bucket_idx > (1U << (container_idx + FCB_HIBIT))) {
+      if (bucket_idx >= (1U << (container_idx + FCB_HIBIT))) {
         container_idx++;
         bucket_idx = 0;
       }
@@ -171,12 +167,12 @@ class monolog_exp2_linear_base {
    * @param len length of data
    */
   void set_unsafe(size_t idx, const T* data, size_t len) {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
 
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
@@ -188,7 +184,7 @@ class monolog_exp2_linear_base {
       T* bucket = atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]);
       memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       bucket_idx++;
-      if (bucket_idx > (1U << (container_idx + FCB_HIBIT))) {
+      if (bucket_idx >= (1U << (container_idx + FCB_HIBIT))) {
         container_idx++;
         bucket_idx = 0;
       }
@@ -202,12 +198,12 @@ class monolog_exp2_linear_base {
    * @return pointer
    */
   const T* ptr(size_t idx) const {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
     return atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]) + bucket_off;
   }
 
@@ -217,22 +213,22 @@ class monolog_exp2_linear_base {
    * @return data
    */
   const T& get(size_t idx) const {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
     return atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx])[bucket_off];
   }
 
   T& operator[](size_t idx) {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
 
     __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
     if (container == nullptr) {
@@ -254,12 +250,12 @@ class monolog_exp2_linear_base {
    * @param len bytes to read
    */
   void get(T* data, size_t idx, size_t len) const {
-    size_t pos = idx + FCS;
+    size_t pos = idx + fcs_;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - FCS_HIBIT;
+    size_t container_idx = hibit - fcs_hibit_;
 
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
@@ -271,7 +267,7 @@ class monolog_exp2_linear_base {
       T* bucket = atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]);
       memcpy(data + data_off, &bucket[bucket_off], bytes_to_read);
       bucket_idx++;
-      if (bucket_idx > (1U << (container_idx + FCB_HIBIT))) {
+      if (bucket_idx >= (1U << (container_idx + FCB_HIBIT))) {
         container_idx++;
         bucket_idx = 0;
       }
@@ -341,6 +337,12 @@ class monolog_exp2_linear_base {
     }
     return new_bucket;
   }
+
+ private:
+  static const size_t FCB = 16;
+  static const size_t FCB_HIBIT = 4;
+  const size_t fcs_ = FCB * BUCKET_SIZE;
+  const size_t fcs_hibit_;
 
   // Stores the pointers to the bucket containers for MonoLog.
   std::array<__atomic_bucket_container_ref, NCONTAINERS> bucket_containers_;
