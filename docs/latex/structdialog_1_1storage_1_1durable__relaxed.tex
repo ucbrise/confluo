@@ -1,0 +1,71 @@
+\hypertarget{structdialog_1_1storage_1_1durable__relaxed}{}\section{dialog\+:\+:storage\+:\+:durable\+\_\+relaxed Struct Reference}
+\label{structdialog_1_1storage_1_1durable__relaxed}\index{dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}}
+
+
+{\ttfamily \#include $<$storage.\+h$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void $\ast$ \hyperlink{structdialog_1_1storage_1_1durable__relaxed_a1067618bb9a7eae15a84642affcfcdd1}{allocate} (const std\+::string \&path, size\+\_\+t size)
+\item 
+static void \hyperlink{structdialog_1_1storage_1_1durable__relaxed_a7eee32ffcf5bd7a8da913f3cc5747579}{free} (void $\ast$ptr, size\+\_\+t size)
+\item 
+static void \hyperlink{structdialog_1_1storage_1_1durable__relaxed_a017593d30af37c9bb6df31c82dfbfcf5}{flush} (void $\ast$ptr, size\+\_\+t size)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Durable (relaxed) storage mode, which allocates memory backed by a file, but delegates flushing of the data to the file to the OS kernel. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1durable__relaxed_a1067618bb9a7eae15a84642affcfcdd1}\label{structdialog_1_1storage_1_1durable__relaxed_a1067618bb9a7eae15a84642affcfcdd1}} 
+\index{dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}!allocate@{allocate}}
+\index{allocate@{allocate}!dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}}
+\subsubsection{\texorpdfstring{allocate()}{allocate()}}
+{\footnotesize\ttfamily static void$\ast$ dialog\+::storage\+::durable\+\_\+relaxed\+::allocate (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Allocates new memory backed by file. Creates the file, overwriting old data if the file already existed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & Backing file. \\
+\hline
+{\em size} & Size of requested memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1durable__relaxed_a017593d30af37c9bb6df31c82dfbfcf5}\label{structdialog_1_1storage_1_1durable__relaxed_a017593d30af37c9bb6df31c82dfbfcf5}} 
+\index{dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}!flush@{flush}}
+\index{flush@{flush}!dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}}
+\subsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily static void dialog\+::storage\+::durable\+\_\+relaxed\+::flush (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Flushes data to backed file (does nothing for this storage mode).
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & Pointer to memory. \\
+\hline
+{\em size} & Size of allocated memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1durable__relaxed_a7eee32ffcf5bd7a8da913f3cc5747579}\label{structdialog_1_1storage_1_1durable__relaxed_a7eee32ffcf5bd7a8da913f3cc5747579}} 
+\index{dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}!free@{free}}
+\index{free@{free}!dialog\+::storage\+::durable\+\_\+relaxed@{dialog\+::storage\+::durable\+\_\+relaxed}}
+\subsubsection{\texorpdfstring{free()}{free()}}
+{\footnotesize\ttfamily static void dialog\+::storage\+::durable\+\_\+relaxed\+::free (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Frees allocated memory. Does not delete backing file.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & Pointer to memory to be freed. \\
+\hline
+{\em size} & Size of allocated memory. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/storage.\+h\end{DoxyCompactItemize}

@@ -1,0 +1,129 @@
+\hypertarget{classdialog_1_1dialog__store}{}\section{dialog\+:\+:dialog\+\_\+store Class Reference}
+\label{classdialog_1_1dialog__store}\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdialog_1_1dialog__store_a88dd772873fbd8c51bb21baa7302ebee}{dialog\+\_\+store} (const std\+::string \&data\+\_\+path)
+\item 
+int64\+\_\+t \hyperlink{classdialog_1_1dialog__store_aec46cdcce3866d0840cf01528eb5e6c0}{add\+\_\+table} (const std\+::string \&table\+\_\+name, const std\+::vector$<$ \hyperlink{classdialog_1_1column__t}{column\+\_\+t} $>$ \&schema, const storage\+::storage\+\_\+id id)
+\item 
+int64\+\_\+t \hyperlink{classdialog_1_1dialog__store_a749d49076f2107e32b65be5d79d5781c}{get\+\_\+table\+\_\+id} (const std\+::string \&table\+\_\+name) const
+\item 
+\hyperlink{classdialog_1_1dialog__table}{dialog\+\_\+table} $\ast$ \hyperlink{classdialog_1_1dialog__store_a3d951f8e4bc697af2fdd7b9f225453d8}{get\+\_\+table} (const std\+::string \&table\+\_\+name)
+\item 
+\hyperlink{classdialog_1_1dialog__table}{dialog\+\_\+table} $\ast$ \hyperlink{classdialog_1_1dialog__store_a7fb7214a8098e54fd3d2ac0bfae4a431}{get\+\_\+table} (int64\+\_\+t table\+\_\+id)
+\item 
+int64\+\_\+t \hyperlink{classdialog_1_1dialog__store_a15b6b065d529ede947ff3ca4db77ab56}{remove\+\_\+table} (const std\+::string \&table\+\_\+name)
+\item 
+int64\+\_\+t \hyperlink{classdialog_1_1dialog__store_a7557cfcb6f7f5458031b7b3971d9d7cd}{remove\+\_\+table} (int64\+\_\+t table\+\_\+id)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_a88dd772873fbd8c51bb21baa7302ebee}\label{classdialog_1_1dialog__store_a88dd772873fbd8c51bb21baa7302ebee}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!dialog\+\_\+store@{dialog\+\_\+store}}
+\index{dialog\+\_\+store@{dialog\+\_\+store}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{dialog\+\_\+store()}{dialog\_store()}}
+{\footnotesize\ttfamily dialog\+::dialog\+\_\+store\+::dialog\+\_\+store (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{data\+\_\+path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor for creating dialog store 
+\begin{DoxyParams}{Parameters}
+{\em data\+\_\+path} & The data path for the store \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_aec46cdcce3866d0840cf01528eb5e6c0}\label{classdialog_1_1dialog__store_aec46cdcce3866d0840cf01528eb5e6c0}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!add\+\_\+table@{add\+\_\+table}}
+\index{add\+\_\+table@{add\+\_\+table}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{add\+\_\+table()}{add\_table()}}
+{\footnotesize\ttfamily int64\+\_\+t dialog\+::dialog\+\_\+store\+::add\+\_\+table (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{table\+\_\+name,  }\item[{const std\+::vector$<$ \hyperlink{classdialog_1_1column__t}{column\+\_\+t} $>$ \&}]{schema,  }\item[{const storage\+::storage\+\_\+id}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Adds a table to the dialog store 
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+name} & The name of the table \\
+\hline
+{\em schema} & List of columns that define the schema \\
+\hline
+{\em id} & The ide of the store \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The id of the table 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_a3d951f8e4bc697af2fdd7b9f225453d8}\label{classdialog_1_1dialog__store_a3d951f8e4bc697af2fdd7b9f225453d8}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!get\+\_\+table@{get\+\_\+table}}
+\index{get\+\_\+table@{get\+\_\+table}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{get\+\_\+table()}{get\_table()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \hyperlink{classdialog_1_1dialog__table}{dialog\+\_\+table}$\ast$ dialog\+::dialog\+\_\+store\+::get\+\_\+table (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{table\+\_\+name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the specified table 
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+name} & The name of the table \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The table that matches the table name 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_a7fb7214a8098e54fd3d2ac0bfae4a431}\label{classdialog_1_1dialog__store_a7fb7214a8098e54fd3d2ac0bfae4a431}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!get\+\_\+table@{get\+\_\+table}}
+\index{get\+\_\+table@{get\+\_\+table}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{get\+\_\+table()}{get\_table()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \hyperlink{classdialog_1_1dialog__table}{dialog\+\_\+table}$\ast$ dialog\+::dialog\+\_\+store\+::get\+\_\+table (\begin{DoxyParamCaption}\item[{int64\+\_\+t}]{table\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the specified table by id 
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+id} & The id of the table \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The table that matches the id 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_a749d49076f2107e32b65be5d79d5781c}\label{classdialog_1_1dialog__store_a749d49076f2107e32b65be5d79d5781c}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!get\+\_\+table\+\_\+id@{get\+\_\+table\+\_\+id}}
+\index{get\+\_\+table\+\_\+id@{get\+\_\+table\+\_\+id}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{get\+\_\+table\+\_\+id()}{get\_table\_id()}}
+{\footnotesize\ttfamily int64\+\_\+t dialog\+::dialog\+\_\+store\+::get\+\_\+table\+\_\+id (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{table\+\_\+name }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the id of the table 
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+name} & The name of the table \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The id of the table 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_a15b6b065d529ede947ff3ca4db77ab56}\label{classdialog_1_1dialog__store_a15b6b065d529ede947ff3ca4db77ab56}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!remove\+\_\+table@{remove\+\_\+table}}
+\index{remove\+\_\+table@{remove\+\_\+table}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{remove\+\_\+table()}{remove\_table()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int64\+\_\+t dialog\+::dialog\+\_\+store\+::remove\+\_\+table (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{table\+\_\+name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Removes a table specified by the name 
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+name} & The name of the table \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The index of the removed table or -\/1 if it doesn\textquotesingle{}t exist 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1dialog__store_a7557cfcb6f7f5458031b7b3971d9d7cd}\label{classdialog_1_1dialog__store_a7557cfcb6f7f5458031b7b3971d9d7cd}} 
+\index{dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}!remove\+\_\+table@{remove\+\_\+table}}
+\index{remove\+\_\+table@{remove\+\_\+table}!dialog\+::dialog\+\_\+store@{dialog\+::dialog\+\_\+store}}
+\subsubsection{\texorpdfstring{remove\+\_\+table()}{remove\_table()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int64\+\_\+t dialog\+::dialog\+\_\+store\+::remove\+\_\+table (\begin{DoxyParamCaption}\item[{int64\+\_\+t}]{table\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Removes the table specified by the id 
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+id} & The id of the table \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The index of the removed table or -\/1 if it doesn\textquotesingle{}t exist 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/dialog\+\_\+store.\+h\end{DoxyCompactItemize}

@@ -1,0 +1,73 @@
+\hypertarget{classdialog_1_1bitmap}{}\section{dialog\+:\+:bitmap Class Reference}
+\label{classdialog_1_1bitmap}\index{dialog\+::bitmap@{dialog\+::bitmap}}
+Inheritance diagram for dialog\+:\+:bitmap\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.621622cm]{classdialog_1_1bitmap}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a9dad89abbacbfbf01882b42d105f8eab}\label{classdialog_1_1bitmap_a9dad89abbacbfbf01882b42d105f8eab}} 
+typedef size\+\_\+t {\bfseries pos\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a1f43213dbbee2916b2300f18cc0cf8e4}\label{classdialog_1_1bitmap_a1f43213dbbee2916b2300f18cc0cf8e4}} 
+typedef size\+\_\+t {\bfseries size\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a581f5b4b805e7227daff300d3e6889a1}\label{classdialog_1_1bitmap_a581f5b4b805e7227daff300d3e6889a1}} 
+typedef uint64\+\_\+t {\bfseries data\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a32a35c8848493dfd325db63fa5d9522b}\label{classdialog_1_1bitmap_a32a35c8848493dfd325db63fa5d9522b}} 
+typedef uint8\+\_\+t {\bfseries width\+\_\+type}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a24d0f574de691d0a6a49042250b70402}\label{classdialog_1_1bitmap_a24d0f574de691d0a6a49042250b70402}} 
+{\bfseries bitmap} (size\+\_\+type num\+\_\+bits)
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a0b900d1a8caeda35213c8891e092c61a}\label{classdialog_1_1bitmap_a0b900d1a8caeda35213c8891e092c61a}} 
+data\+\_\+type $\ast$ {\bfseries data} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a2066fd879c2e7c3d18ff590e9f1826b8}\label{classdialog_1_1bitmap_a2066fd879c2e7c3d18ff590e9f1826b8}} 
+size\+\_\+type {\bfseries num\+\_\+bits} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a560fd4286efbe1d770926a4ceccc3d9a}\label{classdialog_1_1bitmap_a560fd4286efbe1d770926a4ceccc3d9a}} 
+void {\bfseries clear\+\_\+all} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_abeda36a2708d0b87296f7c4322357421}\label{classdialog_1_1bitmap_abeda36a2708d0b87296f7c4322357421}} 
+void {\bfseries set\+\_\+bit} (pos\+\_\+type i)
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a60bf0ac8d398e48e8f3c467999d0b1c8}\label{classdialog_1_1bitmap_a60bf0ac8d398e48e8f3c467999d0b1c8}} 
+void {\bfseries unset\+\_\+bit} (pos\+\_\+type i)
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a50fa02f2e4a94c567f67761988c78d7f}\label{classdialog_1_1bitmap_a50fa02f2e4a94c567f67761988c78d7f}} 
+bool {\bfseries get\+\_\+bit} (pos\+\_\+type i) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a567ec662fb5fa68399b3097cc63c44ea}\label{classdialog_1_1bitmap_a567ec662fb5fa68399b3097cc63c44ea}} 
+{\footnotesize template$<$typename T $>$ }\\std\+::enable\+\_\+if$<$ std\+::is\+\_\+arithmetic$<$ T $>$\+::value $>$\+::type {\bfseries set\+\_\+val\+\_\+pos} (pos\+\_\+type pos, T val, width\+\_\+type bits)
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_aa56b2e9be38fd068ac374f2f7a33120b}\label{classdialog_1_1bitmap_aa56b2e9be38fd068ac374f2f7a33120b}} 
+{\footnotesize template$<$typename T $>$ }\\std\+::enable\+\_\+if$<$ std\+::is\+\_\+arithmetic$<$ T $>$\+::value, T $>$\+::type {\bfseries get\+\_\+val\+\_\+pos} (pos\+\_\+type pos, width\+\_\+type bits) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_af93ff2660d3b790eee85692a41bdb823}\label{classdialog_1_1bitmap_af93ff2660d3b790eee85692a41bdb823}} 
+virtual size\+\_\+type {\bfseries serialize} (std\+::ostream \&out)
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a5c4c9a790b785bbc021d913a53cffe80}\label{classdialog_1_1bitmap_a5c4c9a790b785bbc021d913a53cffe80}} 
+virtual size\+\_\+type {\bfseries deserialize} (std\+::istream \&in)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a343e756ef501f484742f1e87a4085074}\label{classdialog_1_1bitmap_a343e756ef501f484742f1e87a4085074}} 
+data\+\_\+type $\ast$ {\bfseries data\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1bitmap_a85885c54fdd3eec34785d882bc4d3228}\label{classdialog_1_1bitmap_a85885c54fdd3eec34785d882bc4d3228}} 
+size\+\_\+type {\bfseries size\+\_\+}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/bitmap.\+h\end{DoxyCompactItemize}

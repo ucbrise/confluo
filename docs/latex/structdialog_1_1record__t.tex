@@ -1,0 +1,67 @@
+\hypertarget{structdialog_1_1record__t}{}\section{dialog\+:\+:record\+\_\+t Struct Reference}
+\label{structdialog_1_1record__t}\index{dialog\+::record\+\_\+t@{dialog\+::record\+\_\+t}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_af4e986b15f9ca35c54a4ab6e8c52d30f}\label{structdialog_1_1record__t_af4e986b15f9ca35c54a4ab6e8c52d30f}} 
+typedef std\+::vector$<$ \hyperlink{structdialog_1_1field__t}{field\+\_\+t} $>$\+::iterator {\bfseries iterator}
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a7e34b0f2b52763beee231a58e3263c17}\label{structdialog_1_1record__t_a7e34b0f2b52763beee231a58e3263c17}} 
+typedef std\+::vector$<$ \hyperlink{structdialog_1_1field__t}{field\+\_\+t} $>$\+::const\+\_\+iterator {\bfseries const\+\_\+iterator}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a3e010a7750deea6edd3ea9b7c557c900}\label{structdialog_1_1record__t_a3e010a7750deea6edd3ea9b7c557c900}} 
+{\bfseries record\+\_\+t} (size\+\_\+t log\+\_\+offset, void $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t size)
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a003ed255f19d457f16ca593f841912e0}\label{structdialog_1_1record__t_a003ed255f19d457f16ca593f841912e0}} 
+void {\bfseries reserve} (size\+\_\+t n)
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_aa52eed245247cc9546c8f54a1bb79626}\label{structdialog_1_1record__t_aa52eed245247cc9546c8f54a1bb79626}} 
+void {\bfseries push\+\_\+back} (const \hyperlink{structdialog_1_1field__t}{field\+\_\+t} \&val)
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a6e1501e143bccb395442eaedd6d2352a}\label{structdialog_1_1record__t_a6e1501e143bccb395442eaedd6d2352a}} 
+void {\bfseries push\+\_\+back} (\hyperlink{structdialog_1_1field__t}{field\+\_\+t} \&\&val)
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a0c2bf230c9156eaba00a3ceabfcb95d7}\label{structdialog_1_1record__t_a0c2bf230c9156eaba00a3ceabfcb95d7}} 
+const \hyperlink{structdialog_1_1field__t}{field\+\_\+t} \& {\bfseries operator\mbox{[}$\,$\mbox{]}} (uint16\+\_\+t idx) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a11abc485ed657db030ddbe441e1d45d3}\label{structdialog_1_1record__t_a11abc485ed657db030ddbe441e1d45d3}} 
+const \hyperlink{structdialog_1_1field__t}{field\+\_\+t} \& {\bfseries at} (uint16\+\_\+t idx) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_aa3a7c889e5f3013df010cad5217d5e11}\label{structdialog_1_1record__t_aa3a7c889e5f3013df010cad5217d5e11}} 
+uint64\+\_\+t {\bfseries timestamp} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a2bd7e9bf1821ff2d23b32910c3f34934}\label{structdialog_1_1record__t_a2bd7e9bf1821ff2d23b32910c3f34934}} 
+size\+\_\+t {\bfseries log\+\_\+offset} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a4bc3b102414bc572fdc07309ef0f0a7a}\label{structdialog_1_1record__t_a4bc3b102414bc572fdc07309ef0f0a7a}} 
+void $\ast$ {\bfseries data} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a52dbda4f5f04a5ec4c5588241c3a5533}\label{structdialog_1_1record__t_a52dbda4f5f04a5ec4c5588241c3a5533}} 
+uint64\+\_\+t {\bfseries version} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a841131722da9228e784e29188ba77c5b}\label{structdialog_1_1record__t_a841131722da9228e784e29188ba77c5b}} 
+iterator {\bfseries begin} ()
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_ae0881e9d5b98f01480cb62da5441795c}\label{structdialog_1_1record__t_ae0881e9d5b98f01480cb62da5441795c}} 
+iterator {\bfseries end} ()
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a56205f6df46bbd0003d33c7a1fc97814}\label{structdialog_1_1record__t_a56205f6df46bbd0003d33c7a1fc97814}} 
+const\+\_\+iterator {\bfseries begin} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a3c11548c92f6fe3c8c02adaeeca3a6f1}\label{structdialog_1_1record__t_a3c11548c92f6fe3c8c02adaeeca3a6f1}} 
+const\+\_\+iterator {\bfseries end} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a6b7f1ea9625f0dad11bc53dcedb2f1a6}\label{structdialog_1_1record__t_a6b7f1ea9625f0dad11bc53dcedb2f1a6}} 
+size\+\_\+t {\bfseries length} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1record__t_a60677227ea92a2e7672bd4bb16d615f3}\label{structdialog_1_1record__t_a60677227ea92a2e7672bd4bb16d615f3}} 
+std\+::string {\bfseries to\+\_\+string} () const
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/record.\+h\end{DoxyCompactItemize}

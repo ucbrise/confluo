@@ -1,0 +1,62 @@
+\hypertarget{classdialog_1_1unsized__bitmap__array}{}\section{dialog\+:\+:unsized\+\_\+bitmap\+\_\+array$<$ T $>$ Class Template Reference}
+\label{classdialog_1_1unsized__bitmap__array}\index{dialog\+::unsized\+\_\+bitmap\+\_\+array$<$ T $>$@{dialog\+::unsized\+\_\+bitmap\+\_\+array$<$ T $>$}}
+Inheritance diagram for dialog\+:\+:unsized\+\_\+bitmap\+\_\+array$<$ T $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classdialog_1_1unsized__bitmap__array}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a4fe55f99c731168e7f95545f0a0fcd2a}\label{classdialog_1_1unsized__bitmap__array_a4fe55f99c731168e7f95545f0a0fcd2a}} 
+typedef \hyperlink{classdialog_1_1bitmap__array__base}{bitmap\+\_\+array\+\_\+base}$<$ T $>$\+::size\+\_\+type {\bfseries size\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_ad2a52dd64f8be340d5eb8fd7f631c0e3}\label{classdialog_1_1unsized__bitmap__array_ad2a52dd64f8be340d5eb8fd7f631c0e3}} 
+typedef \hyperlink{classdialog_1_1bitmap__array__base}{bitmap\+\_\+array\+\_\+base}$<$ T $>$\+::width\+\_\+type {\bfseries width\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_ac7ad7cccd26c107aae84ac5323fb2ce5}\label{classdialog_1_1unsized__bitmap__array_ac7ad7cccd26c107aae84ac5323fb2ce5}} 
+typedef \hyperlink{classdialog_1_1bitmap__array__base}{bitmap\+\_\+array\+\_\+base}$<$ T $>$\+::pos\+\_\+type {\bfseries pos\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a334227ffb88f529ae1e2d6700ad99041}\label{classdialog_1_1unsized__bitmap__array_a334227ffb88f529ae1e2d6700ad99041}} 
+typedef \hyperlink{classdialog_1_1value__reference}{value\+\_\+reference}$<$ \hyperlink{classdialog_1_1unsized__bitmap__array}{unsized\+\_\+bitmap\+\_\+array}$<$ T $>$ $>$ {\bfseries reference}
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a93a78d41d8baa7829e551a09236ce1ff}\label{classdialog_1_1unsized__bitmap__array_a93a78d41d8baa7829e551a09236ce1ff}} 
+typedef T {\bfseries value\+\_\+type}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a940998b89b7e061c39ea8720aa7b3b61}\label{classdialog_1_1unsized__bitmap__array_a940998b89b7e061c39ea8720aa7b3b61}} 
+{\bfseries unsized\+\_\+bitmap\+\_\+array} (const \hyperlink{classdialog_1_1unsized__bitmap__array}{unsized\+\_\+bitmap\+\_\+array} \&array)
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a849b479fd6e8c67ed680695d04f4cac0}\label{classdialog_1_1unsized__bitmap__array_a849b479fd6e8c67ed680695d04f4cac0}} 
+{\bfseries unsized\+\_\+bitmap\+\_\+array} (size\+\_\+type num\+\_\+elements, width\+\_\+type bit\+\_\+width)
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a2c7c8fa9c04b92259ce3fa1630fdd4f2}\label{classdialog_1_1unsized__bitmap__array_a2c7c8fa9c04b92259ce3fa1630fdd4f2}} 
+{\bfseries unsized\+\_\+bitmap\+\_\+array} (T $\ast$elements, size\+\_\+type num\+\_\+elements, width\+\_\+type bit\+\_\+width)
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_aad12c309b1d637d8c0a25546098cf717}\label{classdialog_1_1unsized__bitmap__array_aad12c309b1d637d8c0a25546098cf717}} 
+void {\bfseries set} (pos\+\_\+type i, T value)
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_ac9dfbc9c10483e0f4d4943a0516a5f08}\label{classdialog_1_1unsized__bitmap__array_ac9dfbc9c10483e0f4d4943a0516a5f08}} 
+T {\bfseries get} (pos\+\_\+type i) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a783d5378e0f0aa1e10c10f0108feefd0}\label{classdialog_1_1unsized__bitmap__array_a783d5378e0f0aa1e10c10f0108feefd0}} 
+const T {\bfseries operator\mbox{[}$\,$\mbox{]}} (const pos\+\_\+type \&i) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_ac3a92dbcf24be1eab76efcb3a5dd8d3a}\label{classdialog_1_1unsized__bitmap__array_ac3a92dbcf24be1eab76efcb3a5dd8d3a}} 
+\hyperlink{classdialog_1_1value__reference}{reference} {\bfseries operator\mbox{[}$\,$\mbox{]}} (const pos\+\_\+type \&i)
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a3c6dfec187c0ecad49d562c2b081ec6a}\label{classdialog_1_1unsized__bitmap__array_a3c6dfec187c0ecad49d562c2b081ec6a}} 
+virtual size\+\_\+type {\bfseries serialize} (std\+::ostream \&out) override
+\item 
+\mbox{\Hypertarget{classdialog_1_1unsized__bitmap__array_a4ae9d743033be4468f4c0be8dbaccbca}\label{classdialog_1_1unsized__bitmap__array_a4ae9d743033be4468f4c0be8dbaccbca}} 
+virtual size\+\_\+type {\bfseries deserialize} (std\+::istream \&in) override
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/bitmap\+\_\+array.\+h\end{DoxyCompactItemize}

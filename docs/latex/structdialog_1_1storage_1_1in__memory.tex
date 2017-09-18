@@ -1,0 +1,71 @@
+\hypertarget{structdialog_1_1storage_1_1in__memory}{}\section{dialog\+:\+:storage\+:\+:in\+\_\+memory Struct Reference}
+\label{structdialog_1_1storage_1_1in__memory}\index{dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}}
+
+
+{\ttfamily \#include $<$storage.\+h$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void $\ast$ \hyperlink{structdialog_1_1storage_1_1in__memory_a0cf298a53915ebf358d46e864f54ad78}{allocate} (const std\+::string \&path, size\+\_\+t size)
+\item 
+static void \hyperlink{structdialog_1_1storage_1_1in__memory_af1a8517c282999c0f80fda59de3483d7}{free\+\_\+mem} (void $\ast$ptr, size\+\_\+t size)
+\item 
+static void \hyperlink{structdialog_1_1storage_1_1in__memory_a8c6edb151f7f3420cb14b567b5c88c64}{flush} (void $\ast$ptr, size\+\_\+t size)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+In memory storage, uses mmap to allocate data that is not backed by a file. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1in__memory_a0cf298a53915ebf358d46e864f54ad78}\label{structdialog_1_1storage_1_1in__memory_a0cf298a53915ebf358d46e864f54ad78}} 
+\index{dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}!allocate@{allocate}}
+\index{allocate@{allocate}!dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}}
+\subsubsection{\texorpdfstring{allocate()}{allocate()}}
+{\footnotesize\ttfamily static void$\ast$ dialog\+::storage\+::in\+\_\+memory\+::allocate (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Allocates new memory.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & Backing file (unused). \\
+\hline
+{\em size} & Size of requested memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1in__memory_a8c6edb151f7f3420cb14b567b5c88c64}\label{structdialog_1_1storage_1_1in__memory_a8c6edb151f7f3420cb14b567b5c88c64}} 
+\index{dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}!flush@{flush}}
+\index{flush@{flush}!dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}}
+\subsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily static void dialog\+::storage\+::in\+\_\+memory\+::flush (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Flushes data to backed file (does nothing for this storage mode).
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & Pointer to memory. \\
+\hline
+{\em size} & Size of allocated memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1in__memory_af1a8517c282999c0f80fda59de3483d7}\label{structdialog_1_1storage_1_1in__memory_af1a8517c282999c0f80fda59de3483d7}} 
+\index{dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}!free\+\_\+mem@{free\+\_\+mem}}
+\index{free\+\_\+mem@{free\+\_\+mem}!dialog\+::storage\+::in\+\_\+memory@{dialog\+::storage\+::in\+\_\+memory}}
+\subsubsection{\texorpdfstring{free\+\_\+mem()}{free\_mem()}}
+{\footnotesize\ttfamily static void dialog\+::storage\+::in\+\_\+memory\+::free\+\_\+mem (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Frees allocated memory.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & Pointer to memory to be freed. \\
+\hline
+{\em size} & Size of allocated memory. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/storage.\+h\end{DoxyCompactItemize}

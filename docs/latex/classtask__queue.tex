@@ -1,0 +1,63 @@
+\hypertarget{classtask__queue}{}\section{task\+\_\+queue Class Reference}
+\label{classtask__queue}\index{task\+\_\+queue@{task\+\_\+queue}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classtask__queue_a54e486a36bec1abf4df464d82f8f7c69}\label{classtask__queue_a54e486a36bec1abf4df464d82f8f7c69}} 
+typedef std\+::function$<$ void()$>$ {\bfseries function\+\_\+t}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classtask__queue_a3f49e001092757da141a3067744f6af0}\label{classtask__queue_a3f49e001092757da141a3067744f6af0}} 
+void {\bfseries invalidate} (void)
+\item 
+bool \hyperlink{classtask__queue_a8febb9f611ff31bc105027c7d90784a6}{dequeue} (function\+\_\+t \&out)
+\item 
+{\footnotesize template$<$class F , class ... A\+R\+GS$>$ }\\auto \hyperlink{classtask__queue_ac9fce851e5f4eecd014ef0130f0db4bc}{enqueue} (F \&\&f, A\+R\+GS \&\&... args) -\/$>$ std\+::future$<$ typename std\+::result\+\_\+of$<$ F(A\+R\+G\+S...)$>$\+::type $>$
+\item 
+bool \hyperlink{classtask__queue_a124dd18ea98e42ae705f7835fd0c69cf}{empty} () const
+\item 
+void \hyperlink{classtask__queue_aded81b6de1995651057c306166c8ae8b}{clear} ()
+\item 
+bool \hyperlink{classtask__queue_a75e723aa9cc68a264d63b40b3ef3f280}{is\+\_\+valid} () const
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classtask__queue_aded81b6de1995651057c306166c8ae8b}\label{classtask__queue_aded81b6de1995651057c306166c8ae8b}} 
+\index{task\+\_\+queue@{task\+\_\+queue}!clear@{clear}}
+\index{clear@{clear}!task\+\_\+queue@{task\+\_\+queue}}
+\subsubsection{\texorpdfstring{clear()}{clear()}}
+{\footnotesize\ttfamily void task\+\_\+queue\+::clear (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Clear all items from the queue. \mbox{\Hypertarget{classtask__queue_a8febb9f611ff31bc105027c7d90784a6}\label{classtask__queue_a8febb9f611ff31bc105027c7d90784a6}} 
+\index{task\+\_\+queue@{task\+\_\+queue}!dequeue@{dequeue}}
+\index{dequeue@{dequeue}!task\+\_\+queue@{task\+\_\+queue}}
+\subsubsection{\texorpdfstring{dequeue()}{dequeue()}}
+{\footnotesize\ttfamily bool task\+\_\+queue\+::dequeue (\begin{DoxyParamCaption}\item[{function\+\_\+t \&}]{out }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get the first value in the queue. Will block until a value is available unless clear is called or the instance is destructed. Returns true if a value was successfully written to the out parameter, false otherwise. \mbox{\Hypertarget{classtask__queue_a124dd18ea98e42ae705f7835fd0c69cf}\label{classtask__queue_a124dd18ea98e42ae705f7835fd0c69cf}} 
+\index{task\+\_\+queue@{task\+\_\+queue}!empty@{empty}}
+\index{empty@{empty}!task\+\_\+queue@{task\+\_\+queue}}
+\subsubsection{\texorpdfstring{empty()}{empty()}}
+{\footnotesize\ttfamily bool task\+\_\+queue\+::empty (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Check whether or not the queue is empty. \mbox{\Hypertarget{classtask__queue_ac9fce851e5f4eecd014ef0130f0db4bc}\label{classtask__queue_ac9fce851e5f4eecd014ef0130f0db4bc}} 
+\index{task\+\_\+queue@{task\+\_\+queue}!enqueue@{enqueue}}
+\index{enqueue@{enqueue}!task\+\_\+queue@{task\+\_\+queue}}
+\subsubsection{\texorpdfstring{enqueue()}{enqueue()}}
+{\footnotesize\ttfamily template$<$class F , class ... A\+R\+GS$>$ \\
+auto task\+\_\+queue\+::enqueue (\begin{DoxyParamCaption}\item[{F \&\&}]{f,  }\item[{A\+R\+GS \&\&...}]{args }\end{DoxyParamCaption}) -\/$>$ std\+::future$<$typename std\+::result\+\_\+of$<$F(A\+R\+G\+S...)$>$\+::type$>$ \hspace{0.3cm}{\ttfamily [inline]}}
+
+Push a new value onto the queue. \mbox{\Hypertarget{classtask__queue_a75e723aa9cc68a264d63b40b3ef3f280}\label{classtask__queue_a75e723aa9cc68a264d63b40b3ef3f280}} 
+\index{task\+\_\+queue@{task\+\_\+queue}!is\+\_\+valid@{is\+\_\+valid}}
+\index{is\+\_\+valid@{is\+\_\+valid}!task\+\_\+queue@{task\+\_\+queue}}
+\subsubsection{\texorpdfstring{is\+\_\+valid()}{is\_valid()}}
+{\footnotesize\ttfamily bool task\+\_\+queue\+::is\+\_\+valid (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Returns whether or not this queue is valid. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/task\+\_\+pool.\+h\end{DoxyCompactItemize}

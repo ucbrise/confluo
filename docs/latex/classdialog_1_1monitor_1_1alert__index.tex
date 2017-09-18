@@ -1,0 +1,28 @@
+\hypertarget{classdialog_1_1monitor_1_1alert__index}{}\section{dialog\+:\+:monitor\+:\+:alert\+\_\+index Class Reference}
+\label{classdialog_1_1monitor_1_1alert__index}\index{dialog\+::monitor\+::alert\+\_\+index@{dialog\+::monitor\+::alert\+\_\+index}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1alert__index_a5bcff590f4b2b262d73459775d1191d5}\label{classdialog_1_1monitor_1_1alert__index_a5bcff590f4b2b262d73459775d1191d5}} 
+typedef \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{monolog\+::monolog\+\_\+exp2\+\_\+linear}$<$ \hyperlink{structdialog_1_1monitor_1_1alert}{alert} $>$ {\bfseries alert\+\_\+log}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1alert__index_a53eb21bd9f555ededdd34215d335dd1b}\label{classdialog_1_1monitor_1_1alert__index_a53eb21bd9f555ededdd34215d335dd1b}} 
+typedef \hyperlink{classdialog_1_1index_1_1radix__tree}{index\+::radix\+\_\+tree}$<$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{alert\+\_\+log} $>$ {\bfseries idx\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1alert__index_aaa5a77021b5c3bd07f3dc71250c7a1fc}\label{classdialog_1_1monitor_1_1alert__index_aaa5a77021b5c3bd07f3dc71250c7a1fc}} 
+typedef \hyperlink{classflattened__container}{idx\+\_\+t\+::rt\+\_\+result} {\bfseries alert\+\_\+list}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1alert__index_aae17c973f4fe58b96ab27adb26b9bdc3}\label{classdialog_1_1monitor_1_1alert__index_aae17c973f4fe58b96ab27adb26b9bdc3}} 
+void {\bfseries add\+\_\+alert} (uint64\+\_\+t time\+\_\+bucket, const std\+::string \&trigger\+\_\+name, const std\+::string \&trigger\+\_\+expr, const \hyperlink{classdialog_1_1numeric}{numeric} \&value, uint64\+\_\+t version)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1alert__index_a07e96cf06909185b98b03e061ca91e8d}\label{classdialog_1_1monitor_1_1alert__index_a07e96cf06909185b98b03e061ca91e8d}} 
+\hyperlink{classflattened__container}{alert\+\_\+list} {\bfseries get\+\_\+alerts} (uint64\+\_\+t t1, uint64\+\_\+t t2) const
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/alert\+\_\+index.\+h\end{DoxyCompactItemize}

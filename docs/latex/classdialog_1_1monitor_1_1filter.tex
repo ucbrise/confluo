@@ -1,0 +1,185 @@
+\hypertarget{classdialog_1_1monitor_1_1filter}{}\section{dialog\+:\+:monitor\+:\+:filter Class Reference}
+\label{classdialog_1_1monitor_1_1filter}\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+
+
+{\ttfamily \#include $<$filter.\+h$>$}
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_ab7625fee3176adc27d81874ef07e286c}\label{classdialog_1_1monitor_1_1filter_ab7625fee3176adc27d81874ef07e286c}} 
+typedef \hyperlink{classdialog_1_1index_1_1radix__tree}{index\+::radix\+\_\+tree}$<$ \hyperlink{classdialog_1_1aggregated__reflog}{aggregated\+\_\+reflog} $>$ {\bfseries idx\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a41a5af5773b4c0576171823801f6829c}\label{classdialog_1_1monitor_1_1filter_a41a5af5773b4c0576171823801f6829c}} 
+typedef \hyperlink{classflattened__container}{idx\+\_\+t\+::rt\+\_\+result} {\bfseries range\+\_\+result}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdialog_1_1monitor_1_1filter_a7fe577f3fc937bef2d62cbcf9c7b6662}{filter} (const \hyperlink{structdialog_1_1compiled__expression}{compiled\+\_\+expression} \&exp, filter\+\_\+fn fn=default\+\_\+filter)
+\item 
+\hyperlink{classdialog_1_1monitor_1_1filter_a5fa052157aa824765614c7de106a11c2}{filter} (filter\+\_\+fn fn=default\+\_\+filter)
+\item 
+size\+\_\+t \hyperlink{classdialog_1_1monitor_1_1filter_a6663e4c56880482de42a3366be94356d}{add\+\_\+trigger} (\hyperlink{structdialog_1_1monitor_1_1trigger}{trigger} $\ast$t)
+\item 
+bool \hyperlink{classdialog_1_1monitor_1_1filter_ac5c01fdc260a434815ab2bbd66ae9ab5}{remove\+\_\+trigger} (size\+\_\+t id)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a8171f52c8ca67d8bc1f0b1fcb2eff525}\label{classdialog_1_1monitor_1_1filter_a8171f52c8ca67d8bc1f0b1fcb2eff525}} 
+\hyperlink{structdialog_1_1monitor_1_1trigger}{trigger} $\ast$ {\bfseries get\+\_\+trigger} (size\+\_\+t id)
+\item 
+size\+\_\+t \hyperlink{classdialog_1_1monitor_1_1filter_aa84bc2df90155d5fd462dce52d86de5c}{num\+\_\+triggers} ()
+\item 
+void \hyperlink{classdialog_1_1monitor_1_1filter_a9daf4fdb82ff01d211a417e1531461e2}{update} (const \hyperlink{structdialog_1_1record__t}{record\+\_\+t} \&r)
+\item 
+void \hyperlink{classdialog_1_1monitor_1_1filter_ad0aba175b70f3bf63c4f0f83b5888ccf}{update} (size\+\_\+t log\+\_\+offset, const \hyperlink{classdialog_1_1schema__snapshot}{schema\+\_\+snapshot} \&snap, \hyperlink{structdialog_1_1record__block}{record\+\_\+block} \&block, size\+\_\+t record\+\_\+size)
+\item 
+\hyperlink{classdialog_1_1aggregated__reflog}{aggregated\+\_\+reflog} const  $\ast$ \hyperlink{classdialog_1_1monitor_1_1filter_a9e112bf3e11d7a02fdb5d49ed51a9827}{lookup} (uint64\+\_\+t ts\+\_\+block) const
+\item 
+\hyperlink{classflattened__container}{range\+\_\+result} \hyperlink{classdialog_1_1monitor_1_1filter_a5523a17cb88d0f5bd6b78bb16c085632}{lookup\+\_\+range} (uint64\+\_\+t ts\+\_\+block\+\_\+begin, uint64\+\_\+t ts\+\_\+block\+\_\+end) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a4bbf4488202299895570ce5d7ac9a76f}\label{classdialog_1_1monitor_1_1filter_a4bbf4488202299895570ce5d7ac9a76f}} 
+bool {\bfseries invalidate} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a4ab87a27c1e11b14c6a9beca95cbfb36}\label{classdialog_1_1monitor_1_1filter_a4ab87a27c1e11b14c6a9beca95cbfb36}} 
+bool {\bfseries is\+\_\+valid} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Actual storage for the filter\+: stores references to data-\/points that pass the filter in a time partitioned index. 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a7fe577f3fc937bef2d62cbcf9c7b6662}\label{classdialog_1_1monitor_1_1filter_a7fe577f3fc937bef2d62cbcf9c7b6662}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!filter@{filter}}
+\index{filter@{filter}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{filter()}{filter()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily dialog\+::monitor\+::filter\+::filter (\begin{DoxyParamCaption}\item[{const \hyperlink{structdialog_1_1compiled__expression}{compiled\+\_\+expression} \&}]{exp,  }\item[{filter\+\_\+fn}]{fn = {\ttfamily default\+\_\+filter} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor that initializes filter with provided compiled expression and filter function.
+
+
+\begin{DoxyParams}{Parameters}
+{\em exp} & Compiled expression. \\
+\hline
+{\em fn} & Filter function. \\
+\hline
+{\em monitor\+\_\+granularity\+\_\+ms} & Time-\/granularity (milliseconds) for monitor. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a5fa052157aa824765614c7de106a11c2}\label{classdialog_1_1monitor_1_1filter_a5fa052157aa824765614c7de106a11c2}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!filter@{filter}}
+\index{filter@{filter}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{filter()}{filter()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily dialog\+::monitor\+::filter\+::filter (\begin{DoxyParamCaption}\item[{filter\+\_\+fn}]{fn = {\ttfamily default\+\_\+filter} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor that initializes the filter function with the provided one.
+
+
+\begin{DoxyParams}{Parameters}
+{\em fn} & Provided filter function. \\
+\hline
+{\em monitor\+\_\+granularity\+\_\+ms} & Time-\/granularity (milliseconds) for monitor. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a6663e4c56880482de42a3366be94356d}\label{classdialog_1_1monitor_1_1filter_a6663e4c56880482de42a3366be94356d}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!add\+\_\+trigger@{add\+\_\+trigger}}
+\index{add\+\_\+trigger@{add\+\_\+trigger}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{add\+\_\+trigger()}{add\_trigger()}}
+{\footnotesize\ttfamily size\+\_\+t dialog\+::monitor\+::filter\+::add\+\_\+trigger (\begin{DoxyParamCaption}\item[{\hyperlink{structdialog_1_1monitor_1_1trigger}{trigger} $\ast$}]{t }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Add a trigger to the filter
+
+
+\begin{DoxyParams}{Parameters}
+{\em t} & Pointer to trigger \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Trigger id. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a9e112bf3e11d7a02fdb5d49ed51a9827}\label{classdialog_1_1monitor_1_1filter_a9e112bf3e11d7a02fdb5d49ed51a9827}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!lookup@{lookup}}
+\index{lookup@{lookup}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{lookup()}{lookup()}}
+{\footnotesize\ttfamily \hyperlink{classdialog_1_1aggregated__reflog}{aggregated\+\_\+reflog} const$\ast$ dialog\+::monitor\+::filter\+::lookup (\begin{DoxyParamCaption}\item[{uint64\+\_\+t}]{ts\+\_\+block }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get the Ref\+Log corresponding to given time-\/block.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ts\+\_\+block} & Given time-\/block. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding Ref\+Log. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a5523a17cb88d0f5bd6b78bb16c085632}\label{classdialog_1_1monitor_1_1filter_a5523a17cb88d0f5bd6b78bb16c085632}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!lookup\+\_\+range@{lookup\+\_\+range}}
+\index{lookup\+\_\+range@{lookup\+\_\+range}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{lookup\+\_\+range()}{lookup\_range()}}
+{\footnotesize\ttfamily \hyperlink{classflattened__container}{range\+\_\+result} dialog\+::monitor\+::filter\+::lookup\+\_\+range (\begin{DoxyParamCaption}\item[{uint64\+\_\+t}]{ts\+\_\+block\+\_\+begin,  }\item[{uint64\+\_\+t}]{ts\+\_\+block\+\_\+end }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get the range of offsets that lie in a given time-\/block.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ts\+\_\+block\+\_\+begin} & Beginning time-\/block \\
+\hline
+{\em ts\+\_\+block\+\_\+end} & End time-\/block. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An iterator over log offsets in the time range. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_aa84bc2df90155d5fd462dce52d86de5c}\label{classdialog_1_1monitor_1_1filter_aa84bc2df90155d5fd462dce52d86de5c}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!num\+\_\+triggers@{num\+\_\+triggers}}
+\index{num\+\_\+triggers@{num\+\_\+triggers}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{num\+\_\+triggers()}{num\_triggers()}}
+{\footnotesize\ttfamily size\+\_\+t dialog\+::monitor\+::filter\+::num\+\_\+triggers (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_ac5c01fdc260a434815ab2bbd66ae9ab5}\label{classdialog_1_1monitor_1_1filter_ac5c01fdc260a434815ab2bbd66ae9ab5}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!remove\+\_\+trigger@{remove\+\_\+trigger}}
+\index{remove\+\_\+trigger@{remove\+\_\+trigger}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{remove\+\_\+trigger()}{remove\_trigger()}}
+{\footnotesize\ttfamily bool dialog\+::monitor\+::filter\+::remove\+\_\+trigger (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Invalidate trigger identified by id.
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & ID for the trigger. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if invalidation was successful, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_a9daf4fdb82ff01d211a417e1531461e2}\label{classdialog_1_1monitor_1_1filter_a9daf4fdb82ff01d211a417e1531461e2}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!update@{update}}
+\index{update@{update}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{update()}{update()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void dialog\+::monitor\+::filter\+::update (\begin{DoxyParamCaption}\item[{const \hyperlink{structdialog_1_1record__t}{record\+\_\+t} \&}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Updates the filter index with a new data point. If the new data point passes the filter, its reference is stored.
+
+
+\begin{DoxyParams}{Parameters}
+{\em r} & Record being tested. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monitor_1_1filter_ad0aba175b70f3bf63c4f0f83b5888ccf}\label{classdialog_1_1monitor_1_1filter_ad0aba175b70f3bf63c4f0f83b5888ccf}} 
+\index{dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}!update@{update}}
+\index{update@{update}!dialog\+::monitor\+::filter@{dialog\+::monitor\+::filter}}
+\subsubsection{\texorpdfstring{update()}{update()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void dialog\+::monitor\+::filter\+::update (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{log\+\_\+offset,  }\item[{const \hyperlink{classdialog_1_1schema__snapshot}{schema\+\_\+snapshot} \&}]{snap,  }\item[{\hyperlink{structdialog_1_1record__block}{record\+\_\+block} \&}]{block,  }\item[{size\+\_\+t}]{record\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Updates the filter index with new data points. If data points pass the filter, their references are stored. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/filter.\+h\end{DoxyCompactItemize}

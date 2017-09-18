@@ -1,0 +1,234 @@
+\hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base}{}\section{dialog\+:\+:monolog\+:\+:monolog\+\_\+exp2\+\_\+base$<$ T, N\+B\+U\+C\+K\+E\+TS $>$ Class Template Reference}
+\label{classdialog_1_1monolog_1_1monolog__exp2__base}\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base$<$ T, N\+B\+U\+C\+K\+E\+T\+S $>$@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base$<$ T, N\+B\+U\+C\+K\+E\+T\+S $>$}}
+Inheritance diagram for dialog\+:\+:monolog\+:\+:monolog\+\_\+exp2\+\_\+base$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classdialog_1_1monolog_1_1monolog__exp2__base}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a58f02a832fcddb4ead166f769ad40a85}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a58f02a832fcddb4ead166f769ad40a85}} 
+typedef atomic\+::type$<$ T $\ast$ $>$ {\bfseries \+\_\+\+\_\+atomic\+\_\+bucket\+\_\+ref}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_ac59fe74069159b44d64ed2395adb2fae}{monolog\+\_\+exp2\+\_\+base} ()
+\item 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a4af0cf1b148d7b832d180da5c9ad389f}{$\sim$monolog\+\_\+exp2\+\_\+base} ()
+\item 
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a86dd772a9b7beee2503a2349619a99ab}{ensure\+\_\+alloc} (size\+\_\+t start\+\_\+idx, size\+\_\+t end\+\_\+idx)
+\item 
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a86d27f015adcd1320b4e1f811e1c1ceb}{set} (size\+\_\+t idx, const T val)
+\item 
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_ace9cdb67da6d6e9138705afb140b1560}{set\+\_\+unsafe} (size\+\_\+t idx, const T val)
+\item 
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a11fb0491dea6bd8e0877a47c3f22708a}{set} (size\+\_\+t idx, const T $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t len)
+\item 
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a5e286b72175a394dfbb9bcf6e5c1fbc6}{set\+\_\+unsafe} (size\+\_\+t idx, const T $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t len)
+\item 
+const T $\ast$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a76b101e66b927da18d6a723656a6a173}{ptr} (size\+\_\+t idx) const
+\item 
+const T \& \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_acfb1656dd72bad1eba0d7e891899e3dc}{get} (size\+\_\+t idx) const
+\item 
+T \& \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_acb8a92ddaabae330d33cb2bd9e14b642}{operator\mbox{[}$\,$\mbox{]}} (size\+\_\+t idx)
+\item 
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_abdff44f16e79714291fab191c9a9e19c}{get} (T $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t idx, size\+\_\+t len) const
+\item 
+size\+\_\+t \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base_a908d3997fcc3790bced9e691223eb865}{storage\+\_\+size} () const
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_af51f7c1502c45d94f2f85a173ddccce6}\label{classdialog_1_1monolog_1_1monolog__exp2__base_af51f7c1502c45d94f2f85a173ddccce6}} 
+static const size\+\_\+t {\bfseries F\+BS} = 16
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a8dc41c856d845d71fa96ce35a1918259}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a8dc41c856d845d71fa96ce35a1918259}} 
+static const size\+\_\+t {\bfseries F\+B\+S\+\_\+\+H\+I\+B\+IT} = 4
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a2566df9503c1dae556d2430535a8fa26}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a2566df9503c1dae556d2430535a8fa26}} 
+T $\ast$ {\bfseries try\+\_\+allocate\+\_\+bucket} (size\+\_\+t bucket\+\_\+idx)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a2abe7a8d0a1da433ba79fe4e340c461f}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a2abe7a8d0a1da433ba79fe4e340c461f}} 
+std\+::array$<$ \+\_\+\+\_\+atomic\+\_\+bucket\+\_\+ref, N\+B\+U\+C\+K\+E\+TS $>$ {\bfseries buckets\+\_\+}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_ac59fe74069159b44d64ed2395adb2fae}\label{classdialog_1_1monolog_1_1monolog__exp2__base_ac59fe74069159b44d64ed2395adb2fae}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!monolog\+\_\+exp2\+\_\+base@{monolog\+\_\+exp2\+\_\+base}}
+\index{monolog\+\_\+exp2\+\_\+base@{monolog\+\_\+exp2\+\_\+base}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{monolog\+\_\+exp2\+\_\+base()}{monolog\_exp2\_base()}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{monolog\+\_\+exp2\+\_\+base} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+The default constructor that initializes all of the buckets for the monolog \mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a4af0cf1b148d7b832d180da5c9ad389f}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a4af0cf1b148d7b832d180da5c9ad389f}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!````~monolog\+\_\+exp2\+\_\+base@{$\sim$monolog\+\_\+exp2\+\_\+base}}
+\index{````~monolog\+\_\+exp2\+\_\+base@{$\sim$monolog\+\_\+exp2\+\_\+base}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{$\sim$monolog\+\_\+exp2\+\_\+base()}{~monolog\_exp2\_base()}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::$\sim$\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{monolog\+\_\+exp2\+\_\+base} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+The default destructor that deletes all of the buckets 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a86dd772a9b7beee2503a2349619a99ab}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a86dd772a9b7beee2503a2349619a99ab}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!ensure\+\_\+alloc@{ensure\+\_\+alloc}}
+\index{ensure\+\_\+alloc@{ensure\+\_\+alloc}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{ensure\+\_\+alloc()}{ensure\_alloc()}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::ensure\+\_\+alloc (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{start\+\_\+idx,  }\item[{size\+\_\+t}]{end\+\_\+idx }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Allocates space for buckets between the indices 
+\begin{DoxyParams}{Parameters}
+{\em start\+\_\+idx} & The start index \\
+\hline
+{\em end\+\_\+idx} & The end index \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_acfb1656dd72bad1eba0d7e891899e3dc}\label{classdialog_1_1monolog_1_1monolog__exp2__base_acfb1656dd72bad1eba0d7e891899e3dc}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!get@{get}}
+\index{get@{get}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{get()}{get()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+const T\& \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::get (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the data at index idx. 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The index of where to get the data \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the data at that index 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_abdff44f16e79714291fab191c9a9e19c}\label{classdialog_1_1monolog_1_1monolog__exp2__base_abdff44f16e79714291fab191c9a9e19c}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!get@{get}}
+\index{get@{get}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{get()}{get()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::get (\begin{DoxyParamCaption}\item[{T $\ast$}]{data,  }\item[{size\+\_\+t}]{idx,  }\item[{size\+\_\+t}]{len }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Copies a contiguous region of the Mono\+Log base into the provided buffer.\+The buffer should have sufficient space to hold the data requested, otherwise undefined behavior may result. 
+\begin{DoxyParams}{Parameters}
+{\em data} & The data to be copied \\
+\hline
+{\em idx} & The index for where the data is copied to \\
+\hline
+{\em len} & The length of the buffer \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_acb8a92ddaabae330d33cb2bd9e14b642}\label{classdialog_1_1monolog_1_1monolog__exp2__base_acb8a92ddaabae330d33cb2bd9e14b642}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!operator\mbox{[}\mbox{]}@{operator[]}}
+\index{operator\mbox{[}\mbox{]}@{operator[]}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{operator[]()}{operator[]()}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+T\& \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::operator\mbox{[}$\,$\mbox{]} (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Accesses the data at a specific index 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The index of what data to get \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the data at the index 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a76b101e66b927da18d6a723656a6a173}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a76b101e66b927da18d6a723656a6a173}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!ptr@{ptr}}
+\index{ptr@{ptr}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{ptr()}{ptr()}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+const T$\ast$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::ptr (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the pointer to the data specified by the index 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The index of where to get the data \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The pointer to the region 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a86d27f015adcd1320b4e1f811e1c1ceb}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a86d27f015adcd1320b4e1f811e1c1ceb}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!set@{set}}
+\index{set@{set}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{set()}{set()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::set (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx,  }\item[{const T}]{val }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Sets the data at index idx to val. Allocates memory if necessary. 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The specified index \\
+\hline
+{\em val} & The data to be set at the index \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a11fb0491dea6bd8e0877a47c3f22708a}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a11fb0491dea6bd8e0877a47c3f22708a}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!set@{set}}
+\index{set@{set}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{set()}{set()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::set (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx,  }\item[{const T $\ast$}]{data,  }\item[{size\+\_\+t}]{len }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Sets a contiguous region of the Mono\+Log base to the provided data. 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The specified index \\
+\hline
+{\em data} & The data that needs to be stored \\
+\hline
+{\em len} & The length of the region \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_ace9cdb67da6d6e9138705afb140b1560}\label{classdialog_1_1monolog_1_1monolog__exp2__base_ace9cdb67da6d6e9138705afb140b1560}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!set\+\_\+unsafe@{set\+\_\+unsafe}}
+\index{set\+\_\+unsafe@{set\+\_\+unsafe}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{set\+\_\+unsafe()}{set\_unsafe()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::set\+\_\+unsafe (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx,  }\item[{const T}]{val }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Sets the data at index idx to val. Does N\+OT allocate memory -- ensure memory is allocated before calling this function. 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The specified index \\
+\hline
+{\em val} & The data to be set at the index \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a5e286b72175a394dfbb9bcf6e5c1fbc6}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a5e286b72175a394dfbb9bcf6e5c1fbc6}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!set\+\_\+unsafe@{set\+\_\+unsafe}}
+\index{set\+\_\+unsafe@{set\+\_\+unsafe}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{set\+\_\+unsafe()}{set\_unsafe()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+void \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::set\+\_\+unsafe (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{idx,  }\item[{const T $\ast$}]{data,  }\item[{size\+\_\+t}]{len }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Sets a contiguous region of the Mono\+Log base to the provided data. Does N\+OT allocate memory -- ensure memory is allocated before calling this function.
+
+
+\begin{DoxyParams}{Parameters}
+{\em idx} & The specified index \\
+\hline
+{\em data} & The data to be stored \\
+\hline
+{\em len} & The length of the region \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__exp2__base_a908d3997fcc3790bced9e691223eb865}\label{classdialog_1_1monolog_1_1monolog__exp2__base_a908d3997fcc3790bced9e691223eb865}} 
+\index{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}!storage\+\_\+size@{storage\+\_\+size}}
+\index{storage\+\_\+size@{storage\+\_\+size}!dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base@{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}}
+\subsubsection{\texorpdfstring{storage\+\_\+size()}{storage\_size()}}
+{\footnotesize\ttfamily template$<$class T , size\+\_\+t N\+B\+U\+C\+K\+E\+TS = 32$>$ \\
+size\+\_\+t \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__base}{dialog\+::monolog\+::monolog\+\_\+exp2\+\_\+base}$<$ T, N\+B\+U\+C\+K\+E\+TS $>$\+::storage\+\_\+size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the size of the storage space \begin{DoxyReturn}{Returns}
+The size of storage in bytes 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/monolog\+\_\+exp2.\+h\end{DoxyCompactItemize}

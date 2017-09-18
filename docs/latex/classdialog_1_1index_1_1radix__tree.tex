@@ -1,0 +1,70 @@
+\hypertarget{classdialog_1_1index_1_1radix__tree}{}\section{dialog\+:\+:index\+:\+:radix\+\_\+tree$<$ reflog $>$ Class Template Reference}
+\label{classdialog_1_1index_1_1radix__tree}\index{dialog\+::index\+::radix\+\_\+tree$<$ reflog $>$@{dialog\+::index\+::radix\+\_\+tree$<$ reflog $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a4171083d914974526d788401cff4a769}\label{classdialog_1_1index_1_1radix__tree_a4171083d914974526d788401cff4a769}} 
+typedef \hyperlink{structdialog_1_1index_1_1radix__tree__node}{radix\+\_\+tree\+\_\+node}$<$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $>$ {\bfseries node\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a94d7e05cbfb067ca81642a059e45a868}\label{classdialog_1_1index_1_1radix__tree_a94d7e05cbfb067ca81642a059e45a868}} 
+typedef \hyperlink{classdialog_1_1byte__string}{byte\+\_\+string} {\bfseries key\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a860158d542bb505c99068fff580e4a68}\label{classdialog_1_1index_1_1radix__tree_a860158d542bb505c99068fff580e4a68}} 
+typedef reflog\+::value\+\_\+type {\bfseries value\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a7d6bb45239ec553be699b648fd66b3a3}\label{classdialog_1_1index_1_1radix__tree_a7d6bb45239ec553be699b648fd66b3a3}} 
+typedef \hyperlink{classdialog_1_1index_1_1rt__reflog__it}{rt\+\_\+reflog\+\_\+it}$<$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $>$ {\bfseries iterator}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a993d828a62dd13f42e4a324ab90d934e}\label{classdialog_1_1index_1_1radix__tree_a993d828a62dd13f42e4a324ab90d934e}} 
+typedef \hyperlink{classdialog_1_1index_1_1rt__reflog__range__result}{rt\+\_\+reflog\+\_\+range\+\_\+result}$<$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $>$ {\bfseries rt\+\_\+reflog\+\_\+result}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_aa1adef4fed992b3ded3831a7180322d8}\label{classdialog_1_1index_1_1radix__tree_aa1adef4fed992b3ded3831a7180322d8}} 
+typedef \hyperlink{classflattened__container}{flattened\+\_\+container}$<$ \hyperlink{classdialog_1_1index_1_1rt__reflog__range__result}{rt\+\_\+reflog\+\_\+range\+\_\+result}$<$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $>$ $>$ {\bfseries rt\+\_\+result}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_adf3672f978967deefb01aa7c3b06bc6e}\label{classdialog_1_1index_1_1radix__tree_adf3672f978967deefb01aa7c3b06bc6e}} 
+typedef \hyperlink{classflattened__iterator}{rt\+\_\+result\+::iterator} {\bfseries range\+\_\+iterator}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a346ba110c09cc087d49659d806425d7a}\label{classdialog_1_1index_1_1radix__tree_a346ba110c09cc087d49659d806425d7a}} 
+{\bfseries radix\+\_\+tree} (size\+\_\+t depth, size\+\_\+t width)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_ae219a6d4008450de31bc4784802fd84c}\label{classdialog_1_1index_1_1radix__tree_ae219a6d4008450de31bc4784802fd84c}} 
+size\+\_\+t {\bfseries width} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_aada7501fdd88e18f99e04a3a35e4038b}\label{classdialog_1_1index_1_1radix__tree_aada7501fdd88e18f99e04a3a35e4038b}} 
+size\+\_\+t {\bfseries depth} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_ad2e65fc7487e741e1339f4c7402348a6}\label{classdialog_1_1index_1_1radix__tree_ad2e65fc7487e741e1339f4c7402348a6}} 
+{\footnotesize template$<$typename ... A\+R\+GS$>$ }\\\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $\ast$\& {\bfseries get\+\_\+or\+\_\+create} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&key, A\+R\+GS \&\&... args)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a07ff353f8a9eba5d557d8373f74fdb47}\label{classdialog_1_1index_1_1radix__tree_a07ff353f8a9eba5d557d8373f74fdb47}} 
+{\footnotesize template$<$typename ... A\+R\+GS$>$ }\\\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $\ast$\& {\bfseries insert} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&key, const value\+\_\+t \&value, A\+R\+GS \&\&... args)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a2d637ae6eea61e95584234fb9a44db94}\label{classdialog_1_1index_1_1radix__tree_a2d637ae6eea61e95584234fb9a44db94}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} const  $\ast$ {\bfseries get} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&key) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_ac6ca64025f76405f306fc7aa90074481}\label{classdialog_1_1index_1_1radix__tree_ac6ca64025f76405f306fc7aa90074481}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $\ast$ {\bfseries operator\mbox{[}$\,$\mbox{]}} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&key)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a19e7ca79ca0a850b8285cc298e6f13f0}\label{classdialog_1_1index_1_1radix__tree_a19e7ca79ca0a850b8285cc298e6f13f0}} 
+\hyperlink{classdialog_1_1index_1_1rt__reflog__it}{iterator} {\bfseries upper\+\_\+bound} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&key) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_ab7abcb24a75757d0986ef4950008bdda}\label{classdialog_1_1index_1_1radix__tree_ab7abcb24a75757d0986ef4950008bdda}} 
+\hyperlink{classdialog_1_1index_1_1rt__reflog__it}{iterator} {\bfseries lower\+\_\+bound} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&key) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a70678f369aede02f2585c76720197916}\label{classdialog_1_1index_1_1radix__tree_a70678f369aede02f2585c76720197916}} 
+\hyperlink{classdialog_1_1index_1_1rt__reflog__range__result}{rt\+\_\+reflog\+\_\+result} {\bfseries range\+\_\+lookup\+\_\+reflogs} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&begin, const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&end) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_a914163136bf6c3330c922855b93955f2}\label{classdialog_1_1index_1_1radix__tree_a914163136bf6c3330c922855b93955f2}} 
+\hyperlink{classflattened__container}{rt\+\_\+result} {\bfseries range\+\_\+lookup} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&begin, const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&end) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1radix__tree_ab5f77a03120aed99761c005677bcda04}\label{classdialog_1_1index_1_1radix__tree_ab5f77a03120aed99761c005677bcda04}} 
+size\+\_\+t {\bfseries approx\+\_\+count} (const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&begin, const \hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&end)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/radix\+\_\+tree.\+h\end{DoxyCompactItemize}

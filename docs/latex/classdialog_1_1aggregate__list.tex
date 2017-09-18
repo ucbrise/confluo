@@ -1,0 +1,142 @@
+\hypertarget{classdialog_1_1aggregate__list}{}\section{dialog\+:\+:aggregate\+\_\+list Class Reference}
+\label{classdialog_1_1aggregate__list}\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdialog_1_1aggregate__list_ae417d77b203ef1f997ff539727d545d3}{aggregate\+\_\+list} ()
+\item 
+\hyperlink{classdialog_1_1aggregate__list_a69fa69ed6498a0f58131e1b3c123a08c}{aggregate\+\_\+list} (\hyperlink{structdialog_1_1data__type}{data\+\_\+type} type, \hyperlink{structdialog_1_1aggregator}{aggregator} agg)
+\item 
+\hyperlink{classdialog_1_1aggregate__list_a7077691cf569731f907c3834be6a769e}{aggregate\+\_\+list} (\hyperlink{structdialog_1_1data__type}{data\+\_\+type} type, aggregate\+\_\+id id)
+\item 
+\hyperlink{classdialog_1_1aggregate__list_ad767031cda7f81971814ff328371f22d}{$\sim$aggregate\+\_\+list} ()=default
+\item 
+void \hyperlink{classdialog_1_1aggregate__list_ae55dc54fd08454fb30679fe54650cd76}{init} (\hyperlink{structdialog_1_1data__type}{data\+\_\+type} type, \hyperlink{structdialog_1_1aggregator}{aggregator} agg)
+\item 
+void \hyperlink{classdialog_1_1aggregate__list_aa362f04871cc8759088cef403c2fb063}{init} (\hyperlink{structdialog_1_1data__type}{data\+\_\+type} type, aggregate\+\_\+id id)
+\item 
+\hyperlink{classdialog_1_1numeric}{numeric} \hyperlink{classdialog_1_1aggregate__list_a71092c5dd73dff8aaf4ebf655e0e397e}{zero} () const
+\item 
+\hyperlink{classdialog_1_1numeric}{numeric} \hyperlink{classdialog_1_1aggregate__list_aaa2ee2ba5a82eb6f6a31b33b0dcb93da}{get} (uint64\+\_\+t version) const
+\item 
+void \hyperlink{classdialog_1_1aggregate__list_a7547b4bbbcc0a41dd020f1c58de69f82}{update} (const \hyperlink{classdialog_1_1numeric}{numeric} \&value, uint64\+\_\+t version)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_ae417d77b203ef1f997ff539727d545d3}\label{classdialog_1_1aggregate__list_ae417d77b203ef1f997ff539727d545d3}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!aggregate\+\_\+list@{aggregate\+\_\+list}}
+\index{aggregate\+\_\+list@{aggregate\+\_\+list}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{aggregate\+\_\+list()}{aggregate\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily dialog\+::aggregate\+\_\+list\+::aggregate\+\_\+list (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Default constructor \mbox{\Hypertarget{classdialog_1_1aggregate__list_a69fa69ed6498a0f58131e1b3c123a08c}\label{classdialog_1_1aggregate__list_a69fa69ed6498a0f58131e1b3c123a08c}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!aggregate\+\_\+list@{aggregate\+\_\+list}}
+\index{aggregate\+\_\+list@{aggregate\+\_\+list}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{aggregate\+\_\+list()}{aggregate\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily dialog\+::aggregate\+\_\+list\+::aggregate\+\_\+list (\begin{DoxyParamCaption}\item[{\hyperlink{structdialog_1_1data__type}{data\+\_\+type}}]{type,  }\item[{\hyperlink{structdialog_1_1aggregator}{aggregator}}]{agg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor for aggregate
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of Aggregate \\
+\hline
+{\em agg} & Aggregate function pointer. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_a7077691cf569731f907c3834be6a769e}\label{classdialog_1_1aggregate__list_a7077691cf569731f907c3834be6a769e}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!aggregate\+\_\+list@{aggregate\+\_\+list}}
+\index{aggregate\+\_\+list@{aggregate\+\_\+list}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{aggregate\+\_\+list()}{aggregate\_list()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily dialog\+::aggregate\+\_\+list\+::aggregate\+\_\+list (\begin{DoxyParamCaption}\item[{\hyperlink{structdialog_1_1data__type}{data\+\_\+type}}]{type,  }\item[{aggregate\+\_\+id}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor for aggregate
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of Aggregate \\
+\hline
+{\em id} & Aggregate ID. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_ad767031cda7f81971814ff328371f22d}\label{classdialog_1_1aggregate__list_ad767031cda7f81971814ff328371f22d}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!````~aggregate\+\_\+list@{$\sim$aggregate\+\_\+list}}
+\index{````~aggregate\+\_\+list@{$\sim$aggregate\+\_\+list}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{$\sim$aggregate\+\_\+list()}{~aggregate\_list()}}
+{\footnotesize\ttfamily dialog\+::aggregate\+\_\+list\+::$\sim$aggregate\+\_\+list (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+Default destructor. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_aaa2ee2ba5a82eb6f6a31b33b0dcb93da}\label{classdialog_1_1aggregate__list_aaa2ee2ba5a82eb6f6a31b33b0dcb93da}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!get@{get}}
+\index{get@{get}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{get()}{get()}}
+{\footnotesize\ttfamily \hyperlink{classdialog_1_1numeric}{numeric} dialog\+::aggregate\+\_\+list\+::get (\begin{DoxyParamCaption}\item[{uint64\+\_\+t}]{version }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get the aggregate value corresponding to the given version.
+
+
+\begin{DoxyParams}{Parameters}
+{\em version} & The version of the data store. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The aggregate value. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_ae55dc54fd08454fb30679fe54650cd76}\label{classdialog_1_1aggregate__list_ae55dc54fd08454fb30679fe54650cd76}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!init@{init}}
+\index{init@{init}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{init()}{init()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void dialog\+::aggregate\+\_\+list\+::init (\begin{DoxyParamCaption}\item[{\hyperlink{structdialog_1_1data__type}{data\+\_\+type}}]{type,  }\item[{\hyperlink{structdialog_1_1aggregator}{aggregator}}]{agg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Initializes the type and aggregate of the list 
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of the aggregate \\
+\hline
+{\em agg} & Aggregate function pointer \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_aa362f04871cc8759088cef403c2fb063}\label{classdialog_1_1aggregate__list_aa362f04871cc8759088cef403c2fb063}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!init@{init}}
+\index{init@{init}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{init()}{init()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void dialog\+::aggregate\+\_\+list\+::init (\begin{DoxyParamCaption}\item[{\hyperlink{structdialog_1_1data__type}{data\+\_\+type}}]{type,  }\item[{aggregate\+\_\+id}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Initializes the type of Aggregate and the id 
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of the aggregate \\
+\hline
+{\em id} & The Aggregate id \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_a7547b4bbbcc0a41dd020f1c58de69f82}\label{classdialog_1_1aggregate__list_a7547b4bbbcc0a41dd020f1c58de69f82}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!update@{update}}
+\index{update@{update}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{update()}{update()}}
+{\footnotesize\ttfamily void dialog\+::aggregate\+\_\+list\+::update (\begin{DoxyParamCaption}\item[{const \hyperlink{classdialog_1_1numeric}{numeric} \&}]{value,  }\item[{uint64\+\_\+t}]{version }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get update the aggregate value with given version.
+
+
+\begin{DoxyParams}{Parameters}
+{\em value} & The value with which the aggregate is to be updated. \\
+\hline
+{\em version} & The aggregate version. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1aggregate__list_a71092c5dd73dff8aaf4ebf655e0e397e}\label{classdialog_1_1aggregate__list_a71092c5dd73dff8aaf4ebf655e0e397e}} 
+\index{dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}!zero@{zero}}
+\index{zero@{zero}!dialog\+::aggregate\+\_\+list@{dialog\+::aggregate\+\_\+list}}
+\subsubsection{\texorpdfstring{zero()}{zero()}}
+{\footnotesize\ttfamily \hyperlink{classdialog_1_1numeric}{numeric} dialog\+::aggregate\+\_\+list\+::zero (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Gets the 0th aggregate given the type of the aggregate \begin{DoxyReturn}{Returns}
+The 0th aggregate 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/\hyperlink{aggregate_8h}{aggregate.\+h}\end{DoxyCompactItemize}

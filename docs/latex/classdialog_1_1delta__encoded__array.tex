@@ -1,0 +1,58 @@
+\hypertarget{classdialog_1_1delta__encoded__array}{}\section{dialog\+:\+:delta\+\_\+encoded\+\_\+array$<$ T, sampling\+\_\+rate $>$ Class Template Reference}
+\label{classdialog_1_1delta__encoded__array}\index{dialog\+::delta\+\_\+encoded\+\_\+array$<$ T, sampling\+\_\+rate $>$@{dialog\+::delta\+\_\+encoded\+\_\+array$<$ T, sampling\+\_\+rate $>$}}
+Inheritance diagram for dialog\+:\+:delta\+\_\+encoded\+\_\+array$<$ T, sampling\+\_\+rate $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classdialog_1_1delta__encoded__array}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a0cd3b42e267ec14eeb48f76bf3211c8f}\label{classdialog_1_1delta__encoded__array_a0cd3b42e267ec14eeb48f76bf3211c8f}} 
+typedef size\+\_\+t {\bfseries size\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a9ed959d0d2070fa3044847cf4c3bbc12}\label{classdialog_1_1delta__encoded__array_a9ed959d0d2070fa3044847cf4c3bbc12}} 
+typedef size\+\_\+t {\bfseries pos\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aaa88ddf82d3790ea40350b14931c515e}\label{classdialog_1_1delta__encoded__array_aaa88ddf82d3790ea40350b14931c515e}} 
+typedef uint8\+\_\+t {\bfseries width\+\_\+type}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}\label{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}} 
+virtual size\+\_\+type {\bfseries serialize} (std\+::ostream \&out)
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}\label{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}} 
+virtual size\+\_\+type {\bfseries deserialize} (std\+::istream \&in)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}\label{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}} 
+virtual width\+\_\+type {\bfseries encoding\+\_\+size} (T delta)=0
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}\label{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}} 
+virtual void {\bfseries encode\+\_\+deltas} (T $\ast$deltas, size\+\_\+type num\+\_\+deltas)=0
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}\label{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}} 
+void {\bfseries encode} (T $\ast$elements, size\+\_\+type num\+\_\+elements)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_af92d09ac19d1c6ac9f9271b0fc857404}\label{classdialog_1_1delta__encoded__array_af92d09ac19d1c6ac9f9271b0fc857404}} 
+\hyperlink{classdialog_1_1unsized__bitmap__array}{unsized\+\_\+bitmap\+\_\+array}$<$ T $>$ $\ast$ {\bfseries samples\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_ad2ca110a0d18668bc6503effd89eb8a8}\label{classdialog_1_1delta__encoded__array_ad2ca110a0d18668bc6503effd89eb8a8}} 
+\hyperlink{classdialog_1_1unsized__bitmap__array}{unsized\+\_\+bitmap\+\_\+array}$<$ pos\+\_\+type $>$ $\ast$ {\bfseries delta\+\_\+offsets\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_ab1b64295148db2954a85757aad6865cf}\label{classdialog_1_1delta__encoded__array_ab1b64295148db2954a85757aad6865cf}} 
+\hyperlink{classdialog_1_1bitmap}{bitmap} $\ast$ {\bfseries deltas\+\_\+}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/delta\+\_\+encoded\+\_\+array.\+h\end{DoxyCompactItemize}

@@ -1,0 +1,46 @@
+\hypertarget{classdialog_1_1record__stream}{}\section{dialog\+:\+:record\+\_\+stream$<$ offset\+\_\+container $>$ Class Template Reference}
+\label{classdialog_1_1record__stream}\index{dialog\+::record\+\_\+stream$<$ offset\+\_\+container $>$@{dialog\+::record\+\_\+stream$<$ offset\+\_\+container $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_ad2e87f19c47fed1ab24f95c374621d55}\label{classdialog_1_1record__stream_ad2e87f19c47fed1ab24f95c374621d55}} 
+typedef std\+::forward\+\_\+iterator\+\_\+tag {\bfseries iterator\+\_\+category}
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_a42dbf21e91ba40e6532a95d7015be1eb}\label{classdialog_1_1record__stream_a42dbf21e91ba40e6532a95d7015be1eb}} 
+typedef \hyperlink{structdialog_1_1record__t}{record\+\_\+t} {\bfseries value\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_af5467b1ca78962cebe23ea9c78a5d32d}\label{classdialog_1_1record__stream_af5467b1ca78962cebe23ea9c78a5d32d}} 
+typedef offset\+\_\+container\+::iterator {\bfseries offset\+\_\+iterator}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_a42921aa2b1009eed0c94e4abde6bf11f}\label{classdialog_1_1record__stream_a42921aa2b1009eed0c94e4abde6bf11f}} 
+{\bfseries record\+\_\+stream} (uint64\+\_\+t version, const offset\+\_\+container \&offsets, const \hyperlink{classdialog_1_1schema__t}{schema\+\_\+t} \&schema, const \hyperlink{classdialog_1_1monolog_1_1monolog__linear}{data\+\_\+log} \&\hyperlink{classdialog_1_1monolog_1_1monolog__linear}{data\+\_\+log})
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_a763e108fd83b5371e0abd425cbac1554}\label{classdialog_1_1record__stream_a763e108fd83b5371e0abd425cbac1554}} 
+\hyperlink{structdialog_1_1record__t}{record\+\_\+t} {\bfseries get} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_a809d836d1e0355a80585110449cf28ba}\label{classdialog_1_1record__stream_a809d836d1e0355a80585110449cf28ba}} 
+\hyperlink{classdialog_1_1record__stream}{record\+\_\+stream} \& {\bfseries operator++} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_a1dad40319a37342cdb1be4dab9d7507d}\label{classdialog_1_1record__stream_a1dad40319a37342cdb1be4dab9d7507d}} 
+\hyperlink{classdialog_1_1record__stream}{record\+\_\+stream} \& {\bfseries operator++} (int)
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_a5c4e497673511f6744dbadd96e2377fe}\label{classdialog_1_1record__stream_a5c4e497673511f6744dbadd96e2377fe}} 
+bool {\bfseries has\+\_\+more} () const
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_ad7a7dec15a4ce64b94d09539f25e5a39}\label{classdialog_1_1record__stream_ad7a7dec15a4ce64b94d09539f25e5a39}} 
+bool {\bfseries operator==} (const \hyperlink{classdialog_1_1record__stream}{record\+\_\+stream} \&a, const \hyperlink{classdialog_1_1record__stream}{record\+\_\+stream} \&b)
+\item 
+\mbox{\Hypertarget{classdialog_1_1record__stream_ade8067f06c184a05dd323e726033f4a8}\label{classdialog_1_1record__stream_ade8067f06c184a05dd323e726033f4a8}} 
+bool {\bfseries operator!=} (const \hyperlink{classdialog_1_1record__stream}{record\+\_\+stream} \&a, const \hyperlink{classdialog_1_1record__stream}{record\+\_\+stream} \&b)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/record\+\_\+stream.\+h\end{DoxyCompactItemize}

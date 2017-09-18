@@ -1,0 +1,160 @@
+\hypertarget{classdialog_1_1dialog__table}{}\section{dialog\+:\+:dialog\+\_\+table Class Reference}
+\label{classdialog_1_1dialog__table}\index{dialog\+::dialog\+\_\+table@{dialog\+::dialog\+\_\+table}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a7ba15c8e7a8715b84ab6869fc25f5c35}\label{classdialog_1_1dialog__table_a7ba15c8e7a8715b84ab6869fc25f5c35}} 
+typedef \hyperlink{classdialog_1_1monolog_1_1monolog__linear}{data\+\_\+log} {\bfseries data\+\_\+log\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a34908f19a70144fd5096ec036b56fa78}\label{classdialog_1_1dialog__table_a34908f19a70144fd5096ec036b56fa78}} 
+typedef \hyperlink{classdialog_1_1schema__t}{schema\+\_\+t} {\bfseries schema\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_aaff5fc77c78bc04aaf959b35ba9eed5d}\label{classdialog_1_1dialog__table_aaff5fc77c78bc04aaf959b35ba9eed5d}} 
+typedef \hyperlink{classdialog_1_1read__tail}{read\+\_\+tail} {\bfseries read\+\_\+tail\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a9c4ee1cfb87e92acab8f9bff83092f88}\label{classdialog_1_1dialog__table_a9c4ee1cfb87e92acab8f9bff83092f88}} 
+typedef \hyperlink{classdialog_1_1metadata__writer}{metadata\+\_\+writer} {\bfseries metadata\+\_\+writer\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ac3b524a812a24f879cd1c38fc17680d2}\label{classdialog_1_1dialog__table_ac3b524a812a24f879cd1c38fc17680d2}} 
+typedef size\+\_\+t {\bfseries filter\+\_\+id\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ac2a8049101ac1b95d08814bb272abdc6}\label{classdialog_1_1dialog__table_ac2a8049101ac1b95d08814bb272abdc6}} 
+typedef std\+::pair$<$ size\+\_\+t, size\+\_\+t $>$ {\bfseries trigger\+\_\+id\+\_\+t}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a78c79b370ad051ab8e0145b4874d1594}\label{classdialog_1_1dialog__table_a78c79b370ad051ab8e0145b4874d1594}} 
+typedef radix\+\_\+index\+::rt\+\_\+result {\bfseries ri\+\_\+offset\+\_\+list}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a86164fbc5fee72cc1a62d179d55b71c6}\label{classdialog_1_1dialog__table_a86164fbc5fee72cc1a62d179d55b71c6}} 
+typedef \hyperlink{classdialog_1_1record__stream}{record\+\_\+stream}$<$ ri\+\_\+offset\+\_\+list $>$ {\bfseries ri\+\_\+stream\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a5205c6bb44ebe5b5de1b82102bc3fcc0}\label{classdialog_1_1dialog__table_a5205c6bb44ebe5b5de1b82102bc3fcc0}} 
+typedef \hyperlink{classdialog_1_1filtered__record__stream}{filtered\+\_\+record\+\_\+stream}$<$ \hyperlink{classdialog_1_1record__stream}{ri\+\_\+stream\+\_\+type} $>$ {\bfseries fri\+\_\+rstream\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a62db48f066dbbb83612443a247063429}\label{classdialog_1_1dialog__table_a62db48f066dbbb83612443a247063429}} 
+typedef \hyperlink{classdialog_1_1union__record__stream}{union\+\_\+record\+\_\+stream}$<$ \hyperlink{classdialog_1_1filtered__record__stream}{fri\+\_\+rstream\+\_\+type} $>$ {\bfseries fri\+\_\+result\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a3a3bb028f66acca9924943c9a93c2229}\label{classdialog_1_1dialog__table_a3a3bb028f66acca9924943c9a93c2229}} 
+typedef filter\+::range\+\_\+result {\bfseries filter\+\_\+offset\+\_\+list}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_aad389a171cfc8c5549a337e28b4af14f}\label{classdialog_1_1dialog__table_aad389a171cfc8c5549a337e28b4af14f}} 
+typedef \hyperlink{classdialog_1_1record__stream}{record\+\_\+stream}$<$ filter\+\_\+offset\+\_\+list $>$ {\bfseries filter\+\_\+rstream\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a7f4be410c829a077bfa120231a305a0a}\label{classdialog_1_1dialog__table_a7f4be410c829a077bfa120231a305a0a}} 
+typedef \hyperlink{classdialog_1_1filtered__record__stream}{filtered\+\_\+record\+\_\+stream}$<$ \hyperlink{classdialog_1_1record__stream}{filter\+\_\+rstream\+\_\+type} $>$ {\bfseries ffilter\+\_\+rstream\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_aab2700c4a4809067039910376460ad1e}\label{classdialog_1_1dialog__table_aab2700c4a4809067039910376460ad1e}} 
+typedef alert\+\_\+index\+::alert\+\_\+list {\bfseries alert\+\_\+list}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ae0a85f4bbbfa82fe99b7f7d0ba039633}\label{classdialog_1_1dialog__table_ae0a85f4bbbfa82fe99b7f7d0ba039633}} 
+{\bfseries dialog\+\_\+table} (const std\+::string \&table\+\_\+name, const std\+::vector$<$ \hyperlink{classdialog_1_1column__t}{column\+\_\+t} $>$ \&table\+\_\+schema, const std\+::string \&path, const \hyperlink{structdialog_1_1storage_1_1storage__mode}{storage\+::storage\+\_\+mode} \&storage, \hyperlink{classtask__pool}{task\+\_\+pool} \&pool)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a30e375c7caf66c7a6b3321d1399ca310}\label{classdialog_1_1dialog__table_a30e375c7caf66c7a6b3321d1399ca310}} 
+void {\bfseries add\+\_\+index} (const std\+::string \&field\+\_\+name, double bucket\+\_\+size=configuration\+\_\+params\+::\+I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a15c186e03a6002b50439897e3763fd33}\label{classdialog_1_1dialog__table_a15c186e03a6002b50439897e3763fd33}} 
+void {\bfseries remove\+\_\+index} (const std\+::string \&field\+\_\+name)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ad2d8ef16c23819cec5e3ff151b3cb311}\label{classdialog_1_1dialog__table_ad2d8ef16c23819cec5e3ff151b3cb311}} 
+void {\bfseries add\+\_\+filter} (const std\+::string \&filter\+\_\+name, const std\+::string \&filter\+\_\+expr)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ace40cebd6fd29a571d1ecec5be46948c}\label{classdialog_1_1dialog__table_ace40cebd6fd29a571d1ecec5be46948c}} 
+void {\bfseries remove\+\_\+filter} (const std\+::string \&filter\+\_\+name)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a20a1c7f7ed546dbb57030d7ec5709ad1}\label{classdialog_1_1dialog__table_a20a1c7f7ed546dbb57030d7ec5709ad1}} 
+void {\bfseries add\+\_\+trigger} (const std\+::string \&trigger\+\_\+name, const std\+::string \&filter\+\_\+name, const std\+::string \&trigger\+\_\+expr)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a7128fafcaf756b6f4994a7a4b71e0b32}\label{classdialog_1_1dialog__table_a7128fafcaf756b6f4994a7a4b71e0b32}} 
+void {\bfseries remove\+\_\+trigger} (const std\+::string \&trigger\+\_\+name)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a872c2666f9746c8eeb0263ff36e170da}\label{classdialog_1_1dialog__table_a872c2666f9746c8eeb0263ff36e170da}} 
+size\+\_\+t {\bfseries append\+\_\+batch} (\hyperlink{structdialog_1_1record__batch}{record\+\_\+batch} \&batch)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a497a0716dcdfa0b60498c9cd1a2da7e4}\label{classdialog_1_1dialog__table_a497a0716dcdfa0b60498c9cd1a2da7e4}} 
+size\+\_\+t {\bfseries append} (void $\ast$\hyperlink{structdialog_1_1data}{data})
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a0e0a957cd04c7d0dc853eeab81ca8e04}\label{classdialog_1_1dialog__table_a0e0a957cd04c7d0dc853eeab81ca8e04}} 
+void $\ast$ {\bfseries read} (uint64\+\_\+t offset, uint64\+\_\+t \&version) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_af30bebda20f4a64e5df6de00c4d6ef0e}\label{classdialog_1_1dialog__table_af30bebda20f4a64e5df6de00c4d6ef0e}} 
+void $\ast$ {\bfseries read} (uint64\+\_\+t offset) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a96bd863f607a9227dee524fd687e021e}\label{classdialog_1_1dialog__table_a96bd863f607a9227dee524fd687e021e}} 
+\hyperlink{classdialog_1_1union__record__stream}{fri\+\_\+result\+\_\+type} {\bfseries execute\+\_\+filter} (const std\+::string \&expr) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a5b35dba9823ea6e39ca92d2bbb54a9e1}\label{classdialog_1_1dialog__table_a5b35dba9823ea6e39ca92d2bbb54a9e1}} 
+\hyperlink{classdialog_1_1record__stream}{filter\+\_\+rstream\+\_\+type} {\bfseries query\+\_\+filter} (const std\+::string \&filter\+\_\+name, uint64\+\_\+t ts\+\_\+block\+\_\+begin, uint64\+\_\+t ts\+\_\+block\+\_\+end) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_af168cbb5be54048fa5bc1be116ce5a1f}\label{classdialog_1_1dialog__table_af168cbb5be54048fa5bc1be116ce5a1f}} 
+\hyperlink{classdialog_1_1filtered__record__stream}{ffilter\+\_\+rstream\+\_\+type} {\bfseries query\+\_\+filter} (const std\+::string \&filter\+\_\+name, const std\+::string \&expr, uint64\+\_\+t ts\+\_\+block\+\_\+begin, uint64\+\_\+t ts\+\_\+block\+\_\+end) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a096494c01c850fee7d9dac56bf96199b}\label{classdialog_1_1dialog__table_a096494c01c850fee7d9dac56bf96199b}} 
+alert\+\_\+list {\bfseries get\+\_\+alerts} (uint64\+\_\+t ts\+\_\+block\+\_\+begin, uint64\+\_\+t ts\+\_\+block\+\_\+end) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_acf4a73a99a547944a581c334cff4231f}\label{classdialog_1_1dialog__table_acf4a73a99a547944a581c334cff4231f}} 
+const std\+::string \& {\bfseries get\+\_\+name} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ae4c87751732e230c325231cc1a2b3443}\label{classdialog_1_1dialog__table_ae4c87751732e230c325231cc1a2b3443}} 
+const \hyperlink{classdialog_1_1schema__t}{schema\+\_\+t} \& {\bfseries get\+\_\+schema} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a664e36dad0512718d74d134b3c9fd45c}\label{classdialog_1_1dialog__table_a664e36dad0512718d74d134b3c9fd45c}} 
+size\+\_\+t {\bfseries num\+\_\+records} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a0a301caeb2a122ebec76a5601c3dba95}\label{classdialog_1_1dialog__table_a0a301caeb2a122ebec76a5601c3dba95}} 
+size\+\_\+t {\bfseries record\+\_\+size} () const
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_aa202a1ffaeb700c37dcca44652e66aed}\label{classdialog_1_1dialog__table_aa202a1ffaeb700c37dcca44652e66aed}} 
+void {\bfseries update\+\_\+aux\+\_\+record\+\_\+block} (uint64\+\_\+t log\+\_\+offset, \hyperlink{structdialog_1_1record__block}{record\+\_\+block} \&block, size\+\_\+t record\+\_\+size)
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ab95356f0ef7c418dee3b9c5073717c1b}\label{classdialog_1_1dialog__table_ab95356f0ef7c418dee3b9c5073717c1b}} 
+void {\bfseries monitor\+\_\+task} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a9fda2ce4c6058d5f7b7e68ff2567072e}\label{classdialog_1_1dialog__table_a9fda2ce4c6058d5f7b7e68ff2567072e}} 
+std\+::string {\bfseries table\+\_\+name\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a306cf7ad9d8593e6eb9147deb77b38bf}\label{classdialog_1_1dialog__table_a306cf7ad9d8593e6eb9147deb77b38bf}} 
+\hyperlink{classdialog_1_1schema__t}{schema\+\_\+type} {\bfseries schema\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_abe161f50cc1909869380543846af5496}\label{classdialog_1_1dialog__table_abe161f50cc1909869380543846af5496}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__linear}{data\+\_\+log\+\_\+type} {\bfseries data\+\_\+log\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ab09b8eb51320c2b3fe2ed4548875400d}\label{classdialog_1_1dialog__table_ab09b8eb51320c2b3fe2ed4548875400d}} 
+\hyperlink{classdialog_1_1read__tail}{read\+\_\+tail\+\_\+type} {\bfseries rt\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a788c2fb30137f795d02a9272ed4a067d}\label{classdialog_1_1dialog__table_a788c2fb30137f795d02a9272ed4a067d}} 
+\hyperlink{classdialog_1_1metadata__writer}{metadata\+\_\+writer\+\_\+type} {\bfseries metadata\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a6f06b521d9f7cb61a95dd158858cb58a}\label{classdialog_1_1dialog__table_a6f06b521d9f7cb61a95dd158858cb58a}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{filter\+\_\+log} {\bfseries filters\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_ad739f47e1874244e9b69e566a068ae76}\label{classdialog_1_1dialog__table_ad739f47e1874244e9b69e566a068ae76}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{index\+\_\+log} {\bfseries indexes\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a10ee44808fec63a9057a61ff068b0df3}\label{classdialog_1_1dialog__table_a10ee44808fec63a9057a61ff068b0df3}} 
+alert\+\_\+index {\bfseries alerts\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a9cbea6e4cb5339bae27a254eba2e061b}\label{classdialog_1_1dialog__table_a9cbea6e4cb5339bae27a254eba2e061b}} 
+\hyperlink{classdialog_1_1string__map}{string\+\_\+map}$<$ filter\+\_\+id\+\_\+t $>$ {\bfseries filter\+\_\+map\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a648401e68f3ccc3c945e42bf28ed8835}\label{classdialog_1_1dialog__table_a648401e68f3ccc3c945e42bf28ed8835}} 
+\hyperlink{classdialog_1_1string__map}{string\+\_\+map}$<$ trigger\+\_\+id\+\_\+t $>$ {\bfseries trigger\+\_\+map\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a3d91f89cdf0efebe15f2f15109cdf6fe}\label{classdialog_1_1dialog__table_a3d91f89cdf0efebe15f2f15109cdf6fe}} 
+\hyperlink{classtask__pool}{task\+\_\+pool} \& {\bfseries mgmt\+\_\+pool\+\_\+}
+\item 
+\mbox{\Hypertarget{classdialog_1_1dialog__table_a644c471ccdeca21088806bb000b645d3}\label{classdialog_1_1dialog__table_a644c471ccdeca21088806bb000b645d3}} 
+\hyperlink{classperiodic__task}{periodic\+\_\+task} {\bfseries monitor\+\_\+task\+\_\+}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/dialog\+\_\+table.\+h\end{DoxyCompactItemize}

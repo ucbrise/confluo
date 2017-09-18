@@ -1,0 +1,49 @@
+\hypertarget{classdialog_1_1string__map}{}\section{dialog\+:\+:string\+\_\+map$<$ V $>$ Class Template Reference}
+\label{classdialog_1_1string__map}\index{dialog\+::string\+\_\+map$<$ V $>$@{dialog\+::string\+\_\+map$<$ V $>$}}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structdialog_1_1string__map_1_1map__entry}{map\+\_\+entry}
+\item 
+struct \hyperlink{structdialog_1_1string__map_1_1string__hash}{string\+\_\+hash}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1string__map_a1cc7d8c33334155940ed24d35cb89179}\label{classdialog_1_1string__map_a1cc7d8c33334155940ed24d35cb89179}} 
+int64\+\_\+t {\bfseries put} (const std\+::string \&key, const V \&value)
+\item 
+\mbox{\Hypertarget{classdialog_1_1string__map_a2632213e9330871062cb565bfdf13f21}\label{classdialog_1_1string__map_a2632213e9330871062cb565bfdf13f21}} 
+int64\+\_\+t {\bfseries get} (const std\+::string \&key, V \&value) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1string__map_aeba4544f65c810f4232c1a690461401a}\label{classdialog_1_1string__map_aeba4544f65c810f4232c1a690461401a}} 
+int64\+\_\+t {\bfseries get} (int64\+\_\+t idx, V \&value) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1string__map_a455e9d6004cd0dbb9a35e15f025b0893}\label{classdialog_1_1string__map_a455e9d6004cd0dbb9a35e15f025b0893}} 
+int64\+\_\+t {\bfseries remove} (const std\+::string \&key, V \&value)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static const uint32\+\_\+t {\bfseries M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classdialog_1_1string__map_ac909ed9a75f2bba1b41649383df1290d}\label{classdialog_1_1string__map_ac909ed9a75f2bba1b41649383df1290d}} 
+\index{dialog\+::string\+\_\+map@{dialog\+::string\+\_\+map}!M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS@{M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS}}
+\index{M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS@{M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS}!dialog\+::string\+\_\+map@{dialog\+::string\+\_\+map}}
+\subsubsection{\texorpdfstring{M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS}{MAX\_BUCKETS}}
+{\footnotesize\ttfamily template$<$typename V$>$ \\
+const uint32\+\_\+t \hyperlink{classdialog_1_1string__map}{dialog\+::string\+\_\+map}$<$ V $>$\+::M\+A\+X\+\_\+\+B\+U\+C\+K\+E\+TS\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= sysconf(\_SC\_PAGESIZE)
+    / \textcolor{keyword}{sizeof}(reflog*)
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/string\+\_\+map.\+h\end{DoxyCompactItemize}

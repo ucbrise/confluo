@@ -1,0 +1,31 @@
+\hypertarget{structdialog_1_1searchable__list}{}\section{dialog\+:\+:searchable\+\_\+list$<$ K, V $>$ Struct Template Reference}
+\label{structdialog_1_1searchable__list}\index{dialog\+::searchable\+\_\+list$<$ K, V $>$@{dialog\+::searchable\+\_\+list$<$ K, V $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1searchable__list_a8c6ec607042bbdd12957bfd74c1729fe}\label{structdialog_1_1searchable__list_a8c6ec607042bbdd12957bfd74c1729fe}} 
+typedef \hyperlink{structdialog_1_1searchable__list__node}{searchable\+\_\+list\+\_\+node}$<$ K, V $>$ {\bfseries node\+\_\+t}
+\item 
+\mbox{\Hypertarget{structdialog_1_1searchable__list_a02fb110f2e6d8572aede1e18c12d3045}\label{structdialog_1_1searchable__list_a02fb110f2e6d8572aede1e18c12d3045}} 
+typedef \hyperlink{structdialog_1_1marked__ptr}{marked\+\_\+ptr}$<$ \hyperlink{structdialog_1_1searchable__list__node}{node\+\_\+t} $>$ {\bfseries marked\+\_\+ptr\+\_\+t}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1searchable__list_a59912d783ee3aa5bc8b4a0d2bc7dae8f}\label{structdialog_1_1searchable__list_a59912d783ee3aa5bc8b4a0d2bc7dae8f}} 
+{\bfseries searchable\+\_\+list} (\hyperlink{structdialog_1_1marked__ptr}{marked\+\_\+ptr\+\_\+t} $\ast$head)
+\item 
+\mbox{\Hypertarget{structdialog_1_1searchable__list_a0098648b9198cb2e98d7a5417872daa4}\label{structdialog_1_1searchable__list_a0098648b9198cb2e98d7a5417872daa4}} 
+bool {\bfseries find} (const K \&key, V \&val, \hyperlink{structdialog_1_1marked__ptr}{marked\+\_\+ptr\+\_\+t} $\ast$$\ast$oprev=nullptr, \hyperlink{structdialog_1_1marked__ptr}{marked\+\_\+ptr\+\_\+t} $\ast$ocur=nullptr, \hyperlink{structdialog_1_1marked__ptr}{marked\+\_\+ptr\+\_\+t} $\ast$onext=nullptr)
+\item 
+\mbox{\Hypertarget{structdialog_1_1searchable__list_a7cb6e453e262657ddc642698a92e7e41}\label{structdialog_1_1searchable__list_a7cb6e453e262657ddc642698a92e7e41}} 
+bool {\bfseries insert} (const K \&key, const V \&value, \hyperlink{structdialog_1_1marked__ptr}{marked\+\_\+ptr\+\_\+t} $\ast$ocur=nullptr)
+\item 
+\mbox{\Hypertarget{structdialog_1_1searchable__list_a971e341de82e4899e0e1e0c1414254a9}\label{structdialog_1_1searchable__list_a971e341de82e4899e0e1e0c1414254a9}} 
+bool {\bfseries remove} (const K \&key)
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/searchable\+\_\+list.\+h\end{DoxyCompactItemize}

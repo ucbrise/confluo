@@ -1,0 +1,49 @@
+\hypertarget{classdialog_1_1index_1_1tiered__index}{}\section{dialog\+:\+:index\+:\+:tiered\+\_\+index$<$ T, K, D, stats $>$ Class Template Reference}
+\label{classdialog_1_1index_1_1tiered__index}\index{dialog\+::index\+::tiered\+\_\+index$<$ T, K, D, stats $>$@{dialog\+::index\+::tiered\+\_\+index$<$ T, K, D, stats $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_afb4ce4f2ba6d376549294eff5732ed52}\label{classdialog_1_1index_1_1tiered__index_afb4ce4f2ba6d376549294eff5732ed52}} 
+typedef \hyperlink{classdialog_1_1index_1_1tiered__index}{tiered\+\_\+index}$<$ T, K, D -\/ 1, stats $>$ {\bfseries child\+\_\+type}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_a2e1ed20ae7f61676e6b4015845a3ea5f}\label{classdialog_1_1index_1_1tiered__index_a2e1ed20ae7f61676e6b4015845a3ea5f}} 
+typedef \hyperlink{classdialog_1_1index_1_1indexlet}{indexlet}$<$ \hyperlink{classdialog_1_1index_1_1tiered__index}{child\+\_\+type}, K $>$ {\bfseries idx\+\_\+type}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_ab909933b66402ddec5491ca0f6ac28df}\label{classdialog_1_1index_1_1tiered__index_ab909933b66402ddec5491ca0f6ac28df}} 
+T $\ast$ {\bfseries operator\mbox{[}$\,$\mbox{]}} (const uint64\+\_\+t key)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_a6aa03fb0e9279385b591f0d7955436ac}\label{classdialog_1_1index_1_1tiered__index_a6aa03fb0e9279385b591f0d7955436ac}} 
+{\footnotesize template$<$typename update , typename ... update\+\_\+args$>$ }\\T $\ast$ {\bfseries operator()} (const uint64\+\_\+t key, update \&\&u, update\+\_\+args \&\&... args)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_a66697fc228452ff109c93903b9f7a6f6}\label{classdialog_1_1index_1_1tiered__index_a66697fc228452ff109c93903b9f7a6f6}} 
+T $\ast$ {\bfseries at} (const uint64\+\_\+t key) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_a39be7166eb13bbaaf053ac4977f10d02}\label{classdialog_1_1index_1_1tiered__index_a39be7166eb13bbaaf053ac4977f10d02}} 
+\hyperlink{classdialog_1_1index_1_1tiered__index}{child\+\_\+type} $\ast$ {\bfseries get\+\_\+or\+\_\+create\+\_\+child} (const uint64\+\_\+t k)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_a8ed6927b1a06398a5af533531f460048}\label{classdialog_1_1index_1_1tiered__index_a8ed6927b1a06398a5af533531f460048}} 
+\hyperlink{classdialog_1_1index_1_1tiered__index}{child\+\_\+type} $\ast$ {\bfseries get\+\_\+child} (const uint64\+\_\+t k) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_af308248d15efc5ce3edc888adfd6e389}\label{classdialog_1_1index_1_1tiered__index_af308248d15efc5ce3edc888adfd6e389}} 
+stats $\ast$ {\bfseries get\+\_\+stats} (const uint64\+\_\+t key, const uint64\+\_\+t depth)
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_ae89ab8dc5e28975b15419d352f239cb8}\label{classdialog_1_1index_1_1tiered__index_ae89ab8dc5e28975b15419d352f239cb8}} 
+stats $\ast$ {\bfseries get\+\_\+stats} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_ae1764ad9f03dc9d5fd608e7c3d327b1a}\label{classdialog_1_1index_1_1tiered__index_ae1764ad9f03dc9d5fd608e7c3d327b1a}} 
+{\footnotesize template$<$typename update , typename ... update\+\_\+args$>$ }\\void {\bfseries update\+\_\+stats} (const uint64\+\_\+t key, update \&\&u, update\+\_\+args \&\&... args)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1tiered__index_a11c55b5e24ed685f71dcdc6e5e52ed5d}\label{classdialog_1_1index_1_1tiered__index_a11c55b5e24ed685f71dcdc6e5e52ed5d}} 
+static uint64\+\_\+t {\bfseries C\+H\+I\+L\+D\+\_\+\+B\+L\+O\+CK} = math\+\_\+utils\+::pow(K, D -\/ 1)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/tiered\+\_\+index.\+h\end{DoxyCompactItemize}
