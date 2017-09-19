@@ -12,7 +12,7 @@ template<typename T, size_t BLOCK_SIZE>
 class mempool {
 
  public:
-  mempool(bool prnt = false) :
+  mempool() :
     array_size_(BLOCK_SIZE / sizeof(T)),
     type_is_pointer_(std::is_pointer<T>::value),
     max_memory_(configuration_params::MAX_MEMORY)
@@ -23,9 +23,7 @@ class mempool {
     if (STAT.get() >= max_memory_) {
       THROW(mempool_exception, "Max memory reached!");
     }
-    int64_t b = utils::time_utils::cur_ns();
     T* ptr = new T[array_size_]();
-    int64_t c = utils::time_utils::cur_ns();
     STAT.increment(BLOCK_SIZE);
     return ptr;
   }
