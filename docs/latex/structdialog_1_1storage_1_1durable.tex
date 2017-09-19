@@ -1,0 +1,71 @@
+\hypertarget{structdialog_1_1storage_1_1durable}{}\section{dialog\+:\+:storage\+:\+:durable Struct Reference}
+\label{structdialog_1_1storage_1_1durable}\index{dialog\+::storage\+::durable@{dialog\+::storage\+::durable}}
+
+
+{\ttfamily \#include $<$storage.\+h$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void $\ast$ \hyperlink{structdialog_1_1storage_1_1durable_ae22bc38ef79ba261079d36af562200fb}{allocate} (const std\+::string \&path, size\+\_\+t size)
+\item 
+static void \hyperlink{structdialog_1_1storage_1_1durable_a4fe38b9ca53b3cb89d53e5343f813db9}{free} (void $\ast$ptr, size\+\_\+t size)
+\item 
+static void \hyperlink{structdialog_1_1storage_1_1durable_a1ea22279109b5b06d195aadfe5594ef4}{flush} (void $\ast$ptr, size\+\_\+t size)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Durable (relaxed) storage mode, which allocates memory backed by a file, and also supports manually flushing of the data to the file. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1durable_ae22bc38ef79ba261079d36af562200fb}\label{structdialog_1_1storage_1_1durable_ae22bc38ef79ba261079d36af562200fb}} 
+\index{dialog\+::storage\+::durable@{dialog\+::storage\+::durable}!allocate@{allocate}}
+\index{allocate@{allocate}!dialog\+::storage\+::durable@{dialog\+::storage\+::durable}}
+\subsubsection{\texorpdfstring{allocate()}{allocate()}}
+{\footnotesize\ttfamily static void$\ast$ dialog\+::storage\+::durable\+::allocate (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Allocates new memory backed by file. Creates the file, overwriting old data if the file already existed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & Backing file. \\
+\hline
+{\em size} & Size of requested memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1durable_a1ea22279109b5b06d195aadfe5594ef4}\label{structdialog_1_1storage_1_1durable_a1ea22279109b5b06d195aadfe5594ef4}} 
+\index{dialog\+::storage\+::durable@{dialog\+::storage\+::durable}!flush@{flush}}
+\index{flush@{flush}!dialog\+::storage\+::durable@{dialog\+::storage\+::durable}}
+\subsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily static void dialog\+::storage\+::durable\+::flush (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Flushes data to backed file (does nothing for this storage mode).
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & Pointer to memory. \\
+\hline
+{\em size} & Size of allocated memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structdialog_1_1storage_1_1durable_a4fe38b9ca53b3cb89d53e5343f813db9}\label{structdialog_1_1storage_1_1durable_a4fe38b9ca53b3cb89d53e5343f813db9}} 
+\index{dialog\+::storage\+::durable@{dialog\+::storage\+::durable}!free@{free}}
+\index{free@{free}!dialog\+::storage\+::durable@{dialog\+::storage\+::durable}}
+\subsubsection{\texorpdfstring{free()}{free()}}
+{\footnotesize\ttfamily static void dialog\+::storage\+::durable\+::free (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Frees allocated memory. Does not delete backing file.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & Pointer to memory to be freed. \\
+\hline
+{\em size} & Size of allocated memory. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/storage.\+h\end{DoxyCompactItemize}

@@ -14,11 +14,22 @@ namespace dialog {
 
 class dialog_store {
  public:
+  /**
+   * Constructor for creating dialog store
+   * @param data_path The data path for the store
+   */
   dialog_store(const std::string& data_path)
       : data_path_(utils::file_utils::full_path(data_path)) {
     utils::file_utils::create_dir(data_path_);
   }
-
+  
+  /**
+   * Adds a table to the dialog store
+   * @param table_name The name of the table
+   * @param schema List of columns that define the schema
+   * @param id The ide of the store
+   * @return The id of the table
+   */
   int64_t add_table(const std::string& table_name,
                     const std::vector<column_t>& schema,
                     const storage::storage_id id) {
@@ -49,6 +60,11 @@ class dialog_store {
     return table_id;
   }
 
+  /**
+   * Gets the id of the table
+   * @param table_name The name of the table
+   * @return The id of the table
+   */
   int64_t get_table_id(const std::string& table_name) const {
     size_t table_id;
     if (table_map_.get(table_name, table_id) == -1) {
@@ -57,10 +73,20 @@ class dialog_store {
     return static_cast<int64_t>(table_id);
   }
 
+  /**
+   * Gets the specified table
+   * @param table_name The name of the table
+   * @return The table that matches the table name
+   */
   dialog_table* get_table(const std::string& table_name) {
     return tables_[get_table_id(table_name)];
   }
-
+    
+  /**
+   * Gets the specified table by id
+   * @param table_id The id of the table
+   * @return The table that matches the id
+   */
   dialog_table* get_table(int64_t table_id) {
     if (table_id >= static_cast<int64_t>(tables_.size())) {
       throw management_exception(
@@ -69,6 +95,11 @@ class dialog_store {
     return tables_[table_id];
   }
 
+  /**
+   * Removes a table specified by the name
+   * @param table_name The name of the table
+   * @return The index of the removed table or -1 if it doesn't exist
+   */
   int64_t remove_table(const std::string& table_name) {
     size_t table_id;
     if (table_map_.get(table_name, table_id) == -1) {
@@ -76,7 +107,12 @@ class dialog_store {
     }
     return table_map_.remove(table_name, table_id);
   }
-
+    
+  /**
+   * Removes the table specified by the id
+   * @param table_id The id of the table
+   * @return The index of the removed table or -1 if it doesn't exist
+   */
   int64_t remove_table(int64_t table_id) {
     return remove_table(get_table(table_id)->get_name());
   }

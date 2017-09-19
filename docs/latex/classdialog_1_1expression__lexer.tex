@@ -1,0 +1,68 @@
+\hypertarget{classdialog_1_1expression__lexer}{}\section{dialog\+:\+:expression\+\_\+lexer Class Reference}
+\label{classdialog_1_1expression__lexer}\index{dialog\+::expression\+\_\+lexer@{dialog\+::expression\+\_\+lexer}}
+
+
+{\ttfamily \#include $<$expression.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a19dbd63a6fb6c87b66bde397bca5c875}\label{classdialog_1_1expression__lexer_a19dbd63a6fb6c87b66bde397bca5c875}} 
+{\bfseries expression\+\_\+lexer} (const std\+::string \&exp)
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a0b5966eb1b0f0d3d5f3e40c0fdd3d868}\label{classdialog_1_1expression__lexer_a0b5966eb1b0f0d3d5f3e40c0fdd3d868}} 
+void {\bfseries str} (const std\+::string \&exp)
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a64a4ab732ed88c5139f59f261a7e4aac}\label{classdialog_1_1expression__lexer_a64a4ab732ed88c5139f59f261a7e4aac}} 
+size\+\_\+t {\bfseries pos} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_aa3a15848d2562dc6901adfdc0aaf42ae}\label{classdialog_1_1expression__lexer_aa3a15848d2562dc6901adfdc0aaf42ae}} 
+std\+::string {\bfseries str} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_ac76253b8c049a7e6899acc765be9c9b4}\label{classdialog_1_1expression__lexer_ac76253b8c049a7e6899acc765be9c9b4}} 
+const \hyperlink{structdialog_1_1expression__lex__token}{expression\+\_\+lex\+\_\+token} {\bfseries next\+\_\+token} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a4810e4e4090270c369784a431bde614a}\label{classdialog_1_1expression__lexer_a4810e4e4090270c369784a431bde614a}} 
+const \hyperlink{structdialog_1_1expression__lex__token}{expression\+\_\+lex\+\_\+token} {\bfseries peek\+\_\+token} ()
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a40cf6a7ea967e8abeb2dbc23f4e76aed}\label{classdialog_1_1expression__lexer_a40cf6a7ea967e8abeb2dbc23f4e76aed}} 
+void {\bfseries put\+\_\+back} (const \hyperlink{structdialog_1_1expression__lex__token}{expression\+\_\+lex\+\_\+token} \&tok)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a8a3c153f50a0b5ecd4158bffb9467a9c}\label{classdialog_1_1expression__lexer_a8a3c153f50a0b5ecd4158bffb9467a9c}} 
+static const int {\bfseries I\+N\+V\+A\+L\+ID} = -\/2
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a080a9a2bb30395f27786cc6c652802d0}\label{classdialog_1_1expression__lexer_a080a9a2bb30395f27786cc6c652802d0}} 
+static const int {\bfseries E\+ND} = -\/1
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a0c271fa07c268b177cf9422a9dc62ddf}\label{classdialog_1_1expression__lexer_a0c271fa07c268b177cf9422a9dc62ddf}} 
+static const int {\bfseries OR} = 0
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a5c5af973665a5ad0f84594bc60e19985}\label{classdialog_1_1expression__lexer_a5c5af973665a5ad0f84594bc60e19985}} 
+static const int {\bfseries A\+ND} = 1
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a0e5fda1ce8991fee059dccc924c03d90}\label{classdialog_1_1expression__lexer_a0e5fda1ce8991fee059dccc924c03d90}} 
+static const int {\bfseries N\+OT} = 2
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_af7dd279996995b7c0e5ee4315f75ec61}\label{classdialog_1_1expression__lexer_af7dd279996995b7c0e5ee4315f75ec61}} 
+static const int {\bfseries L\+E\+FT} = 3
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a9bc7735c32393c063f53ef172407827a}\label{classdialog_1_1expression__lexer_a9bc7735c32393c063f53ef172407827a}} 
+static const int {\bfseries R\+I\+G\+HT} = 4
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a51173760a05683729ff9ee71c9278f5e}\label{classdialog_1_1expression__lexer_a51173760a05683729ff9ee71c9278f5e}} 
+static const int {\bfseries O\+P\+E\+R\+A\+T\+OR} = 5
+\item 
+\mbox{\Hypertarget{classdialog_1_1expression__lexer_a841fb8469c5370606435e9c4dbc4e453}\label{classdialog_1_1expression__lexer_a841fb8469c5370606435e9c4dbc4e453}} 
+static const int {\bfseries O\+P\+E\+R\+A\+ND} = 6
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Lexer for the expression. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/expression.\+h\end{DoxyCompactItemize}

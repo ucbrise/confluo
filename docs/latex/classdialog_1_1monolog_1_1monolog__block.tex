@@ -1,0 +1,73 @@
+\hypertarget{classdialog_1_1monolog_1_1monolog__block}{}\section{dialog\+:\+:monolog\+:\+:monolog\+\_\+block$<$ T, B\+U\+F\+F\+E\+R\+\_\+\+S\+I\+ZE $>$ Class Template Reference}
+\label{classdialog_1_1monolog_1_1monolog__block}\index{dialog\+::monolog\+::monolog\+\_\+block$<$ T, B\+U\+F\+F\+E\+R\+\_\+\+S\+I\+Z\+E $>$@{dialog\+::monolog\+::monolog\+\_\+block$<$ T, B\+U\+F\+F\+E\+R\+\_\+\+S\+I\+Z\+E $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ab4e944acf2c4accd9063fb5955cd9c1b}\label{classdialog_1_1monolog_1_1monolog__block_ab4e944acf2c4accd9063fb5955cd9c1b}} 
+typedef bool {\bfseries block\+\_\+state}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_a8d913e738c1038d194493afabd5a163a}\label{classdialog_1_1monolog_1_1monolog__block_a8d913e738c1038d194493afabd5a163a}} 
+{\bfseries monolog\+\_\+block} (const std\+::string \&path, size\+\_\+t size, const \hyperlink{structdialog_1_1storage_1_1storage__mode}{storage\+::storage\+\_\+mode} \&storage)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ac62dbe270684c1913ecfbe6c4ffc2106}\label{classdialog_1_1monolog_1_1monolog__block_ac62dbe270684c1913ecfbe6c4ffc2106}} 
+{\bfseries monolog\+\_\+block} (const \hyperlink{classdialog_1_1monolog_1_1monolog__block}{monolog\+\_\+block} \&other)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_a60c7dc093c2168365a13436b1c8232ae}\label{classdialog_1_1monolog_1_1monolog__block_a60c7dc093c2168365a13436b1c8232ae}} 
+void {\bfseries init} (const std\+::string \&path, const size\+\_\+t size, const \hyperlink{structdialog_1_1storage_1_1storage__mode}{storage\+::storage\+\_\+mode} \&storage)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ae62550c498712643d68cebac4fcc2dbd}\label{classdialog_1_1monolog_1_1monolog__block_ae62550c498712643d68cebac4fcc2dbd}} 
+size\+\_\+t {\bfseries storage\+\_\+size} () const
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_a011e51ee79e69a714a54846f4faac934}\label{classdialog_1_1monolog_1_1monolog__block_a011e51ee79e69a714a54846f4faac934}} 
+void {\bfseries flush} (size\+\_\+t offset, size\+\_\+t len)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_a848fc37d24b99a125b314ed00d4e9ed3}\label{classdialog_1_1monolog_1_1monolog__block_a848fc37d24b99a125b314ed00d4e9ed3}} 
+void {\bfseries set} (size\+\_\+t i, const T \&val)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_abd7d20244b68a05ac9f5d9bdf42e0255}\label{classdialog_1_1monolog_1_1monolog__block_abd7d20244b68a05ac9f5d9bdf42e0255}} 
+void {\bfseries set\+\_\+unsafe} (size\+\_\+t i, const T \&val)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ad5e410b9dde8f44a1960e87beade503c}\label{classdialog_1_1monolog_1_1monolog__block_ad5e410b9dde8f44a1960e87beade503c}} 
+void {\bfseries write} (size\+\_\+t offset, const T $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t len)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ac4697bb76d9e298c3444c174c51a0f76}\label{classdialog_1_1monolog_1_1monolog__block_ac4697bb76d9e298c3444c174c51a0f76}} 
+void {\bfseries write\+\_\+unsafe} (size\+\_\+t offset, const T $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t len)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_afd735c98a1a3b35a0c0edefa29698163}\label{classdialog_1_1monolog_1_1monolog__block_afd735c98a1a3b35a0c0edefa29698163}} 
+const T \& {\bfseries at} (size\+\_\+t i) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_af811bad52de9b8eb6727c85ed6c7a0f9}\label{classdialog_1_1monolog_1_1monolog__block_af811bad52de9b8eb6727c85ed6c7a0f9}} 
+void {\bfseries read} (size\+\_\+t offset, T $\ast$\hyperlink{structdialog_1_1data}{data}, size\+\_\+t len) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ac751c5945c87da1418c2bb166208e5a2}\label{classdialog_1_1monolog_1_1monolog__block_ac751c5945c87da1418c2bb166208e5a2}} 
+T \& {\bfseries operator\mbox{[}$\,$\mbox{]}} (size\+\_\+t i)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_aff3e78fd6dc26862fc2f5417afc083dd}\label{classdialog_1_1monolog_1_1monolog__block_aff3e78fd6dc26862fc2f5417afc083dd}} 
+void $\ast$ {\bfseries ptr} (size\+\_\+t offset)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_a23eeab6885d2f01fa5fbd4f37580791f}\label{classdialog_1_1monolog_1_1monolog__block_a23eeab6885d2f01fa5fbd4f37580791f}} 
+void $\ast$ {\bfseries cptr} (size\+\_\+t offset) const
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ac34214b6ff292835f96b19eca0163a0a}\label{classdialog_1_1monolog_1_1monolog__block_ac34214b6ff292835f96b19eca0163a0a}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__block}{monolog\+\_\+block} \& {\bfseries operator=} (const \hyperlink{classdialog_1_1monolog_1_1monolog__block}{monolog\+\_\+block} \&other)
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_ab414dafa816d5170c8ab3c4ace387b23}\label{classdialog_1_1monolog_1_1monolog__block_ab414dafa816d5170c8ab3c4ace387b23}} 
+void {\bfseries ensure\+\_\+alloc} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_aa048117940af77eac669ff8e30354e03}\label{classdialog_1_1monolog_1_1monolog__block_aa048117940af77eac669ff8e30354e03}} 
+static const block\+\_\+state {\bfseries U\+N\+I\+N\+IT} = false
+\item 
+\mbox{\Hypertarget{classdialog_1_1monolog_1_1monolog__block_a2fac8eeac6ee353ef1521dd9e69c8c63}\label{classdialog_1_1monolog_1_1monolog__block_a2fac8eeac6ee353ef1521dd9e69c8c63}} 
+static const block\+\_\+state {\bfseries I\+N\+IT} = true
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/monolog\+\_\+linear.\+h\end{DoxyCompactItemize}

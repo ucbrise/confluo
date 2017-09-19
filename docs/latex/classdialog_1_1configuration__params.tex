@@ -1,0 +1,79 @@
+\hypertarget{classdialog_1_1configuration__params}{}\section{dialog\+:\+:configuration\+\_\+params Class Reference}
+\label{classdialog_1_1configuration__params}\index{dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static int {\bfseries M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY}
+\item 
+static double {\bfseries I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE}
+\item 
+static uint64\+\_\+t {\bfseries T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS}
+\item 
+static uint64\+\_\+t {\bfseries M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS}
+\item 
+static uint64\+\_\+t {\bfseries M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classdialog_1_1configuration__params_a105fb4d65030ba540b46bef64f2bba36}\label{classdialog_1_1configuration__params_a105fb4d65030ba540b46bef64f2bba36}} 
+\index{dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}!I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE@{I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE}}
+\index{I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE@{I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE}!dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}}
+\subsubsection{\texorpdfstring{I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE}{INDEX\_BUCKET\_SIZE}}
+{\footnotesize\ttfamily double dialog\+::configuration\+\_\+params\+::\+I\+N\+D\+E\+X\+\_\+\+B\+U\+C\+K\+E\+T\+\_\+\+S\+I\+ZE\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= dialog\_conf.get<\textcolor{keywordtype}{double}>(
+    \textcolor{stringliteral}{"index\_block\_size"}, constants::DEFAULT\_INDEX\_BUCKET\_SIZE)
+\end{DoxyCode}
+\mbox{\Hypertarget{classdialog_1_1configuration__params_ab2507d0d6907196eb004818059a8d09a}\label{classdialog_1_1configuration__params_ab2507d0d6907196eb004818059a8d09a}} 
+\index{dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}!M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY@{M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY}}
+\index{M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY@{M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY}!dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}}
+\subsubsection{\texorpdfstring{M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY}{MAX\_CONCURRENCY}}
+{\footnotesize\ttfamily int dialog\+::configuration\+\_\+params\+::\+M\+A\+X\+\_\+\+C\+O\+N\+C\+U\+R\+R\+E\+N\+CY\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= dialog\_conf.get<\textcolor{keywordtype}{int}>(
+    \textcolor{stringliteral}{"max\_concurrency"}, constants::HARDWARE\_CONCURRENCY)
+\end{DoxyCode}
+\mbox{\Hypertarget{classdialog_1_1configuration__params_ad514430933c909db68a5067179ebe98f}\label{classdialog_1_1configuration__params_ad514430933c909db68a5067179ebe98f}} 
+\index{dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}!M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS@{M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS}}
+\index{M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS@{M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS}!dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}}
+\subsubsection{\texorpdfstring{M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS}{MONITOR\_PERIODICITY\_MS}}
+{\footnotesize\ttfamily uint64\+\_\+t dialog\+::configuration\+\_\+params\+::\+M\+O\+N\+I\+T\+O\+R\+\_\+\+P\+E\+R\+I\+O\+D\+I\+C\+I\+T\+Y\+\_\+\+MS\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= dialog\_conf
+    .get<uint64\_t>(\textcolor{stringliteral}{"monitor\_periodicity\_ms"},
+                   constants::DEFAULT\_MONITOR\_PERIODICITY\_MS)
+\end{DoxyCode}
+\mbox{\Hypertarget{classdialog_1_1configuration__params_a2ce4e104d048a223e2cf076e47fb156b}\label{classdialog_1_1configuration__params_a2ce4e104d048a223e2cf076e47fb156b}} 
+\index{dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}!M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS@{M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS}}
+\index{M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS@{M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS}!dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}}
+\subsubsection{\texorpdfstring{M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS}{MONITOR\_WINDOW\_MS}}
+{\footnotesize\ttfamily uint64\+\_\+t dialog\+::configuration\+\_\+params\+::\+M\+O\+N\+I\+T\+O\+R\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+MS\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= dialog\_conf.get<uint64\_t>(
+    \textcolor{stringliteral}{"monitor\_window\_ms"}, constants::DEFAULT\_MONITOR\_WINDOW\_MS)
+\end{DoxyCode}
+\mbox{\Hypertarget{classdialog_1_1configuration__params_aa78f1536592cb4f05573a29ec231cc50}\label{classdialog_1_1configuration__params_aa78f1536592cb4f05573a29ec231cc50}} 
+\index{dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}!T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS@{T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS}}
+\index{T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS@{T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS}!dialog\+::configuration\+\_\+params@{dialog\+::configuration\+\_\+params}}
+\subsubsection{\texorpdfstring{T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS}{TIME\_RESOLUTION\_NS}}
+{\footnotesize\ttfamily uint64\+\_\+t dialog\+::configuration\+\_\+params\+::\+T\+I\+M\+E\+\_\+\+R\+E\+S\+O\+L\+U\+T\+I\+O\+N\+\_\+\+NS\hspace{0.3cm}{\ttfamily [static]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= dialog\_conf.get<uint64\_t>(
+    \textcolor{stringliteral}{"time\_resolution\_ns"}, constants::DEFAULT\_TIME\_RESOLUTION\_NS)
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/configuration\+\_\+params.\+h\end{DoxyCompactItemize}

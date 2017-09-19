@@ -1,0 +1,195 @@
+\hypertarget{classdialog_1_1index_1_1indexlet}{}\section{dialog\+:\+:index\+:\+:indexlet$<$ T, S\+I\+ZE $>$ Class Template Reference}
+\label{classdialog_1_1index_1_1indexlet}\index{dialog\+::index\+::indexlet$<$ T, S\+I\+Z\+E $>$@{dialog\+::index\+::indexlet$<$ T, S\+I\+Z\+E $>$}}
+
+
+The unit of indexing in tiered indexes.  
+
+
+
+
+{\ttfamily \#include $<$tiered\+\_\+index.\+h$>$}
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_ae0261936539a2e33e07319981977dda3}\label{classdialog_1_1index_1_1indexlet_ae0261936539a2e33e07319981977dda3}} 
+typedef atomic\+::type$<$ T $\ast$ $>$ {\bfseries atomic\+\_\+ref}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdialog_1_1index_1_1indexlet_ab1bb4556decdfc358090e73a078e45d2}{indexlet} ()
+\begin{DoxyCompactList}\small\item\em Constructor for the indexlet. \end{DoxyCompactList}\item 
+virtual \hyperlink{classdialog_1_1index_1_1indexlet_afada63e2f9ead60d701688a06c2fcd81}{$\sim$indexlet} ()
+\begin{DoxyCompactList}\small\item\em Virtual destructor for indexlet. \end{DoxyCompactList}\item 
+T $\ast$ \hyperlink{classdialog_1_1index_1_1indexlet_aac4ccc3e9c4aa70bfebac6f8b48de7eb}{get\+\_\+or\+\_\+create} (const uint32\+\_\+t i)
+\begin{DoxyCompactList}\small\item\em Creates and fetches the value at a given index. \end{DoxyCompactList}\item 
+atomic\+\_\+ref $\ast$ \hyperlink{classdialog_1_1index_1_1indexlet_ab3d280e9176781621a9b9c627c7db0e6}{get\+\_\+atomic} (const uint32\+\_\+t i)
+\begin{DoxyCompactList}\small\item\em Fetches the atomic pointer at a given index. \end{DoxyCompactList}\item 
+T $\ast$ \hyperlink{classdialog_1_1index_1_1indexlet_a879de6014445e5fdd8091a8f20ced31a}{operator\mbox{[}$\,$\mbox{]}} (const uint32\+\_\+t i)
+\begin{DoxyCompactList}\small\item\em Operator override for accessing the value at a given index. \end{DoxyCompactList}\item 
+T $\ast$ \hyperlink{classdialog_1_1index_1_1indexlet_a06b8f0bb16c6ffc2ab1c13404d099298}{get} (const uint32\+\_\+t i) const
+\begin{DoxyCompactList}\small\item\em Function for getting the value at a given index. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{classdialog_1_1index_1_1indexlet_ade4239f0aba692226fb8dd9ff899df87}{size} ()
+\begin{DoxyCompactList}\small\item\em Get the size of the indexlet. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{classdialog_1_1index_1_1indexlet_a68a3f311fb6b2172c70619bc633e729b}{storage\+\_\+size} ()
+\begin{DoxyCompactList}\small\item\em Get the storage size in bytes of the indexlet. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$\newline
+class dialog\+::index\+::indexlet$<$ T, S\+I\+Z\+E $>$}
+
+The unit of indexing in tiered indexes. 
+
+The basic unit of indexing in tiered indexes. An indexlet stores a fixed-\/size array with atomic references to objects of value type.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & Tyepe of the value. \\
+\hline
+{\em S\+I\+ZE} & = 65536 Size of the fixed-\/size array. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_ab1bb4556decdfc358090e73a078e45d2}\label{classdialog_1_1index_1_1indexlet_ab1bb4556decdfc358090e73a078e45d2}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!indexlet@{indexlet}}
+\index{indexlet@{indexlet}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{indexlet()}{indexlet()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+\hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::\hyperlink{classdialog_1_1index_1_1indexlet}{indexlet} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructor for the indexlet. 
+
+Constructor for the indexlet. Initializes all array references to null. \mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_afada63e2f9ead60d701688a06c2fcd81}\label{classdialog_1_1index_1_1indexlet_afada63e2f9ead60d701688a06c2fcd81}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!````~indexlet@{$\sim$indexlet}}
+\index{````~indexlet@{$\sim$indexlet}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{$\sim$indexlet()}{~indexlet()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+virtual \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::$\sim$\hyperlink{classdialog_1_1index_1_1indexlet}{indexlet} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Virtual destructor for indexlet. 
+
+Virtual destructor for indexlet. Deletes all array references. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_a06b8f0bb16c6ffc2ab1c13404d099298}\label{classdialog_1_1index_1_1indexlet_a06b8f0bb16c6ffc2ab1c13404d099298}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!get@{get}}
+\index{get@{get}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{get()}{get()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+T$\ast$ \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::get (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{i }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Function for getting the value at a given index. 
+
+Function for getting the value at a given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & The index to lookup. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Pointer to the value. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_ab3d280e9176781621a9b9c627c7db0e6}\label{classdialog_1_1index_1_1indexlet_ab3d280e9176781621a9b9c627c7db0e6}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!get\+\_\+atomic@{get\+\_\+atomic}}
+\index{get\+\_\+atomic@{get\+\_\+atomic}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{get\+\_\+atomic()}{get\_atomic()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+atomic\+\_\+ref$\ast$ \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::get\+\_\+atomic (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{i }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Fetches the atomic pointer at a given index. 
+
+Obtain the atomic pointer at a given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & The index to lookup. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Atomic pointer to the value. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_aac4ccc3e9c4aa70bfebac6f8b48de7eb}\label{classdialog_1_1index_1_1indexlet_aac4ccc3e9c4aa70bfebac6f8b48de7eb}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!get\+\_\+or\+\_\+create@{get\+\_\+or\+\_\+create}}
+\index{get\+\_\+or\+\_\+create@{get\+\_\+or\+\_\+create}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{get\+\_\+or\+\_\+create()}{get\_or\_create()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+T$\ast$ \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::get\+\_\+or\+\_\+create (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{i }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Creates and fetches the value at a given index. 
+
+Obtain the value at a given index; creates required internal structure for the value if it does not exist.
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & The index to lookup. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Pointer to the value. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_a879de6014445e5fdd8091a8f20ced31a}\label{classdialog_1_1index_1_1indexlet_a879de6014445e5fdd8091a8f20ced31a}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!operator\mbox{[}\mbox{]}@{operator[]}}
+\index{operator\mbox{[}\mbox{]}@{operator[]}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{operator[]()}{operator[]()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+T$\ast$ \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::operator\mbox{[}$\,$\mbox{]} (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{i }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Operator override for accessing the value at a given index. 
+
+Overrides operator for accessing accessing the value at a given index. Creates any required internal structure.
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & Index of the value. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_ade4239f0aba692226fb8dd9ff899df87}\label{classdialog_1_1index_1_1indexlet_ade4239f0aba692226fb8dd9ff899df87}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!size@{size}}
+\index{size@{size}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{size()}{size()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+size\+\_\+t \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get the size of the indexlet. 
+
+Get the size of the indexlet. \begin{DoxyReturn}{Returns}
+Size of the indexlet. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1index_1_1indexlet_a68a3f311fb6b2172c70619bc633e729b}\label{classdialog_1_1index_1_1indexlet_a68a3f311fb6b2172c70619bc633e729b}} 
+\index{dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}!storage\+\_\+size@{storage\+\_\+size}}
+\index{storage\+\_\+size@{storage\+\_\+size}!dialog\+::index\+::indexlet@{dialog\+::index\+::indexlet}}
+\subsubsection{\texorpdfstring{storage\+\_\+size()}{storage\_size()}}
+{\footnotesize\ttfamily template$<$typename T, size\+\_\+t S\+I\+ZE = 65536$>$ \\
+size\+\_\+t \hyperlink{classdialog_1_1index_1_1indexlet}{dialog\+::index\+::indexlet}$<$ T, S\+I\+ZE $>$\+::storage\+\_\+size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get the storage size in bytes of the indexlet. 
+
+Get the storage size in bytes of the indexlet. \begin{DoxyReturn}{Returns}
+The storage size in bytes of the indexlet. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/tiered\+\_\+index.\+h\end{DoxyCompactItemize}

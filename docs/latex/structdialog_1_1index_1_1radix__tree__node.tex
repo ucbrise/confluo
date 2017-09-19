@@ -1,0 +1,82 @@
+\hypertarget{structdialog_1_1index_1_1radix__tree__node}{}\section{dialog\+:\+:index\+:\+:radix\+\_\+tree\+\_\+node$<$ reflog $>$ Struct Template Reference}
+\label{structdialog_1_1index_1_1radix__tree__node}\index{dialog\+::index\+::radix\+\_\+tree\+\_\+node$<$ reflog $>$@{dialog\+::index\+::radix\+\_\+tree\+\_\+node$<$ reflog $>$}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a0662b2a654d2ec8e56fe3dfe2c76f91d}\label{structdialog_1_1index_1_1radix__tree__node_a0662b2a654d2ec8e56fe3dfe2c76f91d}} 
+typedef \hyperlink{structdialog_1_1index_1_1radix__tree__node}{radix\+\_\+tree\+\_\+node}$<$ \hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $>$ {\bfseries node\+\_\+t}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a798fd98a8a69e6b92d5dad72639ba476}\label{structdialog_1_1index_1_1radix__tree__node_a798fd98a8a69e6b92d5dad72639ba476}} 
+typedef atomic\+::type$<$ \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ $>$ {\bfseries child\+\_\+t}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_aa32bb8d1fe0da65e12965fc27dbcc9f3}\label{structdialog_1_1index_1_1radix__tree__node_aa32bb8d1fe0da65e12965fc27dbcc9f3}} 
+typedef \hyperlink{classdialog_1_1byte__string}{byte\+\_\+string} {\bfseries key\+\_\+t}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_afafdbd4fe0946b9813fd6e53144d12d7}\label{structdialog_1_1index_1_1radix__tree__node_afafdbd4fe0946b9813fd6e53144d12d7}} 
+{\footnotesize template$<$typename ... A\+R\+GS$>$ }\\{\bfseries radix\+\_\+tree\+\_\+node} (uint8\+\_\+t node\+\_\+key, size\+\_\+t node\+\_\+width, size\+\_\+t node\+\_\+depth, \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$node\+\_\+parent, bool, A\+R\+GS \&\&... args)
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a230cf563a8b4e2dac324791b7b30bcd4}\label{structdialog_1_1index_1_1radix__tree__node_a230cf563a8b4e2dac324791b7b30bcd4}} 
+{\bfseries radix\+\_\+tree\+\_\+node} (uint8\+\_\+t node\+\_\+key, size\+\_\+t node\+\_\+width, size\+\_\+t node\+\_\+depth, \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$node\+\_\+parent)
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a397829b9ff7017183deb7dcc2623d3d4}\label{structdialog_1_1index_1_1radix__tree__node_a397829b9ff7017183deb7dcc2623d3d4}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $\ast$\& {\bfseries refs} ()
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_ac0c04b6f6d5357feca1ebfd345d13707}\label{structdialog_1_1index_1_1radix__tree__node_ac0c04b6f6d5357feca1ebfd345d13707}} 
+\hyperlink{classdialog_1_1monolog_1_1monolog__exp2__linear}{reflog} $\ast$const  \& {\bfseries refs} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a2b99436aae6d96c0c4ceb612b4748a58}\label{structdialog_1_1index_1_1radix__tree__node_a2b99436aae6d96c0c4ceb612b4748a58}} 
+child\+\_\+t $\ast$\& {\bfseries children} ()
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a5a6c3fc732f518c2ed3ec080afc468ba}\label{structdialog_1_1index_1_1radix__tree__node_a5a6c3fc732f518c2ed3ec080afc468ba}} 
+child\+\_\+t $\ast$const  \& {\bfseries children} () const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a0305272882f54699ce555c1c8e72d5ba}\label{structdialog_1_1index_1_1radix__tree__node_a0305272882f54699ce555c1c8e72d5ba}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries first\+\_\+child} (size\+\_\+t width) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a35eb69ba2cb5a5300de64331619f3c5d}\label{structdialog_1_1index_1_1radix__tree__node_a35eb69ba2cb5a5300de64331619f3c5d}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries last\+\_\+child} (size\+\_\+t width) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a59c5bae980c11d89d714630d440fd964}\label{structdialog_1_1index_1_1radix__tree__node_a59c5bae980c11d89d714630d440fd964}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries next\+\_\+child} (uint8\+\_\+t key, size\+\_\+t width) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_ae28a3dff60ac574327ef8812b26e9173}\label{structdialog_1_1index_1_1radix__tree__node_ae28a3dff60ac574327ef8812b26e9173}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries prev\+\_\+child} (uint8\+\_\+t key, size\+\_\+t width) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a4f3f487295eacd60061d710104ade025}\label{structdialog_1_1index_1_1radix__tree__node_a4f3f487295eacd60061d710104ade025}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries advance} (\hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&t\+\_\+key, size\+\_\+t t\+\_\+width, size\+\_\+t t\+\_\+depth) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_aa781f4973238e053bfd131c28e8ff8e2}\label{structdialog_1_1index_1_1radix__tree__node_aa781f4973238e053bfd131c28e8ff8e2}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries advance\+\_\+descend} (\hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&t\+\_\+key, size\+\_\+t t\+\_\+width, size\+\_\+t t\+\_\+depth) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a74ab89b8f9791631b5457aba7d9a37d4}\label{structdialog_1_1index_1_1radix__tree__node_a74ab89b8f9791631b5457aba7d9a37d4}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries retreat} (\hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&t\+\_\+key, size\+\_\+t t\+\_\+width, size\+\_\+t t\+\_\+depth) const
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a18804efbeade1df1028f2ccdada36a27}\label{structdialog_1_1index_1_1radix__tree__node_a18804efbeade1df1028f2ccdada36a27}} 
+const \hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries retreat\+\_\+descend} (\hyperlink{classdialog_1_1byte__string}{key\+\_\+t} \&t\+\_\+key, size\+\_\+t t\+\_\+width, size\+\_\+t t\+\_\+depth) const
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_ae671cbfb97860434cfa1b1508807da6c}\label{structdialog_1_1index_1_1radix__tree__node_ae671cbfb97860434cfa1b1508807da6c}} 
+uint8\+\_\+t {\bfseries key}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_ac8057cfc7492d204d6997ce4b5151846}\label{structdialog_1_1index_1_1radix__tree__node_ac8057cfc7492d204d6997ce4b5151846}} 
+uint8\+\_\+t {\bfseries depth}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_adee6d7afc7e021b9f432e1766c908594}\label{structdialog_1_1index_1_1radix__tree__node_adee6d7afc7e021b9f432e1766c908594}} 
+void $\ast$ {\bfseries data}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_a149dbbb1e15ebc571ece3e6aeafa3392}\label{structdialog_1_1index_1_1radix__tree__node_a149dbbb1e15ebc571ece3e6aeafa3392}} 
+bool {\bfseries is\+\_\+leaf}
+\item 
+\mbox{\Hypertarget{structdialog_1_1index_1_1radix__tree__node_ace7536851ade6aa80f8aeafcf9a6ec39}\label{structdialog_1_1index_1_1radix__tree__node_ace7536851ade6aa80f8aeafcf9a6ec39}} 
+\hyperlink{structdialog_1_1index_1_1radix__tree__node}{node\+\_\+t} $\ast$ {\bfseries parent}
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/radix\+\_\+tree.\+h\end{DoxyCompactItemize}

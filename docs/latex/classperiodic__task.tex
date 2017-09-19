@@ -1,0 +1,66 @@
+\hypertarget{classperiodic__task}{}\section{periodic\+\_\+task Class Reference}
+\label{classperiodic__task}\index{periodic\+\_\+task@{periodic\+\_\+task}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classperiodic__task_a9290dc74dd438153930c1fa806fc9f43}{periodic\+\_\+task} (const std\+::string \&name)
+\item 
+\hyperlink{classperiodic__task_a48e0b41236097af64f4591f3e270a70f}{$\sim$periodic\+\_\+task} ()
+\item 
+bool \hyperlink{classperiodic__task_a3e9de732bfaf096cb4f83a8813958f5a}{stop} ()
+\item 
+bool \hyperlink{classperiodic__task_a17829d0796787612e33a912f7f1188af}{start} (std\+::function$<$ void(void)$>$ task, uint64\+\_\+t interval\+\_\+ms=1)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classperiodic__task_a9290dc74dd438153930c1fa806fc9f43}\label{classperiodic__task_a9290dc74dd438153930c1fa806fc9f43}} 
+\index{periodic\+\_\+task@{periodic\+\_\+task}!periodic\+\_\+task@{periodic\+\_\+task}}
+\index{periodic\+\_\+task@{periodic\+\_\+task}!periodic\+\_\+task@{periodic\+\_\+task}}
+\subsubsection{\texorpdfstring{periodic\+\_\+task()}{periodic\_task()}}
+{\footnotesize\ttfamily periodic\+\_\+task\+::periodic\+\_\+task (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor for periodic name that initializes the task 
+\begin{DoxyParams}{Parameters}
+{\em name} & The name of the task \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classperiodic__task_a48e0b41236097af64f4591f3e270a70f}\label{classperiodic__task_a48e0b41236097af64f4591f3e270a70f}} 
+\index{periodic\+\_\+task@{periodic\+\_\+task}!````~periodic\+\_\+task@{$\sim$periodic\+\_\+task}}
+\index{````~periodic\+\_\+task@{$\sim$periodic\+\_\+task}!periodic\+\_\+task@{periodic\+\_\+task}}
+\subsubsection{\texorpdfstring{$\sim$periodic\+\_\+task()}{~periodic\_task()}}
+{\footnotesize\ttfamily periodic\+\_\+task\+::$\sim$periodic\+\_\+task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Default destructor that stops the task 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classperiodic__task_a17829d0796787612e33a912f7f1188af}\label{classperiodic__task_a17829d0796787612e33a912f7f1188af}} 
+\index{periodic\+\_\+task@{periodic\+\_\+task}!start@{start}}
+\index{start@{start}!periodic\+\_\+task@{periodic\+\_\+task}}
+\subsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily bool periodic\+\_\+task\+::start (\begin{DoxyParamCaption}\item[{std\+::function$<$ void(void)$>$}]{task,  }\item[{uint64\+\_\+t}]{interval\+\_\+ms = {\ttfamily 1} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Starts the periodic task to run 
+\begin{DoxyParams}{Parameters}
+{\em task} & The function that represents the work to do \\
+\hline
+{\em interval\+\_\+ms} & The time in between executions of the task \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the task was executed successfully, false otherwise 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classperiodic__task_a3e9de732bfaf096cb4f83a8813958f5a}\label{classperiodic__task_a3e9de732bfaf096cb4f83a8813958f5a}} 
+\index{periodic\+\_\+task@{periodic\+\_\+task}!stop@{stop}}
+\index{stop@{stop}!periodic\+\_\+task@{periodic\+\_\+task}}
+\subsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily bool periodic\+\_\+task\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Stops the periodic task \begin{DoxyReturn}{Returns}
+True if the task was successfully stopped, false if the task was already stopped 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/neil/\+Documents/\+Berkeley/research/dialog/libdialog/dialog/periodic\+\_\+task.\+h\end{DoxyCompactItemize}

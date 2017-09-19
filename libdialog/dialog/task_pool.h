@@ -25,14 +25,23 @@ class task_queue {
  public:
   typedef std::function<void()> function_t;
 
+  /**
+   * Default constructor that initializes to a valid task queue
+   */
   task_queue()
       : valid_(true) {
   }
 
+  /**
+   * Default destructor that invalidates the task queue
+   */
   ~task_queue() {
     invalidate();
   }
 
+  /**
+   * Invalidates task queue by obtaining a lock
+   */
   void invalidate(void) {
     std::lock_guard<std::mutex> lock { mutex_ };
     valid_ = false;
@@ -42,7 +51,9 @@ class task_queue {
   /**
    * Get the first value in the queue.
    * Will block until a value is available unless clear is called or the instance is destructed.
-   * Returns true if a value was successfully written to the out parameter, false otherwise.
+   * @param out A void function that will be overriden with the front of
+   * the queue
+   * @return Returns true if a value was successfully written to the out parameter, false otherwise.
    */
   bool dequeue(function_t& out) {
     std::unique_lock<std::mutex> lock(mutex_);
@@ -62,6 +73,9 @@ class task_queue {
 
   /**
    * Push a new value onto the queue.
+   * @param f The future
+   * @param args The arguments for the queue
+   * @return The future value
    */
   template<class F, class ...ARGS>
   auto enqueue(F&& f, ARGS&&... args)
@@ -83,6 +97,7 @@ class task_queue {
 
   /**
    * Check whether or not the queue is empty.
+   * @return True if empty false otherwise
    */
   bool empty() const {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -101,7 +116,8 @@ class task_queue {
   }
 
   /**
-   * Returns whether or not this queue is valid.
+   * Checks whether or not this queue is valid.
+   * @return True if valid false otherwise
    */
   bool is_valid() const {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -118,15 +134,24 @@ class task_queue {
 
 class task_worker {
  public:
+  /**
+   * Default constructor that initalizes work to a queue of tasks to do
+   */
   task_worker(task_queue& queue)
       : stop_(false),
         queue_(queue) {
   }
 
+  /**
+   * Default destructor that stops all the tasks on the queue
+   */
   ~task_worker() {
     stop();
   }
 
+  /**
+   * Starts worker on a new thread and performs each task on the queue
+   */
   void start() {
     worker_ = std::thread([this]() {
       task_queue::function_t task;
@@ -143,6 +168,9 @@ class task_worker {
     });
   }
 
+  /**
+   * Joins all of the workers and their work if possible
+   */
   void stop() {
     atomic::store(&stop_, true);
     if (worker_.joinable())
@@ -157,6 +185,11 @@ class task_worker {
 
 class task_pool {
  public:
+  
+  /**
+   * Constructor for task pool that initializes task workers
+   * @param num_workers The number of task workers to start
+   */
   task_pool(size_t num_workers = 1) {
     for (size_t i = 0; i < num_workers; i++) {
       workers_.push_back(new task_worker(queue_));
@@ -164,6 +197,10 @@ class task_pool {
     }
   }
 
+  /**
+   * Default destructor that invalidates task queue and deletes all of
+   * the workers
+   */
   ~task_pool() {
     queue_.invalidate();
     for (task_worker* worker : workers_) {
@@ -171,6 +208,12 @@ class task_pool {
     }
   }
 
+  /**
+   * Submits work by enqueuing the future result
+   * @param f The future
+   * @param args Arguments for the future
+   * @return The future result
+   */
   template<class F, class ...ARGS>
   auto submit(F&& f, ARGS&&... args)
   -> std::future<typename std::result_of<F(ARGS...)>::type> {
