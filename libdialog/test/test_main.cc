@@ -20,6 +20,8 @@
 #include "flatten_test.h"
 #include "immutable_value_test.h"
 #include "index_state_test.h"
+#include "mempool_test.h"
+#include "mempool_stat_test.h"
 #include "monolog_test.h"
 #include "mutable_value_test.h"
 #include "periodic_task_test.h"
