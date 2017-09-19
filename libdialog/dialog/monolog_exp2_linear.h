@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "atomic.h"
+#include "mempool.h"
 #include "bit_utils.h"
 
 using namespace utils;
@@ -23,18 +24,20 @@ namespace monolog {
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
-
   typedef atomic::type<T*> __atomic_bucket_ref;
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
-  monolog_exp2_linear_base()
-      : fcs_hibit_(bit_utils::highest_bit(fcs_)) {
+  monolog_exp2_linear_base(mempool<T, BUCKET_SIZE * sizeof(T)>& pool)
+      : fcs_hibit_(bit_utils::highest_bit(fcs_)),
+        bucket_pool_(pool) {
     __atomic_bucket_ref* null_ptr = nullptr;
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
     }
     __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
-    atomic::init(&first_container[0], new T[BUCKET_SIZE]());
+
+    T* first_bucket = bucket_pool_.alloc();
+    atomic::init(&first_container[0], first_bucket);
     atomic::init(&bucket_containers_[0], first_container);
   }
 
@@ -328,11 +331,11 @@ class monolog_exp2_linear_base {
    * @return allocated bucket
    */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
-    T* new_bucket = new T[BUCKET_SIZE]();
+    T* new_bucket = bucket_pool_.alloc();
     T* expected = nullptr;
 
     if (!atomic::strong::cas(&container[bucket_idx], &expected, new_bucket)) {
-      delete[] new_bucket;
+      bucket_pool_.dealloc(new_bucket);
       return expected;
     }
     return new_bucket;
@@ -343,6 +346,7 @@ class monolog_exp2_linear_base {
   static const size_t FCB_HIBIT = 4;
   const size_t fcs_ = FCB * BUCKET_SIZE;
   const size_t fcs_hibit_;
+  mempool<T, BUCKET_SIZE * sizeof(T)> bucket_pool_;
 
   // Stores the pointers to the bucket containers for MonoLog.
   std::array<__atomic_bucket_container_ref, NCONTAINERS> bucket_containers_;
@@ -367,8 +371,9 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> iterator;
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
 
-  monolog_exp2_linear()
-      : tail_(0) {
+  monolog_exp2_linear(mempool<T, BUCKET_SIZE * sizeof(T)>& pool)
+      : monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>(pool) {
+    tail_ = 0;
   }
 
   size_t reserve(size_t count) {
