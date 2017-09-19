@@ -24,11 +24,9 @@ width\+\_\+type {\bfseries bit\+\_\+width} () const
 \mbox{\Hypertarget{classdialog_1_1bitmap__array__base_ab7816447c88267c25987ad45ceb65a5e}\label{classdialog_1_1bitmap__array__base_ab7816447c88267c25987ad45ceb65a5e}} 
 bool {\bfseries empty} () const
 \item 
-\mbox{\Hypertarget{classdialog_1_1bitmap__array__base_aa7a0aa644a5a37eaf87a902a20cee939}\label{classdialog_1_1bitmap__array__base_aa7a0aa644a5a37eaf87a902a20cee939}} 
-virtual size\+\_\+type {\bfseries serialize} (std\+::ostream \&out) override
+virtual size\+\_\+type \hyperlink{classdialog_1_1bitmap__array__base_aa7a0aa644a5a37eaf87a902a20cee939}{serialize} (std\+::ostream \&out) override
 \item 
-\mbox{\Hypertarget{classdialog_1_1bitmap__array__base_a51a91fced01d96475dc24e23da2d06e8}\label{classdialog_1_1bitmap__array__base_a51a91fced01d96475dc24e23da2d06e8}} 
-virtual size\+\_\+type {\bfseries deserialize} (std\+::istream \&in) override
+virtual size\+\_\+type \hyperlink{classdialog_1_1bitmap__array__base_a51a91fced01d96475dc24e23da2d06e8}{deserialize} (std\+::istream \&in) override
 \end{DoxyCompactItemize}
 \subsection*{Protected Attributes}
 \begin{DoxyCompactItemize}
@@ -40,6 +38,47 @@ size\+\_\+type {\bfseries num\+\_\+elements\+\_\+}
 width\+\_\+type {\bfseries bit\+\_\+width\+\_\+}
 \end{DoxyCompactItemize}
 \subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1bitmap__array__base_a51a91fced01d96475dc24e23da2d06e8}\label{classdialog_1_1bitmap__array__base_a51a91fced01d96475dc24e23da2d06e8}} 
+\index{dialog\+::bitmap\+\_\+array\+\_\+base@{dialog\+::bitmap\+\_\+array\+\_\+base}!deserialize@{deserialize}}
+\index{deserialize@{deserialize}!dialog\+::bitmap\+\_\+array\+\_\+base@{dialog\+::bitmap\+\_\+array\+\_\+base}}
+\subsubsection{\texorpdfstring{deserialize()}{deserialize()}}
+{\footnotesize\ttfamily template$<$typename T$>$ \\
+virtual size\+\_\+type \hyperlink{classdialog_1_1bitmap__array__base}{dialog\+::bitmap\+\_\+array\+\_\+base}$<$ T $>$\+::deserialize (\begin{DoxyParamCaption}\item[{std\+::istream \&}]{in }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Deserializes bitmap from an input stream 
+\begin{DoxyParams}{Parameters}
+{\em in} & The input stream where the bitmap is read from \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The size of the data from the stream 
+\end{DoxyReturn}
+
+
+Reimplemented from \hyperlink{classdialog_1_1bitmap_a5c4c9a790b785bbc021d913a53cffe80}{dialog\+::bitmap}.
+
+\mbox{\Hypertarget{classdialog_1_1bitmap__array__base_aa7a0aa644a5a37eaf87a902a20cee939}\label{classdialog_1_1bitmap__array__base_aa7a0aa644a5a37eaf87a902a20cee939}} 
+\index{dialog\+::bitmap\+\_\+array\+\_\+base@{dialog\+::bitmap\+\_\+array\+\_\+base}!serialize@{serialize}}
+\index{serialize@{serialize}!dialog\+::bitmap\+\_\+array\+\_\+base@{dialog\+::bitmap\+\_\+array\+\_\+base}}
+\subsubsection{\texorpdfstring{serialize()}{serialize()}}
+{\footnotesize\ttfamily template$<$typename T$>$ \\
+virtual size\+\_\+type \hyperlink{classdialog_1_1bitmap__array__base}{dialog\+::bitmap\+\_\+array\+\_\+base}$<$ T $>$\+::serialize (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{out }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Serializes bitmap to an output stream 
+\begin{DoxyParams}{Parameters}
+{\em out} & The output stream where the bitmap is serialized \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The size of the data in the stream 
+\end{DoxyReturn}
+
+
+Reimplemented from \hyperlink{classdialog_1_1bitmap_af93ff2660d3b790eee85692a41bdb823}{dialog\+::bitmap}.
+
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

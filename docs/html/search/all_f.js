@@ -5,10 +5,18 @@ var searchData=
   ['schema_5ft',['schema_t',['../classdialog_1_1schema__t.html',1,'dialog']]],
   ['searchable_5flist',['searchable_list',['../structdialog_1_1searchable__list.html',1,'dialog']]],
   ['searchable_5flist_5fnode',['searchable_list_node',['../structdialog_1_1searchable__list__node.html',1,'dialog']]],
+  ['serialize',['serialize',['../classdialog_1_1bitmap.html#af93ff2660d3b790eee85692a41bdb823',1,'dialog::bitmap::serialize()'],['../classdialog_1_1bitmap__array__base.html#aa7a0aa644a5a37eaf87a902a20cee939',1,'dialog::bitmap_array_base::serialize()'],['../classdialog_1_1unsized__bitmap__array.html#a3c6dfec187c0ecad49d562c2b081ec6a',1,'dialog::unsized_bitmap_array::serialize()'],['../classdialog_1_1delta__encoded__array.html#a533eeb8833bb554513c86eb7f1ce635f',1,'dialog::delta_encoded_array::serialize()']]],
   ['set',['set',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a86d27f015adcd1320b4e1f811e1c1ceb',1,'dialog::monolog::monolog_exp2_base::set(size_t idx, const T val)'],['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a11fb0491dea6bd8e0877a47c3f22708a',1,'dialog::monolog::monolog_exp2_base::set(size_t idx, const T *data, size_t len)'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#af292efeb7faae83c3f9e24f77a7f1fd8',1,'dialog::monolog::monolog_exp2_linear_base::set(size_t idx, const T val)'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#a17d6ac9dfede2addd128f99cc7ea72bb',1,'dialog::monolog::monolog_exp2_linear_base::set(size_t idx, const T *data, size_t len)']]],
+  ['set_5fbit',['set_bit',['../classdialog_1_1bitmap.html#abeda36a2708d0b87296f7c4322357421',1,'dialog::bitmap']]],
+  ['set_5findexed',['set_indexed',['../classdialog_1_1column__t.html#a18cbf15074f6255b63438bf64d6622bf',1,'dialog::column_t']]],
+  ['set_5findexing',['set_indexing',['../classdialog_1_1column__t.html#ab9651b430ffa98ff36af3c643c591576',1,'dialog::column_t']]],
+  ['set_5funindexed',['set_unindexed',['../classdialog_1_1column__t.html#abd10df62173d46d9189306cca8569494',1,'dialog::column_t']]],
   ['set_5funsafe',['set_unsafe',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#ace9cdb67da6d6e9138705afb140b1560',1,'dialog::monolog::monolog_exp2_base::set_unsafe(size_t idx, const T val)'],['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a5e286b72175a394dfbb9bcf6e5c1fbc6',1,'dialog::monolog::monolog_exp2_base::set_unsafe(size_t idx, const T *data, size_t len)'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#a7adee243bf98901dbeb49c600ead38a5',1,'dialog::monolog::monolog_exp2_linear_base::set_unsafe(size_t idx, const T val)'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#af4641b004a2e4341411872e5cfa9970d',1,'dialog::monolog::monolog_exp2_linear_base::set_unsafe(size_t idx, const T *data, size_t len)']]],
+  ['set_5fval_5fpos',['set_val_pos',['../classdialog_1_1bitmap.html#a567ec662fb5fa68399b3097cc63c44ea',1,'dialog::bitmap']]],
   ['signed_5fbitmap_5farray',['signed_bitmap_array',['../classdialog_1_1signed__bitmap__array.html',1,'dialog']]],
   ['size',['size',['../classdialog_1_1index_1_1indexlet.html#ade4239f0aba692226fb8dd9ff899df87',1,'dialog::index::indexlet']]],
+  ['start',['start',['../classperiodic__task.html#a17829d0796787612e33a912f7f1188af',1,'periodic_task::start()'],['../classtask__worker.html#aa33aec83ef4e75f6a715176a31913d70',1,'task_worker::start()']]],
+  ['stop',['stop',['../classperiodic__task.html#a3e9de732bfaf096cb4f83a8813958f5a',1,'periodic_task::stop()'],['../classtask__worker.html#aaa4b11b564b47d366e3acbe0e8205595',1,'task_worker::stop()']]],
   ['storage_5fmode',['storage_mode',['../structdialog_1_1storage_1_1storage__mode.html',1,'dialog::storage']]],
   ['storage_5fsize',['storage_size',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a908d3997fcc3790bced9e691223eb865',1,'dialog::monolog::monolog_exp2_base::storage_size()'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#a2efcf4f9e75d769f4e7a5e2b0cf57776',1,'dialog::monolog::monolog_exp2_linear_base::storage_size()'],['../classdialog_1_1index_1_1indexlet.html#a68a3f311fb6b2172c70619bc633e729b',1,'dialog::index::indexlet::storage_size()']]],
   ['str_5fto_5fop',['str_to_op',['../classdialog_1_1relop__utils.html#a6dd36213f1e18ce3408281da2dae561c',1,'dialog::relop_utils']]],
@@ -16,5 +24,6 @@ var searchData=
   ['string_5fmap',['string_map',['../classdialog_1_1string__map.html',1,'dialog']]],
   ['string_5fmap_3c_20filter_5fid_5ft_20_3e',['string_map&lt; filter_id_t &gt;',['../classdialog_1_1string__map.html',1,'dialog']]],
   ['string_5fmap_3c_20size_5ft_20_3e',['string_map&lt; size_t &gt;',['../classdialog_1_1string__map.html',1,'dialog']]],
-  ['string_5fmap_3c_20trigger_5fid_5ft_20_3e',['string_map&lt; trigger_id_t &gt;',['../classdialog_1_1string__map.html',1,'dialog']]]
+  ['string_5fmap_3c_20trigger_5fid_5ft_20_3e',['string_map&lt; trigger_id_t &gt;',['../classdialog_1_1string__map.html',1,'dialog']]],
+  ['submit',['submit',['../classtask__pool.html#a1278806d5bf37f76983db19ec64712b5',1,'task_pool']]]
 ];

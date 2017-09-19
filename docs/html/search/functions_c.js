@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['remove_5ftable',['remove_table',['../classdialog_1_1dialog__store.html#a15b6b065d529ede947ff3ca4db77ab56',1,'dialog::dialog_store::remove_table(const std::string &amp;table_name)'],['../classdialog_1_1dialog__store.html#a7557cfcb6f7f5458031b7b3971d9d7cd',1,'dialog::dialog_store::remove_table(int64_t table_id)']]],
-  ['remove_5ftrigger',['remove_trigger',['../classdialog_1_1monitor_1_1filter.html#ac5c01fdc260a434815ab2bbd66ae9ab5',1,'dialog::monitor::filter']]]
+  ['periodic_5ftask',['periodic_task',['../classperiodic__task.html#a9290dc74dd438153930c1fa806fc9f43',1,'periodic_task']]],
+  ['print_5fexpression',['print_expression',['../classdialog_1_1expression__utils.html#ab26b15dece4bf0ab5f0879d397b15ad1',1,'dialog::expression_utils']]],
+  ['ptr',['ptr',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a76b101e66b927da18d6a723656a6a173',1,'dialog::monolog::monolog_exp2_base::ptr()'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#a73c30e25123e9b74ee03905a82a91c07',1,'dialog::monolog::monolog_exp2_linear_base::ptr()']]]
 ];

@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['filter',['filter',['../classdialog_1_1monitor_1_1filter.html#a7fe577f3fc937bef2d62cbcf9c7b6662',1,'dialog::monitor::filter::filter(const compiled_expression &amp;exp, filter_fn fn=default_filter)'],['../classdialog_1_1monitor_1_1filter.html#a5fa052157aa824765614c7de106a11c2',1,'dialog::monitor::filter::filter(filter_fn fn=default_filter)']]],
-  ['flush',['flush',['../structdialog_1_1storage_1_1in__memory.html#a8c6edb151f7f3420cb14b567b5c88c64',1,'dialog::storage::in_memory::flush()'],['../structdialog_1_1storage_1_1durable__relaxed.html#a017593d30af37c9bb6df31c82dfbfcf5',1,'dialog::storage::durable_relaxed::flush()'],['../structdialog_1_1storage_1_1durable.html#a1ea22279109b5b06d195aadfe5594ef4',1,'dialog::storage::durable::flush()']]],
-  ['free',['free',['../structdialog_1_1storage_1_1durable__relaxed.html#a7eee32ffcf5bd7a8da913f3cc5747579',1,'dialog::storage::durable_relaxed::free()'],['../structdialog_1_1storage_1_1durable.html#a4fe38b9ca53b3cb89d53e5343f813db9',1,'dialog::storage::durable::free()']]],
-  ['free_5fexpression',['free_expression',['../classdialog_1_1expression__utils.html#aa077b3345553c3c71674c2577eebf143',1,'dialog::expression_utils']]],
-  ['free_5fmem',['free_mem',['../structdialog_1_1storage_1_1in__memory.html#af1a8517c282999c0f80fda59de3483d7',1,'dialog::storage::in_memory']]]
+  ['elias_5fgamma_5fencoded_5farray',['elias_gamma_encoded_array',['../classdialog_1_1elias__gamma__encoded__array.html#a18b53f9744c7c0c0a1d0e5a77ffcb840',1,'dialog::elias_gamma_encoded_array::elias_gamma_encoded_array()'],['../classdialog_1_1elias__gamma__encoded__array.html#a65bed69251739947eabd7e0a157b8923',1,'dialog::elias_gamma_encoded_array::elias_gamma_encoded_array(T *elements, size_type num_elements)']]],
+  ['empty',['empty',['../classtask__queue.html#a124dd18ea98e42ae705f7835fd0c69cf',1,'task_queue']]],
+  ['encode',['encode',['../classdialog_1_1delta__encoded__array.html#aaab973ffb4fa2d62fb658e5dbcc0acad',1,'dialog::delta_encoded_array']]],
+  ['encode_5fdeltas',['encode_deltas',['../classdialog_1_1delta__encoded__array.html#a4ad7e0110c90c91684873f40c778cd6e',1,'dialog::delta_encoded_array']]],
+  ['encoding_5fsize',['encoding_size',['../classdialog_1_1delta__encoded__array.html#a5a7dd4499765ed12a030b25ca3452ea3',1,'dialog::delta_encoded_array']]],
+  ['enqueue',['enqueue',['../classtask__queue.html#ac9fce851e5f4eecd014ef0130f0db4bc',1,'task_queue']]],
+  ['ensure_5falloc',['ensure_alloc',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a86dd772a9b7beee2503a2349619a99ab',1,'dialog::monolog::monolog_exp2_base::ensure_alloc()'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#a6daa5a4785866597eecfcdae2e333d0e',1,'dialog::monolog::monolog_exp2_linear_base::ensure_alloc()']]]
 ];

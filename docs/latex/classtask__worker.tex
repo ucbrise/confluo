@@ -3,16 +3,45 @@
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classtask__worker_add80ef340c383360fe6ac99f048a7212}\label{classtask__worker_add80ef340c383360fe6ac99f048a7212}} 
-{\bfseries task\+\_\+worker} (\hyperlink{classtask__queue}{task\+\_\+queue} \&queue)
+\hyperlink{classtask__worker_add80ef340c383360fe6ac99f048a7212}{task\+\_\+worker} (\hyperlink{classtask__queue}{task\+\_\+queue} \&queue)
 \item 
-\mbox{\Hypertarget{classtask__worker_aa33aec83ef4e75f6a715176a31913d70}\label{classtask__worker_aa33aec83ef4e75f6a715176a31913d70}} 
-void {\bfseries start} ()
+\hyperlink{classtask__worker_ade29daf48fef6c87172df511b73fb4ff}{$\sim$task\+\_\+worker} ()
 \item 
-\mbox{\Hypertarget{classtask__worker_aaa4b11b564b47d366e3acbe0e8205595}\label{classtask__worker_aaa4b11b564b47d366e3acbe0e8205595}} 
-void {\bfseries stop} ()
+void \hyperlink{classtask__worker_aa33aec83ef4e75f6a715176a31913d70}{start} ()
+\item 
+void \hyperlink{classtask__worker_aaa4b11b564b47d366e3acbe0e8205595}{stop} ()
 \end{DoxyCompactItemize}
 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classtask__worker_add80ef340c383360fe6ac99f048a7212}\label{classtask__worker_add80ef340c383360fe6ac99f048a7212}} 
+\index{task\+\_\+worker@{task\+\_\+worker}!task\+\_\+worker@{task\+\_\+worker}}
+\index{task\+\_\+worker@{task\+\_\+worker}!task\+\_\+worker@{task\+\_\+worker}}
+\subsubsection{\texorpdfstring{task\+\_\+worker()}{task\_worker()}}
+{\footnotesize\ttfamily task\+\_\+worker\+::task\+\_\+worker (\begin{DoxyParamCaption}\item[{\hyperlink{classtask__queue}{task\+\_\+queue} \&}]{queue }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Default constructor that initalizes work to a queue of tasks to do \mbox{\Hypertarget{classtask__worker_ade29daf48fef6c87172df511b73fb4ff}\label{classtask__worker_ade29daf48fef6c87172df511b73fb4ff}} 
+\index{task\+\_\+worker@{task\+\_\+worker}!````~task\+\_\+worker@{$\sim$task\+\_\+worker}}
+\index{````~task\+\_\+worker@{$\sim$task\+\_\+worker}!task\+\_\+worker@{task\+\_\+worker}}
+\subsubsection{\texorpdfstring{$\sim$task\+\_\+worker()}{~task\_worker()}}
+{\footnotesize\ttfamily task\+\_\+worker\+::$\sim$task\+\_\+worker (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Default destructor that stops all the tasks on the queue 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classtask__worker_aa33aec83ef4e75f6a715176a31913d70}\label{classtask__worker_aa33aec83ef4e75f6a715176a31913d70}} 
+\index{task\+\_\+worker@{task\+\_\+worker}!start@{start}}
+\index{start@{start}!task\+\_\+worker@{task\+\_\+worker}}
+\subsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily void task\+\_\+worker\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Starts worker on a new thread and performs each task on the queue \mbox{\Hypertarget{classtask__worker_aaa4b11b564b47d366e3acbe0e8205595}\label{classtask__worker_aaa4b11b564b47d366e3acbe0e8205595}} 
+\index{task\+\_\+worker@{task\+\_\+worker}!stop@{stop}}
+\index{stop@{stop}!task\+\_\+worker@{task\+\_\+worker}}
+\subsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily void task\+\_\+worker\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Joins all of the workers and their work if possible 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 

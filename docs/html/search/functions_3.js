@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['empty',['empty',['../classtask__queue.html#a124dd18ea98e42ae705f7835fd0c69cf',1,'task_queue']]],
-  ['enqueue',['enqueue',['../classtask__queue.html#ac9fce851e5f4eecd014ef0130f0db4bc',1,'task_queue']]],
-  ['ensure_5falloc',['ensure_alloc',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#a86dd772a9b7beee2503a2349619a99ab',1,'dialog::monolog::monolog_exp2_base::ensure_alloc()'],['../classdialog_1_1monolog_1_1monolog__exp2__linear__base.html#a6daa5a4785866597eecfcdae2e333d0e',1,'dialog::monolog::monolog_exp2_linear_base::ensure_alloc()']]]
+  ['data',['data',['../classdialog_1_1bitmap.html#a0b900d1a8caeda35213c8891e092c61a',1,'dialog::bitmap']]],
+  ['delta_5fencoded_5farray',['delta_encoded_array',['../classdialog_1_1delta__encoded__array.html#a3b5f62d85c360a2ac4bc30db2b790d8d',1,'dialog::delta_encoded_array']]],
+  ['dequeue',['dequeue',['../classtask__queue.html#a8febb9f611ff31bc105027c7d90784a6',1,'task_queue']]],
+  ['deserialize',['deserialize',['../classdialog_1_1bitmap.html#a5c4c9a790b785bbc021d913a53cffe80',1,'dialog::bitmap::deserialize()'],['../classdialog_1_1bitmap__array__base.html#a51a91fced01d96475dc24e23da2d06e8',1,'dialog::bitmap_array_base::deserialize()'],['../classdialog_1_1unsized__bitmap__array.html#a4ae9d743033be4468f4c0be8dbaccbca',1,'dialog::unsized_bitmap_array::deserialize()'],['../classdialog_1_1delta__encoded__array.html#aced4bc1f11a264fe3263b89be0e55d33',1,'dialog::delta_encoded_array::deserialize()']]],
+  ['dialog_5fstore',['dialog_store',['../classdialog_1_1dialog__store.html#a88dd772873fbd8c51bb21baa7302ebee',1,'dialog::dialog_store']]],
+  ['disable_5findexing',['disable_indexing',['../classdialog_1_1column__t.html#ad9c14144d0ca7ae53f84f9c7fe222db9',1,'dialog::column_t']]]
 ];

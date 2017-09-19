@@ -1,0 +1,24 @@
+Describe architecture of Dialog (progression from Monolog to MultiLogs)
+-System consists of storage servers, each of which stores Atomic
+MultiLogs and a coordinator
+-Coordinator obtains snapshots of data that is distributed across multiple
+MultiLogs and uses the chain replication protocol to resolve failures
+across nodes
+-MultiLog has three components: writer pool, online module (single
+monitoring thread) and offline module (query pool serving requests),
+and archival module, which takes really old data and stores it more
+efficiently in an archive that is accessed less frequently
+-MultiLog also consists of MonoLogs (concurrent data structure) that enable
+operations such as atomic reads and writes, and queries such as filters
+and aggregates
+
+
+Describe underlying structure behind DataLog, IndexLog, and FilterLog
+
+How are atomic instructions like CompareAndSwap used in the design
+
+How does the system maintain consistency
+
+Describe how the replication system works
+
+How does readTail and writeTail work in execution

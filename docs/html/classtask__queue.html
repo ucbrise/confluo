@@ -75,8 +75,11 @@ typedef std::function&lt; void()&gt;&#160;</td><td class="memItemRight" valign="
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3f49e001092757da141a3067744f6af0"><td class="memItemLeft" align="right" valign="top"><a id="a3f49e001092757da141a3067744f6af0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>invalidate</b> (void)</td></tr>
+<tr class="memitem:ae7cb46be591296794478488fbde3799b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtask__queue.html#ae7cb46be591296794478488fbde3799b">task_queue</a> ()</td></tr>
+<tr class="separator:ae7cb46be591296794478488fbde3799b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01f60d69b15bc36bced03f00b9f3d443"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtask__queue.html#a01f60d69b15bc36bced03f00b9f3d443">~task_queue</a> ()</td></tr>
+<tr class="separator:a01f60d69b15bc36bced03f00b9f3d443"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f49e001092757da141a3067744f6af0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtask__queue.html#a3f49e001092757da141a3067744f6af0">invalidate</a> (void)</td></tr>
 <tr class="separator:a3f49e001092757da141a3067744f6af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8febb9f611ff31bc105027c7d90784a6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtask__queue.html#a8febb9f611ff31bc105027c7d90784a6">dequeue</a> (function_t &amp;out)</td></tr>
 <tr class="separator:a8febb9f611ff31bc105027c7d90784a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -90,6 +93,59 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>invalidate</b> (void)
 <tr class="memitem:a75e723aa9cc68a264d63b40b3ef3f280"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtask__queue.html#a75e723aa9cc68a264d63b40b3ef3f280">is_valid</a> () const</td></tr>
 <tr class="separator:a75e723aa9cc68a264d63b40b3ef3f280"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae7cb46be591296794478488fbde3799b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7cb46be591296794478488fbde3799b">&#9670;&nbsp;</a></span>task_queue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">task_queue::task_queue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default constructor that initializes to a valid task queue </p>
+
+</div>
+</div>
+<a id="a01f60d69b15bc36bced03f00b9f3d443"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01f60d69b15bc36bced03f00b9f3d443">&#9670;&nbsp;</a></span>~task_queue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">task_queue::~task_queue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default destructor that invalidates the task queue </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="aded81b6de1995651057c306166c8ae8b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aded81b6de1995651057c306166c8ae8b">&#9670;&nbsp;</a></span>clear()</h2>
@@ -140,7 +196,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>invalidate</b> (void)
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the first value in the queue. Will block until a value is available unless clear is called or the instance is destructed. Returns true if a value was successfully written to the out parameter, false otherwise. </p>
+<p>Get the first value in the queue. Will block until a value is available unless clear is called or the instance is destructed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">out</td><td>A void function that will be overriden with the front of the queue </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns true if a value was successfully written to the out parameter, false otherwise. </dd></dl>
 
 </div>
 </div>
@@ -166,7 +228,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>invalidate</b> (void)
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Check whether or not the queue is empty. </p>
+<p>Check whether or not the queue is empty. </p><dl class="section return"><dt>Returns</dt><dd>True if empty false otherwise </dd></dl>
 
 </div>
 </div>
@@ -205,7 +267,41 @@ template&lt;class F , class ... ARGS&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Push a new value onto the queue. </p>
+<p>Push a new value onto the queue. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">f</td><td>The future </td></tr>
+    <tr><td class="paramname">args</td><td>The arguments for the queue </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The future value </dd></dl>
+
+</div>
+</div>
+<a id="a3f49e001092757da141a3067744f6af0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f49e001092757da141a3067744f6af0">&#9670;&nbsp;</a></span>invalidate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void task_queue::invalidate </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Invalidates task queue by obtaining a lock </p>
 
 </div>
 </div>
@@ -231,7 +327,7 @@ template&lt;class F , class ... ARGS&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns whether or not this queue is valid. </p>
+<p>Checks whether or not this queue is valid. </p><dl class="section return"><dt>Returns</dt><dd>True if valid false otherwise </dd></dl>
 
 </div>
 </div>

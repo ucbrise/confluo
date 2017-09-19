@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['minterm_5fplan',['minterm_plan',['../classdialog_1_1minterm__plan.html#a547b1de0f11a8ac86b78d5f4ce705e40',1,'dialog::minterm_plan']]],
-  ['monolog_5fexp2_5fbase',['monolog_exp2_base',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#ac59fe74069159b44d64ed2395adb2fae',1,'dialog::monolog::monolog_exp2_base']]]
+  ['lookup',['lookup',['../classdialog_1_1monitor_1_1filter.html#a9e112bf3e11d7a02fdb5d49ed51a9827',1,'dialog::monitor::filter']]],
+  ['lookup_5frange',['lookup_range',['../classdialog_1_1monitor_1_1filter.html#a5523a17cb88d0f5bd6b78bb16c085632',1,'dialog::monitor::filter']]]
 ];

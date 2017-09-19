@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['op_5fto_5fstr',['op_to_str',['../classdialog_1_1relop__utils.html#aa2ece63f9eb4bc6e0af2aef09fcfc8e2',1,'dialog::relop_utils']]],
-  ['operator_5b_5d',['operator[]',['../classdialog_1_1monolog_1_1monolog__exp2__base.html#acb8a92ddaabae330d33cb2bd9e14b642',1,'dialog::monolog::monolog_exp2_base::operator[]()'],['../classdialog_1_1index_1_1indexlet.html#a879de6014445e5fdd8091a8f20ced31a',1,'dialog::index::indexlet::operator[]()']]]
+  ['name',['name',['../classdialog_1_1column__t.html#a2a5d9e2d2673082a96218bb3c5b335b2',1,'dialog::column_t']]],
+  ['num_5fbits',['num_bits',['../classdialog_1_1bitmap.html#a2066fd879c2e7c3d18ff590e9f1826b8',1,'dialog::bitmap']]],
+  ['num_5ftriggers',['num_triggers',['../classdialog_1_1monitor_1_1filter.html#aa84bc2df90155d5fd462dce52d86de5c',1,'dialog::monitor::filter']]]
 ];

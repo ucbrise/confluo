@@ -3,12 +3,52 @@
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classtask__pool_aa0a3c9689f5cb58670a5b4f523452a59}\label{classtask__pool_aa0a3c9689f5cb58670a5b4f523452a59}} 
-{\bfseries task\+\_\+pool} (size\+\_\+t num\+\_\+workers=1)
+\hyperlink{classtask__pool_aa0a3c9689f5cb58670a5b4f523452a59}{task\+\_\+pool} (size\+\_\+t num\+\_\+workers=1)
 \item 
-\mbox{\Hypertarget{classtask__pool_a1278806d5bf37f76983db19ec64712b5}\label{classtask__pool_a1278806d5bf37f76983db19ec64712b5}} 
-{\footnotesize template$<$class F , class ... A\+R\+GS$>$ }\\auto {\bfseries submit} (F \&\&f, A\+R\+GS \&\&... args) -\/$>$ std\+::future$<$ typename std\+::result\+\_\+of$<$ F(A\+R\+G\+S...)$>$\+::type $>$
+\hyperlink{classtask__pool_ae68e373cffd48b66f872120f7b65e74a}{$\sim$task\+\_\+pool} ()
+\item 
+{\footnotesize template$<$class F , class ... A\+R\+GS$>$ }\\auto \hyperlink{classtask__pool_a1278806d5bf37f76983db19ec64712b5}{submit} (F \&\&f, A\+R\+GS \&\&... args) -\/$>$ std\+::future$<$ typename std\+::result\+\_\+of$<$ F(A\+R\+G\+S...)$>$\+::type $>$
 \end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classtask__pool_aa0a3c9689f5cb58670a5b4f523452a59}\label{classtask__pool_aa0a3c9689f5cb58670a5b4f523452a59}} 
+\index{task\+\_\+pool@{task\+\_\+pool}!task\+\_\+pool@{task\+\_\+pool}}
+\index{task\+\_\+pool@{task\+\_\+pool}!task\+\_\+pool@{task\+\_\+pool}}
+\subsubsection{\texorpdfstring{task\+\_\+pool()}{task\_pool()}}
+{\footnotesize\ttfamily task\+\_\+pool\+::task\+\_\+pool (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{num\+\_\+workers = {\ttfamily 1} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Constructor for task pool that initializes task workers 
+\begin{DoxyParams}{Parameters}
+{\em num\+\_\+workers} & The number of task workers to start \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classtask__pool_ae68e373cffd48b66f872120f7b65e74a}\label{classtask__pool_ae68e373cffd48b66f872120f7b65e74a}} 
+\index{task\+\_\+pool@{task\+\_\+pool}!````~task\+\_\+pool@{$\sim$task\+\_\+pool}}
+\index{````~task\+\_\+pool@{$\sim$task\+\_\+pool}!task\+\_\+pool@{task\+\_\+pool}}
+\subsubsection{\texorpdfstring{$\sim$task\+\_\+pool()}{~task\_pool()}}
+{\footnotesize\ttfamily task\+\_\+pool\+::$\sim$task\+\_\+pool (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Default destructor that invalidates task queue and deletes all of the workers 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classtask__pool_a1278806d5bf37f76983db19ec64712b5}\label{classtask__pool_a1278806d5bf37f76983db19ec64712b5}} 
+\index{task\+\_\+pool@{task\+\_\+pool}!submit@{submit}}
+\index{submit@{submit}!task\+\_\+pool@{task\+\_\+pool}}
+\subsubsection{\texorpdfstring{submit()}{submit()}}
+{\footnotesize\ttfamily template$<$class F , class ... A\+R\+GS$>$ \\
+auto task\+\_\+pool\+::submit (\begin{DoxyParamCaption}\item[{F \&\&}]{f,  }\item[{A\+R\+GS \&\&...}]{args }\end{DoxyParamCaption}) -\/$>$ std\+::future$<$typename std\+::result\+\_\+of$<$F(A\+R\+G\+S...)$>$\+::type$>$ \hspace{0.3cm}{\ttfamily [inline]}}
+
+Submits work by enqueuing the future result 
+\begin{DoxyParams}{Parameters}
+{\em f} & The future \\
+\hline
+{\em args} & Arguments for the future \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The future result 
+\end{DoxyReturn}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

@@ -21,23 +21,22 @@ typedef uint8\+\_\+t {\bfseries width\+\_\+type}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}\label{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}} 
-virtual size\+\_\+type {\bfseries serialize} (std\+::ostream \&out)
+\hyperlink{classdialog_1_1delta__encoded__array_a3b5f62d85c360a2ac4bc30db2b790d8d}{delta\+\_\+encoded\+\_\+array} ()
 \item 
-\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}\label{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}} 
-virtual size\+\_\+type {\bfseries deserialize} (std\+::istream \&in)
+virtual \hyperlink{classdialog_1_1delta__encoded__array_acdf15405bdd9cebcbe8de93a797516cb}{$\sim$delta\+\_\+encoded\+\_\+array} ()
+\item 
+virtual size\+\_\+type \hyperlink{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}{serialize} (std\+::ostream \&out)
+\item 
+virtual size\+\_\+type \hyperlink{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}{deserialize} (std\+::istream \&in)
 \end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}\label{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}} 
-virtual width\+\_\+type {\bfseries encoding\+\_\+size} (T delta)=0
+virtual width\+\_\+type \hyperlink{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}{encoding\+\_\+size} (T delta)=0
 \item 
-\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}\label{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}} 
-virtual void {\bfseries encode\+\_\+deltas} (T $\ast$deltas, size\+\_\+type num\+\_\+deltas)=0
+virtual void \hyperlink{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}{encode\+\_\+deltas} (T $\ast$deltas, size\+\_\+type num\+\_\+deltas)=0
 \item 
-\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}\label{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}} 
-void {\bfseries encode} (T $\ast$elements, size\+\_\+type num\+\_\+elements)
+void \hyperlink{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}{encode} (T $\ast$elements, size\+\_\+type num\+\_\+elements)
 \end{DoxyCompactItemize}
 \subsection*{Protected Attributes}
 \begin{DoxyCompactItemize}
@@ -51,6 +50,99 @@ void {\bfseries encode} (T $\ast$elements, size\+\_\+type num\+\_\+elements)
 \mbox{\Hypertarget{classdialog_1_1delta__encoded__array_ab1b64295148db2954a85757aad6865cf}\label{classdialog_1_1delta__encoded__array_ab1b64295148db2954a85757aad6865cf}} 
 \hyperlink{classdialog_1_1bitmap}{bitmap} $\ast$ {\bfseries deltas\+\_\+}
 \end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a3b5f62d85c360a2ac4bc30db2b790d8d}\label{classdialog_1_1delta__encoded__array_a3b5f62d85c360a2ac4bc30db2b790d8d}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!delta\+\_\+encoded\+\_\+array@{delta\+\_\+encoded\+\_\+array}}
+\index{delta\+\_\+encoded\+\_\+array@{delta\+\_\+encoded\+\_\+array}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{delta\+\_\+encoded\+\_\+array()}{delta\_encoded\_array()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+\hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::\hyperlink{classdialog_1_1delta__encoded__array}{delta\+\_\+encoded\+\_\+array} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Default constructor that initializes everything to default values \mbox{\Hypertarget{classdialog_1_1delta__encoded__array_acdf15405bdd9cebcbe8de93a797516cb}\label{classdialog_1_1delta__encoded__array_acdf15405bdd9cebcbe8de93a797516cb}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!````~delta\+\_\+encoded\+\_\+array@{$\sim$delta\+\_\+encoded\+\_\+array}}
+\index{````~delta\+\_\+encoded\+\_\+array@{$\sim$delta\+\_\+encoded\+\_\+array}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{$\sim$delta\+\_\+encoded\+\_\+array()}{~delta\_encoded\_array()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+virtual \hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::$\sim$\hyperlink{classdialog_1_1delta__encoded__array}{delta\+\_\+encoded\+\_\+array} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+Default destructor that deletes all of the samples, offsets, and deltas 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}\label{classdialog_1_1delta__encoded__array_aced4bc1f11a264fe3263b89be0e55d33}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!deserialize@{deserialize}}
+\index{deserialize@{deserialize}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{deserialize()}{deserialize()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+virtual size\+\_\+type \hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::deserialize (\begin{DoxyParamCaption}\item[{std\+::istream \&}]{in }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+Deserializes input stream to an array 
+\begin{DoxyParams}{Parameters}
+{\em in} & The input stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The size of the array from the input stream 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}\label{classdialog_1_1delta__encoded__array_aaab973ffb4fa2d62fb658e5dbcc0acad}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!encode@{encode}}
+\index{encode@{encode}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{encode()}{encode()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+void \hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::encode (\begin{DoxyParamCaption}\item[{T $\ast$}]{elements,  }\item[{size\+\_\+type}]{num\+\_\+elements }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+Encode the delta encoded array 
+\begin{DoxyParams}{Parameters}
+{\em elements} & The elements of the array \\
+\hline
+{\em num\+\_\+elements} & The number of elements \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}\label{classdialog_1_1delta__encoded__array_a4ad7e0110c90c91684873f40c778cd6e}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!encode\+\_\+deltas@{encode\+\_\+deltas}}
+\index{encode\+\_\+deltas@{encode\+\_\+deltas}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{encode\+\_\+deltas()}{encode\_deltas()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+virtual void \hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::encode\+\_\+deltas (\begin{DoxyParamCaption}\item[{T $\ast$}]{deltas,  }\item[{size\+\_\+type}]{num\+\_\+deltas }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}
+
+Encode the delta values 
+\begin{DoxyParams}{Parameters}
+{\em deltas} & The delta values \\
+\hline
+{\em num\+\_\+deltas} & The number of deltas \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}\label{classdialog_1_1delta__encoded__array_a5a7dd4499765ed12a030b25ca3452ea3}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!encoding\+\_\+size@{encoding\+\_\+size}}
+\index{encoding\+\_\+size@{encoding\+\_\+size}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{encoding\+\_\+size()}{encoding\_size()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+virtual width\+\_\+type \hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::encoding\+\_\+size (\begin{DoxyParamCaption}\item[{T}]{delta }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}
+
+Get the encoding size for an delta value 
+\begin{DoxyParams}{Parameters}
+{\em delta} & The delta value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The width type of the delta 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}\label{classdialog_1_1delta__encoded__array_a533eeb8833bb554513c86eb7f1ce635f}} 
+\index{dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}!serialize@{serialize}}
+\index{serialize@{serialize}!dialog\+::delta\+\_\+encoded\+\_\+array@{dialog\+::delta\+\_\+encoded\+\_\+array}}
+\subsubsection{\texorpdfstring{serialize()}{serialize()}}
+{\footnotesize\ttfamily template$<$typename T, uint32\+\_\+t sampling\+\_\+rate = 128$>$ \\
+virtual size\+\_\+type \hyperlink{classdialog_1_1delta__encoded__array}{dialog\+::delta\+\_\+encoded\+\_\+array}$<$ T, sampling\+\_\+rate $>$\+::serialize (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{out }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+Serializes array to output stream 
+\begin{DoxyParams}{Parameters}
+{\em out} & The output stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The size of the data in the output stream 
+\end{DoxyReturn}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

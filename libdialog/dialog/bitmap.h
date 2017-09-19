@@ -21,16 +21,28 @@ class bitmap {
   typedef uint8_t width_type;
 
   // Constructors and Destructors
+  /**
+   * Default constructor initializes the data and size of the bitmap to
+   * default values
+   */
   bitmap() {
     data_ = NULL;
     size_ = 0;
   }
 
+  /**
+   * Constructor that initializes the bitmap
+   * @param num_bits Number of bits in the bitmap
+   * @param size The size of the bitmap
+   */
   bitmap(size_type num_bits) {
     data_ = new data_type[BITS2BLOCKS(num_bits)]();
     size_ = num_bits;
   }
 
+  /**
+   * Default destructor that deletes the bitmap data
+   */
   virtual ~bitmap() {
     if (data_ != NULL) {
       delete[] data_;
@@ -39,32 +51,62 @@ class bitmap {
   }
 
   // Getters
+  /**
+   * Gets the data
+   * @return The data
+   */
   data_type* data() {
     return data_;
   }
 
+  /**
+   * Gets the number of bits
+   * @return The size of the bitmap
+   */
   size_type num_bits() {
     return size_;
   }
 
   // Bit operations
+  /**
+   * Clears all of the data in the bitmap, by setting all values to 0
+   */
   void clear_all() {
     memset((void *) data_, 0, BITS2BLOCKS(size_) * sizeof(uint64_t));
   }
 
+  /**
+   * Sets bit at specified index
+   * @param i The index
+   */
   void set_bit(pos_type i) {
     SETBITVAL(data_, i);
   }
 
+  /**
+   * Clears the bit at the specified index
+   * @param i The index
+   */
   void unset_bit(pos_type i) {
     CLRBITVAL(data_, i);
   }
 
+  /**
+   * Gets the bit at the specified index
+   * @param i The index
+   * @return The bit value at the index
+   */
   bool get_bit(pos_type i) const {
     return GETBITVAL(data_, i);
   }
 
   // Integer operations
+  /**
+   * Sets the value at a specific position
+   * @param pos The position
+   * @param val The value
+   * @param width_type The type of the block width
+   */
   template<typename T>
   typename std::enable_if<std::is_arithmetic<T>::value>::type set_val_pos(
       pos_type pos, T val, width_type bits) {
@@ -85,6 +127,12 @@ class bitmap {
     }
   }
 
+  /**
+   * Gets the value at the position
+   * @param pos The position
+   * @param width_type The type of the block width
+   * @return The data at the position
+   */
   template<typename T>
   typename std::enable_if<std::is_arithmetic<T>::value, T>::type get_val_pos(
       pos_type pos, width_type bits) const {
@@ -102,6 +150,11 @@ class bitmap {
   }
 
   // Serialization/De-serialization
+  /**
+   * Serializes bitmap to an output stream
+   * @param out The output stream where the bitmap is serialized
+   * @return The size of the data in the stream
+   */
   virtual size_type serialize(std::ostream& out) {
     size_t out_size = 0;
 
@@ -115,6 +168,11 @@ class bitmap {
     return out_size;
   }
 
+  /**
+   * Deserializes bitmap from an input stream
+   * @param in The input stream where the bitmap is read from
+   * @return The size of the data from the stream
+   */
   virtual size_type deserialize(std::istream& in) {
     size_t in_size = 0;
 

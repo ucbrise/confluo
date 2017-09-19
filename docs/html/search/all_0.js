@@ -11,5 +11,6 @@ var searchData=
   ['aggregator',['aggregator',['../structdialog_1_1aggregator.html',1,'dialog']]],
   ['alert',['alert',['../structdialog_1_1monitor_1_1alert.html',1,'dialog::monitor']]],
   ['alert_5findex',['alert_index',['../classdialog_1_1monitor_1_1alert__index.html',1,'dialog::monitor']]],
-  ['allocate',['allocate',['../structdialog_1_1storage_1_1in__memory.html#a0cf298a53915ebf358d46e864f54ad78',1,'dialog::storage::in_memory::allocate()'],['../structdialog_1_1storage_1_1durable__relaxed.html#a1067618bb9a7eae15a84642affcfcdd1',1,'dialog::storage::durable_relaxed::allocate()'],['../structdialog_1_1storage_1_1durable.html#ae22bc38ef79ba261079d36af562200fb',1,'dialog::storage::durable::allocate()']]]
+  ['allocate',['allocate',['../structdialog_1_1storage_1_1in__memory.html#a0cf298a53915ebf358d46e864f54ad78',1,'dialog::storage::in_memory::allocate()'],['../structdialog_1_1storage_1_1durable__relaxed.html#a1067618bb9a7eae15a84642affcfcdd1',1,'dialog::storage::durable_relaxed::allocate()'],['../structdialog_1_1storage_1_1durable.html#ae22bc38ef79ba261079d36af562200fb',1,'dialog::storage::durable::allocate()']]],
+  ['apply',['apply',['../classdialog_1_1column__t.html#a73c2aee9091311707673a244d05cc99e',1,'dialog::column_t']]]
 ];
