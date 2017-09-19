@@ -13,7 +13,7 @@ namespace monitor {
 
 class alert_index {
  public:
-  typedef monolog::monolog_exp2_linear<alert> alert_log;
+  typedef monolog::monolog_exp2<alert> alert_log;
   typedef index::radix_tree<alert_log> idx_t;
   typedef idx_t::rt_result alert_list;
 

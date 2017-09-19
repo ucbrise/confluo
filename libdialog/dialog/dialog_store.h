@@ -89,7 +89,7 @@ class dialog_store {
   task_pool mgmt_pool_;
 
   // Tables
-  monolog::monolog_exp2_linear<dialog_table*> tables_;
+  monolog::monolog_exp2<dialog_table*> tables_;
   string_map<size_t> table_map_;
 };
 
