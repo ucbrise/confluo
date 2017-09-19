@@ -2,53 +2,70 @@
 #define DIALOG_DIALOG_MEMPOOL_H_
 
 #include <typeinfo>
-#include "aggregated_reflog.h"
 #include "atomic.h"
 #include "configuration_params.h"
 #include "mempool_stat.h"
 
 namespace dialog {
-namespace mempool {
 
-template<typename T, size_t ARRAY_LEN>
+template<typename T, size_t BLOCK_SIZE>
 class mempool {
 
  public:
-  mempool(mempool_stat* stat) :
-    block_size_(ARRAY_LEN * sizeof(T)),
-    stat_(stat)
+  mempool(bool prnt = false) :
+    array_size_(BLOCK_SIZE / sizeof(T)),
+    type_is_pointer_(std::is_pointer<T>::value),
+    max_memory_(configuration_params::MAX_MEMORY)
     {
   }
 
   T* alloc() {
-    if (stat_->get() >= MAX_MEMORY) {
-      THROW(max_memory_exceeded_exception, "Max memory reached!");
+    if (STAT.get() >= max_memory_) {
+      THROW(mempool_exception, "Max memory reached!");
     }
-    char* ptr = new char[block_size_];
-    T* tptr = new(ptr) T;
-    stat_->increment(block_size_);
-    return tptr;
+    int64_t b = utils::time_utils::cur_ns();
+    T* ptr = new T[array_size_]();
+    int64_t c = utils::time_utils::cur_ns();
+    STAT.increment(BLOCK_SIZE);
+    return ptr;
+  }
+
+  template<typename ... ARGS>
+  T* alloc(ARGS&& ... args) {
+    if (STAT.get() >= max_memory_) {
+      THROW(mempool_exception, "Max memory reached!");
+    }
+    T* ptr = new T[array_size_];
+    for (int i = 0; i < array_size_; i++) {
+      new (&ptr[i]) T(std::forward<ARGS>(args)...);
+    }
+    STAT.increment(BLOCK_SIZE);
+    return ptr;
   }
 
   void dealloc(T* ptr) {
-    ptr->~T();
+//    TODO: don't call destructor for primitives
+//    (the below attempt still doesn't compile)
+//    if (type_is_pointer_) {
+//      for (int i = 0; i < array_size_; i++) {
+//        ptr[i]->~T();
+//      }
+//    }
     delete[] ptr;
-    stat_->decrement(block_size_);
+    STAT.decrement(BLOCK_SIZE);
   }
 
  private:
-  static const size_t MAX_MEMORY;
-  const size_t block_size_;
-  mempool_stat* stat_;
+  static mempool_stat STAT;
+  const int array_size_;
+  const bool type_is_pointer_;
+  const size_t max_memory_;
 
 };
 
 template<typename T, size_t BLOCK_SIZE>
-const size_t mempool<T, BLOCK_SIZE>::MAX_MEMORY = 1e6; // configuration_params::MAX_MEMORY <-- doesn't work;
+mempool_stat mempool<T, BLOCK_SIZE>::STAT;
 
-static mempool_stat* STAT = new mempool_stat();
-
-}
 }
 
 #endif /* DIALOG_DIALOG_MEMPOOL_H_ */
