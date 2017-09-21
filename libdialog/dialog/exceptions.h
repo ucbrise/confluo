@@ -33,6 +33,7 @@ DEFINE_EXCEPTION(invalid_access_exception)
 DEFINE_EXCEPTION(invalid_cast_exception)
 DEFINE_EXCEPTION(invalid_operation_exception)
 DEFINE_EXCEPTION(illegal_state_exception)
+DEFINE_EXCEPTION(mempool_exception)
 DEFINE_EXCEPTION(unsupported_exception)
 DEFINE_EXCEPTION(management_exception)
 

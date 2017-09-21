@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "atomic.h"
+#include "mempool.h"
 #include "bit_utils.h"
 
 using namespace utils;
@@ -23,7 +24,6 @@ namespace monolog {
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
-
   typedef atomic::type<T*> __atomic_bucket_ref;
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
@@ -33,8 +33,12 @@ class monolog_exp2_linear_base {
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
     }
+
     __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
-    atomic::init(&first_container[0], new T[BUCKET_SIZE]());
+    T* first_bucket = BUCKET_POOL.alloc(BUCKET_SIZE);
+    memset(first_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
+
+    atomic::init(&first_container[0], first_bucket);
     atomic::init(&bucket_containers_[0], first_container);
   }
 
@@ -328,11 +332,12 @@ class monolog_exp2_linear_base {
    * @return allocated bucket
    */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
-    T* new_bucket = new T[BUCKET_SIZE]();
+    T* new_bucket = BUCKET_POOL.alloc(BUCKET_SIZE);
+    memset(new_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
     T* expected = nullptr;
 
     if (!atomic::strong::cas(&container[bucket_idx], &expected, new_bucket)) {
-      delete[] new_bucket;
+      BUCKET_POOL.dealloc(new_bucket, BUCKET_SIZE);
       return expected;
     }
     return new_bucket;
@@ -344,9 +349,14 @@ class monolog_exp2_linear_base {
   const size_t fcs_ = FCB * BUCKET_SIZE;
   const size_t fcs_hibit_;
 
+  static mempool<T> BUCKET_POOL;
+
   // Stores the pointers to the bucket containers for MonoLog.
   std::array<__atomic_bucket_container_ref, NCONTAINERS> bucket_containers_;
 };
+
+template<typename T, size_t NCONTAINERS, size_t BUCKET_SIZE>
+mempool<T> monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>::BUCKET_POOL;
 
 /**
  * Relaxed (i.e., not linearizable) implementation for the MonoLog.

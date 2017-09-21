@@ -14,6 +14,7 @@
 #include <sys/mman.h>
 #include <errno.h>
 
+#include "data_log_pool.h"
 #include "file_utils.h"
 #include "mmap_utils.h"
 #include "assertions.h"
@@ -46,7 +47,7 @@ struct storage_mode {
 };
 
 /**
- * In memory storage, uses mmap to allocate data that is not backed by a file.
+ * In memory storage, uses malloc or mempool to allocate data that is not backed by a file.
  */
 struct in_memory {
   /**
@@ -56,6 +57,9 @@ struct in_memory {
    * @param size Size of requested memory.
    */
   inline static void* allocate(const std::string& path, size_t size) {
+    if (size == data_log_constants::BLOCK_SIZE) {
+      return static_cast<void*>(DATA_LOG_BLOCK_POOL.alloc(size / sizeof(uint8_t)));
+    }
     return malloc(size);
   }
 
@@ -66,7 +70,11 @@ struct in_memory {
    * @param size Size of allocated memory.
    */
   inline static void free_mem(void* ptr, size_t size) {
-    free(ptr);
+    if (size == data_log_constants::BLOCK_SIZE) {
+      DATA_LOG_BLOCK_POOL.dealloc(static_cast<uint8_t*>(ptr), size / sizeof(uint8_t));
+    } else {
+      free(ptr);
+    }
   }
 
   /**
