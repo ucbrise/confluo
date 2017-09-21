@@ -6,9 +6,7 @@
 
 namespace dialog {
 
-  static constexpr size_t DATA_LOG_BLOCK_SIZE =
-      (data_log_constants::BLOCK_SIZE + data_log_constants::BUFFER_SIZE) * sizeof(uint8_t);
-  static mempool<uint8_t, DATA_LOG_BLOCK_SIZE> DATA_LOG_BLOCK_POOL;
+static mempool<uint8_t> DATA_LOG_BLOCK_POOL;
 
 }
 

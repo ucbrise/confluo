@@ -8,27 +8,21 @@
 
 namespace dialog {
 
-template<typename T, size_t BLOCK_SIZE>
+template<typename T>
 class mempool {
 
  public:
-  mempool() :
-    max_memory_(configuration_params::MAX_MEMORY())
-    {
-  }
-
   /**
    * Allocate memory for array_size instances of T
    * @param array_size size of array to allocate
    * @return pointer to allocated memory
    */
-  T* alloc(int array_size = BLOCK_ARRAY_SIZE) {
-    if (STAT.get() >= max_memory_) {
+  T* alloc(size_t array_size = 1) {
+    if (STAT.get() >= configuration_params::MAX_MEMORY) {
       THROW(mempool_exception, "Max memory reached!");
     }
-    size_t num_blocks = 1 + (array_size - 1) / BLOCK_ARRAY_SIZE;
-    T* ptr = new T[num_blocks * BLOCK_ARRAY_SIZE];
-    STAT.increment(num_blocks * BLOCK_SIZE);
+    T* ptr = new T[array_size];
+    STAT.increment(array_size * sizeof(T));
     return ptr;
   }
 
@@ -37,25 +31,18 @@ class mempool {
    * @param ptr pointer to allocated memory
    * @param array_size size of allocated array
    */
-  void dealloc(T* ptr, int array_size = BLOCK_ARRAY_SIZE) {
+  void dealloc(T* ptr, size_t array_size = 1) {
     delete[] ptr;
-    size_t num_blocks = 1 + (array_size - 1) / BLOCK_ARRAY_SIZE;
-    STAT.decrement(num_blocks * BLOCK_SIZE);
+    STAT.decrement(array_size * sizeof(T));
   }
 
  private:
   static mempool_stat STAT;
-  static const int BLOCK_ARRAY_SIZE;
-  const size_t max_memory_;
 
 };
 
-
-template<typename T, size_t BLOCK_SIZE>
-const int mempool<T, BLOCK_SIZE>::BLOCK_ARRAY_SIZE = BLOCK_SIZE * sizeof(T);
-
-template<typename T, size_t BLOCK_SIZE>
-mempool_stat mempool<T, BLOCK_SIZE>::STAT;
+template<typename T>
+mempool_stat mempool<T>::STAT;
 
 }
 

@@ -35,7 +35,7 @@ class monolog_exp2_linear_base {
     }
 
     __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
-    T* first_bucket = BUCKET_POOL.alloc();
+    T* first_bucket = BUCKET_POOL.alloc(BUCKET_SIZE);
     memset(first_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
 
     atomic::init(&first_container[0], first_bucket);
@@ -332,12 +332,12 @@ class monolog_exp2_linear_base {
    * @return allocated bucket
    */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
-    T* new_bucket = BUCKET_POOL.alloc();
+    T* new_bucket = BUCKET_POOL.alloc(BUCKET_SIZE);
     memset(new_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
     T* expected = nullptr;
 
     if (!atomic::strong::cas(&container[bucket_idx], &expected, new_bucket)) {
-      BUCKET_POOL.dealloc(new_bucket);
+      BUCKET_POOL.dealloc(new_bucket, BUCKET_SIZE);
       return expected;
     }
     return new_bucket;
@@ -349,14 +349,14 @@ class monolog_exp2_linear_base {
   const size_t fcs_ = FCB * BUCKET_SIZE;
   const size_t fcs_hibit_;
 
-  static mempool<T, BUCKET_SIZE * sizeof(T)> BUCKET_POOL;
+  static mempool<T> BUCKET_POOL;
 
   // Stores the pointers to the bucket containers for MonoLog.
   std::array<__atomic_bucket_container_ref, NCONTAINERS> bucket_containers_;
 };
 
 template<typename T, size_t NCONTAINERS, size_t BUCKET_SIZE>
-mempool<T, BUCKET_SIZE * sizeof(T)> monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>::BUCKET_POOL;
+mempool<T> monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>::BUCKET_POOL;
 
 /**
  * Relaxed (i.e., not linearizable) implementation for the MonoLog.

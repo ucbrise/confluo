@@ -57,8 +57,8 @@ struct in_memory {
    * @param size Size of requested memory.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    if (size == DATA_LOG_BLOCK_SIZE) {
-      return static_cast<void*>(DATA_LOG_BLOCK_POOL.alloc());
+    if (size == data_log_constants::BLOCK_SIZE) {
+      return static_cast<void*>(DATA_LOG_BLOCK_POOL.alloc(size / sizeof(uint8_t)));
     }
     return malloc(size);
   }
@@ -70,7 +70,11 @@ struct in_memory {
    * @param size Size of allocated memory.
    */
   inline static void free_mem(void* ptr, size_t size) {
-    free(ptr);
+    if (size == data_log_constants::BLOCK_SIZE) {
+      DATA_LOG_BLOCK_POOL.dealloc(static_cast<uint8_t*>(ptr), size / sizeof(uint8_t));
+    } else {
+      free(ptr);
+    }
   }
 
   /**
