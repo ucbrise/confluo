@@ -6,6 +6,10 @@
 
 namespace dialog {
 
+utils::configuration_map dialog_conf(
+    utils::config_utils::read_from_env(
+        "DIALOG_CONF", "/etc/conf/dialog.conf:./conf/dialog.conf"));
+
 class configuration_params {
  public:
   // Memory configuration parameters
@@ -27,12 +31,7 @@ class configuration_params {
   static uint64_t MONITOR_WINDOW_MS;
   static uint64_t MONITOR_PERIODICITY_MS;
 
-  static utils::configuration_map dialog_conf;
 };
-
-utils::configuration_map configuration_params::dialog_conf(
-    utils::config_utils::read_from_env(
-        "DIALOG_CONF", "/etc/conf/dialog.conf:./conf/dialog.conf"));
 
 int configuration_params::MAX_CONCURRENCY = dialog_conf.get<int>(
     "max_concurrency", constants::HARDWARE_CONCURRENCY);

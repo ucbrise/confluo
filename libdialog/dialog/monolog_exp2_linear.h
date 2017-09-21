@@ -33,8 +33,10 @@ class monolog_exp2_linear_base {
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
     }
+
     __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
     T* first_bucket = BUCKET_POOL.alloc();
+    memset(first_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
 
     atomic::init(&first_container[0], first_bucket);
     atomic::init(&bucket_containers_[0], first_container);
@@ -337,6 +339,7 @@ class monolog_exp2_linear_base {
       BUCKET_POOL.dealloc(new_bucket);
       return expected;
     }
+    memset(new_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
     return new_bucket;
   }
 
