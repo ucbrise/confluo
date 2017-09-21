@@ -333,13 +333,13 @@ class monolog_exp2_linear_base {
    */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
     T* new_bucket = BUCKET_POOL.alloc();
+    memset(new_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
     T* expected = nullptr;
 
     if (!atomic::strong::cas(&container[bucket_idx], &expected, new_bucket)) {
       BUCKET_POOL.dealloc(new_bucket);
       return expected;
     }
-    memset(new_bucket, 0xFF, BUCKET_SIZE * sizeof(T));
     return new_bucket;
   }
 

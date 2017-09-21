@@ -15,7 +15,7 @@ class MempoolTest : public testing::Test {
 
 };
 
-TEST_F(MempoolTest, AllocTest) {
+TEST_F(MempoolTest, DefaultAllocDeallocTest) {
   mempool<uint64_t, BLOCK_SIZE> pool;
   uint64_t* ptr = pool.alloc();
 
@@ -28,7 +28,22 @@ TEST_F(MempoolTest, AllocTest) {
   }
 
   pool.dealloc(ptr);
+}
 
+TEST_F(MempoolTest, AllocDeallocMultipleBlocksTest) {
+  mempool<uint64_t, BLOCK_SIZE> pool;
+  size_t num_blocks = 4;
+  uint64_t* ptr = pool.alloc(num_blocks * ARRAY_SIZE);
+
+  for (size_t i = 0; i < num_blocks * ARRAY_SIZE; i++) {
+    ptr[i] = i;
+  }
+
+  for (size_t i = 0; i < num_blocks * ARRAY_SIZE; i++) {
+    ASSERT_EQ(ptr[i], i);
+  }
+
+  pool.dealloc(ptr);
 }
 
 #endif /* TEST_MEMPOOL_TEST_H_ */
