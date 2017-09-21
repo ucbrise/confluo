@@ -1,3 +1,7 @@
+/** @file aggregate.h
+ * A brief description
+ */
+
 #ifndef DIALOG_AGGREGATE_H_
 #define DIALOG_AGGREGATE_H_
 
@@ -53,7 +57,9 @@ class aggregate_list {
   /**
    * Constructor for aggregate
    *
+   * @param type The type of Aggregate
    * @param agg Aggregate function pointer.
+   * 
    */
   aggregate_list(data_type type, aggregator agg)
       : head_(nullptr),
@@ -64,6 +70,7 @@ class aggregate_list {
   /**
    * Constructor for aggregate
    *
+   * @param type The type of Aggregate
    * @param id Aggregate ID.
    */
   aggregate_list(data_type type, aggregate_id id)
@@ -76,22 +83,36 @@ class aggregate_list {
    * Default destructor.
    */
   ~aggregate_list() = default;
-
+    
+  /**
+   * Initializes the type and aggregate of the list
+   * @param type The type of the aggregate
+   * @param agg Aggregate function pointer
+   */
   void init(data_type type, aggregator agg) {
     type_ = type;
     agg_ = agg;
   }
-
+    
+  /**
+   * Initializes the type of Aggregate and the id
+   * @param type The type of the aggregate
+   * @param id The Aggregate id
+   */
   void init(data_type type, aggregate_id id) {
     type_ = type;
     agg_ = aggregators[id];
   }
-
+    
+  /**
+   * Gets the 0th aggregate given the type of the aggregate
+   * @return The 0th aggregate
+   */
   numeric zero() const {
     return agg_.zero(type_);
   }
 
-  /**
+  /** 
    * Get the aggregate value corresponding to the given version.
    *
    * @param version The version of the data store.

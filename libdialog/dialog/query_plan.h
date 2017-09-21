@@ -7,6 +7,10 @@ namespace dialog {
 
 class minterm_plan {
  public:
+  /**
+   * Constructor for the minterm
+   * @param ifilter The index filter for the 
+   */
   minterm_plan(const index_filter& ifilter, const compiled_minterm& dfilter)
       : idxf_(ifilter) {
     dataf_.insert(dfilter);

@@ -11,15 +11,27 @@
 
 class periodic_task {
  public:
+  /**
+   * Constructor for periodic name that initializes the task
+   * @param name The name of the task
+   */
   periodic_task(const std::string& name)
       : name_(name),
         enabled_(false) {
   }
 
+  /**
+   * Default destructor that stops the task
+   */
   ~periodic_task() {
     stop();
   }
 
+  /**
+   * Stops the periodic task
+   * @return True if the task was successfully stopped, false if the
+   * task was already stopped
+   */
   bool stop() {
     LOG_TRACE<< "Attempting to stop periodic_task...";
     bool expected = true;
@@ -33,6 +45,12 @@ class periodic_task {
     return false;
   }
 
+  /**
+   * Starts the periodic task to run
+   * @param task The function that represents the work to do
+   * @param interval_ms The time in between executions of the task
+   * @return True if the task was executed successfully, false otherwise
+   */
   bool start(std::function<void(void)> task, uint64_t interval_ms = 1) {
     bool expected = false;
     if (atomic::strong::cas(&enabled_, &expected, true)) {
