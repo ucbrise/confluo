@@ -27,16 +27,15 @@ class monolog_exp2_linear_base {
   typedef atomic::type<T*> __atomic_bucket_ref;
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
-  monolog_exp2_linear_base(mempool<T, BUCKET_SIZE * sizeof(T)>& pool)
-      : fcs_hibit_(bit_utils::highest_bit(fcs_)),
-        bucket_pool_(pool) {
+  monolog_exp2_linear_base()
+      : fcs_hibit_(bit_utils::highest_bit(fcs_)) {
     __atomic_bucket_ref* null_ptr = nullptr;
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
     }
     __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
+    T* first_bucket = BUCKET_POOL.alloc();
 
-    T* first_bucket = bucket_pool_.alloc();
     atomic::init(&first_container[0], first_bucket);
     atomic::init(&bucket_containers_[0], first_container);
   }
@@ -331,11 +330,11 @@ class monolog_exp2_linear_base {
    * @return allocated bucket
    */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
-    T* new_bucket = bucket_pool_.alloc();
+    T* new_bucket = BUCKET_POOL.alloc();
     T* expected = nullptr;
 
     if (!atomic::strong::cas(&container[bucket_idx], &expected, new_bucket)) {
-      bucket_pool_.dealloc(new_bucket);
+      BUCKET_POOL.dealloc(new_bucket);
       return expected;
     }
     return new_bucket;
@@ -344,13 +343,19 @@ class monolog_exp2_linear_base {
  private:
   static const size_t FCB = 16;
   static const size_t FCB_HIBIT = 4;
+
+  constexpr size_t alloc_block_size_ = BUCKET_SIZE * sizeof(T);
   const size_t fcs_ = FCB * BUCKET_SIZE;
   const size_t fcs_hibit_;
-  mempool<T, BUCKET_SIZE * sizeof(T)> bucket_pool_;
+
+  static mempool<T, alloc_block_size_> BUCKET_POOL;
 
   // Stores the pointers to the bucket containers for MonoLog.
   std::array<__atomic_bucket_container_ref, NCONTAINERS> bucket_containers_;
 };
+
+template<typename T, size_t NCONTAINERS, size_t BUCKET_SIZE>
+mempool<T, BUCKET_SIZE * sizeof(T)> monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>::BUCKET_POOL;
 
 /**
  * Relaxed (i.e., not linearizable) implementation for the MonoLog.
@@ -371,9 +376,8 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> iterator;
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
 
-  monolog_exp2_linear(mempool<T, BUCKET_SIZE * sizeof(T)>& pool)
-      : monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>(pool) {
-    tail_ = 0;
+  monolog_exp2_linear()
+      : tail_(0) {
   }
 
   size_t reserve(size_t count) {

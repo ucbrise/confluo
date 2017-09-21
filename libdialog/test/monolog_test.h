@@ -4,7 +4,6 @@
 #include "gtest/gtest.h"
 
 #include <thread>
-#include "mempool.h"
 #include "monolog.h"
 
 using namespace ::dialog::monolog;
@@ -69,17 +68,15 @@ TEST_F(MonoLogTest, MonoLogExp2Test) {
 }
 
 TEST_F(MonoLogTest, MonoLogExp2LinearBaseBaseTest) {
-  mempool<uint64_t, 1024 * sizeof(uint64_t)> pool;
-  monolog_exp2_linear_base<uint64_t> array(pool);
+  monolog_exp2_linear_base<uint64_t> array;
   monolog_test(array);
 }
 
 TEST_F(MonoLogTest, MonoLogExp2LinearTest) {
-  mempool<uint64_t, 1024 * sizeof(uint64_t)> pool;
-  monolog_exp2_linear<uint64_t> array(pool);
+  monolog_exp2_linear<uint64_t> array;
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_exp2_linear<uint64_t> arr(pool);
+    monolog_exp2_linear<uint64_t> arr;
     monolog_test_mt(arr, num_threads);
   }
 }
