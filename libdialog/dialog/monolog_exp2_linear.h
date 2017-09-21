@@ -343,12 +343,10 @@ class monolog_exp2_linear_base {
  private:
   static const size_t FCB = 16;
   static const size_t FCB_HIBIT = 4;
-
-  constexpr size_t alloc_block_size_ = BUCKET_SIZE * sizeof(T);
   const size_t fcs_ = FCB * BUCKET_SIZE;
   const size_t fcs_hibit_;
 
-  static mempool<T, alloc_block_size_> BUCKET_POOL;
+  static mempool<T, BUCKET_SIZE * sizeof(T)> BUCKET_POOL;
 
   // Stores the pointers to the bucket containers for MonoLog.
   std::array<__atomic_bucket_container_ref, NCONTAINERS> bucket_containers_;

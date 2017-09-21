@@ -9,7 +9,10 @@ namespace dialog {
 class configuration_params {
  public:
   // Memory configuration parameters
-  static size_t MAX_MEMORY;
+  static size_t MAX_MEMORY() {
+    static size_t max_memory = dialog_conf.get<size_t>("max_memory", constants::DEFAULT_MAX_MEMORY);
+    return max_memory;
+  }
 
   // Thread configuration parameters
   static int MAX_CONCURRENCY;
@@ -23,14 +26,14 @@ class configuration_params {
   // Monitor configuration parameters
   static uint64_t MONITOR_WINDOW_MS;
   static uint64_t MONITOR_PERIODICITY_MS;
+
+  static utils::configuration_map dialog_conf;
 };
 
-static utils::configuration_map dialog_conf(
+utils::configuration_map configuration_params::dialog_conf(
     utils::config_utils::read_from_env(
         "DIALOG_CONF", "/etc/conf/dialog.conf:./conf/dialog.conf"));
 
-size_t configuration_params::MAX_MEMORY = dialog_conf.get<size_t>(
-    "max_memory", constants::DEFAULT_MAX_MEMORY);
 int configuration_params::MAX_CONCURRENCY = dialog_conf.get<int>(
     "max_concurrency", constants::HARDWARE_CONCURRENCY);
 double configuration_params::INDEX_BUCKET_SIZE = dialog_conf.get<double>(
