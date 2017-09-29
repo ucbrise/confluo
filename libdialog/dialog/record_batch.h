@@ -12,6 +12,9 @@ struct record_block {
   size_t nrecords;
 };
 
+/**
+ * Test
+ */
 struct record_batch {
   std::vector<record_block> blocks;
   size_t nrecords;
