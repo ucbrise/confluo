@@ -12,9 +12,6 @@ struct record_block {
   size_t nrecords;
 };
 
-/**
- * Test
- */
 struct record_batch {
   std::vector<record_block> blocks;
   size_t nrecords;
@@ -34,6 +31,10 @@ class record_batch_builder {
 
   record_batch_builder() = default;
 
+  /**
+   * Adds record to the batch
+   * @param rec The record to be added
+   */
   void add_record(const std::string& rec) {
     int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
     int64_t time_block = ts / TIME_BLOCK;
@@ -41,6 +42,10 @@ class record_batch_builder {
     batch_[time_block].push_back(rec);
   }
 
+  /**
+   * Moves a record to the batch
+   * @param rec The record to be moved
+   */
   void add_record(std::string&& rec) {
     int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
     int64_t time_block = ts / TIME_BLOCK;
@@ -48,6 +53,10 @@ class record_batch_builder {
     batch_[time_block].push_back(std::move(rec));
   }
 
+  /**
+   * Gets the batch of records
+   * @return The batch
+   */
   record_batch get_batch() {
     record_batch batch;
     batch.blocks.resize(batch_.size());

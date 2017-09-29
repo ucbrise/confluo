@@ -40,9 +40,6 @@ using namespace ::dialog::index;
 using namespace ::dialog::monitor;
 using namespace ::utils;
 
-// TODO: Add more tests
-// TODO: Improve documentation
-
 namespace dialog {
 
 class dialog_table {
@@ -66,6 +63,14 @@ class dialog_table {
 
   typedef alert_index::alert_list alert_list;
 
+  /**
+   * Constructor that initializes dialog table
+   * @param table The table name
+   * @param table_schema The schema for the table
+   * @param path The path of the table
+   * @param storage The storage mode of the table
+   * @param pool The pool of tasks
+   */
   dialog_table(const std::string& table_name,
                const std::vector<column_t>& table_schema,
                const std::string& path, const storage::storage_mode& storage,
@@ -83,6 +88,11 @@ class dialog_table {
   }
 
   // Management ops
+  /**
+   * Adds index to the table
+   * @param field_name The name of the field in the table
+   * @throw ex Management exception
+   */
   void add_index(const std::string& field_name, double bucket_size =
                      configuration_params::INDEX_BUCKET_SIZE) {
     optional<management_exception> ex;
@@ -133,6 +143,11 @@ class dialog_table {
       throw ex.value();
   }
 
+  /**
+   * Removes index from the table
+   * @param field_name The name of the field in the table
+   * @throw ex Management exception
+   */
   void remove_index(const std::string& field_name) {
     optional<management_exception> ex;
     auto ret =
@@ -156,6 +171,12 @@ class dialog_table {
       throw ex.value();
   }
 
+  /**
+   * Adds filter to the table
+   * @param filter_name The name of the filter
+   * @param filter_expr The expression to filter out elements in the table
+   * @throw ex Management exception
+   */
   void add_filter(const std::string& filter_name,
                   const std::string& filter_expr) {
     optional<management_exception> ex;
@@ -180,6 +201,11 @@ class dialog_table {
       throw ex.value();
   }
 
+  /**
+   * Removes filter from the table
+   * @param filter_name The name of the filter
+   * @throw ex Management exception
+   */
   void remove_filter(const std::string& filter_name) {
     optional<management_exception> ex;
     auto ret = mgmt_pool_.submit([filter_name, &ex, this] {
@@ -199,6 +225,13 @@ class dialog_table {
       throw ex.value();
   }
 
+  /**
+   * Adds trigger to the table
+   * @param trigger_name The name of the trigger
+   * @param filter_name The name of the filter
+   * @param trigger_expr The trigger expression to be executed
+   * @throw ex Management exception
+   */
   void add_trigger(const std::string& trigger_name,
                    const std::string& filter_name,
                    const std::string& trigger_expr,
@@ -253,6 +286,11 @@ class dialog_table {
       throw ex.value();
   }
 
+  /**
+   * Removes trigger from the table
+   * @param trigger_name The name of the trigger
+   * @throw Management exception
+   */
   void remove_trigger(const std::string& trigger_name) {
     optional<management_exception> ex;
     auto ret =
@@ -275,6 +313,11 @@ class dialog_table {
   }
 
   // Query ops
+  /**
+   * Appends a batch of records to the table
+   * @param batch The record batch to be added
+   * @return The offset where the batch is located
+   */
   size_t append_batch(record_batch& batch) {
     size_t record_size = schema_.record_size();
     size_t batch_bytes = batch.nrecords * record_size;
@@ -293,6 +336,11 @@ class dialog_table {
     return log_offset;
   }
 
+  /**
+   * Appends data to the table
+   * @param data The data to be stored
+   * @return The offset of where the data is located
+   */
   size_t append(void* data) {
     size_t record_size = schema_.record_size();
     size_t offset = data_log_.append((const uint8_t*) data, record_size);
@@ -312,6 +360,12 @@ class dialog_table {
     return offset;
   }
 
+  /**
+   * Reads the data from the table
+   * @param offset The location of where the data is stored
+   * @param version The tail pointer's location
+   * @return The data
+   */
   void* read(uint64_t offset, uint64_t& version) const {
     version = rt_.get();
     if (offset < version) {
@@ -320,11 +374,21 @@ class dialog_table {
     return nullptr;
   }
 
+  /**
+   * Reads the data based on the offset
+   * @param offset The location of the data
+   * @return The data
+   */
   void* read(uint64_t offset) const {
     uint64_t version;
     return read(offset, version);
   }
 
+  /**
+   * Executes the filter expression
+   * @param expr The filter expression
+   * @return The result of applying the filter to the table
+   */
   fri_result_type execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     compiled_expression cexpr = expression_compiler::compile(expr, schema_);
@@ -354,6 +418,14 @@ class dialog_table {
     return filter_rstream_type(rt_.get(), res, schema_, data_log_);
   }
 
+  /**
+   * Executes a query filter expression
+   * @param filter_name The name of the filter
+   * @param expr The filter expression
+   * @param ts_block_begin The beginning of the block
+   * @param ts_block_end The end of the block
+   * @return A stream contanining the results of the filter
+   */
   ffilter_rstream_type query_filter(const std::string& filter_name,
                                     const std::string& expr,
                                     uint64_t ts_block_begin,
@@ -363,27 +435,55 @@ class dialog_table {
         expression_compiler::compile(expr, schema_));
   }
 
+  /**
+   * Gets the alert list
+   * @param ts_block_begin The beginning of the block
+   * @param ts_block_end The end of the block
+   * @return A list of alerts in the block range
+   */
   alert_list get_alerts(uint64_t ts_block_begin, uint64_t ts_block_end) const {
     return alerts_.get_alerts(ts_block_begin, ts_block_end);
   }
 
+  /**
+   * Gets the name of the table
+   * @return The table name
+   */
   const std::string& get_name() const {
     return table_name_;
   }
 
+  /**
+   * Gets the table schema
+   * @return The schema of the table
+   */
   const schema_t& get_schema() const {
     return schema_;
   }
 
+  /**
+   * Gets the number of records in the table
+   * @return The number of records
+   */
   size_t num_records() const {
     return rt_.get() / schema_.record_size();
   }
 
+  /**
+   * Gets the record size
+   * @return The record size of the schema
+   */
   size_t record_size() const {
     return schema_.record_size();
   }
 
  protected:
+  /**
+   * Updates the record block
+   * @param log_offset The offset of the log
+   * @param block The record block
+   * @param record_size The size of each record
+   */
   void update_aux_record_block(uint64_t log_offset, record_block& block,
                                size_t record_size) {
     schema_snapshot snap = schema_.snapshot();
@@ -417,6 +517,9 @@ class dialog_table {
     }
   }
 
+  /**
+   * Monitors the task executed on the table
+   */
   void monitor_task() {
     uint64_t cur_ms = time_utils::cur_ms();
     uint64_t version = rt_.get();

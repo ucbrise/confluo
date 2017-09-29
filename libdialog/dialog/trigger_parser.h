@@ -39,22 +39,42 @@ class trigger_lexer {
   trigger_lexer() {
   }
 
+  /**
+   * Constructor for the lexer
+   * @param exp The expression to be lexicalized
+   */
   trigger_lexer(const std::string& exp) {
     str(exp);
   }
 
+  /**
+   * Places the string in the buffer
+   * @param exp The expression
+   */
   void str(const std::string& exp) {
     stream_.str(exp);
   }
 
+  /**
+   * Gets the position of the buffer
+   * @return The position indicator of the buffer
+   */
   size_t pos() {
     return stream_.tellg();
   }
 
+  /**
+   * Gets the string representation of the buffer
+   * @return The string representation of the buffer
+   */
   std::string str() {
     return stream_.str();
   }
 
+  /**
+   * Gets the next token in the buffer
+   * @return The next lex token 
+   */
   const trigger_lex_token next_token() {
     while (iswspace(stream_.peek()))
       stream_.get();
@@ -108,11 +128,20 @@ class trigger_lexer {
 
 class trigger_parser {
  public:
+  /**
+   * Constructor that initializes the trigger parser
+   * @param exp The expression to parse
+   * @param scheme The schema
+   */
   trigger_parser(const std::string& exp, const schema_t& schema)
       : lex_(exp),
         schema_(schema) {
   }
 
+  /**
+   * Parses the trigger expression
+   * @return The trigger
+   */
   parsed_trigger parse() {
     parsed_trigger t = trig();
     if (lex_.next_token().id != trigger_lexer::END)
