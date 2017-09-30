@@ -5,6 +5,7 @@
 #include "atomic.h"
 #include "configuration_params.h"
 #include "mempool_stat.h"
+#include "exceptions.h"
 
 namespace dialog {
 
