@@ -12,6 +12,7 @@
 
 #include "logger.h"
 #include "file_utils.h"
+#include "string_utils.h"
 
 namespace utils {
 
