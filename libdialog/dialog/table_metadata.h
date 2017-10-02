@@ -67,13 +67,14 @@ struct trigger_info {
  public:
   trigger_info(const std::string& trigger_name, const std::string& filter_name,
                aggregate_id agg_id, const std::string& field_name, relop_id op,
-               const numeric& threshold)
+               const numeric& threshold, uint64_t periodicity_ms)
       : trigger_id_(trigger_name),
         filter_id_(filter_name),
         agg_id_(agg_id),
         field_name_(field_name),
         op_(op),
-        threshold_(threshold) {
+        threshold_(threshold),
+        periodicity_ms_(periodicity_ms) {
   }
 
   const std::string& trigger_name() const {
@@ -100,6 +101,10 @@ struct trigger_info {
     return threshold_;
   }
 
+  uint64_t periodicity_ms() const {
+    return periodicity_ms_;
+  }
+
  private:
   std::string trigger_id_;
   std::string filter_id_;
@@ -107,6 +112,7 @@ struct trigger_info {
   std::string field_name_;
   relop_id op_;
   numeric threshold_;
+  uint64_t periodicity_ms_;
 };
 
 class metadata_writer {
@@ -199,7 +205,8 @@ class metadata_writer {
   void write_trigger_info(const std::string& trigger_name,
                           const std::string& filter_name, aggregate_id agg_id,
                           const std::string& field_name, relop_id op,
-                          const numeric& threshold) {
+                          const numeric& threshold,
+                          const uint64_t periodicity_ms) {
     if (id_ != storage::storage_id::D_IN_MEMORY) {
       metadata_type type = metadata_type::D_TRIGGER_METADATA;
       io_utils::write(out_, type);
@@ -243,6 +250,7 @@ class metadata_writer {
           THROW(invalid_operation_exception,
                 "Threshold is not of numeric type");
       }
+      io_utils::write(out_, periodicity_ms);
       io_utils::flush(out_);
     }
   }
@@ -378,8 +386,9 @@ class metadata_reader {
       default:
         THROW(invalid_operation_exception, "Threshold is not of numeric type");
     }
+    uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
     return trigger_info(trigger_name, filter_name, agg_id, field_name, op,
-                        threshold);
+                        threshold, periodicity_ms);
   }
 
  private:
