@@ -26,7 +26,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   w.write_index_info("col1", 0.0);
   w.write_filter_info("filter1", "col1>0");
   w.write_trigger_info("trigger1", "filter1", aggregate_id::D_SUM, "col1",
-                       relop_id::LT, numeric(3));
+                       relop_id::LT, numeric(3), 10);
 
   metadata_reader r("/tmp");
   ASSERT_EQ(metadata_type::D_SCHEMA_METADATA, r.next_type());
@@ -61,6 +61,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   ASSERT_EQ("col1", tinfo.field_name());
   ASSERT_EQ(relop_id::LT, tinfo.op());
   ASSERT_TRUE(numeric(3) == tinfo.threshold());
+  ASSERT_EQ(UINT64_C(10), tinfo.periodicity_ms());
 }
 
 #endif /* TEST_TABLE_METADATA_TEST_H_ */

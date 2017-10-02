@@ -201,11 +201,30 @@ class dialog_table {
 
   void add_trigger(const std::string& trigger_name,
                    const std::string& filter_name,
-                   const std::string& trigger_expr) {
+                   const std::string& trigger_expr,
+                   const uint64_t periodicity_ms =
+                       configuration_params::MONITOR_PERIODICITY_MS) {
+
+    if (periodicity_ms < configuration_params::MONITOR_PERIODICITY_MS) {
+      throw management_exception(
+          "Trigger periodicity (" + std::to_string(periodicity_ms)
+              + "ms) cannot be less than monitor periodicity ("
+              + std::to_string(configuration_params::MONITOR_PERIODICITY_MS)
+              + "ms)");
+    }
+
+    if (periodicity_ms % configuration_params::MONITOR_PERIODICITY_MS != 0) {
+      throw management_exception(
+          "Trigger periodicity (" + std::to_string(periodicity_ms)
+              + "ms) must be a multiple of monitor periodicity ("
+              + std::to_string(configuration_params::MONITOR_PERIODICITY_MS)
+              + "ms)");
+    }
+
     optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [trigger_name, filter_name, trigger_expr, &ex, this] {
+            [trigger_name, filter_name, trigger_expr, periodicity_ms, &ex, this] {
               trigger_id_t trigger_id;
               if (trigger_map_.get(trigger_name, trigger_id) != -1) {
                 ex = management_exception("Trigger " + trigger_name + " already exists.");
@@ -220,10 +239,10 @@ class dialog_table {
               trigger_parser parser(trigger_expr, schema_);
               parsed_trigger tp = parser.parse();
               const column_t& col = schema_[tp.field_name];
-              trigger* t = new trigger(trigger_name, filter_name, trigger_expr, tp.agg, col.name(), col.idx(), col.type(), tp.relop, tp.threshold);
+              trigger* t = new trigger(trigger_name, filter_name, trigger_expr, tp.agg, col.name(), col.idx(), col.type(), tp.relop, tp.threshold, periodicity_ms);
               trigger_id.second = filters_.at(filter_id)->add_trigger(t);
               metadata_.write_trigger_info(trigger_name, filter_name, tp.agg, tp.field_name, tp.relop,
-                  tp.threshold);
+                  tp.threshold, periodicity_ms);
               if (trigger_map_.put(trigger_name, trigger_id) == -1) {
                 ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
                 return;
@@ -379,7 +398,7 @@ class dialog_table {
         radix_index* idx = indexes_.at(snap.index_id(i));
         // Handle timestamp differently
         // TODO: What if indexing requested for finer granularity?
-        if (i == 0) { // Timestamp
+        if (i == 0) {  // Timestamp
           auto& refs = idx->get_or_create(snap.time_key(block.time_block));
           size_t idx = refs->reserve(block.nrecords);
           for (size_t j = 0; j < block.nrecords; j++) {
@@ -405,20 +424,32 @@ class dialog_table {
     for (size_t i = 0; i < nfilters; i++) {
       filter* f = filters_.at(i);
       if (f->is_valid()) {
-        for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS;
-            ms <= cur_ms; ms++) {
-          const aggregated_reflog* ar = f->lookup(ms);
-          size_t ntriggers = f->num_triggers();
-          for (size_t tid = 0; tid < ntriggers; tid++) {
-            trigger* t = f->get_trigger(tid);
-            if (t->is_valid() && ar != nullptr) {
-              numeric agg = ar->get_aggregate(tid, version);
-              if (numeric::relop(t->op(), agg, t->threshold())) {
-                alerts_.add_alert(ms, t->trigger_name(), t->trigger_expr(), agg,
-                                  version);
+        size_t ntriggers = f->num_triggers();
+        for (size_t tid = 0; tid < ntriggers; tid++) {
+          trigger* t = f->get_trigger(tid);
+          if (t->is_valid() && cur_ms % t->periodicity_ms() == 0) {
+            for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS;
+                ms <= cur_ms; ms++) {
+              if (ms % t->periodicity_ms() == 0) {
+                check_time_bucket(f, t, tid, cur_ms, version);
               }
             }
           }
+        }
+      }
+    }
+  }
+
+  void check_time_bucket(filter* f, trigger* t, size_t tid,
+                         uint64_t time_bucket, uint64_t version) {
+    size_t window_size = t->periodicity_ms();
+    for (uint64_t ms = time_bucket - window_size; ms <= time_bucket; ms++) {
+      const aggregated_reflog* ar = f->lookup(ms);
+      if (ar != nullptr) {
+        numeric agg = ar->get_aggregate(tid, version);
+        if (numeric::relop(t->op(), agg, t->threshold())) {
+          alerts_.add_alert(ms, t->trigger_name(), t->trigger_expr(), agg,
+                            version);
         }
       }
     }
