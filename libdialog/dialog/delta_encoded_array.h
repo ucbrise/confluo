@@ -86,7 +86,6 @@ class delta_encoded_array {
    */
   virtual width_type encoding_size(T delta) = 0;
 
-  /
   /** Encode the delta values
    * @param deltas The delta values
    * @param num_deltas The number of deltas

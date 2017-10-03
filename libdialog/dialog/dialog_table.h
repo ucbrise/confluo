@@ -219,6 +219,7 @@ class dialog_table {
         ex = management_exception("Filter already invalidated.");
         return;
       }
+      filter_map_.remove(filter_name, filter_id);
     });
     ret.wait();
     if (ex.has_value())
@@ -306,6 +307,7 @@ class dialog_table {
                 ex = management_exception("Trigger already invalidated.");
                 return;
               }
+              trigger_map_.remove(trigger_name, trigger_id);
             });
     ret.wait();
     if (ex.has_value())
@@ -413,6 +415,7 @@ class dialog_table {
       THROW(invalid_operation_exception,
             "Filter " + filter_name + " does not exist.");
     }
+
     auto res = filters_.at(filter_id)->lookup_range(ts_block_begin,
                                                     ts_block_end);
     return filter_rstream_type(rt_.get(), res, schema_, data_log_);

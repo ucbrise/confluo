@@ -58,6 +58,23 @@ TEST_F(MonoLogTest, MonoLogExp2BaseBaseTest) {
   monolog_test(array);
 }
 
+TEST_F(MonoLogTest, MonoLogExp2BaseBaseReadWriteTest) {
+  monolog_exp2_base<int> array;
+  array.set(3, 10);
+  int value = array.get(3);
+  ASSERT_EQ(10, value);
+  /*int data[3];
+  data[0] = 1;
+  data[1] = 2;
+  data[2] = 3;
+
+  array.set(0, data, 3);
+
+  int buffer[3];
+  const int* result = array.ptr(0);
+  ASSERT_EQ(data[1], *(result + 1));*/
+}
+
 TEST_F(MonoLogTest, MonoLogExp2Test) {
   monolog_exp2<uint64_t> array;
   monolog_test(array);
