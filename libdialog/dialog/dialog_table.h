@@ -172,6 +172,24 @@ class dialog_table {
   }
 
   /**
+   * Checks whether column of table is indexed
+   * @param field_name The name of the field
+   * @return True if column is indexed, false otherwise
+   * @throw ex Management exception
+   */
+  bool is_indexed(const std::string& field_name) {
+      optional<management_exception> ex;
+      uint16_t idx;
+      try {
+          idx = schema_.get_field_index(field_name);
+      } catch (std::exception& e) {
+          ex = management_exception("Field name doesn't exist");
+      }
+      column_t& col = schema_[idx];
+      return col.is_indexed();
+  }
+
+  /**
    * Adds filter to the table
    * @param filter_name The name of the filter
    * @param filter_expr The expression to filter out elements in the table

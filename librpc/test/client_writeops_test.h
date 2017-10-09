@@ -130,13 +130,6 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
     dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
     dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
 
-    size_t i = 0;
-    for (auto r = dtable->execute_filter("a == true"); r.has_more(); 
-            ++r) {
-        ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
-        i++;
-    }
-
     try {
         client.remove_index("a");
         client.remove_index("a");
@@ -145,12 +138,11 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
             "rpc_management_exception(msg=Could not remove index for a:" \
             " No index exists)";
         ASSERT_STREQ(e.what(), error_message.c_str());
-        client.disconnect();
-        server->stop();
-        if (serve_thread.joinable()) {
-            serve_thread.join();
-        }
     }
+
+    client.remove_index("b");
+    ASSERT_EQ(false, dtable->is_indexed("b"));
+    ASSERT_EQ(true, dtable->is_indexed("c"));
 
     client.disconnect();
     server->stop();
@@ -219,26 +211,23 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
         ASSERT_STREQ(ex.what(), message.c_str());
     }
 
+    auto before_alerts = dtable->get_alerts(beg, end);
     client.remove_trigger("trigger2");
     sleep(1);
-    auto alerts = dtable->get_alerts(beg, end);
+    auto after_alerts = dtable->get_alerts(beg, end);
+    
+    size_t first_count = 0;
+    size_t second_count = 0;
 
-    std::size_t found_trigger_1 = std::string::npos;
-    std::size_t found_trigger_2 = std::string::npos;
-
-    for (const auto& a : alerts) {
-        LOG_INFO << a.to_string() << "\n";
-        if (found_trigger_1 == std::string::npos) {
-            found_trigger_1 = a.to_string().find("trigger1");
-        }
-
-        if (found_trigger_2 == std::string::npos) {
-            found_trigger_2 = a.to_string().find("trigger2");
-        }
+    for (const auto& a : before_alerts) {
+        first_count++;
     }
 
-    ASSERT_EQ(std::string::npos, found_trigger_1);
-    ASSERT_EQ(std::string::npos, found_trigger_2);
+    for (const auto& a : after_alerts) {
+        second_count++;
+    }
+    
+    ASSERT_LE(second_count, first_count);
 
     try {
         client.remove_trigger("trigger1");

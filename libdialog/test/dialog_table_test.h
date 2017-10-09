@@ -261,6 +261,106 @@ TEST_F(DiaLogTableTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(3), i);
 }
 
+TEST_F(DiaLogTableTest, RemoveIndexTest) {
+    dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+
+    dtable.add_index("a", 1);
+    dtable.add_index("b", 1);
+    dtable.add_index("c", 10);
+    dtable.add_index("d", 2);
+    dtable.add_index("e", 100);
+    dtable.add_index("f", 0.1);
+    dtable.add_index("g", 0.01);
+    dtable.add_index("h", 1);
+
+    dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+
+    try {
+        dtable.remove_index("a");
+        dtable.remove_index("a");
+    } catch (std::exception& e) {
+        std::string error_message = "Could not remove index for a:" \
+            " No index exists";
+        ASSERT_STREQ(e.what(), error_message.c_str());
+    }
+
+    dtable.remove_index("b");
+    ASSERT_EQ(false, dtable.is_indexed("b"));
+    ASSERT_EQ(true, dtable.is_indexed("c"));
+}
+
+TEST_F(DiaLogTableTest, RemoveFilterTriggerTest) {
+    dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+    dtable.add_filter("filter1", "a == true");
+    dtable.add_filter("filter2", "b > 4");
+    
+    dtable.add_trigger("trigger1", "filter2", "SUM(d) >= 10");
+    dtable.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
+    
+    int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
+    dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    dtable.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    dtable.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    dtable.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    dtable.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    dtable.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    dtable.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+
+    int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+
+    size_t i = 0;
+    for (auto r = dtable.query_filter("filter1", beg, end); 
+            r.has_more(); ++r) {
+        i++;
+    }
+
+    try {
+        dtable.remove_filter("filter1");
+        dtable.query_filter("filter1", beg, end);
+    } catch (std::exception& e) {
+        std::string message = "Filter filter1 does not exist.";
+        ASSERT_STREQ(e.what(), message.c_str());
+    }
+
+
+    try {
+        dtable.remove_filter("filter2");
+        dtable.remove_filter("filter2");
+    } catch (std::exception& ex) {
+        std::string message = "Filter filter2 does not exist.";
+        ASSERT_STREQ(ex.what(), message.c_str());
+    }
+
+    auto before_alerts = dtable.get_alerts(beg, end);
+    dtable.remove_trigger("trigger2");
+    sleep(1);
+    auto after_alerts = dtable.get_alerts(beg, end);
+    
+    size_t first_count = 0;
+    size_t second_count = 0;
+
+    for (const auto& a : before_alerts) {
+        first_count++;
+    }
+
+    for (const auto& a : after_alerts) {
+        second_count++;
+    }
+
+    ASSERT_LE(second_count, first_count);
+
+    try {
+        dtable.remove_trigger("trigger1");
+        dtable.remove_trigger("trigger1");
+    } catch (std::exception& e) {
+        std::string message = "Trigger trigger1 does not exist.";
+        ASSERT_STREQ(e.what(), message.c_str());
+    }
+  
+}
+
 TEST_F(DiaLogTableTest, FilterTest) {
   dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   dtable.add_filter("filter1", "a == true");

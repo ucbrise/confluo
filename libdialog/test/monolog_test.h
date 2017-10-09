@@ -63,7 +63,7 @@ TEST_F(MonoLogTest, MonoLogExp2BaseBaseReadWriteTest) {
   array.set(3, 10);
   int value = array.get(3);
   ASSERT_EQ(10, value);
-  /*int data[3];
+  int data[3];
   data[0] = 1;
   data[1] = 2;
   data[2] = 3;
@@ -72,7 +72,18 @@ TEST_F(MonoLogTest, MonoLogExp2BaseBaseReadWriteTest) {
 
   int buffer[3];
   const int* result = array.ptr(0);
-  ASSERT_EQ(data[1], *(result + 1));*/
+  ASSERT_EQ(data[1], *(result + 1));
+  ASSERT_EQ(sizeof(int) * 4, array.storage_size());
+    
+  array.ensure_alloc(5, 8);
+  int new_data[3];
+  new_data[0] = 10;
+  new_data[1] = 11;
+  new_data[2] = 12;
+
+  array.set_unsafe(5, new_data, 3);
+  array.get(buffer, 5, 3);
+  ASSERT_EQ(new_data[0], buffer[0]);
 }
 
 TEST_F(MonoLogTest, MonoLogExp2Test) {
