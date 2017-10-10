@@ -183,7 +183,7 @@ class dialog_table {
       try {
           idx = schema_.get_field_index(field_name);
       } catch (std::exception& e) {
-          ex = management_exception("Field name doesn't exist");
+          THROW(management_exception, "Field name does not exist");
       }
       column_t& col = schema_[idx];
       return col.is_indexed();
