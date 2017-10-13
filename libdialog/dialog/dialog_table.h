@@ -28,6 +28,7 @@
 #include "exceptions.h"
 #include "optional.h"
 #include "parser/expression_compiler.h"
+#include "parser/schema_parser.h"
 #include "parser/trigger_compiler.h"
 #include "time_utils.h"
 #include "string_utils.h"
@@ -78,6 +79,13 @@ class dialog_table {
     metadata_.write_schema(schema_);
     monitor_task_.start(std::bind(&dialog_table::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
+  }
+
+  dialog_table(const std::string& table_name, const std::string& table_schema,
+               const std::string& path, const storage::storage_mode& storage,
+               task_pool& pool)
+      : dialog_table(table_name, parser::parse_schema(table_schema), path,
+                     storage, pool) {
   }
 
   // Management ops
@@ -240,7 +248,7 @@ class dialog_table {
               trigger* t = new trigger(trigger_name, filter_name, trigger_expr, ct.agg, col.name(), col.idx(), col.type(), ct.relop, ct.threshold, periodicity_ms);
               trigger_id.second = filters_.at(filter_id)->add_trigger(t);
               metadata_.write_trigger_info(trigger_name, filter_name, ct.agg, ct.field_name, ct.relop,
-                                           ct.threshold, periodicity_ms);
+                  ct.threshold, periodicity_ms);
               if (trigger_map_.put(trigger_name, trigger_id) == -1) {
                 ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
                 return;
