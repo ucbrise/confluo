@@ -1,0 +1,24 @@
+Type Manager class
+-Constructor initializes all data for primitive types
+-Create a new vector for regexes, possibly type names
+-Have an atomic integer field that is able to be concurrently updated every
+time register_type is called
+-register_type (operators to be supported and overriden, update vectors
+such as key_ops/binary_ops/regex that the type needs to update)
+-register_type fetches and adds to the counter every time it's called
+-need to pass in function pointers for binary and unary operators
+
+IPAddress class
+-add a field for name of the type
+-method to initialize IPAddress from a regex string
+-look at arithmetic_ops.h for inspiration 
+-defines its own MIN, MAX, ONE, ZERO, RELOPS, UNOPS, BINOPS, KEYOPS,
+REGEXES
+
+Testing
+-Write test for adding IPAddress and another dummy type at the same time
+and make sure the counter is update appropriately
+-Write test calling different filter functions on the IPAddress type and
+making sure binary/unary operations are natively supported and working
+
+
