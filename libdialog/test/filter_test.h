@@ -75,7 +75,8 @@ class FilterTest : public testing::Test {
     schema_builder builder;
     builder.add_column(LONG_TYPE, "value");
     schema_t schema(builder.get_columns());
-    return expression_compiler::compile(expr, schema);
+    auto t = parser::parse_expression(expr);
+    return parser::compile_expression(t, schema);
   }
 };
 

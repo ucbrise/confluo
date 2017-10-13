@@ -22,6 +22,10 @@ struct compiled_minterm {
     m_.insert(p);
   }
 
+  inline void add(compiled_predicate&& p) {
+    m_.insert(std::move(p));
+  }
+
   inline bool test(const record_t& r) const {
     for (auto& p : m_)
       if (!p.test(r))
@@ -42,7 +46,7 @@ struct compiled_minterm {
     size_t i = 0;
     for (auto& p : m_) {
       s += p.to_string();
-      if (++i < size - 1)
+      if (++i < size)
         s += " and ";
     }
     return s;

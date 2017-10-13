@@ -105,6 +105,15 @@ class schema_t {
     return columns_;
   }
 
+  std::string to_string() const {
+    std::string str = "{\n";
+    for (auto col : columns_) {
+      str += ("\t" + col.name() + ": " + col.type().to_string() + ",\n");
+    }
+    str += "}";
+    return str;
+  }
+
  private:
   size_t record_size_;  // TODO: Switch to dynamically sized records at some point
   std::vector<column_t> columns_;

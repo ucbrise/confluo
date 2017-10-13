@@ -1,26 +1,20 @@
 #ifndef TEST_EXPRESSION_COMPILER_TEST_H_
 #define TEST_EXPRESSION_COMPILER_TEST_H_
 
-#include "expression_compiler.h"
-
+#include "parser/expression_compiler.h"
 #include "schema.h"
-#include "storage.h"
-
 #include "gtest/gtest.h"
+#include "parser/expression_parser.h"
 
-using namespace ::dialog::storage;
+using namespace ::dialog::parser;
 using namespace ::dialog;
 
 class ExpressionCompilerTest : public testing::Test {
  public:
-  static expression_t* build_expression(const std::string& exp) {
-    expression_parser p(exp);
-    return p.parse();
-  }
-
   static void compile(compiled_expression& cexp, const std::string& exp,
                       const schema_t& schema) {
-    expression_compiler::compile(cexp, exp, schema);
+    auto t = parse_expression(exp);
+    cexp = compile_expression(t, schema);
   }
 
   static void check_predicate(const compiled_predicate& c) {

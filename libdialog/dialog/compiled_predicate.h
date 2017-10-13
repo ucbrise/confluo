@@ -5,7 +5,6 @@
 
 #include "record.h"
 #include "column.h"
-#include "expression.h"
 #include "schema.h"
 #include "immutable_value.h"
 #include "relational_ops.h"
@@ -14,22 +13,23 @@
 namespace dialog {
 
 struct compiled_predicate {
-  compiled_predicate(const predicate_t& p, const schema_t& s)
-      : op_(p.op) {
-    field_name_ = s[p.attr].name();
-    field_idx_ = s[p.attr].idx();
-    is_field_indexed_ = s[p.attr].is_indexed();
-    field_index_id_ = s[p.attr].index_id();
-    field_type_ = s[p.attr].type();
-    field_index_bucket_size_ = s[p.attr].index_bucket_size();
+  compiled_predicate(const std::string& attr, int op, const std::string& value,
+                     const schema_t& s)
+      : op_(static_cast<relop_id>(op)) {
+    field_name_ = s[attr].name();
+    field_idx_ = s[attr].idx();
+    is_field_indexed_ = s[attr].is_indexed();
+    field_index_id_ = s[attr].index_id();
+    field_type_ = s[attr].type();
+    field_index_bucket_size_ = s[attr].index_bucket_size();
 
     try {
-      val_ = mutable_value::parse(p.value, field_type_);
+      val_ = mutable_value::parse(value, field_type_);
     } catch (std::exception& e) {
       THROW(
           parse_exception,
-          "Could not parse attribute " + p.attr + " value " + p.value
-              + " to type " + field_type_.to_string());
+          "Could not parse attribute " + attr + " value " + value + " to type "
+              + field_type_.to_string());
     }
 
     switch (op_) {
@@ -42,13 +42,13 @@ struct compiled_predicate {
       }
       case relop_id::GE: {
         rbegin_ = val_.to_key(field_index_bucket_size_);
-        rend_ = s[p.attr].max().to_key(field_index_bucket_size_);
+        rend_ = s[attr].max().to_key(field_index_bucket_size_);
 //        fprintf(stderr, "GE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
 //                rend_.to_string().c_str());
         break;
       }
       case relop_id::LE: {
-        rbegin_ = s[p.attr].min().to_key(field_index_bucket_size_);
+        rbegin_ = s[attr].min().to_key(field_index_bucket_size_);
         rend_ = val_.to_key(field_index_bucket_size_);
 //        fprintf(stderr, "LE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
 //                rend_.to_string().c_str());
@@ -56,13 +56,13 @@ struct compiled_predicate {
       }
       case relop_id::GT: {
         rbegin_ = ++(val_.to_key(field_index_bucket_size_));
-        rend_ = s[p.attr].max().to_key(field_index_bucket_size_);
+        rend_ = s[attr].max().to_key(field_index_bucket_size_);
 //        fprintf(stderr, "GT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
 //                rend_.to_string().c_str());
         break;
       }
       case relop_id::LT: {
-        rbegin_ = s[p.attr].min().to_key(field_index_bucket_size_);
+        rbegin_ = s[attr].min().to_key(field_index_bucket_size_);
         rend_ = --(val_.to_key(field_index_bucket_size_));
 //        fprintf(stderr, "LT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
 //                rend_.to_string().c_str());

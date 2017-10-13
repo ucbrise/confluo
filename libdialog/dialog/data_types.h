@@ -5,11 +5,13 @@
 #include <string>
 #include <array>
 #include <cstdint>
+#include <regex>
 
 #include "relational_ops.h"
 #include "arithmetic_ops.h"
 #include "key_ops.h"
 #include "exceptions.h"
+#include "string_utils.h"
 
 namespace dialog {
 
@@ -242,6 +244,30 @@ struct data_type {
       default:
         return "invalid(" + std::to_string(static_cast<uint16_t>(id)) + ")";
     }
+  }
+
+  inline static data_type from_string(const std::string& str) {
+    std::string tstr = utils::string_utils::to_upper(str);
+    std::regex str_re("STRING\\(([0-9]+)\\)");
+    std::smatch str_matches;
+    if (tstr == "BOOL") {
+      return data_type(type_id::D_BOOL);
+    } else if (tstr == "CHAR") {
+      return data_type(type_id::D_CHAR);
+    } else if (tstr == "SHORT") {
+      return data_type(type_id::D_SHORT);
+    } else if (tstr == "INT") {
+      return data_type(type_id::D_INT);
+    } else if (tstr == "LONG") {
+      return data_type(type_id::D_LONG);
+    } else if (tstr == "FLOAT") {
+      return data_type(type_id::D_FLOAT);
+    } else if (tstr == "DOUBLE") {
+      return data_type(type_id::D_DOUBLE);
+    } else if (std::regex_search(tstr, str_matches, str_re)) {
+      return data_type(type_id::D_STRING, std::stoul(str_matches[1].str()));
+    }
+    return data_type(type_id::D_NONE);
   }
 };
 

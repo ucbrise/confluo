@@ -53,12 +53,7 @@ class CompiledExpressionTest : public testing::Test {
 
   static compiled_predicate predicate(const std::string& attr, relop_id id,
       const std::string& value) {
-    predicate_t p;
-    p.attr = attr;
-    p.op = id;
-    p.value = value;
-    compiled_predicate c(p, s);
-    return c;
+    return compiled_predicate(attr, id, value, s);
   }
 };
 

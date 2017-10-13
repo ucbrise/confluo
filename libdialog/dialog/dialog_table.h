@@ -20,17 +20,15 @@
 #include "filter_log.h"
 #include "alert_index.h"
 #include "periodic_task.h"
-#include "expression_compiler.h"
 #include "query_planner.h"
 #include "record_stream.h"
 #include "radix_tree.h"
 #include "filter.h"
 #include "trigger.h"
-#include "trigger_parser.h"
 #include "exceptions.h"
-
 #include "optional.h"
-
+#include "parser/expression_compiler.h"
+#include "parser/trigger_compiler.h"
 #include "time_utils.h"
 #include "string_utils.h"
 #include "task_pool.h"
@@ -167,7 +165,8 @@ class dialog_table {
                 ex = management_exception("Filter " + filter_name + " already exists.");
                 return;
               }
-              auto cexpr = expression_compiler::compile(filter_expr, schema_);
+              auto t = parser::parse_expression(filter_expr);
+              auto cexpr = parser::compile_expression(t, schema_);
               filter_id = filters_.push_back(new filter(cexpr, default_filter));
               metadata_.write_filter_info(filter_name, filter_expr);
               if (filter_map_.put(filter_name, filter_id) == -1) {
@@ -236,13 +235,12 @@ class dialog_table {
                 return;
               }
               trigger_id.first = filter_id;
-              trigger_parser parser(trigger_expr, schema_);
-              parsed_trigger tp = parser.parse();
-              const column_t& col = schema_[tp.field_name];
-              trigger* t = new trigger(trigger_name, filter_name, trigger_expr, tp.agg, col.name(), col.idx(), col.type(), tp.relop, tp.threshold, periodicity_ms);
+              auto ct = parser::compile_trigger(parser::parse_trigger(trigger_expr), schema_);
+              const column_t& col = schema_[ct.field_name];
+              trigger* t = new trigger(trigger_name, filter_name, trigger_expr, ct.agg, col.name(), col.idx(), col.type(), ct.relop, ct.threshold, periodicity_ms);
               trigger_id.second = filters_.at(filter_id)->add_trigger(t);
-              metadata_.write_trigger_info(trigger_name, filter_name, tp.agg, tp.field_name, tp.relop,
-                  tp.threshold, periodicity_ms);
+              metadata_.write_trigger_info(trigger_name, filter_name, ct.agg, ct.field_name, ct.relop,
+                                           ct.threshold, periodicity_ms);
               if (trigger_map_.put(trigger_name, trigger_id) == -1) {
                 ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
                 return;
@@ -327,7 +325,8 @@ class dialog_table {
 
   fri_result_type execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
-    compiled_expression cexpr = expression_compiler::compile(expr, schema_);
+    auto t = parser::parse_expression(expr);
+    auto cexpr = parser::compile_expression(t, schema_);
     query_planner planner(cexpr, indexes_);
     query_plan plan = planner.plan();
     std::vector<fri_rstream_type> fstreams;
@@ -358,9 +357,10 @@ class dialog_table {
                                     const std::string& expr,
                                     uint64_t ts_block_begin,
                                     uint64_t ts_block_end) const {
+    auto t = parser::parse_expression(expr);
+    auto cexpr = parser::compile_expression(t, schema_);
     return ffilter_rstream_type(
-        query_filter(filter_name, ts_block_begin, ts_block_end),
-        expression_compiler::compile(expr, schema_));
+        query_filter(filter_name, ts_block_begin, ts_block_end), cexpr);
   }
 
   alert_list get_alerts(uint64_t ts_block_begin, uint64_t ts_block_end) const {
