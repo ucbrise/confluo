@@ -2,12 +2,15 @@ include (ExternalProject)
 
 set(GTEST_VERSION "1.8.0")
 set(THRIFT_VERSION "0.10.0")
+set(BOOST_VERSION "1.53")
 
 find_package(Threads REQUIRED)
+find_package(Boost ${BOOST_VERSION} REQUIRED)
 
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 
+# Google Test framework
 if (BUILD_TESTS)
   if(APPLE)
     set(GTEST_CMAKE_CXX_FLAGS "${EXTERNAL_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1 -Wno-unused-value -Wno-ignored-attributes")
@@ -22,10 +25,10 @@ if (BUILD_TESTS)
   set(GTEST_MAIN_STATIC_LIB
     "${GTEST_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX}")
   
-  set(GTEST_CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                       -DCMAKE_INSTALL_PREFIX=${GTEST_PREFIX}
-                       -Dgtest_force_shared_crt=ON
-                       -DCMAKE_CXX_FLAGS=${GTEST_CMAKE_CXX_FLAGS})
+  set(GTEST_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${GTEST_PREFIX}"
+                       "-Dgtest_force_shared_crt=ON"
+                       "-DCMAKE_CXX_FLAGS=${GTEST_CMAKE_CXX_FLAGS}")
   
   ExternalProject_Add(googletest
     URL "https://github.com/google/googletest/archive/release-${GTEST_VERSION}.tar.gz"
