@@ -102,6 +102,149 @@ ClientWriteOpsTest::rec ClientWriteOpsTest::r;
 std::vector<column_t> ClientWriteOpsTest::s = schema();
 
 // TODO: test rpc_dialog_client remove functions
+TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
+    std::string table_name = "my_table";
+
+    auto store = new dialog_store("/tmp");
+    store->add_table(table_name, schema(), storage::D_IN_MEMORY);
+    auto dtable = store->get_table(table_name);
+    
+    auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+    std::thread serve_thread([&server] {
+        server->serve();
+    });
+    sleep(1);
+
+    rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+    client.set_current_table(table_name);
+
+    client.add_index("a", 1);
+    client.add_index("b", 1);
+    client.add_index("c", 10);
+    client.add_index("d", 2);
+    client.add_index("e", 100);
+    client.add_index("f", 0.1);
+    client.add_index("g", 0.01);
+    client.add_index("h", 1);
+
+    dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+
+    try {
+        client.remove_index("a");
+        client.remove_index("a");
+    } catch (std::exception& e) {
+        std::string error_message = "TException - service has thrown: " \
+            "rpc_management_exception(msg=Could not remove index for a:" \
+            " No index exists)";
+        ASSERT_STREQ(e.what(), error_message.c_str());
+    }
+
+    client.remove_index("b");
+    ASSERT_EQ(false, dtable->is_indexed("b"));
+    ASSERT_EQ(true, dtable->is_indexed("c"));
+
+    client.disconnect();
+    server->stop();
+    if (serve_thread.joinable()) {
+        serve_thread.join();
+    }
+}
+
+TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
+    std::string table_name = "my_table";
+
+    auto store = new dialog_store("/tmp");
+    store->add_table(table_name, schema(), storage::D_IN_MEMORY);
+    auto dtable = store->get_table(table_name);
+    auto server = dialog_server::create(store, SERVER_ADDRESS, 
+            SERVER_PORT);
+    std::thread serve_thread([&server] {
+        server->serve();
+    });
+
+    sleep(1);
+
+    rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+    client.set_current_table(table_name);
+
+    client.add_filter("filter1", "a == true");
+    client.add_filter("filter2", "b > 4");
+    
+    client.add_trigger("trigger1", "filter2", "SUM(d) >= 10");
+    client.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
+    
+    int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
+    dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    dtable->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    dtable->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    dtable->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    dtable->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    dtable->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+
+    int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+
+    size_t i = 0;
+    for (auto r = dtable->query_filter("filter1", beg, end); 
+            r.has_more(); ++r) {
+        i++;
+    }
+
+    try {
+        client.remove_filter("filter1");
+        dtable->query_filter("filter1", beg, end);
+    } catch (std::exception& e) {
+        std::string message = "Filter filter1 does not exist.";
+        ASSERT_STREQ(e.what(), message.c_str());
+    }
+
+
+    try {
+        client.remove_filter("filter2");
+        client.remove_filter("filter2");
+    } catch (std::exception& ex) {
+        std::string message = "TException - service has thrown: " \
+            "rpc_management_exception(msg=Filter filter2 does not " \
+            "exist.)";
+        ASSERT_STREQ(ex.what(), message.c_str());
+    }
+
+    auto before_alerts = dtable->get_alerts(beg, end);
+    client.remove_trigger("trigger2");
+    sleep(1);
+    auto after_alerts = dtable->get_alerts(beg, end);
+    
+    size_t first_count = 0;
+    size_t second_count = 0;
+
+    for (const auto& a : before_alerts) {
+        first_count++;
+    }
+
+    for (const auto& a : after_alerts) {
+        second_count++;
+    }
+    
+    ASSERT_LE(second_count, first_count);
+
+    try {
+        client.remove_trigger("trigger1");
+        client.remove_trigger("trigger1");
+    } catch (std::exception& e) {
+        std::string message = "TException - service has thrown: " \
+            "rpc_management_exception(msg=Trigger trigger1 does not " \
+            "exist.)";
+        ASSERT_STREQ(e.what(), message.c_str());
+    }
+  
+    client.disconnect();
+    server->stop();
+    if (serve_thread.joinable()) {
+        serve_thread.join();
+    }
+}
 
 TEST_F(ClientWriteOpsTest, CreateTableTest) {
 

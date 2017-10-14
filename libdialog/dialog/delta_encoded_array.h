@@ -18,12 +18,18 @@ class delta_encoded_array {
   typedef size_t pos_type;
   typedef uint8_t width_type;
 
+  /**
+   * Default constructor that initializes everything to default values
+   */
   delta_encoded_array() {
     samples_ = NULL;
     delta_offsets_ = NULL;
     deltas_ = NULL;
   }
 
+  /**
+   * Default destructor that deletes all of the samples, offsets, and deltas
+   */
   virtual ~delta_encoded_array() {
     if (samples_) {
       delete samples_;
@@ -40,6 +46,11 @@ class delta_encoded_array {
   }
 
   // Serialization and De-serialization
+  /**
+   * Serializes array to output stream
+   * @param out The output stream
+   * @return The size of the data in the output stream
+   */
   virtual size_type serialize(std::ostream& out) {
     size_type out_size = 0;
 
@@ -50,6 +61,11 @@ class delta_encoded_array {
     return out_size;
   }
 
+  /**
+   * Deserializes input stream to an array
+   * @param in The input stream
+   * @return The size of the array from the input stream
+   */
   virtual size_type deserialize(std::istream& in) {
     size_type in_size = 0;
 
@@ -64,13 +80,22 @@ class delta_encoded_array {
   }
 
  protected:
-  // Get the encoding size for an delta value
+  /** Get the encoding size for an delta value
+   * @param delta The delta value
+   * @return The width type of the delta
+   */
   virtual width_type encoding_size(T delta) = 0;
 
-  // Encode the delta values
+  /** Encode the delta values
+   * @param deltas The delta values
+   * @param num_deltas The number of deltas
+   */
   virtual void encode_deltas(T* deltas, size_type num_deltas) = 0;
 
-  // Encode the delta encoded array
+  /** Encode the delta encoded array
+   * @param elements The elements of the array
+   * @param num_elements The number of elements
+   */
   void encode(T* elements, size_type num_elements) {
     if (num_elements == 0) {
       return;
@@ -154,6 +179,9 @@ static struct elias_gamma_prefix_sum {
  public:
   typedef uint16_t block_type;
 
+  /**
+   * Default constructor that initializes the prefix sum
+   */
   elias_gamma_prefix_sum() {
     for (uint64_t i = 0; i < 65536; i++) {
       uint16_t val = (uint16_t) i;
@@ -178,14 +206,29 @@ static struct elias_gamma_prefix_sum {
     }
   }
 
+  /**
+   * Gets the offset
+   * @param i The block
+   * @return The offset from the block
+   */
   uint8_t offset(const block_type i) const {
     return ((prefixsum_[(i)] >> 24) & 0xFF);
   }
 
+  /**
+   * Gets the count of the block
+   * @param i The block
+   * @return The block count
+   */
   uint8_t count(const block_type i) const {
     return ((prefixsum_[i] >> 16) & 0xFF);
   }
 
+  /**
+   * Gets the sum of the block
+   * @param i The block
+   * @return The sum of the block
+   */
   uint16_t sum(const block_type i) const {
     return (prefixsum_[i] & 0xFFFF);
   }
@@ -204,10 +247,18 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   using delta_encoded_array<T>::encoding_size;
   using delta_encoded_array<T>::encode_deltas;
 
+  /**
+   * Default constructor that initializes the encoded array
+   */
   elias_gamma_encoded_array()
       : delta_encoded_array<T>() {
   }
 
+  /**
+   * Constructor that initializes data and size of the array
+   * @param elements The elements of the data
+   * @param num_elements The number of elements in the array
+   */
   elias_gamma_encoded_array(T* elements, size_type num_elements)
       : delta_encoded_array<T>() {
     this->encode(elements, num_elements);
@@ -216,6 +267,11 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   virtual ~elias_gamma_encoded_array() {
   }
 
+  /**
+   * Gets the element at the specified index
+   * @param i The index
+   * @return The value at that index
+   */
   T get(pos_type i) {
     // Get offsets
     pos_type samples_idx = i / sampling_rate;
@@ -230,6 +286,11 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     return val;
   }
 
+  /**
+   * Accesses the array at the specified index
+   * @param i The index
+   * @return The value at that index
+   */
   T operator[](pos_type i) {
     return get(i);
   }

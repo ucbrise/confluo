@@ -76,6 +76,7 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
 };
 
 /**
+ * @class
  * The base class for MonoLog.
  *
  * Implements get/set/multiget/multiset functionalities,
@@ -91,6 +92,10 @@ class monolog_exp2_base {
 
   typedef atomic::type<T*> __atomic_bucket_ref;
 
+  /**
+   * The default constructor that initializes all of the buckets
+   * for the monolog
+   */
   monolog_exp2_base() {
     T* null_ptr = NULL;
     for (auto& x : buckets_) {
@@ -99,12 +104,20 @@ class monolog_exp2_base {
     atomic::init(&buckets_[0], new T[FBS]);
   }
 
+  /**
+   * The default destructor that deletes all of the buckets
+   */
   ~monolog_exp2_base() {
     for (auto& x : buckets_) {
       delete[] atomic::load(&x);
     }
   }
 
+  /**
+   * Allocates space for buckets between the indices
+   * @param start_idx The start index
+   * @param end_idx The end index
+   */
   void ensure_alloc(size_t start_idx, size_t end_idx) {
     size_t pos1 = start_idx + FBS;
     size_t pos2 = end_idx + FBS;
@@ -119,7 +132,11 @@ class monolog_exp2_base {
     }
   }
 
-  // Sets the data at index idx to val. Allocates memory if necessary.
+  /**
+   * Sets the data at index idx to val. Allocates memory if necessary.
+   * @param idx The specified index
+   * @param val The data to be set at the index
+   */
   void set(size_t idx, const T val) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -132,8 +149,12 @@ class monolog_exp2_base {
     bucket[bucket_off] = val;
   }
 
-  // Sets the data at index idx to val. Does NOT allocate memory -- ensure
-  // memory is allocated before calling this function.
+  /**
+   * Sets the data at index idx to val. Does NOT allocate memory -- ensure
+   * memory is allocated before calling this function.
+   * @param idx The specified index
+   * @param val The data to be set at the index
+   */
   void set_unsafe(size_t idx, const T val) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -142,7 +163,11 @@ class monolog_exp2_base {
     atomic::load(&buckets_[bucket_idx])[bucket_off] = val;
   }
 
-  // Sets a contiguous region of the MonoLog base to the provided data.
+  /** Sets a contiguous region of the MonoLog base to the provided data.
+   * @param idx The specified index
+   * @param data The data that needs to be stored
+   * @param len The length of the region
+   */
   void set(size_t idx, const T* data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -158,17 +183,22 @@ class monolog_exp2_base {
       size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
           * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
+      memcpy(bucket + bucket_off, data + data_off, bytes_to_write);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
-      memcpy(bucket + bucket_off, data + data_off, bytes_to_write);
       bucket_idx++;
       bucket_off = 0;
     }
   }
 
-  // Sets a contiguous region of the MonoLog base to the provided data. Does
-  // NOT allocate memory -- ensure memory is allocated before calling this
-  // function.
+  /** Sets a contiguous region of the MonoLog base to the provided data.
+   * Does NOT allocate memory -- ensure memory is allocated before
+   * calling this function.
+   *
+   * @param idx The specified index
+   * @param data The data to be stored
+   * @param len The length of the region
+   */
   void set_unsafe(size_t idx, const T* data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -180,15 +210,20 @@ class monolog_exp2_base {
       size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
           * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
-      data_remaining -= bytes_to_write;
-      data_off += bytes_to_write;
       memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off, data + data_off,
              bytes_to_write);
+      data_remaining -= bytes_to_write;
+      data_off += bytes_to_write;
       bucket_idx++;
       bucket_off = 0;
     }
   }
 
+  /**
+   * Gets the pointer to the data specified by the index
+   * @param idx The index of where to get the data
+   * @return The pointer to the region
+   */
   const T* ptr(size_t idx) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -197,7 +232,10 @@ class monolog_exp2_base {
     return atomic::load(&buckets_[bucket_idx]) + bucket_off;
   }
 
-  // Gets the data at index idx.
+  /** Gets the data at index idx.
+   * @param idx The index of where to get the data
+   * @return A reference to the data at that index
+   */
   const T& get(size_t idx) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -206,6 +244,11 @@ class monolog_exp2_base {
     return atomic::load(&buckets_[bucket_idx])[bucket_off];
   }
 
+  /**
+   * Accesses the data at a specific index
+   * @param idx The index of what data to get
+   * @return A reference to the data at the index
+   */
   T& operator[](size_t idx) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -218,9 +261,13 @@ class monolog_exp2_base {
     return bucket[bucket_off];
   }
 
-  // Copies a contiguous region of the MonoLog base into the provided buffer.
-  // The buffer should have sufficient space to hold the data requested, otherwise
-  // undefined behavior may result.
+  /** Copies a contiguous region of the MonoLog base into the provided 
+   * buffer.The buffer should have sufficient space to hold the 
+   * data requested, otherwise undefined behavior may result.
+   * @param data The data to be copied
+   * @param idx The index for where the data is copied to
+   * @param len The length of the buffer
+   */
   void get(T* data, size_t idx, size_t len) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -232,15 +279,19 @@ class monolog_exp2_base {
       size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
           * sizeof(T);
       size_t bytes_to_read = std::min(bucket_remaining, data_remaining);
-      data_remaining -= bytes_to_read;
-      data_off += bytes_to_read;
       memcpy(data + data_off, atomic::load(&buckets_[bucket_idx]) + bucket_off,
              bytes_to_read);
+      data_remaining -= bytes_to_read;
+      data_off += bytes_to_read;
       bucket_idx++;
       bucket_off = 0;
     }
   }
 
+  /**
+   * Gets the size of the storage space
+   * @return The size of storage in bytes
+   */
   size_t storage_size() const {
     size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
     size_t data_size = 0;
@@ -253,9 +304,12 @@ class monolog_exp2_base {
   }
 
  protected:
-  // Tries to allocate the specifies bucket. If another thread has already
-  // succeeded in allocating the bucket, the current thread deallocates and
-  // returns.
+  /* Tries to allocate the specifies bucket. If another thread has 
+   * already succeeded in allocating the bucket, the current thread 
+   * deallocates and returns.
+   * @param bucket_idx The index of the specified bucket
+   * @return The specified bucket
+   */
   T* try_allocate_bucket(size_t bucket_idx) {
     size_t size = (1U << (bucket_idx + FBS_HIBIT));
     T* new_bucket = new T[size];

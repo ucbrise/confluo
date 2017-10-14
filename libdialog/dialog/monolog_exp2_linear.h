@@ -25,7 +25,7 @@ template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
   typedef atomic::type<T*> __atomic_bucket_ref;
-  typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
+  typedef atomic::type<__atomic_bucket_ref *> __atomic_bucket_container_ref;
 
   monolog_exp2_linear_base()
       : fcs_hibit_(bit_utils::highest_bit(fcs_)) {
@@ -151,9 +151,9 @@ class monolog_exp2_linear_base {
       }
 
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
+      memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
-      memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       bucket_idx++;
       if (bucket_idx >= (1U << (container_idx + FCB_HIBIT))) {
         container_idx++;
@@ -183,10 +183,10 @@ class monolog_exp2_linear_base {
     size_t bucket_remaining = BUCKET_SIZE * sizeof(T);
     while (data_remaining) {
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
-      data_remaining -= bytes_to_write;
-      data_off += bytes_to_write;
       T* bucket = atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]);
       memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
+      data_remaining -= bytes_to_write;
+      data_off += bytes_to_write;
       bucket_idx++;
       if (bucket_idx >= (1U << (container_idx + FCB_HIBIT))) {
         container_idx++;
@@ -266,10 +266,10 @@ class monolog_exp2_linear_base {
     size_t bucket_remaining = BUCKET_SIZE * sizeof(T);
     while (data_remaining) {
       size_t bytes_to_read = std::min(bucket_remaining, data_remaining);
-      data_remaining -= bytes_to_read;
-      data_off += bytes_to_read;
       T* bucket = atomic::load(&atomic::load(&bucket_containers_[container_idx])[bucket_idx]);
       memcpy(data + data_off, &bucket[bucket_off], bytes_to_read);
+      data_remaining -= bytes_to_read;
+      data_off += bytes_to_read;
       bucket_idx++;
       if (bucket_idx >= (1U << (container_idx + FCB_HIBIT))) {
         container_idx++;
@@ -303,7 +303,7 @@ class monolog_exp2_linear_base {
     return container_size + bucket_size + data_size;
   }
 
- protected:
+protected:
   /**
    * Tries to allocate the specified container. If another thread already succeeded
    * in allocating the container, the current thread deallocates and returns.
@@ -343,7 +343,7 @@ class monolog_exp2_linear_base {
     return new_bucket;
   }
 
- private:
+private:
   static const size_t FCB = 16;
   static const size_t FCB_HIBIT = 4;
   const size_t fcs_ = FCB * BUCKET_SIZE;
@@ -365,7 +365,8 @@ mempool<T> monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE>::BUCKET_POOL;
  * - Write operations are atomic
  */
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
-class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE> {
+class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
+    BUCKET_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;
