@@ -20,6 +20,10 @@ struct thread_info {
 // Not thread safe
 class thread_manager {
  public:
+  /**
+   * Registers a thread to the manager
+   * @return The id of the thread
+   */
   static int register_thread() {
     // De-register if already registered
     deregister_thread();
@@ -28,6 +32,10 @@ class thread_manager {
     return core_id;
   }
 
+  /**
+   * Deregisters the thread
+   * @return The id of the deregistered thread
+   */
   static int deregister_thread() {
     int core_id;
     if ((core_id = find()) != -1)
@@ -35,14 +43,26 @@ class thread_manager {
     return core_id;
   }
 
+  /**
+   * Finds the thread
+   * @return The id of the found thread
+   */
   static int get_id() {
     return find();
   }
 
+  /**
+   * Gets the maximum number of threads
+   * @return The maximum number of threads
+   */
   static int get_max_concurrency() {
     return MAX_CONCURRENCY;
   }
 
+  /**
+   * Sets the maximum number of threads to a new value
+   * @param max_concurrency The new maximum concurrency
+   */
   static void set_max_concurrency(int max_concurrency) {
     MAX_CONCURRENCY = max_concurrency;
   }

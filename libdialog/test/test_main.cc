@@ -11,6 +11,7 @@
 #include "column_test.h"
 #include "data_types_test.h"
 #include "delta_encoded_array_test.h"
+#include "dialog_store_test.h"
 #include "dialog_table_test.h"
 #include "expression_compiler_test.h"
 #include "expression_parser_test.h"

@@ -117,6 +117,11 @@ struct trigger_info {
 
 class metadata_writer {
  public:
+  /**
+   * Constructor that initializes metadata writer
+   * @param path The path of where the metadata is
+   * @param id The id of the storage type 
+   */
   metadata_writer(const std::string& path, storage::storage_id id)
       : filename_(path + "/metadata"),
         id_(id) {

@@ -147,15 +147,30 @@ class tiered_index {
 
   static uint64_t CHILD_BLOCK;
 
+  /**
+   * @brief Constructor for the tiered index
+   */
   tiered_index() {
     atomic::init(&stats_, static_cast<stats*>(nullptr));
   }
 
+  /**
+   * @brief Access the child data from the key
+   * @param key The key for lookup
+   * @return The pointer to the child
+   */
   T* operator[](const uint64_t key) {
     child_type* c = get_or_create_child(key / CHILD_BLOCK);
     return (*c)[key % CHILD_BLOCK];
   }
 
+  /**
+   * Access the child data passing in the update arguments
+   * @param key The key for lookup
+   * @param u Reference to update
+   * @param udpate_args The update arguments
+   * @return The pointer to the child with the update arguments
+   */
   template<typename update, typename ...update_args>
   T* operator()(const uint64_t key, update&& u, update_args&&... args) {
     u(atomic::load(&stats_), std::forward<update_args>(args)...);
@@ -163,19 +178,40 @@ class tiered_index {
     return (*c)(key % CHILD_BLOCK, u, std::forward<update_args>(args)...);
   }
 
+  /**
+   * Gets the child at the key
+   * @param key The key for lookup
+   * @return The child pointer
+   */
   T* at(const uint64_t key) const {
     child_type* c = get_child(key / CHILD_BLOCK);
     return c->at(key % CHILD_BLOCK);
   }
 
+  /**
+   * Creates or gets the child at the key
+   * @param k The key to create or fetch the child
+   * @return The child
+   */
   child_type* get_or_create_child(const uint64_t k) {
     return idx_.get_or_create(k);
   }
 
+  /**
+   * Gets the child at the key
+   * @param k The key
+   * @return The child at the key
+   */
   child_type* get_child(const uint64_t k) const {
     return idx_.get(k);
   }
 
+  /**
+   * Gets the stats about the tiered index
+   * @param key The key for lookup
+   * @param depth The depth to look for child
+   * @return The pointer to stats data
+   */
   stats* get_stats(const uint64_t key, const uint64_t depth) {
     if (depth == 0)
       return get_stats();
@@ -185,6 +221,10 @@ class tiered_index {
     return nullptr;
   }
 
+  /**
+   * Retrieves the stats
+   * @return The pointer to stats data
+   */
   stats* get_stats() {
     return atomic::load(&stats_);
   }
