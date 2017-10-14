@@ -91,7 +91,7 @@ class monolog_exp2_base {
   static const size_t FBS_HIBIT = 4;
 
   typedef atomic::type<T*> __atomic_bucket_ref;
-    
+
   /**
    * The default constructor that initializes all of the buckets
    * for the monolog
@@ -103,7 +103,7 @@ class monolog_exp2_base {
     }
     atomic::init(&buckets_[0], new T[FBS]);
   }
-    
+
   /**
    * The default destructor that deletes all of the buckets
    */
@@ -183,22 +183,22 @@ class monolog_exp2_base {
       size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
           * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
+      memcpy(bucket + bucket_off, data + data_off, bytes_to_write);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
-      memcpy(bucket + bucket_off, data + data_off, bytes_to_write);
       bucket_idx++;
       bucket_off = 0;
     }
   }
 
   /** Sets a contiguous region of the MonoLog base to the provided data.
-    * Does NOT allocate memory -- ensure memory is allocated before 
-    * calling this function.
-    *
-    * @param idx The specified index
-    * @param data The data to be stored
-    * @param len The length of the region
-    */
+   * Does NOT allocate memory -- ensure memory is allocated before
+   * calling this function.
+   *
+   * @param idx The specified index
+   * @param data The data to be stored
+   * @param len The length of the region
+   */
   void set_unsafe(size_t idx, const T* data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
@@ -210,10 +210,10 @@ class monolog_exp2_base {
       size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
           * sizeof(T);
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
-      data_remaining -= bytes_to_write;
-      data_off += bytes_to_write;
       memcpy(atomic::load(&buckets_[bucket_idx]) + bucket_off, data + data_off,
              bytes_to_write);
+      data_remaining -= bytes_to_write;
+      data_off += bytes_to_write;
       bucket_idx++;
       bucket_off = 0;
     }
@@ -279,10 +279,10 @@ class monolog_exp2_base {
       size_t bucket_remaining = ((1U << (bucket_idx + FBS_HIBIT)) - bucket_off)
           * sizeof(T);
       size_t bytes_to_read = std::min(bucket_remaining, data_remaining);
-      data_remaining -= bytes_to_read;
-      data_off += bytes_to_read;
       memcpy(data + data_off, atomic::load(&buckets_[bucket_idx]) + bucket_off,
              bytes_to_read);
+      data_remaining -= bytes_to_read;
+      data_off += bytes_to_read;
       bucket_idx++;
       bucket_off = 0;
     }

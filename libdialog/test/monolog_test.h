@@ -72,9 +72,10 @@ TEST_F(MonoLogTest, MonoLogExp2BaseBaseReadWriteTest) {
 
   int buffer[3];
   const int* result = array.ptr(0);
-  ASSERT_EQ(data[1], *(result + 1));
-  ASSERT_EQ(sizeof(int) * 4, array.storage_size());
-    
+  for (size_t i = 0; i < 3; i++) {
+    ASSERT_EQ(data[i], *(result + i));
+  }
+
   array.ensure_alloc(5, 8);
   int new_data[3];
   new_data[0] = 10;
