@@ -53,12 +53,12 @@ class MonoLogTest : public testing::Test {
   }
 };
 
-TEST_F(MonoLogTest, MonoLogExp2BaseBaseTest) {
+TEST_F(MonoLogTest, MonoLogExp2BaseTest) {
   monolog_exp2_base<uint64_t> array;
   monolog_test(array);
 }
 
-TEST_F(MonoLogTest, MonoLogExp2BaseBaseReadWriteTest) {
+TEST_F(MonoLogTest, MonoLogExp2BaseReadWriteTest) {
   monolog_exp2_base<int> array;
   array.set(3, 10);
   int value = array.get(3);
@@ -96,7 +96,7 @@ TEST_F(MonoLogTest, MonoLogExp2Test) {
   }
 }
 
-TEST_F(MonoLogTest, MonoLogExp2LinearBaseBaseTest) {
+TEST_F(MonoLogTest, MonoLogExp2LinearBaseTest) {
   monolog_exp2_linear_base<uint64_t> array;
   monolog_test(array);
 }
