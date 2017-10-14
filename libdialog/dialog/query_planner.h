@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 
-#include "compiled_expression.h"
 #include "radix_tree.h"
 #include "index_log.h"
 #include "query_plan.h"

@@ -1,7 +1,7 @@
 #ifndef DIALOG_QUERY_PLAN_H_
 #define DIALOG_QUERY_PLAN_H_
 
-#include "compiled_minterm.h"
+#include "parser/expression_compiler.h"
 
 namespace dialog {
 

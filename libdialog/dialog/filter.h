@@ -7,13 +7,14 @@
 #include "radix_tree.h"
 #include "record_batch.h"
 #include "aggregated_reflog.h"
-#include "compiled_expression.h"
+#include "parser/expression_compiler.h"
 #include "trigger.h"
 #include "trigger_log.h"
 
 // TODO: Update tests
 
 using namespace ::utils;
+using namespace ::dialog::parser;
 
 namespace dialog {
 namespace monitor {

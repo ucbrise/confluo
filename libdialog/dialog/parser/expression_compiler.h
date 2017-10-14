@@ -1,16 +1,253 @@
 #ifndef PARSER_EXPRESSION_COMPILER_H_
 #define PARSER_EXPRESSION_COMPILER_H_
 
-#include "schema.h"
-#include "compiled_predicate.h"
-#include "compiled_expression.h"
-#include "compiled_minterm.h"
 #include "expression_parser.h"
+#include "index_filter.h"
+#include "schema.h"
+#include "schema_snapshot.h"
 
 namespace dialog {
 namespace parser {
 
 namespace spirit = boost::spirit;
+
+struct compiled_predicate {
+  compiled_predicate(const std::string& attr, int op, const std::string& value,
+                     const schema_t& s)
+      : op_(static_cast<relop_id>(op)) {
+    field_name_ = s[attr].name();
+    field_idx_ = s[attr].idx();
+    is_field_indexed_ = s[attr].is_indexed();
+    field_index_id_ = s[attr].index_id();
+    field_type_ = s[attr].type();
+    field_index_bucket_size_ = s[attr].index_bucket_size();
+
+    try {
+      val_ = mutable_value::parse(value, field_type_);
+    } catch (std::exception& e) {
+      THROW(
+          parse_exception,
+          "Could not parse attribute " + attr + " value " + value + " to type "
+              + field_type_.to_string());
+    }
+
+    switch (op_) {
+      case relop_id::EQ: {
+        rbegin_ = val_.to_key(field_index_bucket_size_);
+        rend_ = val_.to_key(field_index_bucket_size_);
+//        fprintf(stderr, "EQ Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::GE: {
+        rbegin_ = val_.to_key(field_index_bucket_size_);
+        rend_ = s[attr].max().to_key(field_index_bucket_size_);
+//        fprintf(stderr, "GE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::LE: {
+        rbegin_ = s[attr].min().to_key(field_index_bucket_size_);
+        rend_ = val_.to_key(field_index_bucket_size_);
+//        fprintf(stderr, "LE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::GT: {
+        rbegin_ = ++(val_.to_key(field_index_bucket_size_));
+        rend_ = s[attr].max().to_key(field_index_bucket_size_);
+//        fprintf(stderr, "GT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::LT: {
+        rbegin_ = s[attr].min().to_key(field_index_bucket_size_);
+        rend_ = --(val_.to_key(field_index_bucket_size_));
+//        fprintf(stderr, "LT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      default: {
+      }
+    }
+  }
+
+  inline data_type field_type() const {
+    return field_type_;
+  }
+
+  inline std::string field_name() const {
+    return field_name_;
+  }
+
+  inline uint32_t field_idx() const {
+    return field_idx_;
+  }
+
+  inline relop_id op() const {
+    return op_;
+  }
+
+  inline immutable_value value() const {
+    return val_;
+  }
+
+  inline bool is_indexed() const {
+    return is_field_indexed_;
+  }
+
+  inline std::vector<index_filter> idx_filters() const {
+    uint32_t id = field_index_id_;
+    switch (op_) {
+      case relop_id::EQ:
+      case relop_id::GE:
+      case relop_id::LE:
+      case relop_id::GT:
+      case relop_id::LT:
+        return {index_filter(id, rbegin_.copy(), rend_.copy())};
+      default:
+        return {};
+    }
+  }
+
+  inline bool test(const record_t& r) const {
+    return immutable_value::relop(op_, r[field_idx_].value(), val_);
+  }
+
+  inline bool test(const schema_snapshot& snap, void* data) const {
+    return immutable_value::relop(op_, snap.get(data, field_idx_), val_);
+  }
+
+  inline std::string to_string() const {
+    return field_name_ + relop_utils::op_to_str(op_) + val_.to_string();
+  }
+
+  inline bool operator<(const compiled_predicate& other) const {
+    return to_string() < other.to_string();
+  }
+
+ private:
+  std::string field_name_;
+  uint32_t field_idx_;
+  bool is_field_indexed_;
+  uint32_t field_index_id_;
+  double field_index_bucket_size_;
+  data_type field_type_;
+
+  relop_id op_;
+  mutable_value val_;
+
+  byte_string rbegin_;
+  byte_string rend_;
+};
+
+struct compiled_minterm {
+  typedef std::set<compiled_predicate>::iterator iterator;
+  typedef std::set<compiled_predicate>::const_iterator const_iterator;
+
+  compiled_minterm() = default;
+
+  compiled_minterm(const compiled_minterm& other)
+      : m_(other.m_) {
+  }
+
+  inline void add(const compiled_predicate& p) {
+    m_.insert(p);
+  }
+
+  inline void add(compiled_predicate&& p) {
+    m_.insert(std::move(p));
+  }
+
+  inline bool test(const record_t& r) const {
+    for (auto& p : m_)
+      if (!p.test(r))
+        return false;
+    return true;
+  }
+
+  inline bool test(const schema_snapshot& snap, void* data) const {
+    for (auto& p : m_)
+      if (!p.test(snap, data))
+        return false;
+    return true;
+  }
+
+  std::string to_string() const {
+    std::string s = "";
+    size_t size = m_.size();
+    size_t i = 0;
+    for (auto& p : m_) {
+      s += p.to_string();
+      if (++i < size)
+        s += " and ";
+    }
+    return s;
+  }
+
+  iterator begin() {
+    return m_.begin();
+  }
+
+  iterator end() {
+    return m_.end();
+  }
+
+  const_iterator begin() const {
+    return m_.begin();
+  }
+
+  const_iterator end() const {
+    return m_.end();
+  }
+
+  inline bool operator<(const compiled_minterm& other) const {
+    return to_string() < other.to_string();
+  }
+
+  size_t size() const {
+    return m_.size();
+  }
+
+ private:
+  std::set<compiled_predicate> m_;
+};
+
+struct compiled_expression : public std::set<compiled_minterm> {
+  inline bool test(const record_t& r) const {
+    if (empty())
+      return true;
+
+    for (auto& p : *this)
+      if (p.test(r))
+        return true;
+
+    return false;
+  }
+
+  inline bool test(const schema_snapshot& snap, void* data) const {
+      if (empty())
+        return true;
+
+      for (auto& p : *this)
+        if (p.test(snap, data))
+          return true;
+
+      return false;
+    }
+
+  std::string to_string() const {
+    std::string ret = "";
+    size_t s = size();
+    size_t i = 0;
+    for (auto& p : *this) {
+      ret += p.to_string();
+      if (++i < s - 1)
+        ret += " or ";
+    }
+    return ret;
+  }
+};
 
 class utree_expand_conjunction {
  public:
