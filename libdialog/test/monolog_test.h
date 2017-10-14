@@ -101,6 +101,35 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseTest) {
   monolog_test(array);
 }
 
+TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
+  monolog_exp2_linear_base<int> array;
+  array.set(3, 10);
+  int value = array.get(3);
+  ASSERT_EQ(10, value);
+  int data[3];
+  data[0] = 1;
+  data[1] = 2;
+  data[2] = 3;
+
+  array.set(0, data, 3);
+
+  int buffer[3];
+  const int* result = array.ptr(0);
+  for (size_t i = 0; i < 3; i++) {
+    ASSERT_EQ(data[i], *(result + i));
+  }
+
+  array.ensure_alloc(5, 8);
+  int new_data[3];
+  new_data[0] = 10;
+  new_data[1] = 11;
+  new_data[2] = 12;
+
+  array.set_unsafe(5, new_data, 3);
+  array.get(buffer, 5, 3);
+  ASSERT_EQ(new_data[0], buffer[0]);
+}
+
 TEST_F(MonoLogTest, MonoLogExp2LinearTest) {
   monolog_exp2_linear<uint64_t> array;
   monolog_test(array);
