@@ -14,10 +14,12 @@
 #include <sys/mman.h>
 #include <errno.h>
 
-#include "data_log_pool.h"
-#include "file_utils.h"
-#include "mmap_utils.h"
 #include "assertions.h"
+#include "file_utils.h"
+#include "mem_allocator.h"
+#include "mmap_utils.h"
+#include "ptr.h"
+#include "ptr_metadata.h"
 
 #define PROT_RW PROT_READ | PROT_WRITE
 
@@ -30,6 +32,7 @@ namespace storage {
 using namespace ::utils;
 
 typedef void* (*allocate_fn)(const std::string& path, size_t size);
+typedef uint8_t* (*allocate_block_fn)(const std::string& path, size_t size);
 typedef void (*free_fn)(void* ptr, size_t size);
 typedef void (*flush_fn)(void* ptr, size_t size);
 
@@ -42,6 +45,7 @@ enum storage_id {
 struct storage_mode {
   storage_id id;
   allocate_fn allocate;
+  allocate_block_fn allocate_block;
   free_fn free;
   flush_fn flush;
 };
@@ -57,10 +61,11 @@ struct in_memory {
    * @param size Size of requested memory.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    if (size == data_log_constants::BLOCK_SIZE) {
-      return static_cast<void*>(DATA_LOG_BLOCK_POOL.alloc(size / sizeof(uint8_t)));
-    }
     return malloc(size);
+  }
+
+  inline static uint8_t* allocate_block(const std::string& path, size_t size) {
+    return ALLOCATOR.alloc<uint8_t>(size / sizeof(uint8_t));
   }
 
   /**
@@ -70,11 +75,7 @@ struct in_memory {
    * @param size Size of allocated memory.
    */
   inline static void free_mem(void* ptr, size_t size) {
-    if (size == data_log_constants::BLOCK_SIZE) {
-      DATA_LOG_BLOCK_POOL.dealloc(static_cast<uint8_t*>(ptr), size / sizeof(uint8_t));
-    } else {
-      free(ptr);
-    }
+    free(ptr);
   }
 
   /**
@@ -106,6 +107,10 @@ struct durable_relaxed {
     void* data = mmap_utils::map(fd, nullptr, 0, size);
     file_utils::close_file(fd);
     return data;
+  }
+
+  inline static uint8_t* allocate_block(const std::string& path, size_t size) {
+    return ALLOCATOR.mmap<uint8_t>(path, size/sizeof(uint8_t));
   }
 
   /**
@@ -149,6 +154,10 @@ struct durable {
     return data;
   }
 
+  inline static uint8_t* allocate_block(const std::string& path, size_t size) {
+    return ALLOCATOR.mmap<uint8_t>(path, size/sizeof(uint8_t));
+  }
+
   /**
    * Frees allocated memory. Does not delete backing file.
    *
@@ -161,7 +170,7 @@ struct durable {
 
   /**
    * Flushes data to backed file (does nothing for this storage mode).
-   *
+   * TODO: add method for swappable_ptr
    * @param ptr Pointer to memory.
    * @param size Size of allocated memory.
    */
@@ -170,13 +179,13 @@ struct durable {
   }
 };
 
-static storage_mode IN_MEMORY = { storage_id::D_IN_MEMORY, in_memory::allocate,
+static storage_mode IN_MEMORY = { storage_id::D_IN_MEMORY, in_memory::allocate, in_memory::allocate_block,
     in_memory::free_mem, in_memory::flush };
 
-static storage_mode DURABLE_RELAXED = { storage_id::D_DURABLE_RELAXED,
-    durable_relaxed::allocate, durable_relaxed::free, durable_relaxed::flush };
+static storage_mode DURABLE_RELAXED = { storage_id::D_DURABLE_RELAXED, durable_relaxed::allocate,
+    durable_relaxed::allocate_block, durable_relaxed::free, durable_relaxed::flush };
 
-static storage_mode DURABLE = { storage_id::D_DURABLE, durable::allocate,
+static storage_mode DURABLE = { storage_id::D_DURABLE, durable::allocate, durable::allocate_block,
     durable::free, durable::flush };
 
 static storage_mode STORAGE_MODES[3] = { IN_MEMORY, DURABLE_RELAXED, DURABLE };
