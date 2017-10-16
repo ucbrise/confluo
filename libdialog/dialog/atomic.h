@@ -52,6 +52,7 @@ static inline bool cas(type<T>* obj, T* expected, const T& desired) {
   return __atomic_compare_exchange(obj, expected, &desired, false, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);
 #endif
 }
+
 }
 
 // Exchange
@@ -72,6 +73,16 @@ static inline T faa(type<T>* obj, const T& arg) {
   return std::atomic_fetch_add_explicit(obj, arg, std::memory_order_release);
 #else
   return __atomic_fetch_add(obj, arg, __ATOMIC_RELEASE);
+#endif
+}
+
+// Fetch and subtract
+template<typename T>
+static inline T fas(type<T>* obj, const T& arg) {
+#ifdef CPP11_ATOMICS
+  return std::atomic_fetch_sub_explicit(obj, arg, std::memory_order_release);
+#else
+  return __atomic_fetch_sub(obj, arg, __ATOMIC_RELEASE);
 #endif
 }
 
