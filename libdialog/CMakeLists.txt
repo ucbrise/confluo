@@ -8,7 +8,8 @@ set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 
 include_directories(${GTEST_INCLUDE_DIR}
   ${DIALOG_INCLUDE}
-  ${UTILS_INCLUDE})
+  ${UTILS_INCLUDE}
+  ${Boost_INCLUDE_DIRS})
 
 if (BUILD_TESTS)
   # Build test
