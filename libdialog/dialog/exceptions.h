@@ -28,12 +28,13 @@ class name : public std::exception {\
   std::string msg_;\
 };
 
+DEFINE_EXCEPTION(archival_exception)
 DEFINE_EXCEPTION(parse_exception)
 DEFINE_EXCEPTION(invalid_access_exception)
 DEFINE_EXCEPTION(invalid_cast_exception)
 DEFINE_EXCEPTION(invalid_operation_exception)
 DEFINE_EXCEPTION(illegal_state_exception)
-DEFINE_EXCEPTION(mempool_exception)
+DEFINE_EXCEPTION(memory_exception)
 DEFINE_EXCEPTION(unsupported_exception)
 DEFINE_EXCEPTION(management_exception)
 

@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 
+#include "mem_allocator_test.h"
+#include "ptr_test.h"
 #include "aggregate_test.h"
 #include "aggregated_reflog_test.h"
 #include "bitmap_test.h"
@@ -19,8 +21,7 @@
 #include "flatten_test.h"
 #include "immutable_value_test.h"
 #include "index_state_test.h"
-#include "mempool_test.h"
-#include "mempool_stat_test.h"
+#include "memory_stat_test.h"
 #include "monolog_test.h"
 #include "mutable_value_test.h"
 #include "periodic_task_test.h"
