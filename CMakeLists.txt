@@ -55,6 +55,9 @@ endif()
 # Options
 include(BuildOptions)
 
+# Functions
+include(Functions)
+
 # Dependencies
 include(Dependencies)
 

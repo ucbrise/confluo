@@ -29,7 +29,7 @@ class DialogShell(Command):
         os.execv(python_ex, [ python_ex, "-i", "preamble.py"])
 
 setup(name='dialog',
-      version='0.1.0',
+      version='${DIALOG_VERSION}',
       description='Python Client for DiaLog',
       author='Anurag Khandelwal',
       author_email='anuragk@berkley.edu',
