@@ -85,6 +85,10 @@ if (BUILD_RPC)
   endif()
 endif()
 
+if (BUILD_DOC)
+  add_subdirectory(docs)
+endif()
+
 # CPack
 set(CPACK_PACKAGE_NAME "libdialog")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DiaLog")
