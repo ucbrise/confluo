@@ -9,7 +9,6 @@
 #include "gtest/gtest.h"
 
 using namespace ::dialog::parser;
-using namespace ::boost;
 
 class ExpressionParserTest : public testing::Test {
  public:

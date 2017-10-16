@@ -254,7 +254,6 @@ struct expression_parser : qi::grammar<I, ascii::space_type, spirit::utree()> {
     using qi::_val;
     using qi::_1;
     using qi::_a;
-    using qi::char_;
     using qi::alpha;
     using qi::alnum;
     using qi::lexeme;

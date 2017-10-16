@@ -6,6 +6,7 @@ set(BOOST_VERSION "1.53")
 
 find_package(Threads REQUIRED)
 find_package(Boost ${BOOST_VERSION} REQUIRED)
+message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
 
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
 set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
@@ -85,7 +86,6 @@ if (BUILD_RPC)
   include_directories(SYSTEM ${THRIFT_INCLUDE_DIR} ${THRIFT_INCLUDE_DIR}/thrift)
   message(STATUS "Thrift include dir: ${THRIFT_INCLUDE_DIR}")
   message(STATUS "Thrift static library: ${THRIFT_STATIC_LIB}")
-  message(STATUS "Thrift compiler: ${THRIFT_COMPILER}")
   add_library(thriftstatic STATIC IMPORTED GLOBAL)
   set_target_properties(thriftstatic PROPERTIES IMPORTED_LOCATION ${THRIFT_STATIC_LIB})
   

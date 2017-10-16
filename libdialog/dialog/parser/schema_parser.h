@@ -25,7 +25,6 @@ struct schema_parser : public qi::grammar<I, ascii::space_type, kv_list()> {
  public:
   schema_parser()
       : schema_parser::base_type(sch) {
-    using qi::char_;
     using qi::_val;
     using qi::_1;
     using qi::_a;
