@@ -3,9 +3,11 @@ include (ExternalProject)
 set(GTEST_VERSION "1.8.0")
 set(THRIFT_VERSION "0.10.0")
 set(BOOST_VERSION "1.53")
+set(DOXYGEN_VERSION "1.8")
 
 find_package(Threads REQUIRED)
 find_package(Boost ${BOOST_VERSION} REQUIRED)
+find_package(Doxygen ${DOXYGEN_VERSION})
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
 
 set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")

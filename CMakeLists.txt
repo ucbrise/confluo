@@ -55,6 +55,9 @@ endif()
 # Options
 include(BuildOptions)
 
+# Functions
+include(Functions)
+
 # Dependencies
 include(Dependencies)
 
@@ -83,6 +86,10 @@ if (BUILD_RPC)
   if (WITH_JAVA_CLIENT)
     add_subdirectory(javaclient)
   endif()
+endif()
+
+if (BUILD_DOC)
+  add_subdirectory(docs)
 endif()
 
 # CPack
