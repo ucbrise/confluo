@@ -57,6 +57,8 @@ class type_manager {
 
   }
 
+  typedef void (*regex_fn)(void* res, std::string& parse);
+
   static std::vector<void*> MIN;
   static std::vector<void*> MAX;
   static std::vector<void*> ONE;
@@ -66,6 +68,8 @@ class type_manager {
   static std::vector<unary_ops_t> UNOPS;
   static std::vector<binary_ops_t> BINOPS;
   static std::vector<key_op> KEYOPS;
+
+  static std::vector<regex_fn> REGEXES;
 
   static std::vector<data_type> data_types;
 
