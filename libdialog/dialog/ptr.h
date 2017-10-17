@@ -30,8 +30,10 @@ class read_only_ptr {
     ref_count_(ref_count) {
   }
 
-  read_only_ptr(const read_only_ptr<T>& other) {
-    init(other.ptr_, other.offset_, other.ref_count_);
+  read_only_ptr(const read_only_ptr<T>& other) :
+    ptr_(other.ptr_),
+    offset_(other.offset_),
+    ref_count_(other.ref_count_) {
     if (ref_count_ != nullptr)
       atomic::faa(ref_count_, 1U);
   }

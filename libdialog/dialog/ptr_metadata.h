@@ -19,6 +19,7 @@ typedef struct ptr_metadata {
   uint8_t thread_id_ : 8;
   state_type state_ : 4;
   alloc_type alloc_type_ : 4;
+  int unused: 16;
 
   /**
    * Get metadata associated with a pointer

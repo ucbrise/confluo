@@ -182,8 +182,7 @@ class dialog_service_handler : virtual public dialog_serviceIf {
     return store_->get_table(table_id)->append_batch(rbatch);
   }
 
-  void read(std::string& _return, int64_t table_id, const int64_t offset,
-      const int64_t nrecords) {
+  void read(std::string& _return, int64_t table_id, const int64_t offset, const int64_t nrecords) {
     uint64_t limit;
     ro_data_ptr ptr;
     store_->get_table(table_id)->read(offset, limit, ptr);

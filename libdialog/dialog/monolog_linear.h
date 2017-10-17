@@ -177,25 +177,12 @@ class monolog_linear_base {
     return bucket_size + data_size;
   }
 
-//  void set_archived_block(size_t block_idx, void* data, std::string file_path, size_t file_offset) {
-//    monolog_block<T, BUFFER_SIZE> block = blocks_[block_idx];
-//    error_if_archived(block, "Can't archive block twice!");
-//    block.archived_block_ = new archived_monolog_block<T, BUFFER_SIZE>(data, file_path, file_offset);
-//    delete block.in_memory_block_;
-//    block.is_in_memory_ = true;
-//  }
-
  protected:
   std::string name_;
   std::string data_path_;
   std::array<monolog_block<T, BUFFER_SIZE>, MAX_BLOCKS> blocks_;
 
  private:
-//  inline static void error_if_archived(monolog_block<T, BUFFER_SIZE> block, std::string error_msg) {
-//    if (!block.is_in_memory_) {
-//      THROW(archival_exception, error_msg);
-//    }
-//  }
 
 };
 

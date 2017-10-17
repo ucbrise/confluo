@@ -399,6 +399,7 @@ class dialog_table {
     version = rt_.get();
     if (offset < version) {
       data_log_.cptr(offset, ptr);
+      record_t r = schema_.apply(offset, ptr);
       return;
     }
     ptr.init(nullptr, 0, nullptr);

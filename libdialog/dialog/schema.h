@@ -81,7 +81,7 @@ class schema_t {
     return columns_.size();
   }
 
-  record_t apply(size_t offset, storage::read_only_ptr<uint8_t> data) const {
+  record_t apply(size_t offset, storage::read_only_ptr<uint8_t>& data) const {
     record_t r(offset, data, record_size_);
     r.reserve(columns_.size());
     for (uint16_t i = 0; i < columns_.size(); i++)
