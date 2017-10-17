@@ -13,5 +13,5 @@ if (DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen"
     VERBATIM)
 else (DOXYGEN_FOUND)
-  message(WARN "Skipping documentation build since Doxygen was not found")
+  message(WARNING "Skipping documentation build since Doxygen was not found")
 endif (DOXYGEN_FOUND)
