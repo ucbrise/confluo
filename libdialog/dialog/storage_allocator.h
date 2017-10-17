@@ -7,7 +7,7 @@
 #include "ptr_metadata.h"
 
 namespace dialog {
-namespace memory {
+namespace storage {
 
 using namespace ::utils;
 
@@ -15,10 +15,10 @@ using namespace ::utils;
  * Allocator interface
  * TODO: delegate requests to memory pools
  */
-class mem_allocator {
+class storage_allocator {
 
  public:
-  mem_allocator() :
+  storage_allocator() :
     mem_stat_(),
     mmap_stat_() {
   }
@@ -69,9 +69,9 @@ class mem_allocator {
     void* data = mmap_utils::map(fd, nullptr, 0, alloc_size);
     file_utils::close_file(fd);
 
-    memory::ptr_metadata* metadata = static_cast<ptr_metadata*>(data);
-    metadata->alloc_type_ = memory::alloc_type::D_MMAP;
-    metadata->state_ = memory::state_type::D_IN_MEMORY;
+    storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(data);
+    metadata->alloc_type_ = alloc_type::D_MMAP;
+    metadata->state_ = state_type::D_IN_MEMORY;
     metadata->size_ = len * sizeof(T);
 
     return reinterpret_cast<T*>(metadata + 1);
@@ -83,10 +83,10 @@ class mem_allocator {
    */
   template<typename T>
   void dealloc(T* ptr) {
-    ptr_metadata* md = ptr_metadata::get_metadata(ptr);
+    ptr_metadata* md = ptr_metadata::get(ptr);
     size_t alloc_size = sizeof(ptr_metadata) + md->size_;
     switch (md->alloc_type_) {
-    case D_DEFAULT:
+    case alloc_type::D_DEFAULT:
       md->~ptr_metadata();
       for (T* p = ptr; p < ptr + md->size_/sizeof(T); p++) {
         p->~T();
@@ -94,7 +94,7 @@ class mem_allocator {
       ::operator delete(static_cast<void*>(md));
       mem_stat_.decrement(alloc_size);
       break;
-    case D_MMAP:
+    case alloc_type::D_MMAP:
       mmap_utils::unmap(reinterpret_cast<ptr_metadata*>(ptr) - 1, alloc_size);
       mmap_stat_.decrement(alloc_size);
       break;

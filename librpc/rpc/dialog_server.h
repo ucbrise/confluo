@@ -185,7 +185,9 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   void read(std::string& _return, int64_t table_id, const int64_t offset,
       const int64_t nrecords) {
     uint64_t limit;
-    char* data = reinterpret_cast<char*>(store_->get_table(table_id)->read(offset, limit));
+    ro_data_ptr ptr;
+    store_->get_table(table_id)->read(offset, limit, ptr);
+    char* data = reinterpret_cast<char*>(ptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
         static_cast<size_t>(nrecords * store_->get_table(table_id)->record_size()));
     _return.assign(data, size);

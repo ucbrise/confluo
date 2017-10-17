@@ -14,8 +14,8 @@ using namespace ::utils;
 template<typename T, size_t BUFFER_SIZE = 1048576>
 class monolog_block {
  public:
-  typedef memory::swappable_ptr<T> __atomic_block_ref;
-  typedef memory::read_only_ptr<T> __atomic_block_copy_ref;
+  typedef storage::swappable_ptr<T> __atomic_block_ref;
+  typedef storage::read_only_ptr<T> __atomic_block_copy_ref;
 
   typedef bool block_state;
   static const block_state UNINIT = false;
@@ -38,13 +38,15 @@ class monolog_block {
         storage_(storage) {
   }
 
-//  in_memory_monolog_block(const in_memory_monolog_block& other)
-//      : path_(other.path_),
-//        state_(other.state_),
-////        data_(other.data_), TODO
-//        size_(other.size_),
-//        storage_(other.storage_) {
-//  }
+  monolog_block(const monolog_block<T, BUFFER_SIZE>& other)
+      : path_(other.path_),
+        state_(other.state_),
+        size_(other.size_),
+        storage_(other.storage_) {
+    __atomic_block_copy_ref copy;
+    other.data_.atomic_copy(copy);
+    data_.atomic_init(copy.ptr_);
+  }
 
   void init(const std::string& path, const size_t size,
             const storage::storage_mode& storage) {
@@ -111,22 +113,19 @@ class monolog_block {
     return copy.get()[i];
   }
 
-  void* ptr(size_t offset) {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    if (copy.get() == nullptr) {
-      try_allocate(copy);
+  void ptr(size_t offset, __atomic_block_copy_ref& data_ptr) {
+    data_.atomic_copy(data_ptr, offset);
+    if (data_ptr.get() == nullptr) {
+      try_allocate(data_ptr);
+      data_ptr.set_offset(offset);
     }
-    return (void*) (copy.get() + offset);
   }
 
-  void* cptr(size_t offset) const {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    return (void*) (copy.get() + offset);
+  void cptr(size_t offset, __atomic_block_copy_ref& data_ptr) const {
+    data_.atomic_copy(data_ptr, offset);
   }
 
-  monolog_block& operator=(const monolog_block& other) {
+  monolog_block& operator=(const monolog_block<T, BUFFER_SIZE>& other) {
     path_ = other.path_;
     atomic::init(&state_, atomic::load(&other.state_));
     __atomic_block_copy_ref copy;

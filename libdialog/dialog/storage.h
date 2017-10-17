@@ -16,10 +16,10 @@
 
 #include "assertions.h"
 #include "file_utils.h"
-#include "mem_allocator.h"
 #include "mmap_utils.h"
 #include "ptr.h"
 #include "ptr_metadata.h"
+#include "storage_allocator.h"
 
 #define PROT_RW PROT_READ | PROT_WRITE
 

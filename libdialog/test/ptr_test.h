@@ -8,7 +8,7 @@
 #include "ptr_metadata.h"
 
 using namespace ::dialog;
-using namespace ::dialog::memory;
+using namespace ::dialog::storage;
 
 class PtrTest : public testing::Test {
 
@@ -51,7 +51,7 @@ TEST_F(PtrTest, SwapTest) {
   {
     uint64_t* data = ALLOCATOR.alloc<uint64_t>(ARRAY_SIZE);
     uint64_t* data_swapped = ALLOCATOR.alloc<uint64_t>(ARRAY_SIZE);
-    ptr_metadata::get_metadata(data_swapped)->state_ = state_type::D_ARCHIVED;
+    ptr_metadata::get(data_swapped)->state_ = state_type::D_ARCHIVED;
     swappable_ptr<uint64_t> ptr(data);
 
     {

@@ -22,7 +22,7 @@ class rpc_record_stream {
   }
 
   record_t get() {
-    return schema_.apply(0, &handle_.data[cur_off_]);
+    return schema_.apply_unsafe(0, &handle_.data[cur_off_]);
   }
 
   rpc_record_stream& operator++() {

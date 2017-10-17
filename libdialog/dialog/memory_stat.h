@@ -5,7 +5,7 @@
 #include "atomic.h"
 
 namespace dialog {
-namespace memory {
+namespace storage {
 
 class memory_stat {
 

@@ -294,7 +294,9 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
   client.write(ts_str + pad_str("abc", DATA_SIZE));
 
-  std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
+  ro_data_ptr ptr;
+  dtable->read(0, ptr);
+  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()),
   DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
@@ -329,16 +331,18 @@ TEST_F(ClientWriteOpsTest, BufferTest) {
   client.buffer(ts_str + pad_str("ghi", DATA_SIZE));
   client.flush();
 
-  std::string buf = std::string(reinterpret_cast<const char*>(dtable->read(0)),
-  DATA_SIZE);
+  ro_data_ptr ptr;
+
+  dtable->read(0, ptr);
+  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get(), DATA_SIZE));
   ASSERT_EQ(buf.substr(8, 3), "abc");
-  std::string buf2 = std::string(
-      reinterpret_cast<const char*>(dtable->read(schema_size)),
-      DATA_SIZE);
+
+  dtable->read(schema_size, ptr);
+  std::string buf2 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
   ASSERT_EQ(buf2.substr(8, 3), "def");
-  std::string buf3 = std::string(
-      reinterpret_cast<const char*>(dtable->read(schema_size * 2)),
-      DATA_SIZE);
+
+  dtable->read(schema_size * 2, ptr);
+  std::string buf3 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
   ASSERT_EQ(buf3.substr(8, 3), "ghi");
 
   client.disconnect();

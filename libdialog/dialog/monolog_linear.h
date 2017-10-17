@@ -6,6 +6,7 @@
 
 #include "atomic.h"
 #include "monolog_linear_block.h"
+#include "ptr.h"
 #include "storage.h"
 
 // TODO: Add documentation
@@ -29,7 +30,6 @@ class monolog_linear_base {
     data_path_ = data_path;
     for (size_t i = 0; i < MAX_BLOCKS; i++) {
       std::string block_path = data_path + "/" + name + "_" + std::to_string(i) + ".dat";
-//      blocks_[i] = new monolog_block<T, BUFFER_SIZE>();
       blocks_[i].init(block_path, BLOCK_SIZE, storage);
     }
     blocks_[0].ensure_alloc();
@@ -147,19 +147,19 @@ class monolog_linear_base {
   /**
    * Gets a pointer to the data at idx
    * @param idx monolog index
-   * @return pointer to data
+   * @param data_ptr read-only pointer to store in
    */
-  void* ptr(size_t idx) {
-    return blocks_[idx / BLOCK_SIZE].ptr(idx % BLOCK_SIZE);
+  void ptr(size_t idx, storage::read_only_ptr<T>& data_ptr) {
+    blocks_[idx / BLOCK_SIZE].ptr(idx % BLOCK_SIZE, data_ptr);
   }
 
   /**
    * Gets a pointer to the data at idx
    * @param idx monolog index
-   * @return pointer to data
+   * @param data_ptr read-only pointer to store in
    */
-  void* cptr(size_t idx) const {
-    return blocks_[idx / BLOCK_SIZE].cptr(idx % BLOCK_SIZE);
+  void cptr(size_t idx, storage::read_only_ptr<T>& data_ptr) const {
+    blocks_[idx / BLOCK_SIZE].cptr(idx % BLOCK_SIZE, data_ptr);
   }
 
   T& operator[](size_t idx) {

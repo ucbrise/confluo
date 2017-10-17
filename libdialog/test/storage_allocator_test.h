@@ -2,11 +2,10 @@
 #define TEST_ALLOCATOR_TEST_H_
 
 #include "gtest/gtest.h"
-
-#include "mem_allocator.h"
 #include "memory_stat.h"
+#include "storage_allocator.h"
 
-using namespace ::dialog::memory;
+using namespace ::dialog::storage;
 
 class AllocatorTest : public testing::Test {
 
@@ -16,7 +15,7 @@ class AllocatorTest : public testing::Test {
 };
 
 TEST_F(AllocatorTest, AllocTest) {
-  mem_allocator allocator;
+  storage_allocator allocator;
 
   int64_t start = utils::time_utils::cur_ns();
   uint64_t* ptr = allocator.alloc<uint64_t>(ARRAY_SIZE);
@@ -34,7 +33,7 @@ TEST_F(AllocatorTest, AllocTest) {
 }
 
 TEST_F(AllocatorTest, DeallocTest) {
-  mem_allocator allocator;
+  storage_allocator allocator;
   size_t used_memory = allocator.memory_utilization();
 
   uint64_t* ptr = allocator.alloc<uint64_t>(ARRAY_SIZE);
@@ -46,11 +45,11 @@ TEST_F(AllocatorTest, DeallocTest) {
 }
 
 TEST_F(AllocatorTest, GetMetaDataTest) {
-  mem_allocator allocator;
+  storage_allocator allocator;
   size_t used_memory = allocator.memory_utilization();
   uint64_t* ptr = allocator.alloc<uint64_t>(ARRAY_SIZE);
 
-  ptr_metadata* metadata = ptr_metadata::get_metadata(ptr);
+  ptr_metadata* metadata = ptr_metadata::get(ptr);
   ASSERT_EQ(metadata->size_, ARRAY_SIZE * sizeof(uint64_t));
 }
 

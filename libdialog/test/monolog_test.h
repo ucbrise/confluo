@@ -114,9 +114,11 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
   array.set(0, data, 3);
 
   int buffer[3];
-  const int* result = array.ptr(0);
+  read_only_ptr<int> result;
+  array.ptr(0, result);
+  int* result_ptr = result.get();
   for (size_t i = 0; i < 3; i++) {
-    ASSERT_EQ(data[i], *(result + i));
+    ASSERT_EQ(data[i], *(result_ptr + i));
   }
 
   array.ensure_alloc(5, 8);

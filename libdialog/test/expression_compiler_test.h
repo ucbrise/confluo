@@ -50,7 +50,7 @@ class ExpressionCompilerTest : public testing::Test {
       double g) {
     r = {INT64_C(0), a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0}};
-    return s.apply(0, &r);
+    return s.apply_unsafe(0, &r);
   }
 
   static compiled_predicate predicate(const std::string& attr, relop_id id,
