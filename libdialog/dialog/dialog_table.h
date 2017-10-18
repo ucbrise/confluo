@@ -424,11 +424,11 @@ class dialog_table {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
-    query_planner planner(cexpr, indexes_);
+    query_planner planner(cexpr, indexes_, schema_);
     query_plan plan = planner.plan();
     std::vector<fri_rstream_type> fstreams;
-    for (minterm_plan& mplan : plan) {
-      const index_filter& f = mplan.idx_filter();
+    for (auto& mplan : plan) {
+      const auto& f = mplan.idx_filter();
       auto mres = indexes_.at(f.index_id())->range_lookup(f.kbegin(), f.kend());
       ri_stream_type rs(version, mres, schema_, data_log_);
       fstreams.push_back(fri_rstream_type(rs, mplan.data_filter()));

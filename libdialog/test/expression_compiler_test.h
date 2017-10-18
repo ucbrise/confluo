@@ -67,27 +67,27 @@ class ExpressionCompilerTest : public testing::Test {
   static void check_predicate(const compiled_predicate& c) {
     if (c.to_string() == "A==bool(1)") {
       ASSERT_EQ("A", c.field_name());
-      ASSERT_TRUE(BOOL_TYPE == c.field_type());
+      ASSERT_TRUE(BOOL_TYPE == c.value().type());
       ASSERT_EQ(relop_id::EQ, c.op());
     } else if (c.to_string() == "B<char(53)") {
       ASSERT_EQ("B", c.field_name());
-      ASSERT_TRUE(CHAR_TYPE == c.field_type());
+      ASSERT_TRUE(CHAR_TYPE == c.value().type());
       ASSERT_EQ(relop_id::LT, c.op());
     } else if (c.to_string() == "C<short(10)") {
       ASSERT_EQ("C", c.field_name());
-      ASSERT_TRUE(SHORT_TYPE == c.field_type());
+      ASSERT_TRUE(SHORT_TYPE == c.value().type());
       ASSERT_EQ(relop_id::LT, c.op());
     } else if (c.to_string() == "E<long(10)") {
       ASSERT_EQ("E", c.field_name());
-      ASSERT_TRUE(LONG_TYPE == c.field_type());
+      ASSERT_TRUE(LONG_TYPE == c.value().type());
       ASSERT_EQ(relop_id::LT, c.op());
     } else if (c.to_string() == "F<float(1.300000)") {
       ASSERT_EQ("F", c.field_name());
-      ASSERT_TRUE(FLOAT_TYPE == c.field_type());
+      ASSERT_TRUE(FLOAT_TYPE == c.value().type());
       ASSERT_EQ(relop_id::LT, c.op());
     } else if (c.to_string() == "G<double(1.900000)") {
       ASSERT_EQ("G", c.field_name());
-      ASSERT_TRUE(DOUBLE_TYPE == c.field_type());
+      ASSERT_TRUE(DOUBLE_TYPE == c.value().type());
       ASSERT_EQ(relop_id::LT, c.op());
     } else {
       ASSERT_TRUE(false);
