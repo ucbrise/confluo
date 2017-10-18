@@ -118,7 +118,8 @@ class mutable_value : public immutable_value {
         return mutable_value(type, t_str.c_str());
       }
       default: {
-        THROW(parse_exception, "Could not parse value");
+        THROW(parse_exception,
+              "Could not parse value " + str + " to type " + type.to_string());
       }
     }
   }
