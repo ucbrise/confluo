@@ -20,7 +20,7 @@
 #include "filter_log.h"
 #include "alert_index.h"
 #include "periodic_task.h"
-#include "query_planner.h"
+#include "planner/query_planner.h"
 #include "record_stream.h"
 #include "radix_tree.h"
 #include "filter.h"
@@ -37,6 +37,8 @@
 using namespace ::dialog::monolog;
 using namespace ::dialog::index;
 using namespace ::dialog::monitor;
+using namespace ::dialog::parser;
+using namespace ::dialog::planner;
 using namespace ::utils;
 
 namespace dialog {
@@ -424,16 +426,9 @@ class dialog_table {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
-    query_planner planner(cexpr, indexes_, schema_);
+    query_planner planner(cexpr, data_log_, indexes_, schema_);
     query_plan plan = planner.plan();
-    std::vector<fri_rstream_type> fstreams;
-    for (auto& mplan : plan) {
-      const auto& f = mplan.idx_filter();
-      auto mres = indexes_.at(f.index_id())->range_lookup(f.kbegin(), f.kend());
-      ri_stream_type rs(version, mres, schema_, data_log_);
-      fstreams.push_back(fri_rstream_type(rs, mplan.data_filter()));
-    }
-    return fri_result_type(fstreams);
+    return plan.execute(version);
   }
 
   filter_rstream_type query_filter(const std::string& filter_name,

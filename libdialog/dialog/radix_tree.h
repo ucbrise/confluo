@@ -1,6 +1,9 @@
 #ifndef DIALOG_RADIX_TREE_H_
 #define DIALOG_RADIX_TREE_H_
 
+#include <sstream>
+#include <string>
+
 #include "atomic.h"
 #include "byte_string.h"
 #include "exceptions.h"
@@ -398,12 +401,19 @@ class radix_tree {
     return rt_result(range_lookup_reflogs(begin, end));
   }
 
-  size_t approx_count(const key_t& begin, const key_t& end) {
+  size_t approx_count(const key_t& begin, const key_t& end) const {
     return std::accumulate(upper_bound(begin), ++lower_bound(end),
                            static_cast<size_t>(0),
                            [](size_t count, reflog& val) {
                              return count + val.size();
                            });
+  }
+
+  std::string to_string() const {
+    const void *addr = static_cast<const void*>(this);
+    std::stringstream ss;
+    ss << addr;
+    return ss.str();
   }
 
  private:
