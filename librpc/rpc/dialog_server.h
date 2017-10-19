@@ -32,9 +32,9 @@ namespace rpc {
 
 class dialog_service_handler : virtual public dialog_serviceIf {
  public:
-  typedef dialog_table::fri_result_type adhoc_stream;
-  typedef dialog_table::filter_rstream_type predef_stream;
-  typedef dialog_table::ffilter_rstream_type combined_stream;
+  typedef dialog_table::execute_filter_result adhoc_stream;
+  typedef dialog_table::query_filter_result predef_stream;
+  typedef dialog_table::adhoc_query_filter_result combined_stream;
   typedef dialog_table::alert_list::iterator alert_iterator;
   typedef std::pair<alert_iterator, alert_iterator> alert_entry;
 
