@@ -53,14 +53,11 @@ class dialog_table {
   typedef size_t filter_id_t;
   typedef std::pair<size_t, size_t> trigger_id_t;
 
-  typedef radix_index::rt_result ri_offset_list;
-  typedef record_stream<ri_offset_list> ri_stream_type;
-  typedef filtered_record_stream<ri_stream_type> fri_rstream_type;
-  typedef union_record_stream<fri_rstream_type> fri_result_type;
+  typedef query_plan::index_op_res execute_filter_result;
 
   typedef filter::range_result filter_offset_list;
-  typedef record_stream<filter_offset_list> filter_rstream_type;
-  typedef filtered_record_stream<filter_rstream_type> ffilter_rstream_type;
+  typedef record_stream<filter_offset_list> query_filter_result;
+  typedef filtered_record_stream<query_filter_result> adhoc_query_filter_result;
 
   typedef alert_index::alert_list alert_list;
 
@@ -81,6 +78,7 @@ class dialog_table {
         data_log_("data_log", path, storage),
         rt_(path, storage),
         metadata_(path, storage.id),
+        planner_(data_log_, indexes_, schema_),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     metadata_.write_schema(schema_);
@@ -186,15 +184,15 @@ class dialog_table {
    * @throw ex Management exception
    */
   bool is_indexed(const std::string& field_name) {
-      optional<management_exception> ex;
-      uint16_t idx;
-      try {
-          idx = schema_.get_field_index(field_name);
-      } catch (std::exception& e) {
-          THROW(management_exception, "Field name does not exist");
-      }
-      column_t& col = schema_[idx];
-      return col.is_indexed();
+    optional<management_exception> ex;
+    uint16_t idx;
+    try {
+      idx = schema_.get_field_index(field_name);
+    } catch (std::exception& e) {
+      THROW(management_exception, "Field name does not exist");
+    }
+    column_t& col = schema_[idx];
+    return col.is_indexed();
   }
 
   /**
@@ -422,46 +420,41 @@ class dialog_table {
    * @param expr The filter expression
    * @return The result of applying the filter to the table
    */
-  fri_result_type execute_filter(const std::string& expr) const {
+  query_plan::index_op_res execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
-    query_planner planner(cexpr, data_log_, indexes_, schema_);
-    query_plan plan = planner.plan();
-    return plan.execute(version);
+    query_plan plan = planner_.plan(cexpr);
+    return plan.execute_using_indexes(version);
   }
 
-  filter_rstream_type query_filter(const std::string& filter_name,
-                                   uint64_t ts_block_begin,
-                                   uint64_t ts_block_end) const {
-
+  query_filter_result query_filter(const std::string& filter_name,
+                                   uint64_t begin_ms, uint64_t end_ms) const {
     size_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
-      THROW(invalid_operation_exception,
-            "Filter " + filter_name + " does not exist.");
+      throw invalid_operation_exception(
+          "Filter " + filter_name + " does not exist.");
     }
 
-    auto res = filters_.at(filter_id)->lookup_range(ts_block_begin,
-                                                    ts_block_end);
-    return filter_rstream_type(rt_.get(), res, schema_, data_log_);
+    auto res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
+    return query_filter_result(rt_.get(), res, schema_, data_log_);
   }
 
   /**
    * Executes a query filter expression
    * @param filter_name The name of the filter
    * @param expr The filter expression
-   * @param ts_block_begin The beginning of the block
-   * @param ts_block_end The end of the block
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
    * @return A stream contanining the results of the filter
    */
-  ffilter_rstream_type query_filter(const std::string& filter_name,
-                                    const std::string& expr,
-                                    uint64_t ts_block_begin,
-                                    uint64_t ts_block_end) const {
-    auto t = parser::parse_expression(expr);
-    auto cexpr = parser::compile_expression(t, schema_);
-    return ffilter_rstream_type(
-        query_filter(filter_name, ts_block_begin, ts_block_end), cexpr);
+  adhoc_query_filter_result query_filter(const std::string& filter_name,
+                                         const std::string& expr,
+                                         uint64_t begin_ms,
+                                         uint64_t end_ms) const {
+    return adhoc_query_filter_result(
+        query_filter(filter_name, begin_ms, end_ms),
+        compile_expression(parse_expression(expr), schema_));
   }
 
   /**
@@ -601,6 +594,8 @@ class dialog_table {
 
   string_map<filter_id_t> filter_map_;
   string_map<trigger_id_t> trigger_map_;
+
+  query_planner planner_;
 
   // Manangement
   task_pool& mgmt_pool_;

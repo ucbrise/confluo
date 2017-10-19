@@ -4,6 +4,7 @@
 #include "radix_tree.h"
 #include "data_log.h"
 #include "schema.h"
+#include "record_offset_range.h"
 #include "record_stream.h"
 
 namespace dialog {
@@ -69,8 +70,15 @@ class no_valid_index_op : public query_op {
 
 class full_scan_op : public query_op {
  public:
-  full_scan_op(const compiled_expression& expr)
+  typedef record_offset_range offset_container;
+  typedef record_stream<offset_container> record_stream_t;
+  typedef filtered_record_stream<record_stream_t> filtered_record_stream_t;
+
+  full_scan_op(const data_log& dlog, const schema_t& schema,
+               const compiled_expression& expr)
       : query_op(query_op_type::D_SCAN_OP),
+        dlog_(dlog),
+        schema_(schema),
         expr_(expr) {
   }
 
@@ -82,7 +90,15 @@ class full_scan_op : public query_op {
     return UINT64_MAX;
   }
 
+  filtered_record_stream_t execute(uint64_t version) const {
+    auto mres = offset_container(version, schema_.record_size());
+    record_stream_t rs(version, mres, schema_, dlog_);
+    return filtered_record_stream_t(rs, expr_);
+  }
+
  private:
+  const data_log& dlog_;
+  const schema_t& schema_;
   const compiled_expression& expr_;
 };
 
@@ -143,7 +159,7 @@ class index_op : public query_op {
     return index_->approx_count(range_.first, range_.second);
   }
 
-  filtered_record_stream_t execute(uint64_t version) {
+  filtered_record_stream_t execute(uint64_t version) const {
     auto mres = index_->range_lookup(range_.first, range_.second);
     record_stream_t rs(version, mres, schema_, dlog_);
     return filtered_record_stream_t(rs, expr_);
