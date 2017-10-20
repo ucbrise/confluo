@@ -11,6 +11,35 @@
 
 namespace dialog {
 
+struct type_definition {
+    size_t size;
+    rel_ops_t rel_ops;
+    unary_ops_t un_ops;
+
+    binary_ops_t binary_ops;
+    key_op key_ops;
+
+    void* min;
+    void* max;
+
+    void* one;
+    void* zero;
+
+    type_definition(size_t _size, rel_ops_t _rel_ops,
+          unary_ops_t _un_ops, binary_ops_t _binary_ops, 
+          key_op _key_ops, void* _min, void* _max, void* _one, 
+          void* _zero) : size(_size),
+                         rel_ops(_rel_ops),
+                         un_ops(_un_ops),
+                         binary_ops(_binary_ops),
+                         key_ops(_key_ops),
+                         min(_min),
+                         max(_max),
+                         one(_one),
+                         zero(_zero) {
+    }
+};
+
 class type_manager {
  public:
 
@@ -20,21 +49,19 @@ class type_manager {
   /**
    * Registers a type to the manager
    */
-  static void register_type(size_t size, rel_ops_t rel_ops,
-          unary_ops_t un_ops, binary_ops_t binary_ops, 
-          key_op key_ops, void* min, void* max, void* one, void* zero) {
+  static void register_type(type_definition type_def) {
       id = atomic::faa(&id, (uint16_t) 1);
-      data_types.push_back(data_type(id, size));
+      data_types.push_back(data_type(id, type_def.size));
 
-      MIN.push_back(min);
-      MAX.push_back(max);
-      ONE.push_back(one);
-      ZERO.push_back(zero);
+      MIN.push_back(type_def.min);
+      MAX.push_back(type_def.max);
+      ONE.push_back(type_def.one);
+      ZERO.push_back(type_def.zero);
 
-      RELOPS.push_back(rel_ops);
-      UNOPS.push_back(un_ops);
-      BINOPS.push_back(binary_ops);
-      KEYOPS.push_back(key_ops);
+      RELOPS.push_back(type_def.rel_ops);
+      UNOPS.push_back(type_def.un_ops);
+      BINOPS.push_back(type_def.binary_ops);
+      KEYOPS.push_back(type_def.key_ops);
   }
 
   static void register_primitives() {
@@ -58,9 +85,6 @@ class type_manager {
   static void deregister_type() {
 
   }
-
- private:
-  //static std::atomic<std::uint16_t> id;
 };
 
 
