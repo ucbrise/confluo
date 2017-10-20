@@ -34,6 +34,7 @@ class DiaLogTableTest : public testing::Test {
       uint8_t expected = i % 256;
       uint8_t* data = data_ptr.get();
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
+
         ASSERT_EQ(data[j], expected);
       }
     }

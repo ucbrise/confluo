@@ -246,6 +246,8 @@ struct data_type {
         return "string";
       case type_id::D_NONE:
         return "none";
+      case 9:
+        return "ip_address";
       default:
         return "invalid(" + std::to_string(static_cast<uint16_t>(id)) + ")";
     }

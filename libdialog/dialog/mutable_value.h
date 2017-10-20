@@ -117,6 +117,10 @@ class mutable_value : public immutable_value {
         t_str.resize(type.size);
         return mutable_value(type, t_str.c_str());
       }
+      case 9: {
+        int32_t val = string_utils::lexical_cast<int32_t>(str);
+        return mutable_value(val);
+      }
       default: {
         THROW(parse_exception,
               "Could not parse value " + str + " to type " + type.to_string());

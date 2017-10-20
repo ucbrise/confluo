@@ -15,9 +15,18 @@ using namespace ::dialog;
 std::vector<data_type> dialog::type_manager::data_types;
 std::atomic<std::uint16_t> dialog::type_manager::id;
 
+type_definition type_def(sizeof(ip_address), 
+            get_relops(), get_unaryops(),
+            get_binaryops(), get_keyops(),
+            &limits::int_min, &limits::int_max, &limits::int_one,
+            &limits::int_zero);
+
 class TypeManagerTest : public testing::Test {
   public:
     static std::vector<column_t> schema() {
+        type_manager::register_primitives();
+        type_manager::register_type(type_def);
+
         schema_builder builder;
         builder.add_column(dialog::type_manager::data_types[9], "a");
         builder.add_column(dialog::type_manager::data_types[9], "b");
@@ -61,18 +70,11 @@ class TypeManagerTest : public testing::Test {
     }
 };
 
-//TypeManagerTest::rec TypeManagerTest::r;
-//std::vector<column_t> TypeManagerTest::s = schema();
-//task_pool TypeManagerTest::MGMT_POOL;
+TypeManagerTest::rec TypeManagerTest::r;
+std::vector<column_t> TypeManagerTest::s = schema();
+task_pool TypeManagerTest::MGMT_POOL;
 
 TEST_F(TypeManagerTest, RegisterTest) {
-    type_definition type_def(sizeof(ip_address), 
-            get_relops(), get_unaryops(),
-            get_binaryops(), get_keyops(),
-            &limits::int_min, &limits::int_max, &limits::int_one,
-            &limits::int_zero);
-    type_manager::register_type(type_def);
-
     int* limit_reference = (int*) (ONE[9]);
     int limit = *limit_reference;
     ASSERT_EQ(limits::int_one, limit);
@@ -88,10 +90,13 @@ TEST_F(TypeManagerTest, RegisterTest) {
     int* zero_ref = (int*) ZERO[9];
     int zero = *zero_ref;
     ASSERT_EQ(limits::int_zero, zero);
+
+    ASSERT_STREQ("ip_address", 
+            dialog::type_manager::data_types[9].to_string().c_str());
 }
 
 TEST_F(TypeManagerTest, FilterTest) {
-    /*dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, 
+    dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, 
             MGMT_POOL);
     dtable.append(record(ip_address(32), ip_address(42)));
     dtable.append(record(ip_address(50), ip_address(300)));
@@ -101,7 +106,7 @@ TEST_F(TypeManagerTest, FilterTest) {
         ASSERT_TRUE(r.get().at(1).value().to_data().as<ip_address>().
                 get_address() > 33);
         i++;
-    }*/
+    }
     //ASSERT_EQ(1, 1);
 }
 
