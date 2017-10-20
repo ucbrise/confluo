@@ -19,6 +19,7 @@
 #include "flatten_test.h"
 #include "immutable_value_test.h"
 #include "index_state_test.h"
+#include "lazy_stream_test.h"
 #include "mempool_test.h"
 #include "mempool_stat_test.h"
 #include "monolog_test.h"
