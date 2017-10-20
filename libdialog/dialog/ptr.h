@@ -8,6 +8,23 @@
 namespace dialog {
 namespace storage {
 
+class ptr_constants {
+ public:
+  // Increments/decrements for first and second counters
+  static const uint32_t FIRST_DELTA = 1U;
+  static const uint32_t SECOND_DELTA = 1U << 16;
+  static const uint32_t BOTH_DELTA = FIRST_DELTA + SECOND_DELTA;
+
+  static const uint32_t FIRST_MASK = (1U << 16) - 1;
+  static const uint32_t SECOND_SHIFT = 16;
+};
+
+const uint32_t ptr_constants::FIRST_DELTA;
+const uint32_t ptr_constants::SECOND_DELTA;
+const uint32_t ptr_constants::BOTH_DELTA;
+const uint32_t ptr_constants::FIRST_MASK;
+const uint32_t ptr_constants::SECOND_SHIFT;
+
 /**
  * Should be created by a swappable_ptr<T> or by copy
  * of another read_only_ptr<T>. It holds a pointer to
@@ -21,21 +38,26 @@ class read_only_ptr {
   read_only_ptr() :
     ptr_(nullptr),
     offset_(0),
-    ref_count_(nullptr) {
+    ref_counts_(nullptr),
+    uses_first_count_(true) {
   }
 
-  read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_count, size_t offset = 0) :
+  read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_counts, bool uses_first_count, size_t offset = 0) :
     ptr_(ptr),
     offset_(offset),
-    ref_count_(ref_count) {
+    ref_counts_(ref_counts) ,
+    uses_first_count_(uses_first_count) {
   }
 
   read_only_ptr(const read_only_ptr<T>& other) :
     ptr_(other.ptr_),
     offset_(other.offset_),
-    ref_count_(other.ref_count_) {
-    if (ref_count_ != nullptr)
-      atomic::faa(ref_count_, 1U);
+    ref_counts_(other.ref_counts_),
+    uses_first_count_(other.uses_first_count_) {
+    if (ref_counts_ != nullptr) {
+      uint32_t increment = uses_first_count_ ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
+      atomic::faa(ref_counts_, increment);
+    }
   }
 
   ~read_only_ptr() {
@@ -43,9 +65,12 @@ class read_only_ptr {
   }
 
   read_only_ptr& operator=(const read_only_ptr<T>& other) {
-    init(other.ptr_, other.offset_, other.ref_count_);
-    if (ref_count_ != nullptr)
-      atomic::faa(ref_count_, 1U);
+    // TODO potential infinite loop bug here
+    init(other.ptr_, other.offset_, other.ref_counts_, other.uses_first_count_);
+    if (ref_counts_ != nullptr) {
+      uint32_t increment = uses_first_count_ ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
+      atomic::faa(ref_counts_, increment);
+    }
     return *this;
   }
 
@@ -55,12 +80,14 @@ class read_only_ptr {
    * @param ptr pointer to data
    * @param offset offset
    * @param ref_count
+   * @param first_count
    */
-  void init(T* ptr, size_t offset, atomic::type<uint32_t>* ref_count) {
+  void init(T* ptr, size_t offset, bool uses_first_count, atomic::type<uint32_t>* ref_count) {
     decrement_compare_dealloc();
     ptr_ = ptr;
     offset_ = offset;
-    ref_count_ = ref_count;
+    ref_counts_ = ref_count;
+    uses_first_count_ = uses_first_count;
   }
 
   T* get() const {
@@ -77,14 +104,29 @@ class read_only_ptr {
    * not null. Deallocates the pointer if reference count reaches 0.
    */
   void decrement_compare_dealloc() {
-    if (ptr_ != nullptr && ref_count_ != nullptr && atomic::fas(ref_count_, 1U) == 1) {
-      ALLOCATOR.dealloc<T>(ptr_);
+    if (ptr_ != nullptr && ref_counts_ != nullptr) {
+      uint32_t decrement = uses_first_count_ ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
+      uint32_t prev_val = atomic::fas(ref_counts_, decrement);
+      if (uses_first_count_) {
+        prev_val &= ptr_constants::FIRST_MASK;
+      } else {
+        prev_val >>= ptr_constants::SECOND_SHIFT;
+      }
+      if (prev_val == 1) {
+        ALLOCATOR.dealloc<T>(ptr_);
+      }
     }
+  }
+
+  void decrement() {
+
   }
 
   T* ptr_;
   size_t offset_;
-  atomic::type<uint32_t>* ref_count_;
+  atomic::type<uint32_t>* ref_counts_;
+  // TODO: need to resolve space utilization since bool is an extra byte
+  bool uses_first_count_;
 
 };
 
@@ -93,10 +135,15 @@ class read_only_ptr {
  * The lifetime of a swappable pointer must exceed the lifetime of
  * any copies created by it, since copies rely on reference counts
  * allocated in the original pointer.
+ *
+ * After the internal pointer is set for the first time it can never
+ * be null.
  */
 template<typename T>
 class swappable_ptr {
+
  public:
+
   swappable_ptr() :
     swappable_ptr(nullptr) {
   }
@@ -107,8 +154,7 @@ class swappable_ptr {
    * @param ptr pointer
    */
   swappable_ptr(T* ptr) :
-    ref_count1_(1),
-    ref_count2_(1),
+    ref_counts_(ptr_constants::BOTH_DELTA),
     ptr_(ptr) {
   }
 
@@ -117,9 +163,9 @@ class swappable_ptr {
     if (ptr != nullptr) {
       ptr_metadata* metadata = ptr_metadata::get(ptr);
       if (metadata->state_ == state_type::D_IN_MEMORY) {
-        decrement_compare_dealloc(&ref_count1_);
+        decrement_compare_dealloc_first();
       } else if (metadata->state_ == state_type::D_ARCHIVED) {
-        decrement_compare_dealloc(&ref_count2_);
+        decrement_compare_dealloc_second();
       }
     }
   }
@@ -159,7 +205,39 @@ class swappable_ptr {
     atomic::store(&ptr_, new_ptr);
 
     // Deallocate the old pointer if there are no copies.
-    decrement_compare_dealloc(&ref_count1_);
+    decrement_compare_dealloc_first();
+  }
+
+  /**
+   * Atomically write to ptr_[idx]
+   * @param idx index to write to
+   * @param val value to write
+   * @return true if write successful, otherwise false
+   */
+  bool atomic_set(size_t idx, T val) {
+    bool result = false;
+    atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
+    T* ptr = atomic::load(&ptr_);
+    if (ptr != nullptr) {
+      ptr[idx] = val;
+      result = true;
+    }
+    atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
+    return result;
+  }
+
+  /**
+   * Atomically get ptr_[idx]
+   * @param idx index to write to
+   * @param val value to write
+   * @return true if write successful, otherwise false
+   */
+  T& atomic_get(size_t idx) const {
+    atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
+    T* ptr = atomic::load(&ptr_);
+    T& result = ptr[idx];
+    atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
+    return result;
   }
 
   /**
@@ -173,14 +251,12 @@ class swappable_ptr {
     // pointer can't be deallocated if there are no copies.
     // Protects against loading before a swap begins and
     // making a copy after the swap finishes.
-    atomic::faa(&ref_count1_, 1U);
-    atomic::faa(&ref_count2_, 1U);
+    atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
     T* ptr = atomic::load(&ptr_);
 
     if (ptr == nullptr) {
       // Decrement both ref counts (no possibility of them reaching 0 here)
-      atomic::fas(&ref_count1_, 1U);
-      atomic::fas(&ref_count2_, 1U);
+      atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
       return;
     }
 
@@ -188,13 +264,13 @@ class swappable_ptr {
     ptr_metadata* metadata = ptr_metadata::get(ptr);
     if (metadata->state_ == state_type::D_IN_MEMORY) {
       // decrement other ref count (no possibility of it reaching 0 here)
-      atomic::fas(&ref_count2_, 1U);
-      copy.init(ptr, offset, &ref_count1_);
+      atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA);
+      copy.init(ptr, offset, true, &ref_counts_);
       return;
     } else if (metadata->state_ == state_type::D_ARCHIVED) {
       // decrement other ref count (no possibility of it reaching 0 here)
-      atomic::fas(&ref_count1_, 1U);
-      copy.init(ptr, offset, &ref_count2_);
+      atomic::fas(&ref_counts_, ptr_constants::FIRST_DELTA);
+      copy.init(ptr, offset, false, &ref_counts_);
       return;
     } else {
       THROW(memory_exception, "Unsupported pointer state during copy!");
@@ -207,15 +283,20 @@ class swappable_ptr {
    * Decrements the ref count and deallocates the pointer if it reaches 0.
    * @param ref_count reference count to decrement
    */
-  void decrement_compare_dealloc(atomic::type<uint32_t>* ref_count) {
-    if (atomic::fas(ref_count, 1U) == 1) {
+  void decrement_compare_dealloc_first() {
+    if ((atomic::fas(&ref_counts_, 1U) & ptr_constants::FIRST_MASK) == 1) {
+      ALLOCATOR.dealloc<T>(ptr_);
+    }
+  }
+
+  void decrement_compare_dealloc_second() {
+    if ((atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA) >> ptr_constants::SECOND_SHIFT) == 1) {
       ALLOCATOR.dealloc<T>(ptr_);
     }
   }
 
   // mutable reference counts to support logically const functions
-  mutable atomic::type<uint32_t> ref_count1_;
-  mutable atomic::type<uint32_t> ref_count2_;
+  mutable atomic::type<uint32_t> ref_counts_;
 
   atomic::type<T*> ptr_;
 };

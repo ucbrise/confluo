@@ -68,11 +68,10 @@ class monolog_block {
   }
 
   void set(size_t i, const T& val) {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    if (copy.get() == nullptr)
-      try_allocate(copy);
-    copy.get()[i] = val;
+    if (!data_.atomic_set(i, val)) {
+      try_allocate();
+      data_.atomic_set(i, val);
+    }
   }
 
   void set_unsafe(size_t i, const T& val) {
@@ -96,9 +95,7 @@ class monolog_block {
   }
 
   const T& at(size_t i) const {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    return copy.get()[i];
+    return data_.atomic_get(i);
   }
 
   void read(size_t offset, T* data, size_t len) const {
@@ -157,6 +154,20 @@ class monolog_block {
       ;
 
     data_.atomic_copy(copy);
+  }
+
+  void try_allocate() {
+    block_state state = UNINIT;
+    if (atomic::strong::cas(&state_, &state, INIT)) {
+      size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
+      T* ptr = storage_.allocate_block(path_, file_size);
+      data_.atomic_init(ptr);
+      return;
+    }
+
+    // Someone else is initializing, stall until initialized
+    while (data_.atomic_load() == nullptr)
+      ;
   }
 
   std::string path_;

@@ -40,9 +40,6 @@ class storage_allocator {
     void* ptr = ::operator new(alloc_size);
     ptr_metadata* md = new (ptr) ptr_metadata;
     T* data_ptr = reinterpret_cast<T*>(md + 1);
-    for (T* p = data_ptr; p < data_ptr + len; p++) {
-      new (p) T;
-    }
 
     md->alloc_type_ = alloc_type::D_DEFAULT;
     md->state_ = state_type::D_IN_MEMORY;
@@ -88,9 +85,6 @@ class storage_allocator {
     switch (md->alloc_type_) {
     case alloc_type::D_DEFAULT:
       md->~ptr_metadata();
-      for (T* p = ptr; p < ptr + md->size_/sizeof(T); p++) {
-        p->~T();
-      }
       ::operator delete(static_cast<void*>(md));
       mem_stat_.decrement(alloc_size);
       break;

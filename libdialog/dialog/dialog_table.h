@@ -402,7 +402,7 @@ class dialog_table {
       record_t r = schema_.apply(offset, ptr);
       return;
     }
-    ptr.init(nullptr, 0, nullptr);
+    ptr.init(nullptr, 0, true, nullptr);
   }
 
   /**

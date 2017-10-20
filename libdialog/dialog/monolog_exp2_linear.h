@@ -98,12 +98,10 @@ class monolog_exp2_linear_base {
       container = try_allocate_container(container_idx);
     }
 
-    __atomic_bucket_copy_ref bucket;
-    container[bucket_idx].atomic_copy(bucket);
-    if (bucket.get() == nullptr) {
-      try_allocate_bucket(container, bucket_idx, bucket);
+    if (!container[bucket_idx].atomic_set(bucket_off, val)) {
+      try_allocate_bucket(container, bucket_idx);
+      container[bucket_idx].atomic_set(bucket_off, val);
     }
-    bucket.get()[bucket_off] = val;
   }
 
   /**
@@ -229,10 +227,7 @@ class monolog_exp2_linear_base {
     size_t bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
     size_t container_idx = hibit - fcs_hibit_;
-
-    __atomic_bucket_copy_ref bucket;
-    load_bucket_copy(container_idx, bucket_idx, bucket);
-    return bucket.get()[bucket_off];
+    return atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_get(bucket_off);
   }
 
   T& operator[](size_t idx) {
@@ -351,6 +346,14 @@ protected:
       ALLOCATOR.dealloc<T>(new_bucket_data);
     }
     container[bucket_idx].atomic_copy(copy);
+  }
+
+  void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
+    T* new_bucket_data = ALLOCATOR.alloc<T>(BUCKET_SIZE);
+    memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
+    if (!container[bucket_idx].atomic_init(new_bucket_data)) {
+      ALLOCATOR.dealloc<T>(new_bucket_data);
+    }
   }
 
   /**
