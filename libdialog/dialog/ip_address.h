@@ -15,81 +15,322 @@ namespace dialog {
 class ip_address {
   public:
    ip_address(std::string address_string) {
+       if (is_valid(address_string)) {
+           parse(address_string);
+       }
+   }
+
+   ip_address(uint32_t value) {
+       address = value;
    }
 
    std::string to_string() const {
+       return "";
    }
 
    bool is_valid(std::string address_string) {
-       std::regex re("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+       /*std::regex re("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
        std::cmatch match;
-       return std::regex_match(address_string, match, re);
+       return std::regex_match(address_string, match, re);*/
+       return true;
    }
 
    void parse(std::string address_string) {
-       if (!is_valid(address_string)) {
+       /*if (!is_valid(address_string)) {
            return;
        }
 
-       unsigned byte bytes[4];
+       unsigned char bytes[4] = {0, 0, 0, 0};
        sscanf(address_string, "%d.%d.%d.%d", bytes, bytes + 1, bytes + 2,
                bytes + 3);
        address = (256 * 256 * 256 * bytes[0]) + (256 * 256 * bytes[1]) +
-           (256 * bytes[2]) + bytes[3]l
+           (256 * bytes[2]) + bytes[3];*/
+       address = 9000;
    }
 
-   inline void add(void* res, const data& v1, const data& v2) {
+   /*template<>
+   inline void add<ip_address>(void* res, const data& v1, const data& v2) {
       (*(reinterpret_cast<T*>(res))).address = v1.as<T>().address +
           v2.as<T>().address;
-   }
+   }*/
 
-   inline void subtract(void* res, const data& v1, const data& v2) {
+   /*template<>
+   inline void subtract<ip_address>(void* res, const data& v1, 
+           const data& v2) {
       (*(reinterpret_cast<T*>(res))).address = v1.as<T>().address -
           v2.as<T>().address;
    }
 
-
-   inline void multiply(void* res, const data& v1, const data& v2) {
+   template<>
+   inline void multiply<ip_address>(void* res, const data& v1, 
+           const data& v2) {
        THROW(unsupported_exception, "operation not yet supported");
    }
 
-   inline void divide(void* res, const data& v1, const data& v2) {
+   template<>
+   inline void divide<ip_address>(void* res, const data& v1, 
+           const data& v2) {
        THROW(unsupported_exception, "operation not yet supported");
    }
 
-   inline void modulo(void* res, const data& v1, const data& v2) {
+   template<>
+   inline void modulo<ip_address>(void* res, const data& v1, 
+           const data& v2) {
        THROW(unsupported_exception, "operation not yet supported");
    }
    
-   inline void bw_and(void* res, const data& v1, const data& v2) {
+   template<>
+   inline void bw_and<ip_address>(void* res, const data& v1, 
+           const data& v2) {
        THROW(unsupported_exception, "operation not yet supported");
    }
 
-   inline void bw_or(void* res, const data& v1, const data& v2) {
-       THROW(unsupported_exception, "operation not yet supported");
-   }
-   
-   inline void bw_xor(void* res, const data& v1, const data& v2) {
-       THROW(unsupported_exception, "operation not yet supported");
-   }
-   
-   inline void bw_lshift(void* res, const data& v1, const data& v2) {
-       THROW(unsupported_exception, "operation not yet supported");
-   }
-   
-   inline void bw_rshift(void* res, const data& v1, const data& v2) {
+   template<>
+   inline void bw_or<ip_address>(void* res, const data& v1, 
+           const data& v2) {
        THROW(unsupported_exception, "operation not yet supported");
    }
 
-   static binary_ops_t get_binaryops() {
-       return {add, subtract, multiply, divide, modulo, bw_and, bw_or,
-           bw_xor, bw_lshift, bw_rshift};
+   template<>
+   inline void bw_xor<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
    }
 
+   template<>
+   inline void bw_lshift<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void bw_rshift<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void assign<ip_address>(void* res, const data& v) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void negative<ip_address>(void* res, const data& v) {
+       (*(reinterpret_cast<T*>(res))).address = -v.as<T>().address;
+   }
+
+   template<>
+   inline bool less_than<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool less_than_equals<ip_address>(const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool greater_than<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool greater_than_equals<ip_address>(const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool equals<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool not_equals<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   byte_string key_transform<ip_address>(const data& v, 
+           double bucket_size) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }*/
+
+   /*static binary_ops_t get_binaryops() {
+       return {add<ip_address>, subtract<ip_address>, multiply<ip_address>,
+           divide<ip_address>, modulo<ip_address>, bw_and<ip_address>, 
+           bw_or<ip_address>, bw_xor<ip_address>, bw_lshift<ip_address>, 
+           bw_rshift<ip_address>};
+   }
+
+   static unary_ops_t get_unaryops() {
+       return {assign<ip_address>, negative<ip_address>, 
+           positive<ip_address>, bw_not<ip_address>};
+   }
+
+   static rel_ops_t get_relops() {
+       return {less_than<ip_address>, less_than_equals<ip_address>,
+           greater_than<ip_address>, greater_than_equals<ip_address>,
+           equals<ip_address>, not_equals<ip_address>};
+   }
+
+   static key_op get_keyops() {
+       return key_transform<ip_address>;
+   }*/
+
+   uint32_t get_address() { return address; }
+   void set_address(uint32_t addr) { address = addr; }
 
  private:
   uint32_t address;
 };
+
+
+template<>
+inline void add<ip_address>(void* res, const data& v1, const data& v2) {
+    (*(reinterpret_cast<ip_address*>(res))).set_address(
+        v1.as<ip_address>().get_address() + 
+        v2.as<ip_address>().get_address());
+}
+
+   template<>
+   inline void subtract<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+      (*(reinterpret_cast<ip_address*>(res))).set_address(
+          v1.as<ip_address>().get_address()  -
+          v2.as<ip_address>().get_address());
+   }
+
+   template<>
+   inline void multiply<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void divide<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void modulo<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+   
+   template<>
+   inline void bw_and<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void bw_or<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void bw_xor<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void bw_lshift<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void bw_rshift<ip_address>(void* res, const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void assign<ip_address>(void* res, const data& v) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline void negative<ip_address>(void* res, const data& v) {
+       (*(reinterpret_cast<ip_address*>(res))).set_address(
+               -v.as<ip_address>().get_address());
+   }
+
+   template<>
+   inline void positive<ip_address>(void* res, const data& v) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+    
+   template<>
+   inline void bw_not<ip_address>(void* res, const data& v) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool less_than<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool less_than_equals<ip_address>(const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool greater_than<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool greater_than_equals<ip_address>(const data& v1, 
+           const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool equals<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   inline bool not_equals<ip_address>(const data& v1, const data& v2) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   template<>
+   byte_string key_transform<ip_address>(const data& v, 
+           double bucket_size) {
+       THROW(unsupported_exception, "operation not yet supported");
+   }
+
+   static binary_ops_t get_binaryops() {
+       return {add<ip_address>, subtract<ip_address>, multiply<ip_address>,
+           divide<ip_address>, modulo<ip_address>, bw_and<ip_address>, 
+           bw_or<ip_address>, bw_xor<ip_address>, bw_lshift<ip_address>, 
+           bw_rshift<ip_address>};
+   }
+
+   static unary_ops_t get_unaryops() {
+       return {assign<ip_address>, negative<ip_address>, 
+           positive<ip_address>, bw_not<ip_address>};
+   }
+
+   static rel_ops_t get_relops() {
+       return {less_than<ip_address>, less_than_equals<ip_address>,
+           greater_than<ip_address>, greater_than_equals<ip_address>,
+           equals<ip_address>, not_equals<ip_address>};
+   }
+
+   static key_op get_keyops() {
+       return key_transform<ip_address>;
+   }
+
 
 }
 

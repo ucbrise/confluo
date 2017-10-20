@@ -220,7 +220,7 @@ class metadata_writer {
       io_utils::write(out_, agg_id);
       io_utils::write(out_, field_name);
       io_utils::write(out_, op);
-      type_id id = threshold.type().id;
+      uint16_t id = threshold.type().id;
       io_utils::write(out_, id);
       switch (id) {
         case type_id::D_BOOL: {

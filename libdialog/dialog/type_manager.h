@@ -13,17 +13,23 @@ namespace dialog {
 
 class type_manager {
  public:
+
+  static std::vector<data_type> data_types;
+  static std::atomic<std::uint16_t> id;
+
   /**
    * Registers a type to the manager
    */
-  static void register_type(std::vector<rel_ops_t> rel_ops,
-          std::vector<unary_ops_t> un_ops, std::vector<binary_ops_t>
-          binary_ops, std::vector<key_ops_t> key_ops) {
-      id = atomic::faa(id, 1);
-      // TODO Pass in the class type, so can do sizeof(class type)
-      data_types.push_back(data_type(id));
+  static void register_type(size_t size, rel_ops_t rel_ops,
+          unary_ops_t un_ops, binary_ops_t binary_ops, 
+          key_op key_ops, void* min, void* max, void* one, void* zero) {
+      id = atomic::faa(&id, (uint16_t) 1);
+      data_types.push_back(data_type(id, size));
 
-      // TODO Add in fields for min, max, one, zero
+      MIN.push_back(min);
+      MAX.push_back(max);
+      ONE.push_back(one);
+      ZERO.push_back(zero);
 
       RELOPS.push_back(rel_ops);
       UNOPS.push_back(un_ops);
@@ -32,22 +38,18 @@ class type_manager {
   }
 
   static void register_primitives() {
-      MIN = init_min();
-      MAX = init_max();
-      ONE = init_one();
-      ZERO = init_zero();
+      id = atomic::faa(&id, (uint16_t) 8);
+      data_types.push_back(NONE_TYPE);
+      data_types.push_back(BOOL_TYPE);
+      data_types.push_back(CHAR_TYPE);
 
-      RELOPS = init_rops();
-      UNOPS = init_uops();
-      BINOPS = init_bops();
-      KEYOPS = init_kops();
+      data_types.push_back(SHORT_TYPE);
+      data_types.push_back(INT_TYPE);
+      data_types.push_back(LONG_TYPE);
 
-      id = atomic::faa(id, 0);
-
-      // TODO Probably should use compare and swap instead of <
-      for (; id < 9; id = atomic::faa(id, 1)) {
-          data_types.push_back(data_type(id));
-      }
+      data_types.push_back(FLOAT_TYPE);
+      data_types.push_back(DOUBLE_TYPE);
+      data_types.push_back(STRING_TYPE(0));
   }
 
   /**
@@ -57,24 +59,8 @@ class type_manager {
 
   }
 
-  typedef void (*regex_fn)(void* res, std::string& parse);
-
-  static std::vector<void*> MIN;
-  static std::vector<void*> MAX;
-  static std::vector<void*> ONE;
-  static std::vector<void*> ZERO;
-
-  static std::vector<rel_ops_t> RELOPS;
-  static std::vector<unary_ops_t> UNOPS;
-  static std::vector<binary_ops_t> BINOPS;
-  static std::vector<key_op> KEYOPS;
-
-  static std::vector<regex_fn> REGEXES;
-
-  static std::vector<data_type> data_types;
-
  private:
-  int id;
+  //static std::atomic<std::uint16_t> id;
 };
 
 

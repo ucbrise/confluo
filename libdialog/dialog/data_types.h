@@ -126,8 +126,13 @@ static std::vector<key_op> KEYOPS = init_kops();
 
 struct data_type {
  public:
-  type_id id;
+  uint16_t id;
   size_t size;
+
+  data_type(uint16_t _id, size_t _size) {
+      id = _id;
+      size = _size;
+  }
 
   data_type(type_id _id = type_id::D_NONE, size_t _size = 0)
       : id(_id),
@@ -285,8 +290,8 @@ static data_type STRING_TYPE(size_t size) {
 
 // type-ids 1-7 are numeric
 static inline bool is_numeric(const data_type& type) {
-  type_id id = type.id;
-  return id >= 1 && id <= 7;
+  //type_id id = type.id;
+  return type.id >= 1 && type.id <= 7;
 }
 
 }
