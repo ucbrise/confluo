@@ -38,24 +38,22 @@ class read_only_ptr {
   read_only_ptr() :
     ptr_(nullptr),
     offset_(0),
-    ref_counts_(nullptr),
-    uses_first_count_(true) {
+    ref_counts_(nullptr) {
   }
 
-  read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_counts, bool uses_first_count, size_t offset = 0) :
+  read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_counts, size_t offset = 0) :
     ptr_(ptr),
     offset_(offset),
-    ref_counts_(ref_counts) ,
-    uses_first_count_(uses_first_count) {
+    ref_counts_(ref_counts) {
   }
 
   read_only_ptr(const read_only_ptr<T>& other) :
     ptr_(other.ptr_),
     offset_(other.offset_),
-    ref_counts_(other.ref_counts_),
-    uses_first_count_(other.uses_first_count_) {
+    ref_counts_(other.ref_counts_) {
     if (ref_counts_ != nullptr) {
-      uint32_t increment = uses_first_count_ ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
+      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+      uint32_t increment = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
       atomic::faa(ref_counts_, increment);
     }
   }
@@ -66,9 +64,10 @@ class read_only_ptr {
 
   read_only_ptr& operator=(const read_only_ptr<T>& other) {
     // TODO potential infinite loop bug here
-    init(other.ptr_, other.offset_, other.ref_counts_, other.uses_first_count_);
+    init(other.ptr_, other.offset_, other.ref_counts_);
     if (ref_counts_ != nullptr) {
-      uint32_t increment = uses_first_count_ ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
+      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+      uint32_t increment = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
       atomic::faa(ref_counts_, increment);
     }
     return *this;
@@ -82,12 +81,11 @@ class read_only_ptr {
    * @param ref_count
    * @param first_count
    */
-  void init(T* ptr, size_t offset, bool uses_first_count, atomic::type<uint32_t>* ref_count) {
+  void init(T* ptr, size_t offset, atomic::type<uint32_t>* ref_count) {
     decrement_compare_dealloc();
     ptr_ = ptr;
     offset_ = offset;
     ref_counts_ = ref_count;
-    uses_first_count_ = uses_first_count;
   }
 
   T* get() const {
@@ -105,9 +103,10 @@ class read_only_ptr {
    */
   void decrement_compare_dealloc() {
     if (ptr_ != nullptr && ref_counts_ != nullptr) {
-      uint32_t decrement = uses_first_count_ ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
+      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+      uint32_t decrement = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
       uint32_t prev_val = atomic::fas(ref_counts_, decrement);
-      if (uses_first_count_) {
+      if (uses_first_count) {
         prev_val &= ptr_constants::FIRST_MASK;
       } else {
         prev_val >>= ptr_constants::SECOND_SHIFT;
@@ -125,8 +124,6 @@ class read_only_ptr {
   T* ptr_;
   size_t offset_;
   atomic::type<uint32_t>* ref_counts_;
-  // TODO: need to resolve space utilization since bool is an extra byte
-  bool uses_first_count_;
 
 };
 
@@ -209,24 +206,6 @@ class swappable_ptr {
   }
 
   /**
-   * Atomically write to ptr_[idx]
-   * @param idx index to write to
-   * @param val value to write
-   * @return true if write successful, otherwise false
-   */
-  bool atomic_set(size_t idx, T val) {
-    bool result = false;
-    atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
-    T* ptr = atomic::load(&ptr_);
-    if (ptr != nullptr) {
-      ptr[idx] = val;
-      result = true;
-    }
-    atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
-    return result;
-  }
-
-  /**
    * Atomically get ptr_[idx]
    * @param idx index to write to
    * @param val value to write
@@ -265,12 +244,12 @@ class swappable_ptr {
     if (metadata->state_ == state_type::D_IN_MEMORY) {
       // decrement other ref count (no possibility of it reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA);
-      copy.init(ptr, offset, true, &ref_counts_);
+      copy.init(ptr, offset, &ref_counts_);
       return;
     } else if (metadata->state_ == state_type::D_ARCHIVED) {
       // decrement other ref count (no possibility of it reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::FIRST_DELTA);
-      copy.init(ptr, offset, false, &ref_counts_);
+      copy.init(ptr, offset, &ref_counts_);
       return;
     } else {
       THROW(memory_exception, "Unsupported pointer state during copy!");

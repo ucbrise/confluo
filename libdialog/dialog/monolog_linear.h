@@ -166,6 +166,10 @@ class monolog_linear_base {
     return blocks_[idx / BLOCK_SIZE][idx % BLOCK_SIZE];
   }
 
+  void swap_block_ptr(size_t idx, T* ptr) {
+    blocks_[idx / BLOCK_SIZE].swap_ptr(ptr);
+  }
+
   /**
    * @return storage size of the monolog
    */
@@ -188,8 +192,7 @@ class monolog_linear_base {
 
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
     size_t BUFFER_SIZE = 1048576>
-class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
-    BUFFER_SIZE> {
+class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;

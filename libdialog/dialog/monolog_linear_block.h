@@ -67,31 +67,54 @@ class monolog_block {
     storage_.flush(copy.get() + offset, len * sizeof(T));
   }
 
+  /**
+   * Sets value at index. Allocates bucket if necessary.
+   * Assumes no contention between writers and archiver.
+   * @param i index
+   * @param val value
+   */
   void set(size_t i, const T& val) {
-    if (!data_.atomic_set(i, val)) {
-      try_allocate();
-      data_.atomic_set(i, val);
+    T* ptr = data_.atomic_load();
+    if (ptr == nullptr) {
+      ptr = try_allocate();
     }
+    ptr[i] = val;
   }
 
+  /**
+   * Sets value at index. Assumes no contention between
+   * writers and archiver.
+   * @param i index
+   * @param val value
+   */
   void set_unsafe(size_t i, const T& val) {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    copy.get()[i] = val;
+    data_.atomic_load()[i] = val;
   }
 
+  /**
+   * Writes data to offset. Allocates bucket if necessary.
+   * Assumes no contention between writers and archiver.
+   * @param offset offset to write at
+   * @param data data to write
+   * @param len length of data
+   */
   void write(size_t offset, const T* data, size_t len) {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    if (copy.get() == nullptr)
-      try_allocate(copy);
-    memcpy(copy.get() + offset, data, len * sizeof(T));
+    T* ptr = data_.atomic_load();
+    if (ptr == nullptr) {
+      ptr = try_allocate();
+    }
+    memcpy(ptr + offset, data, len * sizeof(T));
   }
 
+  /**
+   * Writes data to offset. Assumes no contention between
+   * writers and archiver.
+   * @param offset offset to write at
+   * @param data data to write
+   * @param len length of data
+   */
   void write_unsafe(size_t offset, const T* data, size_t len) {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    memcpy(copy.get() + offset, data, len * sizeof(T));
+    memcpy(data_.atomic_load() + offset, data, len * sizeof(T));
   }
 
   const T& at(size_t i) const {
@@ -138,6 +161,14 @@ class monolog_block {
     }
   }
 
+  /**
+   * Swap current pointer with new pointer.
+   * @param ptr new pointer
+   */
+  void swap_ptr(T* ptr) {
+    data_.swap_ptr(ptr);
+  }
+
  private:
   void try_allocate(__atomic_block_copy_ref& copy) {
     block_state state = UNINIT;
@@ -156,18 +187,20 @@ class monolog_block {
     data_.atomic_copy(copy);
   }
 
-  void try_allocate() {
+  T* try_allocate() {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
       T* ptr = storage_.allocate_block(path_, file_size);
       data_.atomic_init(ptr);
-      return;
+      return ptr;
     }
 
     // Someone else is initializing, stall until initialized
-    while (data_.atomic_load() == nullptr)
+    T* ptr;
+    while ((ptr = data_.atomic_load()) == nullptr)
       ;
+    return ptr;
   }
 
   std::string path_;

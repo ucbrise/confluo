@@ -82,6 +82,7 @@ class monolog_exp2_linear_base {
 
   /**
    * Sets the data at index idx to val. Allocates memory if necessary.
+   * Assumes no contention between writers and archiver.
    * @param idx index to set at
    * @param val value to set
    */
@@ -98,15 +99,17 @@ class monolog_exp2_linear_base {
       container = try_allocate_container(container_idx);
     }
 
-    if (!container[bucket_idx].atomic_set(bucket_off, val)) {
-      try_allocate_bucket(container, bucket_idx);
-      container[bucket_idx].atomic_set(bucket_off, val);
+    T* ptr = container[bucket_idx].atomic_load();
+    if (ptr == nullptr) {
+      ptr = try_allocate_bucket(container, bucket_idx);
     }
+    ptr[bucket_off] = val;
   }
 
   /**
    * Sets the data at index idx to val. Does NOT allocate memory --
    * ensure memory is allocated before calling this function.
+   * Assumes no contention between writers and archiver.
    * @param idx index to set at
    * @param val value to set
    */
@@ -118,13 +121,13 @@ class monolog_exp2_linear_base {
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
     size_t container_idx = hibit - fcs_hibit_;
 
-    __atomic_bucket_copy_ref bucket;
-    load_bucket_copy(container_idx, bucket_idx, bucket);
-    bucket.get()[bucket_off] = val;
+    __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
+    container[bucket_idx].atomic_load()[bucket_idx] = val;
   }
 
   /**
    * Sets a contiguous region of the MonoLog base to the provided data.
+   * Assumes no contention between writers and archiver.
    * @param idx monolog index
    * @param data data to set
    * @param len length of data
@@ -146,14 +149,13 @@ class monolog_exp2_linear_base {
         container = try_allocate_container(container_idx);
       }
 
-      __atomic_bucket_copy_ref bucket;
-      container[bucket_idx].atomic_copy(bucket);
-      if (bucket.get() == nullptr) {
-        try_allocate_bucket(container, bucket_idx, bucket);
+      T* bucket = container[bucket_idx].atomic_load();
+      if (bucket == nullptr) {
+        bucket = try_allocate_bucket(container, bucket_idx);
       }
 
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
-      memcpy(&bucket.get()[bucket_off], data + data_off, bytes_to_write);
+      memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
       bucket_idx++;
@@ -168,6 +170,7 @@ class monolog_exp2_linear_base {
   /**
    * Sets a contiguous region of the MonoLog base to the provided data. Does
    * NOT allocate memory -- ensure memory is allocated before calling this function.
+   * Assumes no contention between writers and archiver.
    * @param idx monolog index
    * @param data data to set
    * @param len length of data
@@ -185,9 +188,9 @@ class monolog_exp2_linear_base {
     size_t bucket_remaining = BUCKET_SIZE * sizeof(T);
     while (data_remaining) {
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
-      __atomic_bucket_copy_ref bucket;
-      load_bucket_copy(container_idx, bucket_idx, bucket);
-      memcpy(&bucket.get()[bucket_off], data + data_off, bytes_to_write);
+      __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
+      T* bucket = container[bucket_idx].atomic_load();
+      memcpy(&bucket[bucket_off], data + data_off, bytes_to_write);
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
       bucket_idx++;
@@ -348,12 +351,14 @@ protected:
     container[bucket_idx].atomic_copy(copy);
   }
 
-  void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
+  T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
     T* new_bucket_data = ALLOCATOR.alloc<T>(BUCKET_SIZE);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(new_bucket_data)) {
       ALLOCATOR.dealloc<T>(new_bucket_data);
+      return container[bucket_idx].atomic_load();
     }
+    return new_bucket_data;
   }
 
   /**
