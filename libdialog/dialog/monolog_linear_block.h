@@ -117,7 +117,7 @@ class monolog_block {
     memcpy(data_.atomic_load() + offset, data, len * sizeof(T));
   }
 
-  const T& at(size_t i) const {
+  const T at(size_t i) const {
     return data_.atomic_get(i);
   }
 

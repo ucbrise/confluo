@@ -223,7 +223,7 @@ class monolog_exp2_linear_base {
    * @param idx index
    * @return data
    */
-  const T& get(size_t idx) const {
+  const T get(size_t idx) const {
     size_t pos = idx + FCS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
@@ -425,7 +425,7 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
     return idx;
   }
 
-  const T& at(size_t idx) const {
+  const T at(size_t idx) const {
     return this->get(idx);
   }
 

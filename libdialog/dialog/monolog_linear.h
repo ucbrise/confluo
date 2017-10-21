@@ -127,7 +127,7 @@ class monolog_linear_base {
    * @param idx monolog index
    * @return data
    */
-  const T& get(size_t idx) const {
+  const T get(size_t idx) const {
     return blocks_[idx / BLOCK_SIZE].at(idx % BLOCK_SIZE);
   }
 
@@ -243,7 +243,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUF
     return atomic::faa(&tail_, len);
   }
 
-  const T& at(size_t idx) const {
+  const T at(size_t idx) const {
     return this->get(idx);
   }
 

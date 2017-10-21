@@ -208,13 +208,11 @@ class swappable_ptr {
   /**
    * Atomically get ptr_[idx]
    * @param idx index to write to
-   * @param val value to write
-   * @return true if write successful, otherwise false
+   * @return value at index
    */
-  T& atomic_get(size_t idx) const {
+  T atomic_get(size_t idx) const {
     atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
-    T* ptr = atomic::load(&ptr_);
-    T& result = ptr[idx];
+    T result = atomic::load(&ptr_)[idx];
     atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
     return result;
   }
