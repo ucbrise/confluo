@@ -42,15 +42,13 @@ struct type_definition {
 
 class type_manager {
  public:
-
-  static std::vector<data_type> data_types;
-  static std::atomic<std::uint16_t> id;
+  static std::vector<struct data_type> data_types;
 
   /**
    * Registers a type to the manager
    */
-  static void register_type(type_definition type_def) {
-      id = atomic::faa(&id, (uint16_t) 1);
+  static uint16_t register_type(type_definition type_def) {
+      atomic::faa(&id, (uint16_t) 1);
       data_types.push_back(data_type(id, type_def.size));
 
       MIN.push_back(type_def.min);
@@ -62,21 +60,27 @@ class type_manager {
       UNOPS.push_back(type_def.un_ops);
       BINOPS.push_back(type_def.binary_ops);
       KEYOPS.push_back(type_def.key_ops);
+
+      return id;
   }
 
-  static void register_primitives() {
-      id = atomic::faa(&id, (uint16_t) 8);
-      data_types.push_back(NONE_TYPE);
-      data_types.push_back(BOOL_TYPE);
-      data_types.push_back(CHAR_TYPE);
+  static uint16_t register_primitives() {
+      data_types.push_back(data_type(0, 0));
+      data_types.push_back(data_type(1, sizeof(bool)));
+      data_types.push_back(data_type(2, sizeof(int8_t)));
 
-      data_types.push_back(SHORT_TYPE);
-      data_types.push_back(INT_TYPE);
-      data_types.push_back(LONG_TYPE);
+      data_types.push_back(data_type(3, sizeof(int16_t)));
+      data_types.push_back(data_type(4, sizeof(int32_t)));
+      data_types.push_back(data_type(5, sizeof(int64_t)));
 
-      data_types.push_back(FLOAT_TYPE);
-      data_types.push_back(DOUBLE_TYPE);
-      data_types.push_back(STRING_TYPE(0));
+      data_types.push_back(data_type(6, sizeof(float)));
+      data_types.push_back(data_type(7, sizeof(double)));
+
+      size_t size = 10000;
+      data_types.push_back(data_type(8, size));
+
+      atomic::faa(&id, (uint16_t) 8);
+      return id;
   }
 
   /**
@@ -85,8 +89,12 @@ class type_manager {
   static void deregister_type() {
 
   }
+
+ private:
+   static std::atomic<uint16_t> id;
 };
 
+//register_primitives();
 
 }
 

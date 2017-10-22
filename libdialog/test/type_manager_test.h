@@ -13,7 +13,7 @@
 using namespace ::dialog;
 
 std::vector<data_type> dialog::type_manager::data_types;
-std::atomic<std::uint16_t> dialog::type_manager::id;
+std::atomic<uint16_t> dialog::type_manager::id;
 
 type_definition type_def(sizeof(ip_address), 
             get_relops(), get_unaryops(),
@@ -107,7 +107,7 @@ TEST_F(TypeManagerTest, FilterTest) {
                 get_address() > 33);
         i++;
     }
-    //ASSERT_EQ(1, 1);
+    //ASSERT_EQ(1, 1);*/
 }
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */

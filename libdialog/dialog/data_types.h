@@ -67,6 +67,8 @@ static double double_max = std::numeric_limits<double>::max();
 
 }
 
+//std::vector<data_type> dialog::type_manager::data_types;
+
 static std::vector<void*> init_min() {
   return {nullptr, &limits::bool_min, &limits::char_min, &limits::short_min,
     &limits::int_min, &limits::long_min, &limits::float_min,
@@ -129,11 +131,6 @@ struct data_type {
   uint16_t id;
   size_t size;
 
-  data_type(uint16_t _id, size_t _size) {
-      id = _id;
-      size = _size;
-  }
-
   data_type(type_id _id = type_id::D_NONE, size_t _size = 0)
       : id(_id),
         size(_size) {
@@ -178,6 +175,11 @@ struct data_type {
               "Must specify length for non-primitive data types");
       }
     }
+  }
+
+  data_type(uint16_t _id, size_t _size) {
+      id = _id;
+      size = _size;
   }
 
   void* min() const {
@@ -226,31 +228,46 @@ struct data_type {
     return KEYOPS[id];
   }
 
+  inline bool is_primitive() const {
+      return id >= 0 && id <= 8;
+  }
+
+  inline const std::string primitive_string() const {
+      switch (id) {
+          case 0:
+              return "none";
+          case 1:
+              return "bool";
+          case 2:
+              return "char";
+          case 3:
+              return "short";
+          case 4:
+              return "int";
+          case 5:
+              return "long";
+          case 6:
+              return "float";
+          case 7:
+              return "double";
+          case 8:
+              return "string";
+          default:
+              return "";
+      }
+  }
+
   inline std::string to_string() const {
-    switch (id) {
-      case type_id::D_BOOL:
-        return "bool";
-      case type_id::D_CHAR:
-        return "char";
-      case type_id::D_SHORT:
-        return "short";
-      case type_id::D_INT:
-        return "int";
-      case type_id::D_LONG:
-        return "long";
-      case type_id::D_FLOAT:
-        return "float";
-      case type_id::D_DOUBLE:
-        return "double";
-      case type_id::D_STRING:
-        return "string";
-      case type_id::D_NONE:
-        return "none";
-      case 9:
-        return "ip_address";
-      default:
-        return "invalid(" + std::to_string(static_cast<uint16_t>(id)) + ")";
-    }
+      if (is_primitive()) {
+          return primitive_string();
+      }
+      THROW(invalid_operation_exception,
+              "Must to_string for non-primitive data types");
+
+  }
+
+  inline std::string to_string(std::string (*f)()) {
+      return f();
   }
 
   inline static data_type from_string(const std::string& str) {
@@ -258,23 +275,23 @@ struct data_type {
     std::regex str_re("STRING\\(([0-9]+)\\)");
     std::smatch str_matches;
     if (tstr == "BOOL") {
-      return data_type(type_id::D_BOOL);
+      return data_type(1, sizeof(bool));
     } else if (tstr == "CHAR") {
-      return data_type(type_id::D_CHAR);
+      return data_type(2, sizeof(int8_t));
     } else if (tstr == "SHORT") {
-      return data_type(type_id::D_SHORT);
+      return data_type(3, sizeof(int16_t));
     } else if (tstr == "INT") {
-      return data_type(type_id::D_INT);
+      return data_type(4, sizeof(int32_t));
     } else if (tstr == "LONG") {
-      return data_type(type_id::D_LONG);
+      return data_type(5, sizeof(int64_t));
     } else if (tstr == "FLOAT") {
-      return data_type(type_id::D_FLOAT);
+      return data_type(6, sizeof(float));
     } else if (tstr == "DOUBLE") {
-      return data_type(type_id::D_DOUBLE);
+      return data_type(7, sizeof(double));
     } else if (std::regex_search(tstr, str_matches, str_re)) {
-      return data_type(type_id::D_STRING, std::stoul(str_matches[1].str()));
+      return data_type(8, std::stoul(str_matches[1].str()));
     }
-    return data_type(type_id::D_NONE);
+    return data_type(0, 0);
   }
 };
 
@@ -292,7 +309,6 @@ static data_type STRING_TYPE(size_t size) {
 
 // type-ids 1-7 are numeric
 static inline bool is_numeric(const data_type& type) {
-  //type_id id = type.id;
   return type.id >= 1 && type.id <= 7;
 }
 
