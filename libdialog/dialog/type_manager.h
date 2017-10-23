@@ -43,6 +43,7 @@ struct type_definition {
     }
 };
 
+
 class type_manager {
  public:
   static std::vector<struct data_type> data_types;
@@ -80,11 +81,24 @@ class type_manager {
       data_types.push_back(data_type(6, sizeof(float)));
       data_types.push_back(data_type(7, sizeof(double)));
 
-      size_t size = 10000;
-      data_types.push_back(data_type(8, size));
+      // Insert an arbitrary string data_type not actually used
+      // Use STRING_TYPE(size) for the actual string
+      // Can't push to data_types vector because don't know size in
+      // advance
+      // Done to keep the indexing nice
+      data_types.push_back(data_type(8, 10000));
 
       atomic::faa(&id, (uint16_t) 8);
       return id;
+  }
+
+  static uint16_t get_id_from_type_name(std::string type_name) {
+      for (unsigned int i = 0; i < data_types.size(); i++) {
+          if (type_name.compare(data_types[i].to_string()) == 0) {
+              return i;
+          }
+      }
+      return -1;
   }
 
   /**
@@ -97,6 +111,26 @@ class type_manager {
  private:
    static std::atomic<uint16_t> id;
 };
+
+/*static data_type NONE_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[0]())];
+static data_type BOOL_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[1]())];
+static data_type CHAR_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[2]())];
+static data_type SHORT_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[3]())];
+static data_type INT_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[4]())];
+static data_type LONG_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[5]())];
+static data_type FLOAT_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[6]())];
+static data_type DOUBLE_TYPE = type_manager::data_types[
+    type_manager::get_id_from_type_name(TO_STRINGS[7]())];
+static data_type STRING_TYPE(size_t size) {
+  return data_type(type_id::D_STRING, size);
+}*/
 
 //register_primitives();
 

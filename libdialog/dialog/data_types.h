@@ -159,6 +159,11 @@ static std::vector<std::string (*)()> init_to_strings() {
     &string_string};
 }
 
+static std::vector<size_t> primitive_sizes() {
+    return {0, sizeof(bool), sizeof(int8_t), sizeof(int16_t), 
+        sizeof(int32_t), sizeof(int64_t), sizeof(float), sizeof(double)};
+}
+
 static std::vector<void*> MIN = init_min();
 static std::vector<void*> MAX = init_max();
 static std::vector<void*> ONE = init_one();
@@ -168,55 +173,27 @@ static std::vector<unary_ops_t> UNOPS = init_uops();
 static std::vector<binary_ops_t> BINOPS = init_bops();
 static std::vector<key_op> KEYOPS = init_kops();
 static std::vector<std::string (*)()> TO_STRINGS = init_to_strings();
+static std::vector<size_t> PRIMITIVE_SIZES = primitive_sizes();
 
 struct data_type {
  public:
   uint16_t id;
   size_t size;
 
+  bool is_primitive() {
+      return id >= 0 && id <= 8;
+  }
+
   data_type(type_id _id = type_id::D_NONE, size_t _size = 0)
       : id(_id),
         size(_size) {
-    switch (id) {
-      case type_id::D_NONE: {
-        size = 0;
-        break;
-      }
-      case type_id::D_BOOL: {
-        size = sizeof(bool);
-        break;
-      }
-      case type_id::D_CHAR: {
-        size = sizeof(int8_t);
-        break;
-      }
-      case type_id::D_SHORT: {
-        size = sizeof(int16_t);
-        break;
-      }
-      case type_id::D_INT: {
-        size = sizeof(int32_t);
-        break;
-      }
-      case type_id::D_LONG: {
-        size = sizeof(int64_t);
-        break;
-      }
-      case type_id::D_FLOAT: {
-        size = sizeof(float);
-        break;
-      }
-      case type_id::D_DOUBLE: {
-        size = sizeof(double);
-        break;
-      }
-      case type_id::D_STRING: {
-        break;
-      }
-      default: {
+    uint16_t string_id = 8;
+
+    if (!is_primitive()) {
         THROW(invalid_operation_exception,
               "Must specify length for non-primitive data types");
-      }
+    } else if (id != string_id) {
+        size = PRIMITIVE_SIZES[id];
     }
   }
 

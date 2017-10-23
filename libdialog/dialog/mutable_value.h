@@ -3,9 +3,9 @@
 
 #include <cstdint>
 
-#include "immutable_value.h"
 #include "data_types.h"
 #include "exceptions.h"
+#include "immutable_value.h"
 
 namespace dialog {
 

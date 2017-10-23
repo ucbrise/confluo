@@ -1,10 +1,10 @@
 #ifndef DIALOG_SCHEMA_SNAPSHOT_H_
 #define DIALOG_SCHEMA_SNAPSHOT_H_
 
-#include "immutable_value.h"
 #include "column_snapshot.h"
 #include "byte_string.h"
 #include "data.h"
+#include "immutable_value.h"
 
 namespace dialog {
 

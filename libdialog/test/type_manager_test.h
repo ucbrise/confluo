@@ -93,6 +93,7 @@ TEST_F(TypeManagerTest, RegisterTest) {
 
     ASSERT_STREQ("ip_address", 
             dialog::type_manager::data_types[9].to_string().c_str());
+    ASSERT_EQ(9, dialog::type_manager::get_id_from_type_name("ip_address"));
 }
 
 /*TEST_F(TypeManagerTest, FilterTest) {
