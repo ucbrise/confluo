@@ -6,6 +6,7 @@
 #include "schema.h"
 #include "record_offset_range.h"
 #include "record_stream.h"
+#include "lazy/lazy_stream.h"
 
 namespace dialog {
 namespace planner {
@@ -70,11 +71,7 @@ class no_valid_index_op : public query_op {
 
 class full_scan_op : public query_op {
  public:
-  typedef record_offset_range offset_container;
-  typedef record_stream<offset_container> record_stream_t;
-  typedef filtered_record_stream<record_stream_t> filtered_record_stream_t;
-
-  full_scan_op(const data_log& dlog, const schema_t& schema,
+  full_scan_op(const data_log* dlog, const schema_t* schema,
                const compiled_expression& expr)
       : query_op(query_op_type::D_SCAN_OP),
         dlog_(dlog),
@@ -90,15 +87,20 @@ class full_scan_op : public query_op {
     return UINT64_MAX;
   }
 
-  filtered_record_stream_t execute(uint64_t version) const {
-    auto mres = offset_container(version, schema_.record_size());
-    record_stream_t rs(version, mres, schema_, dlog_);
-    return filtered_record_stream_t(rs, expr_);
+  lazy::lazy_stream<record_t> execute(uint64_t version) const {
+    static auto to_record = [this](uint64_t offset) -> record_t {
+      return this->schema_->apply(offset, this->dlog_->cptr(offset));
+    };
+    auto expr_check = [this](const record_t& r) -> bool {
+      return this->expr_.test(r);
+    };
+    auto r = record_offset_range(version, schema_->record_size());
+    return lazy::from_container(r).map(to_record).filter(expr_check);
   }
 
  private:
-  const data_log& dlog_;
-  const schema_t& schema_;
+  const data_log* dlog_;
+  const schema_t* schema_;
   const compiled_expression& expr_;
 };
 
@@ -106,12 +108,8 @@ class index_op : public query_op {
  public:
   typedef std::pair<byte_string, byte_string> key_range;
 
-  typedef index::radix_index::rt_result offset_container;
-  typedef record_stream<offset_container> record_stream_t;
-  typedef filtered_record_stream<record_stream_t> filtered_record_stream_t;
-
-  index_op(const data_log& dlog, const index::radix_index* index,
-           const schema_t& schema, const key_range& range,
+  index_op(const data_log* dlog, const index::radix_index* index,
+           const schema_t* schema, const key_range& range,
            const compiled_minterm& m)
       : query_op(query_op_type::D_INDEX_OP),
         dlog_(dlog),
@@ -119,34 +117,6 @@ class index_op : public query_op {
         schema_(schema),
         range_(range) {
     expr_.insert(m);
-  }
-
-  void set_range(const key_range& range) {
-    range_ = range;
-  }
-
-  const index::radix_index* index() const {
-    return index_;
-  }
-
-  byte_string const& kbegin() const {
-    return range_.first;
-  }
-
-  byte_string const& kend() const {
-    return range_.second;
-  }
-
-  immutable_byte_string kbegin_immutable() const {
-    return range_.first.copy();
-  }
-
-  immutable_byte_string kend_immutable() const {
-    return range_.second.copy();
-  }
-
-  compiled_expression const& minterm() const {
-    return expr_;
   }
 
   virtual std::string to_string() const override {
@@ -159,16 +129,32 @@ class index_op : public query_op {
     return index_->approx_count(range_.first, range_.second);
   }
 
-  filtered_record_stream_t execute(uint64_t version) const {
-    auto mres = index_->range_lookup(range_.first, range_.second);
-    record_stream_t rs(version, mres, schema_, dlog_);
-    return filtered_record_stream_t(rs, expr_);
+  lazy::lazy_stream<record_t> execute(uint64_t version) const {
+    const data_log* d = dlog_;
+    const schema_t* s = schema_;
+    compiled_expression e = expr_;
+
+    auto version_check = [version](uint64_t offset) -> bool {
+      return offset < version;
+    };
+
+    auto to_record = [d, s](uint64_t offset) -> record_t {
+      return s->apply(offset, d->cptr(offset));
+    };
+
+    auto expr_check = [e](const record_t& r) -> bool {
+      return e.test(r);
+    };
+
+    auto r = index_->range_lookup(range_.first, range_.second);
+    return lazy::from_container(r).filter(version_check).map(to_record).filter(
+        expr_check);
   }
 
  private:
-  const data_log& dlog_;
+  const data_log* dlog_;
   const index::radix_index* index_;
-  const schema_t& schema_;
+  const schema_t* schema_;
   key_range range_;
   compiled_expression expr_;
 };

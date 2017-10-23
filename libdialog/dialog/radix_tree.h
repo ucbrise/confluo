@@ -173,6 +173,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
  public:
   typedef radix_tree_node<reflog> node_t;
   typedef byte_string key_t;
+  typedef reflog value_type;
   typedef rt_reflog_it<reflog> self_type;
   typedef reflog& reference;
   typedef reflog* pointer;
@@ -242,6 +243,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
 template<typename reflog>
 class rt_reflog_range_result {
  public:
+  typedef reflog value_type;
   typedef rt_reflog_it<reflog> const_iterator;
   typedef rt_reflog_it<reflog> iterator;
 

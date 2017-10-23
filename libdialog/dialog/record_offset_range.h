@@ -8,9 +8,12 @@ namespace dialog {
 
 class record_offset_range {
  public:
+  typedef uint64_t value_type;
   class iterator : public std::iterator<std::input_iterator_tag, uint64_t,
       uint64_t, const uint64_t*, uint64_t> {
    public:
+    typedef uint64_t value_type;
+
     explicit iterator(uint64_t offset, uint64_t version, uint64_t record_size)
         : offset_(offset),
           version_(version),

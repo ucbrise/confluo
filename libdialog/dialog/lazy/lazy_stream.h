@@ -2,6 +2,9 @@
 #define LAZY_LAZY_STREAM_H_
 
 #include <memory>
+#include <functional>
+#include <unordered_set>
+
 #include "suspended_function.h"
 
 namespace dialog {
@@ -24,7 +27,7 @@ class cell {
       : value_(value) {
   }
 
-  T const& value() const {
+  T value() const {
     return value_;
   }
 
@@ -76,7 +79,11 @@ class lazy_stream {
     return !lazy_cell_;
   }
 
-  T const& get() const {
+  bool has_more() const {
+    return !empty();
+  }
+
+  T get() const {
     return lazy_cell_->get().value();
   }
 
@@ -118,7 +125,7 @@ class lazy_stream {
     });
   }
 
-  stream_t operator+(stream_t const& other) const {
+  stream_t concat(stream_t const& other) const {
     if (empty()) {
       return other;
     }
@@ -127,6 +134,10 @@ class lazy_stream {
     return stream_t([v, t, other, this]() {
       return cell_t(v, t + other);
     });
+  }
+
+  stream_t operator+(stream_t const& other) const {
+    return concat(other);
   }
 
   template<typename F>
@@ -150,7 +161,38 @@ class lazy_stream {
     return flatten(map(std::forward<F>(f)));
   }
 
- private:
+  std::vector<T> to_vector() const {
+    std::vector<T> v;
+    stream_t t = *this;
+    while (!t.empty()) {
+      v.push_back(t.get());
+      t = t.pop_front();
+    }
+    return v;
+  }
+
+  stream_t distinct() const {
+    fprintf(stderr, "Distinct called!\n");
+    return distinct(std::make_shared<std::unordered_set<T>>());
+  }
+
+ protected:
+  stream_t distinct(std::shared_ptr<std::unordered_set<T>> seen) const {
+    if (empty()) {
+      return stream_t();
+    }
+    auto v = get();
+    auto t = pop_front();
+    if (seen->find(v) == seen->end()) {
+      seen->insert(v);
+      return stream_t([v, t, seen]() {
+        return cell_t(v, t.distinct(seen));
+      });
+    } else {
+      return t.distinct(seen);
+    }
+  }
+
   std::shared_ptr<susp_t> lazy_cell_;
 };
 
@@ -165,7 +207,7 @@ static lazy_stream<U> flatten(lazy_stream<lazy_stream<U>> s) {
   }
   return lazy_stream<U>([s]() {
     auto h = s.get();
-    return cell<U>(h.get(), h.pop_front() + flatten(s.pop_front()));
+    return cell<U>(h.get(), h.pop_front().concat(flatten(s.pop_front())));
   });
 }
 

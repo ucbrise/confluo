@@ -53,12 +53,6 @@ class dialog_table {
   typedef size_t filter_id_t;
   typedef std::pair<size_t, size_t> trigger_id_t;
 
-  typedef query_plan::index_op_res execute_filter_result;
-
-  typedef filter::range_result filter_offset_list;
-  typedef record_stream<filter_offset_list> query_filter_result;
-  typedef filtered_record_stream<query_filter_result> adhoc_query_filter_result;
-
   typedef alert_index::alert_list alert_list;
 
   /**
@@ -78,7 +72,7 @@ class dialog_table {
         data_log_("data_log", path, storage),
         rt_(path, storage),
         metadata_(path, storage.id),
-        planner_(data_log_, indexes_, schema_),
+        planner_(&data_log_, &indexes_, &schema_),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     metadata_.write_schema(schema_);
@@ -415,16 +409,17 @@ class dialog_table {
    * @param expr The filter expression
    * @return The result of applying the filter to the table
    */
-  query_plan::index_op_res execute_filter(const std::string& expr) const {
+  lazy::lazy_stream<record_t> execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
     query_plan plan = planner_.plan(cexpr);
-    return plan.execute_using_indexes(version);
+    return plan.execute(version);
   }
 
-  query_filter_result query_filter(const std::string& filter_name,
-                                   uint64_t begin_ms, uint64_t end_ms) const {
+  lazy::lazy_stream<record_t> query_filter(const std::string& filter_name,
+                                           uint64_t begin_ms,
+                                           uint64_t end_ms) const {
     size_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
       throw invalid_operation_exception(
@@ -432,7 +427,18 @@ class dialog_table {
     }
 
     auto res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
-    return query_filter_result(rt_.get(), res, schema_, data_log_);
+    uint64_t version = rt_.get();
+    auto version_check = [version](uint64_t offset) -> bool {
+      return offset < version;
+    };
+
+    data_log const* d = &data_log_;
+    schema_t const* s = &schema_;
+    auto to_record = [d, s](uint64_t offset) -> record_t {
+      return s->apply(offset, d->cptr(offset));
+    };
+
+    return lazy::from_container(res).filter(version_check).map(to_record);
   }
 
   /**
@@ -443,13 +449,16 @@ class dialog_table {
    * @param end_ms End of time-range in ms
    * @return A stream contanining the results of the filter
    */
-  adhoc_query_filter_result query_filter(const std::string& filter_name,
-                                         const std::string& expr,
-                                         uint64_t begin_ms,
-                                         uint64_t end_ms) const {
-    return adhoc_query_filter_result(
-        query_filter(filter_name, begin_ms, end_ms),
-        compile_expression(parse_expression(expr), schema_));
+  lazy::lazy_stream<record_t> query_filter(const std::string& filter_name,
+                                           const std::string& expr,
+                                           uint64_t begin_ms,
+                                           uint64_t end_ms) const {
+    auto t = parser::parse_expression(expr);
+    auto e = parser::compile_expression(t, schema_);
+    auto expr_check = [e](const record_t& r) -> bool {
+      return e.test(r);
+    };
+    return query_filter(filter_name, begin_ms, end_ms).filter(expr_check);
   }
 
   /**

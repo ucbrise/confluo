@@ -6,35 +6,36 @@
 
 using namespace ::dialog::lazy;
 
+static lazy_stream<int> ints_from(int n) {
+  return lazy_stream<int>([n]() {
+    return cell<int>(n, ints_from(n + 1));
+  });
+}
+
+static lazy_stream<int> ints(int n, int m) {
+  if (n > m) {
+    return lazy_stream<int>();
+  }
+  return lazy_stream<int>([n, m]() {
+    return cell<int>(n, ints(n + 1, m));
+  });
+}
+
+static std::vector<int> vector_ints(int n, int m) {
+  std::vector<int> vec;
+  for (int i = n; i <= m; ++i) {
+    vec.push_back(i);
+  }
+  return vec;
+}
+
 class LazyStreamTest : public testing::Test {
- public:
-  static lazy_stream<int> ints_from(int n) {
-    return lazy_stream<int>([n]() {
-      return cell<int>(n, ints_from(n + 1));
-    });
-  }
-
-  static lazy_stream<int> ints(int n, int m) {
-    if (n > m) {
-      return lazy_stream<int>();
-    }
-    return lazy_stream<int>([n, m]() {
-      return cell<int>(n, ints(n + 1, m));
-    });
-  }
-
-  static std::vector<int> vector_ints(int n, int m) {
-    std::vector<int> vec;
-    for (int i = n; i <= m; ++i) {
-      vec.push_back(i);
-    }
-    return vec;
-  }
 };
 
 TEST_F(LazyStreamTest, BasicTest) {
   auto first_10 = ints(1, 10);
   int i = 1;
+  auto v = first_10.to_vector();
   while (!first_10.empty()) {
     ASSERT_EQ(i, first_10.get());
     ++i;

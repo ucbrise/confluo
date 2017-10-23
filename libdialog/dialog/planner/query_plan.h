@@ -1,6 +1,7 @@
 #ifndef DIALOG_QUERY_PLAN_H_
 #define DIALOG_QUERY_PLAN_H_
 
+#include "lazy/lazy_stream.h"
 #include "parser/expression_compiler.h"
 #include "planner/query_ops.h"
 
@@ -9,9 +10,6 @@ namespace planner {
 
 class query_plan : public std::vector<std::shared_ptr<query_op>> {
  public:
-  typedef union_record_stream<index_op::filtered_record_stream_t> index_op_res;
-  typedef full_scan_op::filtered_record_stream_t full_scan_op_res;
-
   std::string to_string() {
     std::string ret = "union(\n";
     for (auto& op : *this) {
@@ -25,20 +23,23 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
     return !(size() == 1 && at(0)->op_type() == query_op_type::D_SCAN_OP);
   }
 
-  full_scan_op_res execute_using_full_scan(uint64_t version) {
+  lazy::lazy_stream<record_t> execute(uint64_t version) {
+    return is_optimized() ? using_indexes(version) : using_full_scan(version);
+  }
+
+ private:
+  lazy::lazy_stream<record_t> using_full_scan(uint64_t version) {
     return std::dynamic_pointer_cast<full_scan_op>(at(0))->execute(version);
   }
 
-  index_op_res execute_using_indexes(uint64_t version) {
-    // Our plan either contains a single full_scan_op, or a vector of index_ops
-    // TODO: handle scan case, i.e., when
-    //    size() == 1 && at(0)->op_type() == query_op_type::D_SCAN_OP
-    std::vector<index_op::filtered_record_stream_t> streams;
-    for (auto& op : *this) {
-      auto idx_op = std::dynamic_pointer_cast<index_op>(op);
-      streams.push_back(idx_op->execute(version));
+  lazy::lazy_stream<record_t> using_indexes(uint64_t version) {
+    if (size() == 1) {
+      return std::dynamic_pointer_cast<index_op>(at(0))->execute(version);
     }
-    return index_op_res(streams);
+    auto executor = [version](std::shared_ptr<query_op> op) {
+      return std::dynamic_pointer_cast<index_op>(op)->execute(version);
+    };
+    return lazy::from_container(*this).flat_map(executor).distinct();
   }
 };
 

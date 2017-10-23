@@ -21,8 +21,8 @@ class query_planner {
   typedef index_ops::iterator if_iterator;
   typedef index_ops::const_iterator const_if_iterator;
 
-  query_planner(const data_log& dlog, const index_log& idx_list,
-                const schema_t& schema)
+  query_planner(const data_log* dlog, const index_log* idx_list,
+                const schema_t* schema)
       : dlog_(dlog),
         idx_list_(idx_list),
         schema_(schema) {
@@ -77,7 +77,7 @@ class query_planner {
     key_range_map m_key_ranges;
     for (const auto& p : m) {
       uint32_t idx = p.field_idx();
-      const auto& col = schema_[idx];
+      const auto& col = (*schema_)[idx];
       if (col.is_indexed() && p.op() != relop_id::NEQ) {
         double bucket_size = col.index_bucket_size();
         key_range r;
@@ -129,20 +129,20 @@ class query_planner {
     for (const auto& m_entry : m_key_ranges) {
       size_t cost;
       // TODO: Make the cost function pluggable
-      if ((cost = idx_list_.at(m_entry.first)->approx_count(
+      if ((cost = idx_list_->at(m_entry.first)->approx_count(
           m_entry.second.first, m_entry.second.second)) < min_cost) {
         min_cost = cost;
         min_id = m_entry.first;
       }
     }
 
-    return std::make_shared<index_op>(dlog_, idx_list_.at(min_id), schema_,
+    return std::make_shared<index_op>(dlog_, idx_list_->at(min_id), schema_,
                                       m_key_ranges[min_id], m);
   }
 
-  const data_log& dlog_;
-  const index_log& idx_list_;
-  const schema_t& schema_;
+  const data_log* dlog_;
+  const index_log* idx_list_;
+  const schema_t* schema_;
 };
 
 }

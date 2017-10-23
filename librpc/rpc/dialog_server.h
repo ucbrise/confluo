@@ -32,15 +32,12 @@ namespace rpc {
 
 class dialog_service_handler : virtual public dialog_serviceIf {
  public:
-  typedef dialog_table::execute_filter_result adhoc_stream;
-  typedef dialog_table::query_filter_result predef_stream;
-  typedef dialog_table::adhoc_query_filter_result combined_stream;
   typedef dialog_table::alert_list::iterator alert_iterator;
   typedef std::pair<alert_iterator, alert_iterator> alert_entry;
 
-  typedef std::map<rpc_iterator_id, adhoc_stream> adhoc_map;
-  typedef std::map<rpc_iterator_id, predef_stream> predef_map;
-  typedef std::map<rpc_iterator_id, combined_stream> combined_map;
+  typedef std::map<rpc_iterator_id, lazy::lazy_stream<record_t>> adhoc_map;
+  typedef std::map<rpc_iterator_id, lazy::lazy_stream<record_t>> predef_map;
+  typedef std::map<rpc_iterator_id, lazy::lazy_stream<record_t>> combined_map;
   typedef std::map<rpc_iterator_id, alert_entry> alerts_map;
 
   dialog_service_handler(dialog_store* store)
@@ -327,7 +324,7 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; res.has_more() && i < to_read; ++i, ++res) {
+      for (; res.has_more() && i < to_read; ++i, res = res.pop_front()) {
         record_t rec = res.get();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
@@ -354,7 +351,7 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; res.has_more() && i < to_read; ++i, ++res) {
+      for (; res.has_more() && i < to_read; ++i, res = res.pop_front()) {
         record_t rec = res.get();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
@@ -381,7 +378,7 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; res.has_more() && i < to_read; ++i, ++res) {
+      for (; res.has_more() && i < to_read; ++i, res = res.pop_front()) {
         record_t rec = res.get();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
