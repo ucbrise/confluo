@@ -5,7 +5,6 @@
 #include "data_log.h"
 #include "schema.h"
 #include "record_offset_range.h"
-#include "record_stream.h"
 #include "lazy/lazy_stream.h"
 
 namespace dialog {

@@ -21,7 +21,6 @@
 #include "alert_index.h"
 #include "periodic_task.h"
 #include "planner/query_planner.h"
-#include "record_stream.h"
 #include "radix_tree.h"
 #include "filter.h"
 #include "trigger.h"
