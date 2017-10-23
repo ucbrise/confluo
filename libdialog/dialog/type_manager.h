@@ -7,7 +7,6 @@
 #include "data_types.h"
 #include "exceptions.h"
 #include "atomic.h"
-#include "ip_address.h"
 
 namespace dialog {
 
@@ -43,10 +42,12 @@ struct type_definition {
     }
 };
 
+static std::vector<data_type> data_types;
+static std::atomic<uint16_t> id;
 
 class type_manager {
  public:
-  static std::vector<struct data_type> data_types;
+  //static std::vector<data_type> data_types;
 
   /**
    * Registers a type to the manager
@@ -108,31 +109,31 @@ class type_manager {
 
   }
 
- private:
-   static std::atomic<uint16_t> id;
+ //private:
+ //  static std::atomic<uint16_t> id;
 };
 
-/*static data_type NONE_TYPE = type_manager::data_types[
+static uint16_t tid = type_manager::register_primitives();
+
+static data_type NONE_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[0]())];
-static data_type BOOL_TYPE = type_manager::data_types[
+static data_type BOOL_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[1]())];
-static data_type CHAR_TYPE = type_manager::data_types[
+static data_type CHAR_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[2]())];
-static data_type SHORT_TYPE = type_manager::data_types[
+static data_type SHORT_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[3]())];
-static data_type INT_TYPE = type_manager::data_types[
+static data_type INT_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[4]())];
-static data_type LONG_TYPE = type_manager::data_types[
+static data_type LONG_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[5]())];
-static data_type FLOAT_TYPE = type_manager::data_types[
+static data_type FLOAT_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[6]())];
-static data_type DOUBLE_TYPE = type_manager::data_types[
+static data_type DOUBLE_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[7]())];
 static data_type STRING_TYPE(size_t size) {
   return data_type(type_id::D_STRING, size);
-}*/
-
-//register_primitives();
+}
 
 }
 

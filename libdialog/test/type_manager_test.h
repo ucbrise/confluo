@@ -2,18 +2,18 @@
 #define TEST_TYPE_MANAGER_TEST_H_
 
 #include "data_types.h"
-#include "type_manager.h"
 #include "ip_address.h"
 #include "dialog_table.h"
 #include "gtest/gtest.h"
+#include "type_manager.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
 using namespace ::dialog;
 
-std::vector<data_type> dialog::type_manager::data_types;
-std::atomic<uint16_t> dialog::type_manager::id;
+//std::vector<data_type> dialog::type_manager::data_types;
+//std::atomic<uint16_t> dialog::type_manager::id;
 
 type_definition type_def(sizeof(ip_address), 
             get_relops(), get_unaryops(),
@@ -24,12 +24,12 @@ type_definition type_def(sizeof(ip_address),
 class TypeManagerTest : public testing::Test {
   public:
     static std::vector<column_t> schema() {
-        type_manager::register_primitives();
+        //type_manager::register_primitives();
         type_manager::register_type(type_def);
 
         schema_builder builder;
-        builder.add_column(dialog::type_manager::data_types[9], "a");
-        builder.add_column(dialog::type_manager::data_types[9], "b");
+        builder.add_column(data_types[9], "a");
+        builder.add_column(data_types[9], "b");
         
         return builder.get_columns();
     }
@@ -92,7 +92,7 @@ TEST_F(TypeManagerTest, RegisterTest) {
     ASSERT_EQ(limits::int_zero, zero);
 
     ASSERT_STREQ("ip_address", 
-            dialog::type_manager::data_types[9].to_string().c_str());
+            data_types[9].to_string().c_str());
     ASSERT_EQ(9, dialog::type_manager::get_id_from_type_name("ip_address"));
 }
 
