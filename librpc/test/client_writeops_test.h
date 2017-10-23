@@ -188,7 +188,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
 
     size_t i = 0;
     for (auto r = dtable->query_filter("filter1", beg, end); 
-            r.has_more(); ++r) {
+            r.has_more(); r = r.pop_front()) {
         i++;
     }
 
@@ -388,56 +388,56 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = dtable->execute_filter("a == true"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("a == true"); r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("b > 4"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("b > 4"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("c <= 30"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("c <= 30"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("d == 0"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("d == 0"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("e <= 100"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("e <= 100"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("f > 0.1"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("f > 0.1"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("g < 0.06"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("g < 0.06"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("h == zzz"); r.has_more(); ++r) {
+  for (auto r = dtable->execute_filter("h == zzz"); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -447,7 +447,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   i = 0;
   for (auto r = dtable->execute_filter("a == true && b > 4"); r.has_more();
-      ++r) {
+      r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -456,7 +456,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   i = 0;
   for (auto r = dtable->execute_filter("a == true && (b > 4 || c <= 30)");
-      r.has_more(); ++r) {
+      r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -467,7 +467,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   i = 0;
   for (auto r = dtable->execute_filter("a == true && (b > 4 || f > 0.1)");
-      r.has_more(); ++r) {
+      r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -529,56 +529,56 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
-  for (auto r = dtable->query_filter("filter1", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter1", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter2", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter2", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter3", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter3", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter4", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter4", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter5", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter5", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter6", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter6", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter7", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter7", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter8", beg, end); r.has_more(); ++r) {
+  for (auto r = dtable->query_filter("filter8", beg, end); r.has_more(); r = r.pop_front()) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -588,7 +588,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   i = 0;
   for (auto r = dtable->query_filter("filter1", "b > 4", beg, end);
-      r.has_more(); ++r) {
+      r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -597,7 +597,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   i = 0;
   for (auto r = dtable->query_filter("filter1", "b > 4 || c <= 30", beg, end);
-      r.has_more(); ++r) {
+      r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -608,7 +608,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   i = 0;
   for (auto r = dtable->query_filter("filter1", "b > 4 || f > 0.1", beg, end);
-      r.has_more(); ++r) {
+      r.has_more(); r = r.pop_front()) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
