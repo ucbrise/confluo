@@ -28,8 +28,8 @@ class ip_address {
        address = value;
    }
 
-   std::string to_string() const {
-       return "";
+   static std::string to_string() {
+       return "ip_address";
    }
 
    bool is_valid(std::string address_string) {

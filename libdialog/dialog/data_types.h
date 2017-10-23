@@ -28,6 +28,42 @@ enum type_id
   D_STRING = 8
 };
 
+std::string none_string() {
+    return "none";
+}
+
+std::string bool_string() {
+    return "bool";
+}
+
+std::string char_string() {
+    return "char";
+}
+
+std::string short_string() {
+    return "short";
+}
+
+std::string int_string() {
+    return "int";
+}
+
+std::string long_string() {
+    return "long";
+}
+
+std::string float_string() {
+    return "float";
+}
+
+std::string double_string() {
+    return "double";
+}
+
+std::string string_string() {
+    return "string";
+}
+
 namespace limits {
 
 static bool bool_min = std::numeric_limits<bool>::lowest();
@@ -117,6 +153,12 @@ static std::vector<key_op> init_kops() {
     key_transform<float>, key_transform<double>, key_transform<std::string>};
 }
 
+static std::vector<std::string (*)()> init_to_strings() {
+    return {&none_string, &bool_string, &char_string, &short_string,
+        &int_string, &long_string, &float_string, &double_string,
+    &string_string};
+}
+
 static std::vector<void*> MIN = init_min();
 static std::vector<void*> MAX = init_max();
 static std::vector<void*> ONE = init_one();
@@ -125,6 +167,7 @@ static std::vector<rel_ops_t> RELOPS = init_rops();
 static std::vector<unary_ops_t> UNOPS = init_uops();
 static std::vector<binary_ops_t> BINOPS = init_bops();
 static std::vector<key_op> KEYOPS = init_kops();
+static std::vector<std::string (*)()> TO_STRINGS = init_to_strings();
 
 struct data_type {
  public:
@@ -232,42 +275,8 @@ struct data_type {
       return id >= 0 && id <= 8;
   }
 
-  inline const std::string primitive_string() const {
-      switch (id) {
-          case 0:
-              return "none";
-          case 1:
-              return "bool";
-          case 2:
-              return "char";
-          case 3:
-              return "short";
-          case 4:
-              return "int";
-          case 5:
-              return "long";
-          case 6:
-              return "float";
-          case 7:
-              return "double";
-          case 8:
-              return "string";
-          default:
-              return "";
-      }
-  }
-
   inline std::string to_string() const {
-      if (is_primitive()) {
-          return primitive_string();
-      }
-      THROW(invalid_operation_exception,
-              "Must to_string for non-primitive data types");
-
-  }
-
-  inline std::string to_string(std::string (*f)()) {
-      return f();
+      return TO_STRINGS[id]();
   }
 
   inline static data_type from_string(const std::string& str) {

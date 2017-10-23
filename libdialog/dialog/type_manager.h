@@ -25,10 +25,12 @@ struct type_definition {
     void* one;
     void* zero;
 
+    std::string (*name)();
+
     type_definition(size_t _size, rel_ops_t _rel_ops,
           unary_ops_t _un_ops, binary_ops_t _binary_ops, 
           key_op _key_ops, void* _min, void* _max, void* _one, 
-          void* _zero) : size(_size),
+          void* _zero, std::string (*_name)()) : size(_size),
                          rel_ops(_rel_ops),
                          un_ops(_un_ops),
                          binary_ops(_binary_ops),
@@ -36,7 +38,8 @@ struct type_definition {
                          min(_min),
                          max(_max),
                          one(_one),
-                         zero(_zero) {
+                         zero(_zero),
+                         name(_name) {
     }
 };
 
@@ -60,6 +63,7 @@ class type_manager {
       UNOPS.push_back(type_def.un_ops);
       BINOPS.push_back(type_def.binary_ops);
       KEYOPS.push_back(type_def.key_ops);
+      TO_STRINGS.push_back(type_def.name);
 
       return id;
   }

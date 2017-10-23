@@ -19,7 +19,7 @@ type_definition type_def(sizeof(ip_address),
             get_relops(), get_unaryops(),
             get_binaryops(), get_keyops(),
             &limits::int_min, &limits::int_max, &limits::int_one,
-            &limits::int_zero);
+            &limits::int_zero, &ip_address::to_string);
 
 class TypeManagerTest : public testing::Test {
   public:
@@ -95,7 +95,7 @@ TEST_F(TypeManagerTest, RegisterTest) {
             dialog::type_manager::data_types[9].to_string().c_str());
 }
 
-TEST_F(TypeManagerTest, FilterTest) {
+/*TEST_F(TypeManagerTest, FilterTest) {
     dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, 
             MGMT_POOL);
     dtable.append(record(ip_address(32), ip_address(42)));
@@ -107,7 +107,7 @@ TEST_F(TypeManagerTest, FilterTest) {
                 get_address() > 33);
         i++;
     }
-    //ASSERT_EQ(1, 1);*/
-}
+    //ASSERT_EQ(1, 1);
+}*/
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */
