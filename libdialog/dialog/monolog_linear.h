@@ -4,158 +4,17 @@
 #include <array>
 #include <vector>
 
-#include "storage.h"
 #include "atomic.h"
+#include "monolog_linear_block.h"
+#include "ptr.h"
+#include "storage.h"
 
 // TODO: Add documentation
 
 namespace dialog {
 namespace monolog {
 
-template<typename T, size_t BUFFER_SIZE = 1048576>
-class monolog_block {
- public:
-  typedef bool block_state;
-
-  static const block_state UNINIT = false;
-  static const block_state INIT = true;
-
-  monolog_block()
-      : path_(""),
-        state_(UNINIT),
-        data_(nullptr),
-        size_(0),
-        storage_(storage::IN_MEMORY) {
-  }
-
-  monolog_block(const std::string& path, size_t size,
-                const storage::storage_mode& storage)
-      : path_(path),
-        state_(UNINIT),
-        data_(nullptr),
-        size_(size),
-        storage_(storage) {
-  }
-
-  monolog_block(const monolog_block& other)
-      : path_(other.path_),
-        state_(other.state_),
-        data_(other.data_),
-        size_(other.size_),
-        storage_(other.storage_) {
-  }
-
-  void init(const std::string& path, const size_t size,
-            const storage::storage_mode& storage) {
-    path_ = path;
-    size_ = size;
-    storage_ = storage;
-  }
-
-  size_t storage_size() const {
-    if (atomic::load(&data_) != nullptr)
-      return (size_ + BUFFER_SIZE) * sizeof(T);
-    return 0;
-  }
-
-  void flush(size_t offset, size_t len) {
-    storage_.flush(atomic::load(&data_) + offset, len * sizeof(T));
-  }
-
-  void set(size_t i, const T& val) {
-    T* ptr;
-    if ((ptr = atomic::load(&data_)) == nullptr)
-      ptr = try_allocate();
-    ptr[i] = val;
-  }
-
-  void set_unsafe(size_t i, const T& val) {
-    atomic::load(&data_)[i] = val;
-  }
-
-  void write(size_t offset, const T* data, size_t len) {
-    T* ptr;
-    if ((ptr = atomic::load(&data_)) == nullptr)
-      ptr = try_allocate();
-    memcpy(ptr + offset, data, len * sizeof(T));
-  }
-
-  void write_unsafe(size_t offset, const T* data, size_t len) {
-    memcpy(atomic::load(&data_) + offset, data, len * sizeof(T));
-  }
-
-  const T& at(size_t i) const {
-    return atomic::load(&data_)[i];
-  }
-
-  void read(size_t offset, T* data, size_t len) const {
-    memcpy(data, atomic::load(&data_) + offset, len * sizeof(T));
-  }
-
-  T& operator[](size_t i) {
-    T* ptr;
-    if ((ptr = atomic::load(&data_)) == nullptr)
-      ptr = try_allocate();
-    return ptr[i];
-  }
-
-  void* ptr(size_t offset) {
-    T *data;
-    if ((data = atomic::load(&data_)) == nullptr) {
-      data = try_allocate();
-    }
-    return (void*) (data + offset);
-  }
-
-  void* cptr(size_t offset) const {
-    return (void*) (atomic::load(&data_) + offset);
-  }
-
-  monolog_block& operator=(const monolog_block& other) {
-    path_ = other.path_;
-    atomic::init(&state_, atomic::load(&other.state_));
-    atomic::init(&data_, atomic::load(&other.data_));
-    return *this;
-  }
-
-  void ensure_alloc() {
-    if (atomic::load(&data_) == nullptr)
-      try_allocate();
-  }
-
- private:
-  T* try_allocate() {
-    block_state state = UNINIT;
-    if (atomic::strong::cas(&state_, &state, INIT)) {
-      size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      T* data = reinterpret_cast<T*>(storage_.allocate(path_, file_size));
-      atomic::store(&data_, data);
-      return data;
-    }
-
-    // Someone else is initializing, stall until initialized
-    T* data;
-    while ((data = atomic::load(&data_)) == nullptr)
-      ;
-
-    return data;
-  }
-
-  std::string path_;
-  atomic::type<block_state> state_;
-  atomic::type<T*> data_;
-  size_t size_;
-  storage::storage_mode storage_;
-};
-
-template<typename T, size_t BUFFER_SIZE>
-const bool monolog_block<T, BUFFER_SIZE>::INIT;
-
-template<typename T, size_t BUFFER_SIZE>
-const bool monolog_block<T, BUFFER_SIZE>::UNINIT;
-
-template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
-    size_t BUFFER_SIZE = 1048576>
+template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456, size_t BUFFER_SIZE = 1048576>
 class monolog_linear_base {
  public:
   monolog_linear_base() = default;
@@ -170,8 +29,7 @@ class monolog_linear_base {
     name_ = name;
     data_path_ = data_path;
     for (size_t i = 0; i < MAX_BLOCKS; i++) {
-      std::string block_path = data_path + "/" + name + "_" + std::to_string(i)
-          + ".dat";
+      std::string block_path = data_path + "/" + name + "_" + std::to_string(i) + ".dat";
       blocks_[i].init(block_path, BLOCK_SIZE, storage);
     }
     blocks_[0].ensure_alloc();
@@ -185,59 +43,91 @@ class monolog_linear_base {
     return data_path_;
   }
 
-  void ensure_alloc(size_t idx1, size_t idx2) {
-    size_t bucket_idx1 = idx1 / BLOCK_SIZE;
-    size_t bucket_idx2 = idx2 / BLOCK_SIZE;
-    for (size_t i = bucket_idx1; i <= bucket_idx2; i++)
+  /**
+   * Ensures containers are allocated to cover the range of indexes given.
+   * @param start_idx start index
+   * @param end_idx end index
+   */
+  void ensure_alloc(size_t start_idx, size_t end_idx) {
+    size_t bucket_idx1 = start_idx / BLOCK_SIZE;
+    size_t bucket_idx2 = end_idx / BLOCK_SIZE;
+    for (size_t i = bucket_idx1; i <= bucket_idx2; i++) {
       blocks_[i].ensure_alloc();
+    }
   }
 
-  // Sets the data at index idx to val. Allocates memory if necessary.
+  /**
+   * Sets the data at index idx to val. Allocates memory if necessary.
+   * @param idx index to set at
+   * @param val value to set
+   */
   void set(size_t idx, const T& val) {
     blocks_[idx / BLOCK_SIZE].set(idx % BLOCK_SIZE, val);
   }
 
-  // Sets the data at index idx to val. Does NOT allocate memory -- ensure
-  // memory is allocated before calling this function.
+  /**
+   * Sets the data at index idx to val. Does NOT allocate memory --
+   * ensure memory is allocated before calling this function.
+   * @param idx index to set at
+   * @param val value to set
+   */
   void set_unsafe(size_t idx, const T val) {
     blocks_[idx / BLOCK_SIZE].set_unsafe(idx % BLOCK_SIZE, val);
   }
 
-  // Write len bytes of data at offset.
-  // Allocates memory if necessary.
-  void write(size_t offset, const T* data, size_t len) {
+  /**
+   * Write len bytes of data at idx. Allocates memory if necessary.
+   * @param idx monolog index
+   * @param data data to write
+   * @param len length of data
+   */
+  void write(size_t idx, const T* data, size_t len) {
     size_t remaining = len;
     while (remaining) {
-      size_t bucket_idx = offset / BLOCK_SIZE;
-      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_idx = idx / BLOCK_SIZE;
+      size_t bucket_off = idx % BLOCK_SIZE;
       size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
       blocks_[bucket_idx].write(bucket_off, data + len - remaining, bucket_len);
-      offset += bucket_len;
+      idx += bucket_len;
       remaining -= bucket_len;
     }
   }
 
-  // Write len bytes of data at offset. Does NOT allocate memory -- ensure
-  // memory is allocated before calling this function.
-  void write_unsafe(size_t offset, const T* data, size_t len) {
+  /**
+   * Write len bytes of data at idx. Does NOT allocate memory -- ensure
+   * memory is allocated before calling this function.
+   * @param idx monolog index
+   * @param data data to write
+   * @param len length of data
+   */
+  void write_unsafe(size_t idx, const T* data, size_t len) {
     size_t remaining = len;
     while (remaining) {
-      size_t bucket_idx = offset / BLOCK_SIZE;
-      size_t bucket_off = offset % BLOCK_SIZE;
+      size_t bucket_idx = idx / BLOCK_SIZE;
+      size_t bucket_off = idx % BLOCK_SIZE;
       size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
-      blocks_[bucket_idx].write_unsafe(bucket_off, data + len - remaining,
-                                       bucket_len);
-      offset += bucket_len;
+      blocks_[bucket_idx].write_unsafe(bucket_off, data + len - remaining, bucket_len);
+
+      idx += bucket_len;
       remaining -= bucket_len;
     }
   }
 
-  void flush(size_t offset, size_t len) {
-    blocks_[offset / BLOCK_SIZE].flush(offset % BLOCK_SIZE, len);
+  /**
+   * Flush data at idx
+   * @param idx monolog index
+   * @param len length of data to flush
+   */
+  void flush(size_t idx, size_t len) {
+    blocks_[idx / BLOCK_SIZE].flush(idx % BLOCK_SIZE, len);
   }
 
-  // Gets the data at index idx.
-  const T& get(size_t idx) const {
+  /**
+   * Gets data at idx
+   * @param idx monolog index
+   * @return data
+   */
+  const T get(size_t idx) const {
     return blocks_[idx / BLOCK_SIZE].at(idx % BLOCK_SIZE);
   }
 
@@ -254,24 +144,37 @@ class monolog_linear_base {
     }
   }
 
+  /**
+   * Gets a pointer to the data at idx
+   * @param idx monolog index
+   * @param data_ptr read-only pointer to store in
+   */
+  void ptr(size_t idx, storage::read_only_ptr<T>& data_ptr) {
+    blocks_[idx / BLOCK_SIZE].ptr(idx % BLOCK_SIZE, data_ptr);
+  }
+
+  /**
+   * Gets a pointer to the data at idx
+   * @param idx monolog index
+   * @param data_ptr read-only pointer to store in
+   */
+  void cptr(size_t idx, storage::read_only_ptr<T>& data_ptr) const {
+    blocks_[idx / BLOCK_SIZE].cptr(idx % BLOCK_SIZE, data_ptr);
+  }
+
   T& operator[](size_t idx) {
     return blocks_[idx / BLOCK_SIZE][idx % BLOCK_SIZE];
   }
 
-  void* ptr(size_t offset) {
-    return blocks_[offset / BLOCK_SIZE].ptr(offset % BLOCK_SIZE);
+  void swap_block_ptr(size_t idx, T* ptr) {
+    blocks_[idx / BLOCK_SIZE].swap_ptr(ptr);
   }
 
-  void* ptr(size_t offset) const {
-    return blocks_[offset / BLOCK_SIZE].ptr(offset % BLOCK_SIZE);
-  }
-
-  void* cptr(size_t offset) const {
-    return blocks_[offset / BLOCK_SIZE].cptr(offset % BLOCK_SIZE);
-  }
-
+  /**
+   * @return storage size of the monolog
+   */
   size_t storage_size() const {
-    size_t bucket_size = blocks_.size() * sizeof(monolog_block<T> );
+    size_t bucket_size = blocks_.size() * sizeof(monolog_block<T, BLOCK_SIZE>);
     size_t data_size = 0;
     for (size_t i = 0; i < blocks_.size(); i++)
       data_size += blocks_[i].storage_size();
@@ -282,12 +185,14 @@ class monolog_linear_base {
   std::string name_;
   std::string data_path_;
   std::array<monolog_block<T, BUFFER_SIZE>, MAX_BLOCKS> blocks_;
+
+ private:
+
 };
 
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
     size_t BUFFER_SIZE = 1048576>
-class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
-    BUFFER_SIZE> {
+class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;
@@ -338,7 +243,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
     return atomic::faa(&tail_, len);
   }
 
-  const T& at(size_t idx) const {
+  const T at(size_t idx) const {
     return this->get(idx);
   }
 

@@ -1,7 +1,6 @@
 #ifndef LIBDIALOG_DIALOG_REFLOG_H_
 #define LIBDIALOG_DIALOG_REFLOG_H_
 
-#include "mempool.h"
 #include "monolog.h"
 
 using namespace ::dialog::monolog;

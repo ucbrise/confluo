@@ -240,7 +240,7 @@ TEST_F(SchemaTest, SchemaApplyTest) {
   schema_t s(schema_vec);
 
   rec tmp(true, 'a', 10, 101, 1000, 102.4, 182.3);
-  record_t r = s.apply(0, &tmp);
+  record_t r = s.apply_unsafe(0, &tmp);
 
   ASSERT_EQ(0, r[0].idx());
   ASSERT_EQ(tmp.ts, r[0].as<int64_t>());

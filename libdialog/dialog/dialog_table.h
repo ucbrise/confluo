@@ -370,7 +370,10 @@ class dialog_table {
   size_t append(void* data) {
     size_t record_size = schema_.record_size();
     size_t offset = data_log_.append((const uint8_t*) data, record_size);
-    record_t r = schema_.apply(offset, data_log_.ptr(offset));
+
+    ro_data_ptr ptr;
+    data_log_.ptr(offset, ptr);
+    record_t r = schema_.apply(offset, ptr);
 
     size_t nfilters = filters_.size();
     for (size_t i = 0; i < nfilters; i++)
@@ -390,24 +393,26 @@ class dialog_table {
    * Reads the data from the table
    * @param offset The location of where the data is stored
    * @param version The tail pointer's location
-   * @return The data
+   * @param ptr The read-only pointer to store in
    */
-  void* read(uint64_t offset, uint64_t& version) const {
+  void read(uint64_t offset, uint64_t& version, ro_data_ptr& ptr) const {
     version = rt_.get();
     if (offset < version) {
-      return data_log_.cptr(offset);
+      data_log_.cptr(offset, ptr);
+      record_t r = schema_.apply(offset, ptr);
+      return;
     }
-    return nullptr;
+    ptr.init(nullptr, 0, nullptr);
   }
 
   /**
    * Reads the data based on the offset
    * @param offset The location of the data
-   * @return The data
+   * @param ptr The read-only pointer to store in
    */
-  void* read(uint64_t offset) const {
+  void read(uint64_t offset, ro_data_ptr& ptr) const {
     uint64_t version;
-    return read(offset, version);
+    read(offset, version, ptr);
   }
 
   /**

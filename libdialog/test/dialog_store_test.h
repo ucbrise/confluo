@@ -29,7 +29,9 @@ class DiaLogStoreTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      uint8_t* data = reinterpret_cast<uint8_t*>(dtable.read(offsets[i]));
+      ro_data_ptr ptr;
+      dtable.read(offsets[i], ptr);
+      uint8_t* data = reinterpret_cast<uint8_t*>(ptr.get());
       ASSERT_TRUE(data != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {

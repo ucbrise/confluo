@@ -30,7 +30,9 @@ class record_stream {
 
   record_t get() const {
     uint64_t offset = *it_;
-    return schema_.apply(offset, data_log_.cptr(offset));
+    ro_data_ptr ptr;
+    data_log_.cptr(offset, ptr);
+    return schema_.apply(offset, ptr);
   }
 
   record_stream& operator++() {

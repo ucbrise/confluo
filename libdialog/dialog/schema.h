@@ -81,8 +81,16 @@ class schema_t {
     return columns_.size();
   }
 
-  record_t apply(size_t offset, void* data) const {
+  record_t apply(size_t offset, storage::read_only_ptr<uint8_t>& data) const {
     record_t r(offset, data, record_size_);
+    r.reserve(columns_.size());
+    for (uint16_t i = 0; i < columns_.size(); i++)
+      r.push_back(columns_[i].apply(r.data()));
+    return r;
+  }
+
+  record_t apply_unsafe(size_t offset, void* data) const {
+    record_t r(offset, reinterpret_cast<uint8_t*>(data), record_size_);
     r.reserve(columns_.size());
     for (uint16_t i = 0; i < columns_.size(); i++)
       r.push_back(columns_[i].apply(r.data()));

@@ -5,23 +5,24 @@
 #include "atomic.h"
 
 namespace dialog {
+namespace storage {
 
-class mempool_stat {
+class memory_stat {
 
  public:
-  mempool_stat() :
+  memory_stat() :
     memory_used_(0) {
   }
 
-  inline void increment(size_t size) {
+  void increment(size_t size) {
     atomic::faa(&memory_used_, size);
   }
 
-  inline void decrement(size_t size) {
-    atomic::faa(&memory_used_, -size);
+  void decrement(size_t size) {
+    atomic::fas(&memory_used_, size);
   }
 
-  inline size_t get() {
+  size_t get() {
     return atomic::load(&memory_used_);
   }
 
@@ -30,6 +31,7 @@ class mempool_stat {
 
 };
 
+}
 }
 
 #endif /* DIALOG_MEMPOOL_STAT_H_ */
