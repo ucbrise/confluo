@@ -55,23 +55,49 @@ class storage_allocator {
    * Allocates new memory backed by file. Creates the file, overwriting old
    * data if the file already existed.
    *
-   * @param path Backing file.
-   * @param len Length of array
+   * @param path backing file.
+   * @param len length of array
+   * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
   template<typename T>
-  T* mmap(std::string path, size_t len = 1) {
+  T* mmap(std::string path, size_t len = 1, uint8_t state = state_type::D_IN_MEMORY) {
     size_t alloc_size = sizeof(ptr_metadata) + len * sizeof(T);
     mmap_stat_.increment(alloc_size);
 
-    int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
+    int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
     file_utils::truncate_file(fd, alloc_size);
     void* data = mmap_utils::map(fd, nullptr, 0, alloc_size);
     file_utils::close_file(fd);
 
     storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(data);
     metadata->alloc_type_ = alloc_type::D_MMAP;
-    metadata->state_ = state_type::D_IN_MEMORY;
+    metadata->state_ = state;
+    metadata->size_ = len * sizeof(T);
+
+    return reinterpret_cast<T*>(metadata + 1);
+  }
+
+  /**
+   * Memory-maps an existing file.
+   *
+   * @param path path of file
+   * @param offset file offset
+   * @param len length of array
+   * @param state pointer state (bit field, constrained to storage::state_type)
+   * @return pointer to memory
+   */
+  template<typename T>
+  T* mmap(std::string path, off_t offset, size_t len, uint8_t state) {
+    size_t mmap_size = sizeof(ptr_metadata) + len * sizeof(T);
+    mmap_stat_.increment(mmap_size);
+    int fd = file_utils::open_file(path, O_RDWR);
+    void* data = mmap_utils::map(fd, nullptr, offset, mmap_size);
+    file_utils::close_file(fd);
+
+    storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(data);
+    metadata->alloc_type_ = alloc_type::D_MMAP;
+    metadata->state_ = state;
     metadata->size_ = len * sizeof(T);
 
     return reinterpret_cast<T*>(metadata + 1);
