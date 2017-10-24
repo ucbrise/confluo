@@ -46,7 +46,7 @@ class file_utils {
     return stat(path.c_str(), &buf) == 0;
   }
 
-  static int create_file(const std::string& path, int flags) {
+  static int open_file(const std::string& path, int flags) {
     int ret = open(path.c_str(), flags, PERMISSIONS);
     assert_throw(
         ret != -1,

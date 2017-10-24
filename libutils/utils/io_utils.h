@@ -11,6 +11,11 @@ class io_utils {
   }
 
   template<typename T>
+  static void write(std::ostream& out, const T* values, size_t length) {
+    out.write(reinterpret_cast<const char*>(values), length * sizeof(T));
+  }
+
+  template<typename T>
   static T read(std::istream& in) {
     T val;
     in.read(reinterpret_cast<char*>(&val), sizeof(T));
@@ -20,6 +25,7 @@ class io_utils {
   static void flush(std::ostream& out) {
     out.flush();
   }
+
 };
 
 template<>

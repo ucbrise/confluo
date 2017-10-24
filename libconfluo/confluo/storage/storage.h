@@ -129,7 +129,7 @@ struct durable_relaxed {
    * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
+    int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
     file_utils::truncate_file(fd, size);
     void* data = mmap_utils::map(fd, nullptr, 0, size);
     file_utils::close_file(fd);
@@ -182,7 +182,7 @@ struct durable {
    * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
+    int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
     file_utils::truncate_file(fd, size);
     void* data = mmap_utils::map(fd, nullptr, 0, size);
     file_utils::close_file(fd);
