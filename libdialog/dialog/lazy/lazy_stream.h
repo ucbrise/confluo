@@ -172,7 +172,6 @@ class lazy_stream {
   }
 
   stream_t distinct() const {
-    fprintf(stderr, "Distinct called!\n");
     return distinct(std::make_shared<std::unordered_set<T>>());
   }
 
