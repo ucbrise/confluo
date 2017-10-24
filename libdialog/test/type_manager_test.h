@@ -7,6 +7,8 @@
 #include "gtest/gtest.h"
 #include "type_manager.h"
 
+#include <regex>
+
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
@@ -15,7 +17,7 @@ using namespace ::dialog;
 //std::vector<data_type> dialog::type_manager::data_types;
 //std::atomic<uint16_t> dialog::type_manager::id;
 
-type_definition type_def(sizeof(ip_address), 
+type_definition type_def(sizeof(uint32_t), 
             get_relops(), get_unaryops(),
             get_binaryops(), get_keyops(),
             &limits::int_min, &limits::int_max, &limits::int_one,
@@ -96,10 +98,10 @@ TEST_F(TypeManagerTest, RegisterTest) {
     ASSERT_EQ(9, dialog::type_manager::get_id_from_type_name("ip_address"));
 }
 
-/*TEST_F(TypeManagerTest, FilterTest) {
+TEST_F(TypeManagerTest, FilterTest) {
     dialog_table dtable("my_table", s, "/tmp", storage::IN_MEMORY, 
             MGMT_POOL);
-    dtable.append(record(ip_address(32), ip_address(42)));
+    dtable.append(record(ip_address(52), ip_address(42)));
     dtable.append(record(ip_address(50), ip_address(300)));
 
     size_t i = 0;
@@ -108,7 +110,7 @@ TEST_F(TypeManagerTest, RegisterTest) {
                 get_address() > 33);
         i++;
     }
-    //ASSERT_EQ(1, 1);
-}*/
+    ASSERT_EQ(0, i);
+}
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */

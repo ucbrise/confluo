@@ -14,11 +14,11 @@ namespace dialog {
 
 class ip_address {
   public:
-   ip_address(std::string address_string) {
+   /*ip_address(std::string address_string) {
        if (is_valid(address_string)) {
            parse(address_string);
        }
-   }
+   }*/
 
    ip_address() {
        address = 0;
@@ -32,24 +32,30 @@ class ip_address {
        return "ip_address";
    }
 
-   bool is_valid(std::string address_string) {
-       /*std::regex re("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+   /*bool is_valid(std::string address_string) {
+       std::regex re("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
        std::cmatch match;
-       return std::regex_match(address_string, match, re);*/
+       return std::regex_match(address_string, match, re);
        return true;
-   }
+   }*/
 
-   void parse(std::string address_string) {
-       /*if (!is_valid(address_string)) {
-           return;
-       }
+   static ip_address from_string(const std::string& str) {
+        std::regex re("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+        std::smatch str_matches;
+        if (std::regex_search(str, str_matches, re)) {
+            const int num_bytes = 4;
+            int bytes[num_bytes];
 
-       unsigned char bytes[4] = {0, 0, 0, 0};
-       sscanf(address_string, "%d.%d.%d.%d", bytes, bytes + 1, bytes + 2,
-               bytes + 3);
-       address = (256 * 256 * 256 * bytes[0]) + (256 * 256 * bytes[1]) +
-           (256 * bytes[2]) + bytes[3];*/
-       address = 9000;
+            for (unsigned int i = 0; i < num_bytes; i++) {
+                bytes[i] = utils::string_utils::lexical_cast<int>(str_matches.str(i + 1));
+            }
+
+            uint32_t addr = 256 * 256 * 256 * bytes[0] +
+                256 * 256 * bytes[1] + 
+                256 * bytes[2] + bytes[num_bytes - 1];
+            return ip_address(addr);
+        }
+        return ip_address(0);
    }
 
    uint32_t get_address() { return address; }
@@ -59,6 +65,11 @@ class ip_address {
   uint32_t address;
 };
 
+/*mutable_value parse_ip_address(const std::string& str) {
+    uint32_t val = ip_address::from_string(str);
+    int32_t mut_val = (int32_t) val;
+    return mutable_value(mut_val);
+}*/
 
 template<>
 inline void add<ip_address>(void* res, const data& v1, const data& v2) {
@@ -181,7 +192,9 @@ inline void add<ip_address>(void* res, const data& v1, const data& v2) {
    template<>
    byte_string key_transform<ip_address>(const data& v, 
            double bucket_size) {
-       THROW(unsupported_exception, "operation not yet supported 17");
+       //THROW(unsupported_exception, "operation not yet supported 17");
+       return byte_string(static_cast<uint32_t>(v.as<ip_address>(
+                       ).get_address() / bucket_size));
    }
 
    static binary_ops_t get_binaryops() {

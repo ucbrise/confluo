@@ -64,6 +64,7 @@ std::string string_string() {
     return "string";
 }
 
+
 namespace limits {
 
 static bool bool_min = std::numeric_limits<bool>::lowest();
@@ -164,6 +165,75 @@ static std::vector<size_t> primitive_sizes() {
         sizeof(int32_t), sizeof(int64_t), sizeof(float), sizeof(double)};
 }
 
+/*mutable_value parse_void(const std::string &str) {
+    return mutable_value(str);
+}
+
+mutable_value parse_bool(const std::string& str) {
+    bool val = string_utils::lexical_cast<bool>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_char(const std::string& str) {
+    bool val = string_utils::lexical_cast<int8_t>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_short(const std::string& str) {
+    bool val = string_utils::lexical_cast<int16_t>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_int(const std::string& str) {
+    bool val = string_utils::lexical_cast<int32_t>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_long(const std::string& str) {
+    bool val = string_utils::lexical_cast<int64_t>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_float(const std::string& str) {
+    bool val = string_utils::lexical_cast<float>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_double(const std::string& str) {
+    bool val = string_utils::lexical_cast<double>(str);
+    return mutable_value(val);
+}
+
+
+mutable_value parse_string(const std::string& str) {
+    return mutable_value(str);
+}
+
+static std::vector<mutable_value (*)(const std::string&)> init_parsers {
+   return {&parse_void, &parse_bool, &parse_char, &parse_short,
+       &parse_int, &parse_long, &parse_float, &parse_double, &parse_string};
+}*/
+
+
+/*template<typename T>
+static T from_string(std::string& str) {
+    return string_utils::lexical_cast<T>(str);
+}
+
+template<typename T>
+static std::vector<T (*)(std::string&)> init_from_strings() {
+    return {&from_string<void>, &from_string<bool>, &from_string<int8_t>,
+        &from_string<int16_t>, &from_string<int32_t>, &from_string<int64_t>,
+        &from_string<float>, &from_string<double>, &from_string<std::string>
+    };
+}*/
+
 static std::vector<void*> MIN = init_min();
 static std::vector<void*> MAX = init_max();
 static std::vector<void*> ONE = init_one();
@@ -174,6 +244,10 @@ static std::vector<binary_ops_t> BINOPS = init_bops();
 static std::vector<key_op> KEYOPS = init_kops();
 static std::vector<std::string (*)()> TO_STRINGS = init_to_strings();
 static std::vector<size_t> PRIMITIVE_SIZES = primitive_sizes();
+//static std::vector<mutable_value (*)(const std::string&)> PARSERS = 
+//    init_parsers();
+//template<typename T>
+//static std::vector<T (*)(std::string&)> FROM_STRINGS = init_from_strings();
 
 struct data_type {
  public:
@@ -255,6 +329,10 @@ struct data_type {
   inline std::string to_string() const {
       return TO_STRINGS[id]();
   }
+
+  /*inline mutable_value parse(const std::string& str) const {
+      return PARSERS[id](str);
+  }*/
 
   inline static data_type from_string(const std::string& str) {
     std::string tstr = utils::string_utils::to_upper(str);

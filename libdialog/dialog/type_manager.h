@@ -25,6 +25,7 @@ struct type_definition {
     void* zero;
 
     std::string (*name)();
+    //mutable_value (*parse)(const std::string&);
 
     type_definition(size_t _size, rel_ops_t _rel_ops,
           unary_ops_t _un_ops, binary_ops_t _binary_ops, 
@@ -66,6 +67,8 @@ class type_manager {
       BINOPS.push_back(type_def.binary_ops);
       KEYOPS.push_back(type_def.key_ops);
       TO_STRINGS.push_back(type_def.name);
+
+      //PARSERS.push_back(type_def.parse);
 
       return id;
   }

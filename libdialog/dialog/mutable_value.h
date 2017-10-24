@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "data_types.h"
+#include "ip_address.h"
 #include "exceptions.h"
 #include "immutable_value.h"
 
@@ -118,8 +119,11 @@ class mutable_value : public immutable_value {
         return mutable_value(type, t_str.c_str());
       }
       case 9: {
-        int32_t val = string_utils::lexical_cast<int32_t>(str);
-        return mutable_value(val);
+        ip_address *ip = new ip_address(
+                string_utils::lexical_cast<int32_t>(str));
+        const void* val = (void *) ip;
+        std::cout << "\n\n" << ip->get_address() << std::endl;
+        return mutable_value(type, val);
       }
       default: {
         THROW(parse_exception,
