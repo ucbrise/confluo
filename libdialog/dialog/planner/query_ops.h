@@ -5,7 +5,7 @@
 #include "data_log.h"
 #include "schema.h"
 #include "record_offset_range.h"
-#include "lazy/lazy_stream.h"
+#include "lazy/stream.h"
 
 namespace dialog {
 namespace planner {
@@ -86,7 +86,7 @@ class full_scan_op : public query_op {
     return UINT64_MAX;
   }
 
-  lazy::lazy_stream<record_t> execute(uint64_t version) const {
+  lazy::stream<record_t> execute(uint64_t version) const {
     static auto to_record = [this](uint64_t offset) -> record_t {
       return this->schema_->apply(offset, this->dlog_->cptr(offset));
     };
@@ -94,7 +94,7 @@ class full_scan_op : public query_op {
       return this->expr_.test(r);
     };
     auto r = record_offset_range(version, schema_->record_size());
-    return lazy::from_container(r).map(to_record).filter(expr_check);
+    return lazy::container_to_stream(r).map(to_record).filter(expr_check);
   }
 
  private:
@@ -128,7 +128,7 @@ class index_op : public query_op {
     return index_->approx_count(range_.first, range_.second);
   }
 
-  lazy::lazy_stream<record_t> execute(uint64_t version) const {
+  lazy::stream<record_t> execute(uint64_t version) const {
     const data_log* d = dlog_;
     const schema_t* s = schema_;
     compiled_expression e = expr_;
@@ -146,8 +146,8 @@ class index_op : public query_op {
     };
 
     auto r = index_->range_lookup(range_.first, range_.second);
-    return lazy::from_container(r).filter(version_check).map(to_record).filter(
-        expr_check);
+    return lazy::container_to_stream(r).filter(version_check).map(to_record)
+        .filter(expr_check);
   }
 
  private:

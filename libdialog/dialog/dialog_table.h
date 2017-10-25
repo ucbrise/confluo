@@ -413,7 +413,7 @@ class dialog_table {
    * @param expr The filter expression
    * @return The result of applying the filter to the table
    */
-  lazy::lazy_stream<record_t> execute_filter(const std::string& expr) const {
+  lazy::stream<record_t> execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
@@ -421,9 +421,9 @@ class dialog_table {
     return plan.execute(version);
   }
 
-  lazy::lazy_stream<record_t> query_filter(const std::string& filter_name,
-                                           uint64_t begin_ms,
-                                           uint64_t end_ms) const {
+  lazy::stream<record_t> query_filter(const std::string& filter_name,
+                                      uint64_t begin_ms,
+                                      uint64_t end_ms) const {
     size_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
       throw invalid_operation_exception(
@@ -442,7 +442,7 @@ class dialog_table {
       return s->apply(offset, d->cptr(offset));
     };
 
-    return lazy::from_container(res).filter(version_check).map(to_record);
+    return lazy::container_to_stream(res).filter(version_check).map(to_record);
   }
 
   /**
@@ -453,10 +453,10 @@ class dialog_table {
    * @param end_ms End of time-range in ms
    * @return A stream contanining the results of the filter
    */
-  lazy::lazy_stream<record_t> query_filter(const std::string& filter_name,
-                                           const std::string& expr,
-                                           uint64_t begin_ms,
-                                           uint64_t end_ms) const {
+  lazy::stream<record_t> query_filter(const std::string& filter_name,
+                                      const std::string& expr,
+                                      uint64_t begin_ms,
+                                      uint64_t end_ms) const {
     auto t = parser::parse_expression(expr);
     auto e = parser::compile_expression(t, schema_);
     auto expr_check = [e](const record_t& r) -> bool {
