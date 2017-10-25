@@ -52,10 +52,20 @@ class ip_address {
 
             uint32_t addr = 256 * 256 * 256 * bytes[0] +
                 256 * 256 * bytes[1] + 
-                256 * bytes[2] + bytes[num_bytes - 1];
+                256 * bytes[2] + bytes[3];
             return ip_address(addr);
         }
         return ip_address(0);
+   }
+
+   static data parse_ip(const std::string& str) {
+        ip_address *ip = new ip_address(ip_address::from_string(str).get_address());
+        const void* val = (void *) ip;
+        return data(val, sizeof(uint32_t));
+   }
+
+   std::string repr() {
+       return std::to_string(address);
    }
 
    uint32_t get_address() { return address; }
@@ -169,8 +179,11 @@ inline void add<ip_address>(void* res, const data& v1, const data& v2) {
 
    template<>
    inline bool greater_than<ip_address>(const data& v1, const data& v2) {
+       std::cout << "first " << v1.as<ip_address>().get_address() << std::endl;
+       std::cout << "second " << v2.as<ip_address>().get_address() << std::endl;
        return v1.as<ip_address>().get_address() > 
            v2.as<ip_address>().get_address();
+       //THROW(unsupported_exception, "operation not supported 69");
    }
 
    template<>

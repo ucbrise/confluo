@@ -6,6 +6,7 @@
 #include "data_types.h"
 #include "string_utils.h"
 #include "type_manager.h"
+#include "ip_address.h"
 
 using namespace utils;
 
@@ -88,6 +89,9 @@ class immutable_value {
   }
 
   std::string to_string() const {
+    if (type_manager::is_valid_id(type_.id) && !type_manager::is_primitive(type_.id)) {
+        return data_types[type_.id].to_string() + "()";
+    }
     switch (type_.id) {
       case type_id::D_BOOL: {
         return "bool(" + std::to_string(*reinterpret_cast<const bool*>(ptr_))
@@ -127,6 +131,7 @@ class immutable_value {
       }
       default: {
         THROW(illegal_state_exception, "Invalid type id");
+        //return data_types[type_.id].to_string() + "(" + data(ptr, type_.size).as<T> + ")"; 
       }
     }
   }

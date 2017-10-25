@@ -6,7 +6,9 @@
 #include <array>
 #include <cstdint>
 #include <regex>
+#include <cstring>
 
+#include "data.h"
 #include "relational_ops.h"
 #include "arithmetic_ops.h"
 #include "key_ops.h"
@@ -165,60 +167,63 @@ static std::vector<size_t> primitive_sizes() {
         sizeof(int32_t), sizeof(int64_t), sizeof(float), sizeof(double)};
 }
 
-/*mutable_value parse_void(const std::string &str) {
-    return mutable_value(str);
+data parse_void(const std::string &str) {
+    return data((void*) new char[0], 0);
+    
 }
 
-mutable_value parse_bool(const std::string& str) {
+data parse_bool(const std::string& str) {
     bool val = string_utils::lexical_cast<bool>(str);
-    return mutable_value(val);
+    //return mutable_value(val);
+    return data((void*) new bool(val), sizeof(bool));
 }
 
 
-mutable_value parse_char(const std::string& str) {
-    bool val = string_utils::lexical_cast<int8_t>(str);
-    return mutable_value(val);
+data parse_char(const std::string& str) {
+    int8_t val = string_utils::lexical_cast<int8_t>(str);
+    return data((void*) new int8_t(val), sizeof(int8_t));
 }
 
 
-mutable_value parse_short(const std::string& str) {
-    bool val = string_utils::lexical_cast<int16_t>(str);
-    return mutable_value(val);
+data parse_short(const std::string& str) {
+    int16_t val = string_utils::lexical_cast<int16_t>(str);
+    return data((void*) new int16_t(val), sizeof(int16_t));
 }
 
 
-mutable_value parse_int(const std::string& str) {
-    bool val = string_utils::lexical_cast<int32_t>(str);
-    return mutable_value(val);
+data parse_int(const std::string& str) {
+    int32_t val = string_utils::lexical_cast<int32_t>(str);
+    return data((void*) new int32_t(val), sizeof(int32_t));
 }
 
 
-mutable_value parse_long(const std::string& str) {
-    bool val = string_utils::lexical_cast<int64_t>(str);
-    return mutable_value(val);
+data parse_long(const std::string& str) {
+    int64_t val = string_utils::lexical_cast<int64_t>(str);
+    return data((void*) new int64_t(val), sizeof(int64_t));
 }
 
 
-mutable_value parse_float(const std::string& str) {
-    bool val = string_utils::lexical_cast<float>(str);
-    return mutable_value(val);
+data parse_float(const std::string& str) {
+    float val = string_utils::lexical_cast<float>(str);
+    return data((void*) new float(val), sizeof(float));
 }
 
 
-mutable_value parse_double(const std::string& str) {
-    bool val = string_utils::lexical_cast<double>(str);
-    return mutable_value(val);
+data parse_double(const std::string& str) {
+    double val = string_utils::lexical_cast<double>(str);
+    return data((void*) new double(val), sizeof(double));
 }
 
 
-mutable_value parse_string(const std::string& str) {
-    return mutable_value(str);
+data parse_string(const std::string& str) {
+    char* characters = new char[strlen(str.c_str()) + 1];
+    strcpy(characters, str.c_str());
+    return data((void*) characters, strlen(str.c_str()) + 1);
 }
 
-static std::vector<mutable_value (*)(const std::string&)> init_parsers {
-   return {&parse_void, &parse_bool, &parse_char, &parse_short,
-       &parse_int, &parse_long, &parse_float, &parse_double, &parse_string};
-}*/
+static std::vector<data (*)(const std::string&)> init_parsers() {
+   return {&parse_void, &parse_bool, &parse_char, &parse_short, &parse_int, &parse_long, &parse_float, &parse_double, &parse_string};
+}
 
 
 /*template<typename T>
@@ -244,8 +249,8 @@ static std::vector<binary_ops_t> BINOPS = init_bops();
 static std::vector<key_op> KEYOPS = init_kops();
 static std::vector<std::string (*)()> TO_STRINGS = init_to_strings();
 static std::vector<size_t> PRIMITIVE_SIZES = primitive_sizes();
-//static std::vector<mutable_value (*)(const std::string&)> PARSERS = 
-//    init_parsers();
+static std::vector<data (*)(const std::string&)> PARSERS = 
+    init_parsers();
 //template<typename T>
 //static std::vector<T (*)(std::string&)> FROM_STRINGS = init_from_strings();
 

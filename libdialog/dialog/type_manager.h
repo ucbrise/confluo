@@ -25,12 +25,14 @@ struct type_definition {
     void* zero;
 
     std::string (*name)();
-    //mutable_value (*parse)(const std::string&);
+    data (*parse)(const std::string&);
 
     type_definition(size_t _size, rel_ops_t _rel_ops,
           unary_ops_t _un_ops, binary_ops_t _binary_ops, 
           key_op _key_ops, void* _min, void* _max, void* _one, 
-          void* _zero, std::string (*_name)()) : size(_size),
+          void* _zero, std::string (*_name)(), data (*_parse)(
+              const std::string&)) : 
+                         size(_size),
                          rel_ops(_rel_ops),
                          un_ops(_un_ops),
                          binary_ops(_binary_ops),
@@ -39,7 +41,8 @@ struct type_definition {
                          max(_max),
                          one(_one),
                          zero(_zero),
-                         name(_name) {
+                         name(_name),
+                         parse(_parse) {
     }
 };
 
@@ -68,7 +71,7 @@ class type_manager {
       KEYOPS.push_back(type_def.key_ops);
       TO_STRINGS.push_back(type_def.name);
 
-      //PARSERS.push_back(type_def.parse);
+      PARSERS.push_back(type_def.parse);
 
       return id;
   }
@@ -103,6 +106,14 @@ class type_manager {
           }
       }
       return -1;
+  }
+
+  static bool is_valid_id(uint16_t other_id) {
+      return other_id >= 0 && other_id <= id;
+  }
+
+  static bool is_primitive(uint16_t other_id) {
+      return other_id >= 0 && other_id <= 8;
   }
 
   /**

@@ -17,9 +17,14 @@ class mutable_value : public immutable_value {
           type, type.id == type_id::D_NONE ? nullptr : new uint8_t[type.size]) {
   }
 
+  mutable_value(const data_type& type, data value) 
+      : immutable_value(type, const_cast<void*>(value.ptr)) {
+      type_.unaryop(unaryop_id::ASSIGN)(ptr_, value);
+  }
+
   mutable_value(const data_type& type, const void* value)
       : immutable_value(type, new uint8_t[type.size]()) {
-    type.unaryop(unaryop_id::ASSIGN)(ptr_, data(value, type.size));
+    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(value, type.size));
   }
 
   mutable_value(bool value)
@@ -84,6 +89,9 @@ class mutable_value : public immutable_value {
   }
 
   static mutable_value parse(const std::string& str, const data_type& type) {
+    if (type.id > 8) {
+        return mutable_value(type, PARSERS[type.id](str));
+    }
     switch (type.id) {
       case type_id::D_BOOL: {
         bool val = string_utils::lexical_cast<bool>(str);
@@ -118,18 +126,12 @@ class mutable_value : public immutable_value {
         t_str.resize(type.size);
         return mutable_value(type, t_str.c_str());
       }
-      case 9: {
-        ip_address *ip = new ip_address(
-                string_utils::lexical_cast<int32_t>(str));
-        const void* val = (void *) ip;
-        std::cout << "\n\n" << ip->get_address() << std::endl;
-        return mutable_value(type, val);
-      }
       default: {
         THROW(parse_exception,
               "Could not parse value " + str + " to type " + type.to_string());
       }
     }
+    
   }
 
   immutable_value copy() const {

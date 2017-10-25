@@ -17,6 +17,69 @@ struct compiled_predicate {
         field_idx_(s[attr].idx()),
         op_(static_cast<relop_id>(op)),
         val_(mutable_value::parse(value, s[attr].type())) {
+/*=======
+      : op_(static_cast<relop_id>(op)) {
+    field_name_ = s[attr].name();
+    field_idx_ = s[attr].idx();
+    is_field_indexed_ = s[attr].is_indexed();
+    field_index_id_ = s[attr].index_id();
+    field_type_ = s[attr].type();
+    field_index_bucket_size_ = s[attr].index_bucket_size();
+
+    try {
+      val_ = mutable_value::parse(value, field_type_);
+
+    } catch (std::exception& e) {
+      THROW(
+          parse_exception,
+          "Could not parse attribute " + attr + " value " + value + " to type "
+              + field_type_.to_string());
+    }
+
+    switch (op_) {
+      case relop_id::EQ: {
+        rbegin_ = val_.to_key(field_index_bucket_size_);
+        rend_ = val_.to_key(field_index_bucket_size_);
+//        fprintf(stderr, "EQ Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::GE: {
+        rbegin_ = val_.to_key(field_index_bucket_size_);
+        rend_ = s[attr].max().to_key(field_index_bucket_size_);
+//        fprintf(stderr, "GE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::LE: {
+        rbegin_ = s[attr].min().to_key(field_index_bucket_size_);
+        rend_ = val_.to_key(field_index_bucket_size_);
+//        fprintf(stderr, "LE Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::GT: {
+        rbegin_ = ++(val_.to_key(field_index_bucket_size_));
+        rend_ = s[attr].max().to_key(field_index_bucket_size_);
+        fprintf(stderr, "GT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+                rend_.to_string().c_str());
+        break;
+      }
+      case relop_id::LT: {
+        rbegin_ = s[attr].min().to_key(field_index_bucket_size_);
+        rend_ = --(val_.to_key(field_index_bucket_size_));
+//        fprintf(stderr, "LT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+//                rend_.to_string().c_str());
+        break;
+      }
+      default: {
+      }
+    }
+  }
+
+  inline data_type field_type() const {
+    return field_type_;
+>>>>>>> Got parser to finally work, will add more tests and create the size type*/
   }
 
   inline std::string const& field_name() const {
