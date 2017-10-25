@@ -35,9 +35,9 @@ class dialog_service_handler : virtual public dialog_serviceIf {
   typedef dialog_table::alert_list::iterator alert_iterator;
   typedef std::pair<alert_iterator, alert_iterator> alert_entry;
 
-  typedef std::map<rpc_iterator_id, lazy::lazy_stream<record_t>> adhoc_map;
-  typedef std::map<rpc_iterator_id, lazy::lazy_stream<record_t>> predef_map;
-  typedef std::map<rpc_iterator_id, lazy::lazy_stream<record_t>> combined_map;
+  typedef std::map<rpc_iterator_id, lazy::stream<record_t>> adhoc_map;
+  typedef std::map<rpc_iterator_id, lazy::stream<record_t>> predef_map;
+  typedef std::map<rpc_iterator_id, lazy::stream<record_t>> combined_map;
   typedef std::map<rpc_iterator_id, alert_entry> alerts_map;
 
   dialog_service_handler(dialog_store* store)
@@ -324,12 +324,12 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; res.has_more() && i < to_read; ++i, res = res.pop_front()) {
-        record_t rec = res.get();
+      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
+        record_t rec = res.head();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
       _return.num_entries = i;
-      _return.has_more = res.has_more();
+      _return.has_more = !res.empty();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
@@ -351,12 +351,12 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; res.has_more() && i < to_read; ++i, res = res.pop_front()) {
-        record_t rec = res.get();
+      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
+        record_t rec = res.head();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
       _return.num_entries = i;
-      _return.has_more = res.has_more();
+      _return.has_more = !res.empty();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
@@ -378,12 +378,12 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; res.has_more() && i < to_read; ++i, res = res.pop_front()) {
-        record_t rec = res.get();
+      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
+        record_t rec = res.head();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
       _return.num_entries = i;
-      _return.has_more = res.has_more();
+      _return.has_more = !res.empty();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
