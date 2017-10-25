@@ -29,6 +29,7 @@
 #include "record_batch_test.h"
 #include "schema_parser_test.h"
 #include "schema_test.h"
+#include "stream_test.h"
 #include "string_map_test.h"
 #include "table_metadata_test.h"
 #include "task_test.h"
