@@ -439,7 +439,9 @@ class dialog_table {
     data_log const* d = &data_log_;
     schema_t const* s = &schema_;
     auto to_record = [d, s](uint64_t offset) -> record_t {
-      return s->apply(offset, d->cptr(offset));
+      ro_data_ptr ptr;
+      d->cptr(offset, ptr);
+      return s->apply(offset, ptr);
     };
 
     return lazy::container_to_stream(res).filter(version_check).map(to_record);

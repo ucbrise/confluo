@@ -28,9 +28,11 @@ class DiaLogTableTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      uint8_t* data = reinterpret_cast<uint8_t*>(dtable.read(offsets[i]));
-      ASSERT_TRUE(data != nullptr);
+      ro_data_ptr data_ptr;
+      dtable.read(offsets[i], data_ptr);
+      ASSERT_TRUE(data_ptr.get() != nullptr);
       uint8_t expected = i % 256;
+      uint8_t* data = data_ptr.get();
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(data[j], expected);
       }

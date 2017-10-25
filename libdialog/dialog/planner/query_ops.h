@@ -87,8 +87,12 @@ class full_scan_op : public query_op {
   }
 
   lazy::stream<record_t> execute(uint64_t version) const {
-    static auto to_record = [this](uint64_t offset) -> record_t {
-      return this->schema_->apply(offset, this->dlog_->cptr(offset));
+    const data_log* d = dlog_;
+    const schema_t* s = schema_;
+    static auto to_record = [d, s](uint64_t offset) -> record_t {
+      ro_data_ptr ptr;
+      d->cptr(offset, ptr);
+      return s->apply(offset, ptr);
     };
     auto expr_check = [this](const record_t& r) -> bool {
       return this->expr_.test(r);
@@ -138,7 +142,9 @@ class index_op : public query_op {
     };
 
     auto to_record = [d, s](uint64_t offset) -> record_t {
-      return s->apply(offset, d->cptr(offset));
+      ro_data_ptr ptr;
+      d->cptr(offset, ptr);
+      return s->apply(offset, ptr);
     };
 
     auto expr_check = [e](const record_t& r) -> bool {
