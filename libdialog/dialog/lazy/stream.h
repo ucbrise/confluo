@@ -1,7 +1,9 @@
 #ifndef LAZY_STREAM_H_
 #define LAZY_STREAM_H_
 
+#include <memory>
 #include <functional>
+#include <unordered_set>
 
 namespace dialog {
 namespace lazy {
@@ -115,8 +117,8 @@ class stream {
   }
 
   template<typename F>
-  auto map(F&& f) const -> stream<decltype(f(head()))> {
-    using U = decltype(f(head()));
+  auto map(F&& f) const -> stream<decltype(f(this->head()))> {
+    using U = decltype(f(this->head()));
     if (empty_) {
       return stream<U>::nil;
     }
@@ -157,7 +159,7 @@ class stream {
   }
 
   template<typename F>
-  auto flat_map(F&& f) const -> decltype(f(head())) {
+  auto flat_map(F&& f) const -> decltype(f(this->head())) {
     return flatten(map(std::forward<F>(f)));
   }
 

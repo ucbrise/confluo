@@ -84,7 +84,7 @@ TEST_F(StreamTest, MapTest) {
   {
     auto first_10 = integers(1, 10);
     int i = 1;
-    auto multiple = first_10.map([](int i) {
+    auto multiple = first_10.map([](int i) -> int {
       return i * 10;
     });
     while (!multiple.empty()) {
