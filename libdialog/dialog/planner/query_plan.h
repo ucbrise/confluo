@@ -1,7 +1,7 @@
 #ifndef DIALOG_QUERY_PLAN_H_
 #define DIALOG_QUERY_PLAN_H_
 
-#include "lazy/lazy_stream.h"
+#include "lazy/stream.h"
 #include "parser/expression_compiler.h"
 #include "planner/query_ops.h"
 
