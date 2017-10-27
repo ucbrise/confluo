@@ -10,7 +10,7 @@
 
 namespace dialog {
 
-struct type_definition {
+struct type_operators {
     size_t size;
     rel_ops_t rel_ops;
     unary_ops_t un_ops;
@@ -27,7 +27,7 @@ struct type_definition {
     std::string (*name)();
     data (*parse)(const std::string&);
 
-    type_definition(size_t _size, rel_ops_t _rel_ops,
+    type_operators(size_t _size, rel_ops_t _rel_ops,
           unary_ops_t _un_ops, binary_ops_t _binary_ops, 
           key_op _key_ops, void* _min, void* _max, void* _one, 
           void* _zero, std::string (*_name)(), data (*_parse)(
@@ -56,7 +56,7 @@ class type_manager {
   /**
    * Registers a type to the manager
    */
-  static uint16_t register_type(type_definition type_def) {
+  static uint16_t register_type(type_operators type_def) {
       atomic::faa(&id, (uint16_t) 1);
       data_types.push_back(data_type(id, type_def.size));
 

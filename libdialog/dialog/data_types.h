@@ -94,6 +94,11 @@ static int64_t long_zero = static_cast<int64_t>(0);
 static int64_t long_one = static_cast<int64_t>(1);
 static int64_t long_max = std::numeric_limits<int64_t>::max();
 
+static uint64_t long_long_min = std::numeric_limits<uint64_t>::lowest();
+static uint64_t long_long_zero = static_cast<uint64_t>(0);
+static uint64_t long_long_one = static_cast<uint64_t>(1);
+static uint64_t long_long_max = std::numeric_limits<uint64_t>::max();
+
 static float float_min = std::numeric_limits<float>::lowest();
 static float float_zero = static_cast<float>(0.0);
 static float float_one = static_cast<float>(1.0);

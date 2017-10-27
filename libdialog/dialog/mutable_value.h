@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include "data_types.h"
-#include "ip_address.h"
 #include "exceptions.h"
 #include "immutable_value.h"
 

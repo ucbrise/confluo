@@ -179,8 +179,6 @@ inline void add<ip_address>(void* res, const data& v1, const data& v2) {
 
    template<>
    inline bool greater_than<ip_address>(const data& v1, const data& v2) {
-       std::cout << "first " << v1.as<ip_address>().get_address() << std::endl;
-       std::cout << "second " << v2.as<ip_address>().get_address() << std::endl;
        return v1.as<ip_address>().get_address() > 
            v2.as<ip_address>().get_address();
        //THROW(unsupported_exception, "operation not supported 69");

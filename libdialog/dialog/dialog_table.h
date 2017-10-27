@@ -434,7 +434,6 @@ class dialog_table {
 /*=======
     query_planner planner(cexpr, indexes_);
     query_plan plan = planner.plan();
-    std::cout << "Plan:\n\n" << plan.to_string() << std::endl;
     std::vector<fri_rstream_type> fstreams;
     for (minterm_plan& mplan : plan) {
       const index_filter& f = mplan.idx_filter();

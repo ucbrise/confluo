@@ -6,7 +6,6 @@
 #include "data_types.h"
 #include "string_utils.h"
 #include "type_manager.h"
-#include "ip_address.h"
 
 using namespace utils;
 

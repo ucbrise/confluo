@@ -61,8 +61,8 @@ struct compiled_predicate {
       case relop_id::GT: {
         rbegin_ = ++(val_.to_key(field_index_bucket_size_));
         rend_ = s[attr].max().to_key(field_index_bucket_size_);
-        fprintf(stderr, "GT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
-                rend_.to_string().c_str());
+        //fprintf(stderr, "GT Range: (%s, %s)\n", rbegin_.to_string().c_str(),
+        //        rend_.to_string().c_str());
         break;
       }
       case relop_id::LT: {
