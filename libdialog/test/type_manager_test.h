@@ -5,6 +5,7 @@
 #include "ip_address.h"
 #include "size_type.h"
 #include "dialog_table.h"
+#include "parser/schema_parser.h"
 #include "gtest/gtest.h"
 #include "type_manager.h"
 
@@ -71,6 +72,17 @@ class TypeManagerTest : public testing::Test {
         int64_t ts = utils::time_utils::cur_ns();
         r = {ts, a, b, c};
         return reinterpret_cast<void*>(&r);
+    }
+
+    static void compile(compiled_expression& cexp, const std::string&
+            exp, const schema_t& schema) {
+        auto t = parse_expression(exp);
+        cexp = compile_expression(t, schema);
+    }
+
+    static compiled_predicate predicate(const std::string& attr, relop_id
+            id, const std::string& value) {
+        return compiled_predicate(attr, id, value, schema());
     }
 
   protected:
@@ -260,6 +272,117 @@ TEST_F(TypeManagerTest, SizeTypeTest) {
     ASSERT_TRUE(test::test_utils::test_fail([]() {
         mutable_value::parse("10987", data_types[9]);
     }));
+}
+
+TEST_F(TypeManagerTest, CompilerTest) {
+    compiled_expression m1, m2, m3;
+    compile(m1, "a==192.34.123.4", s);
+    ASSERT_EQ(static_cast<size_t>(1), m1.size());
+    
+    compile(m2, "b==123.43.234.64", s);
+    ASSERT_EQ(static_cast<size_t>(1), m2.size());
+
+    compile(m3, "c==67kb", s);
+    ASSERT_EQ(static_cast<size_t>(1), m3.size());
+
+    compiled_minterm m4, m5, m6;
+    m4.add(predicate("a", relop_id::EQ, "4.4.4.4"));
+    m5.add(predicate("b", relop_id::GT, "0.0.0.7"));
+    m6.add(predicate("c", relop_id::EQ, "4kb"));
+
+    compiled_expression cexp;
+    cexp.insert(m4);
+    cexp.insert(m5);
+    cexp.insert(m6);
+
+}
+
+TEST_F(TypeManagerTest, SchemaTest) {
+    schema_builder build;
+    build.add_column(data_types[9], "a");
+    build.add_column(data_types[
+            type_manager::get_id_from_type_name("ip_address")], "b");
+    build.add_column(data_types[10], "c");
+    build.add_column(data_types[10], "d");
+    auto schema_vec = build.get_columns();
+    schema_t s(schema_vec);
+
+    ASSERT_EQ(static_cast<size_t>(5), schema_vec.size());
+    ASSERT_EQ(0, schema_vec[0].idx());
+    ASSERT_EQ(0, schema_vec[0].offset());
+    ASSERT_EQ("TIMESTAMP", schema_vec[0].name());
+    ASSERT_TRUE(LONG_TYPE == schema_vec[0].type());
+    ASSERT_FALSE(schema_vec[0].is_indexed());
+
+    ASSERT_EQ(1, schema_vec[1].idx());
+    ASSERT_EQ(8, schema_vec[1].offset());
+    ASSERT_EQ("A", schema_vec[1].name());
+    ASSERT_TRUE(data_types[9] == schema_vec[1].type());
+    ASSERT_FALSE(schema_vec[1].is_indexed());
+    
+    ASSERT_EQ(2, s[2].idx());
+    ASSERT_EQ(12, s[2].offset());
+    ASSERT_EQ("B", s[2].name());
+    ASSERT_TRUE(data_types[9] == s[2].type());
+    ASSERT_FALSE(s[2].is_indexed());
+
+    ASSERT_EQ(3, s[3].idx());
+    ASSERT_EQ(16, s[3].offset());
+    ASSERT_EQ("C", s[3].name());
+    ASSERT_TRUE(data_types[10] == s[3].type());
+    ASSERT_FALSE(s[3].is_indexed());
+
+    ASSERT_EQ(4, s[4].idx());
+    ASSERT_EQ(24, s[4].offset());
+    ASSERT_EQ("D", s[4].name());
+    ASSERT_TRUE(data_types[10] == s[4].type());
+    ASSERT_FALSE(s[4].is_indexed());
+
+    ASSERT_EQ(static_cast<size_t>(5), s.size());
+
+    ASSERT_EQ(0, s[0].idx());
+    ASSERT_EQ(0, s[0].offset());
+    ASSERT_EQ("TIMESTAMP", s[0].name());
+    ASSERT_TRUE(LONG_TYPE == s[0].type());
+    ASSERT_FALSE(s[0].is_indexed());
+    
+    ASSERT_EQ(1, s[1].idx());
+    ASSERT_EQ(8, s[1].offset());
+    ASSERT_EQ("A", s[1].name());
+    ASSERT_TRUE(data_types[9] == s[1].type());
+    ASSERT_FALSE(s[1].is_indexed());
+
+    ASSERT_EQ(2, s[2].idx());
+    ASSERT_EQ(12, s[2].offset());
+    ASSERT_EQ("B", s[2].name());
+    ASSERT_TRUE(data_types[9] == s[2].type());
+    ASSERT_FALSE(s[2].is_indexed());
+
+    ASSERT_EQ(3, s[3].idx());
+    ASSERT_EQ(16, s[3].offset());
+    ASSERT_EQ("C", s[3].name());
+    ASSERT_TRUE(data_types[10] == s[3].type());
+    ASSERT_FALSE(s[3].is_indexed());
+
+    ASSERT_EQ(4, s[4].idx());
+    ASSERT_EQ(24, s[4].offset());
+    ASSERT_EQ("D", s[4].name());
+    ASSERT_TRUE(data_types[10] == s[4].type());
+    ASSERT_FALSE(s[4].is_indexed());
+}
+
+TEST_F(TypeManagerTest, DataTypesGetterTest) {
+    data_type t1 = data_types[9];
+    data_type t2 = data_types[10];
+
+    ASSERT_TRUE(data_types[
+            type_manager::get_id_from_type_name("ip_address")] == t1);
+    ASSERT_TRUE(data_types[
+            type_manager::get_id_from_type_name("size type")] == t2);
+    ASSERT_FALSE(t1 == t2);
+
+    ASSERT_TRUE(t1.to_string() == "ip_address");
+    ASSERT_TRUE(t2.to_string() == "size type");
 }
 
 
