@@ -144,4 +144,64 @@ TEST_F(TypeManagerTest, FilterTest) {
     ASSERT_EQ(2, i);
 }
 
+TEST_F(TypeManagerTest, IPAddressTest) {
+    data d1 = ip_address::parse_ip("69.89.31.226");
+    data d2 = ip_address::parse_ip("216.65.216.164");
+    data d3 = ip_address::parse_ip("172.16.254.1");
+    
+    mutable_value n1(data_types[
+            type_manager::get_id_from_type_name("ip_address")], d1);
+    mutable_value n2(data_types[
+            type_manager::get_id_from_type_name("ip_address")], d2);
+    mutable_value n3(data_types[
+            type_manager::get_id_from_type_name("ip_address")], d3);
+
+    ASSERT_EQ(9, n1.type().id);
+    ASSERT_EQ(9, n2.type().id);
+    ASSERT_EQ(9, n3.type().id);
+
+    ASSERT_EQ(1163468770, 
+            (*reinterpret_cast<const ip_address*>(n1.ptr())).get_address());
+    ASSERT_EQ(3628193956, 
+            (*reinterpret_cast<const ip_address*>(n2.ptr())).get_address());
+    ASSERT_EQ(2886794753,
+            (*reinterpret_cast<const ip_address*>(n3.ptr())).get_address());
+
+    ASSERT_TRUE(n3 > n1);
+    ASSERT_TRUE(n2 > n3);
+    ASSERT_TRUE(n2 > n1);
+
+    ASSERT_FALSE(n1 > n3);
+    ASSERT_FALSE(n3 > n2);
+    ASSERT_FALSE(n1 > n2);
+
+    data d4 = ip_address::parse_ip_value(1163468770);
+    data d5 = ip_address::parse_ip_value(3628193956);
+    data d6 = ip_address::parse_ip_value(static_cast<uint32_t>(4791662726));
+
+    ASSERT_TRUE(mutable_value(n1.type(), new ip_address(1163468770)) == n1);
+    ASSERT_TRUE(mutable_value(n1.type(), d4) == n1);
+    ASSERT_TRUE(mutable_value(n2.type(), d5) == n2);
+    ASSERT_TRUE(mutable_value(n3.type(), d6) == 
+            (n1 + n2));
+
+    mutable_value val1 = mutable_value::parse("42.35.109.253", n1.type());
+    data d7 = ip_address::parse_ip_value(706964989);
+    ASSERT_EQ(706964989, 
+            (*reinterpret_cast<const ip_address*>(val1.ptr())).get_address());
+
+    ASSERT_TRUE(test::test_utils::test_fail([]() {
+        mutable_value::parse("-1.3.4.5", data_types[9]);
+    }));
+
+    ASSERT_TRUE(test::test_utils::test_fail([]() {
+        mutable_value::parse("278.1.1.1", data_types[9]);
+    }));
+
+    ASSERT_TRUE(test::test_utils::test_fail([]() {
+        mutable_value::parse("123412341", data_types[9]);
+    }));
+
+}
+
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */

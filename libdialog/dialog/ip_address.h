@@ -55,7 +55,7 @@ class ip_address {
                 256 * bytes[2] + bytes[3];
             return ip_address(addr);
         }
-        return ip_address(0);
+        THROW(unsupported_exception, "not valid ip");
    }
 
    static data parse_ip(const std::string& str) {
@@ -68,7 +68,13 @@ class ip_address {
        return std::to_string(address);
    }
 
-   uint32_t get_address() { return address; }
+   static data parse_ip_value(uint32_t val) {
+       ip_address *ip = new ip_address(val);
+       const void* ptr = (void *) ip;
+       return data(ptr, sizeof(uint32_t));
+   }
+
+   uint32_t get_address() const { return address; }
    void set_address(uint32_t addr) { address = addr; }
 
  private:
@@ -88,19 +94,22 @@ inline void add<ip_address>(void* res, const data& v1, const data& v2) {
         v2.as<ip_address>().get_address());
 }
 
-   template<>
-   inline void subtract<ip_address>(void* res, const data& v1, 
+template<>
+inline void subtract<ip_address>(void* res, const data& v1, 
            const data& v2) {
-      (*(reinterpret_cast<ip_address*>(res))).set_address(
-          v1.as<ip_address>().get_address()  -
-          v2.as<ip_address>().get_address());
-   }
+    (*(reinterpret_cast<ip_address*>(res))).set_address(
+        v1.as<ip_address>().get_address()  -
+        v2.as<ip_address>().get_address());
+}
 
-   template<>
-   inline void multiply<ip_address>(void* res, const data& v1, 
+template<>
+inline void multiply<ip_address>(void* res, const data& v1, 
            const data& v2) {
-       THROW(unsupported_exception, "operation not yet supported 1");
-   }
+    (*(reinterpret_cast<ip_address*>(res))).set_address(
+        v1.as<ip_address>().get_address() *
+        v2.as<ip_address>().get_address());
+
+}
 
    template<>
    inline void divide<ip_address>(void* res, const data& v1, 
@@ -192,7 +201,9 @@ inline void add<ip_address>(void* res, const data& v1, const data& v2) {
 
    template<>
    inline bool equals<ip_address>(const data& v1, const data& v2) {
-       THROW(unsupported_exception, "operation not yet supported 15");
+       return v1.as<ip_address>().get_address() == 
+           v2.as<ip_address>().get_address();
+       //THROW(unsupported_exception, "operation not yet supported 15");
    }
 
    template<>
