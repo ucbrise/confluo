@@ -121,10 +121,12 @@ TEST_F(TypeManagerTest, RegisterTest) {
     ASSERT_STREQ("ip_address", 
             data_types[9].to_string().c_str());
     ASSERT_EQ(9, dialog::type_manager::get_id_from_type_name("ip_address"));
+    ASSERT_STREQ("ip_address", s[1].type().to_string().c_str());
     
     ASSERT_STREQ("size type", 
             data_types[10].to_string().c_str());
     ASSERT_EQ(10, dialog::type_manager::get_id_from_type_name("size type"));
+    ASSERT_STREQ("size type", s[3].type().to_string().c_str());
 
 }
 
@@ -142,14 +144,18 @@ TEST_F(TypeManagerTest, FilterTest) {
 
     size_t i = 0;
     for (auto r = dtable.execute_filter("a > 0.0.0.3"); r.has_more(); ++r) {
-        //ASSERT_TRUE(r.get().at(1).value().to_data().as<ip_address>().
-        //        get_address() > 33);
+        ASSERT_TRUE(r.get().at(1).value().to_data().as<ip_address>().
+                get_address() > 33);
         i++;
     }
     ASSERT_EQ(2, i);
     
     i = 0;
     for (auto r = dtable.execute_filter("c == 1kb"); r.has_more(); ++r) {
+        ASSERT_EQ(1024, r.get().at(3).value().to_data().as<size_type>().
+                get_bytes());
+        ASSERT_TRUE(r.get().at(3).value().to_data().as<size_type>().
+            get_bytes() == static_cast<uint64_t>(1024));
         i++;
     }
 
@@ -294,6 +300,9 @@ TEST_F(TypeManagerTest, CompilerTest) {
     cexp.insert(m4);
     cexp.insert(m5);
     cexp.insert(m6);
+
+    ASSERT_STREQ("A==ip_address() or B>ip_address()C==size type()", 
+            cexp.to_string().c_str());
 
 }
 
