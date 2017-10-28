@@ -88,7 +88,8 @@ class mutable_value : public immutable_value {
   }
 
   static mutable_value parse(const std::string& str, const data_type& type) {
-    if (type.id > 8) {
+    if (!type_manager::is_primitive(type.id)
+            && type_manager::is_valid_id(type.id)) {
         return mutable_value(type, PARSERS[type.id](str));
     }
     switch (type.id) {

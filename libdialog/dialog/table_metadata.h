@@ -10,6 +10,7 @@
 #include "numeric.h"
 #include "aggregate_types.h"
 #include "io_utils.h"
+#include "type_manager.h"
 
 using namespace utils;
 
@@ -139,6 +140,12 @@ class metadata_writer {
         io_utils::write(out_, col.name());
         io_utils::write(out_, col.type().id);
         io_utils::write(out_, col.type().size);
+
+        if (!type_manager::is_primitive(col.type().id) &&
+                type_manager::is_valid_id(col.type().id)) {
+            io_utils::write(out_, col.min());
+            io_utils::write(out_, col.max());
+        }
         switch (col.type().id) {
           case type_id::D_BOOL: {
             io_utils::write(out_, col.min().as<bool>());
@@ -222,6 +229,10 @@ class metadata_writer {
       io_utils::write(out_, op);
       uint16_t id = threshold.type().id;
       io_utils::write(out_, id);
+      if (!type_manager::is_primitive(id) &&
+              type_manager::is_valid_id(id)) {
+          io_utils::write(out_, threshold);
+      }
       switch (id) {
         case type_id::D_BOOL: {
           io_utils::write(out_, threshold.as<bool>());
@@ -285,6 +296,12 @@ class metadata_reader {
       data_type type;
       type.id = io_utils::read<type_id>(in_);
       type.size = io_utils::read<size_t>(in_);
+      /*if (!type_manager::is_primitive(type.id) &&
+              type_manager::is_valid_id(type.id)) {
+          mutable_value min(io_utils::read(in_));
+          mutable_value max(io_utils::read(in_));
+          builder.add_column(type, name, min, max);
+      }*/
       switch (type.id) {
         case type_id::D_BOOL: {
           mutable_value min(io_utils::read<bool>(in_));
