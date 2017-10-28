@@ -53,7 +53,7 @@ class size_type {
              
             return size_type(byt);
         }
-        return size_type(0);
+        THROW(unsupported_exception, "invalid size string");
    }
 
    static data parse_bytes(const std::string& str) {
@@ -67,7 +67,7 @@ class size_type {
        return std::to_string(bytes);
    }
 
-   uint32_t get_bytes() { return bytes; }
+   uint64_t get_bytes() const { return bytes; }
    void set_bytes(uint64_t _bytes) { bytes = _bytes; }
 
  private:

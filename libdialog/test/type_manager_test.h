@@ -201,7 +201,66 @@ TEST_F(TypeManagerTest, IPAddressTest) {
     ASSERT_TRUE(test::test_utils::test_fail([]() {
         mutable_value::parse("123412341", data_types[9]);
     }));
-
 }
+
+TEST_F(TypeManagerTest, SizeTypeTest) {
+    data d1 = size_type::parse_bytes("3mb");
+    data d2 = size_type::parse_bytes("10gb");
+    data d3 = size_type::parse_bytes("3072kb");
+    
+    mutable_value n1(data_types[
+            type_manager::get_id_from_type_name("size type")], d1);
+    mutable_value n2(data_types[
+            type_manager::get_id_from_type_name("size type")], d2);
+    mutable_value n3(data_types[
+            type_manager::get_id_from_type_name("size type")], d3);
+
+    ASSERT_EQ(10, n1.type().id);
+    ASSERT_EQ(10, n2.type().id);
+    ASSERT_EQ(10, n3.type().id);
+
+    ASSERT_EQ(3145728, 
+            (*reinterpret_cast<const size_type*>(n1.ptr())).get_bytes());
+    ASSERT_EQ(10737418240, 
+            (*reinterpret_cast<const size_type*>(n2.ptr())).get_bytes());
+    ASSERT_EQ(3145728,
+            (*reinterpret_cast<const size_type*>(n3.ptr())).get_bytes());
+
+    ASSERT_TRUE(n2 > n1);
+    ASSERT_TRUE(n2 > n3);
+    ASSERT_TRUE(n3 == n1);
+
+    ASSERT_FALSE(n1 > n2);
+    ASSERT_FALSE(n3 > n2);
+    ASSERT_FALSE(n1 > n3);
+
+    data d4 = size_type::parse_bytes("3145728b");
+    data d5 = size_type::parse_bytes("10737418240b");
+    data d6 = size_type::parse_bytes("10740563968b");
+
+    ASSERT_TRUE(mutable_value(n1.type(), new size_type(3145728)) == n1);
+    ASSERT_TRUE(mutable_value(n1.type(), d4) == n1);
+    ASSERT_TRUE(mutable_value(n2.type(), d5) == n2);
+    ASSERT_TRUE(mutable_value(n3.type(), d6) == 
+            (n1 + n2));
+
+    mutable_value val1 = mutable_value::parse("15pb", n1.type());
+    data d7 = size_type::parse_bytes("16888498602639360b");
+    ASSERT_EQ(16888498602639360, 
+            (*reinterpret_cast<const size_type*>(val1.ptr())).get_bytes());
+
+    ASSERT_TRUE(test::test_utils::test_fail([]() {
+        mutable_value::parse("234xb", data_types[9]);
+    }));
+
+    ASSERT_TRUE(test::test_utils::test_fail([]() {
+        mutable_value::parse("1234k", data_types[9]);
+    }));
+
+    ASSERT_TRUE(test::test_utils::test_fail([]() {
+        mutable_value::parse("10987", data_types[9]);
+    }));
+}
+
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */
