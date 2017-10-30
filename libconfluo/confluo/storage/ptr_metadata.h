@@ -5,7 +5,7 @@ namespace confluo {
 namespace storage {
 
 /**
- * The type of allocator
+ * Type of allocation.
  */
 struct alloc_type {
   /** Default allocation */
@@ -18,7 +18,7 @@ const uint8_t alloc_type::D_DEFAULT;
 const uint8_t alloc_type::D_MMAP;
 
 /**
- * Type of state
+ * State of data residing in allocated memory.
  */
 struct state_type {
   /** In memory state */
@@ -31,19 +31,15 @@ const uint8_t state_type::D_IN_MEMORY;
 const uint8_t state_type::D_ARCHIVED;
 
 /**
- * Metadata from the pointer
+ * Pointer metadata set for memory allocated by the
+ * allocator. Not all fields may necessarily be set.
  */
 typedef struct ptr_metadata {
-  /** Size of pointer */
-  size_t size_ : 32;
-  /** Identifier of the thread */
-  uint8_t thread_id_ : 8;
-  /** The state of the pointer */
-  uint8_t state_ : 4;
-  /** The allocation type */
-  uint8_t alloc_type_ : 4;
-  /** Amount unused */
-  int unused: 16;
+  size_t size_ : 32; // size of data
+  uint8_t thread_id_ : 8; // allocating thread id
+  uint8_t state_ : 4; // data state
+  uint8_t alloc_type_ : 4; // allocation type
+  uint16_t offset_: 16; // offset from allocated pointer
 
   /**
    * Get metadata associated with a pointer

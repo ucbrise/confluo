@@ -1,6 +1,8 @@
 #ifndef CONFLUO_STORAGE_STORAGE_ALLOCATOR_H_
 #define CONFLUO_STORAGE_STORAGE_ALLOCATOR_H_
 
+#include <unistd.h>
+
 #include "exceptions.h"
 #include "mmap_utils.h"
 #include "storage/memory_stat.h"
@@ -67,10 +69,10 @@ class storage_allocator {
 
     int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
     file_utils::truncate_file(fd, alloc_size);
-    void* data = mmap_utils::map(fd, nullptr, 0, alloc_size);
+    void* ptr = mmap_utils::map(fd, nullptr, 0, alloc_size);
     file_utils::close_file(fd);
 
-    storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(data);
+    storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;
     metadata->state_ = state;
     metadata->size_ = len * sizeof(T);
@@ -79,26 +81,32 @@ class storage_allocator {
   }
 
   /**
-   * Memory-maps an existing file.
+   * Memory-maps part of an existing file.
    *
    * @param path path of file
-   * @param offset file offset
+   * @param offset file offset (does not need to be page aligned)
    * @param len length of array
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
   template<typename T>
   T* mmap(std::string path, off_t offset, size_t len, uint8_t state) {
-    size_t mmap_size = sizeof(ptr_metadata) + len * sizeof(T);
+    off_t page_aligned_offset = offset - (offset % getpagesize());
+    int mmap_delta = offset - page_aligned_offset;
+
+    size_t mmap_size = sizeof(ptr_metadata) + len * sizeof(T) + mmap_delta;
     mmap_stat_.increment(mmap_size);
+
     int fd = file_utils::open_file(path, O_RDWR);
-    void* data = mmap_utils::map(fd, nullptr, offset, mmap_size);
+    uint8_t* ptr = static_cast<uint8_t*>(mmap_utils::map(fd, nullptr, page_aligned_offset, mmap_size));
+    ptr += mmap_delta;
     file_utils::close_file(fd);
 
-    storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(data);
+    storage::ptr_metadata* metadata = reinterpret_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;
     metadata->state_ = state;
     metadata->size_ = len * sizeof(T);
+    metadata->offset_ = mmap_delta;
 
     return reinterpret_cast<T*>(metadata + 1);
   }
@@ -118,7 +126,8 @@ class storage_allocator {
       mem_stat_.decrement(alloc_size);
       break;
     case alloc_type::D_MMAP:
-      mmap_utils::unmap(reinterpret_cast<ptr_metadata*>(ptr) - 1, alloc_size);
+      size_t total_offset = ptr_metadata::get(ptr)->offset_ + sizeof(ptr_metadata);
+      mmap_utils::unmap(reinterpret_cast<uint8_t*>(ptr) - total_offset, alloc_size);
       mmap_stat_.decrement(alloc_size);
       break;
     }

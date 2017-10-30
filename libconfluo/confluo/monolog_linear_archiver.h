@@ -55,8 +55,7 @@ class monolog_linear_archiver {
     size_t start = archival_tail_ / BLOCK_SIZE;
     size_t stop = std::min(offset / BLOCK_SIZE, (size_t) rt_.get() / BLOCK_SIZE); // TODO fix cast
 
-    std::ofstream archival_out(cur_file_path());
-    archival_out.seekp(0, std::ios::end);
+    std::ofstream archival_out(cur_file_path(), std::ios::in | std::ios::out | std::ios::ate);
     size_t file_off = archival_out.tellp();
 
     for (size_t i = start; i < stop; i++) {
