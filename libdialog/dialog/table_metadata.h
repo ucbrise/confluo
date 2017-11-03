@@ -141,11 +141,11 @@ class metadata_writer {
         io_utils::write(out_, col.type().id);
         io_utils::write(out_, col.type().size);
 
-        if (!type_manager::is_primitive(col.type().id) &&
+        /*if (!type_manager::is_primitive(col.type().id) &&
                 type_manager::is_valid_id(col.type().id)) {
-            io_utils::write(out_, col.min());
-            io_utils::write(out_, col.max());
-        }
+            io_utils::write(out_, col.min().as<T>());
+            io_utils::write(out_, col.max().as<T>());
+        }*/
         switch (col.type().id) {
           case type_id::D_BOOL: {
             io_utils::write(out_, col.min().as<bool>());
@@ -229,10 +229,10 @@ class metadata_writer {
       io_utils::write(out_, op);
       uint16_t id = threshold.type().id;
       io_utils::write(out_, id);
-      if (!type_manager::is_primitive(id) &&
+      /*if (!type_manager::is_primitive(id) &&
               type_manager::is_valid_id(id)) {
           io_utils::write(out_, threshold);
-      }
+      }*/
       switch (id) {
         case type_id::D_BOOL: {
           io_utils::write(out_, threshold.as<bool>());

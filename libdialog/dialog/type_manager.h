@@ -46,8 +46,19 @@ struct type_operators {
     }
 };
 
-static std::vector<data_type> data_types;
 static std::atomic<uint16_t> id;
+
+namespace details {
+static std::vector<data_type> register_primitives() {
+    atomic::faa(&dialog::id, (uint16_t) 8);
+    return {data_type(0, 0), data_type(1, sizeof(bool)), 
+        data_type(2, sizeof(int8_t)), data_type(3, sizeof(int16_t)),
+        data_type(4, sizeof(int32_t)), data_type(5, sizeof(int64_t)),
+        data_type(6, sizeof(float)), data_type(7, sizeof(double)),
+        data_type(8, 10000)};
+}
+}
+static std::vector<data_type> data_types = details::register_primitives();
 
 class type_manager {
  public:
@@ -76,29 +87,7 @@ class type_manager {
       return id;
   }
 
-  static uint16_t register_primitives() {
-      data_types.push_back(data_type(0, 0));
-      data_types.push_back(data_type(1, sizeof(bool)));
-      data_types.push_back(data_type(2, sizeof(int8_t)));
-
-      data_types.push_back(data_type(3, sizeof(int16_t)));
-      data_types.push_back(data_type(4, sizeof(int32_t)));
-      data_types.push_back(data_type(5, sizeof(int64_t)));
-
-      data_types.push_back(data_type(6, sizeof(float)));
-      data_types.push_back(data_type(7, sizeof(double)));
-
-      // Insert an arbitrary string data_type not actually used
-      // Use STRING_TYPE(size) for the actual string
-      // Can't push to data_types vector because don't know size in
-      // advance
-      // Done to keep the indexing nice
-      data_types.push_back(data_type(8, 10000));
-
-      atomic::faa(&id, (uint16_t) 8);
-      return id;
-  }
-
+  
   static uint16_t get_id_from_type_name(std::string type_name) {
       for (unsigned int i = 0; i < data_types.size(); i++) {
           if (type_name.compare(data_types[i].to_string()) == 0) {
@@ -126,8 +115,6 @@ class type_manager {
  //private:
  //  static std::atomic<uint16_t> id;
 };
-
-static uint16_t tid = type_manager::register_primitives();
 
 static data_type NONE_TYPE = data_types[
     type_manager::get_id_from_type_name(TO_STRINGS[0]())];
