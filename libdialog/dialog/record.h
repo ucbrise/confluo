@@ -110,12 +110,16 @@ struct record_t {
 
   std::string to_string() const {
     std::string str = "(";
-    for (auto& f: *this) {
+    for (auto& f : *this) {
       str += f.to_string() + ", ";
     }
     str.pop_back();
     str += ")";
     return str;
+  }
+
+  bool operator==(const record_t& other) const {
+    return log_offset_ == other.log_offset_;
   }
 
  private:
@@ -126,6 +130,17 @@ struct record_t {
   size_t size_;
   uint64_t version_;
   std::vector<field_t> fields_;
+};
+
+}
+
+namespace std {
+
+template<>
+struct hash<dialog::record_t> {
+  size_t operator()(const dialog::record_t& k) const {
+    return k.log_offset();
+  }
 };
 
 }

@@ -321,8 +321,8 @@ class byte_string {
   }
 
   inline byte_string& operator=(byte_string&& other) {
-    size_ = other.size_;
-    data_ = other.data_;
+    size_ = std::move(other.size_);
+    data_ = std::move(other.data_);
 
     other.size_ = 0;
     other.data_ = nullptr;

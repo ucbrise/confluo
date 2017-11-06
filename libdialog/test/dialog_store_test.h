@@ -1,5 +1,5 @@
-#ifndef TEST_DIALOG_TABLE_TEST_H_
-#define TEST_DIALOG_TABLE_TEST_H_
+#ifndef TEST_DIALOG_STORE_TEST_H_
+#define TEST_DIALOG_STORE_TEST_H_
 
 #include "dialog_store.h"
 #include "dialog_table.h"
@@ -149,4 +149,4 @@ TEST_F(DiaLogStoreTest, RemoveTableTest) {
   }
 }
 
-#endif /* TEST_DIALOG_TABLE_TEST_H_ */
+#endif /* TEST_DIALOG_STORE_TEST_H_ */

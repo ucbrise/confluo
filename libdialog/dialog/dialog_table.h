@@ -20,8 +20,7 @@
 #include "filter_log.h"
 #include "alert_index.h"
 #include "periodic_task.h"
-#include "query_planner.h"
-#include "record_stream.h"
+#include "planner/query_planner.h"
 #include "radix_tree.h"
 #include "filter.h"
 #include "trigger.h"
@@ -37,6 +36,8 @@
 using namespace ::dialog::monolog;
 using namespace ::dialog::index;
 using namespace ::dialog::monitor;
+using namespace ::dialog::parser;
+using namespace ::dialog::planner;
 using namespace ::utils;
 
 namespace dialog {
@@ -50,15 +51,6 @@ class dialog_table {
 
   typedef size_t filter_id_t;
   typedef std::pair<size_t, size_t> trigger_id_t;
-
-  typedef radix_index::rt_result ri_offset_list;
-  typedef record_stream<ri_offset_list> ri_stream_type;
-  typedef filtered_record_stream<ri_stream_type> fri_rstream_type;
-  typedef union_record_stream<fri_rstream_type> fri_result_type;
-
-  typedef filter::range_result filter_offset_list;
-  typedef record_stream<filter_offset_list> filter_rstream_type;
-  typedef filtered_record_stream<filter_rstream_type> ffilter_rstream_type;
 
   typedef alert_index::alert_list alert_list;
 
@@ -79,6 +71,7 @@ class dialog_table {
         data_log_("data_log", path, storage),
         rt_(path, storage),
         metadata_(path, storage.id),
+        planner_(&data_log_, &indexes_, &schema_),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     metadata_.write_schema(schema_);
@@ -184,15 +177,15 @@ class dialog_table {
    * @throw ex Management exception
    */
   bool is_indexed(const std::string& field_name) {
-      optional<management_exception> ex;
-      uint16_t idx;
-      try {
-          idx = schema_.get_field_index(field_name);
-      } catch (std::exception& e) {
-          THROW(management_exception, "Field name does not exist");
-      }
-      column_t& col = schema_[idx];
-      return col.is_indexed();
+    optional<management_exception> ex;
+    uint16_t idx;
+    try {
+      idx = schema_.get_field_index(field_name);
+    } catch (std::exception& e) {
+      THROW(management_exception, "Field name does not exist");
+    }
+    column_t& col = schema_[idx];
+    return col.is_indexed();
   }
 
   /**
@@ -420,53 +413,58 @@ class dialog_table {
    * @param expr The filter expression
    * @return The result of applying the filter to the table
    */
-  fri_result_type execute_filter(const std::string& expr) const {
+  lazy::stream<record_t> execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
-    query_planner planner(cexpr, indexes_);
-    query_plan plan = planner.plan();
-    std::vector<fri_rstream_type> fstreams;
-    for (minterm_plan& mplan : plan) {
-      const index_filter& f = mplan.idx_filter();
-      auto mres = indexes_.at(f.index_id())->range_lookup(f.kbegin(), f.kend());
-      ri_stream_type rs(version, mres, schema_, data_log_);
-      fstreams.push_back(fri_rstream_type(rs, mplan.data_filter()));
-    }
-    return fri_result_type(fstreams);
+    query_plan plan = planner_.plan(cexpr);
+    return plan.execute(version);
   }
 
-  filter_rstream_type query_filter(const std::string& filter_name,
-                                   uint64_t ts_block_begin,
-                                   uint64_t ts_block_end) const {
-
+  lazy::stream<record_t> query_filter(const std::string& filter_name,
+                                      uint64_t begin_ms,
+                                      uint64_t end_ms) const {
     size_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
-      THROW(invalid_operation_exception,
-            "Filter " + filter_name + " does not exist.");
+      throw invalid_operation_exception(
+          "Filter " + filter_name + " does not exist.");
     }
 
-    auto res = filters_.at(filter_id)->lookup_range(ts_block_begin,
-                                                    ts_block_end);
-    return filter_rstream_type(rt_.get(), res, schema_, data_log_);
+    auto res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
+    uint64_t version = rt_.get();
+    auto version_check = [version](uint64_t offset) -> bool {
+      return offset < version;
+    };
+
+    data_log const* d = &data_log_;
+    schema_t const* s = &schema_;
+    auto to_record = [d, s](uint64_t offset) -> record_t {
+      ro_data_ptr ptr;
+      d->cptr(offset, ptr);
+      return s->apply(offset, ptr);
+    };
+
+    return lazy::container_to_stream(res).filter(version_check).map(to_record);
   }
 
   /**
    * Executes a query filter expression
    * @param filter_name The name of the filter
    * @param expr The filter expression
-   * @param ts_block_begin The beginning of the block
-   * @param ts_block_end The end of the block
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
    * @return A stream contanining the results of the filter
    */
-  ffilter_rstream_type query_filter(const std::string& filter_name,
-                                    const std::string& expr,
-                                    uint64_t ts_block_begin,
-                                    uint64_t ts_block_end) const {
+  lazy::stream<record_t> query_filter(const std::string& filter_name,
+                                      const std::string& expr,
+                                      uint64_t begin_ms,
+                                      uint64_t end_ms) const {
     auto t = parser::parse_expression(expr);
-    auto cexpr = parser::compile_expression(t, schema_);
-    return ffilter_rstream_type(
-        query_filter(filter_name, ts_block_begin, ts_block_end), cexpr);
+    auto e = parser::compile_expression(t, schema_);
+    auto expr_check = [e](const record_t& r) -> bool {
+      return e.test(r);
+    };
+    return query_filter(filter_name, begin_ms, end_ms).filter(expr_check);
   }
 
   /**
@@ -606,6 +604,8 @@ class dialog_table {
 
   string_map<filter_id_t> filter_map_;
   string_map<trigger_id_t> trigger_map_;
+
+  query_planner planner_;
 
   // Manangement
   task_pool& mgmt_pool_;

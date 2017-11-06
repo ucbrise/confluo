@@ -87,6 +87,7 @@ class flattened_iterator {
 template<typename container_t>
 class flattened_container {
  public:
+  typedef typename container_t::value_type::value_type value_type;
   typedef typename container_t::const_iterator container_iterator;
   typedef flattened_iterator<container_iterator> iterator;
 
