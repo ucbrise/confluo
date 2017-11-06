@@ -146,7 +146,14 @@ class metadata_writer {
             io_utils::write(out_, col.min().as<T>());
             io_utils::write(out_, col.max().as<T>());
         }*/
-        switch (col.type().id) {
+        if (col.type().id != type_id::D_STRING) {
+            data min_data = col.min().to_data();
+            data max_data = col.max().to_data();
+
+            SERIALIZERS[col.type().id](out_, min_data);
+            SERIALIZERS[col.type().id](out_, max_data);
+        }
+        /*switch (col.type().id) {
           case type_id::D_BOOL: {
             io_utils::write(out_, col.min().as<bool>());
             io_utils::write(out_, col.max().as<bool>());
@@ -187,7 +194,7 @@ class metadata_writer {
           }
           default:
             THROW(invalid_operation_exception, "Invalid data type");
-        }
+        }*/
       }
       io_utils::flush(out_);
     }
@@ -233,7 +240,9 @@ class metadata_writer {
               type_manager::is_valid_id(id)) {
           io_utils::write(out_, threshold);
       }*/
-      switch (id) {
+      data d1 = threshold.to_data();
+      SERIALIZERS[id](out_, d1);
+      /*switch (id) {
         case type_id::D_BOOL: {
           io_utils::write(out_, threshold.as<bool>());
           break;
@@ -265,7 +274,7 @@ class metadata_writer {
         default:
           THROW(invalid_operation_exception,
                 "Threshold is not of numeric type");
-      }
+      }*/
       io_utils::write(out_, periodicity_ms);
       io_utils::flush(out_);
     }
@@ -302,7 +311,17 @@ class metadata_reader {
           mutable_value max(io_utils::read(in_));
           builder.add_column(type, name, min, max);
       }*/
-      switch (type.id) {
+      if (type.id != type_id::D_STRING) {
+        data min = DESERIALIZERS[type.id](in_);
+        data max = DESERIALIZERS[type.id](in_);
+        mutable_value min_ = mutable_value(type, min);
+        mutable_value max_ = mutable_value(type, max);
+        builder.add_column(type, name, min_, max_);
+      } else {
+          builder.add_column(type, name);
+      }
+
+      /*switch (type.id) {
         case type_id::D_BOOL: {
           mutable_value min(io_utils::read<bool>(in_));
           mutable_value max(io_utils::read<bool>(in_));
@@ -351,7 +370,7 @@ class metadata_reader {
         }
         default:
           THROW(invalid_operation_exception, "Invalid data type");
-      }
+      }*/
     }
     return schema_t(builder.get_columns());
   }

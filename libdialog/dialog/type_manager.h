@@ -27,11 +27,15 @@ struct type_operators {
     std::string (*name)();
     data (*parse)(const std::string&);
 
+    void (*serialize)(std::ostream&, data&);
+    data (*deserialize)(std::istream&);
+
     type_operators(size_t _size, rel_ops_t _rel_ops,
           unary_ops_t _un_ops, binary_ops_t _binary_ops, 
           key_op _key_ops, void* _min, void* _max, void* _one, 
           void* _zero, std::string (*_name)(), data (*_parse)(
-              const std::string&)) : 
+          const std::string&), void (*_serialize)(std::ostream&,
+          data&), data (*_deserialize)(std::istream&)) : 
                          size(_size),
                          rel_ops(_rel_ops),
                          un_ops(_un_ops),
@@ -42,7 +46,9 @@ struct type_operators {
                          one(_one),
                          zero(_zero),
                          name(_name),
-                         parse(_parse) {
+                         parse(_parse),
+                         serialize(_serialize),
+                         deserialize(_deserialize) {
     }
 };
 
@@ -83,6 +89,8 @@ class type_manager {
       TO_STRINGS.push_back(type_def.name);
 
       PARSERS.push_back(type_def.parse);
+      SERIALIZERS.push_back(type_def.serialize);
+      DESERIALIZERS.push_back(type_def.deserialize);
 
       return id;
   }

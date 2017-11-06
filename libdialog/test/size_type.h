@@ -63,6 +63,12 @@ class size_type {
         return data(val, sizeof(uint64_t));
    }
 
+   static data parse_bytes(uint64_t _bytes) {
+       size_type *size = new size_type(_bytes);
+       const void* val = (void*) size;
+       return data(val, sizeof(uint64_t));
+   }
+
    std::string repr() {
        return std::to_string(bytes);
    }
@@ -79,6 +85,19 @@ class size_type {
     int32_t mut_val = (int32_t) val;
     return mutable_value(mut_val);
 }*/
+
+template<>
+static void serialize<size_type>(std::ostream& out, data& value) {
+    size_type val = value.as<size_type>();
+    out.write(reinterpret_cast<const char*>(&(value.ptr)), value.size);
+}
+
+template<>
+static data deserialize<size_type>(std::istream& in) {
+    uint64_t val;
+    in.read(reinterpret_cast<char*>(&val), sizeof(uint64_t));
+    return size_type::parse_bytes(val);
+}
 
 template<>
 inline void add<size_type>(void* res, const data& v1, const data& v2) {

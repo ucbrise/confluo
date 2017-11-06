@@ -10,6 +10,7 @@
 #include "type_manager.h"
 
 #include <regex>
+#include <fstream>
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -24,14 +25,16 @@ type_operators type_def(sizeof(uint32_t),
             get_binaryops(), get_keyops(),
             &limits::int_min, &limits::int_max, &limits::int_one,
             &limits::int_zero, &ip_address::to_string, 
-            &ip_address::parse_ip);
+            &ip_address::parse_ip, &dialog::serialize<ip_address>,
+            &dialog::deserialize<ip_address>);
 
 type_operators size_type_ops(sizeof(uint64_t),
         get_reops(), get_unarops(), get_binarops(), get_keops(),
         &limits::long_long_min, 
         &limits::long_long_max,
         &limits::long_long_one, &limits::long_long_zero,
-        &size_type::to_string, &size_type::parse_bytes);
+        &size_type::to_string, &size_type::parse_bytes,
+        &dialog::serialize<size_type>, &dialog::deserialize<size_type>);
 
 class TypeManagerTest : public testing::Test {
   public:
@@ -394,5 +397,46 @@ TEST_F(TypeManagerTest, DataTypesGetterTest) {
     ASSERT_TRUE(t2.to_string() == "size type");
 }
 
+TEST_F(TypeManagerTest, SerializeTest) {
+    std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
+    std::ofstream outfile("/tmp/test.txt", std::ofstream::binary);
+    int* int_ptr = new int(390);
+    void* void_ptr = (void*) int_ptr;
+    const void* const_ptr = const_cast<const void*>(void_ptr);
+
+    data d1 = data(const_ptr, 4);
+    ASSERT_EQ(390, d1.as<int>());
+    SERIALIZERS[4](outfile, d1);
+    //data d2 = DESERIALIZERS[4](infile);
+    //int* first = (int*) d2.ptr;
+    char* buffer = new char[4];
+    infile.read(buffer, 4);
+    int value;
+    sscanf(buffer, "%x", &value);
+    ASSERT_EQ(390, value);
+    delete[] buffer;
+
+    outfile.close();
+    infile.close();
+}
+
+TEST_F(TypeManagerTest, DeserializeTest) {
+    std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
+    std::ofstream outfile("/tmp/test1.txt", std::ofstream::binary);
+
+    int* int_ptr = new int(490);
+    void* void_ptr = (void*) int_ptr;
+    const void* const_ptr = const_cast<const void*>(void_ptr);
+
+    data d1 = data(const_ptr, 4);
+    ASSERT_EQ(490, d1.as<int>());
+
+    SERIALIZERS[4](outfile, d1);
+    data d3 = DESERIALIZERS[4](infile);
+    ASSERT_EQ(490, d3.as<int>());
+
+    outfile.close();
+    infile.close();
+}
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */

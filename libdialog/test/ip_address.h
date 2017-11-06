@@ -88,6 +88,20 @@ class ip_address {
 }*/
 
 template<>
+static void serialize<ip_address>(std::ostream& out, data& value) {
+    ip_address val = value.as<ip_address>();
+    out.write(reinterpret_cast<const char*>(&(value.ptr)), 
+            value.size);
+}
+
+template<>
+static data deserialize<ip_address>(std::istream& in) {
+    uint32_t val;
+    in.read(reinterpret_cast<char*>(&val), sizeof(uint32_t));
+    return ip_address::parse_ip_value(val);
+}
+
+template<>
 inline void add<ip_address>(void* res, const data& v1, const data& v2) {
     (*(reinterpret_cast<ip_address*>(res))).set_address(
         v1.as<ip_address>().get_address() + 

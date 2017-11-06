@@ -230,19 +230,32 @@ static std::vector<data (*)(const std::string&)> init_parsers() {
    return {&parse_void, &parse_bool, &parse_char, &parse_short, &parse_int, &parse_long, &parse_float, &parse_double, &parse_string};
 }
 
-
-/*template<typename T>
-static T from_string(std::string& str) {
-    return string_utils::lexical_cast<T>(str);
+template<typename T>
+static void serialize(std::ostream& out, data& value) {
+    T val = value.as<T>();
+    out.write(reinterpret_cast<const char*>(&val), value.size);
 }
 
 template<typename T>
-static std::vector<T (*)(std::string&)> init_from_strings() {
-    return {&from_string<void>, &from_string<bool>, &from_string<int8_t>,
-        &from_string<int16_t>, &from_string<int32_t>, &from_string<int64_t>,
-        &from_string<float>, &from_string<double>, &from_string<std::string>
-    };
-}*/
+static data deserialize(std::istream& in) {
+    T* val_ptr = new T;
+    in.read(reinterpret_cast<char*>(val_ptr), sizeof(T));
+    void* void_ptr = (void*) val_ptr;
+    const void* const_ptr = const_cast<const void*>(void_ptr);
+    return data(const_ptr, sizeof(T));
+}
+
+static std::vector<void (*)(std::ostream&, data&)> init_serializers() {
+    return {&serialize<bool>, &serialize<bool>, &serialize<char>,
+    &serialize<short>, &serialize<int>, &serialize<long>, 
+    &serialize<float>, &serialize<double>, &serialize<std::string>};
+}
+
+static std::vector<data (*)(std::istream&)> init_deserializers() {
+    return {&deserialize<bool>, &deserialize<bool>, &deserialize<char>,
+    &deserialize<short>, &deserialize<int>, &deserialize<long>,
+    &deserialize<float>, &deserialize<double>, &deserialize<std::string>};
+}
 
 static std::vector<void*> MIN = init_min();
 static std::vector<void*> MAX = init_max();
@@ -256,8 +269,10 @@ static std::vector<std::string (*)()> TO_STRINGS = init_to_strings();
 static std::vector<size_t> PRIMITIVE_SIZES = primitive_sizes();
 static std::vector<data (*)(const std::string&)> PARSERS = 
     init_parsers();
-//template<typename T>
-//static std::vector<T (*)(std::string&)> FROM_STRINGS = init_from_strings();
+static std::vector<void (*)(std::ostream&, data&)> SERIALIZERS = 
+                init_serializers();
+static std::vector<data (*)(std::istream&)> DESERIALIZERS = 
+                init_deserializers();
 
 struct data_type {
  public:
