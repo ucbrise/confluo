@@ -405,8 +405,11 @@ TEST_F(TypeManagerTest, SerializeTest) {
     //std::cout << "Const void_ptr: " << *const_ptr << std::endl;
 
     data d1 = data(const_ptr, 4);
+    data d11 = ip_address::parse_ip("69.89.31.226");
+
     ASSERT_EQ(390, d1.as<int>());
     SERIALIZERS[4](outfile, d1);
+    SERIALIZERS[9](outfile, d11);
     outfile.close();
     //data d2 = DESERIALIZERS[4](infile);
     //int* first = (int*) d2.ptr;
@@ -415,6 +418,11 @@ TEST_F(TypeManagerTest, SerializeTest) {
     infile.read(buffer, 4);
     int* value_ptr = (int*) buffer;
     int value = *value_ptr;
+
+    infile.read(buffer, 4);
+    uint32_t* ip_ptr = (uint32_t*) buffer;
+    uint32_t ip_value = *ip_ptr;
+    ASSERT_EQ(1163468770, ip_value);
 
     ASSERT_EQ(390, value);
     delete[] buffer;
@@ -430,9 +438,12 @@ TEST_F(TypeManagerTest, DeserializeTest) {
     const void* const_ptr = const_cast<const void*>(void_ptr);
 
     data d1 = data(const_ptr, 4);
+    data d11 = ip_address::parse_ip("69.89.31.226");
+
     ASSERT_EQ(-490, d1.as<int>());
 
     SERIALIZERS[4](outfile, d1);
+    SERIALIZERS[9](outfile, d11);
     outfile.close();
 
     std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
@@ -440,6 +451,12 @@ TEST_F(TypeManagerTest, DeserializeTest) {
     data d3 = data(new_alloc, 4);
     DESERIALIZERS[4](infile, d3);
     ASSERT_EQ(-490, d3.as<int>());
+
+    const void* new_ip = (const void*) new ip_address;
+    data d13 = data(new_ip, 4);
+    DESERIALIZERS[9](infile, d13);
+    ASSERT_EQ(1163468770, 
+            (*reinterpret_cast<const ip_address*>(d13.ptr)).get_address());
 
     infile.close();
     delete int_ptr;

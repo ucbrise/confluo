@@ -38,8 +38,8 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
     ASSERT_EQ(s[i].type().id, schema[i].type().id);
     ASSERT_EQ(s[i].type().size, schema[i].type().size);
     if (s[i].type().id != type_id::D_STRING) {
-      std::cout << "MetaTest Min: " << s[i].min().to_string() << "\t" << schema[i].min().to_string() << std::endl;
-       std::cout << "MetaTest Max: " << s[i].max().to_string() << "\t" << schema[i].max().to_string() << std::endl;
+      //std::cout << "MetaTest Min: " << s[i].min().to_string() << "\t" << schema[i].min().to_string() << std::endl;
+       //std::cout << "MetaTest Max: " << s[i].max().to_string() << "\t" << schema[i].max().to_string() << std::endl;
 
       ASSERT_TRUE(s[i].min() == schema[i].min());
       ASSERT_TRUE(s[i].max() == schema[i].max());
