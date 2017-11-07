@@ -245,6 +245,11 @@ static data deserialize(std::istream& in) {
     return data(const_ptr, sizeof(T));
 }
 
+template<>
+void serialize<std::string>(std::ostream& out, data& value) {
+    
+}
+
 static std::vector<void (*)(std::ostream&, data&)> init_serializers() {
     return {&serialize<bool>, &serialize<bool>, &serialize<char>,
     &serialize<short>, &serialize<int>, &serialize<long>, 

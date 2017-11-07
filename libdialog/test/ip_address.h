@@ -88,14 +88,14 @@ class ip_address {
 }*/
 
 template<>
-static void serialize<ip_address>(std::ostream& out, data& value) {
+void serialize<ip_address>(std::ostream& out, data& value) {
     ip_address val = value.as<ip_address>();
     out.write(reinterpret_cast<const char*>(&(value.ptr)), 
             value.size);
 }
 
 template<>
-static data deserialize<ip_address>(std::istream& in) {
+data deserialize<ip_address>(std::istream& in) {
     uint32_t val;
     in.read(reinterpret_cast<char*>(&val), sizeof(uint32_t));
     return ip_address::parse_ip_value(val);

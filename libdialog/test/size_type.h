@@ -87,13 +87,13 @@ class size_type {
 }*/
 
 template<>
-static void serialize<size_type>(std::ostream& out, data& value) {
+void serialize<size_type>(std::ostream& out, data& value) {
     size_type val = value.as<size_type>();
     out.write(reinterpret_cast<const char*>(&(value.ptr)), value.size);
 }
 
 template<>
-static data deserialize<size_type>(std::istream& in) {
+data deserialize<size_type>(std::istream& in) {
     uint64_t val;
     in.read(reinterpret_cast<char*>(&val), sizeof(uint64_t));
     return size_type::parse_bytes(val);
