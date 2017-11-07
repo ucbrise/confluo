@@ -398,30 +398,31 @@ TEST_F(TypeManagerTest, DataTypesGetterTest) {
 }
 
 TEST_F(TypeManagerTest, SerializeTest) {
-    std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
     std::ofstream outfile("/tmp/test.txt", std::ofstream::binary);
     int* int_ptr = new int(390);
     void* void_ptr = (void*) int_ptr;
     const void* const_ptr = const_cast<const void*>(void_ptr);
+    //std::cout << "Const void_ptr: " << *const_ptr << std::endl;
 
     data d1 = data(const_ptr, 4);
     ASSERT_EQ(390, d1.as<int>());
     SERIALIZERS[4](outfile, d1);
+    outfile.close();
     //data d2 = DESERIALIZERS[4](infile);
     //int* first = (int*) d2.ptr;
+    std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
     char* buffer = new char[4];
     infile.read(buffer, 4);
-    int value;
-    sscanf(buffer, "%x", &value);
+    int* value_ptr = (int*) buffer;
+    int value = *value_ptr;
+
     ASSERT_EQ(390, value);
     delete[] buffer;
-
-    outfile.close();
+    delete int_ptr;
     infile.close();
 }
 
 TEST_F(TypeManagerTest, DeserializeTest) {
-    std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
     std::ofstream outfile("/tmp/test1.txt", std::ofstream::binary);
 
     int* int_ptr = new int(490);
@@ -432,11 +433,17 @@ TEST_F(TypeManagerTest, DeserializeTest) {
     ASSERT_EQ(490, d1.as<int>());
 
     SERIALIZERS[4](outfile, d1);
-    data d3 = DESERIALIZERS[4](infile);
+    outfile.close();
+
+    std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
+    const void* new_alloc = (const void*) new int;
+    data d3 = data(new_alloc, 4);
+    DESERIALIZERS[4](infile, d3);
     ASSERT_EQ(490, d3.as<int>());
 
-    outfile.close();
     infile.close();
+    delete int_ptr;
+    delete new_alloc;
 }
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */

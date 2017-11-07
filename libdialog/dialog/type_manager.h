@@ -28,14 +28,14 @@ struct type_operators {
     data (*parse)(const std::string&);
 
     void (*serialize)(std::ostream&, data&);
-    data (*deserialize)(std::istream&);
+    void (*deserialize)(std::istream&, data&);
 
     type_operators(size_t _size, rel_ops_t _rel_ops,
           unary_ops_t _un_ops, binary_ops_t _binary_ops, 
           key_op _key_ops, void* _min, void* _max, void* _one, 
           void* _zero, std::string (*_name)(), data (*_parse)(
           const std::string&), void (*_serialize)(std::ostream&,
-          data&), data (*_deserialize)(std::istream&)) : 
+          data&), void (*_deserialize)(std::istream&, data&)) : 
                          size(_size),
                          rel_ops(_rel_ops),
                          un_ops(_un_ops),

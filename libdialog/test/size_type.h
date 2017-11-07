@@ -93,10 +93,10 @@ void serialize<size_type>(std::ostream& out, data& value) {
 }
 
 template<>
-data deserialize<size_type>(std::istream& in) {
+void deserialize<size_type>(std::istream& in, data& out) {
     uint64_t val;
     in.read(reinterpret_cast<char*>(&val), sizeof(uint64_t));
-    return size_type::parse_bytes(val);
+    //return size_type::parse_bytes(val);
 }
 
 template<>

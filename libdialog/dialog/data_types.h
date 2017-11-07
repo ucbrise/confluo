@@ -232,16 +232,16 @@ static std::vector<data (*)(const std::string&)> init_parsers() {
 
 template<typename T>
 static void serialize(std::ostream& out, data& value) {
-    out.write(reinterpret_cast<const char*>(value.ptr), value.size);
+    T val = value.as<T>();
+    char* val_char = (char*) &val;
+    out.write(val_char, value.size);
 }
 
 template<typename T>
-static data deserialize(std::istream& in) {
-    T* val_ptr = new T;
-    in.read(reinterpret_cast<char*>(val_ptr), sizeof(T));
-    void* void_ptr = (void*) val_ptr;
-    const void* const_ptr = const_cast<const void*>(void_ptr);
-    return data(const_ptr, sizeof(T));
+static void deserialize(std::istream& in, data& out) {
+    in.read(reinterpret_cast<char*>(const_cast<void*>(out.ptr)), sizeof(T));
+    //const void* const_ptr = const_cast<const void*>(val_ptr);
+    //return out;
 }
 
 template<>
@@ -255,7 +255,7 @@ static std::vector<void (*)(std::ostream&, data&)> init_serializers() {
     &serialize<float>, &serialize<double>, &serialize<std::string>};
 }
 
-static std::vector<data (*)(std::istream&)> init_deserializers() {
+static std::vector<void (*)(std::istream&, data&)> init_deserializers() {
     return {&deserialize<bool>, &deserialize<bool>, &deserialize<char>,
     &deserialize<short>, &deserialize<int>, &deserialize<long>,
     &deserialize<float>, &deserialize<double>, &deserialize<std::string>};
@@ -275,7 +275,7 @@ static std::vector<data (*)(const std::string&)> PARSERS =
     init_parsers();
 static std::vector<void (*)(std::ostream&, data&)> SERIALIZERS = 
                 init_serializers();
-static std::vector<data (*)(std::istream&)> DESERIALIZERS = 
+static std::vector<void (*)(std::istream&, data&)> DESERIALIZERS = 
                 init_deserializers();
 
 struct data_type {

@@ -95,10 +95,10 @@ void serialize<ip_address>(std::ostream& out, data& value) {
 }
 
 template<>
-data deserialize<ip_address>(std::istream& in) {
+void deserialize<ip_address>(std::istream& in, data& out) {
     uint32_t val;
     in.read(reinterpret_cast<char*>(&val), sizeof(uint32_t));
-    return ip_address::parse_ip_value(val);
+    //return ip_address::parse_ip_value(val);
 }
 
 template<>

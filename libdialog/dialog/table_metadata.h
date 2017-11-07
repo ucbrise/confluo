@@ -312,8 +312,10 @@ class metadata_reader {
           builder.add_column(type, name, min, max);
       }*/
       if (type.id != type_id::D_STRING) {
-        data min = DESERIALIZERS[type.id](in_);
-        data max = DESERIALIZERS[type.id](in_);
+        data min(::operator new(type.size), type.size);
+        data max(::operator new(type.size), type.size);
+        DESERIALIZERS[type.id](in_, min);
+        DESERIALIZERS[type.id](in_, max);
         mutable_value min_ = mutable_value(type, min);
         mutable_value max_ = mutable_value(type, max);
         builder.add_column(type, name, min_, max_);
