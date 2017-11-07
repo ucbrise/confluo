@@ -431,8 +431,8 @@ class dialog_table {
     auto cexpr = parser::compile_expression(t, schema_);
     query_plan plan = planner_.plan(cexpr);
     return plan.execute(version);
-/*=======
-    query_planner planner(cexpr, indexes_);
+//=======
+    /*query_planner planner(cexpr, indexes_);
     query_plan plan = planner.plan();
     std::vector<fri_rstream_type> fstreams;
     for (minterm_plan& mplan : plan) {
@@ -442,7 +442,7 @@ class dialog_table {
       fstreams.push_back(fri_rstream_type(rs, mplan.data_filter()));
     }
     return fri_result_type(fstreams);
->>>>>>> Got parser to finally work, will add more tests and create the size type*/
+//>>>>>>> Got parser to finally work, will add more tests and create the size type*/
   }
 
   lazy::stream<record_t> query_filter(const std::string& filter_name,

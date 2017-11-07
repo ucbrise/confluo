@@ -146,18 +146,18 @@ TEST_F(TypeManagerTest, FilterTest) {
                 size_type::from_string("1kb")));
 
     size_t i = 0;
-    for (auto r = dtable.execute_filter("a > 0.0.0.3"); r.has_more(); ++r) {
-        ASSERT_TRUE(r.get().at(1).value().to_data().as<ip_address>().
+    for (auto r = dtable.execute_filter("a > 0.0.0.3"); !r.empty(); r = r.tail()) {
+        ASSERT_TRUE(r.head().at(1).value().to_data().as<ip_address>().
                 get_address() > 33);
         i++;
     }
     ASSERT_EQ(2, i);
     
     i = 0;
-    for (auto r = dtable.execute_filter("c == 1kb"); r.has_more(); ++r) {
-        ASSERT_EQ(1024, r.get().at(3).value().to_data().as<size_type>().
+    for (auto r = dtable.execute_filter("c == 1kb"); !r.empty(); r = r.tail()) {
+        ASSERT_EQ(1024, r.head().at(3).value().to_data().as<size_type>().
                 get_bytes());
-        ASSERT_TRUE(r.get().at(3).value().to_data().as<size_type>().
+        ASSERT_TRUE(r.head().at(3).value().to_data().as<size_type>().
             get_bytes() == static_cast<uint64_t>(1024));
         i++;
     }
