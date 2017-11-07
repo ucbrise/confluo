@@ -232,14 +232,14 @@ static std::vector<data (*)(const std::string&)> init_parsers() {
 
 template<typename T>
 static void serialize(std::ostream& out, data& value) {
-    T val = value.as<T>();
-    char* val_char = (char*) &val;
+    //T val = value.as<T>();
+    char* val_char = (char*) value.ptr;
     out.write(val_char, value.size);
 }
 
 template<typename T>
 static void deserialize(std::istream& in, data& out) {
-    in.read(reinterpret_cast<char*>(const_cast<void*>(out.ptr)), sizeof(T));
+    in.read(reinterpret_cast<char*>(const_cast<void*>(out.ptr)), out.size);
     //const void* const_ptr = const_cast<const void*>(val_ptr);
     //return out;
 }

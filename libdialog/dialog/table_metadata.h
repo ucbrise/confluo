@@ -140,6 +140,9 @@ class metadata_writer {
         io_utils::write(out_, col.name());
         io_utils::write(out_, col.type().id);
         io_utils::write(out_, col.type().size);
+        //std::cout << col.name() << std::endl;
+        //std::cout << col.type().id << std::endl;
+        //std::cout << col.type().size << std::endl;
 
         /*if (!type_manager::is_primitive(col.type().id) &&
                 type_manager::is_valid_id(col.type().id)) {
@@ -147,12 +150,34 @@ class metadata_writer {
             io_utils::write(out_, col.max().as<T>());
         }*/
         if (col.type().id != type_id::D_STRING) {
+            //std::cout << "Column min: " << col.min().to_string() << std::endl;
+            //std::cout << "Column max: " << col.max().to_string() << std::endl;
             data min_data = col.min().to_data();
             data max_data = col.max().to_data();
+            const void* min_void = ::operator new(col.type().size);
+            //void* min_void;
+            //memcpy(min_void, min_data.ptr, col.type().size);
+            //char* min_void = new char[col.type().size];
+            min_void = const_cast<const void*>(col.min().ptr());
 
-            SERIALIZERS[col.type().id](out_, min_data);
-            SERIALIZERS[col.type().id](out_, max_data);
-        }
+            const void* max_void = ::operator new(col.type().size);
+            //void* max_void; 
+            //memcpy(max_void, max_data.ptr, col.type().size);
+            //max_void = const_cast<const void*>(col.max().ptr());
+            max_void = max_data.ptr;
+
+            data m1 = data(min_void, col.type().size);
+            data m2 = data(max_void, col.type().size);
+
+            mutable_value mut1 = mutable_value(col.type(), min_void);
+            mutable_value mut2 = mutable_value(col.type(), max_void);
+
+            //std::cout << "M1: " << mut1.to_string() << std::endl;
+            //std::cout << "M2: " << mut2.to_string() << std::endl;
+            //std::cout << "Column name: " << col.name() << std::endl;
+            SERIALIZERS[col.type().id](out_, m1);
+            SERIALIZERS[col.type().id](out_, m2);
+        } 
         /*switch (col.type().id) {
           case type_id::D_BOOL: {
             io_utils::write(out_, col.min().as<bool>());
@@ -241,7 +266,9 @@ class metadata_writer {
           io_utils::write(out_, threshold);
       }*/
       data d1 = threshold.to_data();
-      SERIALIZERS[id](out_, d1);
+      const void* threshold_ptr = d1.ptr;
+      data t1 = data(threshold_ptr, threshold.type().size);
+      SERIALIZERS[id](out_, t1);
       /*switch (id) {
         case type_id::D_BOOL: {
           io_utils::write(out_, threshold.as<bool>());
@@ -299,12 +326,16 @@ class metadata_reader {
 
   schema_t next_schema() {
     size_t ncolumns = io_utils::read<size_t>(in_);
+    //std::cout << "Cols: " << ncolumns << std::endl;
     schema_builder builder;
     for (size_t i = 0; i < ncolumns; i++) {
+      //std::cout << "Iteration: " << i << std::endl;
       std::string name = io_utils::read<std::string>(in_);
       data_type type;
       type.id = io_utils::read<type_id>(in_);
       type.size = io_utils::read<size_t>(in_);
+      //std::cout << "Id: " << type.id << std::endl;
+      //std::cout << "Size: " << type.size << std::endl;
       /*if (!type_manager::is_primitive(type.id) &&
               type_manager::is_valid_id(type.id)) {
           mutable_value min(io_utils::read(in_));
@@ -318,6 +349,8 @@ class metadata_reader {
         DESERIALIZERS[type.id](in_, max);
         mutable_value min_ = mutable_value(type, min);
         mutable_value max_ = mutable_value(type, max);
+        //std::cout << "Min: " << min_.to_string() << std::endl;
+        //std::cout << "Max: " << max_.to_string() << std::endl;
         builder.add_column(type, name, min_, max_);
       } else {
           builder.add_column(type, name);
@@ -397,7 +430,11 @@ class metadata_reader {
     relop_id op = io_utils::read<relop_id>(in_);
     type_id tid = io_utils::read<type_id>(in_);
     numeric threshold;
-    switch (tid) {
+    const data_type type = data_types[tid];
+    data thresh(::operator new(type.size), type.size);
+    DESERIALIZERS[tid](in_, thresh);
+    threshold = numeric(data_types[tid], const_cast<void*>(thresh.ptr));
+    /*switch (tid) {
       case type_id::D_BOOL: {
         threshold = io_utils::read<bool>(in_);
         break;
@@ -428,7 +465,7 @@ class metadata_reader {
       }
       default:
         THROW(invalid_operation_exception, "Threshold is not of numeric type");
-    }
+    }*/
     uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
     return trigger_info(trigger_name, filter_name, agg_id, field_name, op,
                         threshold, periodicity_ms);
