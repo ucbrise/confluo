@@ -232,8 +232,7 @@ static std::vector<data (*)(const std::string&)> init_parsers() {
 
 template<typename T>
 static void serialize(std::ostream& out, data& value) {
-    T val = value.as<T>();
-    out.write(reinterpret_cast<const char*>(&val), value.size);
+    out.write(reinterpret_cast<const char*>(value.ptr), value.size);
 }
 
 template<typename T>
