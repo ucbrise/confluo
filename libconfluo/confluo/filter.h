@@ -170,6 +170,17 @@ class filter {
         refs->comb_update_aggregate(tid, j, local_aggs[j], version);
   }
 
+  // TODO rename later
+  /**
+   * Get the RefLog corresponding to given time-block.
+   *
+   * @param ts_block Given time-block.
+   * @return Corresponding RefLog.
+   */
+  aggregated_reflog* lookup_unsafe(uint64_t ts_block) const {
+    return idx_.get_unsafe(byte_string(ts_block));
+  }
+
   /**
    * Get the RefLog corresponding to given time-block.
    *

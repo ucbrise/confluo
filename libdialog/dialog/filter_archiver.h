@@ -13,54 +13,47 @@
 namespace dialog {
 namespace archival {
 
-using namespace ::dialog::monitor;
 using namespace ::utils;
 
+template<typename encoded_ptr>
 class filter_archiver {
 
  public:
   typedef storage::read_only_ptr<uint64_t> bucket_ptr_t;
-  typedef size_t filter_id_t;
+  typedef bucket_ptr_t::decoded_ptr decoded_ptr_t;
 
-  filter_archiver(const std::string& name,
-                  const std::string& path,
-                  const read_tail& rt,
-                  filter_log& filters,
-                  encoder<uint64_t> encoder)
-      : path_(path + "/" + name + "/"),
-        filter_file_counts_(filters.size()),
-        archival_tails_ts_(filters.size()),
-        archival_reflog_offsets_(filters.size()),
-        archival_tail_(0),
-        rt_(rt),
-        filters_(filters),
-        encoder_(encoder) {
-    file_utils::create_dir(path_);
-    for (size_t i = 0; i < filters_.size(); i++) {
-      if (filters_.at(i)->is_valid()) {
-        std::ofstream archival_out = create_new_archival_file(i);
-        archival_out.close();
-      }
-    }
+  filter_archiver()
+      : path_(),
+        filter_(nullptr),
+        file_num_(0),
+        data_log_tail_(0),
+        reflog_tail_(0),
+        ts_tail_(0) {
   }
 
-  /**
-   * Archive all filters up to offset.
-   * @param offset data log offset
-   */
-  void archive(size_t offset) {
-    for (size_t i = 0; i < filters_.size(); i++) {
-      if (filters_.at(i)->is_valid()) {
-        aggregated_reflog const* reflog = filters_.at(i)->lookup(archival_tails_ts_[i]);
-        bool is_completely_archived = archive_reflog(i, reflog, offset);
-        if (!is_completely_archived) {
-          break;
-        }
-        archival_tails_ts_[i]++;
-        archival_reflog_offsets_[i] = 0;
+  filter_archiver(const std::string& path, filter* filter)
+      : path_(path),
+        filter_(filter),
+        file_num_(0),
+        data_log_tail_(0),
+        reflog_tail_(0),
+        ts_tail_(0) {
+    file_utils::create_dir(path_);
+    std::ofstream archival_out = create_new_archival_file();
+    archival_out.close();
+  }
+
+  void archive(size_t offset, encoder<uint64_t> encoder) {
+    while (true) {
+      aggregated_reflog* reflog = filter_->lookup_unsafe(ts_tail_); // TODO refactor new func names
+      bool is_completely_archived = archive_reflog(reflog, offset, encoder);
+      if (!is_completely_archived) {
+        break;
       }
+      // TODO replace with iterator
+      reflog_tail_ = 0;
+      ts_tail_++;
     }
-    archival_tail_ += offset;
   }
 
  private:
@@ -74,15 +67,18 @@ class filter_archiver {
    * @param offset data log offset
    * @return true if reflog is completely archived, otherwise false
    */
-  bool archive_reflog(filter_id_t id, aggregated_reflog const* reflog, size_t offset) {
+  bool archive_reflog(aggregated_reflog* reflog, size_t offset, encoder<uint64_t> encoder) {
 
-    std::ofstream out(cur_filter_file_path(id), std::ios::in | std::ios::out | std::ios::ate);
+    std::ofstream out(cur_filter_file_path(), std::ios::in | std::ios::out | std::ios::ate);
     size_t file_off = out.tellp();
 
-    while (true) { // TODO fix this condition lol
+    while (data_log_tail_ < offset) {
       bucket_ptr_t bucket_ptr;
-      reflog->ptr(archival_reflog_offsets_[id], bucket_ptr);
-      if (!is_archivable(bucket_ptr, offset)) {
+      reflog->ptr(reflog_tail_, bucket_ptr);
+      auto decoded_ptr = bucket_ptr.decode_ptr();
+
+      uint64_t max_off_lt = *std::max_element(decoded_ptr.get(), decoded_ptr.get() + 1024);
+      if (max_off_lt >= offset) {
         return false;
       }
 
@@ -91,84 +87,119 @@ class filter_archiver {
 
       // TODO use a better interface than encoder, preferably there should only be one iface
       // since encoded_ptr and encoder duplicates functionality
-      auto decoded_ptr = bucket_ptr.decode_ptr();
-      uint8_t* encoded_bucket = encoder_.encode(decoded_ptr.get());
-      // TODO clean this whole size stuff up
-      size_t archived_bucket_size = encoder_.encoding_size(metadata_copy.data_size_);
-      size_t md_size = sizeof(storage::ptr_metadata);
+      uint8_t* encoded_bucket = encoder.encode(decoded_ptr.get());
 
-      if (file_off + md_size + archived_bucket_size > configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
+      size_t encoded_size = encoder.encoding_size(metadata_copy.data_size_);
+      size_t md_size = sizeof(storage::ptr_metadata);
+      if (file_off + md_size + encoded_size > configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
         out.close();
-        out = create_new_archival_file(id);
+        out = create_new_archival_file();
         file_off = out.tellp();
       }
 
       io_utils::write<storage::ptr_metadata>(out, metadata_copy);
-      io_utils::write<uint8_t>(out, encoded_bucket, archived_bucket_size);
-      update_file_header(out, archival_tail_);
+      io_utils::write<uint8_t>(out, encoded_bucket, encoded_size);
+      update_file_header(out, max_off_lt);
 
-      void* data = ALLOCATOR.mmap(cur_filter_file_path(id), file_off, archived_bucket_size,
+      void* data = ALLOCATOR.mmap(cur_filter_file_path(), file_off, encoded_size,
                                   storage::state_type::D_ARCHIVED);
 
-      // TODO template encoded_ptr on the class to support arbitrary archival schemes
-      storage::encoded_ptr<uint64_t> enc_data(data);
-      reflog->swap_bucket_ptr(archival_reflog_offsets_[id], enc_data);
-      archival_reflog_offsets_[id] += 1024; // TODO remove hardcode
+      encoded_ptr enc_data(data);
+      reflog->swap_bucket_ptr(reflog_tail_, enc_data);
+      reflog_tail_ += 1024; // TODO remove hardcode
       file_off = out.tellp();
+      data_log_tail_ = max_off_lt;
     }
     return true;
   }
 
   /**
    * Path to current file being used for archival for a filter.
-   * @param filter_id filter id
-   * @return file path
+   * @return path_prefix directory path
    */
-  std::string cur_filter_file_path(filter_id_t id) {
-    return path_ + "/" + "filter_" + std::to_string(id) + "_" + std::to_string(filter_file_counts_[id]) + ".dat";
+  std::string cur_filter_file_path() const {
+    return path_ + "/filter_data_" + std::to_string(file_num_) + ".dat";
   }
 
   /**
    * Create a new archival file and set its header.
-   * @param filter_id filter id
+   * @param offset data log offset
    * @return file stream
    */
-  std::ofstream create_new_archival_file(size_t id) {
-    filter_file_counts_[id]++;
-    std::ofstream archival_out(cur_filter_file_path(id), std::ofstream::out | std::ofstream::trunc);
-    io_utils::write<size_t>(archival_out, archival_tail_);
-    io_utils::write<size_t>(archival_out, archival_tail_);
+  std::ofstream create_new_archival_file() {
+    file_num_++;
+    std::ofstream archival_out(cur_filter_file_path(), std::ofstream::out | std::ofstream::trunc);
+    io_utils::write<size_t>(archival_out, data_log_tail_);
+    io_utils::write<size_t>(archival_out, data_log_tail_);
     return archival_out;
   }
 
-  static bool is_archivable(bucket_ptr_t bucket_ptr, size_t offset) {
-    // TODO account for read tail
-    auto decoded_ptr = bucket_ptr.decode_ptr();
-    uint64_t* ptr = decoded_ptr.get();
-    for (size_t i = 0; i < 1024; i++) {
-      if (ptr[i] > offset)
-        return false;
-    }
-    return true;
-  }
-
   /**
-   * Update the file header with the last offset archived.
+   * Update the file header with the last offset archived. Seek to EOF.
    * @param out
    * @param offset
    */
   static void update_file_header(std::ofstream& out, size_t offset) {
+    // TODO create a generic file header schema
     out.seekp(sizeof(size_t));
     io_utils::write<size_t>(out, offset);
     out.seekp(0, std::ios::end);
   }
 
   std::string path_;
-  std::vector<size_t> filter_file_counts_;
+  filter* filter_;
 
-  std::vector<uint64_t> archival_tails_ts_;
-  std::vector<uint64_t> archival_reflog_offsets_;
-  size_t archival_tail_;
+  size_t file_num_;
+  size_t data_log_tail_;
+  size_t reflog_tail_;
+  uint64_t ts_tail_;
+
+};
+
+template<typename encoded_ptr>
+class filter_log_archiver {
+
+ public:
+
+  filter_log_archiver(const std::string& name,
+                  const std::string& path,
+                  filter_log& filters,
+                  const read_tail& rt,
+                  encoder<uint64_t> encoder)
+      : path_(path + "/" + name + "/"),
+        filter_archivers_(),
+        rt_(rt),
+        filters_(filters),
+        encoder_(encoder) {
+    file_utils::create_dir(path_);
+    add_new_archivers();
+  }
+
+  /**
+   * Archive all filters up to offset.
+   * @param offset data log offset
+   */
+  void archive(size_t offset) {
+    add_new_archivers();
+    for (size_t i = 0; i < filters_.size(); i++) {
+      if (filters_.at(i)->is_valid()) {
+        size_t max_offset = std::min(offset, (size_t) rt_.get());
+        filter_archivers_.at(i)->archive(max_offset, encoder_);
+      }
+    }
+  }
+
+ private:
+  void add_new_archivers() {
+    for (size_t i = filter_archivers_.size(); i < filters_.size(); i++) {
+      std::string filter_path = path_ + "/filter_" + std::to_string(i) + "/";
+      filter* filter = filters_.at(i);
+      filter_archivers_.push_back(new filter_archiver<encoded_ptr>(filter_path, filter));
+    }
+  }
+
+  std::string path_;
+  monolog::monolog_exp2<filter_archiver<encoded_ptr>*> filter_archivers_;
 
   read_tail rt_;
   filter_log& filters_;
