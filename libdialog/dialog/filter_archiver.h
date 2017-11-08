@@ -89,9 +89,10 @@ class filter_archiver {
       storage::ptr_metadata metadata_copy = *(storage::ptr_metadata::get(bucket_ptr.get().internal_ptr()));
       metadata_copy.state_ = storage::state_type::D_ARCHIVED;
 
-      // TODO use a better interface than encoder, preferebly there should only be one iface
+      // TODO use a better interface than encoder, preferably there should only be one iface
       // since encoded_ptr and encoder duplicates functionality
-      uint8_t* encoded_bucket = encoder_.encode(bucket_ptr.get().decode().get());
+      auto decoded_ptr = bucket_ptr.decode_ptr();
+      uint8_t* encoded_bucket = encoder_.encode(decoded_ptr.get());
       // TODO clean this whole size stuff up
       size_t archived_bucket_size = encoder_.encoding_size(metadata_copy.data_size_);
       size_t md_size = sizeof(storage::ptr_metadata);
@@ -141,7 +142,9 @@ class filter_archiver {
   }
 
   static bool is_archivable(bucket_ptr_t bucket_ptr, size_t offset) {
-    uint64_t* ptr = bucket_ptr.get().decode().get();
+    // TODO account for read tail
+    auto decoded_ptr = bucket_ptr.decode_ptr();
+    uint64_t* ptr = decoded_ptr.get();
     for (size_t i = 0; i < 1024; i++) {
       if (ptr[i] > offset)
         return false;

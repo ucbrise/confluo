@@ -22,8 +22,6 @@ class monolog_linear_archiver {
 
  public:
 
-  // TODO this will be replaced with either encoder iface or something to do w/ encoded_ptr
-
   /**
    * Constructor
    * @param name name
@@ -91,16 +89,18 @@ class monolog_linear_archiver {
    * @param out archival destination
    * @param file_offset archival file offset to write to
    */
-  void archive_block(std::ofstream& out, storage::read_only_ptr<T> block_ptr) {
+  void archive_block(std::ofstream& out, storage::read_only_ptr<T>& block_ptr) {
     // Since the file will be memory-mapped, there must be space in the file for the pointer metadata,
     // so it is written with the data. The actual values of the metadata, apart from the state,
     // do not matter since they'll be overwritten by the allocator.
     auto metadata_copy = *(storage::ptr_metadata::get(block_ptr.get().internal_ptr()));
     metadata_copy.state_ = storage::state_type::D_ARCHIVED;
 
+    auto decoded_ptr = block_ptr.decode_ptr();
     size_t encoded_size = encoder_.encoding_size(metadata_copy.data_size_);
+
     io_utils::write<storage::ptr_metadata>(out, metadata_copy);
-    io_utils::write<uint8_t>(out, encoder_.encode(block_ptr.get().decode().get()), encoded_size);
+    io_utils::write<uint8_t>(out, encoder_.encode(decoded_ptr.get()), encoded_size);
     update_file_header(out, archival_tail_);
   }
 
