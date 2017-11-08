@@ -46,18 +46,23 @@ const uint32_t ptr_constants::SECOND_SHIFT;
 template<typename T>
 class read_only_ptr {
  public:
+  typedef typename encoded_ptr<T>::unique_ptr unique_ptr;
+
   read_only_ptr()
-    : enc_ptr_(),
-      ref_counts_(nullptr) {
+      : enc_ptr_(),
+        offset_(0),
+        ref_counts_(nullptr) {
   }
 
-  read_only_ptr(encoded_ptr<T> enc_ptr, atomic::type<uint32_t>* ref_counts)
-    : enc_ptr_(enc_ptr),
-      ref_counts_(ref_counts) {
+  read_only_ptr(encoded_ptr<T> enc_ptr, size_t offset, atomic::type<uint32_t>* ref_counts)
+      : enc_ptr_(enc_ptr),
+        offset_(offset),
+        ref_counts_(ref_counts) {
   }
 
   read_only_ptr(const read_only_ptr<T>& other)
       : enc_ptr_(other.enc_ptr_),
+        offset_(other.offset_),
         ref_counts_(other.ref_counts_) {
     if (ref_counts_ != nullptr) {
       bool uses_first_count = ptr_metadata::get(enc_ptr_.internal_ptr())->state_ == state_type::D_IN_MEMORY;
@@ -83,7 +88,7 @@ class read_only_ptr {
    */
   read_only_ptr& operator=(const read_only_ptr<T>& other) {
     // TODO potential infinite loop bug here
-    init(other.enc_ptr_, other.ref_counts_);
+    init(other.enc_ptr_, other.offset_, other.ref_counts_);
     if (ref_counts_ != nullptr) {
       bool uses_first_count = ptr_metadata::get(enc_ptr_.internal_ptr())->state_ == state_type::D_IN_MEMORY;
       uint32_t increment = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
@@ -95,19 +100,47 @@ class read_only_ptr {
   /**
    * Decrement counter for current pointer if any, and replace
    * with new pointer, offset and reference count.
-   * @param ptr pointer to data
-   * @param offset The offset in bytes
-   * @param ref_count The number of references
-   * @param first_count The first count
+   * @param ptr encoded pointer to data
+   * @param offset logical offset into data
+   * @param ref_count the number of references
    */
-  void init(encoded_ptr<T> enc_ptr, atomic::type<uint32_t>* ref_count) {
+  void init(encoded_ptr<T> enc_ptr, size_t offset = 0, atomic::type<uint32_t>* ref_count = nullptr) {
     decrement_compare_dealloc();
     enc_ptr_ = enc_ptr;
+    offset_ = offset;
     ref_counts_ = ref_count;
   }
 
   encoded_ptr<T> get() const {
     return enc_ptr_;
+  }
+
+  void set_offset(size_t offset) {
+    offset_ = offset;
+  }
+
+  // Forwarding encode/decode member functions over encoded_ptr<T> below.
+  // This is necessary since the offset must be stored outside encoded_ptr<T>
+  // to minimize the footprint of atomic operations in swappable_ptr<T>.
+
+  void encode(size_t idx, T val) {
+    enc_ptr_.encode(idx + offset_, val);
+  }
+
+  void encode(size_t idx, size_t len, const T* data) {
+    enc_ptr_.encode(idx + offset_, len, data);
+  }
+
+  unique_ptr decode_ptr(size_t idx = 0) const {
+    return enc_ptr_.decode_ptr(idx + offset_);
+  }
+
+  T decode(size_t idx) const {
+    return enc_ptr_.decode(idx + offset_);
+  }
+
+  void decode(T* buffer, size_t idx, size_t len) const {
+    enc_ptr_.decode(buffer, idx + offset_, len);
   }
 
  private:
@@ -132,8 +165,9 @@ class read_only_ptr {
     }
   }
 
-  encoded_ptr<T> enc_ptr_;
-  atomic::type<uint32_t>* ref_counts_;
+  encoded_ptr<T> enc_ptr_; // encoded pointer to data
+  size_t offset_; // logical offset into decoded data
+  atomic::type<uint32_t>* ref_counts_; // pointer to ref counts stored in the swappable_ptr ancestor
 
 };
 
@@ -163,15 +197,15 @@ class swappable_ptr {
    * @param ptr The pointer
    */
   swappable_ptr(encoded_ptr<T> ptr) :
-    ref_counts_(ptr_constants::BOTH_DELTA),
-    ptr_(ptr) {
+      ref_counts_(ptr_constants::BOTH_DELTA),
+      enc_ptr_(ptr) {
   }
 
   /**
    * Deallocates the pointer
    */
   ~swappable_ptr() {
-    encoded_ptr<T> ptr = atomic::load(&ptr_);
+    encoded_ptr<T> ptr = atomic::load(&enc_ptr_);
     if (ptr.internal_ptr() != nullptr) {
       ptr_metadata* metadata = ptr_metadata::get(ptr.internal_ptr());
       if (metadata->state_ == state_type::D_IN_MEMORY) {
@@ -190,7 +224,7 @@ class swappable_ptr {
    */
   bool atomic_init(encoded_ptr<T> ptr) {
     encoded_ptr<T> expected;
-    return atomic::strong::cas(&ptr_, &expected, ptr);
+    return atomic::strong::cas(&enc_ptr_, &expected, ptr);
   }
 
   /**
@@ -200,7 +234,7 @@ class swappable_ptr {
    * @return pointer
    */
   encoded_ptr<T> atomic_load() const {
-    return atomic::load(&ptr_);
+    return atomic::load(&enc_ptr_);
   }
 
   /**
@@ -215,9 +249,9 @@ class swappable_ptr {
       THROW(memory_exception, "Pointer cannot be null!");
     }
     // Get old pointer
-    encoded_ptr<T> old_ptr = atomic::load(&ptr_).internal_ptr();
+    encoded_ptr<T> old_ptr = atomic::load(&enc_ptr_).internal_ptr();
     // Store new pointer
-    atomic::store(&ptr_, new_ptr);
+    atomic::store(&enc_ptr_, new_ptr);
     // Deallocate old pointer if there are no copies.
     if ((atomic::fas(&ref_counts_, 1U) & ptr_constants::FIRST_MASK) == 1) {
       ALLOCATOR.dealloc(old_ptr.internal_ptr());
@@ -225,13 +259,13 @@ class swappable_ptr {
   }
 
   /**
-   * Atomically get ptr_[idx].
-   * @param idx index to write to
+   * Atomically get the decoded value at the logical index idx.
+   * @param idx logical index into decoded data
    * @return value at index
    */
   T atomic_get_decode(size_t idx) const {
     atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
-    T result = atomic::load(&ptr_).decode(idx);
+    T result = atomic::load(&enc_ptr_).decode(idx);
     atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
     return result;
   }
@@ -248,8 +282,7 @@ class swappable_ptr {
     // Protects against loading before a swap begins and
     // making a copy after the swap finishes.
     atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
-    encoded_ptr<T> ptr(atomic::load(&ptr_));
-    ptr.set_offset(offset);
+    encoded_ptr<T> ptr = atomic::load(&enc_ptr_);
 
     if (ptr.internal_ptr() == nullptr) {
       // Decrement both ref counts (no possibility of them reaching 0 here)
@@ -262,12 +295,12 @@ class swappable_ptr {
     if (metadata->state_ == state_type::D_IN_MEMORY) {
       // decrement other ref count (no possibility of it reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA);
-      copy.init(ptr, &ref_counts_);
+      copy.init(ptr, offset, &ref_counts_);
       return;
     } else if (metadata->state_ == state_type::D_ARCHIVED) {
       // decrement other ref count (no possibility of it reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::FIRST_DELTA);
-      copy.init(ptr, &ref_counts_);
+      copy.init(ptr, offset, &ref_counts_);
       return;
     } else {
       THROW(memory_exception, "Unsupported pointer state during copy!");
@@ -280,7 +313,7 @@ class swappable_ptr {
    */
   void decrement_compare_dealloc_first() {
     if ((atomic::fas(&ref_counts_, 1U) & ptr_constants::FIRST_MASK) == 1) {
-      ALLOCATOR.dealloc(atomic::load(&ptr_).internal_ptr());
+      ALLOCATOR.dealloc(atomic::load(&enc_ptr_).internal_ptr());
     }
   }
 
@@ -289,12 +322,12 @@ class swappable_ptr {
    */
   void decrement_compare_dealloc_second() {
     if ((atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA) >> ptr_constants::SECOND_SHIFT) == 1) {
-      ALLOCATOR.dealloc(atomic::load(&ptr_).internal_ptr());
+      ALLOCATOR.dealloc(atomic::load(&enc_ptr_).internal_ptr());
     }
   }
 
   mutable atomic::type<uint32_t> ref_counts_; // mutable reference counts for logically const functions
-  atomic::type<encoded_ptr<T>> ptr_;
+  atomic::type<encoded_ptr<T>> enc_ptr_;
 };
 
 }
