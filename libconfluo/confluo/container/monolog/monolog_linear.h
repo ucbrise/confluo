@@ -207,12 +207,11 @@ class monolog_linear_base {
   }
 
   /**
-   * Swaps the block pointer with given pointer.
-   *
-   * @param block_idx The block index.
-   * @param ptr The pointer to swap the block pointer with.
+   * Swap block pointer
+   * @param block_idx index of monolog block
+   * @param ptr new pointer
    */
-  void swap_block_ptr(size_t block_idx, T* ptr) {
+  void swap_block_ptr(size_t block_idx, storage::encoded_ptr<T> ptr) {
     blocks_[block_idx].swap_ptr(ptr);
   }
 

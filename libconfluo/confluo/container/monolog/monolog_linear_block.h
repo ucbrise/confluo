@@ -10,13 +10,7 @@ namespace confluo {
 namespace monolog {
 
 using namespace ::utils;
-
-/**
- * Block in a monolog
- *
- * @tparam T The data type
- * @tparam BUFFER_SIZE Extra buffer space.
- */
+// TODO standardize naming conventions between monolog_exp2_linear and monolog_linear
 template<typename T, size_t BUFFER_SIZE = 1048576>
 class monolog_block {
  public:
@@ -96,10 +90,12 @@ class monolog_block {
     return 0;
   }
 
+  // TODO: will error for an archived block, also could just atomic_get assuming no
+  // contention with archiver.
   void flush(size_t offset, size_t len) {
     __atomic_block_copy_ref copy;
     data_.atomic_copy(copy);
-    storage::STORAGE_FNS[mode_].flush(copy.get() + offset, len * sizeof(T));
+    storage::STORAGE_FNS[mode_].flush(static_cast<T*>(copy.get().internal_ptr()) + offset, len * sizeof(T));
   }
 
   /**
@@ -109,11 +105,11 @@ class monolog_block {
    * @param val value
    */
   void set(size_t i, const T& val) {
-    T* ptr = data_.atomic_load();
-    if (ptr == nullptr) {
-      ptr = try_allocate();
+    storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
+    if (enc_ptr.internal_ptr() == nullptr) {
+      enc_ptr = try_allocate();
     }
-    ptr[i] = val;
+    enc_ptr.encode(i, val);
   }
 
   /**
@@ -123,7 +119,7 @@ class monolog_block {
    * @param val value
    */
   void set_unsafe(size_t i, const T& val) {
-    data_.atomic_load()[i] = val;
+    data_.atomic_load().encode(i, val);
   }
 
   /**
@@ -134,11 +130,11 @@ class monolog_block {
    * @param len length of data
    */
   void write(size_t offset, const T* data, size_t len) {
-    T* ptr = data_.atomic_load();
-    if (ptr == nullptr) {
-      ptr = try_allocate();
+    storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
+    if (enc_ptr.internal_ptr() == nullptr) {
+      enc_ptr = try_allocate();
     }
-    memcpy(ptr + offset, data, len * sizeof(T));
+    enc_ptr.encode(offset, len, data);
   }
 
   /**
@@ -149,7 +145,8 @@ class monolog_block {
    * @param len length of data
    */
   void write_unsafe(size_t offset, const T* data, size_t len) {
-    memcpy(data_.atomic_load() + offset, data, len * sizeof(T));
+    storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
+    enc_ptr.encode(offset, len, data);
   }
 
   /**
@@ -160,7 +157,7 @@ class monolog_block {
    * @return The value at the specified index.
    */
   const T at(size_t i) const {
-    return data_.atomic_get(i);
+    return data_.atomic_get_decode(i);
   }
 
   /**
@@ -170,32 +167,23 @@ class monolog_block {
    * @param len The number of bytes to read.
    */
   void read(size_t offset, T* data, size_t len) const {
-    memcpy(data, data_.atomic_copy()->get() + offset, len * sizeof(T));
-  }
-
-  /**
-   * operator[] (reference)
-   * @param i Index of reference to get.
-   * @return Reference to requested data.
-   */
-  T& operator[](size_t i) {
     __atomic_block_copy_ref copy;
     data_.atomic_copy(copy);
-    if (copy.get() == nullptr)
-      try_allocate(copy);
-    return copy.get()[i];
+    copy.get().decode(data, offset, len);
   }
 
-  /**
-   * Gets a pointer to the data at specified offset
-   * @param offset offset into the block
-   * @param data_ptr read-only pointer to store in
-   */
+//  T& operator[](size_t i) {
+//    __atomic_block_copy_ref copy;
+//    data_.atomic_copy(copy);
+//    if (copy.get().get() == nullptr)
+//      try_allocate(copy);
+//    return copy.get()[i];
+//  }
+
   void ptr(size_t offset, __atomic_block_copy_ref& data_ptr) {
     data_.atomic_copy(data_ptr, offset);
-    if (data_ptr.get() == nullptr) {
-      try_allocate(data_ptr);
-      data_ptr.set_offset(offset);
+    if (data_ptr.get().internal_ptr() == nullptr) {
+      try_allocate(data_ptr, offset);
     }
   }
 
@@ -228,7 +216,7 @@ class monolog_block {
    * Ensure that the monolog block is allocated.
    */
   void ensure_alloc() {
-    if (data_.atomic_load() == nullptr) {
+    if (data_.atomic_load().internal_ptr() == nullptr) {
       __atomic_block_copy_ref copy;
       try_allocate(copy);
     }
@@ -236,31 +224,32 @@ class monolog_block {
 
   /**
    * Swap current pointer with new pointer.
-   * @param ptr new pointer
+   * @param enc_ptr new encoded pointer
    */
-  void swap_ptr(T* ptr) {
-    data_.swap_ptr(ptr);
+  void swap_ptr(storage::encoded_ptr<T> enc_ptr) {
+    data_.swap_ptr(enc_ptr);
   }
 
-private:
+ private:
   /**
    * Try to allocate space for block.
    * @param copy An atomic copy reference of the allocated space.
    */
-  void try_allocate(__atomic_block_copy_ref& copy) {
+  void try_allocate(__atomic_block_copy_ref& copy, size_t offset = 0) {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      T* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
+      void* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
+      storage::encoded_ptr<T> enc_ptr(ptr);
       data_.atomic_init(ptr);
       data_.atomic_copy(copy);
       return;
     }
 
     // Someone else is initializing, stall until initialized
-    while (data_.atomic_load() == nullptr)
-    ;
+    while (data_.atomic_load().internal_ptr() == nullptr)
+      ;
 
     data_.atomic_copy(copy);
   }
@@ -269,21 +258,22 @@ private:
    * Try to allocate space for the monolog block.
    * @return The allocated space.
    */
-  T* try_allocate() {
+  storage::encoded_ptr<T> try_allocate() {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      T* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
+      void* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
-      data_.atomic_init(ptr);
-      return ptr;
+      storage::encoded_ptr<T> enc_ptr(ptr);
+      data_.atomic_init(enc_ptr);
+      return enc_ptr;
     }
 
     // Someone else is initializing, stall until initialized
-    T* ptr;
-    while ((ptr = data_.atomic_load()) == nullptr)
-    ;
-    return ptr;
+    storage::encoded_ptr<T> enc_ptr;
+    while ((enc_ptr = data_.atomic_load()).internal_ptr() == nullptr)
+      ;
+    return enc_ptr;
   }
 
   std::string path_;
