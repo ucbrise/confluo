@@ -163,7 +163,7 @@ class monolog_exp2_linear_base {
       }
 
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
-      bucket.encode(bucket_off, bytes_to_write / sizeof(T), data + data_off);
+      bucket.encode(bucket_off, data + data_off, bytes_to_write / sizeof(T));
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
       bucket_idx++;
@@ -198,7 +198,7 @@ class monolog_exp2_linear_base {
       size_t bytes_to_write = std::min(bucket_remaining, data_remaining);
       __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
       storage::encoded_ptr<T> bucket = container[bucket_idx].atomic_load();
-      bucket.encode(bucket_off, bytes_to_write / sizeof(T), data + data_off);
+      bucket.encode(bucket_off, data + data_off, bytes_to_write / sizeof(T));
       data_remaining -= bytes_to_write;
       data_off += bytes_to_write;
       bucket_idx++;
@@ -283,7 +283,7 @@ class monolog_exp2_linear_base {
       size_t bytes_to_read = std::min(bucket_remaining, data_remaining);
       __atomic_bucket_copy_ref bucket;
       load_bucket_copy(container_idx, bucket_idx, bucket);
-      bucket.get().decode(data + data_off, bucket_off, bytes_to_read / sizeof(T));
+      bucket.decode(data + data_off, bucket_off, bytes_to_read / sizeof(T));
       data_remaining -= bytes_to_read;
       data_off += bytes_to_read;
       bucket_idx++;

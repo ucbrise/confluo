@@ -90,12 +90,14 @@ class monolog_block {
     return 0;
   }
 
-  // TODO: will error for an archived block, also could just atomic_get assuming no
-  // contention with archiver.
+  /**
+   * Flushes data. Assumes no contention between writers and archiver.
+   * @param offset offset
+   * @param len length
+   */
   void flush(size_t offset, size_t len) {
-    __atomic_block_copy_ref copy;
-    data_.atomic_copy(copy);
-    storage::STORAGE_FNS[mode_].flush(static_cast<T*>(copy.get().internal_ptr()) + offset, len * sizeof(T));
+    storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
+    storage::STORAGE_FNS[mode_].flush(static_cast<T*>(enc_ptr.internal_ptr()) + offset, len * sizeof(T));
   }
 
   /**
@@ -134,7 +136,7 @@ class monolog_block {
     if (enc_ptr.internal_ptr() == nullptr) {
       enc_ptr = try_allocate();
     }
-    enc_ptr.encode(offset, len, data);
+    enc_ptr.encode(offset, data, len);
   }
 
   /**
@@ -146,7 +148,7 @@ class monolog_block {
    */
   void write_unsafe(size_t offset, const T* data, size_t len) {
     storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
-    enc_ptr.encode(offset, len, data);
+    enc_ptr.encode(offset, data, len);
   }
 
   /**
@@ -169,16 +171,8 @@ class monolog_block {
   void read(size_t offset, T* data, size_t len) const {
     __atomic_block_copy_ref copy;
     data_.atomic_copy(copy);
-    copy.get().decode(data, offset, len);
+    copy.decode(data, offset, len);
   }
-
-//  T& operator[](size_t i) {
-//    __atomic_block_copy_ref copy;
-//    data_.atomic_copy(copy);
-//    if (copy.get().get() == nullptr)
-//      try_allocate(copy);
-//    return copy.get()[i];
-//  }
 
   void ptr(size_t offset, __atomic_block_copy_ref& data_ptr) {
     data_.atomic_copy(data_ptr, offset);
@@ -239,7 +233,7 @@ class monolog_block {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      void* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
+      void* data_ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
       storage::encoded_ptr<T> enc_ptr(ptr);
       data_.atomic_init(ptr);
@@ -262,7 +256,7 @@ class monolog_block {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      void* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
+      void* data_ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
       storage::encoded_ptr<T> enc_ptr(ptr);
       data_.atomic_init(enc_ptr);
