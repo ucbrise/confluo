@@ -4,7 +4,7 @@
 namespace confluo {
 namespace archival {
 
-// TODO replace this, need common iface
+// TODO replace this, need better iface since there's overlap with encoded_ptr
 template<typename T>
 class encoder {
 
@@ -14,10 +14,11 @@ class encoder {
    * @param ptr unencoded pointer
    * @return encoded pointer
    */
-  void* encode(T* ptr) {
-    return ptr;
+  uint8_t* encode(T* ptr) {
+    return reinterpret_cast<uint8_t*>(ptr);
   }
 
+  // Probably a better way to do this
   /**
    * Get the size of the encoded pointer for an
    * unencoded pointer of a particular size.
