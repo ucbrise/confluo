@@ -345,15 +345,15 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param offset The offset to read from
    * @param nrecords The number of records to read
    */
-  void read(std::string& _return, int64_t id, const int64_t offset,
-      const int64_t nrecords) {
-    uint64_t limit;
-    ro_data_ptr ptr;
+    void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    uint64_t limit;
+    storage::read_only_ptr<uint8_t> ptr;
     mlog->read(offset, limit, ptr);
-    char* data = reinterpret_cast<char*>(ptr.get());
+    auto decoded_ptr = ptr.get().decode();
+    char* data = reinterpret_cast<char*>(decoded_ptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
-        static_cast<size_t>(nrecords * mlog->record_size()));
+                           static_cast<size_t>(nrecords * mlog->record_size()));
     _return.assign(data, size);
   }
 

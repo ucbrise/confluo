@@ -342,10 +342,7 @@ class atomic_multilog {
   size_t append(void* data) {
     size_t record_size = schema_.record_size();
     size_t offset = data_log_.append((const uint8_t*) data, record_size);
-
-    ro_data_ptr ptr;
-    data_log_.ptr(offset, ptr);
-    record_t r = schema_.apply(offset, ptr);
+    record_t r = schema_.apply_unsafe(offset, data);
 
     size_t nfilters = filters_.size();
     for (size_t i = 0; i < nfilters; i++)
@@ -381,14 +378,13 @@ class atomic_multilog {
    * @param version The tail pointer's location
    * @param ptr The read-only pointer to store in
    */
-  void read(uint64_t offset, uint64_t& version, ro_data_ptr& ptr) const {
+  void read(uint64_t offset, uint64_t& version, storage::read_only_ptr<uint8_t>& ptr) const {
     version = rt_.get();
     if (offset < version) {
       data_log_.cptr(offset, ptr);
-      record_t r = schema_.apply(offset, ptr);
       return;
     }
-    ptr.init(nullptr, 0, nullptr);
+    ptr.init(nullptr, nullptr);
   }
 
   /**
@@ -396,7 +392,7 @@ class atomic_multilog {
    * @param offset The location of the data
    * @param ptr The read-only pointer to store in
    */
-  void read(uint64_t offset, ro_data_ptr& ptr) const {
+  void read(uint64_t offset, storage::read_only_ptr<uint8_t>& ptr) const {
     uint64_t version;
     read(offset, version, ptr);
   }
