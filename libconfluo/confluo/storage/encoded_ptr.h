@@ -7,15 +7,10 @@ namespace confluo {
 namespace storage {
 
 // TODO split into interface and 2 implementations, one for in-memory and one for archived representations.
-
-/**
- * The internal pointer is expected to be
- * one allocated by the allocator.
- */
 template<typename T>
 class encoded_ptr {
  public:
-  typedef std::unique_ptr<T, void (*)(T*)> unique_ptr;
+  typedef std::unique_ptr<T, void (*)(T*)> decoded_ptr;
 
   encoded_ptr(void* ptr = nullptr, size_t offset = 0)
       : ptr_(ptr) {
@@ -26,13 +21,6 @@ class encoded_ptr {
    */
   void* internal_ptr() const {
     return ptr_;
-  }
-
-  /**
-   * @return size of decoded ptr in bytes
-   */
-  size_t decoded_size() {
-    return ptr_metadata::get(ptr_)->data_size_;
   }
 
   // Encode/decode member functions
@@ -53,9 +41,9 @@ class encoded_ptr {
     memcpy(buffer, &static_cast<T*>(ptr_)[idx], sizeof(T) * len);
   }
 
-  unique_ptr decode_ptr(size_t idx = 0) const {
+  decoded_ptr decode_ptr(size_t idx = 0) const {
     T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + idx;
-    return unique_ptr(ptr, delete_no_op);
+    return decoded_ptr(ptr, delete_no_op);
   }
 
  private:

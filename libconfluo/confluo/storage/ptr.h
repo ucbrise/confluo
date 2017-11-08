@@ -46,7 +46,7 @@ const uint32_t ptr_constants::SECOND_SHIFT;
 template<typename T>
 class read_only_ptr {
  public:
-  typedef typename encoded_ptr<T>::unique_ptr unique_ptr;
+  typedef typename encoded_ptr<T>::decoded_ptr decoded_ptr;
 
   read_only_ptr()
       : enc_ptr_(),
@@ -131,7 +131,7 @@ class read_only_ptr {
     enc_ptr_.encode(idx + offset_, len, data);
   }
 
-  unique_ptr decode_ptr(size_t idx = 0) const {
+  decoded_ptr decode_ptr(size_t idx = 0) const {
     return enc_ptr_.decode_ptr(idx + offset_);
   }
 
