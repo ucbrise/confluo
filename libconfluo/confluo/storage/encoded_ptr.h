@@ -28,12 +28,11 @@ class encoded_ptr {
     return ptr_;
   }
 
+  /**
+   * @return size of decoded ptr in bytes
+   */
   size_t decoded_size() {
-    return decoded_size(ptr_metadata::get(ptr_)->data_size_);
-  }
-
-  size_t decoded_size(size_t encoded_size) {
-    return encoded_size;
+    return ptr_metadata::get(ptr_)->data_size_;
   }
 
   // Encode/decode member functions

@@ -17,8 +17,10 @@ class DataArchivalTest : public testing::Test {
   static const size_t MAX_BLOCKS = 8;
   static const uint64_t ARRAY_SIZE = MAX_BLOCKS * BLOCK_SIZE;
 
+  typedef storage::encoded_ptr<uint8_t> encoded_ptr_t;
   typedef monolog_linear<uint8_t, MAX_BLOCKS, BLOCK_SIZE, 1024> small_monolog_linear;
-  typedef archival::monolog_linear_archiver<uint8_t, MAX_BLOCKS, BLOCK_SIZE, 1024> small_monolog_archiver;
+  typedef archival::monolog_linear_archiver
+      <uint8_t, encoded_ptr_t, MAX_BLOCKS, BLOCK_SIZE, 1024> small_monolog_archiver;
 
   void write_to_log(small_monolog_linear& log) {
     for (size_t i = 0; i < ARRAY_SIZE; i++) {

@@ -17,18 +17,19 @@ namespace archival {
 
 using namespace ::utils;
 
-template<typename T, size_t MAX_BLOCKS, size_t BLOCK_SIZE, size_t BUF_SIZE>
+template<typename T, typename encoded_ptr, size_t MAX_BLOCKS, size_t BLOCK_SIZE, size_t BUF_SIZE>
 class monolog_linear_archiver {
 
  public:
+  typedef storage::read_only_ptr<T> block_ptr_t;
 
   /**
    * Constructor
-   * @param name name
-   * @param path path
-   * @param rt global read tail
+   * @param name archiver name
+   * @param path path to directory to archive in
+   * @param rt read tail
    * @param log monolog to archive
-   * @param transform transform function to apply before archiving each block
+   * @param encoder encoder
    */
   monolog_linear_archiver(const std::string& name,
                           const std::string& path,
@@ -60,7 +61,7 @@ class monolog_linear_archiver {
 
     for (size_t i = start; i < stop; i++) {
 
-      storage::read_only_ptr<T> block_ptr;
+      block_ptr_t block_ptr;
       log_.ptr(archival_tail_, block_ptr);
 
       auto* metadata = storage::ptr_metadata::get(block_ptr.get().internal_ptr());
@@ -75,8 +76,9 @@ class monolog_linear_archiver {
 
       archive_block(archival_out, block_ptr);
       void* archived_data = ALLOCATOR.mmap(cur_file_path(), file_off, encoded_size, storage::state_type::D_ARCHIVED);
-      storage::encoded_ptr<T> enc_ptr(archived_data);
+      encoded_ptr enc_ptr(archived_data);
       log_.swap_block_ptr(i, enc_ptr);
+
       file_off = archival_out.tellp();
       archival_tail_ += BLOCK_SIZE;
     }
@@ -85,11 +87,11 @@ class monolog_linear_archiver {
  private:
   // TODO separate out logic better between archive and archive_block, too many common calls
   /**
-   * Write the next block to archival file.
+   * Write a block and its metadata to archival file.
    * @param out archival destination
-   * @param file_offset archival file offset to write to
+   * @param block_ptr block pointer
    */
-  void archive_block(std::ofstream& out, storage::read_only_ptr<T>& block_ptr) {
+  void archive_block(std::ofstream& out, block_ptr_t& block_ptr) {
     // Since the file will be memory-mapped, there must be space in the file for the pointer metadata,
     // so it is written with the data. The actual values of the metadata, apart from the state,
     // do not matter since they'll be overwritten by the allocator.
@@ -108,7 +110,7 @@ class monolog_linear_archiver {
    * Path to current file being used for archival.
    * @return file path
    */
-  std::string cur_file_path() {
+  std::string cur_file_path() const {
     return path_ + std::to_string(cur_file_count_) + ".dat";
   }
 
@@ -125,7 +127,7 @@ class monolog_linear_archiver {
   }
 
   /**
-   * Update the file header with the last offset archived.
+   * Update the file header with the last offset archived. Seek to EOF.
    * @param out
    * @param offset
    */
