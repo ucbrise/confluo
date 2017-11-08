@@ -21,34 +21,34 @@ class storage_allocator {
 
  public:
   /**
-   * Initializes a storage allocator
+   * Initializes a storage allocator.
    */
-  storage_allocator() :
-    mem_stat_(),
-    mmap_stat_() {
+  storage_allocator()
+      : mem_stat_(),
+        mmap_stat_() {
   }
 
   /**
-   * Allocates memory and metadata for len instances of T
-   * @param len length of array to allocate
+   * Allocates memory and metadata for an object.
+   * @param size size in bytes to allocate
    * @return pointer to allocated memory
    */
-  template<typename T>
-  T* alloc(size_t len = 1) {
+  void* alloc(size_t size) {
     if (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
       THROW(memory_exception, "Max memory reached!");
     }
-    size_t alloc_size = sizeof(ptr_metadata) + len * sizeof(T);
+    size_t alloc_size = sizeof(ptr_metadata) + size;
     mem_stat_.increment(alloc_size);
 
     // allocate contiguous memory for both the ptr and metadata
-    void* ptr = ::operator new(alloc_size);
+    void* ptr = malloc(alloc_size);
     ptr_metadata* md = new (ptr) ptr_metadata;
-    T* data_ptr = reinterpret_cast<T*>(md + 1);
+    void* data_ptr = reinterpret_cast<void*>(md + 1);
 
     md->alloc_type_ = alloc_type::D_DEFAULT;
     md->state_ = state_type::D_IN_MEMORY;
-    md->size_ = len * sizeof(T);
+    md->data_size_ = size;
+    md->offset_ = 0;
 
     return data_ptr;
   }
@@ -57,14 +57,13 @@ class storage_allocator {
    * Allocates new memory backed by file. Creates the file, overwriting old
    * data if the file already existed.
    *
-   * @param path backing file.
-   * @param len length of array
+   * @param path backing file
+   * @param size size to allocate
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
-  template<typename T>
-  T* mmap(std::string path, size_t len = 1, uint8_t state = state_type::D_IN_MEMORY) {
-    size_t alloc_size = sizeof(ptr_metadata) + len * sizeof(T);
+  void* mmap(std::string path, size_t size, uint8_t state = state_type::D_IN_MEMORY) {
+    size_t alloc_size = sizeof(ptr_metadata) + size;
     mmap_stat_.increment(alloc_size);
 
     int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
@@ -75,9 +74,10 @@ class storage_allocator {
     storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;
     metadata->state_ = state;
-    metadata->size_ = len * sizeof(T);
+    metadata->data_size_ = size;
+    metadata->offset_ = 0;
 
-    return reinterpret_cast<T*>(metadata + 1);
+    return reinterpret_cast<void*>(metadata + 1);
   }
 
   /**
@@ -85,44 +85,43 @@ class storage_allocator {
    *
    * @param path path of file
    * @param offset file offset (does not need to be page aligned)
-   * @param len length of array
+   * @param size size to allocate
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
-  template<typename T>
-  T* mmap(std::string path, off_t offset, size_t len, uint8_t state) {
-    off_t page_aligned_offset = offset - (offset % getpagesize());
-    int mmap_delta = offset - page_aligned_offset;
+  void* mmap(std::string path, off_t offset, size_t size, uint8_t state) {
+    int mmap_delta = offset % getpagesize();
+    off_t page_aligned_offset = offset - mmap_delta;
 
-    size_t mmap_size = sizeof(ptr_metadata) + len * sizeof(T) + mmap_delta;
+    size_t mmap_size = sizeof(ptr_metadata) + size + mmap_delta;
     mmap_stat_.increment(mmap_size);
 
     int fd = file_utils::open_file(path, O_RDWR);
     uint8_t* ptr = static_cast<uint8_t*>(mmap_utils::map(fd, nullptr, page_aligned_offset, mmap_size));
+
     ptr += mmap_delta;
     file_utils::close_file(fd);
 
     storage::ptr_metadata* metadata = reinterpret_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;
     metadata->state_ = state;
-    metadata->size_ = len * sizeof(T);
+    metadata->data_size_ = size;
     metadata->offset_ = mmap_delta;
 
-    return reinterpret_cast<T*>(metadata + 1);
+    return reinterpret_cast<void*>(metadata + 1);
   }
 
   /**
-   * Deallocate memory allocated by this allocator
+   * Deallocate memory allocated by this allocator.
    * @param ptr pointer to allocated memory
    */
-  template<typename T>
-  void dealloc(T* ptr) {
+  void dealloc(void* ptr) {
     ptr_metadata* md = ptr_metadata::get(ptr);
-    size_t alloc_size = sizeof(ptr_metadata) + md->size_;
+    size_t alloc_size = sizeof(ptr_metadata) + md->data_size_ + md->offset_;
     switch (md->alloc_type_) {
     case alloc_type::D_DEFAULT:
       md->~ptr_metadata();
-      ::operator delete(static_cast<void*>(md));
+      free(md);
       mem_stat_.decrement(alloc_size);
       break;
     case alloc_type::D_MMAP:

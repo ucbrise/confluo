@@ -15,10 +15,10 @@ class memory_stat {
 
  public:
   /**
-   * Initializes the memory statistics
+   * Initializes memory statistics.
    */
-  memory_stat() :
-    memory_used_(0) {
+  memory_stat()
+      : memory_used_(0) {
   }
 
   /**

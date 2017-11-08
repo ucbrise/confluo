@@ -35,7 +35,7 @@ const uint8_t state_type::D_ARCHIVED;
  * allocator. Not all fields may necessarily be set.
  */
 typedef struct ptr_metadata {
-  size_t size_ : 32; // size of data
+  size_t data_size_ : 32; // size of data
   uint8_t thread_id_ : 8; // allocating thread id
   uint8_t state_ : 4; // data state
   uint8_t alloc_type_ : 4; // allocation type

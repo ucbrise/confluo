@@ -34,7 +34,7 @@ using namespace ::utils;
 /** Allocate function that allocates a file of a certain size */
 typedef void* (*allocate_fn)(const std::string& path, size_t size);
 /** Allocates a block in a file of a certain size */
-typedef uint8_t* (*allocate_block_fn)(const std::string& path, size_t size);
+typedef void* (*allocate_block_fn)(const std::string& path, size_t size);
 /** Frees the given pointer */
 typedef void (*free_fn)(void* ptr, size_t size);
 /** Flushes the memory specified by the pointer */
@@ -91,7 +91,7 @@ struct in_memory {
    * @return Allocated block.
    */
   inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.alloc<uint8_t>(size / sizeof(uint8_t));
+    return ALLOCATOR.alloc(size);
   }
 
   /**
@@ -144,7 +144,7 @@ struct durable_relaxed {
    * @return Allocated block.
    */
   inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap<uint8_t>(path, size / sizeof(uint8_t));
+    return ALLOCATOR.mmap(path, size);
   }
 
   /**
@@ -197,7 +197,7 @@ struct durable {
    * @return Allocated block.
    */
   inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap<uint8_t>(path, size / sizeof(uint8_t));
+    return ALLOCATOR.mmap(path, size);
   }
 
   /**
