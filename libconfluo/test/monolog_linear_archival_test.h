@@ -1,10 +1,12 @@
 #ifndef TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 #define TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 
+#include "encoder.h"
 #include "monolog_linear_archiver.h"
 #include "container/monolog/monolog_linear.h"
 #include "read_tail.h"
 #include "gtest/gtest.h"
+#include "read_tail.h"
 
 using namespace ::dialog;
 
@@ -38,7 +40,8 @@ class DataArchivalTest : public testing::Test {
 TEST_F(DataArchivalTest, ArchivalTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, &log);
+  archival::encoder<uint8_t> encoder;
+  small_monolog_archiver archiver("data_archives", "/tmp", rt, log, encoder);
 
   write_to_log(log);
   rt.advance(0, ARRAY_SIZE * sizeof(uint8_t));
@@ -59,7 +62,8 @@ TEST_F(DataArchivalTest, ArchivalTest) {
 TEST_F(DataArchivalTest, PtrSwapTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, &log);
+  archival::encoder<uint8_t> encoder;
+  small_monolog_archiver archiver("data_archives", "/tmp", rt, log, encoder);
 
   write_to_log(log);
   rt.advance(0, ARRAY_SIZE * sizeof(uint8_t));
@@ -80,7 +84,8 @@ TEST_F(DataArchivalTest, PtrSwapTest) {
 TEST_F(DataArchivalTest, ArchivePastReadTailTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, &log);
+  archival::encoder<uint8_t> encoder;
+  small_monolog_archiver archiver("data_archives", "/tmp", rt, log, encoder);
 
   write_to_log(log);
   rt.advance(0, 7 * BLOCK_SIZE);
@@ -91,7 +96,7 @@ TEST_F(DataArchivalTest, ArchivePastReadTailTest) {
   // make sure last block wasn't archived
   storage::read_only_ptr<uint8_t> ptr;
   log.ptr(7 * BLOCK_SIZE, ptr);
-  ASSERT_EQ(storage::ptr_metadata::get(ptr.get())->state_, storage::state_type::D_IN_MEMORY);
+  ASSERT_EQ(storage::ptr_metadata::get(ptr.get().internal_ptr())->state_, storage::state_type::D_IN_MEMORY);
 }
 
 #endif /* TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_ */
