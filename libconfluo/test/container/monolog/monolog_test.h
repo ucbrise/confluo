@@ -117,9 +117,9 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
   int buffer[3];
   read_only_ptr<int> result;
   array.ptr(0, result);
-  int* result_ptr = result.get();
+  auto result_ptr = result.get().decode();
   for (size_t i = 0; i < 3; i++) {
-    ASSERT_EQ(data[i], *(result_ptr + i));
+    ASSERT_EQ(data[i], result_ptr.get()[i]);
   }
 
   array.ensure_alloc(5, 8);
@@ -131,6 +131,8 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
   array.set_unsafe(5, new_data, 3);
   array.get(buffer, 5, 3);
   ASSERT_EQ(new_data[0], buffer[0]);
+  ASSERT_EQ(new_data[1], buffer[1]);
+  ASSERT_EQ(new_data[2], buffer[2]);
 }
 
 TEST_F(MonoLogTest, MonoLogExp2LinearTest) {
