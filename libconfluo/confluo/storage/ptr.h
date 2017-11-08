@@ -2,6 +2,7 @@
 #define CONFLUO_STORAGE_PTR_H_
 
 #include "atomic.h"
+#include "encoded_ptr.h"
 #include "exceptions.h"
 #include "storage/allocator.h"
 
@@ -12,6 +13,7 @@ namespace storage {
  * Pointer constants class. Contains constants for important values for 
  * pointers
  */
+// TODO move to utility, abstract away increment and decrement functions
 class ptr_constants {
  public:
   // Increments/decrements for first and second counters
@@ -44,39 +46,21 @@ const uint32_t ptr_constants::SECOND_SHIFT;
 template<typename T>
 class read_only_ptr {
  public:
- /**
-   * Constructs a null read only pointer
-   */
-  read_only_ptr() :
-    ptr_(nullptr),
-    offset_(0),
-    ref_counts_(nullptr) {
+  read_only_ptr()
+    : enc_ptr_(),
+      ref_counts_(nullptr) {
   }
 
-  /**
-   * Constructs a read only pointer from a specified pointer
-   *
-   * @param ptr The pointer to construct a read only pointer from
-   * @param ref_counts The ref_counts for the pointer
-   * @param offset The offset for the pointer
-   */
-  read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_counts, size_t offset = 0) :
-    ptr_(ptr),
-    offset_(offset),
-    ref_counts_(ref_counts) {
+  read_only_ptr(encoded_ptr<T> enc_ptr, atomic::type<uint32_t>* ref_counts)
+    : enc_ptr_(enc_ptr),
+      ref_counts_(ref_counts) {
   }
 
-  /**
-   * Constructs a read only pointer from another read only pointer
-   *
-   * @param other The other read only pointer
-   */
-  read_only_ptr(const read_only_ptr<T>& other) :
-    ptr_(other.ptr_),
-    offset_(other.offset_),
-    ref_counts_(other.ref_counts_) {
+  read_only_ptr(const read_only_ptr<T>& other)
+      : enc_ptr_(other.enc_ptr_),
+        ref_counts_(other.ref_counts_) {
     if (ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+      bool uses_first_count = ptr_metadata::get(enc_ptr_.internal_ptr())->state_ == state_type::D_IN_MEMORY;
       uint32_t increment = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
       atomic::faa(ref_counts_, increment);
     }
@@ -99,9 +83,9 @@ class read_only_ptr {
    */
   read_only_ptr& operator=(const read_only_ptr<T>& other) {
     // TODO potential infinite loop bug here
-    init(other.ptr_, other.offset_, other.ref_counts_);
+    init(other.enc_ptr_, other.ref_counts_);
     if (ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+      bool uses_first_count = ptr_metadata::get(enc_ptr_.internal_ptr())->state_ == state_type::D_IN_MEMORY;
       uint32_t increment = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
       atomic::faa(ref_counts_, increment);
     }
@@ -116,29 +100,14 @@ class read_only_ptr {
    * @param ref_count The number of references
    * @param first_count The first count
    */
-  void init(T* ptr, size_t offset, atomic::type<uint32_t>* ref_count) {
+  void init(encoded_ptr<T> enc_ptr, atomic::type<uint32_t>* ref_count) {
     decrement_compare_dealloc();
-    ptr_ = ptr;
-    offset_ = offset;
+    enc_ptr_ = enc_ptr;
     ref_counts_ = ref_count;
   }
 
-  /**
-   * Gets the pointer
-   *
-   * @return The pointer
-   */
-  T* get() const {
-    return ptr_ ? ptr_ + offset_ : ptr_;
-  }
-
-  /**
-   * Sets the pointer offset
-   *
-   * @param offset The offset of the pointer
-   */
-  void set_offset(size_t offset) {
-    offset_ = offset;
+  encoded_ptr<T> get() const {
+    return enc_ptr_;
   }
 
  private:
@@ -147,8 +116,9 @@ class read_only_ptr {
    * not null. Deallocates the pointer if reference count reaches 0.
    */
   void decrement_compare_dealloc() {
-    if (ptr_ != nullptr && ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+    void* internal_ptr = enc_ptr_.internal_ptr();
+    if (internal_ptr != nullptr && ref_counts_ != nullptr) {
+      bool uses_first_count = ptr_metadata::get(internal_ptr)->state_ == state_type::D_IN_MEMORY;
       uint32_t decrement = uses_first_count ? ptr_constants::FIRST_DELTA : ptr_constants::SECOND_DELTA;
       uint32_t prev_val = atomic::fas(ref_counts_, decrement);
       if (uses_first_count) {
@@ -157,17 +127,12 @@ class read_only_ptr {
         prev_val >>= ptr_constants::SECOND_SHIFT;
       }
       if (prev_val == 1) {
-        ALLOCATOR.dealloc<T>(ptr_);
+        ALLOCATOR.dealloc(internal_ptr);
       }
     }
   }
 
-  void decrement() {
-
-  }
-
-  T* ptr_;
-  size_t offset_;
+  encoded_ptr<T> enc_ptr_;
   atomic::type<uint32_t>* ref_counts_;
 
 };
@@ -197,7 +162,7 @@ class swappable_ptr {
    * protect from premature deallocation by a copy
    * @param ptr The pointer
    */
-  swappable_ptr(T* ptr) :
+  swappable_ptr(encoded_ptr<T> ptr) :
     ref_counts_(ptr_constants::BOTH_DELTA),
     ptr_(ptr) {
   }
@@ -206,9 +171,9 @@ class swappable_ptr {
    * Deallocates the pointer
    */
   ~swappable_ptr() {
-    T* ptr = atomic::load(&ptr_);
-    if (ptr != nullptr) {
-      ptr_metadata* metadata = ptr_metadata::get(ptr);
+    encoded_ptr<T> ptr = atomic::load(&ptr_);
+    if (ptr.internal_ptr() != nullptr) {
+      ptr_metadata* metadata = ptr_metadata::get(ptr.internal_ptr());
       if (metadata->state_ == state_type::D_IN_MEMORY) {
         decrement_compare_dealloc_first();
       } else if (metadata->state_ == state_type::D_ARCHIVED) {
@@ -223,16 +188,18 @@ class swappable_ptr {
    * @param ptr The pointer to initialize
    * @return True if initialization successful, false otherwise
    */
-  bool atomic_init(T* ptr) {
-    T* expected = nullptr;
+  bool atomic_init(encoded_ptr<T> ptr) {
+    encoded_ptr<T> expected;
     return atomic::strong::cas(&ptr_, &expected, ptr);
   }
 
   /**
-   * Get the stored pointer
+   * Get the stored pointer. It is unsafe to access the pointer
+   * through this method since it may be deallocated. For safe
+   * access create a read-only copy.
    * @return pointer
    */
-  T* atomic_load() const {
+  encoded_ptr<T> atomic_load() const {
     return atomic::load(&ptr_);
   }
 
@@ -243,26 +210,28 @@ class swappable_ptr {
    * concurrent calls to swap_ptr.
    * @param new_ptr The new pointer
    */
-  void swap_ptr(T* new_ptr) {
-    if (new_ptr == nullptr) {
+  void swap_ptr(encoded_ptr<T> new_ptr) {
+    if (new_ptr.internal_ptr() == nullptr) {
       THROW(memory_exception, "Pointer cannot be null!");
     }
-    T* old_ptr = atomic::load(&ptr_);
-    ptr_metadata* metadata = ptr_metadata::get(new_ptr);
+    // Get old pointer
+    encoded_ptr<T> old_ptr = atomic::load(&ptr_).internal_ptr();
+    // Store new pointer
     atomic::store(&ptr_, new_ptr);
-
-    // Deallocate the old pointer if there are no copies.
-    decrement_compare_dealloc_first();
+    // Deallocate old pointer if there are no copies.
+    if ((atomic::fas(&ref_counts_, 1U) & ptr_constants::FIRST_MASK) == 1) {
+      ALLOCATOR.dealloc(old_ptr.internal_ptr());
+    }
   }
 
   /**
-   * Atomically get ptr_[idx]
-   * @param idx The index to write to
-   * @return The value at index
+   * Atomically get ptr_[idx].
+   * @param idx index to write to
+   * @return value at index
    */
-  T atomic_get(size_t idx) const {
+  T atomic_get_decode(size_t idx) const {
     atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
-    T result = atomic::load(&ptr_)[idx];
+    T result = atomic::load(&ptr_).decode(idx);
     atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
     return result;
   }
@@ -279,25 +248,26 @@ class swappable_ptr {
     // Protects against loading before a swap begins and
     // making a copy after the swap finishes.
     atomic::faa(&ref_counts_, ptr_constants::BOTH_DELTA);
-    T* ptr = atomic::load(&ptr_);
+    encoded_ptr<T> ptr(atomic::load(&ptr_));
+    ptr.set_offset(offset);
 
-    if (ptr == nullptr) {
+    if (ptr.internal_ptr() == nullptr) {
       // Decrement both ref counts (no possibility of them reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::BOTH_DELTA);
       return;
     }
 
     // Correct the other counter and create the copy.
-    ptr_metadata* metadata = ptr_metadata::get(ptr);
+    ptr_metadata* metadata = ptr_metadata::get(ptr.internal_ptr());
     if (metadata->state_ == state_type::D_IN_MEMORY) {
       // decrement other ref count (no possibility of it reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA);
-      copy.init(ptr, offset, &ref_counts_);
+      copy.init(ptr, &ref_counts_);
       return;
     } else if (metadata->state_ == state_type::D_ARCHIVED) {
       // decrement other ref count (no possibility of it reaching 0 here)
       atomic::fas(&ref_counts_, ptr_constants::FIRST_DELTA);
-      copy.init(ptr, offset, &ref_counts_);
+      copy.init(ptr, &ref_counts_);
       return;
     } else {
       THROW(memory_exception, "Unsupported pointer state during copy!");
@@ -305,32 +275,26 @@ class swappable_ptr {
   }
 
  private:
-
   /**
-   * Decrements the ref count and deallocates the pointer if it reaches 0.
-   * @param ref_count reference count to decrement
+   * Decrements the first ref count and deallocates the pointer if it reaches 0.
    */
   void decrement_compare_dealloc_first() {
     if ((atomic::fas(&ref_counts_, 1U) & ptr_constants::FIRST_MASK) == 1) {
-      ALLOCATOR.dealloc<T>(ptr_);
+      ALLOCATOR.dealloc(atomic::load(&ptr_).internal_ptr());
     }
   }
 
   /**
-   * Decrements the ref count for the second counter
-   * and deallocates the pointer if it reaches 0.
-   * @param ref_count reference count to decrement
+   * Decrements the second ref count and deallocates the pointer if it reaches 0.
    */
   void decrement_compare_dealloc_second() {
     if ((atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA) >> ptr_constants::SECOND_SHIFT) == 1) {
-      ALLOCATOR.dealloc<T>(ptr_);
+      ALLOCATOR.dealloc(atomic::load(&ptr_).internal_ptr());
     }
   }
 
-  // mutable reference counts to support logically const functions
-  mutable atomic::type<uint32_t> ref_counts_;
-
-  atomic::type<T*> ptr_;
+  mutable atomic::type<uint32_t> ref_counts_; // mutable reference counts for logically const functions
+  atomic::type<encoded_ptr<T>> ptr_;
 };
 
 }

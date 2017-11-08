@@ -1,7 +1,7 @@
-#ifndef DIALOG_DIALOG_ENCODER_H_
-#define DIALOG_DIALOG_ENCODER_H_
+#ifndef CONFLUO_ENCODER_H_
+#define CONFLUO_ENCODER_H_
 
-namespace dialog {
+namespace confluo {
 namespace archival {
 
 // TODO replace this, need common iface
@@ -33,4 +33,4 @@ class encoder {
 }
 }
 
-#endif /* DIALOG_DIALOG_ENCODER_H_ */
+#endif /* CONFLUO_ENCODER_H_ */

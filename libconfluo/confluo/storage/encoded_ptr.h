@@ -1,9 +1,9 @@
-#ifndef DIALOG_DIALOG_MONOLOG_BUCKET_H_
-#define DIALOG_DIALOG_MONOLOG_BUCKET_H_
+#ifndef CONFLUO_ENCODED_PTR_H_
+#define CONFLUO_ENCODED_PTR_H_
 
 #include "ptr_metadata.h"
 
-namespace dialog {
+namespace confluo {
 namespace storage {
 
 // TODO split into interface and 2 implementations, one for in-memory and one for archived representations.
@@ -73,4 +73,4 @@ class encoded_ptr {
 }
 }
 
-#endif /* DIALOG_DIALOG_MONOLOG_BUCKET_H_ */
+#endif /* CONFLUO_ENCODED_PTR_H_ */

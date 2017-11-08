@@ -3,7 +3,9 @@
 
 #include "storage/ptr.h"
 #include "gtest/gtest.h"
+
 #include "storage/allocator.h"
+#include "storage/encoded_ptr.h"
 #include "storage/ptr_metadata.h"
 
 using namespace ::confluo;
@@ -21,19 +23,20 @@ TEST_F(PtrTest, CopyTest) {
   size_t initial_mem_usage = ALLOCATOR.memory_utilization();
 
   {
-    uint64_t* data = ALLOCATOR.alloc<uint64_t>(ARRAY_SIZE);
-    swappable_ptr<uint64_t> ptr(data);
+    void* data = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE);
+    encoded_ptr<uint64_t> enc_ptr(data);
+    swappable_ptr<uint64_t> ptr(enc_ptr);
 
     ASSERT_EQ(initial_mem_usage + ALLOC_SIZE, ALLOCATOR.memory_utilization());
     {
       read_only_ptr<uint64_t> ptr_copy;
       ptr.atomic_copy(ptr_copy);
-      ASSERT_EQ(data, ptr_copy.get());
+      ASSERT_EQ(data, ptr_copy.get().internal_ptr());
       ASSERT_EQ(initial_mem_usage + ALLOC_SIZE, ALLOCATOR.memory_utilization());
       {
         read_only_ptr<uint64_t> ptr_copy2;
         ptr.atomic_copy(ptr_copy2);
-        ASSERT_EQ(data, ptr_copy2.get());
+        ASSERT_EQ(data, ptr_copy2.get().internal_ptr());
         ASSERT_EQ(initial_mem_usage + ALLOC_SIZE, ALLOCATOR.memory_utilization());
       }
     }
@@ -48,27 +51,31 @@ TEST_F(PtrTest, SwapTest) {
   size_t initial_mem_usage = ALLOCATOR.memory_utilization();
 
   {
-    uint64_t* data = ALLOCATOR.alloc<uint64_t>(ARRAY_SIZE);
-    uint64_t* data_swapped = ALLOCATOR.alloc<uint64_t>(ARRAY_SIZE);
+    void* data = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE);
+    void* data_swapped = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE);
     ptr_metadata::get(data_swapped)->state_ = state_type::D_ARCHIVED;
-    swappable_ptr<uint64_t> ptr(data);
+
+    encoded_ptr<uint64_t> enc_ptr(data);
+    encoded_ptr<uint64_t> enc_swapped_ptr(data_swapped);
+
+    swappable_ptr<uint64_t> ptr(enc_ptr);
 
     {
       read_only_ptr<uint64_t> ptr_copy;
       ptr.atomic_copy(ptr_copy);
-      ASSERT_EQ(data, ptr_copy.get());
+      ASSERT_EQ(data, ptr_copy.get().internal_ptr());
       {
         read_only_ptr<uint64_t> ptr_copy2;
         ptr.atomic_copy(ptr_copy2);
-        ASSERT_EQ(data, ptr_copy2.get());
+        ASSERT_EQ(data, ptr_copy2.get().internal_ptr());
 
         // swap pointer
-        ptr.swap_ptr(data_swapped);
+        ptr.swap_ptr(enc_swapped_ptr);
         ASSERT_EQ(initial_mem_usage + 2 * ALLOC_SIZE, ALLOCATOR.memory_utilization());
 
         read_only_ptr<uint64_t> ptr_copy3;
         ptr.atomic_copy(ptr_copy3);
-        ASSERT_EQ(data_swapped, ptr_copy3.get());
+        ASSERT_EQ(data_swapped, ptr_copy3.get().internal_ptr());
 
       }
       ASSERT_EQ(initial_mem_usage + 2 * ALLOC_SIZE, ALLOCATOR.memory_utilization());
