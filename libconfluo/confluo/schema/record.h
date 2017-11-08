@@ -51,9 +51,9 @@ struct record_t {
    * @param size size of data
    */
   record_t(size_t log_offset, storage::read_only_ptr<uint8_t> data, size_t size)
-      : timestamp_(*reinterpret_cast<int64_t*>(data.get().decode().get())),
+      : timestamp_(*reinterpret_cast<int64_t*>(data.decode_ptr().get())),
         log_offset_(log_offset),
-        data_(data.get().decode().get()),
+        data_(data.decode_ptr().get()), // TODO since unique_ptr, can't just use rvalue
         ptr_(data),
         size_(size),
         version_(log_offset + size) {

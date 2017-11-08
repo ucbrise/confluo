@@ -384,7 +384,7 @@ class atomic_multilog {
       data_log_.cptr(offset, ptr);
       return;
     }
-    ptr.init(nullptr, nullptr);
+    ptr.init(nullptr);
   }
 
   /**

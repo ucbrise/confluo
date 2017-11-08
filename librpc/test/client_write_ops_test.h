@@ -137,7 +137,6 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
 }
 
 TEST_F(ClientWriteOpsTest, WriteTest) {
-
   std::string atomic_multilog_name = "my_multilog";
 
   auto store = simple_multilog_store(atomic_multilog_name, storage::storage_mode::IN_MEMORY);
@@ -157,7 +156,8 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
 
   storage::read_only_ptr<uint8_t> ptr;
   dtable->read(0, ptr);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get().decode().get()), DATA_SIZE);
+  auto decoded_ptr = ptr.decode_ptr();
+  std::string buf = std::string(reinterpret_cast<const char*>(decoded_ptr.get()), DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
   client.disconnect();
