@@ -320,6 +320,7 @@ class monolog_exp2_linear_base {
   }
 
   // TODO remove const from here and add non-const methods in radix tree instead
+  // Also this method takes in the monolog idx, but monolog_linear used bucket_idx, fix this
   void swap_bucket_ptr(size_t idx, storage::encoded_ptr<T> data) const {
     size_t pos = idx + FCS;
     size_t hibit = bit_utils::highest_bit(pos);
