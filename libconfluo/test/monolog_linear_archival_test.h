@@ -19,8 +19,8 @@ class DataArchivalTest : public testing::Test {
 
   typedef storage::encoded_ptr<uint8_t> encoded_ptr_t;
   typedef monolog_linear<uint8_t, MAX_BLOCKS, BLOCK_SIZE, 1024> small_monolog_linear;
-  typedef archival::monolog_linear_archiver
-      <uint8_t, encoded_ptr_t, MAX_BLOCKS, BLOCK_SIZE, 1024> small_monolog_archiver;
+  typedef archival::monolog_linear_archiver<uint8_t, archival::encoding_type::IDENTITY, MAX_BLOCKS,
+                                            BLOCK_SIZE, 1024> small_monolog_archiver;
 
   void write_to_log(small_monolog_linear& log) {
     for (size_t i = 0; i < ARRAY_SIZE; i++) {
@@ -42,8 +42,7 @@ class DataArchivalTest : public testing::Test {
 TEST_F(DataArchivalTest, ArchivalTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  archival::encoder<uint8_t> encoder;
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, log, encoder);
+  small_monolog_archiver archiver("data_archives", "/tmp", rt, log);
 
   write_to_log(log);
   rt.advance(0, ARRAY_SIZE * sizeof(uint8_t));
@@ -64,8 +63,7 @@ TEST_F(DataArchivalTest, ArchivalTest) {
 TEST_F(DataArchivalTest, PtrSwapTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  archival::encoder<uint8_t> encoder;
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, log, encoder);
+  small_monolog_archiver archiver("data_archives", "/tmp", rt, log);
 
   write_to_log(log);
   rt.advance(0, ARRAY_SIZE * sizeof(uint8_t));
@@ -86,8 +84,7 @@ TEST_F(DataArchivalTest, PtrSwapTest) {
 TEST_F(DataArchivalTest, ArchivePastReadTailTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  archival::encoder<uint8_t> encoder;
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, log, encoder);
+  small_monolog_archiver archiver("data_archives", "/tmp", rt, log);
 
   write_to_log(log);
   rt.advance(0, 7 * BLOCK_SIZE);

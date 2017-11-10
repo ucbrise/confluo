@@ -4,6 +4,7 @@
 #include "dialog_allocator.h"
 #include "encoder.h"
 #include "file_utils.h"
+#include "incr_file_writer.h"
 #include "io_utils.h"
 #include "mmap_utils.h"
 #include "read_tail.h"
@@ -17,7 +18,7 @@ namespace archival {
 
 using namespace ::utils;
 
-template<typename T, typename encoded_ptr, size_t MAX_BLOCKS, size_t BLOCK_SIZE, size_t BUF_SIZE>
+template<typename T, encoding_type ENCODING, size_t MAX_BLOCKS, size_t BLOCK_SIZE, size_t BUF_SIZE>
 class monolog_linear_archiver {
 
  public:
@@ -29,22 +30,17 @@ class monolog_linear_archiver {
    * @param path path to directory to archive in
    * @param rt read tail
    * @param log monolog to archive
-   * @param encoder encoder
    */
   monolog_linear_archiver(const std::string& name,
                           const std::string& path,
                           const read_tail& rt,
-                          monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUF_SIZE>& log,
-                          encoder<T> encoder)
+                          monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUF_SIZE>& log)
       : path_(path + "/" + name + "/"),
-        cur_file_count_(0),
+        writer_(path + "/" + name + "/", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         archival_tail_(0),
         rt_(rt),
-        log_(log),
-        encoder_(encoder) {
+        log_(log) {
     file_utils::create_dir(path_);
-    std::ofstream archival_out = create_new_archival_file();
-    archival_out.close();
   }
 
   /**
@@ -52,12 +48,9 @@ class monolog_linear_archiver {
    * @param offset monolog offset
    */
   void archive(size_t offset) {
+    // TODO replace with block iterator later
     size_t start = archival_tail_ / BLOCK_SIZE;
     size_t stop = std::min(offset / BLOCK_SIZE, (size_t) rt_.get() / BLOCK_SIZE); // TODO fix cast
-
-    // std::ios::in required to prevent truncation, caused by lack of std::ios::app
-    std::ofstream archival_out(cur_file_path(), std::ios::in | std::ios::out | std::ios::ate);
-    size_t file_off = archival_out.tellp();
 
     for (size_t i = start; i < stop; i++) {
 
@@ -65,85 +58,30 @@ class monolog_linear_archiver {
       log_.ptr(archival_tail_, block_ptr);
 
       auto* metadata = storage::ptr_metadata::get(block_ptr.get().internal_ptr());
-      size_t encoded_size = encoder_.encoding_size(metadata->data_size_);
-      size_t write_size = sizeof(storage::ptr_metadata) + encoded_size;
+      auto decoded_ptr = block_ptr.decode_ptr();
 
-      if (file_off + write_size > configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
-        archival_out.close();
-        archival_out = create_new_archival_file();
-        file_off = archival_out.tellp();
-      }
+      size_t encoded_size;
+      auto raw_encoded_block  = encoder::encode<T, ENCODING>(decoded_ptr.get(), encoded_size);
 
-      archive_block(archival_out, block_ptr);
-      void* archived_data = ALLOCATOR.mmap(cur_file_path(), file_off, encoded_size, storage::state_type::D_ARCHIVED);
-      encoded_ptr enc_ptr(archived_data);
-      log_.swap_block_ptr(i, enc_ptr);
+      size_t off = writer_.append<storage::ptr_metadata, uint8_t>(metadata, 1, raw_encoded_block.get(),
+                                                                  encoded_size);
+      writer_.update_header(archival_tail_);
+      void* archived_data = ALLOCATOR.mmap(writer_.cur_path(), off, encoded_size,
+                                           storage::state_type::D_ARCHIVED);
+      log_.swap_block_ptr(i, storage::encoded_ptr<T>(archived_data));
 
-      file_off = archival_out.tellp();
       archival_tail_ += BLOCK_SIZE;
     }
   }
 
  private:
-  // TODO separate out logic better between archive and archive_block, too many common calls
-  /**
-   * Write a block and its metadata to archival file.
-   * @param out archival destination
-   * @param block_ptr block pointer
-   */
-  void archive_block(std::ofstream& out, block_ptr_t& block_ptr) {
-    // Since the file will be memory-mapped, there must be space in the file for the pointer metadata,
-    // so it is written with the data. The actual values of the metadata, apart from the state,
-    // do not matter since they'll be overwritten by the allocator.
-    auto metadata_copy = *(storage::ptr_metadata::get(block_ptr.get().internal_ptr()));
-    metadata_copy.state_ = storage::state_type::D_ARCHIVED;
-
-    auto decoded_ptr = block_ptr.decode_ptr();
-    size_t encoded_size = encoder_.encoding_size(metadata_copy.data_size_);
-
-    io_utils::write<storage::ptr_metadata>(out, metadata_copy);
-    io_utils::write<uint8_t>(out, encoder_.encode(decoded_ptr.get()), encoded_size);
-    update_file_header(out, archival_tail_);
-  }
-
-  /**
-   * Path to current file being used for archival.
-   * @return file path
-   */
-  std::string cur_file_path() const {
-    return path_ + std::to_string(cur_file_count_) + ".dat";
-  }
-
-  /**
-   * Create a new archival file and set its header.
-   * @return file stream
-   */
-  std::ofstream create_new_archival_file() {
-    cur_file_count_++;
-    std::ofstream archival_out(cur_file_path(), std::ofstream::out | std::ofstream::trunc);
-    io_utils::write<size_t>(archival_out, archival_tail_);
-    io_utils::write<size_t>(archival_out, archival_tail_);
-    return archival_out;
-  }
-
-  /**
-   * Update the file header with the last offset archived. Seek to EOF.
-   * @param out
-   * @param offset
-   */
-  static void update_file_header(std::ofstream& out, size_t offset) {
-    out.seekp(sizeof(size_t));
-    io_utils::write<size_t>(out, offset);
-    out.seekp(0, std::ios::end);
-  }
 
   std::string path_;
-  int cur_file_count_;
+  utils::incremental_file_writer writer_;
   size_t archival_tail_;
 
   read_tail rt_;
   monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUF_SIZE>& log_;
-  encoder<T> encoder_;
 
 };
 
