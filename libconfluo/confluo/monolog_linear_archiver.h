@@ -35,12 +35,12 @@ class monolog_linear_archiver {
                           const std::string& path,
                           const read_tail& rt,
                           monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUF_SIZE>& log)
-      : path_(path + "/" + name + "/"),
-        writer_(path + "/" + name + "/", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+      : writer_(path + "/" + name + "/", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         archival_tail_(0),
         rt_(rt),
         log_(log) {
-    file_utils::create_dir(path_);
+    file_utils::create_dir(path + "/" + name + "/");
+    writer_.init();
   }
 
   /**
@@ -76,7 +76,6 @@ class monolog_linear_archiver {
 
  private:
 
-  std::string path_;
   utils::incremental_file_writer writer_;
   size_t archival_tail_;
 

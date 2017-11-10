@@ -14,6 +14,10 @@ class incremental_file_writer {
         max_file_size_(max_file_size) {
   }
 
+  void init() {
+    create_new_file();
+  }
+
   template<typename T>
   size_t append(T* values, size_t len) {
     size_t off = open_for(sizeof(T) * len);
@@ -62,19 +66,21 @@ class incremental_file_writer {
   size_t open_for(size_t append_size) {
     if (!cur_ofs_.is_open()) {
       // std::ios::in required to prevent truncation, caused by lack of std::ios::app
-      LOG_INFO << "sup";
       cur_ofs_ = std::ofstream(cur_path(), std::ios::in | std::ios::out | std::ios::ate);
-      LOG_INFO << "dawg";
     }
     else if (((size_t) cur_ofs_.tellp()) + append_size > max_file_size_) {
-      close();
-      file_num_++;
-      cur_ofs_ = std::ofstream(cur_path(), std::ios::out | std::ios::trunc);
-      // TODO replace with default header, passed into constructor
-      io_utils::write<size_t>(cur_ofs_, 0);
-      io_utils::write<size_t>(cur_ofs_, 0);
+      create_new_file();
     }
     return cur_ofs_.tellp();
+  }
+
+  void create_new_file() {
+    close();
+    file_num_++;
+    cur_ofs_ = std::ofstream(cur_path(), std::ios::out | std::ios::trunc);
+    // TODO replace with default header, passed into constructor
+    io_utils::write<size_t>(cur_ofs_, 0);
+    io_utils::write<size_t>(cur_ofs_, 0);
   }
 
   std::ofstream cur_ofs_;

@@ -24,22 +24,21 @@ class filter_archiver {
   typedef bucket_ptr_t::decoded_ptr decoded_ptr_t;
 
   filter_archiver()
-      : path_(),
-        filter_(nullptr),
-        writer_(path_ + "/filter_data_", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+      : filter_(nullptr),
+        writer_("", "", 0),
         data_log_tail_(0),
         reflog_tail_(0),
         ts_tail_(0) {
   }
 
   filter_archiver(const std::string& path, filter* filter)
-      : path_(path),
-        filter_(filter),
-        writer_(path_ + "/filter_data_", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+      : filter_(filter),
+        writer_(path + "/filter_data_", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         data_log_tail_(0),
         reflog_tail_(0),
         ts_tail_(0) {
-    file_utils::create_dir(path_);
+    file_utils::create_dir(path);
+    writer_.init();
   }
 
   void archive(size_t offset) {
@@ -65,7 +64,7 @@ class filter_archiver {
    * @param offset data log offset
    * @return true if reflog is completely archived, otherwise false
    */
-  bool archive_reflog(aggregated_reflog* reflog, size_t offset) {
+  bool archive_reflog(reflog* reflog, size_t offset) {
     while (data_log_tail_ < offset) {
       bucket_ptr_t bucket_ptr;
       reflog->ptr(reflog_tail_, bucket_ptr);
@@ -95,7 +94,6 @@ class filter_archiver {
     return true;
   }
 
-  std::string path_;
   filter* filter_;
   utils::incremental_file_writer writer_;
 
