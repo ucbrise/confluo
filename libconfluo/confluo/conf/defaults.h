@@ -10,6 +10,7 @@ namespace confluo {
  */
 class defaults {
  public:
+  static const size_t DEFAULT_MAX_ARCHIVAL_FILE_SIZE = 1024 * 1024 * 64;
   /** The thread hardware concurrency */
   static const int HARDWARE_CONCURRENCY;
   /** Default bucket size for index */
@@ -24,6 +25,7 @@ class defaults {
   static constexpr uint64_t DEFAULT_MONITOR_PERIODICITY_MS = 1;
 };
 
+const size_t defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE;
 const int defaults::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
 constexpr double defaults::DEFAULT_INDEX_BUCKET_SIZE;
 constexpr size_t defaults::DEFAULT_MAX_MEMORY;

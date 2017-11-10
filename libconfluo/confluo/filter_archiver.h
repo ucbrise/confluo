@@ -1,5 +1,5 @@
-#ifndef DIALOG_FILTER_ARCHIVER_H_
-#define DIALOG_FILTER_ARCHIVER_H_
+#ifndef CONFLUO_FILTER_ARCHIVER_H_
+#define CONFLUO_FILTER_ARCHIVER_H_
 
 #include "aggregated_reflog.h"
 #include "encoder.h"
@@ -8,9 +8,9 @@
 #include "filter_log.h"
 #include "io_utils.h"
 #include "read_tail.h"
-#include "string_map.h"
+#include "container/string_map.h"
 
-namespace dialog {
+namespace confluo {
 namespace archival {
 
 using namespace ::utils;
@@ -210,4 +210,4 @@ class filter_log_archiver {
 }
 }
 
-#endif /* DIALOG_FILTER_ARCHIVER_H_ */
+#endif /* CONFLUO_FILTER_ARCHIVER_H_ */

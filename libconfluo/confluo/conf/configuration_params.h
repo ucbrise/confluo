@@ -11,6 +11,9 @@ namespace confluo {
  */
 class configuration_params {
  public:
+  /** Archival configuration parameters */
+  static size_t MAX_ARCHIVAL_FILE_SIZE;
+
   /** Memory configuration parameters */
   static size_t MAX_MEMORY;
 
@@ -33,6 +36,8 @@ static utils::configuration_map confluo_conf(
     utils::config_utils::read_from_env(
         "CONFLUO_CONF", "/etc/conf/confluo.conf:./conf/confluo.conf"));
 
+size_t configuration_params::MAX_ARCHIVAL_FILE_SIZE = confluo_conf.get<size_t>(
+    "max_archival_file_size", defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE);
 size_t configuration_params::MAX_MEMORY = confluo_conf.get<size_t>(
     "max_memory", defaults::DEFAULT_MAX_MEMORY);
 int configuration_params::MAX_CONCURRENCY = confluo_conf.get<int>(
