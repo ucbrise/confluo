@@ -43,7 +43,7 @@ class encoded_ptr {
 
   decoded_ptr decode_ptr(size_t idx = 0) const {
     T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + idx;
-    return decoded_ptr(ptr, delete_no_op);
+    return decoded_ptr(ptr, no_op_delete);
   }
 
  private:
@@ -51,7 +51,7 @@ class encoded_ptr {
    * No-op.
    * @param ptr pointer
    */
-  static void delete_no_op(T* ptr) { }
+  static void no_op_delete(T* ptr) { }
 
   void* ptr_; // internal encoded pointer
 

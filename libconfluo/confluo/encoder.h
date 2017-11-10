@@ -4,30 +4,28 @@
 namespace confluo {
 namespace archival {
 
-// TODO replace this, need better iface since there's overlap with encoded_ptr
-template<typename T>
-class encoder {
+enum encoding_type {
+  IDENTITY
+};
 
+class encoder {
  public:
+  typedef std::unique_ptr<uint8_t, void (*)(uint8_t*)> raw_encoded_ptr;
+
   /**
    * Encode pointer.
-   * @param ptr unencoded pointer
-   * @return encoded pointer
+   * @param ptr unencoded data pointer, allocated by the storage allocator.
+   * @param encoded_size size of encoded data in bytes
+   * @return raw encoded pointer (no metadata)
    */
-  uint8_t* encode(T* ptr) {
-    return reinterpret_cast<uint8_t*>(ptr);
+  template<typename T, encoding_type ENCODING>
+  static raw_encoded_ptr encode(T* ptr, size_t& encoded_size) {
+    encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
+    return raw_encoded_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete);
   }
 
-  // Probably a better way to do this
-  /**
-   * Get the size of the encoded pointer for an
-   * unencoded pointer of a particular size.
-   * @param unencoded_size unencoded size in bytes
-   * @return encoded size in bytes
-   */
-  size_t encoding_size(size_t unencoded_size) {
-    return unencoded_size;
-  }
+ private:
+  static void no_op_delete(uint8_t* ptr) { }
 
 };
 
