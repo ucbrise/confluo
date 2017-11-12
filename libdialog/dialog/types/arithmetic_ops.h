@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "data.h"
 #include "exceptions.h"
 
 namespace dialog {
