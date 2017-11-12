@@ -16,18 +16,18 @@
 
 using namespace ::dialog;
 
-type_properties type_def(sizeof(uint32_t), get_relops(), get_unaryops(),
-                         get_binaryops(), get_keyops(), &limits::int_min,
+type_properties type_def("ip_address", sizeof(uint32_t), &limits::int_min,
                          &limits::int_max, &limits::int_one, &limits::int_zero,
-                         &ip_address::to_string, &ip_address::parse_ip,
+                         get_relops(), get_unaryops(), get_binaryops(),
+                         get_keyops(), &ip_address::parse_ip,
                          &dialog::serialize<ip_address>,
                          &dialog::deserialize<ip_address>);
 
-type_properties size_type_ops(sizeof(uint64_t), get_reops(), get_unarops(),
-                              get_binarops(), get_keops(),
+type_properties size_type_ops("size type", sizeof(uint64_t),
                               &limits::long_long_min, &limits::long_long_max,
                               &limits::long_long_one, &limits::long_long_zero,
-                              &size_type::to_string, &size_type::parse_bytes,
+                              get_reops(), get_unarops(), get_binarops(),
+                              get_keops(), &size_type::parse_bytes,
                               &dialog::serialize<size_type>,
                               &dialog::deserialize<size_type>);
 

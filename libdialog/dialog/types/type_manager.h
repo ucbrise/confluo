@@ -23,8 +23,6 @@ static std::vector<data_type> data_types = detail::register_primitives();
 
 class type_manager {
  public:
-  //static std::vector<data_type> data_types;
-
   /**
    * Registers a type to the manager
    */
@@ -67,34 +65,16 @@ class type_manager {
   static bool is_primitive(uint16_t other_id) {
       return other_id >= 0 && other_id <= 8;
   }
-
-  /**
-   * Deregisters the type
-   */
-  static void deregister_type() {
-
-  }
-
- //private:
- //  static std::atomic<uint16_t> id;
 };
 
-static data_type NONE_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[0]())];
-static data_type BOOL_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[1]())];
-static data_type CHAR_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[2]())];
-static data_type SHORT_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[3]())];
-static data_type INT_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[4]())];
-static data_type LONG_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[5]())];
-static data_type FLOAT_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[6]())];
-static data_type DOUBLE_TYPE = data_types[
-    type_manager::get_id_from_type_name(TO_STRINGS[7]())];
+static data_type NONE_TYPE = data_types[0];
+static data_type BOOL_TYPE = data_types[1];
+static data_type CHAR_TYPE = data_types[2];
+static data_type SHORT_TYPE = data_types[3];
+static data_type INT_TYPE = data_types[4];
+static data_type LONG_TYPE = data_types[5];
+static data_type FLOAT_TYPE = data_types[6];
+static data_type DOUBLE_TYPE = data_types[7];
 static data_type STRING_TYPE(size_t size) {
   return data_type(type_id::D_STRING, size);
 }

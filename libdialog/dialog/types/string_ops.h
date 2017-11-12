@@ -13,50 +13,48 @@ namespace dialog {
 typedef data (*from_string_op)(const std::string&);
 
 data parse_void(const std::string &str) {
-  return data((void*) new char[0], 0);
-
+  return data(new char[0], 0);
 }
 
 data parse_bool(const std::string& str) {
   bool val = string_utils::lexical_cast<bool>(str);
-  //return mutable_value(val);
-  return data((void*) new bool(val), sizeof(bool));
+  return data(new bool(val), sizeof(bool));
 }
 
 data parse_char(const std::string& str) {
   int8_t val = string_utils::lexical_cast<int8_t>(str);
-  return data((void*) new int8_t(val), sizeof(int8_t));
+  return data(new int8_t(val), sizeof(int8_t));
 }
 
 data parse_short(const std::string& str) {
   int16_t val = string_utils::lexical_cast<int16_t>(str);
-  return data((void*) new int16_t(val), sizeof(int16_t));
+  return data(new int16_t(val), sizeof(int16_t));
 }
 
 data parse_int(const std::string& str) {
   int32_t val = string_utils::lexical_cast<int32_t>(str);
-  return data((void*) new int32_t(val), sizeof(int32_t));
+  return data(new int32_t(val), sizeof(int32_t));
 }
 
 data parse_long(const std::string& str) {
   int64_t val = string_utils::lexical_cast<int64_t>(str);
-  return data((void*) new int64_t(val), sizeof(int64_t));
+  return data(new int64_t(val), sizeof(int64_t));
 }
 
 data parse_float(const std::string& str) {
   float val = string_utils::lexical_cast<float>(str);
-  return data((void*) new float(val), sizeof(float));
+  return data(new float(val), sizeof(float));
 }
 
 data parse_double(const std::string& str) {
   double val = string_utils::lexical_cast<double>(str);
-  return data((void*) new double(val), sizeof(double));
+  return data(new double(val), sizeof(double));
 }
 
 data parse_string(const std::string& str) {
   char* characters = new char[strlen(str.c_str()) + 1];
   strcpy(characters, str.c_str());
-  return data((void*) characters, strlen(str.c_str()) + 1);
+  return data(characters, strlen(str.c_str()) + 1);
 }
 
 static std::vector<data (*)(const std::string&)> init_parsers() {

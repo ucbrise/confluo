@@ -160,10 +160,9 @@ static std::vector<key_op> init_kops() {
     key_transform<float>, key_transform<double>, key_transform<std::string>};
 }
 
-static std::vector<std::string (*)()> init_to_strings() {
-  return {&none_string, &bool_string, &char_string, &short_string,
-    &int_string, &long_string, &float_string, &double_string,
-    &string_string};
+static std::vector<std::string> init_to_strings() {
+  return {"none", "bool", "char", "short", "int", "long", "float", "double",
+    "string"};
 }
 
 static std::vector<size_t> primitive_sizes() {
@@ -179,7 +178,7 @@ static std::vector<rel_ops_t> RELOPS = init_rops();
 static std::vector<unary_ops_t> UNOPS = init_uops();
 static std::vector<binary_ops_t> BINOPS = init_bops();
 static std::vector<key_op> KEYOPS = init_kops();
-static std::vector<std::string (*)()> TO_STRINGS = init_to_strings();
+static std::vector<std::string> TO_STRINGS = init_to_strings();
 static std::vector<size_t> PRIMITIVE_SIZES = primitive_sizes();
 static std::vector<from_string_op> PARSERS = init_parsers();
 static std::vector<serialize_op> SERIALIZERS = init_serializers();
@@ -263,7 +262,7 @@ struct data_type {
   }
 
   inline std::string to_string() const {
-    return TO_STRINGS[id]();
+    return TO_STRINGS[id];
   }
 
   inline static data_type from_string(const std::string& str) {
