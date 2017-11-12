@@ -32,7 +32,7 @@
 #include "time_utils.h"
 #include "string_utils.h"
 #include "task_pool.h"
-#include "type_manager.h"
+#include "types/type_manager.h"
 
 using namespace ::dialog::monolog;
 using namespace ::dialog::index;

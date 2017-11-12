@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "relational_ops.h"
+#include "../types/relational_ops.h"
 
 namespace dialog {
 namespace parser {

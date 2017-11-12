@@ -2,9 +2,9 @@
 #define DIALOG_SCHEMA_SNAPSHOT_H_
 
 #include "column_snapshot.h"
-#include "byte_string.h"
-#include "data.h"
 #include "immutable_value.h"
+#include "types/byte_string.h"
+#include "types/data.h"
 
 namespace dialog {
 

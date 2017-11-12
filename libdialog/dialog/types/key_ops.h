@@ -2,7 +2,9 @@
 #define DIALOG_KEY_OPS_H_
 
 #include <type_traits>
-#include "byte_string.h"
+
+#include "types/data.h"
+#include "types/byte_string.h"
 
 namespace dialog {
 

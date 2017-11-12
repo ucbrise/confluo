@@ -2,11 +2,11 @@
 #define DIALOG_TYPE_MANAGER_H_
 
 #include "relational_ops.h"
-#include "arithmetic_ops.h"
 #include "key_ops.h"
 #include "data_types.h"
 #include "exceptions.h"
 #include "atomic.h"
+#include "types/arithmetic_ops.h"
 
 namespace dialog {
 

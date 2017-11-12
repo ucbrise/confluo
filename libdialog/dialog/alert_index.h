@@ -5,8 +5,8 @@
 #include "monolog_exp2.h"
 #include "radix_tree.h"
 #include "trigger.h"
-#include "numeric.h"
-#include "byte_string.h"
+#include "types/byte_string.h"
+#include "types/numeric.h"
 
 namespace dialog {
 namespace monitor {

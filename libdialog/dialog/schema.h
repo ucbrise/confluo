@@ -13,9 +13,9 @@
 #include "field.h"
 #include "column.h"
 #include "record.h"
-#include "data_types.h"
 #include "immutable_value.h"
 #include "string_utils.h"
+#include "types/data_types.h"
 
 using namespace utils;
 

@@ -1,7 +1,8 @@
 #ifndef TEST_BYTE_STRING_TEST_H_
 #define TEST_BYTE_STRING_TEST_H_
 
-#include "byte_string.h"
+#include "../dialog/types/byte_string.h"
+
 #include "gtest/gtest.h"
 
 using namespace ::dialog;

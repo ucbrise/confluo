@@ -1,9 +1,9 @@
 #ifndef PARSER_TRIGGER_COMPILER_H_
 #define PARSER_TRIGGER_COMPILER_H_
 
+#include "../types/numeric.h"
+#include "../types/relational_ops.h"
 #include "aggregate.h"
-#include "relational_ops.h"
-#include "numeric.h"
 #include "schema.h"
 #include "trigger_parser.h"
 

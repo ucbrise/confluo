@@ -1,9 +1,9 @@
 #ifndef DIALOG_NUMERIC_H_
 #define DIALOG_NUMERIC_H_
 
-#include "data_types.h"
 #include "immutable_value.h"
 #include "string_utils.h"
+#include "types/data_types.h"
 
 namespace dialog {
 

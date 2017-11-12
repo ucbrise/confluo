@@ -3,9 +3,9 @@
 
 #include <cstdlib>
 
-#include "data_types.h"
 #include "string_utils.h"
-#include "type_manager.h"
+#include "types/data_types.h"
+#include "types/type_manager.h"
 
 using namespace utils;
 

@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "data.h"
 #include "exceptions.h"
+#include "types/data.h"
 
 namespace dialog {
 

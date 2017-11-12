@@ -1,7 +1,8 @@
 #ifndef TEST_DATA_TYPES_TEST_H_
 #define TEST_DATA_TYPES_TEST_H_
 
-#include "data_types.h"
+#include "../dialog/types/data_types.h"
+
 #include "gtest/gtest.h"
 
 using namespace ::dialog;

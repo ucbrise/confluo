@@ -1,9 +1,9 @@
 #ifndef DIALOG_ALERT_H_
 #define DIALOG_ALERT_H_
 
-#include "numeric.h"
 #include "trigger.h"
 #include "time_utils.h"
+#include "types/numeric.h"
 
 namespace dialog {
 namespace monitor {

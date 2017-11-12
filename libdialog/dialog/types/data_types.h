@@ -8,12 +8,12 @@
 #include <regex>
 #include <cstring>
 
-#include "data.h"
-#include "relational_ops.h"
-#include "arithmetic_ops.h"
-#include "key_ops.h"
 #include "exceptions.h"
+#include "key_ops.h"
+#include "relational_ops.h"
 #include "string_utils.h"
+#include "types/arithmetic_ops.h"
+#include "types/data.h"
 
 namespace dialog {
 

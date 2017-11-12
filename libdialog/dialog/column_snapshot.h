@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "data_types.h"
+#include "types/data_types.h"
 
 namespace dialog {
 

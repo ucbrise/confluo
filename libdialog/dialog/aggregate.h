@@ -6,9 +6,9 @@
 #define DIALOG_AGGREGATE_H_
 
 #include "atomic.h"
-#include "numeric.h"
-#include "aggregate_ops.h"
 #include "thread_manager.h"
+#include "types/aggregate_ops.h"
+#include "types/numeric.h"
 //#include "type_manager.h"
 
 namespace dialog {

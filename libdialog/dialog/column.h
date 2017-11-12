@@ -6,9 +6,9 @@
 
 #include "column_snapshot.h"
 #include "field.h"
-#include "mutable_value.h"
 #include "index_state.h"
 #include "string_utils.h"
+#include "types/mutable_value.h"
 
 namespace dialog {
 

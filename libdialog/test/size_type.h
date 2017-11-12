@@ -7,8 +7,8 @@
 #include <math.h>
 #include <algorithm>
 
-#include "data_types.h"
-#include "byte_string.h"
+#include "../dialog/types/byte_string.h"
+#include "../dialog/types/data_types.h"
 #include "immutable_value.h"
 #include "exceptions.h"
 

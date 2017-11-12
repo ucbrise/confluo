@@ -7,10 +7,10 @@
 
 #include "schema.h"
 #include "storage.h"
-#include "numeric.h"
 #include "aggregate_types.h"
 #include "io_utils.h"
-#include "type_manager.h"
+#include "types/numeric.h"
+#include "types/type_manager.h"
 
 using namespace utils;
 
