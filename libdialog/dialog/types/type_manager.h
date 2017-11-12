@@ -1,60 +1,15 @@
 #ifndef DIALOG_TYPE_MANAGER_H_
 #define DIALOG_TYPE_MANAGER_H_
 
-#include "relational_ops.h"
-#include "key_ops.h"
-#include "data_types.h"
+#include "type_properties.h"
 #include "exceptions.h"
 #include "atomic.h"
-#include "types/arithmetic_ops.h"
 
 namespace dialog {
 
-struct type_operators {
-    size_t size;
-    rel_ops_t rel_ops;
-    unary_ops_t un_ops;
-
-    binary_ops_t binary_ops;
-    key_op key_ops;
-
-    void* min;
-    void* max;
-
-    void* one;
-    void* zero;
-
-    std::string (*name)();
-    data (*parse)(const std::string&);
-
-    void (*serialize)(std::ostream&, data&);
-    void (*deserialize)(std::istream&, data&);
-
-    type_operators(size_t _size, rel_ops_t _rel_ops,
-          unary_ops_t _un_ops, binary_ops_t _binary_ops, 
-          key_op _key_ops, void* _min, void* _max, void* _one, 
-          void* _zero, std::string (*_name)(), data (*_parse)(
-          const std::string&), void (*_serialize)(std::ostream&,
-          data&), void (*_deserialize)(std::istream&, data&)) : 
-                         size(_size),
-                         rel_ops(_rel_ops),
-                         un_ops(_un_ops),
-                         binary_ops(_binary_ops),
-                         key_ops(_key_ops),
-                         min(_min),
-                         max(_max),
-                         one(_one),
-                         zero(_zero),
-                         name(_name),
-                         parse(_parse),
-                         serialize(_serialize),
-                         deserialize(_deserialize) {
-    }
-};
-
 static std::atomic<uint16_t> id;
 
-namespace details {
+namespace detail {
 static std::vector<data_type> register_primitives() {
     atomic::faa(&dialog::id, (uint16_t) 8);
     return {data_type(0, 0), data_type(1, sizeof(bool)), 
@@ -64,7 +19,7 @@ static std::vector<data_type> register_primitives() {
         data_type(8, 10000)};
 }
 }
-static std::vector<data_type> data_types = details::register_primitives();
+static std::vector<data_type> data_types = detail::register_primitives();
 
 class type_manager {
  public:
@@ -73,7 +28,7 @@ class type_manager {
   /**
    * Registers a type to the manager
    */
-  static uint16_t register_type(type_operators type_def) {
+  static uint16_t register_type(type_properties type_def) {
       atomic::faa(&id, (uint16_t) 1);
       data_types.push_back(data_type(id, type_def.size));
 

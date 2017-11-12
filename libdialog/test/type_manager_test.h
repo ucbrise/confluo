@@ -19,14 +19,14 @@ using namespace ::dialog;
 //std::vector<data_type> dialog::type_manager::data_types;
 //std::atomic<uint16_t> dialog::type_manager::id;
 
-type_operators type_def(sizeof(uint32_t), get_relops(), get_unaryops(),
+type_properties type_def(sizeof(uint32_t), get_relops(), get_unaryops(),
                         get_binaryops(), get_keyops(), &limits::int_min,
                         &limits::int_max, &limits::int_one, &limits::int_zero,
                         &ip_address::to_string, &ip_address::parse_ip,
                         &dialog::serialize<ip_address>,
                         &dialog::deserialize<ip_address>);
 
-type_operators size_type_ops(sizeof(uint64_t), get_reops(), get_unarops(),
+type_properties size_type_ops(sizeof(uint64_t), get_reops(), get_unarops(),
                              get_binarops(), get_keops(),
                              &limits::long_long_min, &limits::long_long_max,
                              &limits::long_long_one, &limits::long_long_zero,
