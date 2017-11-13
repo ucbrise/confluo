@@ -38,17 +38,21 @@ class TypeManagerTest : public testing::Test {
     type_manager::register_type(type_def);
     type_manager::register_type(size_type_ops);
 
+    addr_type = type_manager::get_type("ip_address");
+    sz_type = type_manager::get_type("size type");
+
     schema_builder builder;
-    builder.add_column(data_types[9], "a");
-    builder.add_column(data_types[9], "b");
-    builder.add_column(
-        data_types[type_manager::get_id_from_type_name("size type")], "c");
+    builder.add_column(addr_type, "a");
+    builder.add_column(addr_type, "b");
+    builder.add_column(sz_type, "c");
 
     return builder.get_columns();
   }
 
   static task_pool MGMT_POOL;
   static std::vector<column_t> s;
+  static data_type addr_type;
+  static data_type sz_type;
 
   static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
@@ -96,6 +100,8 @@ class TypeManagerTest : public testing::Test {
 };
 
 TypeManagerTest::rec TypeManagerTest::r;
+data_type TypeManagerTest::addr_type;
+data_type TypeManagerTest::sz_type;
 std::vector<column_t> TypeManagerTest::s = schema();
 task_pool TypeManagerTest::MGMT_POOL;
 
@@ -116,11 +122,11 @@ TEST_F(TypeManagerTest, RegisterTest) {
   int zero = *zero_ref;
   ASSERT_EQ(limits::int_zero, zero);
 
-  ASSERT_STREQ("ip_address", data_types[9].to_string().c_str());
+  ASSERT_STREQ("ip_address", addr_type.to_string().c_str());
   ASSERT_EQ(9, dialog::type_manager::get_id_from_type_name("ip_address"));
   ASSERT_STREQ("ip_address", s[1].type().to_string().c_str());
 
-  ASSERT_STREQ("size type", data_types[10].to_string().c_str());
+  ASSERT_STREQ("size type", sz_type.to_string().c_str());
   ASSERT_EQ(10, dialog::type_manager::get_id_from_type_name("size type"));
   ASSERT_STREQ("size type", s[3].type().to_string().c_str());
 
@@ -161,12 +167,9 @@ TEST_F(TypeManagerTest, IPAddressTest) {
   data d2 = ip_address::parse_ip("216.65.216.164");
   data d3 = ip_address::parse_ip("172.16.254.1");
 
-  mutable_value n1(
-      data_types[type_manager::get_id_from_type_name("ip_address")], d1);
-  mutable_value n2(
-      data_types[type_manager::get_id_from_type_name("ip_address")], d2);
-  mutable_value n3(
-      data_types[type_manager::get_id_from_type_name("ip_address")], d3);
+  mutable_value n1(addr_type, d1);
+  mutable_value n2(addr_type, d2);
+  mutable_value n3(addr_type, d3);
 
   ASSERT_EQ(9, n1.type().id);
   ASSERT_EQ(9, n2.type().id);
@@ -202,15 +205,15 @@ TEST_F(TypeManagerTest, IPAddressTest) {
             (*reinterpret_cast<const ip_address*>(val1.ptr())).get_address());
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
-    mutable_value::parse("-1.3.4.5", data_types[9]);
+    mutable_value::parse("-1.3.4.5", addr_type);
   }));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
-    mutable_value::parse("278.1.1.1", data_types[9]);
+    mutable_value::parse("278.1.1.1", addr_type);
   }));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
-    mutable_value::parse("123412341", data_types[9]);
+    mutable_value::parse("123412341", addr_type);
   }));
 }
 
@@ -219,23 +222,17 @@ TEST_F(TypeManagerTest, SizeTypeTest) {
   data d2 = size_type::parse_bytes("10gb");
   data d3 = size_type::parse_bytes("3072kb");
 
-  mutable_value n1(data_types[type_manager::get_id_from_type_name("size type")],
-                   d1);
-  mutable_value n2(data_types[type_manager::get_id_from_type_name("size type")],
-                   d2);
-  mutable_value n3(data_types[type_manager::get_id_from_type_name("size type")],
-                   d3);
+  mutable_value n1(sz_type, d1);
+  mutable_value n2(sz_type, d2);
+  mutable_value n3(sz_type, d3);
 
   ASSERT_EQ(10, n1.type().id);
   ASSERT_EQ(10, n2.type().id);
   ASSERT_EQ(10, n3.type().id);
 
-  ASSERT_EQ(3145728,
-            (*reinterpret_cast<const size_type*>(n1.ptr())).get_bytes());
-  ASSERT_EQ(10737418240,
-            (*reinterpret_cast<const size_type*>(n2.ptr())).get_bytes());
-  ASSERT_EQ(3145728,
-            (*reinterpret_cast<const size_type*>(n3.ptr())).get_bytes());
+  ASSERT_EQ(3145728, n1.as<size_type>().get_bytes());
+  ASSERT_EQ(10737418240, n2.as<size_type>().get_bytes());
+  ASSERT_EQ(3145728, n3.as<size_type>().get_bytes());
 
   ASSERT_TRUE(n2 > n1);
   ASSERT_TRUE(n2 > n3);
@@ -260,15 +257,15 @@ TEST_F(TypeManagerTest, SizeTypeTest) {
             (*reinterpret_cast<const size_type*>(val1.ptr())).get_bytes());
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
-    mutable_value::parse("234xb", data_types[9]);
+    mutable_value::parse("234xb", addr_type);
   }));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
-    mutable_value::parse("1234k", data_types[9]);
+    mutable_value::parse("1234k", addr_type);
   }));
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
-    mutable_value::parse("10987", data_types[9]);
+    mutable_value::parse("10987", addr_type);
   }));
 }
 
@@ -300,11 +297,10 @@ TEST_F(TypeManagerTest, CompilerTest) {
 
 TEST_F(TypeManagerTest, SchemaTest) {
   schema_builder build;
-  build.add_column(data_types[9], "a");
-  build.add_column(
-      data_types[type_manager::get_id_from_type_name("ip_address")], "b");
-  build.add_column(data_types[10], "c");
-  build.add_column(data_types[10], "d");
+  build.add_column(addr_type, "a");
+  build.add_column(addr_type, "b");
+  build.add_column(sz_type, "c");
+  build.add_column(sz_type, "d");
   auto schema_vec = build.get_columns();
   schema_t s(schema_vec);
 
@@ -318,25 +314,25 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(1, schema_vec[1].idx());
   ASSERT_EQ(8, schema_vec[1].offset());
   ASSERT_EQ("A", schema_vec[1].name());
-  ASSERT_TRUE(data_types[9] == schema_vec[1].type());
+  ASSERT_TRUE(addr_type == schema_vec[1].type());
   ASSERT_FALSE(schema_vec[1].is_indexed());
 
   ASSERT_EQ(2, s[2].idx());
   ASSERT_EQ(12, s[2].offset());
   ASSERT_EQ("B", s[2].name());
-  ASSERT_TRUE(data_types[9] == s[2].type());
+  ASSERT_TRUE(addr_type == s[2].type());
   ASSERT_FALSE(s[2].is_indexed());
 
   ASSERT_EQ(3, s[3].idx());
   ASSERT_EQ(16, s[3].offset());
   ASSERT_EQ("C", s[3].name());
-  ASSERT_TRUE(data_types[10] == s[3].type());
+  ASSERT_TRUE(sz_type == s[3].type());
   ASSERT_FALSE(s[3].is_indexed());
 
   ASSERT_EQ(4, s[4].idx());
   ASSERT_EQ(24, s[4].offset());
   ASSERT_EQ("D", s[4].name());
-  ASSERT_TRUE(data_types[10] == s[4].type());
+  ASSERT_TRUE(sz_type == s[4].type());
   ASSERT_FALSE(s[4].is_indexed());
 
   ASSERT_EQ(static_cast<size_t>(5), s.size());
@@ -350,36 +346,34 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(1, s[1].idx());
   ASSERT_EQ(8, s[1].offset());
   ASSERT_EQ("A", s[1].name());
-  ASSERT_TRUE(data_types[9] == s[1].type());
+  ASSERT_TRUE(addr_type == s[1].type());
   ASSERT_FALSE(s[1].is_indexed());
 
   ASSERT_EQ(2, s[2].idx());
   ASSERT_EQ(12, s[2].offset());
   ASSERT_EQ("B", s[2].name());
-  ASSERT_TRUE(data_types[9] == s[2].type());
+  ASSERT_TRUE(addr_type == s[2].type());
   ASSERT_FALSE(s[2].is_indexed());
 
   ASSERT_EQ(3, s[3].idx());
   ASSERT_EQ(16, s[3].offset());
   ASSERT_EQ("C", s[3].name());
-  ASSERT_TRUE(data_types[10] == s[3].type());
+  ASSERT_TRUE(sz_type == s[3].type());
   ASSERT_FALSE(s[3].is_indexed());
 
   ASSERT_EQ(4, s[4].idx());
   ASSERT_EQ(24, s[4].offset());
   ASSERT_EQ("D", s[4].name());
-  ASSERT_TRUE(data_types[10] == s[4].type());
+  ASSERT_TRUE(sz_type == s[4].type());
   ASSERT_FALSE(s[4].is_indexed());
 }
 
 TEST_F(TypeManagerTest, DataTypesGetterTest) {
-  data_type t1 = data_types[9];
-  data_type t2 = data_types[10];
+  data_type t1 = addr_type;
+  data_type t2 = sz_type;
 
-  ASSERT_TRUE(
-      data_types[type_manager::get_id_from_type_name("ip_address")] == t1);
-  ASSERT_TRUE(
-      data_types[type_manager::get_id_from_type_name("size type")] == t2);
+  ASSERT_TRUE(type_manager::get_type("ip_address") == t1);
+  ASSERT_TRUE(type_manager::get_type("size type") == t2);
   ASSERT_FALSE(t1 == t2);
 
   ASSERT_TRUE(t1.to_string() == "ip_address");

@@ -12,6 +12,23 @@ namespace dialog {
 
 typedef data (*from_string_op)(const std::string&);
 
+template<typename T>
+data parse(const std::string& str) {
+  return data(new T(string_utils::lexical_cast<T>(str)), sizeof(T));
+}
+
+template<>
+data parse<void>(const std::string& str) {
+  return data(nullptr, 0);
+}
+
+template<>
+data parse<std::string>(const std::string& str) {
+  char* characters = new char[strlen(str.c_str()) + 1];
+  strcpy(characters, str.c_str());
+  return data(characters, strlen(str.c_str()) + 1);
+}
+
 data parse_void(const std::string &str) {
   return data(new char[0], 0);
 }

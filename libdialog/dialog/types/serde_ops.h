@@ -10,8 +10,7 @@ typedef void (*deserialize_op)(std::istream&, data&);
 
 template<typename T>
 static void serialize(std::ostream& out, data& value) {
-  char* val_char = (char*) value.ptr;
-  out.write(val_char, value.size);
+  out.write(reinterpret_cast<const char*>(value.ptr), value.size);
 }
 
 template<typename T>
