@@ -7,11 +7,8 @@
 
 namespace dialog {
 
-static std::atomic<size_t> id;
-
 namespace detail {
 static std::vector<data_type> register_primitives() {
-  atomic::faa(&dialog::id, (size_t) 8);
   return {data_type(0, 0), data_type(1, sizeof(bool)),
     data_type(2, sizeof(int8_t)), data_type(3, sizeof(int16_t)),
     data_type(4, sizeof(int32_t)), data_type(5, sizeof(int64_t)),
@@ -27,7 +24,7 @@ class type_manager {
    * Registers a type to the manager
    */
   static size_t register_type(type_properties type_def) {
-    atomic::faa(&id, (size_t) 1);
+    size_t id = data_types.size();
     data_types.push_back(data_type(id, type_def.size));
 
     MIN.push_back(type_def.min);
@@ -66,7 +63,7 @@ class type_manager {
   }
 
   static bool is_valid_id(uint16_t other_id) {
-    return other_id >= 0 && other_id <= id;
+    return other_id >= 0 && other_id < data_types.size();
   }
 
   static bool is_primitive(uint16_t other_id) {
