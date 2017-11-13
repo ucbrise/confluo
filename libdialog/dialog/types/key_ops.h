@@ -8,7 +8,7 @@
 
 namespace dialog {
 
-typedef byte_string (*key_op)(const data& v, double bucket_size);
+typedef byte_string (*key_op_t)(const data& v, double bucket_size);
 
 template<typename T>
 byte_string key_transform(const data& v, double bucket_size) {

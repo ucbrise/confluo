@@ -19,7 +19,7 @@ class column_t {
    */
   column_t()
       : idx_(UINT16_MAX),
-        type_(),
+        type_(NONE_TYPE),
         offset_(UINT16_MAX) {
   }
 

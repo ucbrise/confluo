@@ -7,9 +7,9 @@
 #include <math.h>
 #include <algorithm>
 
+#include "../dialog/types/immutable_value.h"
 #include "types/byte_string.h"
 #include "types/data_types.h"
-#include "immutable_value.h"
 #include "exceptions.h"
 
 namespace dialog {
@@ -80,14 +80,8 @@ class size_type {
   uint64_t bytes;
 };
 
-/*mutable_value parse_ip_address(const std::string& str) {
-    uint32_t val = size_type::from_string(str);
-    int32_t mut_val = (int32_t) val;
-    return mutable_value(mut_val);
-}*/
-
 template<>
-void serialize<size_type>(std::ostream& out, data& value) {
+void serialize<size_type>(std::ostream& out, const data& value) {
     size_type val = value.as<size_type>();
     uint64_t val_bytes = val.get_bytes();
     out.write(reinterpret_cast<const char*>(&(val_bytes)), value.size);
@@ -247,7 +241,7 @@ static rel_ops_t get_reops() {
         equals<size_type>, not_equals<size_type>};
 }
 
-static key_op get_keops() {
+static key_op_t get_keops() {
     return key_transform<size_type>;
 }
 

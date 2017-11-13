@@ -44,92 +44,92 @@ class ExpressionParserTest : public testing::Test {
 
 TEST_F(ExpressionParserTest, ParsePredicateTest) {
   auto t1 = parse_expression("a < b");
-  test_predicate(t1, "a", relop_id::LT, "b");
+  test_predicate(t1, "a", reational_op_id::LT, "b");
 
   auto t2 = parse_expression("a1 > b1");
-  test_predicate(t2, "a1", relop_id::GT, "b1");
+  test_predicate(t2, "a1", reational_op_id::GT, "b1");
 
   auto t3 = parse_expression("abc <= def");
-  test_predicate(t3, "abc", relop_id::LE, "def");
+  test_predicate(t3, "abc", reational_op_id::LE, "def");
 
   auto t4 = parse_expression("a_1 == b_1");
-  test_predicate(t4, "a_1", relop_id::EQ, "b_1");
+  test_predicate(t4, "a_1", reational_op_id::EQ, "b_1");
 }
 
 TEST_F(ExpressionParserTest, ParseOrTest) {
   auto t1 = parse_expression("a < b || b > c");
   test_or(t1);
-  test_predicate(left(t1), "a", relop_id::LT, "b");
-  test_predicate(right(t1), "b", relop_id::GT, "c");
+  test_predicate(left(t1), "a", reational_op_id::LT, "b");
+  test_predicate(right(t1), "b", reational_op_id::GT, "c");
 
   auto t2 = parse_expression("a < b || b > c || c == d");
   test_or(t2);
   test_or(left(t2));
-  test_predicate(left(left(t2)), "a", relop_id::LT, "b");
-  test_predicate(right(left(t2)), "b", relop_id::GT, "c");
-  test_predicate(right(t2), "c", relop_id::EQ, "d");
+  test_predicate(left(left(t2)), "a", reational_op_id::LT, "b");
+  test_predicate(right(left(t2)), "b", reational_op_id::GT, "c");
+  test_predicate(right(t2), "c", reational_op_id::EQ, "d");
 
   auto t3 = parse_expression("a < b || (b > c || c == d)");
   test_or(t3);
-  test_predicate(left(t3), "a", relop_id::LT, "b");
+  test_predicate(left(t3), "a", reational_op_id::LT, "b");
   test_or(right(t3));
-  test_predicate(left(right(t3)), "b", relop_id::GT, "c");
-  test_predicate(right(right(t3)), "c", relop_id::EQ, "d");
+  test_predicate(left(right(t3)), "b", reational_op_id::GT, "c");
+  test_predicate(right(right(t3)), "c", reational_op_id::EQ, "d");
 }
 
 TEST_F(ExpressionParserTest, ParseAndTest) {
   auto t1 = parse_expression("a < b && b > c");
   test_and(t1);
-  test_predicate(left(t1), "a", relop_id::LT, "b");
-  test_predicate(right(t1), "b", relop_id::GT, "c");
+  test_predicate(left(t1), "a", reational_op_id::LT, "b");
+  test_predicate(right(t1), "b", reational_op_id::GT, "c");
 
   auto t2 = parse_expression("a < b && b > c && c == d");
   test_and(t2);
   test_and(left(t2));
-  test_predicate(left(left(t2)), "a", relop_id::LT, "b");
-  test_predicate(right(left(t2)), "b", relop_id::GT, "c");
-  test_predicate(right(t2), "c", relop_id::EQ, "d");
+  test_predicate(left(left(t2)), "a", reational_op_id::LT, "b");
+  test_predicate(right(left(t2)), "b", reational_op_id::GT, "c");
+  test_predicate(right(t2), "c", reational_op_id::EQ, "d");
 
   auto t3 = parse_expression("a < b && (b > c && c == d)");
   test_and(t3);
-  test_predicate(left(t3), "a", relop_id::LT, "b");
+  test_predicate(left(t3), "a", reational_op_id::LT, "b");
   test_and(right(t3));
-  test_predicate(left(right(t3)), "b", relop_id::GT, "c");
-  test_predicate(right(right(t3)), "c", relop_id::EQ, "d");
+  test_predicate(left(right(t3)), "b", reational_op_id::GT, "c");
+  test_predicate(right(right(t3)), "c", reational_op_id::EQ, "d");
 }
 
 TEST_F(ExpressionParserTest, ParseNotTest) {
   auto t1 = parse_expression("!(a < b)");
-  test_predicate(t1, "a", relop_id::GE, "b");
+  test_predicate(t1, "a", reational_op_id::GE, "b");
 
   auto t2 = parse_expression("!(a < b && b > c)");
   test_or(t2);
-  test_predicate(left(t2), "a", relop_id::GE, "b");
-  test_predicate(right(t2), "b", relop_id::LE, "c");
+  test_predicate(left(t2), "a", reational_op_id::GE, "b");
+  test_predicate(right(t2), "b", reational_op_id::LE, "c");
 
   auto t3 = parse_expression("!(a < b || b > c)");
   test_and(t3);
-  test_predicate(left(t3), "a", relop_id::GE, "b");
-  test_predicate(right(t3), "b", relop_id::LE, "c");
+  test_predicate(left(t3), "a", reational_op_id::GE, "b");
+  test_predicate(right(t3), "b", reational_op_id::LE, "c");
 
   auto t4 = parse_expression("!!(a < b)");
-  test_predicate(t4, "a", relop_id::LT, "b");
+  test_predicate(t4, "a", reational_op_id::LT, "b");
 }
 
 TEST_F(ExpressionParserTest, ParseAndOrTest) {
   auto exp1 = parse_expression("a < b && b > c || c == d");
   test_or(exp1);
   test_and(left(exp1));
-  test_predicate(left(left(exp1)), "a", relop_id::LT, "b");
-  test_predicate(right(left(exp1)), "b", relop_id::GT, "c");
-  test_predicate(right(exp1), "c", relop_id::EQ, "d");
+  test_predicate(left(left(exp1)), "a", reational_op_id::LT, "b");
+  test_predicate(right(left(exp1)), "b", reational_op_id::GT, "c");
+  test_predicate(right(exp1), "c", reational_op_id::EQ, "d");
 
   auto exp2 = parse_expression("a < b && (b > c || c == d)");
   test_and(exp2);
-  test_predicate(left(exp2), "a", relop_id::LT, "b");
+  test_predicate(left(exp2), "a", reational_op_id::LT, "b");
   test_or(right(exp2));
-  test_predicate(left(right(exp2)), "b", relop_id::GT, "c");
-  test_predicate(right(right(exp2)), "c", relop_id::EQ, "d");
+  test_predicate(left(right(exp2)), "b", reational_op_id::GT, "c");
+  test_predicate(right(right(exp2)), "c", reational_op_id::EQ, "d");
 }
 
 #endif /* TEST_SCHEMA_TOKENIZER_TEST_H_ */

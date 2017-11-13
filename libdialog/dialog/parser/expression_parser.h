@@ -56,7 +56,7 @@ class utree_dbg_print {
 
   void operator()(int op) const {
     if (op < 6) {
-      relop_id id = static_cast<relop_id>(op);
+      reational_op_id id = static_cast<reational_op_id>(op);
       fprintf(stderr, " %s ", relop_utils::op_to_str(id).c_str());
     } else {
       fprintf(stderr, " %s ", (op == and_or::AND) ? "AND" : "OR");
@@ -142,18 +142,18 @@ class utree_negate {
 
   spirit::utree operator()(int op) const {
     switch (op) {
-      case relop_id::EQ:
-        return spirit::utree(relop_id::NEQ);
-      case relop_id::NEQ:
-        return spirit::utree(relop_id::EQ);
-      case relop_id::LT:
-        return spirit::utree(relop_id::GE);
-      case relop_id::GT:
-        return spirit::utree(relop_id::LE);
-      case relop_id::LE:
-        return spirit::utree(relop_id::GT);
-      case relop_id::GE:
-        return spirit::utree(relop_id::LT);
+      case reational_op_id::EQ:
+        return spirit::utree(reational_op_id::NEQ);
+      case reational_op_id::NEQ:
+        return spirit::utree(reational_op_id::EQ);
+      case reational_op_id::LT:
+        return spirit::utree(reational_op_id::GE);
+      case reational_op_id::GT:
+        return spirit::utree(reational_op_id::LE);
+      case reational_op_id::LE:
+        return spirit::utree(reational_op_id::GT);
+      case reational_op_id::GE:
+        return spirit::utree(reational_op_id::LT);
       case and_or::AND:
         return spirit::utree(and_or::OR);
       case and_or::OR:
@@ -209,12 +209,12 @@ struct pred {
   int const op;
 };
 
-boost::phoenix::function<pred> const LT = pred(relop_id::LT);
-boost::phoenix::function<pred> const LE = pred(relop_id::LE);
-boost::phoenix::function<pred> const GT = pred(relop_id::GT);
-boost::phoenix::function<pred> const GE = pred(relop_id::GE);
-boost::phoenix::function<pred> const EQ = pred(relop_id::EQ);
-boost::phoenix::function<pred> const NEQ = pred(relop_id::NEQ);
+boost::phoenix::function<pred> const LT = pred(reational_op_id::LT);
+boost::phoenix::function<pred> const LE = pred(reational_op_id::LE);
+boost::phoenix::function<pred> const GT = pred(reational_op_id::GT);
+boost::phoenix::function<pred> const GE = pred(reational_op_id::GE);
+boost::phoenix::function<pred> const EQ = pred(reational_op_id::EQ);
+boost::phoenix::function<pred> const NEQ = pred(reational_op_id::NEQ);
 
 boost::phoenix::function<expr> const CONJ = expr(and_or::AND);
 boost::phoenix::function<expr> const DISJ = expr(and_or::OR);

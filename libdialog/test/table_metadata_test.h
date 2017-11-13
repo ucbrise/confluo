@@ -26,7 +26,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   w.write_index_info("col1", 0.0);
   w.write_filter_info("filter1", "col1>0");
   w.write_trigger_info("trigger1", "filter1", aggregate_id::D_SUM, "col1",
-                       relop_id::LT, numeric(3), 10);
+                       reational_op_id::LT, numeric(3), 10);
 
   metadata_reader r("/tmp");
   ASSERT_EQ(metadata_type::D_SCHEMA_METADATA, r.next_type());
@@ -38,9 +38,6 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
     ASSERT_EQ(s[i].type().id, schema[i].type().id);
     ASSERT_EQ(s[i].type().size, schema[i].type().size);
     if (s[i].type().id != type_id::D_STRING) {
-      //std::cout << "MetaTest Min: " << s[i].min().to_string() << "\t" << schema[i].min().to_string() << std::endl;
-       //std::cout << "MetaTest Max: " << s[i].max().to_string() << "\t" << schema[i].max().to_string() << std::endl;
-
       ASSERT_TRUE(s[i].min() == schema[i].min());
       ASSERT_TRUE(s[i].max() == schema[i].max());
     }
@@ -62,7 +59,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
   ASSERT_EQ("filter1", tinfo.filter_name());
   ASSERT_EQ(aggregate_id::D_SUM, tinfo.agg_id());
   ASSERT_EQ("col1", tinfo.field_name());
-  ASSERT_EQ(relop_id::LT, tinfo.op());
+  ASSERT_EQ(reational_op_id::LT, tinfo.op());
   ASSERT_TRUE(numeric(3) == tinfo.threshold());
   ASSERT_EQ(UINT64_C(10), tinfo.periodicity_ms());
 }

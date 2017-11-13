@@ -23,7 +23,7 @@ struct trigger {
   trigger(const std::string& trigger_name, const std::string& filter_name,
           const std::string& trigger_expr, aggregate_id agg,
           const std::string& field_name, size_t field_idx,
-          const data_type& field_type, relop_id op, const numeric& threshold,
+          const data_type& field_type, reational_op_id op, const numeric& threshold,
           const uint64_t periodicity_ms)
       : trigger_name_(trigger_name),
         filter_name_(filter_name),
@@ -100,7 +100,7 @@ struct trigger {
    * Gets the operation
    * @return The operation
    */
-  relop_id op() const {
+  reational_op_id op() const {
     return op_;
   }
 
@@ -177,7 +177,7 @@ struct trigger {
   std::string field_name_;
   uint32_t field_idx_;
   data_type field_type_;
-  relop_id op_;
+  reational_op_id op_;
   numeric threshold_;
   uint64_t periodicity_ms_;
   atomic::type<bool> is_valid_;

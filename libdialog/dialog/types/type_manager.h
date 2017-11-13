@@ -3,71 +3,71 @@
 
 #include "type_properties.h"
 #include "exceptions.h"
-#include "atomic.h"
 
 namespace dialog {
-
-namespace detail {
-static std::vector<data_type> register_primitives() {
-  return {data_type(0, 0), data_type(1, sizeof(bool)),
-    data_type(2, sizeof(int8_t)), data_type(3, sizeof(int16_t)),
-    data_type(4, sizeof(int32_t)), data_type(5, sizeof(int64_t)),
-    data_type(6, sizeof(float)), data_type(7, sizeof(double)),
-    data_type(8, 10000)};
-}
-}
-static std::vector<data_type> data_types = detail::register_primitives();
 
 class type_manager {
  public:
   /**
    * Registers a type to the manager
+   *
+   * @param type_def Properties for data type
+   * @return Type id.
    */
-  static size_t register_type(type_properties type_def) {
-    size_t id = data_types.size();
-    data_types.push_back(data_type(id, type_def.size));
-
-    MIN.push_back(type_def.min);
-    MAX.push_back(type_def.max);
-    ONE.push_back(type_def.one);
-    ZERO.push_back(type_def.zero);
-
-    RELOPS.push_back(type_def.rel_ops);
-    UNOPS.push_back(type_def.un_ops);
-    BINOPS.push_back(type_def.binary_ops);
-    KEYOPS.push_back(type_def.key_ops);
-    TO_STRINGS.push_back(type_def.name);
-
-    PARSERS.push_back(type_def.parse_op);
-    SERIALIZERS.push_back(type_def.serialize_op);
-    DESERIALIZERS.push_back(type_def.deserialize_op);
+  static size_t register_type(const type_properties& type_def) {
+    size_t id = DATA_TYPES.size();
+    DATA_TYPES.push_back(type_def);
     return id;
   }
 
-  static size_t get_id_from_type_name(std::string type_name) {
-    for (unsigned int i = 0; i < data_types.size(); i++) {
-      if (type_name.compare(data_types[i].to_string()) == 0) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
+  /**
+   * Get type from type name and size
+   *
+   * @param type_name Type name.
+   * @param size Size; if not provided, assumes the default type size.
+   * @return Wrapper around data type
+   */
   static data_type get_type(const std::string& type_name, size_t size = 0) {
-    for (unsigned int i = 0; i < data_types.size(); i++) {
-      if (type_name.compare(data_types[i].to_string()) == 0) {
-        return data_types[i];
+    for (unsigned int i = 0; i < DATA_TYPES.size(); i++) {
+      if (type_name.compare(DATA_TYPES[i].name) == 0) {
+        return data_type(i, size ? size : DATA_TYPES[i].size);
       }
     }
-    return data_type(0, 0);
+    return data_type();
   }
 
-  static bool is_valid_id(uint16_t other_id) {
-    return other_id >= 0 && other_id < data_types.size();
+  /**
+   * Get type from type id and size
+   *
+   * @param id Type id.
+   * @param size Size; if not provided, assumes the default type size.
+   * @return Wrapper around data type
+   */
+  static data_type get_type(size_t id, size_t size = 0) {
+    if (is_valid_id(id)) {
+      return data_type(id, size ? size : DATA_TYPES[id].size);
+    }
+    return data_type();
   }
 
-  static bool is_primitive(uint16_t other_id) {
-    return other_id >= 0 && other_id <= 8;
+  /**
+   * Checks if type is valid
+   *
+   * @param id Id to check.
+   * @return True if id is valid, false otherwise
+   */
+  static bool is_valid_id(size_t id) {
+    return id >= 1 && id < DATA_TYPES.size();
+  }
+
+  /**
+   * Checks if type is primitive
+   *
+   * @param id Id to check.
+   * @return True if id is primitive, false otherwise
+   */
+  static bool is_primitive(size_t id) {
+    return id >= 1 && id <= 8;
   }
 };
 

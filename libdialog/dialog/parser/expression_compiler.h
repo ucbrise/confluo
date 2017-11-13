@@ -15,7 +15,7 @@ struct compiled_predicate {
                      const schema_t& s)
       : field_name_(s[attr].name()),
         field_idx_(s[attr].idx()),
-        op_(static_cast<relop_id>(op)),
+        op_(static_cast<reational_op_id>(op)),
         val_(mutable_value::parse(value, s[attr].type())) {
 /*=======
       : op_(static_cast<relop_id>(op)) {
@@ -90,7 +90,7 @@ struct compiled_predicate {
     return field_idx_;
   }
 
-  inline relop_id op() const {
+  inline reational_op_id op() const {
     return op_;
   }
 
@@ -117,7 +117,7 @@ struct compiled_predicate {
  private:
   std::string field_name_;
   uint32_t field_idx_;
-  relop_id op_;
+  reational_op_id op_;
   mutable_value val_;
 };
 
@@ -221,12 +221,12 @@ class utree_expand_conjunction {
     iterator i = range.begin();
     int op = spirit::utree::visit(*i, utree_to_op());
     switch (op) {
-      case relop_id::EQ:
-      case relop_id::NEQ:
-      case relop_id::LT:
-      case relop_id::GT:
-      case relop_id::LE:
-      case relop_id::GE: {
+      case reational_op_id::EQ:
+      case reational_op_id::NEQ:
+      case reational_op_id::LT:
+      case reational_op_id::GT:
+      case reational_op_id::LE:
+      case reational_op_id::GE: {
         compiled_minterm right = m_;
         std::string attr = spirit::utree::visit(*(++i), utree_to_string());
         std::string value = spirit::utree::visit(*(++i), utree_to_string());
@@ -288,12 +288,12 @@ class utree_compile_expression {
     iterator i = range.begin();
     int op = spirit::utree::visit(*i, utree_to_op());
     switch (op) {
-      case relop_id::EQ:
-      case relop_id::NEQ:
-      case relop_id::LT:
-      case relop_id::GT:
-      case relop_id::LE:
-      case relop_id::GE: {
+      case reational_op_id::EQ:
+      case reational_op_id::NEQ:
+      case reational_op_id::LT:
+      case reational_op_id::GT:
+      case reational_op_id::LE:
+      case reational_op_id::GE: {
         compiled_minterm m;
         std::string attr = spirit::utree::visit(*(++i), utree_to_string());
         std::string value = spirit::utree::visit(*(++i), utree_to_string());

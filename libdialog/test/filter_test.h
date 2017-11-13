@@ -164,7 +164,7 @@ TEST_F(FilterTest, TriggerTest) {
   auto cexpr = get_expr(expr);
   filter f(cexpr);
   trigger *t = new trigger("filter", "trigger1", "", aggregate_id::D_MAX,
-                           "value", 0, LONG_TYPE, relop_id::GE,
+                           "value", 0, LONG_TYPE, reational_op_id::GE,
                            numeric(static_cast<int64_t>(90000)), 1);
 
   f.add_trigger(t);
@@ -182,7 +182,7 @@ TEST_F(FilterTest, MultiThreadedTriggerTest) {
   auto cexpr = get_expr(expr);
   filter f(cexpr);
   trigger *t = new trigger("filter", "trigger1", "", aggregate_id::D_MAX,
-                           "value", 0, LONG_TYPE, relop_id::GE,
+                           "value", 0, LONG_TYPE, reational_op_id::GE,
                            numeric(static_cast<int64_t>(90000)), 1);
 
   f.add_trigger(t);

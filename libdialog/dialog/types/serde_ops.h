@@ -5,11 +5,22 @@
 
 namespace dialog {
 
-typedef void (*serialize_op)(std::ostream&, data&);
-typedef void (*deserialize_op)(std::istream&, data&);
+typedef void (*serialize_op_t)(std::ostream&, const data&);
+typedef void (*deserialize_op_t)(std::istream&, data&);
 
 template<typename T>
-static void serialize(std::ostream& out, data& value) {
+static void serialize(std::ostream& out, const data& value) {
+  out.write(reinterpret_cast<const char*>(value.ptr), value.size);
+}
+
+template<>
+void serialize<void>(std::ostream& out, const data& value) {
+  THROW(unsupported_exception, "Serialize not supported for none type");
+}
+
+template<>
+void serialize<std::string>(std::ostream& out, const data& value) {
+  out.write(reinterpret_cast<const char*>(value.size), sizeof(size_t));
   out.write(reinterpret_cast<const char*>(value.ptr), value.size);
 }
 
@@ -19,20 +30,16 @@ static void deserialize(std::istream& in, data& out) {
 }
 
 template<>
-void serialize<std::string>(std::ostream& out, data& value) {
-
+void deserialize<void>(std::istream& in, data& value) {
+  THROW(unsupported_exception, "Deserialize not supported for none type");
 }
 
-static std::vector<void (*)(std::ostream&, data&)> init_serializers() {
-  return {&serialize<bool>, &serialize<bool>, &serialize<char>,
-    &serialize<short>, &serialize<int>, &serialize<long>,
-    &serialize<float>, &serialize<double>, &serialize<std::string>};
-}
-
-static std::vector<void (*)(std::istream&, data&)> init_deserializers() {
-  return {&deserialize<bool>, &deserialize<bool>, &deserialize<char>,
-    &deserialize<short>, &deserialize<int>, &deserialize<long>,
-    &deserialize<float>, &deserialize<double>, &deserialize<std::string>};
+template<>
+void deserialize<std::string>(std::istream& in, data& value) {
+  in.read(reinterpret_cast<char*>(value.size), sizeof(size_t));
+  char *buf = new char[value.size];
+  in.read(buf, value.size);
+  value.ptr = buf;
 }
 
 }

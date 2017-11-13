@@ -19,32 +19,31 @@ struct type_properties {
   void* one;
   void* zero;
 
-  rel_ops_t rel_ops;
-  unary_ops_t un_ops;
+  rel_ops_t relational_ops;
+  unary_ops_t unary_ops;
   binary_ops_t binary_ops;
-  key_op key_ops;
+  key_op_t key_transform_op;
 
-  data (*parse_op)(const std::string&);
+  parse_op_t parse_op;
 
-  void (*serialize_op)(std::ostream&, data&);
-  void (*deserialize_op)(std::istream&, data&);
+  serialize_op_t serialize_op;
+  deserialize_op_t deserialize_op;
 
   type_properties(const std::string& _name, size_t _size, void* _min,
                   void* _max, void* _one, void* _zero, rel_ops_t _rel_ops,
                   unary_ops_t _un_ops, binary_ops_t _binary_ops,
-                  key_op _key_ops, data (*_parse)(const std::string&),
-                  void (*_serialize)(std::ostream&, data&),
-                  void (*_deserialize)(std::istream&, data&))
+                  key_op_t _key_ops, parse_op_t _parse,
+                  serialize_op_t _serialize, deserialize_op_t _deserialize)
       : name(_name),
         size(_size),
         min(_min),
         max(_max),
         one(_one),
         zero(_zero),
-        rel_ops(_rel_ops),
-        un_ops(_un_ops),
+        relational_ops(_rel_ops),
+        unary_ops(_un_ops),
         binary_ops(_binary_ops),
-        key_ops(_key_ops),
+        key_transform_op(_key_ops),
         parse_op(_parse),
         serialize_op(_serialize),
         deserialize_op(_deserialize) {
@@ -81,7 +80,7 @@ std::vector<type_properties> init_primitives() {
   props.push_back(DEFINE_PRIMITIVE(int, int32_t));
   props.push_back(DEFINE_PRIMITIVE(long, int64_t));
   props.push_back(DEFINE_PRIMITIVE(float, float));
-  props.push_back(DEFINE_PRIMITIVE(double, float));
+  props.push_back(DEFINE_PRIMITIVE(double, double));
   props.push_back(build_properties<std::string>("string", 0));
   return props;
 }

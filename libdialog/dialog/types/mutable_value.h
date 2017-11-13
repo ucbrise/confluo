@@ -18,62 +18,62 @@ class mutable_value : public immutable_value {
 
   mutable_value(const data_type& type, data value) 
       : immutable_value(type, const_cast<void*>(value.ptr)) {
-      type_.unaryop(unaryop_id::ASSIGN)(ptr_, value);
+      type_.unaryop(unary_op_id::ASSIGN)(ptr_, value);
   }
 
   mutable_value(const data_type& type, const void* value)
       : immutable_value(type, new uint8_t[type.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(value, type.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(value, type.size));
   }
 
   mutable_value(bool value)
       : immutable_value(BOOL_TYPE, new uint8_t[BOOL_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, BOOL_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, BOOL_TYPE.size));
   }
 
   mutable_value(int8_t value)
       : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, CHAR_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, CHAR_TYPE.size));
   }
 
   mutable_value(int16_t value)
       : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, SHORT_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, SHORT_TYPE.size));
   }
 
   mutable_value(int32_t value)
       : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, INT_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, INT_TYPE.size));
   }
 
   mutable_value(int64_t value)
       : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, LONG_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, LONG_TYPE.size));
   }
 
   mutable_value(float value)
       : immutable_value(FLOAT_TYPE, new uint8_t[FLOAT_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, FLOAT_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, FLOAT_TYPE.size));
   }
 
   mutable_value(double value)
       : immutable_value(DOUBLE_TYPE, new uint8_t[DOUBLE_TYPE.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(&value, DOUBLE_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, DOUBLE_TYPE.size));
   }
 
   mutable_value(const std::string& str)
       : immutable_value(STRING_TYPE(str.length()), new char[str.length()]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, data(str.c_str(), str.length()));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(str.c_str(), str.length()));
   }
 
   mutable_value(const immutable_value& other)
       : immutable_value(other.type(), new uint8_t[other.type().size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, other.to_data());
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
   }
 
   mutable_value(const mutable_value& other)
       : immutable_value(other.type_, new uint8_t[other.type_.size]()) {
-    type_.unaryop(unaryop_id::ASSIGN)(ptr_, other.to_data());
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
   }
 
   mutable_value(mutable_value&& other)
@@ -90,7 +90,7 @@ class mutable_value : public immutable_value {
   static mutable_value parse(const std::string& str, const data_type& type) {
     if (!type_manager::is_primitive(type.id)
             && type_manager::is_valid_id(type.id)) {
-        return mutable_value(type, PARSERS[type.id](str));
+        return mutable_value(type, type.parse_op()(str));
     }
     switch (type.id) {
       case type_id::D_BOOL: {
@@ -139,25 +139,25 @@ class mutable_value : public immutable_value {
   }
 
   // Arithmetic operations
-  static inline mutable_value unaryop(unaryop_id id, const immutable_value& n) {
+  static inline mutable_value unaryop(unary_op_id id, const immutable_value& n) {
     mutable_value result(n.type());
     result.type_.unaryop(id)(result.ptr_, n.to_data());
     return result;
   }
 
   friend inline mutable_value operator-(const immutable_value& n) {
-    return unaryop(unaryop_id::NEGATIVE, n);
+    return unaryop(unary_op_id::NEGATIVE, n);
   }
 
   friend inline mutable_value operator+(const immutable_value& n) {
-    return unaryop(unaryop_id::POSITIVE, n);
+    return unaryop(unary_op_id::POSITIVE, n);
   }
 
   friend inline mutable_value operator~(const immutable_value& n) {
-    return unaryop(unaryop_id::BW_NOT, n);
+    return unaryop(unary_op_id::BW_NOT, n);
   }
 
-  static mutable_value binaryop(binaryop_id id, const immutable_value& first,
+  static mutable_value binaryop(binary_op_id id, const immutable_value& first,
                                 const immutable_value& second) {
     if (first.type() != second.type())
       THROW(invalid_operation_exception,
@@ -169,52 +169,52 @@ class mutable_value : public immutable_value {
 
   friend inline mutable_value operator+(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::ADD, first, second);
+    return binaryop(binary_op_id::ADD, first, second);
   }
 
   friend inline mutable_value operator-(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::SUBTRACT, first, second);
+    return binaryop(binary_op_id::SUBTRACT, first, second);
   }
 
   friend inline mutable_value operator*(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::MULTIPLY, first, second);
+    return binaryop(binary_op_id::MULTIPLY, first, second);
   }
 
   friend inline mutable_value operator/(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::DIVIDE, first, second);
+    return binaryop(binary_op_id::DIVIDE, first, second);
   }
 
   friend inline mutable_value operator%(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::MODULO, first, second);
+    return binaryop(binary_op_id::MODULO, first, second);
   }
 
   friend inline mutable_value operator&(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::BW_AND, first, second);
+    return binaryop(binary_op_id::BW_AND, first, second);
   }
 
   friend inline mutable_value operator|(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::BW_OR, first, second);
+    return binaryop(binary_op_id::BW_OR, first, second);
   }
 
   friend inline mutable_value operator^(const immutable_value& first,
                                         const immutable_value& second) {
-    return binaryop(binaryop_id::BW_XOR, first, second);
+    return binaryop(binary_op_id::BW_XOR, first, second);
   }
 
   friend inline mutable_value operator<<(const immutable_value& first,
                                          const immutable_value& second) {
-    return binaryop(binaryop_id::BW_LSHIFT, first, second);
+    return binaryop(binary_op_id::BW_LSHIFT, first, second);
   }
 
   friend inline mutable_value operator>>(const immutable_value& first,
                                          const immutable_value& second) {
-    return binaryop(binaryop_id::BW_RSHIFT, first, second);
+    return binaryop(binary_op_id::BW_RSHIFT, first, second);
   }
 
   // TODO: Add more assignment operators
@@ -224,7 +224,7 @@ class mutable_value : public immutable_value {
       if (ptr_ != nullptr)
         delete[] reinterpret_cast<uint8_t*>(ptr_);
       ptr_ = new uint8_t[type_.size];
-      type_.unaryop(unaryop_id::ASSIGN)(ptr_, other.to_data());
+      type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
     }
     return *this;
   }
@@ -235,7 +235,7 @@ class mutable_value : public immutable_value {
       if (ptr_ != nullptr)
         delete[] reinterpret_cast<uint8_t*>(ptr_);
       ptr_ = new uint8_t[type_.size];
-      type_.unaryop(unaryop_id::ASSIGN)(ptr_, other.to_data());
+      type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
     }
     return *this;
   }

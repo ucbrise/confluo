@@ -13,7 +13,7 @@ namespace parser {
 struct compiled_trigger {
   aggregate_id agg;
   std::string field_name;
-  relop_id relop;
+  reational_op_id relop;
   numeric threshold;
 };
 

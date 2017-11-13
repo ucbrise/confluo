@@ -3,9 +3,9 @@
 
 #include <cstdint>
 
-#include "immutable_value.h"
 #include "types/byte_string.h"
 #include "types/data_types.h"
+#include "types/immutable_value.h"
 
 namespace dialog {
 

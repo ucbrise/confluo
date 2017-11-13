@@ -53,7 +53,7 @@ class ExpressionCompilerTest : public testing::Test {
     return s.apply_unsafe(0, &r);
   }
 
-  static compiled_predicate predicate(const std::string& attr, relop_id id,
+  static compiled_predicate predicate(const std::string& attr, reational_op_id id,
       const std::string& value) {
     return compiled_predicate(attr, id, value, s);
   }
@@ -68,27 +68,27 @@ class ExpressionCompilerTest : public testing::Test {
     if (c.to_string() == "A==bool(1)") {
       ASSERT_EQ("A", c.field_name());
       ASSERT_TRUE(BOOL_TYPE == c.value().type());
-      ASSERT_EQ(relop_id::EQ, c.op());
+      ASSERT_EQ(reational_op_id::EQ, c.op());
     } else if (c.to_string() == "B<char(53)") {
       ASSERT_EQ("B", c.field_name());
       ASSERT_TRUE(CHAR_TYPE == c.value().type());
-      ASSERT_EQ(relop_id::LT, c.op());
+      ASSERT_EQ(reational_op_id::LT, c.op());
     } else if (c.to_string() == "C<short(10)") {
       ASSERT_EQ("C", c.field_name());
       ASSERT_TRUE(SHORT_TYPE == c.value().type());
-      ASSERT_EQ(relop_id::LT, c.op());
+      ASSERT_EQ(reational_op_id::LT, c.op());
     } else if (c.to_string() == "E<long(10)") {
       ASSERT_EQ("E", c.field_name());
       ASSERT_TRUE(LONG_TYPE == c.value().type());
-      ASSERT_EQ(relop_id::LT, c.op());
+      ASSERT_EQ(reational_op_id::LT, c.op());
     } else if (c.to_string() == "F<float(1.300000)") {
       ASSERT_EQ("F", c.field_name());
       ASSERT_TRUE(FLOAT_TYPE == c.value().type());
-      ASSERT_EQ(relop_id::LT, c.op());
+      ASSERT_EQ(reational_op_id::LT, c.op());
     } else if (c.to_string() == "G<double(1.900000)") {
       ASSERT_EQ("G", c.field_name());
       ASSERT_TRUE(DOUBLE_TYPE == c.value().type());
-      ASSERT_EQ(relop_id::LT, c.op());
+      ASSERT_EQ(reational_op_id::LT, c.op());
     } else {
       ASSERT_TRUE(false);
     }
@@ -183,15 +183,15 @@ TEST_F(ExpressionCompilerTest, CompilerTest) {
 
 TEST_F(ExpressionCompilerTest, TestCompiledExpressionRecordTest) {
   compiled_minterm m1, m2, m3;
-  m1.add(predicate("a", relop_id::EQ, "true"));
-  m1.add(predicate("b", relop_id::LT, "c"));
+  m1.add(predicate("a", reational_op_id::EQ, "true"));
+  m1.add(predicate("b", reational_op_id::LT, "c"));
 
-  m2.add(predicate("c", relop_id::LE, "10"));
-  m2.add(predicate("d", relop_id::GT, "100"));
+  m2.add(predicate("c", reational_op_id::LE, "10"));
+  m2.add(predicate("d", reational_op_id::GT, "100"));
 
-  m3.add(predicate("e", relop_id::GE, "1000"));
-  m3.add(predicate("f", relop_id::NEQ, "100.3"));
-  m3.add(predicate("g", relop_id::LT, "194.312"));
+  m3.add(predicate("e", reational_op_id::GE, "1000"));
+  m3.add(predicate("f", reational_op_id::NEQ, "100.3"));
+  m3.add(predicate("g", reational_op_id::LT, "194.312"));
 
   compiled_expression cexp;
   cexp.insert(m1);
@@ -204,15 +204,15 @@ TEST_F(ExpressionCompilerTest, TestCompiledExpressionRecordTest) {
 TEST_F(ExpressionCompilerTest, TestCompiledExpressionBufferTest) {
   auto snap = s.snapshot();
   compiled_minterm m1, m2, m3;
-  m1.add(predicate("a", relop_id::EQ, "true"));
-  m1.add(predicate("b", relop_id::LT, "c"));
+  m1.add(predicate("a", reational_op_id::EQ, "true"));
+  m1.add(predicate("b", reational_op_id::LT, "c"));
 
-  m2.add(predicate("c", relop_id::LE, "10"));
-  m2.add(predicate("d", relop_id::GT, "100"));
+  m2.add(predicate("c", reational_op_id::LE, "10"));
+  m2.add(predicate("d", reational_op_id::GT, "100"));
 
-  m3.add(predicate("e", relop_id::GE, "1000"));
-  m3.add(predicate("f", relop_id::NEQ, "100.3"));
-  m3.add(predicate("g", relop_id::LT, "194.312"));
+  m3.add(predicate("e", reational_op_id::GE, "1000"));
+  m3.add(predicate("f", reational_op_id::NEQ, "100.3"));
+  m3.add(predicate("g", reational_op_id::LT, "194.312"));
 
   compiled_expression cexp;
   cexp.insert(m1);
@@ -225,15 +225,15 @@ TEST_F(ExpressionCompilerTest, TestCompiledExpressionBufferTest) {
 
 TEST_F(ExpressionCompilerTest, TestMintermRecordTest) {
   compiled_minterm m1, m2, m3;
-  m1.add(predicate("a", relop_id::EQ, "true"));
-  m1.add(predicate("b", relop_id::LT, "c"));
+  m1.add(predicate("a", reational_op_id::EQ, "true"));
+  m1.add(predicate("b", reational_op_id::LT, "c"));
 
-  m2.add(predicate("c", relop_id::LE, "10"));
-  m2.add(predicate("d", relop_id::GT, "100"));
+  m2.add(predicate("c", reational_op_id::LE, "10"));
+  m2.add(predicate("d", reational_op_id::GT, "100"));
 
-  m3.add(predicate("e", relop_id::GE, "1000"));
-  m3.add(predicate("f", relop_id::NEQ, "100.3"));
-  m3.add(predicate("g", relop_id::LT, "194.312"));
+  m3.add(predicate("e", reational_op_id::GE, "1000"));
+  m3.add(predicate("f", reational_op_id::NEQ, "100.3"));
+  m3.add(predicate("g", reational_op_id::LT, "194.312"));
 
   ASSERT_TRUE(m1.test(record(true, 'a', 11, 0, 0, 0.0, 0.0)));
   ASSERT_TRUE(m2.test(record(false, 'Z', 10, 101, 0, 0, 0)));
@@ -243,15 +243,15 @@ TEST_F(ExpressionCompilerTest, TestMintermRecordTest) {
 TEST_F(ExpressionCompilerTest, TestMintermBufferTest) {
   auto snap = s.snapshot();
   compiled_minterm m1, m2, m3;
-  m1.add(predicate("a", relop_id::EQ, "true"));
-  m1.add(predicate("b", relop_id::LT, "c"));
+  m1.add(predicate("a", reational_op_id::EQ, "true"));
+  m1.add(predicate("b", reational_op_id::LT, "c"));
 
-  m2.add(predicate("c", relop_id::LE, "10"));
-  m2.add(predicate("d", relop_id::GT, "100"));
+  m2.add(predicate("c", reational_op_id::LE, "10"));
+  m2.add(predicate("d", reational_op_id::GT, "100"));
 
-  m3.add(predicate("e", relop_id::GE, "1000"));
-  m3.add(predicate("f", relop_id::NEQ, "100.3"));
-  m3.add(predicate("g", relop_id::LT, "194.312"));
+  m3.add(predicate("e", reational_op_id::GE, "1000"));
+  m3.add(predicate("f", reational_op_id::NEQ, "100.3"));
+  m3.add(predicate("g", reational_op_id::LT, "194.312"));
 
   ASSERT_TRUE(m1.test(snap, record_buf(true, 'a', 11, 0, 0, 0.0, 0.0)));
   ASSERT_TRUE(m2.test(snap, record_buf(false, 'Z', 10, 101, 0, 0, 0)));
@@ -260,62 +260,62 @@ TEST_F(ExpressionCompilerTest, TestMintermBufferTest) {
 
 TEST_F(ExpressionCompilerTest, TestPredicateRecordTest) {
   ASSERT_TRUE(
-      predicate("a", relop_id::EQ, "true").test(
+      predicate("a", reational_op_id::EQ, "true").test(
           record(true, 0, 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("b", relop_id::LT, "c").test(
+      predicate("b", reational_op_id::LT, "c").test(
           record(false, 'a', 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("c", relop_id::LE, "10").test(
+      predicate("c", reational_op_id::LE, "10").test(
           record(false, 0, 10, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("d", relop_id::GT, "100").test(
+      predicate("d", reational_op_id::GT, "100").test(
           record(false, 0, 0, 101, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("e", relop_id::GE, "1000").test(
+      predicate("e", reational_op_id::GE, "1000").test(
           record(false, 0, 0, 0, 1000, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("f", relop_id::NEQ, "100.3").test(
+      predicate("f", reational_op_id::NEQ, "100.3").test(
           record(false, 0, 0, 0, 0, 102.4, 0)));
 
   ASSERT_TRUE(
-      predicate("g", relop_id::LT, "194.312").test(
+      predicate("g", reational_op_id::LT, "194.312").test(
           record(false, 0, 0, 0, 0, 0, 182.3)));
 }
 
 TEST_F(ExpressionCompilerTest, TestPredicateBufferTest) {
   auto snap = s.snapshot();
   ASSERT_TRUE(
-      predicate("a", relop_id::EQ, "true").test(
+      predicate("a", reational_op_id::EQ, "true").test(
           snap, record_buf(true, 0, 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("b", relop_id::LT, "c").test(
+      predicate("b", reational_op_id::LT, "c").test(
           snap, record_buf(false, 'a', 0, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("c", relop_id::LE, "10").test(
+      predicate("c", reational_op_id::LE, "10").test(
           snap, record_buf(false, 0, 10, 0, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("d", relop_id::GT, "100").test(
+      predicate("d", reational_op_id::GT, "100").test(
           snap, record_buf(false, 0, 0, 101, 0, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("e", relop_id::GE, "1000").test(
+      predicate("e", reational_op_id::GE, "1000").test(
           snap, record_buf(false, 0, 0, 0, 1000, 0, 0)));
 
   ASSERT_TRUE(
-      predicate("f", relop_id::NEQ, "100.3").test(
+      predicate("f", reational_op_id::NEQ, "100.3").test(
           snap, record_buf(false, 0, 0, 0, 0, 102.4, 0)));
 
   ASSERT_TRUE(
-      predicate("g", relop_id::LT, "194.312").test(
+      predicate("g", reational_op_id::LT, "194.312").test(
           snap, record_buf(false, 0, 0, 0, 0, 0, 182.3)));
 }
 

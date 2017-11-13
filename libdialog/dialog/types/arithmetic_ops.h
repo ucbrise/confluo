@@ -11,7 +11,7 @@ namespace dialog {
 /**
  * Unary arithmetic/bitwise operators
  */
-enum unaryop_id
+enum unary_op_id
   : uint8_t {
     ASSIGN = 0,  //!< ASSIGN (=)
   NEGATIVE = 1,  //!< NEGATIVE (-)
@@ -22,7 +22,7 @@ enum unaryop_id
 /**
  * Binary arithmetic/bitwise operators
  */
-enum binaryop_id
+enum binary_op_id
   : uint8_t {
     ADD = 0,      //!< ADD (+)
   SUBTRACT = 1,  //!< SUBTRACT (-)
@@ -36,12 +36,12 @@ enum binaryop_id
   BW_RSHIFT = 9  //!< BW_RSHIFT (>>)
 };
 
-typedef void (*unary_fn)(void* res, const data& v);
+typedef void (*unary_op_t)(void* res, const data& v);
 
-typedef void (*binary_fn)(void* res, const data& v1, const data& v2);
+typedef void (*binary_op_t)(void* res, const data& v1, const data& v2);
 
-typedef std::vector<unary_fn> unary_ops_t;
-typedef std::vector<binary_fn> binary_ops_t;
+typedef std::vector<unary_op_t> unary_ops_t;
+typedef std::vector<binary_op_t> binary_ops_t;
 
 // Unary arithmetic operators
 template<typename T>

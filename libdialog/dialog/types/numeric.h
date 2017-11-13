@@ -114,7 +114,7 @@ class numeric {
   }
 
   // Relational operators
-  static bool relop(relop_id id, const numeric& first, const numeric& second) {
+  static bool relop(reational_op_id id, const numeric& first, const numeric& second) {
     if (first.type_ != second.type_)
       THROW(
           invalid_operation_exception,
@@ -124,49 +124,49 @@ class numeric {
   }
 
   friend inline bool operator <(const numeric& first, const numeric& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(reational_op_id::LT, first, second);
   }
 
   friend inline bool operator <=(const numeric& first, const numeric& second) {
-    return relop(relop_id::LE, first, second);
+    return relop(reational_op_id::LE, first, second);
   }
 
   friend inline bool operator >(const numeric& first, const numeric& second) {
-    return relop(relop_id::GT, first, second);
+    return relop(reational_op_id::GT, first, second);
   }
 
   friend inline bool operator >=(const numeric& first, const numeric& second) {
-    return relop(relop_id::GE, first, second);
+    return relop(reational_op_id::GE, first, second);
   }
 
   friend inline bool operator ==(const numeric& first, const numeric& second) {
-    return relop(relop_id::EQ, first, second);
+    return relop(reational_op_id::EQ, first, second);
   }
 
   friend inline bool operator !=(const numeric& first, const numeric& second) {
-    return relop(relop_id::NEQ, first, second);
+    return relop(reational_op_id::NEQ, first, second);
   }
 
   // Arithmetic operations
-  static inline numeric unaryop(unaryop_id id, const numeric& n) {
+  static inline numeric unaryop(unary_op_id id, const numeric& n) {
     numeric result(n.type());
     result.type_.unaryop(id)(result.data_, n.to_data());
     return result;
   }
 
   friend inline numeric operator-(const numeric& n) {
-    return unaryop(unaryop_id::NEGATIVE, n);
+    return unaryop(unary_op_id::NEGATIVE, n);
   }
 
   friend inline numeric operator+(const numeric& n) {
-    return unaryop(unaryop_id::POSITIVE, n);
+    return unaryop(unary_op_id::POSITIVE, n);
   }
 
   friend inline numeric operator~(const numeric& n) {
-    return unaryop(unaryop_id::BW_NOT, n);
+    return unaryop(unary_op_id::BW_NOT, n);
   }
 
-  static numeric binaryop(binaryop_id id, const numeric& first,
+  static numeric binaryop(binary_op_id id, const numeric& first,
                           const numeric& second) {
     if (first.type() != second.type())
       THROW(
@@ -180,52 +180,52 @@ class numeric {
   }
 
   friend inline numeric operator+(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::ADD, first, second);
+    return binaryop(binary_op_id::ADD, first, second);
   }
 
   friend inline numeric operator-(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::SUBTRACT, first, second);
+    return binaryop(binary_op_id::SUBTRACT, first, second);
   }
 
   friend inline numeric operator*(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::MULTIPLY, first, second);
+    return binaryop(binary_op_id::MULTIPLY, first, second);
   }
 
   friend inline numeric operator/(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::DIVIDE, first, second);
+    return binaryop(binary_op_id::DIVIDE, first, second);
   }
 
   friend inline numeric operator%(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::MODULO, first, second);
+    return binaryop(binary_op_id::MODULO, first, second);
   }
 
   friend inline numeric operator&(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::BW_AND, first, second);
+    return binaryop(binary_op_id::BW_AND, first, second);
   }
 
   friend inline numeric operator|(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::BW_OR, first, second);
+    return binaryop(binary_op_id::BW_OR, first, second);
   }
 
   friend inline numeric operator^(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::BW_XOR, first, second);
+    return binaryop(binary_op_id::BW_XOR, first, second);
   }
 
   friend inline numeric operator<<(const numeric& first,
                                    const numeric& second) {
-    return binaryop(binaryop_id::BW_LSHIFT, first, second);
+    return binaryop(binary_op_id::BW_LSHIFT, first, second);
   }
 
   friend inline numeric operator>>(const numeric& first,
                                    const numeric& second) {
-    return binaryop(binaryop_id::BW_RSHIFT, first, second);
+    return binaryop(binary_op_id::BW_RSHIFT, first, second);
   }
 
   numeric& operator=(const immutable_value& other) {
     type_ = other.type();
     if (!is_numeric(type_))
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
-    type_.unaryop(unaryop_id::ASSIGN)(data_, other.to_data());
+    type_.unaryop(unary_op_id::ASSIGN)(data_, other.to_data());
     return *this;
   }
 

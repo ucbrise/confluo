@@ -36,11 +36,11 @@ class immutable_value {
   }
 
   inline byte_string to_key(double bucket_size) const {
-    return type_.keytransform()(to_data(), bucket_size);
+    return type_.key_transform()(to_data(), bucket_size);
   }
 
   // Relational operators
-  static bool relop(relop_id id, const immutable_value& first,
+  static bool relop(reational_op_id id, const immutable_value& first,
                     const immutable_value& second) {
     if (first.type_ != second.type_)
       THROW(invalid_operation_exception, "Comparing values of different types");
@@ -49,32 +49,32 @@ class immutable_value {
 
   friend inline bool operator <(const immutable_value& first,
                                 const immutable_value& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(reational_op_id::LT, first, second);
   }
 
   friend inline bool operator <=(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::LE, first, second);
+    return relop(reational_op_id::LE, first, second);
   }
 
   friend inline bool operator >(const immutable_value& first,
                                 const immutable_value& second) {
-    return relop(relop_id::GT, first, second);
+    return relop(reational_op_id::GT, first, second);
   }
 
   friend inline bool operator >=(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::GE, first, second);
+    return relop(reational_op_id::GE, first, second);
   }
 
   friend inline bool operator ==(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::EQ, first, second);
+    return relop(reational_op_id::EQ, first, second);
   }
 
   friend inline bool operator !=(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::NEQ, first, second);
+    return relop(reational_op_id::NEQ, first, second);
   }
 
   template<typename T>
@@ -89,7 +89,7 @@ class immutable_value {
 
   std::string to_string() const {
     if (type_manager::is_valid_id(type_.id) && !type_manager::is_primitive(type_.id)) {
-        return data_types[type_.id].to_string() + "()";
+        return type_.to_string() + "()";
     }
     switch (type_.id) {
       case type_id::D_BOOL: {
