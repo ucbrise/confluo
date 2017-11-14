@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 #include "read_tail.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class DataArchivalTest : public testing::Test {
 

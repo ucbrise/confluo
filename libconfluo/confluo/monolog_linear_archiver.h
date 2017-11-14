@@ -1,7 +1,6 @@
-#ifndef DIALOG_MONOLOG_LINEAR_ARCHIVER_H_
-#define DIALOG_MONOLOG_LINEAR_ARCHIVER_H_
+#ifndef CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_
+#define CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_
 
-#include "dialog_allocator.h"
 #include "encoder.h"
 #include "file_utils.h"
 #include "incr_file_writer.h"
@@ -13,7 +12,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-namespace dialog {
+namespace confluo {
 namespace archival {
 
 using namespace ::utils;
@@ -87,4 +86,4 @@ class monolog_linear_archiver {
 }
 }
 
-#endif /* DIALOG_MONOLOG_LINEAR_ARCHIVER_H_ */
+#endif /* CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_ */
