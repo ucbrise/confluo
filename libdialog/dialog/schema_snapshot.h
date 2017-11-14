@@ -3,8 +3,8 @@
 
 #include "column_snapshot.h"
 #include "types/byte_string.h"
-#include "types/data.h"
 #include "types/immutable_value.h"
+#include "types/raw_data.h"
 
 namespace dialog {
 
@@ -28,12 +28,12 @@ class schema_snapshot {
 
   byte_string time_key(int64_t time_block) const {
     return LONG_TYPE.key_transform()(
-        data(reinterpret_cast<uint8_t*>(&time_block), LONG_TYPE.size), 1.0);
+        immutable_raw_data(reinterpret_cast<uint8_t*>(&time_block), LONG_TYPE.size), 1.0);
   }
 
   byte_string get_key(void* ptr, uint32_t i) const {
     return snapshot_[i].type.key_transform()(
-        data(reinterpret_cast<uint8_t*>(ptr) + snapshot_[i].offset,
+        immutable_raw_data(reinterpret_cast<uint8_t*>(ptr) + snapshot_[i].offset,
              snapshot_[i].type.size),
         snapshot_[i].index_bucket_size);
   }

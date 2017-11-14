@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "exceptions.h"
-#include "types/data.h"
+#include "raw_data.h"
 
 namespace dialog {
 
@@ -21,67 +21,67 @@ enum reational_op_id
   NEQ = 5  //!< NEQ
 };
 
-typedef bool (*relational_op_t)(const data& v1, const data& v2);
+typedef bool (*relational_op_t)(const immutable_raw_data& v1, const immutable_raw_data& v2);
 
 typedef std::vector<relational_op_t> rel_ops_t;
 
 template<typename T>
-inline bool less_than(const data& v1, const data& v2) {
+inline bool less_than(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() < v2.as<T>();
 }
 
 template<>
-inline bool less_than<void>(const data& v1, const data& v2) {
+inline bool less_than<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "< not supported for none type");
 }
 
 template<typename T>
-inline bool less_than_equals(const data& v1, const data& v2) {
+inline bool less_than_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() <= v2.as<T>();
 }
 
 template<>
-inline bool less_than_equals<void>(const data& v1, const data& v2) {
+inline bool less_than_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "<= not supported for none type");
 }
 
 template<typename T>
-inline bool greater_than(const data& v1, const data& v2) {
+inline bool greater_than(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() > v2.as<T>();
 }
 
 template<>
-inline bool greater_than<void>(const data& v1, const data& v2) {
+inline bool greater_than<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "> not supported for none type");
 }
 
 template<typename T>
-inline bool greater_than_equals(const data& v1, const data& v2) {
+inline bool greater_than_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() >= v2.as<T>();
 }
 
 template<>
-inline bool greater_than_equals<void>(const data& v1, const data& v2) {
+inline bool greater_than_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, ">= not supported for none type");
 }
 
 template<typename T>
-inline bool equals(const data& v1, const data& v2) {
+inline bool equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() == v2.as<T>();
 }
 
 template<>
-inline bool equals<void>(const data& v1, const data& v2) {
+inline bool equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "== not supported for none type");
 }
 
 template<typename T>
-inline bool not_equals(const data& v1, const data& v2) {
+inline bool not_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() != v2.as<T>();
 }
 
 template<>
-inline bool not_equals<void>(const data& v1, const data& v2) {
+inline bool not_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "!= not supported for none type");
 }
 

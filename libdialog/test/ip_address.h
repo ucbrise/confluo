@@ -46,20 +46,16 @@ class ip_address {
     THROW(unsupported_exception, "not valid ip");
   }
 
-  static data parse_ip(const std::string& str) {
-    ip_address *ip = new ip_address(ip_address::from_string(str).get_address());
-    const void* val = (void *) ip;
-    return data(val, sizeof(uint32_t));
+  static void parse_ip(const std::string& str, mutable_raw_data& out) {
+    out.set(ip_address::from_string(str));
   }
 
   std::string repr() {
     return std::to_string(address);
   }
 
-  static data parse_ip_value(uint32_t val) {
-    ip_address *ip = new ip_address(val);
-    const void* ptr = (void *) ip;
-    return data(ptr, sizeof(uint32_t));
+  static mutable_raw_data parse_ip_value(uint32_t val) {
+    return mutable_raw_data(sizeof(ip_address)).set(val);
   }
 
   uint32_t get_address() const {
@@ -74,7 +70,7 @@ class ip_address {
 };
 
 template<>
-void serialize<ip_address>(std::ostream& out, const data& value) {
+void serialize<ip_address>(std::ostream& out, const immutable_raw_data& value) {
   ip_address val = value.as<ip_address>();
   uint32_t val_address = val.get_address();
   out.write(reinterpret_cast<const char*>(&(val_address)), value.size);
@@ -82,123 +78,138 @@ void serialize<ip_address>(std::ostream& out, const data& value) {
 }
 
 template<>
-void deserialize<ip_address>(std::istream& in, data& out) {
-  uint32_t val;
-  in.read(reinterpret_cast<char*>(&val), sizeof(uint32_t));
-  out = ip_address::parse_ip_value(val);
+void deserialize<ip_address>(std::istream& in, mutable_raw_data& out) {
+  in.read(reinterpret_cast<char*>(out.ptr), sizeof(uint32_t));
 }
 
 template<>
-inline void add<ip_address>(void* res, const data& v1, const data& v2) {
+inline void add<ip_address>(void* res, const immutable_raw_data& v1,
+                            const immutable_raw_data& v2) {
   (*(reinterpret_cast<ip_address*>(res))).set_address(
       v1.as<ip_address>().get_address() + v2.as<ip_address>().get_address());
 }
 
 template<>
-inline void subtract<ip_address>(void* res, const data& v1, const data& v2) {
+inline void subtract<ip_address>(void* res, const immutable_raw_data& v1,
+                                 const immutable_raw_data& v2) {
   (*(reinterpret_cast<ip_address*>(res))).set_address(
       v1.as<ip_address>().get_address() - v2.as<ip_address>().get_address());
 }
 
 template<>
-inline void multiply<ip_address>(void* res, const data& v1, const data& v2) {
+inline void multiply<ip_address>(void* res, const immutable_raw_data& v1,
+                                 const immutable_raw_data& v2) {
   (*(reinterpret_cast<ip_address*>(res))).set_address(
       v1.as<ip_address>().get_address() * v2.as<ip_address>().get_address());
 
 }
 
 template<>
-inline void divide<ip_address>(void* res, const data& v1, const data& v2) {
+inline void divide<ip_address>(void* res, const immutable_raw_data& v1,
+                               const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 2");
 }
 
 template<>
-inline void modulo<ip_address>(void* res, const data& v1, const data& v2) {
+inline void modulo<ip_address>(void* res, const immutable_raw_data& v1,
+                               const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 3");
 }
 
 template<>
-inline void bw_and<ip_address>(void* res, const data& v1, const data& v2) {
+inline void bw_and<ip_address>(void* res, const immutable_raw_data& v1,
+                               const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 4");
 }
 
 template<>
-inline void bw_or<ip_address>(void* res, const data& v1, const data& v2) {
+inline void bw_or<ip_address>(void* res, const immutable_raw_data& v1,
+                              const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 5");
 }
 
 template<>
-inline void bw_xor<ip_address>(void* res, const data& v1, const data& v2) {
+inline void bw_xor<ip_address>(void* res, const immutable_raw_data& v1,
+                               const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 6");
 }
 
 template<>
-inline void bw_lshift<ip_address>(void* res, const data& v1, const data& v2) {
+inline void bw_lshift<ip_address>(void* res, const immutable_raw_data& v1,
+                                  const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 7");
 }
 
 template<>
-inline void bw_rshift<ip_address>(void* res, const data& v1, const data& v2) {
+inline void bw_rshift<ip_address>(void* res, const immutable_raw_data& v1,
+                                  const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 8");
 }
 
 template<>
-inline void assign<ip_address>(void* res, const data& v) {
+inline void assign<ip_address>(void* res, const immutable_raw_data& v) {
   //THROW(unsupported_exception, "operation not yet supported 9");
   (*(reinterpret_cast<ip_address*>(res))).set_address(
       v.as<ip_address>().get_address());
 }
 
 template<>
-inline void negative<ip_address>(void* res, const data& v) {
+inline void negative<ip_address>(void* res, const immutable_raw_data& v) {
   (*(reinterpret_cast<ip_address*>(res))).set_address(
       -v.as<ip_address>().get_address());
 }
 
 template<>
-inline void positive<ip_address>(void* res, const data& v) {
+inline void positive<ip_address>(void* res, const immutable_raw_data& v) {
   THROW(unsupported_exception, "operation not yet supported 10");
 }
 
 template<>
-inline void bw_not<ip_address>(void* res, const data& v) {
+inline void bw_not<ip_address>(void* res, const immutable_raw_data& v) {
   THROW(unsupported_exception, "operation not yet supported 11");
 }
 
 template<>
-inline bool less_than<ip_address>(const data& v1, const data& v2) {
+inline bool less_than<ip_address>(const immutable_raw_data& v1,
+                                  const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 12");
 }
 
 template<>
-inline bool less_than_equals<ip_address>(const data& v1, const data& v2) {
+inline bool less_than_equals<ip_address>(const immutable_raw_data& v1,
+                                         const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 13");
 }
 
 template<>
-inline bool greater_than<ip_address>(const data& v1, const data& v2) {
+inline bool greater_than<ip_address>(const immutable_raw_data& v1,
+                                     const immutable_raw_data& v2) {
   return v1.as<ip_address>().get_address() > v2.as<ip_address>().get_address();
   //THROW(unsupported_exception, "operation not supported 69");
 }
 
 template<>
-inline bool greater_than_equals<ip_address>(const data& v1, const data& v2) {
+inline bool greater_than_equals<ip_address>(const immutable_raw_data& v1,
+                                            const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 14");
 }
 
 template<>
-inline bool equals<ip_address>(const data& v1, const data& v2) {
+inline bool equals<ip_address>(const immutable_raw_data& v1,
+                               const immutable_raw_data& v2) {
   return v1.as<ip_address>().get_address() == v2.as<ip_address>().get_address();
   //THROW(unsupported_exception, "operation not yet supported 15");
 }
 
 template<>
-inline bool not_equals<ip_address>(const data& v1, const data& v2) {
+inline bool not_equals<ip_address>(const immutable_raw_data& v1,
+                                   const immutable_raw_data& v2) {
   THROW(unsupported_exception, "operation not yet supported 16");
 }
 
 template<>
-byte_string key_transform<ip_address>(const data& v, double bucket_size) {
+byte_string key_transform<ip_address>(const immutable_raw_data& v,
+                                      double bucket_size) {
   //THROW(unsupported_exception, "operation not yet supported 17");
   return byte_string(
       static_cast<uint32_t>(v.as<ip_address>().get_address() / bucket_size));

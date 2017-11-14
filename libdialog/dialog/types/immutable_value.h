@@ -31,8 +31,8 @@ class immutable_value {
     return ptr_;
   }
 
-  inline data to_data() const {
-    return data(ptr_, type_.size);
+  inline immutable_raw_data to_data() const {
+    return immutable_raw_data(ptr_, type_.size);
   }
 
   inline byte_string to_key(double bucket_size) const {

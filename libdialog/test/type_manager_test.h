@@ -16,14 +16,14 @@
 
 using namespace ::dialog;
 
-type_properties type_def("ip_address", sizeof(uint32_t), &limits::int_min,
+type_properties type_def("ip_address", sizeof(ip_address), &limits::int_min,
                          &limits::int_max, &limits::int_one, &limits::int_zero,
                          get_relops(), get_unaryops(), get_binaryops(),
                          get_keyops(), &ip_address::parse_ip,
                          &dialog::serialize<ip_address>,
                          &dialog::deserialize<ip_address>);
 
-type_properties size_type_ops("size_type", sizeof(uint64_t),
+type_properties size_type_ops("size_type", sizeof(size_type),
                               &limits::long_long_min, &limits::long_long_max,
                               &limits::long_long_one, &limits::long_long_zero,
                               get_reops(), get_unarops(), get_binarops(),
@@ -34,7 +34,6 @@ type_properties size_type_ops("size_type", sizeof(uint64_t),
 class TypeManagerTest : public testing::Test {
  public:
   static std::vector<column_t> schema() {
-    //type_manager::register_primitives();
     type_manager::register_type(type_def);
     type_manager::register_type(size_type_ops);
 
@@ -107,22 +106,10 @@ std::vector<column_t> TypeManagerTest::s = schema();
 task_pool TypeManagerTest::MGMT_POOL;
 
 TEST_F(TypeManagerTest, RegisterTest) {
-  int* limit_reference = (int*) (addr_type.one());
-  int limit = *limit_reference;
-  ASSERT_EQ(limits::int_one, limit);
-
-  int* min_ref = (int*) addr_type.min();
-  int min = *min_ref;
-  ASSERT_EQ(limits::int_min, min);
-
-  int* max_ref = (int*) addr_type.max();
-  int max = *max_ref;
-  ASSERT_EQ(limits::int_max, max);
-
-  int* zero_ref = (int*) addr_type.zero();
-  int zero = *zero_ref;
-  ASSERT_EQ(limits::int_zero, zero);
-
+  ASSERT_EQ(limits::int_one, *reinterpret_cast<int*>(addr_type.one()));
+  ASSERT_EQ(limits::int_min, *reinterpret_cast<int*>(addr_type.min()));
+  ASSERT_EQ(limits::int_max, *reinterpret_cast<int*>(addr_type.max()));
+  ASSERT_EQ(limits::int_zero, *reinterpret_cast<int*>(addr_type.zero()));
   ASSERT_STREQ("ip_address", addr_type.to_string().c_str());
   ASSERT_EQ(9, dialog::type_manager::get_type("ip_address").id);
   ASSERT_STREQ("ip_address", s[1].type().to_string().c_str());
@@ -164,24 +151,22 @@ TEST_F(TypeManagerTest, FilterTest) {
 }
 
 TEST_F(TypeManagerTest, IPAddressTest) {
-  data d1 = ip_address::parse_ip("69.89.31.226");
-  data d2 = ip_address::parse_ip("216.65.216.164");
-  data d3 = ip_address::parse_ip("172.16.254.1");
+  mutable_raw_data d1(addr_type.size), d2(addr_type.size), d3(addr_type.size);
+  ip_address::parse_ip("69.89.31.226", d1);
+  ip_address::parse_ip("216.65.216.164", d2);
+  ip_address::parse_ip("172.16.254.1", d3);
 
-  mutable_value n1(addr_type, d1);
-  mutable_value n2(addr_type, d2);
-  mutable_value n3(addr_type, d3);
+  mutable_value n1(addr_type, std::move(d1));
+  mutable_value n2(addr_type, std::move(d2));
+  mutable_value n3(addr_type, std::move(d3));
 
   ASSERT_EQ(9, n1.type().id);
   ASSERT_EQ(9, n2.type().id);
   ASSERT_EQ(9, n3.type().id);
 
-  ASSERT_EQ(1163468770,
-            (*reinterpret_cast<const ip_address*>(n1.ptr())).get_address());
-  ASSERT_EQ(3628193956,
-            (*reinterpret_cast<const ip_address*>(n2.ptr())).get_address());
-  ASSERT_EQ(2886794753,
-            (*reinterpret_cast<const ip_address*>(n3.ptr())).get_address());
+  ASSERT_EQ(1163468770, n1.as<ip_address>().get_address());
+  ASSERT_EQ(3628193956, n2.as<ip_address>().get_address());
+  ASSERT_EQ(2886794753, n3.as<ip_address>().get_address());
 
   ASSERT_TRUE(n3 > n1);
   ASSERT_TRUE(n2 > n3);
@@ -191,19 +176,19 @@ TEST_F(TypeManagerTest, IPAddressTest) {
   ASSERT_FALSE(n3 > n2);
   ASSERT_FALSE(n1 > n2);
 
-  data d4 = ip_address::parse_ip_value(1163468770);
-  data d5 = ip_address::parse_ip_value(3628193956);
-  data d6 = ip_address::parse_ip_value(static_cast<uint32_t>(4791662726));
+  mutable_raw_data d4 = ip_address::parse_ip_value(UINT32_C(1163468770));
+  mutable_raw_data d5 = ip_address::parse_ip_value(UINT32_C(3628193956));
+  mutable_raw_data d6 = ip_address::parse_ip_value(
+      static_cast<uint32_t>(4791662726));
 
-  ASSERT_TRUE(mutable_value(n1.type(), new ip_address(1163468770)) == n1);
-  ASSERT_TRUE(mutable_value(n1.type(), d4) == n1);
-  ASSERT_TRUE(mutable_value(n2.type(), d5) == n2);
-  ASSERT_TRUE(mutable_value(n3.type(), d6) == (n1 + n2));
+  ip_address addr(1163468770);
+  ASSERT_TRUE(mutable_value(n1.type(), &addr) == n1);
+  ASSERT_TRUE(mutable_value(n1.type(), std::move(d4)) == n1);
+  ASSERT_TRUE(mutable_value(n2.type(), std::move(d5)) == n2);
+  ASSERT_TRUE(mutable_value(n3.type(), std::move(d6)) == (n1 + n2));
 
   mutable_value val1 = mutable_value::parse("42.35.109.253", n1.type());
-  data d7 = ip_address::parse_ip_value(706964989);
-  ASSERT_EQ(706964989,
-            (*reinterpret_cast<const ip_address*>(val1.ptr())).get_address());
+  ASSERT_EQ(706964989, val1.as<ip_address>().get_address());
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
     mutable_value::parse("-1.3.4.5", addr_type);
@@ -219,13 +204,14 @@ TEST_F(TypeManagerTest, IPAddressTest) {
 }
 
 TEST_F(TypeManagerTest, SizeTypeTest) {
-  data d1 = size_type::parse_bytes("3mb");
-  data d2 = size_type::parse_bytes("10gb");
-  data d3 = size_type::parse_bytes("3072kb");
+  mutable_raw_data d1(sz_type.size), d2(sz_type.size), d3(sz_type.size);
+  size_type::parse_bytes("3mb", d1);
+  size_type::parse_bytes("10gb", d2);
+  size_type::parse_bytes("3072kb", d3);
 
-  mutable_value n1(sz_type, d1);
-  mutable_value n2(sz_type, d2);
-  mutable_value n3(sz_type, d3);
+  mutable_value n1(sz_type, std::move(d1));
+  mutable_value n2(sz_type, std::move(d2));
+  mutable_value n3(sz_type, std::move(d3));
 
   ASSERT_EQ(10, n1.type().id);
   ASSERT_EQ(10, n2.type().id);
@@ -243,17 +229,20 @@ TEST_F(TypeManagerTest, SizeTypeTest) {
   ASSERT_FALSE(n3 > n2);
   ASSERT_FALSE(n1 > n3);
 
-  data d4 = size_type::parse_bytes("3145728b");
-  data d5 = size_type::parse_bytes("10737418240b");
-  data d6 = size_type::parse_bytes("10740563968b");
+  mutable_raw_data d4(sz_type.size), d5(sz_type.size), d6(sz_type.size);
+  size_type::parse_bytes("3145728b", d4);
+  size_type::parse_bytes("10737418240b", d5);
+  size_type::parse_bytes("10740563968b", d6);
 
-  ASSERT_TRUE(mutable_value(n1.type(), new size_type(3145728)) == n1);
-  ASSERT_TRUE(mutable_value(n1.type(), d4) == n1);
-  ASSERT_TRUE(mutable_value(n2.type(), d5) == n2);
-  ASSERT_TRUE(mutable_value(n3.type(), d6) == (n1 + n2));
+  size_type sz(3145728);
+  ASSERT_TRUE(mutable_value(n1.type(), &sz) == n1);
+  ASSERT_TRUE(mutable_value(n1.type(), std::move(d4)) == n1);
+  ASSERT_TRUE(mutable_value(n2.type(), std::move(d5)) == n2);
+  ASSERT_TRUE(mutable_value(n3.type(), std::move(d6)) == (n1 + n2));
 
   mutable_value val1 = mutable_value::parse("15pb", n1.type());
-  data d7 = size_type::parse_bytes("16888498602639360b");
+  mutable_raw_data d7(sz_type.size);
+  size_type::parse_bytes("16888498602639360b", d7);
 
   ASSERT_TRUE(16888498602639360 == val1.as<size_type>().get_bytes());
 
@@ -370,79 +359,62 @@ TEST_F(TypeManagerTest, SchemaTest) {
 }
 
 TEST_F(TypeManagerTest, DataTypesGetterTest) {
-  data_type t1 = addr_type;
-  data_type t2 = sz_type;
+  ASSERT_TRUE(type_manager::get_type("ip_address") == addr_type);
+  ASSERT_TRUE(type_manager::get_type("size_type") == sz_type);
+  ASSERT_FALSE(addr_type == sz_type);
 
-  ASSERT_TRUE(type_manager::get_type("ip_address") == t1);
-  ASSERT_TRUE(type_manager::get_type("size_type") == t2);
-  ASSERT_FALSE(t1 == t2);
-
-  ASSERT_TRUE(t1.to_string() == "ip_address");
-  ASSERT_TRUE(t2.to_string() == "size_type");
+  ASSERT_TRUE(addr_type.to_string() == "ip_address");
+  ASSERT_TRUE(sz_type.to_string() == "size_type");
 }
 
 TEST_F(TypeManagerTest, SerializeTest) {
   std::ofstream outfile("/tmp/test.txt", std::ofstream::binary);
-  int* int_ptr = new int(390);
-  void* void_ptr = (void*) int_ptr;
-  const void* const_ptr = const_cast<const void*>(void_ptr);
-  //std::cout << "Const void_ptr: " << *const_ptr << std::endl;
-
-  data d1 = data(const_ptr, 4);
-  data d11 = ip_address::parse_ip("69.89.31.226");
+  int32_t val = 390;
+  immutable_raw_data d1(&val, INT_TYPE.size);
+  mutable_raw_data d11(addr_type.size);
+  ip_address::parse_ip("69.89.31.226", d11);
 
   ASSERT_EQ(390, d1.as<int>());
   INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile, d11);
+  addr_type.serialize_op()(outfile, d11.immutable());
   outfile.close();
 
   std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
-  char* buffer = new char[4];
-  infile.read(buffer, 4);
-  int* value_ptr = (int*) buffer;
-  int value = *value_ptr;
+  int32_t val_read;
+  infile.read(reinterpret_cast<char*>(&val_read), INT_TYPE.size);
+  ASSERT_EQ(390, val_read);
 
-  infile.read(buffer, 4);
-  uint32_t* ip_ptr = (uint32_t*) buffer;
-  uint32_t ip_value = *ip_ptr;
-  ASSERT_EQ(1163468770, ip_value);
+  ip_address addr_read;
+  infile.read(reinterpret_cast<char*>(&addr_read), addr_type.size);
+  ASSERT_EQ(1163468770, addr_read.get_address());
 
-  ASSERT_EQ(390, value);
-  delete[] buffer;
-  delete int_ptr;
   infile.close();
 }
 
 TEST_F(TypeManagerTest, DeserializeTest) {
   std::ofstream outfile("/tmp/test1.txt", std::ofstream::binary);
 
-  int* int_ptr = new int(-490);
-  void* void_ptr = (void*) int_ptr;
-  const void* const_ptr = const_cast<const void*>(void_ptr);
-
-  data d1 = data(const_ptr, sizeof(int32_t));
-  data d11 = ip_address::parse_ip("69.89.31.226");
+  int val = -490;
+  immutable_raw_data d1 = immutable_raw_data(&val, INT_TYPE.size);
+  mutable_raw_data d11(addr_type.size);
+  ip_address::parse_ip("69.89.31.226", d11);
 
   ASSERT_EQ(-490, d1.as<int>());
 
   INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile, d11);
+  addr_type.serialize_op()(outfile, d11.immutable());
   outfile.close();
 
   std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
-  const void* new_alloc = (const void*) new int;
-  data d3 = data(new_alloc, sizeof(int32_t));
+  mutable_raw_data d3(INT_TYPE.size);
   INT_TYPE.deserialize_op()(infile, d3);
   ASSERT_EQ(-490, d3.as<int32_t>());
 
-  const void* new_ip = (const void*) new ip_address;
-  data d13 = data(new_ip, 4);
+  mutable_raw_data d13(addr_type.size);
   addr_type.deserialize_op()(infile, d13);
   ASSERT_EQ(1163468770, d13.as<ip_address>().get_address());
 
   infile.close();
-  delete int_ptr;
-  //delete new_alloc;
 }
 
 #endif /* TEST_TYPE_MANAGER_TEST_H_ */

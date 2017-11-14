@@ -16,54 +16,63 @@ class mutable_value : public immutable_value {
           type, type.id == type_id::D_NONE ? nullptr : new uint8_t[type.size]) {
   }
 
-  mutable_value(const data_type& type, data value) 
+  mutable_value(const data_type& type, immutable_raw_data value)
       : immutable_value(type, const_cast<void*>(value.ptr)) {
-      type_.unaryop(unary_op_id::ASSIGN)(ptr_, value);
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_, value);
   }
 
   mutable_value(const data_type& type, const void* value)
       : immutable_value(type, new uint8_t[type.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(value, type.size));
+    type_.unaryop(unary_op_id::ASSIGN)(ptr_,
+                                       immutable_raw_data(value, type.size));
   }
 
   mutable_value(bool value)
       : immutable_value(BOOL_TYPE, new uint8_t[BOOL_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, BOOL_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, BOOL_TYPE.size));
   }
 
   mutable_value(int8_t value)
       : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, CHAR_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, CHAR_TYPE.size));
   }
 
   mutable_value(int16_t value)
       : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, SHORT_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, SHORT_TYPE.size));
   }
 
   mutable_value(int32_t value)
       : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, INT_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, INT_TYPE.size));
   }
 
   mutable_value(int64_t value)
       : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, LONG_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, LONG_TYPE.size));
   }
 
   mutable_value(float value)
       : immutable_value(FLOAT_TYPE, new uint8_t[FLOAT_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, FLOAT_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, FLOAT_TYPE.size));
   }
 
   mutable_value(double value)
       : immutable_value(DOUBLE_TYPE, new uint8_t[DOUBLE_TYPE.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(&value, DOUBLE_TYPE.size));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(&value, DOUBLE_TYPE.size));
   }
 
   mutable_value(const std::string& str)
       : immutable_value(STRING_TYPE(str.length()), new char[str.length()]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, data(str.c_str(), str.length()));
+    type_.unaryop(unary_op_id::ASSIGN)(
+        ptr_, immutable_raw_data(str.c_str(), str.length()));
   }
 
   mutable_value(const immutable_value& other)
@@ -82,56 +91,21 @@ class mutable_value : public immutable_value {
     other.ptr_ = nullptr;
   }
 
+  mutable_value(const data_type& type, mutable_raw_data&& data)
+      : immutable_value(type, data.ptr) {
+    data.ptr = nullptr;
+    data.size = 0;
+  }
+
   ~mutable_value() {
     if (ptr_ != nullptr && type_.id != type_id::D_NONE)
       delete[] reinterpret_cast<uint8_t*>(ptr_);
   }
 
   static mutable_value parse(const std::string& str, const data_type& type) {
-    if (!type_manager::is_primitive(type.id)
-            && type_manager::is_valid_id(type.id)) {
-        return mutable_value(type, type.parse_op()(str));
-    }
-    switch (type.id) {
-      case type_id::D_BOOL: {
-        bool val = string_utils::lexical_cast<bool>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_CHAR: {
-        int8_t val = string_utils::lexical_cast<int8_t>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_SHORT: {
-        int16_t val = string_utils::lexical_cast<int16_t>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_INT: {
-        int32_t val = string_utils::lexical_cast<int32_t>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_LONG: {
-        int64_t val = string_utils::lexical_cast<int64_t>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_FLOAT: {
-        float val = string_utils::lexical_cast<float>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_DOUBLE: {
-        double val = string_utils::lexical_cast<double>(str);
-        return mutable_value(val);
-      }
-      case type_id::D_STRING: {
-        std::string t_str = str;
-        t_str.resize(type.size);
-        return mutable_value(type, t_str.c_str());
-      }
-      default: {
-        THROW(parse_exception,
-              "Could not parse value " + str + " to type " + type.to_string());
-      }
-    }
-    
+    mutable_raw_data data(type.size);
+    type.parse_op()(str, data);
+    return mutable_value(type, std::move(data));
   }
 
   immutable_value copy() const {
@@ -139,7 +113,8 @@ class mutable_value : public immutable_value {
   }
 
   // Arithmetic operations
-  static inline mutable_value unaryop(unary_op_id id, const immutable_value& n) {
+  static inline mutable_value unaryop(unary_op_id id,
+                                      const immutable_value& n) {
     mutable_value result(n.type());
     result.type_.unaryop(id)(result.ptr_, n.to_data());
     return result;

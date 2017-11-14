@@ -10,23 +10,21 @@ using namespace utils;
 
 namespace dialog {
 
-typedef data (*parse_op_t)(const std::string&);
+typedef void (*parse_op_t)(const std::string&, mutable_raw_data&);
 
 template<typename T>
-data parse(const std::string& str) {
-  return data(new T(string_utils::lexical_cast<T>(str)), sizeof(T));
+void parse(const std::string& str, mutable_raw_data& out) {
+  out.set(string_utils::lexical_cast<T>(str));
 }
 
 template<>
-data parse<void>(const std::string& str) {
-  return data(nullptr, 0);
+void parse<void>(const std::string& str, mutable_raw_data& out) {
+  THROW(unsupported_exception, "Cannot parse none type");
 }
 
 template<>
-data parse<std::string>(const std::string& str) {
-  char* characters = new char[strlen(str.c_str()) + 1];
-  strcpy(characters, str.c_str());
-  return data(characters, strlen(str.c_str()) + 1);
+void parse<std::string>(const std::string& str, mutable_raw_data& out) {
+  out.set(str);
 }
 
 }

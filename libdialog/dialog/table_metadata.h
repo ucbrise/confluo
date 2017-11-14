@@ -67,8 +67,9 @@ struct filter_info {
 struct trigger_info {
  public:
   trigger_info(const std::string& trigger_name, const std::string& filter_name,
-               aggregate_id agg_id, const std::string& field_name, reational_op_id op,
-               const numeric& threshold, uint64_t periodicity_ms)
+               aggregate_id agg_id, const std::string& field_name,
+               reational_op_id op, const numeric& threshold,
+               uint64_t periodicity_ms)
       : trigger_id_(trigger_name),
         filter_id_(filter_name),
         agg_id_(agg_id),
@@ -140,34 +141,9 @@ class metadata_writer {
         io_utils::write(out_, col.name());
         io_utils::write(out_, col.type().id);
         io_utils::write(out_, col.type().size);
-        //std::cout << col.name() << std::endl;
-        //std::cout << col.type().id << std::endl;
-        //std::cout << col.type().size << std::endl;
-
         if (col.type().id != type_id::D_STRING) {
-          //std::cout << "Column min: " << col.min().to_string() << std::endl;
-          //std::cout << "Column max: " << col.max().to_string() << std::endl;
-          data min_data = col.min().to_data();
-          data max_data = col.max().to_data();
-          const void* min_void = ::operator new(col.type().size);
-          //void* min_void;
-          //memcpy(min_void, min_data.ptr, col.type().size);
-          //char* min_void = new char[col.type().size];
-          min_void = const_cast<const void*>(col.min().ptr());
-
-          const void* max_void = ::operator new(col.type().size);
-          //void* max_void;
-          //memcpy(max_void, max_data.ptr, col.type().size);
-          //max_void = const_cast<const void*>(col.max().ptr());
-          max_void = max_data.ptr;
-
-          data m1 = data(min_void, col.type().size);
-          data m2 = data(max_void, col.type().size);
-
-          mutable_value mut1 = mutable_value(col.type(), min_void);
-          mutable_value mut2 = mutable_value(col.type(), max_void);
-          col.type().serialize_op()(out_, m1);
-          col.type().serialize_op()(out_, m2);
+          col.type().serialize_op()(out_, col.min().to_data());
+          col.type().serialize_op()(out_, col.max().to_data());
         }
       }
       io_utils::flush(out_);
@@ -212,10 +188,7 @@ class metadata_writer {
       size_t size = threshold.type().size;
       io_utils::write(out_, id);
       io_utils::write(out_, size);
-      data d1 = threshold.to_data();
-      const void* threshold_ptr = d1.ptr;
-      data t1 = data(threshold_ptr, threshold.type().size);
-      threshold.type().serialize_op()(out_, t1);
+      threshold.type().serialize_op()(out_, threshold.to_data());
       io_utils::write(out_, periodicity_ms);
       io_utils::flush(out_);
     }
@@ -247,13 +220,12 @@ class metadata_reader {
       type.id = io_utils::read<size_t>(in_);
       type.size = io_utils::read<size_t>(in_);
       if (type.id != type_id::D_STRING) {
-        data min(::operator new(type.size), type.size);
-        data max(::operator new(type.size), type.size);
-        type.deserialize_op()(in_, min);
-        type.deserialize_op()(in_, max);
-        mutable_value min_ = mutable_value(type, min);
-        mutable_value max_ = mutable_value(type, max);
-        builder.add_column(type, name, min_, max_);
+        mutable_raw_data min_raw(type.size), max_raw(type.size);
+        type.deserialize_op()(in_, min_raw);
+        type.deserialize_op()(in_, max_raw);
+        mutable_value min(type, std::move(min_raw));
+        mutable_value max(type, std::move(max_raw));
+        builder.add_column(type, name, min, max);
       } else {
         builder.add_column(type, name);
       }
@@ -283,9 +255,9 @@ class metadata_reader {
     size_t size = io_utils::read<size_t>(in_);
     numeric threshold;
     data_type type(tid, size);
-    data thresh(::operator new(type.size), type.size);
-    type.deserialize_op()(in_, thresh);
-    threshold = numeric(type, const_cast<void*>(thresh.ptr));
+    mutable_raw_data threshold_data(size);
+    type.deserialize_op()(in_, threshold_data);
+    threshold = numeric(type, const_cast<void*>(threshold_data.ptr));
     uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
     return trigger_info(trigger_name, filter_name, agg_id, field_name, op,
                         threshold, periodicity_ms);

@@ -105,8 +105,8 @@ class numeric {
     }
   }
 
-  inline data to_data() const {
-    return data(data_, type_.size);
+  inline immutable_raw_data to_data() const {
+    return immutable_raw_data(data_, type_.size);
   }
 
   data_type const& type() const {
