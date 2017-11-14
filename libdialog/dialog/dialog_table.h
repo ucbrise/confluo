@@ -113,34 +113,13 @@ class dialog_table {
               if (success) {
                 uint16_t index_id = UINT16_MAX;
                 if (col.type().id == type_id::D_BOOL) {
-                    index_id = indexes_.push_back(new radix_index(1, 2));
-                } else if (type_manager::is_valid_id(col.type().id)) {
-                    index_id = indexes_.push_back(new radix_index(
-                                col.type().size, 256));
-                } else {
-                    ex = management_exception("Index not supported for field type");
-                }
-
-
-                /*switch (col.type().id) {
-                  case type_id::D_BOOL:
                   index_id = indexes_.push_back(new radix_index(1, 2));
-                  break;
-                  case type_id::D_CHAR:
-                  case type_id::D_SHORT:
-                  case type_id::D_INT:
-                  case type_id::D_LONG:
-                  case type_id::D_FLOAT:
-                  case type_id::D_DOUBLE:
-                  case type_id::D_STRING:
-                  index_id = indexes_.push_back(new radix_index(col.type().size, 256));
-                  break;
-                  default:
-                  //col.set_unindexed();
-                  //ex = management_exception("Index not supported for field type");
-                  //return;
-                  index_id = indexes_.push_back(new radix_index(col.type().size, 256));
-                }*/
+                } else if (type_manager::is_valid_id(col.type().id)) {
+                  index_id = indexes_.push_back(new radix_index(
+                          col.type().size, 256));
+                } else {
+                  ex = management_exception("Index not supported for field type");
+                }
                 col.set_indexed(index_id, bucket_size);
                 metadata_.write_index_info(field_name, bucket_size);
               } else {
@@ -431,18 +410,6 @@ class dialog_table {
     auto cexpr = parser::compile_expression(t, schema_);
     query_plan plan = planner_.plan(cexpr);
     return plan.execute(version);
-//=======
-    /*query_planner planner(cexpr, indexes_);
-    query_plan plan = planner.plan();
-    std::vector<fri_rstream_type> fstreams;
-    for (minterm_plan& mplan : plan) {
-      const index_filter& f = mplan.idx_filter();
-      auto mres = indexes_.at(f.index_id())->range_lookup(f.kbegin(), f.kend());
-      ri_stream_type rs(version, mres, schema_, data_log_);
-      fstreams.push_back(fri_rstream_type(rs, mplan.data_filter()));
-    }
-    return fri_result_type(fstreams);
-//>>>>>>> Got parser to finally work, will add more tests and create the size type*/
   }
 
   lazy::stream<record_t> query_filter(const std::string& filter_name,
