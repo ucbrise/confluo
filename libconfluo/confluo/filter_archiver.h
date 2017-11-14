@@ -2,39 +2,22 @@
 #define CONFLUO_FILTER_ARCHIVER_H_
 
 #include "aggregated_reflog.h"
-#include "incr_file_writer.h"
+#include "archival_utils.h"
 #include "encoder.h"
-#include "file_utils.h"
 #include "filter.h"
 #include "filter_log.h"
-#include "io_utils.h"
 #include "read_tail.h"
-#include "container/string_map.h"
 
 namespace confluo {
 namespace archival {
-
-using namespace ::utils;
 
 template<encoding_type ENCODING>
 class filter_archiver {
 
  public:
-  typedef storage::read_only_ptr<uint64_t> bucket_ptr_t;
-  typedef bucket_ptr_t::decoded_ptr decoded_ptr_t;
-
-  filter_archiver()
-      : filter_(nullptr),
-        writer_("", "", 0),
-        data_log_tail_(0),
-        reflog_tail_(0),
-        ts_tail_(0) {
-  }
-
   filter_archiver(const std::string& path, filter* filter)
       : filter_(filter),
         writer_(path + "/filter_data_", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
-        data_log_tail_(0),
         reflog_tail_(0),
         ts_tail_(0) {
     file_utils::create_dir(path);
@@ -45,8 +28,8 @@ class filter_archiver {
     //TODO iterator: auto reflogs = filter_->lookup_range_reflogs(ts_tail_, ???);
     while (true) {
       aggregated_reflog* reflog = filter_->lookup_unsafe(ts_tail_); // TODO refactor func name
-      bool is_completely_archived = archive_reflog(reflog, offset);
-      if (!is_completely_archived) {
+      reflog_tail_ = archival_utils::archive_reflog<ENCODING>(reflog, writer_, offset, reflog_tail_);
+      if (reflog_tail_ < reflog->size()) {
         break;
       }
       reflog_tail_ = 0;
@@ -56,48 +39,9 @@ class filter_archiver {
   }
 
  private:
-
-  // TODO create monolog bucket iterator
-  /**
-   * Archives a reflog belonging to a filter.
-   * @param reflog aggregated reflog
-   * @param offset data log offset
-   * @return true if reflog is completely archived, otherwise false
-   */
-  bool archive_reflog(reflog* reflog, size_t offset) {
-    while (data_log_tail_ < offset) {
-      bucket_ptr_t bucket_ptr;
-      reflog->ptr(reflog_tail_, bucket_ptr);
-      auto decoded_ptr = bucket_ptr.decode_ptr();
-      uint64_t* data = decoded_ptr.get();
-
-      uint64_t max_off_lt = *std::max_element(data, data + reflog_constants::BUCKET_SIZE);
-      if (max_off_lt >= offset) {
-        return false;
-      }
-
-      auto* metadata = storage::ptr_metadata::get(bucket_ptr.get().internal_ptr());
-
-      size_t encoded_size;
-      auto raw_encoded_bucket = encoder::encode<uint64_t, ENCODING>(data, encoded_size);
-
-      size_t off = writer_.append<storage::ptr_metadata, uint8_t>(
-                                           metadata, 1, raw_encoded_bucket.get(), encoded_size);
-      writer_.update_header(max_off_lt);
-      void* encoded_bucket = ALLOCATOR.mmap(writer_.cur_path(), off, encoded_size,
-                                            storage::state_type::D_ARCHIVED);
-      reflog->swap_bucket_ptr(reflog_tail_, storage::encoded_ptr<uint64_t>(encoded_bucket));
-
-      reflog_tail_ += reflog_constants::BUCKET_SIZE;
-      data_log_tail_ = max_off_lt;
-    }
-    return true;
-  }
-
   filter* filter_;
   utils::incremental_file_writer writer_;
 
-  size_t data_log_tail_; // offsets up to this tail have been archived
   size_t reflog_tail_; // data in the current reflog up to this tail has been archived
   uint64_t ts_tail_; // reflogs in the filter up to this time stamp have been archived
 
