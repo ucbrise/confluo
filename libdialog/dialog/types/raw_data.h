@@ -128,7 +128,7 @@ inline std::string mutable_raw_data::as<std::string>() const {
 
 template<>
 inline mutable_raw_data& mutable_raw_data::set<std::string>(const std::string& str) {
-  memcpy(ptr, str.data(), size);
+  memcpy(ptr, str.data(), str.length());
   return *this;
 }
 
