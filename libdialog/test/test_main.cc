@@ -37,6 +37,7 @@
 #include "tiered_index_test.h"
 #include "trigger_compiler_test.h"
 #include "trigger_parser_test.h"
+#include "type_manager_test.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

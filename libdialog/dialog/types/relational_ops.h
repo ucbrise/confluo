@@ -3,15 +3,15 @@
 
 #include <vector>
 
-#include "data.h"
 #include "exceptions.h"
+#include "raw_data.h"
 
 namespace dialog {
 
 /**
  * Relational operator
  */
-enum relop_id
+enum reational_op_id
   : uint8_t {
     LT = 0,  //!< LT
   LE = 1,  //!< LE
@@ -21,67 +21,67 @@ enum relop_id
   NEQ = 5  //!< NEQ
 };
 
-typedef bool (*relational_fn)(const data& v1, const data& v2);
+typedef bool (*relational_op_t)(const immutable_raw_data& v1, const immutable_raw_data& v2);
 
-typedef std::vector<relational_fn> rel_ops_t;
+typedef std::vector<relational_op_t> rel_ops_t;
 
 template<typename T>
-inline bool less_than(const data& v1, const data& v2) {
+inline bool less_than(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() < v2.as<T>();
 }
 
 template<>
-inline bool less_than<void>(const data& v1, const data& v2) {
+inline bool less_than<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "< not supported for none type");
 }
 
 template<typename T>
-inline bool less_than_equals(const data& v1, const data& v2) {
+inline bool less_than_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() <= v2.as<T>();
 }
 
 template<>
-inline bool less_than_equals<void>(const data& v1, const data& v2) {
+inline bool less_than_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "<= not supported for none type");
 }
 
 template<typename T>
-inline bool greater_than(const data& v1, const data& v2) {
+inline bool greater_than(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() > v2.as<T>();
 }
 
 template<>
-inline bool greater_than<void>(const data& v1, const data& v2) {
+inline bool greater_than<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "> not supported for none type");
 }
 
 template<typename T>
-inline bool greater_than_equals(const data& v1, const data& v2) {
+inline bool greater_than_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() >= v2.as<T>();
 }
 
 template<>
-inline bool greater_than_equals<void>(const data& v1, const data& v2) {
+inline bool greater_than_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, ">= not supported for none type");
 }
 
 template<typename T>
-inline bool equals(const data& v1, const data& v2) {
+inline bool equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() == v2.as<T>();
 }
 
 template<>
-inline bool equals<void>(const data& v1, const data& v2) {
+inline bool equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "== not supported for none type");
 }
 
 template<typename T>
-inline bool not_equals(const data& v1, const data& v2) {
+inline bool not_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   return v1.as<T>() != v2.as<T>();
 }
 
 template<>
-inline bool not_equals<void>(const data& v1, const data& v2) {
+inline bool not_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
   THROW(unsupported_exception, "!= not supported for none type");
 }
 
@@ -99,19 +99,19 @@ class relop_utils {
    * @param op String operator
    * @return relop_id enum
    */
-  static relop_id str_to_op(const std::string& op) {
+  static reational_op_id str_to_op(const std::string& op) {
     if (op == "==") {
-      return relop_id::EQ;
+      return reational_op_id::EQ;
     } else if (op == "!=") {
-      return relop_id::NEQ;
+      return reational_op_id::NEQ;
     } else if (op == "<") {
-      return relop_id::LT;
+      return reational_op_id::LT;
     } else if (op == ">") {
-      return relop_id::GT;
+      return reational_op_id::GT;
     } else if (op == "<=") {
-      return relop_id::LE;
+      return reational_op_id::LE;
     } else if (op == ">=") {
-      return relop_id::GE;
+      return reational_op_id::GE;
     } else {
       THROW(parse_exception, "Invalid relational operator " + op);
     }
@@ -123,19 +123,19 @@ class relop_utils {
    * @param op relop_id enum
    * @return String representation of operator
    */
-  static std::string op_to_str(const relop_id& op) {
+  static std::string op_to_str(const reational_op_id& op) {
     switch (op) {
-      case relop_id::EQ:
+      case reational_op_id::EQ:
         return "==";
-      case relop_id::NEQ:
+      case reational_op_id::NEQ:
         return "!=";
-      case relop_id::LT:
+      case reational_op_id::LT:
         return "<";
-      case relop_id::GT:
+      case reational_op_id::GT:
         return ">";
-      case relop_id::LE:
+      case reational_op_id::LE:
         return "<=";
-      case relop_id::GE:
+      case reational_op_id::GE:
         return ">=";
     }
     return "INVALID";

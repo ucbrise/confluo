@@ -32,6 +32,7 @@
 #include "time_utils.h"
 #include "string_utils.h"
 #include "task_pool.h"
+#include "types/type_manager.h"
 
 using namespace ::dialog::monolog;
 using namespace ::dialog::index;
@@ -111,23 +112,11 @@ class dialog_table {
               bool success = col.set_indexing();
               if (success) {
                 uint16_t index_id = UINT16_MAX;
-                switch (col.type().id) {
-                  case type_id::D_BOOL:
-                  index_id = indexes_.push_back(new radix_index(1, 2));
-                  break;
-                  case type_id::D_CHAR:
-                  case type_id::D_SHORT:
-                  case type_id::D_INT:
-                  case type_id::D_LONG:
-                  case type_id::D_FLOAT:
-                  case type_id::D_DOUBLE:
-                  case type_id::D_STRING:
-                  index_id = indexes_.push_back(new radix_index(col.type().size, 256));
-                  break;
-                  default:
-                  col.set_unindexed();
+                if (col.type().is_valid()) {
+                  index_id = indexes_.push_back(new radix_index(
+                          col.type().size, 256));
+                } else {
                   ex = management_exception("Index not supported for field type");
-                  return;
                 }
                 col.set_indexed(index_id, bucket_size);
                 metadata_.write_index_info(field_name, bucket_size);

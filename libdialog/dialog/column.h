@@ -6,9 +6,9 @@
 
 #include "column_snapshot.h"
 #include "field.h"
-#include "mutable_value.h"
 #include "index_state.h"
 #include "string_utils.h"
+#include "types/mutable_value.h"
 
 namespace dialog {
 
@@ -19,7 +19,7 @@ class column_t {
    */
   column_t()
       : idx_(UINT16_MAX),
-        type_(),
+        type_(NONE_TYPE),
         offset_(UINT16_MAX) {
   }
 
@@ -158,8 +158,9 @@ class column_t {
                    is_indexed(), idx_state_.id(), idx_state_.bucket_size());
   }
 
-  /*
+  /**
    * Takes a snapshot of the column data
+   *
    * @return A new column that is the snapshot
    */
   column_snapshot snapshot() const {

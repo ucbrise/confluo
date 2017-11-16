@@ -1,0 +1,8 @@
+-Make an implementation plan and post it to the issue
+-Type manager class
+-Register method takes in arguments operators, update vectors
+-Ask for a type name as a field for primitive and new types
+-Use atomic fetch and add when registering types (so when you try to add
+new types at the same time the counter is updated correctly)
+-Create a regex vector for primitive and user defined types like ip
+addresses that parses data in the string to add a type

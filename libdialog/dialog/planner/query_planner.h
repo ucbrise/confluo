@@ -78,31 +78,31 @@ class query_planner {
     for (const auto& p : m) {
       uint32_t idx = p.field_idx();
       const auto& col = (*schema_)[idx];
-      if (col.is_indexed() && p.op() != relop_id::NEQ) {
+      if (col.is_indexed() && p.op() != reational_op_id::NEQ) {
         double bucket_size = col.index_bucket_size();
         key_range r;
         switch (p.op()) {
-          case relop_id::EQ: {
+          case reational_op_id::EQ: {
             r = std::make_pair(p.value().to_key(bucket_size),
                                p.value().to_key(bucket_size));
             break;
           }
-          case relop_id::GE: {
+          case reational_op_id::GE: {
             r = std::make_pair(p.value().to_key(bucket_size),
                                col.max().to_key(bucket_size));
             break;
           }
-          case relop_id::LE: {
+          case reational_op_id::LE: {
             r = std::make_pair(col.min().to_key(bucket_size),
                                p.value().to_key(bucket_size));
             break;
           }
-          case relop_id::GT: {
+          case reational_op_id::GT: {
             r = std::make_pair(++p.value().to_key(bucket_size),
                                col.max().to_key(bucket_size));
             break;
           }
-          case relop_id::LT: {
+          case reational_op_id::LT: {
             r = std::make_pair(col.min().to_key(bucket_size),
                                --p.value().to_key(bucket_size));
             break;

@@ -1,9 +1,10 @@
 #ifndef TEST_IMMUTABLE_VALUE_TEST_H_
 #define TEST_IMMUTABLE_VALUE_TEST_H_
 
+#include "../dialog/types/immutable_value.h"
+
 #include "test_utils.h"
 #include "gtest/gtest.h"
-#include "immutable_value.h"
 
 using namespace ::dialog;
 

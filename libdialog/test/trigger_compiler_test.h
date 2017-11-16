@@ -31,25 +31,25 @@ TEST_F(TriggerCompilerTest, ParseTest) {
   auto t1 = compile_trigger(parse_trigger("SUM(c) < 10"), s);
   ASSERT_EQ(aggregate_id::D_SUM, t1.agg);
   ASSERT_EQ("c", t1.field_name);
-  ASSERT_EQ(relop_id::LT, t1.relop);
+  ASSERT_EQ(reational_op_id::LT, t1.relop);
   ASSERT_TRUE(numeric(static_cast<int16_t>(10)) == t1.threshold);
 
   auto t2 = compile_trigger(parse_trigger("MIN(d) >= 200"), s);
   ASSERT_EQ(aggregate_id::D_MIN, t2.agg);
   ASSERT_EQ("d", t2.field_name);
-  ASSERT_EQ(relop_id::GE, t2.relop);
+  ASSERT_EQ(reational_op_id::GE, t2.relop);
   ASSERT_TRUE(numeric(static_cast<int32_t>(200)) == t2.threshold);
 
   auto t3 = compile_trigger(parse_trigger("MAX(e) == 4000"), s);
   ASSERT_EQ(aggregate_id::D_MAX, t3.agg);
   ASSERT_EQ("e", t3.field_name);
-  ASSERT_EQ(relop_id::EQ, t3.relop);
+  ASSERT_EQ(reational_op_id::EQ, t3.relop);
   ASSERT_TRUE(numeric(static_cast<int64_t>(4000)) == t3.threshold);
 
   auto t4 = compile_trigger(parse_trigger("CNT(d) <= 10"), s);
   ASSERT_EQ(aggregate_id::D_CNT, t4.agg);
   ASSERT_EQ("d", t4.field_name);
-  ASSERT_EQ(relop_id::LE, t4.relop);
+  ASSERT_EQ(reational_op_id::LE, t4.relop);
   ASSERT_TRUE(numeric(static_cast<int64_t>(10)) == t4.threshold);
 }
 

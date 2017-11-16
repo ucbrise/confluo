@@ -3,8 +3,9 @@
 
 #include <cstdlib>
 
-#include "data_types.h"
 #include "string_utils.h"
+#include "types/data_types.h"
+#include "types/type_manager.h"
 
 using namespace utils;
 
@@ -30,16 +31,16 @@ class immutable_value {
     return ptr_;
   }
 
-  inline data to_data() const {
-    return data(ptr_, type_.size);
+  inline immutable_raw_data to_data() const {
+    return immutable_raw_data(ptr_, type_.size);
   }
 
   inline byte_string to_key(double bucket_size) const {
-    return type_.keytransform()(to_data(), bucket_size);
+    return type_.key_transform()(to_data(), bucket_size);
   }
 
   // Relational operators
-  static bool relop(relop_id id, const immutable_value& first,
+  static bool relop(reational_op_id id, const immutable_value& first,
                     const immutable_value& second) {
     if (first.type_ != second.type_)
       THROW(invalid_operation_exception, "Comparing values of different types");
@@ -48,32 +49,32 @@ class immutable_value {
 
   friend inline bool operator <(const immutable_value& first,
                                 const immutable_value& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(reational_op_id::LT, first, second);
   }
 
   friend inline bool operator <=(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::LE, first, second);
+    return relop(reational_op_id::LE, first, second);
   }
 
   friend inline bool operator >(const immutable_value& first,
                                 const immutable_value& second) {
-    return relop(relop_id::GT, first, second);
+    return relop(reational_op_id::GT, first, second);
   }
 
   friend inline bool operator >=(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::GE, first, second);
+    return relop(reational_op_id::GE, first, second);
   }
 
   friend inline bool operator ==(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::EQ, first, second);
+    return relop(reational_op_id::EQ, first, second);
   }
 
   friend inline bool operator !=(const immutable_value& first,
                                  const immutable_value& second) {
-    return relop(relop_id::NEQ, first, second);
+    return relop(reational_op_id::NEQ, first, second);
   }
 
   template<typename T>
@@ -87,47 +88,7 @@ class immutable_value {
   }
 
   std::string to_string() const {
-    switch (type_.id) {
-      case type_id::D_BOOL: {
-        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(ptr_))
-            + ")";
-      }
-      case type_id::D_CHAR: {
-        return "char(" + std::to_string(*reinterpret_cast<const char*>(ptr_))
-            + ")";
-      }
-      case type_id::D_SHORT: {
-        return "short(" + std::to_string(*reinterpret_cast<const short*>(ptr_))
-            + ")";
-      }
-      case type_id::D_INT: {
-        return "int(" + std::to_string(*reinterpret_cast<const int*>(ptr_))
-            + ")";
-      }
-      case type_id::D_LONG: {
-        return "long(" + std::to_string(*reinterpret_cast<const long*>(ptr_))
-            + ")";
-      }
-      case type_id::D_FLOAT: {
-        return "float(" + std::to_string(*reinterpret_cast<const float*>(ptr_))
-            + ")";
-      }
-      case type_id::D_DOUBLE: {
-        return "double("
-            + std::to_string(*reinterpret_cast<const double*>(ptr_)) + ")";
-      }
-      case type_id::D_STRING: {
-        return "string("
-            + immutable_byte_string(reinterpret_cast<uint8_t*>(ptr_),
-                                    type_.size).to_string() + ")";
-      }
-      case type_id::D_NONE: {
-        return "none()";
-      }
-      default: {
-        THROW(illegal_state_exception, "Invalid type id");
-      }
-    }
+    return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
   }
 
  protected:

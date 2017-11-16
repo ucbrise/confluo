@@ -47,16 +47,16 @@ TEST_F(AggregatedReflogTest, GetSetTest) {
   trigger_log log;
   log.push_back(
       new trigger("filter", "trigger1", "", aggregate_id::D_SUM, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(10), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
   log.push_back(
       new trigger("filter", "trigger2", "", aggregate_id::D_MIN, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(10), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
   log.push_back(
       new trigger("filter", "trigger3", "", aggregate_id::D_MAX, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(10), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
   log.push_back(
       new trigger("filter", "trigger4", "", aggregate_id::D_CNT, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(INT64_C(10)), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(INT64_C(10)), 1));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(0, 0));
@@ -112,16 +112,16 @@ TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
   trigger_log log;
   log.push_back(
       new trigger("filter", "trigger1", "", aggregate_id::D_SUM, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(10), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
   log.push_back(
       new trigger("filter", "trigger2", "", aggregate_id::D_MIN, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(10), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
   log.push_back(
       new trigger("filter", "trigger3", "", aggregate_id::D_MAX, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(10), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
   log.push_back(
       new trigger("filter", "trigger4", "", aggregate_id::D_CNT, "col", 0,
-                  INT_TYPE, relop_id::GT, numeric(INT64_C(10)), 1));
+                  INT_TYPE, reational_op_id::GT, numeric(INT64_C(10)), 1));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(0, 0));

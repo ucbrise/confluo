@@ -1,12 +1,13 @@
 #ifndef DIALOG_BYTE_STRING_H_
 #define DIALOG_BYTE_STRING_H_
 
+#include "types/byte_string.h"
+
 #include <cstring>
 #include <cstdio>
 #include <type_traits>
 
 #include "byte_utils.h"
-#include "byte_string.h"
 
 using namespace utils;
 

@@ -13,9 +13,9 @@
 #include "field.h"
 #include "column.h"
 #include "record.h"
-#include "data_types.h"
-#include "immutable_value.h"
 #include "string_utils.h"
+#include "types/data_types.h"
+#include "types/immutable_value.h"
 
 using namespace utils;
 
@@ -116,7 +116,7 @@ class schema_t {
   std::string to_string() const {
     std::string str = "{\n";
     for (auto col : columns_) {
-      str += ("\t" + col.name() + ": " + col.type().to_string() + ",\n");
+      str += ("\t" + col.name() + ": " + col.type().name() + ",\n");
     }
     str += "}";
     return str;
@@ -134,9 +134,9 @@ class schema_builder {
       : user_provided_ts_(false),
         offset_(0) {
     // Every schema must have timestamp
-    columns_.push_back(
-        column_t(0, 0, LONG_TYPE, "TIMESTAMP", LONG_TYPE.zero(),
-                 LONG_TYPE.max()));
+    mutable_value min(LONG_TYPE, LONG_TYPE.zero());
+    mutable_value max(LONG_TYPE, LONG_TYPE.max());
+    columns_.push_back(column_t(0, 0, LONG_TYPE, "TIMESTAMP", min, max));
     offset_ += LONG_TYPE.size;
   }
 
@@ -159,8 +159,6 @@ class schema_builder {
 
   inline schema_builder& add_column(const data_type& type,
                                     const std::string& name) {
-    if (type.id == type_id::D_STRING)
-      return add_column(type, name, mutable_value(), mutable_value());
     return add_column(type, name, mutable_value(type, type.min()),
                       mutable_value(type, type.max()));
   }

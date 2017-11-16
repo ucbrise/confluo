@@ -1,11 +1,12 @@
 #ifndef TEST_MUTABLE_VALUE_TEST_H_
 #define TEST_MUTABLE_VALUE_TEST_H_
 
+#include "../dialog/types/mutable_value.h"
+
 #include <cmath>
 
 #include "test_utils.h"
 #include "gtest/gtest.h"
-#include "mutable_value.h"
 
 using namespace ::dialog;
 
@@ -21,9 +22,9 @@ class MutableValueTest : public testing::Test {
 
 TEST_F(MutableValueTest, BoolValueTest) {
   mutable_value n1(true), n2(false), n3(true);
-  ASSERT_EQ(n1.type().id, type_id::D_BOOL);
-  ASSERT_EQ(n2.type().id, type_id::D_BOOL);
-  ASSERT_EQ(n3.type().id, type_id::D_BOOL);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_BOOL);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_BOOL);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_BOOL);
 
   ASSERT_EQ(*reinterpret_cast<const bool*>(n1.ptr()), true);
   ASSERT_EQ(*reinterpret_cast<const bool*>(n2.ptr()), false);
@@ -53,9 +54,9 @@ TEST_F(MutableValueTest, BoolValueTest) {
 TEST_F(MutableValueTest, CharValueTest) {
   mutable_value n1(static_cast<int8_t>(5)), n2(static_cast<int8_t>(2)), n3(
       static_cast<int8_t>(5));
-  ASSERT_EQ(n1.type().id, type_id::D_CHAR);
-  ASSERT_EQ(n2.type().id, type_id::D_CHAR);
-  ASSERT_EQ(n3.type().id, type_id::D_CHAR);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_CHAR);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_CHAR);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_CHAR);
 
   ASSERT_EQ(*reinterpret_cast<const int8_t*>(n1.ptr()), static_cast<int8_t>(5));
   ASSERT_EQ(*reinterpret_cast<const int8_t*>(n2.ptr()), static_cast<int8_t>(2));
@@ -94,9 +95,9 @@ TEST_F(MutableValueTest, ShortValueTest) {
 
   mutable_value n1(static_cast<int16_t>(5)), n2(static_cast<int16_t>(2)), n3(
       static_cast<int16_t>(5));
-  ASSERT_EQ(n1.type().id, type_id::D_SHORT);
-  ASSERT_EQ(n2.type().id, type_id::D_SHORT);
-  ASSERT_EQ(n3.type().id, type_id::D_SHORT);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_SHORT);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_SHORT);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_SHORT);
 
   ASSERT_EQ(*reinterpret_cast<const int16_t*>(n1.ptr()),
             static_cast<int16_t>(5));
@@ -137,9 +138,9 @@ TEST_F(MutableValueTest, ShortValueTest) {
 TEST_F(MutableValueTest, IntValueTest) {
   mutable_value n1(static_cast<int32_t>(5)), n2(static_cast<int32_t>(2)), n3(
       static_cast<int32_t>(5));
-  ASSERT_EQ(n1.type().id, type_id::D_INT);
-  ASSERT_EQ(n2.type().id, type_id::D_INT);
-  ASSERT_EQ(n3.type().id, type_id::D_INT);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_INT);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_INT);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_INT);
 
   ASSERT_EQ(*reinterpret_cast<const int32_t*>(n1.ptr()),
             static_cast<int32_t>(5));
@@ -180,9 +181,9 @@ TEST_F(MutableValueTest, IntValueTest) {
 TEST_F(MutableValueTest, LongValueTest) {
   mutable_value n1(static_cast<int64_t>(5)), n2(static_cast<int64_t>(2)), n3(
       static_cast<int64_t>(5));
-  ASSERT_EQ(n1.type().id, type_id::D_LONG);
-  ASSERT_EQ(n2.type().id, type_id::D_LONG);
-  ASSERT_EQ(n3.type().id, type_id::D_LONG);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_LONG);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_LONG);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_LONG);
 
   ASSERT_EQ(*reinterpret_cast<const int64_t*>(n1.ptr()),
             static_cast<int64_t>(5));
@@ -223,9 +224,9 @@ TEST_F(MutableValueTest, LongValueTest) {
 TEST_F(MutableValueTest, FloatValueTest) {
   mutable_value n1(static_cast<float>(5.2)), n2(static_cast<float>(2.6)), n3(
       static_cast<float>(5.2));
-  ASSERT_EQ(n1.type().id, type_id::D_FLOAT);
-  ASSERT_EQ(n2.type().id, type_id::D_FLOAT);
-  ASSERT_EQ(n3.type().id, type_id::D_FLOAT);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_FLOAT);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_FLOAT);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_FLOAT);
 
   ASSERT_EQ(*reinterpret_cast<const float*>(n1.ptr()), static_cast<float>(5.2));
   ASSERT_EQ(*reinterpret_cast<const float*>(n2.ptr()), static_cast<float>(2.6));
@@ -268,9 +269,9 @@ TEST_F(MutableValueTest, FloatValueTest) {
 TEST_F(MutableValueTest, DoubleValueTest) {
   mutable_value n1(static_cast<double>(5.2)), n2(static_cast<double>(2.6)), n3(
       static_cast<double>(5.2));
-  ASSERT_EQ(n1.type().id, type_id::D_DOUBLE);
-  ASSERT_EQ(n2.type().id, type_id::D_DOUBLE);
-  ASSERT_EQ(n3.type().id, type_id::D_DOUBLE);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_DOUBLE);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_DOUBLE);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_DOUBLE);
 
   ASSERT_EQ(*reinterpret_cast<const double*>(n1.ptr()),
             static_cast<double>(5.2));
@@ -319,9 +320,9 @@ TEST_F(MutableValueTest, DoubleValueTest) {
 TEST_F(MutableValueTest, StringValueTest) {
   std::string s1 = "abc", s2 = "123", s3 = "abc";
   mutable_value n1(s1), n2(s2), n3(s3);
-  ASSERT_EQ(n1.type().id, type_id::D_STRING);
-  ASSERT_EQ(n2.type().id, type_id::D_STRING);
-  ASSERT_EQ(n3.type().id, type_id::D_STRING);
+  ASSERT_EQ(n1.type().id, primitive_type_id::D_STRING);
+  ASSERT_EQ(n2.type().id, primitive_type_id::D_STRING);
+  ASSERT_EQ(n3.type().id, primitive_type_id::D_STRING);
 
   ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n1.ptr()), n1.type().size) == s1);
   ASSERT_TRUE(std::string(reinterpret_cast<const char*>(n2.ptr()), n2.type().size) == s2);

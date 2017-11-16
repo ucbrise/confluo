@@ -5,10 +5,10 @@
 #include <string>
 
 #include "atomic.h"
-#include "byte_string.h"
 #include "exceptions.h"
 #include "flatten.h"
 #include "reflog.h"
+#include "types/byte_string.h"
 
 namespace dialog {
 namespace index {

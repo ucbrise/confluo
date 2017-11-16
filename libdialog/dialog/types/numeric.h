@@ -1,9 +1,9 @@
 #ifndef DIALOG_NUMERIC_H_
 #define DIALOG_NUMERIC_H_
 
-#include "data_types.h"
 #include "immutable_value.h"
 #include "string_utils.h"
+#include "types/data_types.h"
 
 namespace dialog {
 
@@ -57,56 +57,26 @@ class numeric {
 
   numeric(const data_type& type, void* data)
       : type_(type) {
-    if (!is_numeric(type_))
+    if (!type_.is_numeric())
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
     memcpy(data_, data, type_.size);
   }
 
   numeric(const immutable_value& val)
       : type_(val.type()) {
-    if (!is_numeric(type_))
+    if (!type_.is_numeric())
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
     memcpy(data_, val.ptr(), type_.size);
   }
 
   static numeric parse(const std::string& str, const data_type& type) {
-    switch (type.id) {
-      case type_id::D_BOOL: {
-        bool val = string_utils::lexical_cast<bool>(str);
-        return numeric(val);
-      }
-      case type_id::D_CHAR: {
-        int8_t val = string_utils::lexical_cast<int8_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_SHORT: {
-        int16_t val = string_utils::lexical_cast<int16_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_INT: {
-        int32_t val = string_utils::lexical_cast<int32_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_LONG: {
-        int64_t val = string_utils::lexical_cast<int64_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_FLOAT: {
-        float val = string_utils::lexical_cast<float>(str);
-        return numeric(val);
-      }
-      case type_id::D_DOUBLE: {
-        double val = string_utils::lexical_cast<double>(str);
-        return numeric(val);
-      }
-      default: {
-        THROW(parse_exception, "Could not parse numeric value");
-      }
-    }
+    mutable_raw_data data(type.size);
+    type.parse_op()(str, data);
+    return numeric(type, data.ptr);
   }
 
-  inline data to_data() const {
-    return data(data_, type_.size);
+  inline immutable_raw_data to_data() const {
+    return immutable_raw_data(data_, type_.size);
   }
 
   data_type const& type() const {
@@ -114,118 +84,118 @@ class numeric {
   }
 
   // Relational operators
-  static bool relop(relop_id id, const numeric& first, const numeric& second) {
+  static bool relop(reational_op_id id, const numeric& first,
+                    const numeric& second) {
     if (first.type_ != second.type_)
       THROW(
           invalid_operation_exception,
-          "Comparing values of different types: (" + first.type().to_string()
-              + ", " + second.type().to_string() + ")");
+          "Comparing values of different types: (" + first.type().name() + ", "
+              + second.type().name() + ")");
     return first.type_.relop(id)(first.to_data(), second.to_data());
   }
 
   friend inline bool operator <(const numeric& first, const numeric& second) {
-    return relop(relop_id::LT, first, second);
+    return relop(reational_op_id::LT, first, second);
   }
 
   friend inline bool operator <=(const numeric& first, const numeric& second) {
-    return relop(relop_id::LE, first, second);
+    return relop(reational_op_id::LE, first, second);
   }
 
   friend inline bool operator >(const numeric& first, const numeric& second) {
-    return relop(relop_id::GT, first, second);
+    return relop(reational_op_id::GT, first, second);
   }
 
   friend inline bool operator >=(const numeric& first, const numeric& second) {
-    return relop(relop_id::GE, first, second);
+    return relop(reational_op_id::GE, first, second);
   }
 
   friend inline bool operator ==(const numeric& first, const numeric& second) {
-    return relop(relop_id::EQ, first, second);
+    return relop(reational_op_id::EQ, first, second);
   }
 
   friend inline bool operator !=(const numeric& first, const numeric& second) {
-    return relop(relop_id::NEQ, first, second);
+    return relop(reational_op_id::NEQ, first, second);
   }
 
   // Arithmetic operations
-  static inline numeric unaryop(unaryop_id id, const numeric& n) {
+  static inline numeric unaryop(unary_op_id id, const numeric& n) {
     numeric result(n.type());
     result.type_.unaryop(id)(result.data_, n.to_data());
     return result;
   }
 
   friend inline numeric operator-(const numeric& n) {
-    return unaryop(unaryop_id::NEGATIVE, n);
+    return unaryop(unary_op_id::NEGATIVE, n);
   }
 
   friend inline numeric operator+(const numeric& n) {
-    return unaryop(unaryop_id::POSITIVE, n);
+    return unaryop(unary_op_id::POSITIVE, n);
   }
 
   friend inline numeric operator~(const numeric& n) {
-    return unaryop(unaryop_id::BW_NOT, n);
+    return unaryop(unary_op_id::BW_NOT, n);
   }
 
-  static numeric binaryop(binaryop_id id, const numeric& first,
+  static numeric binaryop(binary_op_id id, const numeric& first,
                           const numeric& second) {
     if (first.type() != second.type())
       THROW(
           invalid_operation_exception,
-          "Cannot operate on values of different types: ("
-              + first.type().to_string() + ", " + second.type().to_string()
-              + ")");
+          "Cannot operate on values of different types: (" + first.type().name()
+              + ", " + second.type().name() + ")");
     numeric result(first.type());
     result.type_.binaryop(id)(result.data_, first.to_data(), second.to_data());
     return result;
   }
 
   friend inline numeric operator+(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::ADD, first, second);
+    return binaryop(binary_op_id::ADD, first, second);
   }
 
   friend inline numeric operator-(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::SUBTRACT, first, second);
+    return binaryop(binary_op_id::SUBTRACT, first, second);
   }
 
   friend inline numeric operator*(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::MULTIPLY, first, second);
+    return binaryop(binary_op_id::MULTIPLY, first, second);
   }
 
   friend inline numeric operator/(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::DIVIDE, first, second);
+    return binaryop(binary_op_id::DIVIDE, first, second);
   }
 
   friend inline numeric operator%(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::MODULO, first, second);
+    return binaryop(binary_op_id::MODULO, first, second);
   }
 
   friend inline numeric operator&(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::BW_AND, first, second);
+    return binaryop(binary_op_id::BW_AND, first, second);
   }
 
   friend inline numeric operator|(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::BW_OR, first, second);
+    return binaryop(binary_op_id::BW_OR, first, second);
   }
 
   friend inline numeric operator^(const numeric& first, const numeric& second) {
-    return binaryop(binaryop_id::BW_XOR, first, second);
+    return binaryop(binary_op_id::BW_XOR, first, second);
   }
 
   friend inline numeric operator<<(const numeric& first,
                                    const numeric& second) {
-    return binaryop(binaryop_id::BW_LSHIFT, first, second);
+    return binaryop(binary_op_id::BW_LSHIFT, first, second);
   }
 
   friend inline numeric operator>>(const numeric& first,
                                    const numeric& second) {
-    return binaryop(binaryop_id::BW_RSHIFT, first, second);
+    return binaryop(binary_op_id::BW_RSHIFT, first, second);
   }
 
   numeric& operator=(const immutable_value& other) {
     type_ = other.type();
-    if (!is_numeric(type_))
+    if (!type_.is_numeric())
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
-    type_.unaryop(unaryop_id::ASSIGN)(data_, other.to_data());
+    type_.unaryop(unary_op_id::ASSIGN)(data_, other.to_data());
     return *this;
   }
 
@@ -288,39 +258,7 @@ class numeric {
   }
 
   std::string to_string() const {
-    switch (type_.id) {
-      case type_id::D_BOOL: {
-        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(data_))
-            + ")";
-      }
-      case type_id::D_CHAR: {
-        return "char(" + std::to_string(*reinterpret_cast<const int8_t*>(data_))
-            + ")";
-      }
-      case type_id::D_SHORT: {
-        return "short("
-            + std::to_string(*reinterpret_cast<const int16_t*>(data_)) + ")";
-      }
-      case type_id::D_INT: {
-        return "int(" + std::to_string(*reinterpret_cast<const int32_t*>(data_))
-            + ")";
-      }
-      case type_id::D_LONG: {
-        return "long("
-            + std::to_string(*reinterpret_cast<const int64_t*>(data_)) + ")";
-      }
-      case type_id::D_FLOAT: {
-        return "float(" + std::to_string(*reinterpret_cast<const float*>(data_))
-            + ")";
-      }
-      case type_id::D_DOUBLE: {
-        return "double("
-            + std::to_string(*reinterpret_cast<const double*>(data_)) + ")";
-      }
-      default: {
-        THROW(illegal_state_exception, "Not a numeric type");
-      }
-    }
+    return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
   }
 
  private:

@@ -1,7 +1,8 @@
 #ifndef TEST_DATA_TYPES_TEST_H_
 #define TEST_DATA_TYPES_TEST_H_
 
-#include "data_types.h"
+#include "../dialog/types/data_types.h"
+
 #include "gtest/gtest.h"
 
 using namespace ::dialog;
@@ -24,14 +25,14 @@ TEST_F(DataTypesTest, GetterTest) {
 
   ASSERT_TRUE(BOOL_TYPE != CHAR_TYPE);
 
-  ASSERT_TRUE(t1.to_string() == "bool");
-  ASSERT_TRUE(t2.to_string() == "char");
-  ASSERT_TRUE(t3.to_string() == "short");
-  ASSERT_TRUE(t4.to_string() == "int");
-  ASSERT_TRUE(t5.to_string() == "long");
-  ASSERT_TRUE(t6.to_string() == "float");
-  ASSERT_TRUE(t7.to_string() == "double");
-  ASSERT_TRUE(t8.to_string() == "none");
+  ASSERT_TRUE(t1.name() == "bool");
+  ASSERT_TRUE(t2.name() == "char");
+  ASSERT_TRUE(t3.name() == "short");
+  ASSERT_TRUE(t4.name() == "int");
+  ASSERT_TRUE(t5.name() == "long");
+  ASSERT_TRUE(t6.name() == "float");
+  ASSERT_TRUE(t7.name() == "double");
+  ASSERT_TRUE(t8.name() == "none");
 }
 
 #endif /* TEST_DATA_TYPES_TEST_H_ */

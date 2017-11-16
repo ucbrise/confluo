@@ -7,9 +7,10 @@
 
 #include "schema.h"
 #include "storage.h"
-#include "numeric.h"
 #include "aggregate_types.h"
 #include "io_utils.h"
+#include "types/numeric.h"
+#include "types/type_manager.h"
 
 using namespace utils;
 
@@ -66,8 +67,9 @@ struct filter_info {
 struct trigger_info {
  public:
   trigger_info(const std::string& trigger_name, const std::string& filter_name,
-               aggregate_id agg_id, const std::string& field_name, relop_id op,
-               const numeric& threshold, uint64_t periodicity_ms)
+               aggregate_id agg_id, const std::string& field_name,
+               reational_op_id op, const numeric& threshold,
+               uint64_t periodicity_ms)
       : trigger_id_(trigger_name),
         filter_id_(filter_name),
         agg_id_(agg_id),
@@ -89,7 +91,7 @@ struct trigger_info {
     return agg_id_;
   }
 
-  relop_id op() const {
+  reational_op_id op() const {
     return op_;
   }
 
@@ -110,7 +112,7 @@ struct trigger_info {
   std::string filter_id_;
   aggregate_id agg_id_;
   std::string field_name_;
-  relop_id op_;
+  reational_op_id op_;
   numeric threshold_;
   uint64_t periodicity_ms_;
 };
@@ -137,50 +139,7 @@ class metadata_writer {
       io_utils::write(out_, schema.columns().size());
       for (auto& col : schema.columns()) {
         io_utils::write(out_, col.name());
-        io_utils::write(out_, col.type().id);
-        io_utils::write(out_, col.type().size);
-        switch (col.type().id) {
-          case type_id::D_BOOL: {
-            io_utils::write(out_, col.min().as<bool>());
-            io_utils::write(out_, col.max().as<bool>());
-            break;
-          }
-          case type_id::D_CHAR: {
-            io_utils::write(out_, col.min().as<int8_t>());
-            io_utils::write(out_, col.max().as<int8_t>());
-            break;
-          }
-          case type_id::D_SHORT: {
-            io_utils::write(out_, col.min().as<int16_t>());
-            io_utils::write(out_, col.max().as<int16_t>());
-            break;
-          }
-          case type_id::D_INT: {
-            io_utils::write(out_, col.min().as<int32_t>());
-            io_utils::write(out_, col.max().as<int32_t>());
-            break;
-          }
-          case type_id::D_LONG: {
-            io_utils::write(out_, col.min().as<int64_t>());
-            io_utils::write(out_, col.max().as<int64_t>());
-            break;
-          }
-          case type_id::D_FLOAT: {
-            io_utils::write(out_, col.min().as<float>());
-            io_utils::write(out_, col.max().as<float>());
-            break;
-          }
-          case type_id::D_DOUBLE: {
-            io_utils::write(out_, col.min().as<double>());
-            io_utils::write(out_, col.max().as<double>());
-            break;
-          }
-          case type_id::D_STRING: {
-            break;
-          }
-          default:
-            THROW(invalid_operation_exception, "Invalid data type");
-        }
+        col.type().serialize(out_);
       }
       io_utils::flush(out_);
     }
@@ -209,7 +168,7 @@ class metadata_writer {
 
   void write_trigger_info(const std::string& trigger_name,
                           const std::string& filter_name, aggregate_id agg_id,
-                          const std::string& field_name, relop_id op,
+                          const std::string& field_name, reational_op_id op,
                           const numeric& threshold,
                           const uint64_t periodicity_ms) {
     if (id_ != storage::storage_id::D_IN_MEMORY) {
@@ -220,41 +179,8 @@ class metadata_writer {
       io_utils::write(out_, agg_id);
       io_utils::write(out_, field_name);
       io_utils::write(out_, op);
-      type_id id = threshold.type().id;
-      io_utils::write(out_, id);
-      switch (id) {
-        case type_id::D_BOOL: {
-          io_utils::write(out_, threshold.as<bool>());
-          break;
-        }
-        case type_id::D_CHAR: {
-          io_utils::write(out_, threshold.as<int8_t>());
-          break;
-        }
-        case type_id::D_SHORT: {
-          io_utils::write(out_, threshold.as<int16_t>());
-          break;
-        }
-        case type_id::D_INT: {
-          io_utils::write(out_, threshold.as<int32_t>());
-          break;
-        }
-        case type_id::D_LONG: {
-          io_utils::write(out_, threshold.as<int64_t>());
-          break;
-        }
-        case type_id::D_FLOAT: {
-          io_utils::write(out_, threshold.as<float>());
-          break;
-        }
-        case type_id::D_DOUBLE: {
-          io_utils::write(out_, threshold.as<double>());
-          break;
-        }
-        default:
-          THROW(invalid_operation_exception,
-                "Threshold is not of numeric type");
-      }
+      threshold.type().serialize(out_);
+      threshold.type().serialize_op()(out_, threshold.to_data());
       io_utils::write(out_, periodicity_ms);
       io_utils::flush(out_);
     }
@@ -282,59 +208,8 @@ class metadata_reader {
     schema_builder builder;
     for (size_t i = 0; i < ncolumns; i++) {
       std::string name = io_utils::read<std::string>(in_);
-      data_type type;
-      type.id = io_utils::read<type_id>(in_);
-      type.size = io_utils::read<size_t>(in_);
-      switch (type.id) {
-        case type_id::D_BOOL: {
-          mutable_value min(io_utils::read<bool>(in_));
-          mutable_value max(io_utils::read<bool>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_CHAR: {
-          mutable_value min(io_utils::read<int8_t>(in_));
-          mutable_value max(io_utils::read<int8_t>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_SHORT: {
-          mutable_value min(io_utils::read<int16_t>(in_));
-          mutable_value max(io_utils::read<int16_t>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_INT: {
-          mutable_value min(io_utils::read<int32_t>(in_));
-          mutable_value max(io_utils::read<int32_t>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_LONG: {
-          mutable_value min(io_utils::read<int64_t>(in_));
-          mutable_value max(io_utils::read<int64_t>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_FLOAT: {
-          mutable_value min(io_utils::read<float>(in_));
-          mutable_value max(io_utils::read<float>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_DOUBLE: {
-          mutable_value min(io_utils::read<double>(in_));
-          mutable_value max(io_utils::read<double>(in_));
-          builder.add_column(type, name, min, max);
-          break;
-        }
-        case type_id::D_STRING: {
-          builder.add_column(type, name);
-          break;
-        }
-        default:
-          THROW(invalid_operation_exception, "Invalid data type");
-      }
+      data_type type = data_type::deserialize(in_);
+      builder.add_column(type, name);
     }
     return schema_t(builder.get_columns());
   }
@@ -356,41 +231,11 @@ class metadata_reader {
     std::string filter_name = io_utils::read<std::string>(in_);
     aggregate_id agg_id = io_utils::read<aggregate_id>(in_);
     std::string field_name = io_utils::read<std::string>(in_);
-    relop_id op = io_utils::read<relop_id>(in_);
-    type_id tid = io_utils::read<type_id>(in_);
-    numeric threshold;
-    switch (tid) {
-      case type_id::D_BOOL: {
-        threshold = io_utils::read<bool>(in_);
-        break;
-      }
-      case type_id::D_CHAR: {
-        threshold = io_utils::read<int8_t>(in_);
-        break;
-      }
-      case type_id::D_SHORT: {
-        threshold = io_utils::read<int16_t>(in_);
-        break;
-      }
-      case type_id::D_INT: {
-        threshold = io_utils::read<int32_t>(in_);
-        break;
-      }
-      case type_id::D_LONG: {
-        threshold = io_utils::read<int64_t>(in_);
-        break;
-      }
-      case type_id::D_FLOAT: {
-        threshold = io_utils::read<float>(in_);
-        break;
-      }
-      case type_id::D_DOUBLE: {
-        threshold = io_utils::read<double>(in_);
-        break;
-      }
-      default:
-        THROW(invalid_operation_exception, "Threshold is not of numeric type");
-    }
+    reational_op_id op = io_utils::read<reational_op_id>(in_);
+    data_type type = data_type::deserialize(in_);
+    mutable_raw_data threshold_data(type.size);
+    type.deserialize_op()(in_, threshold_data);
+    numeric threshold(type, threshold_data.ptr);
     uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
     return trigger_info(trigger_name, filter_name, agg_id, field_name, op,
                         threshold, periodicity_ms);

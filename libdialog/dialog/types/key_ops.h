@@ -2,19 +2,21 @@
 #define DIALOG_KEY_OPS_H_
 
 #include <type_traits>
-#include "byte_string.h"
+
+#include "raw_data.h"
+#include "types/byte_string.h"
 
 namespace dialog {
 
-typedef byte_string (*key_op)(const data& v, double bucket_size);
+typedef byte_string (*key_op_t)(const immutable_raw_data& v, double bucket_size);
 
 template<typename T>
-byte_string key_transform(const data& v, double bucket_size) {
+byte_string key_transform(const immutable_raw_data& v, double bucket_size) {
   return byte_string(static_cast<T>(v.as<T>() / bucket_size));
 }
 
 template<>
-byte_string key_transform<float>(const data& v, double bucket_size) {
+byte_string key_transform<float>(const immutable_raw_data& v, double bucket_size) {
   float val = v.as<float>() / bucket_size;
   if (val < std::numeric_limits<int32_t>::min()) {
     return byte_string(std::numeric_limits<int32_t>::min());
@@ -25,7 +27,7 @@ byte_string key_transform<float>(const data& v, double bucket_size) {
 }
 
 template<>
-byte_string key_transform<double>(const data& v, double bucket_size) {
+byte_string key_transform<double>(const immutable_raw_data& v, double bucket_size) {
   double val = v.as<double>() / bucket_size;
   if (val < std::numeric_limits<int64_t>::min()) {
     return byte_string(std::numeric_limits<int64_t>::min());
@@ -36,12 +38,12 @@ byte_string key_transform<double>(const data& v, double bucket_size) {
 }
 
 template<>
-byte_string key_transform<std::string>(const data& v, double bucket_size) {
+byte_string key_transform<std::string>(const immutable_raw_data& v, double bucket_size) {
   return byte_string(v.as<std::string>());
 }
 
 template<>
-byte_string key_transform<void>(const data& data, double bucket_size) {
+byte_string key_transform<void>(const immutable_raw_data& data, double bucket_size) {
   THROW(unsupported_exception, "key_transform not supported for none type");
 }
 
