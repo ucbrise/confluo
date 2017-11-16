@@ -35,6 +35,7 @@
 #include "task_test.h"
 #include "thread_manager_test.h"
 #include "tiered_index_test.h"
+#include "timeseries_db_test.h"
 #include "trigger_compiler_test.h"
 #include "trigger_parser_test.h"
 

@@ -31,7 +31,7 @@ class dialog_store {
    * @return The id of the table
    */
   int64_t add_table(const std::string& table_name,
-                    const std::vector<column_t>& schema,
+                   const std::vector<column_t>& schema,
                     const storage::storage_id id) {
     optional<management_exception> ex;
     storage::storage_mode mode = storage::STORAGE_MODES[id];
