@@ -164,8 +164,7 @@ class filter {
 
     size_t version = log_offset + block.nrecords * record_size;
     for (size_t j = 0; j < local_aggs.size(); j++)
-      if (triggers_.at(j)->is_valid()
-          && local_aggs[j].type().id != type_id::D_NONE)
+      if (triggers_.at(j)->is_valid() && !local_aggs[j].type().is_none())
         refs->update_aggregate(tid, j, local_aggs[j], version);
   }
 

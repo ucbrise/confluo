@@ -37,7 +37,7 @@ TEST_F(TableMetadataTest, ReadWriteTest) {
     ASSERT_EQ(s[i].name(), schema[i].name());
     ASSERT_EQ(s[i].type().id, schema[i].type().id);
     ASSERT_EQ(s[i].type().size, schema[i].type().size);
-    if (s[i].type().id != type_id::D_STRING) {
+    if (s[i].type().id != primitive_type_id::D_STRING) {
       ASSERT_TRUE(s[i].min() == schema[i].min());
       ASSERT_TRUE(s[i].max() == schema[i].max());
     }

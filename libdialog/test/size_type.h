@@ -24,8 +24,12 @@ class size_type {
     bytes = value;
   }
 
-  static std::string to_string() {
-    return "size type";
+  static std::string name() {
+    return "size_type";
+  }
+
+  std::string to_string() const {
+    return std::to_string(bytes) + "b";
   }
 
   static size_type from_string(const std::string& str) {
@@ -58,11 +62,15 @@ class size_type {
     out.set(size_type::from_string(str));
   }
 
+  static std::string size_to_string(const immutable_raw_data& data) {
+    return data.as<size_type>().to_string();
+  }
+
   static mutable_raw_data parse_bytes(uint64_t _bytes) {
     return mutable_raw_data(sizeof(size_type)).set(_bytes);
   }
 
-  std::string repr() {
+  std::string repr() const {
     return std::to_string(bytes);
   }
 

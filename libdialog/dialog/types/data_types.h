@@ -88,43 +88,61 @@ struct data_type {
     return DATA_TYPES[id].parse_op;
   }
 
+  inline const to_string_op_t& to_string_op() const {
+    return DATA_TYPES[id].to_string_op;
+  }
+
+  inline bool is_valid() const {
+    return id >= 1 && id < DATA_TYPES.size();
+  }
+
+  inline bool is_none() const {
+    return id == 0;
+  }
+
   inline bool is_primitive() const {
     return id >= 1 && id <= 8;
   }
 
-  inline std::string to_string() const {
+  inline bool is_numeric() const {
+    return DATA_TYPES[id].is_numeric;
+  }
+
+  inline std::string name() const {
     return DATA_TYPES[id].name;
   }
 
+  inline bool is_bounded() const {
+    return DATA_TYPES[id].min != nullptr && DATA_TYPES[id].max != nullptr;
+  }
+
+  inline void serialize(std::ostream& out) const {
+    out.write(reinterpret_cast<const char*>(&id), sizeof(size_t));
+    out.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
+  }
+
+  inline static data_type deserialize(std::istream& in) {
+    size_t id, size;
+    in.read(reinterpret_cast<char*>(&id), sizeof(size_t));
+    in.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+    return data_type(id, size);
+  }
+
   inline static data_type from_string(const std::string& str) {
-    std::string tstr = utils::string_utils::to_upper(str);
-    std::regex str_re("STRING\\(([0-9]+)\\)");
-    std::smatch str_matches;
-    if (tstr == "BOOL") {
-      return data_type(1, sizeof(bool));
-    } else if (tstr == "CHAR") {
-      return data_type(2, sizeof(int8_t));
-    } else if (tstr == "SHORT") {
-      return data_type(3, sizeof(int16_t));
-    } else if (tstr == "INT") {
-      return data_type(4, sizeof(int32_t));
-    } else if (tstr == "LONG") {
-      return data_type(5, sizeof(int64_t));
-    } else if (tstr == "FLOAT") {
-      return data_type(6, sizeof(float));
-    } else if (tstr == "DOUBLE") {
-      return data_type(7, sizeof(double));
-    } else if (std::regex_search(tstr, str_matches, str_re)) {
-      return data_type(8, std::stoul(str_matches[1].str()));
+    std::regex type_re("([a-zA-Z_]+)(?:\\(([[:digit:]]*)\\))?");
+    std::smatch type_parts;
+    if (std::regex_match(str, type_parts, type_re)) {
+      std::string name = type_parts[1].str();
+      size_t size = 0;
+      if (type_parts.size() == 3 && type_parts[2].str() != "") {
+        size = std::stoull(type_parts[2].str());
+      }
+      size_t id = find_type_properties(name);
+      return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
     }
-    return data_type(0, 0);
+    THROW(parse_exception, "Malformed type name " + str);
   }
 };
-
-// type-ids 1-7 are numeric
-static inline bool is_numeric(const data_type& type) {
-  return type.id >= 1 && type.id <= 7;
-}
 
 }
 

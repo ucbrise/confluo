@@ -22,8 +22,19 @@ class ip_address {
     address = value;
   }
 
-  static std::string to_string() {
+  static std::string name() {
     return "ip_address";
+  }
+
+  std::string to_string() const {
+    uint8_t bytes[4];
+    bytes[0] = address & 0xFF;
+    bytes[1] = (address >> 8) & 0xFF;
+    bytes[2] = (address >> 16) & 0xFF;
+    bytes[3] = (address >> 24) & 0xFF;
+    char buf[100];
+    sprintf(buf, "%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
+    return std::string(buf);
   }
 
   static ip_address from_string(const std::string& str) {
@@ -56,6 +67,10 @@ class ip_address {
 
   static mutable_raw_data parse_ip_value(uint32_t val) {
     return mutable_raw_data(sizeof(ip_address)).set(val);
+  }
+
+  static std::string ip_to_string(const immutable_raw_data& data) {
+    return data.as<ip_address>().to_string();
   }
 
   uint32_t get_address() const {

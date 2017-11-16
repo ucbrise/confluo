@@ -88,51 +88,7 @@ class immutable_value {
   }
 
   std::string to_string() const {
-    if (type_manager::is_valid_id(type_.id) && !type_manager::is_primitive(type_.id)) {
-        return type_.to_string() + "()";
-    }
-    switch (type_.id) {
-      case type_id::D_BOOL: {
-        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(ptr_))
-            + ")";
-      }
-      case type_id::D_CHAR: {
-        return "char(" + std::to_string(*reinterpret_cast<const char*>(ptr_))
-            + ")";
-      }
-      case type_id::D_SHORT: {
-        return "short(" + std::to_string(*reinterpret_cast<const short*>(ptr_))
-            + ")";
-      }
-      case type_id::D_INT: {
-        return "int(" + std::to_string(*reinterpret_cast<const int*>(ptr_))
-            + ")";
-      }
-      case type_id::D_LONG: {
-        return "long(" + std::to_string(*reinterpret_cast<const long*>(ptr_))
-            + ")";
-      }
-      case type_id::D_FLOAT: {
-        return "float(" + std::to_string(*reinterpret_cast<const float*>(ptr_))
-            + ")";
-      }
-      case type_id::D_DOUBLE: {
-        return "double("
-            + std::to_string(*reinterpret_cast<const double*>(ptr_)) + ")";
-      }
-      case type_id::D_STRING: {
-        return "string("
-            + immutable_byte_string(reinterpret_cast<uint8_t*>(ptr_),
-                                    type_.size).to_string() + ")";
-      }
-      case type_id::D_NONE: {
-        return "none()";
-      }
-      default: {
-        THROW(illegal_state_exception, "Invalid type id");
-        //return data_types[type_.id].to_string() + "(" + data(ptr, type_.size).as<T> + ")"; 
-      }
-    }
+    return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
   }
 
  protected:

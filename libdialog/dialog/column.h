@@ -158,8 +158,9 @@ class column_t {
                    is_indexed(), idx_state_.id(), idx_state_.bucket_size());
   }
 
-  /*
+  /**
    * Takes a snapshot of the column data
+   *
    * @return A new column that is the snapshot
    */
   column_snapshot snapshot() const {

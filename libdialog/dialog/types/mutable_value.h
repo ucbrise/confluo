@@ -12,8 +12,7 @@ namespace dialog {
 class mutable_value : public immutable_value {
  public:
   mutable_value(data_type type = NONE_TYPE)
-      : immutable_value(
-          type, type.id == type_id::D_NONE ? nullptr : new uint8_t[type.size]) {
+      : immutable_value(type, type.is_none() ? nullptr : new uint8_t[type.size]) {
   }
 
   mutable_value(const data_type& type, immutable_raw_data value)
@@ -22,9 +21,12 @@ class mutable_value : public immutable_value {
   }
 
   mutable_value(const data_type& type, const void* value)
-      : immutable_value(type, new uint8_t[type.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_,
-                                       immutable_raw_data(value, type.size));
+      : immutable_value(type,
+                        value == nullptr ? nullptr : new uint8_t[type.size]()) {
+    if (value != nullptr) {
+      type_.unaryop(unary_op_id::ASSIGN)(ptr_,
+                                         immutable_raw_data(value, type.size));
+    }
   }
 
   mutable_value(bool value)
@@ -81,8 +83,12 @@ class mutable_value : public immutable_value {
   }
 
   mutable_value(const mutable_value& other)
-      : immutable_value(other.type_, new uint8_t[other.type_.size]()) {
-    type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
+      : immutable_value(
+          other.type_,
+          other.ptr_ == nullptr ? nullptr : new uint8_t[other.type_.size]()) {
+    if (other.ptr_ != nullptr) {
+      type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
+    }
   }
 
   mutable_value(mutable_value&& other)
@@ -98,7 +104,7 @@ class mutable_value : public immutable_value {
   }
 
   ~mutable_value() {
-    if (ptr_ != nullptr && type_.id != type_id::D_NONE)
+    if (ptr_ != nullptr && !type_.is_none())
       delete[] reinterpret_cast<uint8_t*>(ptr_);
   }
 
@@ -195,7 +201,7 @@ class mutable_value : public immutable_value {
   // TODO: Add more assignment operators
   mutable_value& operator=(const immutable_value& other) {
     type_ = other.type();
-    if (type_.id != type_id::D_NONE) {
+    if (!type_.is_none()) {
       if (ptr_ != nullptr)
         delete[] reinterpret_cast<uint8_t*>(ptr_);
       ptr_ = new uint8_t[type_.size];
@@ -206,7 +212,7 @@ class mutable_value : public immutable_value {
 
   mutable_value& operator=(const mutable_value& other) {
     type_ = other.type();
-    if (type_.id != type_id::D_NONE) {
+    if (!type_.is_none()) {
       if (ptr_ != nullptr)
         delete[] reinterpret_cast<uint8_t*>(ptr_);
       ptr_ = new uint8_t[type_.size];

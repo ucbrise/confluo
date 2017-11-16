@@ -116,7 +116,7 @@ class schema_t {
   std::string to_string() const {
     std::string str = "{\n";
     for (auto col : columns_) {
-      str += ("\t" + col.name() + ": " + col.type().to_string() + ",\n");
+      str += ("\t" + col.name() + ": " + col.type().name() + ",\n");
     }
     str += "}";
     return str;
@@ -159,8 +159,6 @@ class schema_builder {
 
   inline schema_builder& add_column(const data_type& type,
                                     const std::string& name) {
-    if (type.id == type_id::D_STRING)
-      return add_column(type, name, mutable_value(), mutable_value());
     return add_column(type, name, mutable_value(type, type.min()),
                       mutable_value(type, type.max()));
   }

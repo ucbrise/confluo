@@ -57,52 +57,22 @@ class numeric {
 
   numeric(const data_type& type, void* data)
       : type_(type) {
-    if (!is_numeric(type_))
+    if (!type_.is_numeric())
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
     memcpy(data_, data, type_.size);
   }
 
   numeric(const immutable_value& val)
       : type_(val.type()) {
-    if (!is_numeric(type_))
+    if (!type_.is_numeric())
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
     memcpy(data_, val.ptr(), type_.size);
   }
 
   static numeric parse(const std::string& str, const data_type& type) {
-    switch (type.id) {
-      case type_id::D_BOOL: {
-        bool val = string_utils::lexical_cast<bool>(str);
-        return numeric(val);
-      }
-      case type_id::D_CHAR: {
-        int8_t val = string_utils::lexical_cast<int8_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_SHORT: {
-        int16_t val = string_utils::lexical_cast<int16_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_INT: {
-        int32_t val = string_utils::lexical_cast<int32_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_LONG: {
-        int64_t val = string_utils::lexical_cast<int64_t>(str);
-        return numeric(val);
-      }
-      case type_id::D_FLOAT: {
-        float val = string_utils::lexical_cast<float>(str);
-        return numeric(val);
-      }
-      case type_id::D_DOUBLE: {
-        double val = string_utils::lexical_cast<double>(str);
-        return numeric(val);
-      }
-      default: {
-        THROW(parse_exception, "Could not parse numeric value");
-      }
-    }
+    mutable_raw_data data(type.size);
+    type.parse_op()(str, data);
+    return numeric(type, data.ptr);
   }
 
   inline immutable_raw_data to_data() const {
@@ -114,12 +84,13 @@ class numeric {
   }
 
   // Relational operators
-  static bool relop(reational_op_id id, const numeric& first, const numeric& second) {
+  static bool relop(reational_op_id id, const numeric& first,
+                    const numeric& second) {
     if (first.type_ != second.type_)
       THROW(
           invalid_operation_exception,
-          "Comparing values of different types: (" + first.type().to_string()
-              + ", " + second.type().to_string() + ")");
+          "Comparing values of different types: (" + first.type().name() + ", "
+              + second.type().name() + ")");
     return first.type_.relop(id)(first.to_data(), second.to_data());
   }
 
@@ -171,9 +142,8 @@ class numeric {
     if (first.type() != second.type())
       THROW(
           invalid_operation_exception,
-          "Cannot operate on values of different types: ("
-              + first.type().to_string() + ", " + second.type().to_string()
-              + ")");
+          "Cannot operate on values of different types: (" + first.type().name()
+              + ", " + second.type().name() + ")");
     numeric result(first.type());
     result.type_.binaryop(id)(result.data_, first.to_data(), second.to_data());
     return result;
@@ -223,7 +193,7 @@ class numeric {
 
   numeric& operator=(const immutable_value& other) {
     type_ = other.type();
-    if (!is_numeric(type_))
+    if (!type_.is_numeric())
       THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
     type_.unaryop(unary_op_id::ASSIGN)(data_, other.to_data());
     return *this;
@@ -288,39 +258,7 @@ class numeric {
   }
 
   std::string to_string() const {
-    switch (type_.id) {
-      case type_id::D_BOOL: {
-        return "bool(" + std::to_string(*reinterpret_cast<const bool*>(data_))
-            + ")";
-      }
-      case type_id::D_CHAR: {
-        return "char(" + std::to_string(*reinterpret_cast<const int8_t*>(data_))
-            + ")";
-      }
-      case type_id::D_SHORT: {
-        return "short("
-            + std::to_string(*reinterpret_cast<const int16_t*>(data_)) + ")";
-      }
-      case type_id::D_INT: {
-        return "int(" + std::to_string(*reinterpret_cast<const int32_t*>(data_))
-            + ")";
-      }
-      case type_id::D_LONG: {
-        return "long("
-            + std::to_string(*reinterpret_cast<const int64_t*>(data_)) + ")";
-      }
-      case type_id::D_FLOAT: {
-        return "float(" + std::to_string(*reinterpret_cast<const float*>(data_))
-            + ")";
-      }
-      case type_id::D_DOUBLE: {
-        return "double("
-            + std::to_string(*reinterpret_cast<const double*>(data_)) + ")";
-      }
-      default: {
-        THROW(illegal_state_exception, "Not a numeric type");
-      }
-    }
+    return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
   }
 
  private:

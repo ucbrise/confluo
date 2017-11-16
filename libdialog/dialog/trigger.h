@@ -23,8 +23,8 @@ struct trigger {
   trigger(const std::string& trigger_name, const std::string& filter_name,
           const std::string& trigger_expr, aggregate_id agg,
           const std::string& field_name, size_t field_idx,
-          const data_type& field_type, reational_op_id op, const numeric& threshold,
-          const uint64_t periodicity_ms)
+          const data_type& field_type, reational_op_id op,
+          const numeric& threshold, const uint64_t periodicity_ms)
       : trigger_name_(trigger_name),
         filter_name_(filter_name),
         trigger_expr_(trigger_expr),
@@ -134,7 +134,7 @@ struct trigger {
   numeric agg(const numeric& a, const schema_snapshot& s, void* data) {
     numeric b(s.get(data, field_idx_));
     return aggregators[agg_id_].agg(
-        a.type().id == type_id::D_NONE ? zero() : a,
+        a.type().is_none() ? zero() : a,
         agg_id_ == aggregate_id::D_CNT ? count_one : b);
   }
 

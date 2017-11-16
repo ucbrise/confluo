@@ -28,12 +28,8 @@ class type_manager {
    * @return Wrapper around data type
    */
   static data_type get_type(const std::string& type_name, size_t size = 0) {
-    for (unsigned int i = 0; i < DATA_TYPES.size(); i++) {
-      if (type_name.compare(DATA_TYPES[i].name) == 0) {
-        return data_type(i, size ? size : DATA_TYPES[i].size);
-      }
-    }
-    return data_type();
+    size_t id = find_type_properties(type_name);
+    return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
   }
 
   /**
@@ -44,8 +40,8 @@ class type_manager {
    * @return Wrapper around data type
    */
   static data_type get_type(size_t id, size_t size = 0) {
-    if (is_valid_id(id)) {
-      return data_type(id, size ? size : DATA_TYPES[id].size);
+    if (id < DATA_TYPES.size()) {
+      return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
     }
     return data_type();
   }

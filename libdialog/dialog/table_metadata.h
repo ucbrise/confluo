@@ -139,12 +139,7 @@ class metadata_writer {
       io_utils::write(out_, schema.columns().size());
       for (auto& col : schema.columns()) {
         io_utils::write(out_, col.name());
-        io_utils::write(out_, col.type().id);
-        io_utils::write(out_, col.type().size);
-        if (col.type().id != type_id::D_STRING) {
-          col.type().serialize_op()(out_, col.min().to_data());
-          col.type().serialize_op()(out_, col.max().to_data());
-        }
+        col.type().serialize(out_);
       }
       io_utils::flush(out_);
     }
@@ -184,10 +179,7 @@ class metadata_writer {
       io_utils::write(out_, agg_id);
       io_utils::write(out_, field_name);
       io_utils::write(out_, op);
-      size_t id = threshold.type().id;
-      size_t size = threshold.type().size;
-      io_utils::write(out_, id);
-      io_utils::write(out_, size);
+      threshold.type().serialize(out_);
       threshold.type().serialize_op()(out_, threshold.to_data());
       io_utils::write(out_, periodicity_ms);
       io_utils::flush(out_);
@@ -216,19 +208,8 @@ class metadata_reader {
     schema_builder builder;
     for (size_t i = 0; i < ncolumns; i++) {
       std::string name = io_utils::read<std::string>(in_);
-      data_type type;
-      type.id = io_utils::read<size_t>(in_);
-      type.size = io_utils::read<size_t>(in_);
-      if (type.id != type_id::D_STRING) {
-        mutable_raw_data min_raw(type.size), max_raw(type.size);
-        type.deserialize_op()(in_, min_raw);
-        type.deserialize_op()(in_, max_raw);
-        mutable_value min(type, std::move(min_raw));
-        mutable_value max(type, std::move(max_raw));
-        builder.add_column(type, name, min, max);
-      } else {
-        builder.add_column(type, name);
-      }
+      data_type type = data_type::deserialize(in_);
+      builder.add_column(type, name);
     }
     return schema_t(builder.get_columns());
   }
@@ -251,13 +232,10 @@ class metadata_reader {
     aggregate_id agg_id = io_utils::read<aggregate_id>(in_);
     std::string field_name = io_utils::read<std::string>(in_);
     reational_op_id op = io_utils::read<reational_op_id>(in_);
-    size_t tid = io_utils::read<size_t>(in_);
-    size_t size = io_utils::read<size_t>(in_);
-    numeric threshold;
-    data_type type(tid, size);
-    mutable_raw_data threshold_data(size);
+    data_type type = data_type::deserialize(in_);
+    mutable_raw_data threshold_data(type.size);
     type.deserialize_op()(in_, threshold_data);
-    threshold = numeric(type, const_cast<void*>(threshold_data.ptr));
+    numeric threshold(type, threshold_data.ptr);
     uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
     return trigger_info(trigger_name, filter_name, agg_id, field_name, op,
                         threshold, periodicity_ms);

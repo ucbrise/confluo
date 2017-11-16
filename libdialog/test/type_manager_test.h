@@ -16,26 +16,32 @@
 
 using namespace ::dialog;
 
-type_properties type_def("ip_address", sizeof(ip_address), &limits::int_min,
-                         &limits::int_max, &limits::int_one, &limits::int_zero,
-                         get_relops(), get_unaryops(), get_binaryops(),
-                         get_keyops(), &ip_address::parse_ip,
-                         &dialog::serialize<ip_address>,
-                         &dialog::deserialize<ip_address>);
+type_properties ip_type_properties("ip_address", sizeof(ip_address),
+                                   &limits::int_min, &limits::int_max,
+                                   &limits::int_one, &limits::int_zero, false,
+                                   get_relops(), get_unaryops(),
+                                   get_binaryops(), get_keyops(),
+                                   &ip_address::parse_ip,
+                                   &ip_address::ip_to_string,
+                                   &dialog::serialize<ip_address>,
+                                   &dialog::deserialize<ip_address>);
 
-type_properties size_type_ops("size_type", sizeof(size_type),
-                              &limits::long_long_min, &limits::long_long_max,
-                              &limits::long_long_one, &limits::long_long_zero,
-                              get_reops(), get_unarops(), get_binarops(),
-                              get_keops(), &size_type::parse_bytes,
-                              &dialog::serialize<size_type>,
-                              &dialog::deserialize<size_type>);
+type_properties size_type_properties("size_type", sizeof(size_type),
+                                     &limits::ulong_min,
+                                     &limits::ulong_max,
+                                     &limits::ulong_one,
+                                     &limits::ulong_zero, true, get_reops(),
+                                     get_unarops(), get_binarops(), get_keops(),
+                                     &size_type::parse_bytes,
+                                     &size_type::size_to_string,
+                                     &dialog::serialize<size_type>,
+                                     &dialog::deserialize<size_type>);
 
 class TypeManagerTest : public testing::Test {
  public:
   static std::vector<column_t> schema() {
-    type_manager::register_type(type_def);
-    type_manager::register_type(size_type_ops);
+    type_manager::register_type(ip_type_properties);
+    type_manager::register_type(size_type_properties);
 
     addr_type = type_manager::get_type("ip_address");
     sz_type = type_manager::get_type("size_type");
@@ -110,13 +116,13 @@ TEST_F(TypeManagerTest, RegisterTest) {
   ASSERT_EQ(limits::int_min, *reinterpret_cast<int*>(addr_type.min()));
   ASSERT_EQ(limits::int_max, *reinterpret_cast<int*>(addr_type.max()));
   ASSERT_EQ(limits::int_zero, *reinterpret_cast<int*>(addr_type.zero()));
-  ASSERT_STREQ("ip_address", addr_type.to_string().c_str());
+  ASSERT_STREQ("ip_address", addr_type.name().c_str());
   ASSERT_EQ(9, dialog::type_manager::get_type("ip_address").id);
-  ASSERT_STREQ("ip_address", s[1].type().to_string().c_str());
+  ASSERT_STREQ("ip_address", s[1].type().name().c_str());
 
-  ASSERT_STREQ("size_type", sz_type.to_string().c_str());
+  ASSERT_STREQ("size_type", sz_type.name().c_str());
   ASSERT_EQ(10, dialog::type_manager::get_type("size_type").id);
-  ASSERT_STREQ("size_type", s[3].type().to_string().c_str());
+  ASSERT_STREQ("size_type", s[3].type().name().c_str());
 
 }
 
@@ -280,8 +286,9 @@ TEST_F(TypeManagerTest, CompilerTest) {
   cexp.insert(m5);
   cexp.insert(m6);
 
-  ASSERT_STREQ("A==ip_address() or B>ip_address()C==size_type()",
-               cexp.to_string().c_str());
+  ASSERT_STREQ(
+      "A==ip_address(4.4.4.4) or B>ip_address(0.0.0.7)C==size_type(4096b)",
+      cexp.to_string().c_str());
 
 }
 
@@ -363,8 +370,8 @@ TEST_F(TypeManagerTest, DataTypesGetterTest) {
   ASSERT_TRUE(type_manager::get_type("size_type") == sz_type);
   ASSERT_FALSE(addr_type == sz_type);
 
-  ASSERT_TRUE(addr_type.to_string() == "ip_address");
-  ASSERT_TRUE(sz_type.to_string() == "size_type");
+  ASSERT_TRUE(addr_type.name() == "ip_address");
+  ASSERT_TRUE(sz_type.name() == "size_type");
 }
 
 TEST_F(TypeManagerTest, SerializeTest) {

@@ -112,9 +112,7 @@ class dialog_table {
               bool success = col.set_indexing();
               if (success) {
                 uint16_t index_id = UINT16_MAX;
-                if (col.type().id == type_id::D_BOOL) {
-                  index_id = indexes_.push_back(new radix_index(1, 2));
-                } else if (type_manager::is_valid_id(col.type().id)) {
+                if (col.type().is_valid()) {
                   index_id = indexes_.push_back(new radix_index(
                           col.type().size, 256));
                 } else {
