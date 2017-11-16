@@ -9,7 +9,7 @@
 #include "primitive_types.h"
 #include "string_utils.h"
 
-namespace dialog {
+namespace confluo {
 
 struct type_properties {
   std::string name;

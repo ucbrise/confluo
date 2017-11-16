@@ -9,7 +9,7 @@
 
 using namespace utils;
 
-namespace dialog {
+namespace confluo {
 
 class immutable_value {
  public:

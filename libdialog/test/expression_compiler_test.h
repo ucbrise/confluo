@@ -5,8 +5,8 @@
 #include "schema.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog::parser;
-using namespace ::dialog;
+using namespace ::confluo::parser;
+using namespace ::confluo;
 
 class ExpressionCompilerTest : public testing::Test {
  public:

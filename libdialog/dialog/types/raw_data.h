@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace dialog {
+namespace confluo {
 
 struct immutable_raw_data {
   const void* ptr;

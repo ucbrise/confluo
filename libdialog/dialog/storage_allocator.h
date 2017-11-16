@@ -6,7 +6,7 @@
 #include "mmap_utils.h"
 #include "ptr_metadata.h"
 
-namespace dialog {
+namespace confluo {
 namespace storage {
 
 using namespace ::utils;

@@ -14,7 +14,7 @@
 
 using namespace utils;
 
-namespace dialog {
+namespace confluo {
 
 enum metadata_type
   : uint32_t {

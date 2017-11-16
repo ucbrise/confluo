@@ -6,7 +6,7 @@
 #include "raw_data.h"
 #include "types/byte_string.h"
 
-namespace dialog {
+namespace confluo {
 
 typedef byte_string (*key_op_t)(const immutable_raw_data& v, double bucket_size);
 

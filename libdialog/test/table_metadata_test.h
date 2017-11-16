@@ -4,7 +4,7 @@
 #include "table_metadata.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class TableMetadataTest : public testing::Test {
 };

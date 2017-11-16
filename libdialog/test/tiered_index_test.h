@@ -7,8 +7,8 @@
 
 #include <thread>
 
-using namespace ::dialog::index;
-using namespace ::dialog::monolog;
+using namespace ::confluo::index;
+using namespace ::confluo::monolog;
 
 typedef monolog_exp2<uint64_t, 24> entry_list;
 

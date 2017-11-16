@@ -11,7 +11,7 @@
 
 #include <thrift/TToString.h>
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 int _krpc_storage_modeValues[] = {
   RPC_IN_MEMORY,

@@ -10,7 +10,7 @@
 
 #include "schema.h"
 
-namespace dialog {
+namespace confluo {
 namespace parser {
 
 namespace qi = boost::spirit::qi;

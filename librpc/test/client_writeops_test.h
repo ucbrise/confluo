@@ -10,8 +10,8 @@
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
-using namespace ::dialog::rpc;
-using namespace ::dialog;
+using namespace ::confluo::rpc;
+using namespace ::confluo;
 
 class ClientWriteOpsTest : public testing::Test {
  public:

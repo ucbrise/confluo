@@ -5,8 +5,8 @@
 #include "aggregated_reflog.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
-using namespace ::dialog::monitor;
+using namespace ::confluo;
+using namespace ::confluo::monitor;
 
 class AggregatedReflogTest : public testing::Test {
  public:

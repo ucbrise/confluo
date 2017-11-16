@@ -5,7 +5,7 @@
 #include "config_utils.h"
 #include "configuration_params.h"
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class rpc_configuration_params {

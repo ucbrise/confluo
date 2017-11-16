@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "reflog.h"
 
-namespace dialog {
+namespace confluo {
 
 template<typename V>
 class string_map {

@@ -5,12 +5,12 @@
 #include <regex>
 #include <stdio.h>
 
-#include "../dialog/types/immutable_value.h"
+#include "types/immutable_value.h"
 #include "types/byte_string.h"
 #include "types/data_types.h"
 #include "exceptions.h"
 
-namespace dialog {
+namespace confluo {
 
 class ip_address {
  public:

@@ -6,7 +6,7 @@
 #include "types/immutable_value.h"
 #include "types/raw_data.h"
 
-namespace dialog {
+namespace confluo {
 
 class schema_snapshot {
  public:

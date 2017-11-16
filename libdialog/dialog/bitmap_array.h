@@ -5,7 +5,7 @@
 
 #include <limits>
 
-namespace dialog {
+namespace confluo {
 
 // Reference to a value
 template<typename bitmap_array_impl>

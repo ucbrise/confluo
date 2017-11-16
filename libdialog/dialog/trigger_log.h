@@ -4,7 +4,7 @@
 #include "monolog_exp2.h"
 #include "trigger.h"
 
-namespace dialog {
+namespace confluo {
 
 typedef monolog::monolog_exp2<monitor::trigger*> trigger_log;
 

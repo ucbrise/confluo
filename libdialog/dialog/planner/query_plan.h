@@ -5,7 +5,7 @@
 #include "parser/expression_compiler.h"
 #include "planner/query_ops.h"
 
-namespace dialog {
+namespace confluo {
 namespace planner {
 
 class query_plan : public std::vector<std::shared_ptr<query_op>> {

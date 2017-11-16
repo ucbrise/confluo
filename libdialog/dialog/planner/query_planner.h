@@ -10,7 +10,7 @@
 #include "planner/query_ops.h"
 #include "planner/query_plan.h"
 
-namespace dialog {
+namespace confluo {
 namespace planner {
 
 class query_planner {

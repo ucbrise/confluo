@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "parser/schema_parser.h"
 
-using namespace ::dialog::parser;
+using namespace ::confluo::parser;
 
 class SchemaParserTest : public testing::Test {
 };

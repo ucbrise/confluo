@@ -8,7 +8,7 @@
 #include "types/byte_string.h"
 #include "types/numeric.h"
 
-namespace dialog {
+namespace confluo {
 namespace monitor {
 
 class alert_index {

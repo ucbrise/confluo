@@ -9,7 +9,7 @@
 
 #include "dialog_types.h"
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 template <class Protocol_>
 uint32_t rpc_column::read(Protocol_* iprot) {

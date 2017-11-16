@@ -11,7 +11,7 @@
 
 // TODO: Add documentation
 
-namespace dialog {
+namespace confluo {
 namespace monolog {
 
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456, size_t BUFFER_SIZE = 1048576>

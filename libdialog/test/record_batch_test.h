@@ -4,7 +4,7 @@
 #include "record_batch.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class RecordBatchTest : public testing::Test {
  public:

@@ -1,7 +1,7 @@
 #ifndef DIALOG_DATA_LOG_CONSTANTS_H_
 #define DIALOG_DATA_LOG_CONSTANTS_H_
 
-namespace dialog {
+namespace confluo {
 
 class data_log_constants {
  public:

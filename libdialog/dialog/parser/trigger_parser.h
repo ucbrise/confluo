@@ -8,7 +8,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 
-namespace dialog {
+namespace confluo {
 namespace parser {
 
 struct parsed_trigger {
@@ -22,13 +22,13 @@ struct parsed_trigger {
 }
 
 BOOST_FUSION_ADAPT_STRUCT(
-    dialog::parser::parsed_trigger,
+    confluo::parser::parsed_trigger,
     (std::string, agg)
     (std::string, field_name)
     (std::string, relop)
     (std::string, threshold))
 
-namespace dialog {
+namespace confluo {
 namespace parser {
 
 namespace qi = boost::spirit::qi;

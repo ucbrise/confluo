@@ -10,7 +10,7 @@
 #include "task_pool.h"
 #include "file_utils.h"
 
-namespace dialog {
+namespace confluo {
 
 class dialog_store {
  public:

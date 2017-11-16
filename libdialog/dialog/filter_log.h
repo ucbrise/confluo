@@ -4,7 +4,7 @@
 #include "monolog_exp2.h"
 #include "filter.h"
 
-namespace dialog {
+namespace confluo {
 
 typedef monolog::monolog_exp2<monitor::filter*> filter_log;
 

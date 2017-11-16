@@ -4,7 +4,7 @@
 #include "constants.h"
 #include "config_utils.h"
 
-namespace dialog {
+namespace confluo {
 
 class configuration_params {
  public:

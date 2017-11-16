@@ -23,7 +23,7 @@
 
 #define PROT_RW PROT_READ | PROT_WRITE
 
-namespace dialog {
+namespace confluo {
 namespace storage {
 
 // TODO: Add documentation

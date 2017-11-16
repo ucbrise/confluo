@@ -6,7 +6,7 @@
  */
 #include "dialog_constants.h"
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 const dialogConstants g_dialog_constants;
 

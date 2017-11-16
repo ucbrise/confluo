@@ -10,7 +10,7 @@
 #include "string_utils.h"
 #include "types/mutable_value.h"
 
-namespace dialog {
+namespace confluo {
 
 class column_t {
  public:

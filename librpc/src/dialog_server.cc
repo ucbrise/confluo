@@ -9,8 +9,8 @@ using namespace ::apache::thrift::server;
 
 using boost::shared_ptr;
 
-using namespace ::dialog;
-using namespace ::dialog::rpc;
+using namespace ::confluo;
+using namespace ::confluo::rpc;
 using namespace ::utils;
 
 int main(int argc, char **argv) {

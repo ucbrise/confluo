@@ -1,14 +1,14 @@
 #ifndef TEST_MUTABLE_VALUE_TEST_H_
 #define TEST_MUTABLE_VALUE_TEST_H_
 
-#include "../dialog/types/mutable_value.h"
+#include "types/mutable_value.h"
 
 #include <cmath>
 
 #include "test_utils.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class MutableValueTest : public testing::Test {
  public:

@@ -3,7 +3,7 @@
 
 #include "exceptions.h"
 
-namespace dialog {
+namespace confluo {
 
 template<typename T>
 class optional {

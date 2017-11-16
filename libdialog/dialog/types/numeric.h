@@ -5,7 +5,7 @@
 #include "string_utils.h"
 #include "types/data_types.h"
 
-namespace dialog {
+namespace confluo {
 
 class numeric {
  public:

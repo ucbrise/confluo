@@ -7,7 +7,7 @@
 #include "schema.h"
 #include "trigger_parser.h"
 
-namespace dialog {
+namespace confluo {
 namespace parser {
 
 struct compiled_trigger {

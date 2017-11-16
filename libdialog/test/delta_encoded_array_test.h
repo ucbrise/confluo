@@ -4,7 +4,7 @@
 #include "delta_encoded_array.h"
 #include "gtest/gtest.h"
 
-using namespace dialog;
+using namespace confluo;
 
 class DeltaEncodedArrayTest : public testing::Test {
  public:

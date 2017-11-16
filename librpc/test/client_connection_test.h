@@ -6,8 +6,8 @@
 #include "configuration_params.h"
 #include "rpc_dialog_client.h"
 
-using namespace ::dialog::rpc;
-using namespace ::dialog;
+using namespace ::confluo::rpc;
+using namespace ::confluo;
 
 class ClientConnectionTest : public testing::Test {
 };

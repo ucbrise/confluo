@@ -7,7 +7,7 @@
 #include "record_offset_range.h"
 #include "lazy/stream.h"
 
-namespace dialog {
+namespace confluo {
 namespace planner {
 
 enum query_op_type {

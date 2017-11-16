@@ -6,7 +6,7 @@
 
 #include "configuration_params.h"
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class rpc_record_batch_builder {

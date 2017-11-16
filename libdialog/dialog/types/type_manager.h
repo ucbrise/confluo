@@ -4,7 +4,7 @@
 #include "type_properties.h"
 #include "exceptions.h"
 
-namespace dialog {
+namespace confluo {
 
 class type_manager {
  public:

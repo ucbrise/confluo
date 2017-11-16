@@ -4,7 +4,7 @@
 #include "data_log_constants.h"
 #include "monolog_linear.h"
 
-namespace dialog {
+namespace confluo {
 
 typedef monolog::monolog_linear<uint8_t,
         data_log_constants::MAX_BLOCKS,

@@ -4,7 +4,7 @@
 #include "monolog_exp2.h"
 #include "radix_tree.h"
 
-namespace dialog {
+namespace confluo {
 
 typedef monolog::monolog_exp2<index::radix_index*> index_log;
 

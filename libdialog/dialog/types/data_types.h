@@ -11,7 +11,7 @@
 #include "primitive_types.h"
 #include "type_properties.h"
 
-namespace dialog {
+namespace confluo {
 
 struct data_type {
  public:

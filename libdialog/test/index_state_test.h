@@ -4,7 +4,7 @@
 #include "index_state.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class IndexStateTest : public testing::Test {
 };

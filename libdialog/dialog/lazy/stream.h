@@ -5,7 +5,7 @@
 #include <functional>
 #include <unordered_set>
 
-namespace dialog {
+namespace confluo {
 namespace lazy {
 
 template<typename T>

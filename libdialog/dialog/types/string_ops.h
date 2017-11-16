@@ -7,7 +7,7 @@
 
 using namespace utils;
 
-namespace dialog {
+namespace confluo {
 
 typedef void (*parse_op_t)(const std::string&, mutable_raw_data&);
 typedef std::string (*to_string_op_t)(const immutable_raw_data&);

@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-namespace dialog {
+namespace confluo {
 namespace test {
 class test_utils {
  public:

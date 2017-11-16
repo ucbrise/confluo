@@ -6,8 +6,8 @@
 #include <thread>
 #include "monolog.h"
 
-using namespace ::dialog::monolog;
-using namespace ::dialog::storage;
+using namespace ::confluo::monolog;
+using namespace ::confluo::storage;
 
 class MonoLogTest : public testing::Test {
  public:

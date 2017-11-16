@@ -7,7 +7,7 @@
 #include "types/data_types.h"
 #include "types/immutable_value.h"
 
-namespace dialog {
+namespace confluo {
 
 struct field_t {
   field_t(uint16_t idx, const data_type& type, void* data, bool indexed,

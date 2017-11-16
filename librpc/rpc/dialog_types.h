@@ -18,7 +18,7 @@
 #include <thrift/cxxfunctional.h>
 
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 enum rpc_storage_mode {
   RPC_IN_MEMORY = 0,

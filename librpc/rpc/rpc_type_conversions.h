@@ -7,7 +7,7 @@
 #include "schema.h"
 #include "storage.h"
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 class rpc_type_conversions {
  public:

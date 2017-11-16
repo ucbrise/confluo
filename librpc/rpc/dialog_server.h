@@ -27,7 +27,7 @@ using namespace ::apache::thrift::server;
 
 using boost::shared_ptr;
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class dialog_service_handler : virtual public dialog_serviceIf {

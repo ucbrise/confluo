@@ -1,11 +1,11 @@
 #ifndef TEST_DATA_TYPES_TEST_H_
 #define TEST_DATA_TYPES_TEST_H_
 
-#include "../dialog/types/data_types.h"
+#include "types/data_types.h"
 
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class DataTypesTest : public testing::Test {
 };

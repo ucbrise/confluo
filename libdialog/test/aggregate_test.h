@@ -4,7 +4,7 @@
 #include "aggregate.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class AggregateTest : public testing::Test {
 };

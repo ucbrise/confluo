@@ -6,7 +6,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace dialog;
+using namespace confluo;
 
 class BitmapArrayTest : public testing::Test {
  public:

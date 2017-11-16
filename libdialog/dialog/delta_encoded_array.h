@@ -9,7 +9,7 @@
 
 using namespace utils;
 
-namespace dialog {
+namespace confluo {
 
 template<typename T, uint32_t sampling_rate = 128>
 class delta_encoded_array {

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <iterator>
 
-namespace dialog {
+namespace confluo {
 
 class record_offset_range {
  public:

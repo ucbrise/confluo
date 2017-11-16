@@ -11,7 +11,7 @@
 #include <thrift/async/TConcurrentClientSyncInfo.h>
 #include "dialog_types.h"
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 #ifdef _WIN32
   #pragma warning( push )

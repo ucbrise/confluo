@@ -4,7 +4,7 @@
 #include "configuration_params.h"
 #include "atomic.h"
 
-namespace dialog {
+namespace confluo {
 namespace storage {
 
 class memory_stat {

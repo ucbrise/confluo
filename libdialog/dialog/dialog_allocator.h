@@ -3,7 +3,7 @@
 
 #include "storage_allocator.h"
 
-namespace dialog {
+namespace confluo {
 
 static storage::storage_allocator ALLOCATOR;
 

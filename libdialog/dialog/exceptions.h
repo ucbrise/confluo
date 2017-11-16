@@ -6,7 +6,7 @@
 
 #include "error_handling.h"
 
-namespace dialog {
+namespace confluo {
 
 #define DEFINE_EXCEPTION(name)\
 class name : public std::exception {\

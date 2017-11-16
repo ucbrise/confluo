@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "task_pool.h"
 
-using namespace dialog;
+using namespace confluo;
 
 class TaskTest: public testing::Test {
 };

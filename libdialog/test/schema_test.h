@@ -4,7 +4,7 @@
 #include "schema.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class SchemaTest : public testing::Test {
  public:

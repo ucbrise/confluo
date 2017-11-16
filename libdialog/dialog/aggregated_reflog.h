@@ -5,7 +5,7 @@
 #include "reflog.h"
 #include "trigger_log.h"
 
-namespace dialog {
+namespace confluo {
 
 class aggregated_reflog : public reflog {
  public:

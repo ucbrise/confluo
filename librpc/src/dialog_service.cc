@@ -7,7 +7,7 @@
 #include "dialog_service.h"
 #include "dialog_service.tcc"
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 
 dialog_service_register_handler_args::~dialog_service_register_handler_args() throw() {

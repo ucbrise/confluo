@@ -2,9 +2,9 @@
 #define TEST_MEMPOOL_STAT_TEST_H_
 
 #include "gtest/gtest.h"
-#include "../dialog/memory_stat.h"
+#include "memory_stat.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class MemoryStatTest : public testing::Test {
 };

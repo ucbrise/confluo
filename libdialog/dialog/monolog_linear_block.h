@@ -6,7 +6,7 @@
 #include "ptr.h"
 #include "storage.h"
 
-namespace dialog {
+namespace confluo {
 namespace monolog {
 
 using namespace ::utils;

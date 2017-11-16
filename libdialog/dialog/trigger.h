@@ -4,7 +4,7 @@
 #include "aggregate.h"
 #include "schema_snapshot.h"
 
-namespace dialog {
+namespace confluo {
 namespace monitor {
 struct trigger {
  public:

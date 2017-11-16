@@ -8,7 +8,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace ::dialog::parser;
+using namespace ::confluo::parser;
 
 class ExpressionParserTest : public testing::Test {
  public:

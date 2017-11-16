@@ -7,7 +7,7 @@
 
 using boost::shared_ptr;
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class rpc_alert_stream {

@@ -7,9 +7,9 @@
 
 #include "filter.h"
 
-using namespace ::dialog::monitor;
-using namespace ::dialog::monolog;
-using namespace ::dialog;
+using namespace ::confluo::monitor;
+using namespace ::confluo::monolog;
+using namespace ::confluo;
 
 // Stateless filter
 inline bool filter1(const record_t& r) {

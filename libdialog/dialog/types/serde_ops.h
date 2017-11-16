@@ -3,7 +3,7 @@
 
 #include "raw_data.h"
 
-namespace dialog {
+namespace confluo {
 
 typedef void (*serialize_op_t)(std::ostream&, const immutable_raw_data&);
 typedef void (*deserialize_op_t)(std::istream&, mutable_raw_data&);

@@ -6,7 +6,7 @@
 #include "exceptions.h"
 #include "raw_data.h"
 
-namespace dialog {
+namespace confluo {
 
 /**
  * Relational operator

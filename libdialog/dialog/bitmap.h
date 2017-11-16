@@ -10,7 +10,7 @@
 
 #include "bit_utils.h"
 
-namespace dialog {
+namespace confluo {
 
 class bitmap {
  public:

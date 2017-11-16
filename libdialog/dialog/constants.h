@@ -3,7 +3,7 @@
 
 #include <thread>
 
-namespace dialog {
+namespace confluo {
 
 class constants {
  public:

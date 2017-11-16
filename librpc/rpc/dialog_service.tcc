@@ -9,7 +9,7 @@
 #define dialog_service_TCC
 
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 
 template <class Protocol_>

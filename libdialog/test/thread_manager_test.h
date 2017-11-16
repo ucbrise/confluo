@@ -4,7 +4,7 @@
 #include "thread_manager.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class ThreadManagerTest : public testing::Test {
 

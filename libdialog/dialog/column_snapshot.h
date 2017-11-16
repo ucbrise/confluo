@@ -5,7 +5,7 @@
 
 #include "types/data_types.h"
 
-namespace dialog {
+namespace confluo {
 
 struct column_snapshot {
   data_type type;

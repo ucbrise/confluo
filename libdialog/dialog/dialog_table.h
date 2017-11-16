@@ -34,14 +34,14 @@
 #include "task_pool.h"
 #include "types/type_manager.h"
 
-using namespace ::dialog::monolog;
-using namespace ::dialog::index;
-using namespace ::dialog::monitor;
-using namespace ::dialog::parser;
-using namespace ::dialog::planner;
+using namespace ::confluo::monolog;
+using namespace ::confluo::index;
+using namespace ::confluo::monitor;
+using namespace ::confluo::parser;
+using namespace ::confluo::planner;
 using namespace ::utils;
 
-namespace dialog {
+namespace confluo {
 
 class dialog_table {
  public:

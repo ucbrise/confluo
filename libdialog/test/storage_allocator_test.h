@@ -5,7 +5,7 @@
 #include "memory_stat.h"
 #include "storage_allocator.h"
 
-using namespace ::dialog::storage;
+using namespace ::confluo::storage;
 
 class AllocatorTest : public testing::Test {
 

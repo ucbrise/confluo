@@ -7,12 +7,13 @@
 #include <math.h>
 #include <algorithm>
 
-#include "../dialog/types/immutable_value.h"
+#include "types/immutable_value.h"
 #include "types/byte_string.h"
 #include "types/data_types.h"
+#include "types/type_properties.h"
 #include "exceptions.h"
 
-namespace dialog {
+namespace confluo {
 
 class size_type {
  public:

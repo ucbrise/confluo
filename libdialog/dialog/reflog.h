@@ -3,9 +3,9 @@
 
 #include "monolog.h"
 
-using namespace ::dialog::monolog;
+using namespace ::confluo::monolog;
 
-namespace dialog {
+namespace confluo {
 
 /**
  * typedef for RefLog type -- a MonoLog of type uint64_t,

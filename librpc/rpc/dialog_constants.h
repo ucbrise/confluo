@@ -9,7 +9,7 @@
 
 #include "dialog_types.h"
 
-namespace dialog { namespace rpc {
+namespace confluo { namespace rpc {
 
 class dialogConstants {
  public:

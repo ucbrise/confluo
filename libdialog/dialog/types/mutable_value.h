@@ -7,7 +7,7 @@
 #include "immutable_value.h"
 #include "types/data_types.h"
 
-namespace dialog {
+namespace confluo {
 
 class mutable_value : public immutable_value {
  public:

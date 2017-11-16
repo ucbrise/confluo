@@ -4,7 +4,7 @@
 #include "aggregate_types.h"
 #include "numeric.h"
 
-namespace dialog {
+namespace confluo {
 
 using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
 using zero_fn = numeric (*)(const data_type& type);

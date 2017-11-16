@@ -1,7 +1,7 @@
 #ifndef DIALOG_DIALOG_PTR_METADATA_H_
 #define DIALOG_DIALOG_PTR_METADATA_H_
 
-namespace dialog {
+namespace confluo {
 namespace storage {
 
 struct alloc_type {

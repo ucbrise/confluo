@@ -6,7 +6,7 @@
 
 #include "ptr.h"
 
-namespace dialog {
+namespace confluo {
 
 struct record_t {
  public:
@@ -137,8 +137,8 @@ struct record_t {
 namespace std {
 
 template<>
-struct hash<dialog::record_t> {
-  size_t operator()(const dialog::record_t& k) const {
+struct hash<confluo::record_t> {
+  size_t operator()(const confluo::record_t& k) const {
     return k.log_offset();
   }
 };

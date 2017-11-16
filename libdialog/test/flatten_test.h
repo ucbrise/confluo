@@ -5,7 +5,7 @@
 #include "radix_tree.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class FlattenTest : public testing::Test {
 };

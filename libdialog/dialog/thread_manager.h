@@ -10,7 +10,7 @@
 #include "thread_utils.h"
 #include "configuration_params.h"
 
-namespace dialog {
+namespace confluo {
 
 struct thread_info {
   std::thread::id tid;

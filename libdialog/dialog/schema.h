@@ -24,7 +24,7 @@ using namespace utils;
 // FIXME: Timestamp handling
 // FIXME: Handle non-unique field names
 
-namespace dialog {
+namespace confluo {
 
 class schema_t {
  public:

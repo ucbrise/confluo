@@ -14,9 +14,9 @@
 // TODO: Update tests
 
 using namespace ::utils;
-using namespace ::dialog::parser;
+using namespace ::confluo::parser;
 
-namespace dialog {
+namespace confluo {
 namespace monitor {
 
 /**

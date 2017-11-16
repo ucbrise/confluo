@@ -4,7 +4,7 @@
 #include "string_map.h"
 #include "gtest/gtest.h"
 
-using namespace dialog;
+using namespace confluo;
 
 class StringMapTest : public testing::Test {
 };

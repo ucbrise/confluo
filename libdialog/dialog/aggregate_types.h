@@ -3,7 +3,7 @@
 
 #include "exceptions.h"
 
-namespace dialog {
+namespace confluo {
 
 enum aggregate_id
   : uint8_t {

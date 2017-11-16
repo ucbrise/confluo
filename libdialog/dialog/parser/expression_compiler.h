@@ -5,7 +5,7 @@
 #include "schema.h"
 #include "schema_snapshot.h"
 
-namespace dialog {
+namespace confluo {
 namespace parser {
 
 namespace spirit = boost::spirit;

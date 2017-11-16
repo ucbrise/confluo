@@ -10,7 +10,7 @@
 #include "reflog.h"
 #include "types/byte_string.h"
 
-namespace dialog {
+namespace confluo {
 namespace index {
 
 template<typename reflog>

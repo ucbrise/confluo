@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-namespace dialog {
+namespace confluo {
 
 struct record_block {
   int64_t time_block;

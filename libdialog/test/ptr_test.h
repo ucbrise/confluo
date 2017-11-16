@@ -7,8 +7,8 @@
 #include "ptr.h"
 #include "ptr_metadata.h"
 
-using namespace ::dialog;
-using namespace ::dialog::storage;
+using namespace ::confluo;
+using namespace ::confluo::storage;
 
 class PtrTest : public testing::Test {
 

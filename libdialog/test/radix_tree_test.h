@@ -4,7 +4,7 @@
 #include "radix_tree.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog::index;
+using namespace ::confluo::index;
 
 class RadixTreeTest : public testing::Test {
 };

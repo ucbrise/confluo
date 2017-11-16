@@ -11,7 +11,7 @@
 #include "types/numeric.h"
 //#include "type_manager.h"
 
-namespace dialog {
+namespace confluo {
 
 class aggregate;
 

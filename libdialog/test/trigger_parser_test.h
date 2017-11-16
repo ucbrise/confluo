@@ -4,7 +4,7 @@
 #include "parser/trigger_parser.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog::parser;
+using namespace ::confluo::parser;
 
 class TriggerParserTest : public testing::Test {
 };

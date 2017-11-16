@@ -5,7 +5,7 @@
 
 #include "atomic.h"
 
-namespace dialog {
+namespace confluo {
 
 struct index_state_t {
   static const uint8_t UNINDEXED = 0;

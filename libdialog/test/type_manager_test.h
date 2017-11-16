@@ -14,7 +14,7 @@
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 type_properties ip_type_properties("ip_address", sizeof(ip_address),
                                    &limits::int_min, &limits::int_max,
@@ -23,8 +23,8 @@ type_properties ip_type_properties("ip_address", sizeof(ip_address),
                                    get_binaryops(), get_keyops(),
                                    &ip_address::parse_ip,
                                    &ip_address::ip_to_string,
-                                   &dialog::serialize<ip_address>,
-                                   &dialog::deserialize<ip_address>);
+                                   &confluo::serialize<ip_address>,
+                                   &confluo::deserialize<ip_address>);
 
 type_properties size_type_properties("size_type", sizeof(size_type),
                                      &limits::ulong_min,
@@ -34,8 +34,8 @@ type_properties size_type_properties("size_type", sizeof(size_type),
                                      get_unarops(), get_binarops(), get_keops(),
                                      &size_type::parse_bytes,
                                      &size_type::size_to_string,
-                                     &dialog::serialize<size_type>,
-                                     &dialog::deserialize<size_type>);
+                                     &confluo::serialize<size_type>,
+                                     &confluo::deserialize<size_type>);
 
 class TypeManagerTest : public testing::Test {
  public:
@@ -117,11 +117,11 @@ TEST_F(TypeManagerTest, RegisterTest) {
   ASSERT_EQ(limits::int_max, *reinterpret_cast<int*>(addr_type.max()));
   ASSERT_EQ(limits::int_zero, *reinterpret_cast<int*>(addr_type.zero()));
   ASSERT_STREQ("ip_address", addr_type.name().c_str());
-  ASSERT_EQ(9, dialog::type_manager::get_type("ip_address").id);
+  ASSERT_EQ(9, confluo::type_manager::get_type("ip_address").id);
   ASSERT_STREQ("ip_address", s[1].type().name().c_str());
 
   ASSERT_STREQ("size_type", sz_type.name().c_str());
-  ASSERT_EQ(10, dialog::type_manager::get_type("size_type").id);
+  ASSERT_EQ(10, confluo::type_manager::get_type("size_type").id);
   ASSERT_STREQ("size_type", s[3].type().name().c_str());
 
 }

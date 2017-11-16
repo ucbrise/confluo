@@ -7,7 +7,7 @@
 #include "atomic.h"
 #include "storage.h"
 
-namespace dialog {
+namespace confluo {
 
 class read_tail {
  public:

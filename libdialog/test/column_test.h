@@ -4,7 +4,7 @@
 #include "column.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class ColumnTest : public testing::Test {
 };

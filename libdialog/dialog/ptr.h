@@ -5,7 +5,7 @@
 #include "exceptions.h"
 #include "dialog_allocator.h"
 
-namespace dialog {
+namespace confluo {
 namespace storage {
 
 class ptr_constants {

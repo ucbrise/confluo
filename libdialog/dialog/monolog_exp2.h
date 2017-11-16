@@ -11,7 +11,7 @@
 
 using namespace utils;
 
-namespace dialog {
+namespace confluo {
 namespace monolog {
 
 /**

@@ -8,7 +8,7 @@
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class DiaLogStoreTest : public testing::Test {
  public:

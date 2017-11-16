@@ -5,7 +5,7 @@
 #include "time_utils.h"
 #include "types/numeric.h"
 
-namespace dialog {
+namespace confluo {
 namespace monitor {
 
 struct alert {

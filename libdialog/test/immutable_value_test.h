@@ -1,12 +1,12 @@
 #ifndef TEST_IMMUTABLE_VALUE_TEST_H_
 #define TEST_IMMUTABLE_VALUE_TEST_H_
 
-#include "../dialog/types/immutable_value.h"
+#include "types/immutable_value.h"
 
 #include "test_utils.h"
 #include "gtest/gtest.h"
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class ImmutableValueTest : public testing::Test {
  public:

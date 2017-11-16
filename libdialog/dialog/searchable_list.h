@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace dialog {
+namespace confluo {
 
 template<typename T>
 struct marked_ptr {

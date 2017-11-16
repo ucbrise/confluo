@@ -1,7 +1,7 @@
 #ifndef RPC_RPC_CONSTANTS_H_
 #define RPC_RPC_CONSTANTS_H_
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class rpc_constants {
