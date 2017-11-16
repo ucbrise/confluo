@@ -28,7 +28,7 @@ class rpc_type_conversions {
   static std::vector<column_t> convert_schema(const rpc_schema& s) {
     schema_builder builder;
     for (const rpc_column& col : s) {
-      data_type type(static_cast<type_id>(col.type_id), col.type_size);
+      data_type type(static_cast<size_t>(col.type_id), col.type_size);
       builder.add_column(type, col.name);
     }
     return builder.get_columns();
