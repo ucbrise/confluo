@@ -83,7 +83,7 @@ class size_type {
 
  private:
   uint64_t bytes;
-};
+}__attribute__((packed));
 
 template<>
 void serialize<size_type>(std::ostream& out, const immutable_raw_data& value) {

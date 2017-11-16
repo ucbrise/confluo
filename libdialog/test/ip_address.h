@@ -82,7 +82,7 @@ class ip_address {
 
  private:
   uint32_t address;
-};
+} __attribute__((packed));
 
 template<>
 void serialize<ip_address>(std::ostream& out, const immutable_raw_data& value) {
