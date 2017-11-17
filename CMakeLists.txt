@@ -73,8 +73,8 @@ add_subdirectory(libutils)
 # DiaLog core
 add_subdirectory(libdialog)
 
+# DiaLog examples
 add_subdirectory(examples/libtimeseries)
-add_subdirectory(examples/libtimeseries/test)
 
 if (BUILD_RPC)
   # RPC Framework

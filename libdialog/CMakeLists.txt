@@ -6,13 +6,13 @@ file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 set(DIALOG_INCLUDE dialog)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 set(EXAMPLES_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../examples/libtimeseries)
-set(EXAMPLES_INC ${CMAKE_CURRENT_SOURCE_DIR}/../examples/libtimeseries/test)
+set(TEST_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../examples/libtimeseries/test)
 
 include_directories(${GTEST_INCLUDE_DIR}
   ${DIALOG_INCLUDE}
   ${UTILS_INCLUDE}
   ${EXAMPLES_INCLUDE}
-  ${EXAMPLES_INC}
+  ${TEST_INCLUDE}
   ${Boost_INCLUDE_DIRS})
 
 if (BUILD_TESTS)

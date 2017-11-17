@@ -132,6 +132,18 @@ TimeseriesDBTest::rec TimeseriesDBTest::r;
 std::vector<column_t> TimeseriesDBTest::s = schema();
 task_pool TimeseriesDBTest::MGMT_POOL;
 
+int64_t get_time(uint8_t* data) {
+  return static_cast<int64_t>(data[0]) | 
+      static_cast<int64_t>(data[1]) << 8 | 
+      static_cast<int64_t>(data[2]) << 16 |
+      static_cast<int64_t>(data[3]) << 24 | 
+      static_cast<int64_t>(data[4]) << 32 | 
+      static_cast<int64_t>(data[5]) << 40 |
+      static_cast<int64_t>(data[6]) << 48 |
+      static_cast<int64_t>(data[7]) << 56;
+}
+
+
 TEST_F(TimeseriesDBTest, AppendTest) {
   timeseries_db ts("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   ts.add_index("a");
@@ -143,52 +155,42 @@ TEST_F(TimeseriesDBTest, AppendTest) {
   ts.add_index("g", 0.01);
   ts.add_index("h");
 
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  size_t offset = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
-  int64_t time = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  size_t offset = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t time = r.ts;
 
-  size_t offset1 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
-  int64_t time1 = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  size_t offset1 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t time1 = r.ts; 
 
-  size_t offset2 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
-  int64_t time2 = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  size_t offset2 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t time2 = r.ts;
 
-  size_t offset3 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
-  int end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  size_t offset3 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t end = r.ts;
 
   ro_data_ptr ptr;
   ts.read(offset, ptr);
   uint8_t* data = ptr.get();
   // 64 bits = 8 bytes
-  int64_t calculated = data[0] + data[1] * pow(2, 8) + data[2] * pow(2, 16) +
-    data[3] * pow(2, 24) + data[4] * pow(2, 32); + data[5] * pow(2, 40) +
-    data[6] * pow(2, 48) + data[7] * pow(2, 56);
+  int64_t calculated = get_time(data);
   ASSERT_EQ(time, calculated);
 
   ts.read(offset1, ptr);
   data = ptr.get();
-  calculated = data[0] + data[1] * pow(2, 8) + data[2] * pow(2, 16) +
-    data[3] * pow(2, 24) + data[4] * pow(2, 32) + data[5] * pow(2, 40) +
-    data[6] * pow(2, 48) + data[7] * pow(2, 56);
-  
-  ASSERT_EQ(time1, data[0]);
+  calculated = get_time(data);
+  ASSERT_EQ(time1, calculated);
 
   ts.read(offset2, ptr);
   data = ptr.get();
-
-  calculated = data[0] + data[1] * pow(2, 8) + data[2] * pow(2, 16) +
-      data[3] * pow(2, 24) + data[4] * pow(2, 32) + data[5] * pow(2, 40)+ 
-      data[6] * pow(2, 48) + data[7] * pow(2, 56);
-  
+  calculated = get_time(data);
   ASSERT_EQ(time2, calculated);
 
   ts.read(offset3, ptr);
   data = ptr.get();
-
-  calculated = data[0] + data[1] * pow(2, 8) + data[2] * pow(2, 16) +
-    data[3] * pow(2, 24) + data[4] * pow(2, 32) + data[5] * pow(2, 40) +
-    data[6] * pow(2, 48) + data[7] * pow(2, 56);
-  
+  calculated = get_time(data);
   ASSERT_EQ(end, calculated);
 }
 
@@ -203,37 +205,75 @@ TEST_F(TimeseriesDBTest, GetRangeTest) {
   ts.add_index("g", 0.01);
   ts.add_index("h");
 
-  record_batch batch = get_batch();
-  ts.append_batch(batch);
-  int64_t beg = batch.start_time_block();
-  int64_t end = batch.end_time_block();
-  size_t batch_size = 8;
+  int64_t beg = r.ts;
+  size_t offset = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t time = r.ts;
 
+  size_t offset1 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t time1 = r.ts;
+
+  size_t offset2 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01,
+              "abc"));
+  int64_t time2 = r.ts;
+
+  size_t offset3 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, 
+              "abc"));
+  int64_t end = r.ts;
+
+  size_t num_pts = 4;
   std::vector<data> data_pts;
   ts.get_range(data_pts, beg, end);
 
-  ASSERT_EQ(batch_size, data_pts.size());
+  ASSERT_EQ(num_pts, data_pts.size());
 }
 
 TEST_F(TimeseriesDBTest, GetNearestTest) {
   timeseries_db ts1("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   ts1.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = r.ts;
   ts1.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  int64_t expected = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t expected = r.ts;
   ts1.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
   ts1.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
   ts1.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
   ts1.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
   ts1.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   ts1.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = r.ts;
 
-  data nearest_val = ts1.get_nearest_value(beg, true);
-  ASSERT_EQ(beg, nearest_val.as<int64_t>());
+  record_t nearest_val = ts1.get_nearest_value(beg, true);
+  ASSERT_EQ(expected, nearest_val.at(0).value().to_data().as<int64_t>());
 }
 
 TEST_F(TimeseriesDBTest, ComputeDiffTest) {
+  std::vector<ro_data_ptr> ptrs;
+  std::vector<uint64_t> offsets;
+  
+  timeseries_db ts1("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  ts1.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  int64_t from_version = ts1.get_version();
+  offsets.push_back(ts1.append(record(true, '1', 10, 2, 1, 0.1, 0.02, 
+                  "defg")));
+  offsets.push_back(ts1.append(record(false, '2', 20, 4, 10, 0.2, 0.03, 
+              "hijkl")));
+  offsets.push_back(ts1.append(record(true, '3', 30, 6, 100, 0.3, 0.04, 
+              "mnopqr")));
+  offsets.push_back(ts1.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, 
+              "stuvwx")));
+  offsets.push_back(ts1.append(record(true, '5', 50, 10, 10000, 0.5, 
+                  0.06, "yyy")));
+  offsets.push_back(ts1.append(record(false, '6', 60, 12, 100000, 0.6, 
+                  0.07, "zzz")));
+  offsets.push_back(ts1.append(record(true, '7', 70, 14, 1000000, 0.7, 
+              0.08, "zzz")));
+
+  int64_t to_version = ts1.get_version();
+  size_t expected_size = 7;
+  ptrs.reserve(to_version - from_version);
+  ts1.compute_diff(ptrs, offsets, from_version, to_version);
+  ASSERT_EQ(expected_size, ptrs.size());
 }
 
 #endif /* TEST_TIMESERIES_DB_TEST_H_ */
