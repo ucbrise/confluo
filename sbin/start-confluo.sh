@@ -3,8 +3,8 @@
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/dialog-config.sh"
-. "$DIALOG_PREFIX/sbin/load-dialog-env.sh"
+. "$sbin/confluo-config.sh"
+. "$CONFLUO_PREFIX/sbin/load-confluo-env.sh"
 
 LOG_PATH="$sbin/../log"
 mkdir -p $LOG_PATH
@@ -23,5 +23,5 @@ if [ "$DATA_PATH" = "" ]; then
 fi
 
 mkdir -p $LOG_PATH
-$sbin/../build/bin/dialogd --address=$BIND_ADDRESS --port $BIND_PORT \
-  --data-path $DATA_PATH 2>$LOG_PATH/dialog.stderr 1>$LOG_PATH/dialog.stdout &
+$sbin/../build/bin/confluod --address=$BIND_ADDRESS --port $BIND_PORT \
+  --data-path $DATA_PATH 2>$LOG_PATH/confluo.stderr 1>$LOG_PATH/confluo.stdout &

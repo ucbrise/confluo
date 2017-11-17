@@ -10,6 +10,6 @@ script="`basename "$this"`"
 config_bin="`cd "$config_bin"; pwd`"
 this="$config_bin/$script"
 
-export DIALOG_PREFIX="`dirname "$this"`"/..
-export DIALOG_HOME="${DIALOG_PREFIX}"
-export DIALOG_CONF_DIR="${DIALOG_CONF_DIR:-"$DIALOG_HOME/conf"}"
+export CONFLUO_PREFIX="`dirname "$this"`"/..
+export CONFLUO_HOME="${CONFLUO_PREFIX}"
+export CONFLUO_CONF_DIR="${CONFLUO_CONF_DIR:-"$CONFLUO_HOME/conf"}"

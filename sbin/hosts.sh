@@ -2,11 +2,11 @@
 #
 # Environment Variables
 #
-#   DIALOG_SERVERS    File naming remote servers.
-#     Default is ${DIALOG_CONF_DIR}/servers.
-#   DIALOG_CONF_DIR  Alternate conf dir. Default is ${DIALOG_HOME}/conf.
-#   DIALOG_HOST_SLEEP Seconds to sleep between spawning remote commands.
-#   DIALOG_SSH_OPTS Options passed to ssh when running remote commands.
+#   CONFLUO_SERVERS    File naming remote servers.
+#     Default is ${CONFLUO_CONF_DIR}/servers.
+#   CONFLUO_CONF_DIR  Alternate conf dir. Default is ${CONFLUO_HOME}/conf.
+#   CONFLUO_HOST_SLEEP Seconds to sleep between spawning remote commands.
+#   CONFLUO_SSH_OPTS Options passed to ssh when running remote commands.
 ##
 
 usage="Usage: servers.sh [--config <conf-dir>] command..."
@@ -20,13 +20,13 @@ fi
 sbin="`dirname "$0"`"
 sbin="`cd "$sbin"; pwd`"
 
-. "$sbin/dialog-config.sh"
+. "$sbin/confluo-config.sh"
 
 # If the servers file is specified in the command line,
 # then it takes precedence over the definition in
-# dialog-env.sh. Save it here.
-if [ -f "$DIALOG_SERVERS" ]; then
-  SERVERLIST=`cat "$DIALOG_SERVERS"`
+# confluo-env.sh. Save it here.
+if [ -f "$CONFLUO_SERVERS" ]; then
+  SERVERLIST=`cat "$CONFLUO_SERVERS"`
 fi
 
 # Check if --config is passed as an argument. It is an optional parameter.
@@ -41,42 +41,42 @@ then
     echo $usage
     exit 1
   else
-    export DIALOG_CONF_DIR="$conf_dir"
+    export CONFLUO_CONF_DIR="$conf_dir"
   fi
   shift
 fi
 
-. "$DIALOG_PREFIX/sbin/load-dialog-env.sh"
+. "$CONFLUO_PREFIX/sbin/load-confluo-env.sh"
 
 if [ "$SERVERLIST" = "" ]; then
-  if [ "$DIALOG_SERVERS" = "" ]; then
-    if [ -f "${DIALOG_CONF_DIR}/hosts" ]; then
-      SERVERLIST=`cat "${DIALOG_CONF_DIR}/hosts"`
+  if [ "$CONFLUO_SERVERS" = "" ]; then
+    if [ -f "${CONFLUO_CONF_DIR}/hosts" ]; then
+      SERVERLIST=`cat "${CONFLUO_CONF_DIR}/hosts"`
     else
       SERVERLIST=localhost
     fi
   else
-    SERVERLIST=`cat "${DIALOG_SERVERS}"`
+    SERVERLIST=`cat "${CONFLUO_SERVERS}"`
   fi
 fi
 
 
 
 # By default disable strict host key checking
-if [ "$DIALOG_SSH_OPTS" = "" ]; then
-  DIALOG_SSH_OPTS="-o StrictHostKeyChecking=no"
+if [ "$CONFLUO_SSH_OPTS" = "" ]; then
+  CONFLUO_SSH_OPTS="-o StrictHostKeyChecking=no"
 fi
 
 for host in `echo "$SERVERLIST"|sed  "s/#.*$//;/^$/d"`; do
-  if [ -n "${DIALOG_SSH_FOREGROUND}" ]; then
-    ssh $DIALOG_SSH_OPTS "$host" $"${@// /\\ }" \
+  if [ -n "${CONFLUO_SSH_FOREGROUND}" ]; then
+    ssh $CONFLUO_SSH_OPTS "$host" $"${@// /\\ }" \
       2>&1 | sed "s/^/$host: /"
   else
-    ssh $DIALOG_SSH_OPTS "$host" $"${@// /\\ }" \
+    ssh $CONFLUO_SSH_OPTS "$host" $"${@// /\\ }" \
       2>&1 | sed "s/^/$host: /" &
   fi
-  if [ "$DIALOG_HOST_SLEEP" != "" ]; then
-    sleep $DIALOG_HOST_SLEEP
+  if [ "$CONFLUO_HOST_SLEEP" != "" ]; then
+    sleep $CONFLUO_HOST_SLEEP
   fi
 done
 
