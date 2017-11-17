@@ -7,32 +7,7 @@
 #include <numeric>
 #include <thread>
 
-#include "configuration_params.h"
-#include "storage.h"
-#include "monolog.h"
-#include "read_tail.h"
-#include "schema.h"
-#include "data.h"
-#include "record_batch.h"
-#include "string_map.h"
-#include "table_metadata.h"
-#include "data_log.h"
-#include "index_log.h"
-#include "filter_log.h"
-#include "alert_index.h"
-#include "periodic_task.h"
-#include "planner/query_planner.h"
-#include "radix_tree.h"
-#include "filter.h"
-#include "trigger.h"
-#include "exceptions.h"
-#include "optional.h"
-#include "parser/expression_compiler.h"
-#include "parser/schema_parser.h"
-#include "parser/trigger_compiler.h"
-#include "time_utils.h"
-#include "string_utils.h"
-#include "task_pool.h"
+#include "dialog_table.h"
 
 using namespace ::dialog::monolog;
 using namespace ::dialog::index;
@@ -59,17 +34,14 @@ class timeseries_db : public dialog_table {
   }
 
   void get_range(std::vector<data>& out, int64_t ts1, int64_t ts2) {
-      size_t filter_id = filters_.push_back(&filter_);
-      std::string filter_name = "filter";
-      filter_map_.put(filter_name, filter_id);
-
-      for(auto r = query_filter(filter_name, ts1, ts2); !r.empty();
-              r = r.tail()) {
+      std::string expr = "TIMESTAMP >= " + std::to_string(ts1) + 
+          " && TIMESTAMP <= " + std::to_string(ts2);
+      for(auto r = execute_filter(expr); !r.empty(); r = r.tail()) {
           out.push_back(r.head().at(0).value().to_data());
       }
   }
 
-  data get_nearest_value(int64_t ts, bool direction) {
+  record_t get_nearest_value(int64_t ts, bool direction) {
       std::string op;
       if (direction) {
           op = ">";
@@ -79,20 +51,30 @@ class timeseries_db : public dialog_table {
 
       std::string exp = "TIMESTAMP " + op + " " + std::to_string(ts);
       auto r = execute_filter(exp);
-      
-      return r.head().at(0).value().to_data();
-  }
-
-  void compute_diff(std::vector<const aggregated_reflog*>& pts, 
-          uint64_t from_version, uint64_t to_version) {
-      for (uint64_t version = from_version; version < to_version;
-              version++) {
-          pts.push_back(filter_.lookup(version));
+     
+      if (!r.empty()) {
+        return r.head();
+      } else {
+          return record_t();
       }
   }
 
- private:
-  filter filter_;
+  void compute_diff(std::vector<ro_data_ptr>& pts, 
+          std::vector<uint64_t>& offsets,
+          uint64_t from_version, uint64_t to_version) {
+
+      size_t index = 0;
+      uint64_t version;
+      for (version = from_version; version <= to_version; 
+              version++) {
+          read(offsets[index], version, pts[index]);
+          index++;
+      }
+  }
+
+  uint64_t get_version() { 
+      return rt_.get();
+  }
 
 };
 

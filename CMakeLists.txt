@@ -73,8 +73,8 @@ add_subdirectory(libutils)
 # Core library
 add_subdirectory(libconfluo)
 
+# DiaLog examples
 add_subdirectory(examples/libtimeseries)
-add_subdirectory(examples/libtimeseries/test)
 
 if (BUILD_RPC)
   # RPC Framework

@@ -112,6 +112,7 @@ class query_planner {
           }
         }
 
+        bool val = !add_range(m_key_ranges, col.index_id(), r);
         if (!add_range(m_key_ranges, col.index_id(), r)) {
           return std::make_shared<no_op>();
         }
