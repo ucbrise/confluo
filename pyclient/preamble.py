@@ -3,21 +3,21 @@
 import os
 import sys
 from thrift import Thrift
-from dialog import dialog_client
+from confluo.rpc import rpc_client
 
-dialog = None
+rpc = None
 
-def dialogConnect(host = 'localhost', port = 9090):
-  global dialog
-  dialog = dialog_client.dialog_client(host, port)  
+def rpcConnect(host = 'localhost', port = 9090):
+  global rpc
+  rpc = rpc_client.rpc_client(host, port)  
   
 
 try:
-  dialogConnect()
-  print "DiaLog Client is now available as dialog."
+  rpcConnect()
+  print "DiaLog Client is now available as rpc."
 except Thrift.TException, tx:
   print '%s' % (tx.message)
-  print 'Check your server status and retry connecting with dialogConnect(host, port)'
+  print 'Check your server status and retry connecting with rpcConnect(host, port)'
 
 # Add auto-completion and a stored history file of commands to your Python
 # interactive interpreter. Requires Python 2.0+, readline. Autocomplete is

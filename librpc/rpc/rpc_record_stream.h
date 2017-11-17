@@ -1,7 +1,7 @@
 #ifndef RPC_RPC_RECORD_STREAM_H_
 #define RPC_RPC_RECORD_STREAM_H_
 
-#include "dialog_service.h"
+#include "rpc_service.h"
 
 using boost::shared_ptr;
 
@@ -10,10 +10,11 @@ namespace rpc {
 
 class rpc_record_stream {
  public:
-  typedef dialog_serviceClient rpc_client;
+  typedef rpc_serviceClient thrift_client;
 
   rpc_record_stream(int64_t table_id, const schema_t& schema,
-                    shared_ptr<rpc_client> client, rpc_iterator_handle&& handle)
+                    shared_ptr<thrift_client> client,
+                    rpc_iterator_handle&& handle)
       : table_id_(table_id),
         schema_(schema),
         handle_(std::move(handle)),
@@ -45,7 +46,7 @@ class rpc_record_stream {
   schema_t schema_;
   rpc_iterator_handle handle_;
   size_t cur_off_;
-  shared_ptr<rpc_client> client_;
+  shared_ptr<thrift_client> client_;
 };
 
 }

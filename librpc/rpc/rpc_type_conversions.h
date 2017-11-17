@@ -1,11 +1,11 @@
 #ifndef RPC_RPC_TYPE_CONVERSIONS_H_
 #define RPC_RPC_TYPE_CONVERSIONS_H_
 
-#include "dialog_types.h"
-
 #include "record_batch.h"
 #include "schema.h"
 #include "storage.h"
+#include "rpc_types.h"
+
 
 namespace confluo {
 namespace rpc {

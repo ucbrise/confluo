@@ -1,11 +1,11 @@
 #ifndef TEST_WRITER_TEST_H_
 #define TEST_WRITER_TEST_H_
 
-#include "dialog_server.h"
-#include "dialog_table.h"
 #include "gtest/gtest.h"
 
-#include "rpc_dialog_client.h"
+#include "atomic_multilog.h"
+#include "rpc_client.h"
+#include "rpc_server.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -63,10 +63,10 @@ class ClientWriteOpsTest : public testing::Test {
     return str;
   }
 
-  static dialog_store* simple_table_store(std::string table_name,
+  static confluo_store* simple_table_store(std::string table_name,
                                           storage::storage_id id) {
-    auto store = new dialog_store("/tmp");
-    store->add_table(
+    auto store = new confluo_store("/tmp");
+    store->create_atomic_multilog(
         table_name,
         schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
         id);
@@ -101,21 +101,20 @@ class ClientWriteOpsTest : public testing::Test {
 ClientWriteOpsTest::rec ClientWriteOpsTest::r;
 std::vector<column_t> ClientWriteOpsTest::s = schema();
 
-// TODO: test rpc_dialog_client remove functions
 TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
     std::string table_name = "my_table";
 
-    auto store = new dialog_store("/tmp");
-    store->add_table(table_name, schema(), storage::D_IN_MEMORY);
-    auto dtable = store->get_table(table_name);
+    auto store = new confluo_store("/tmp");
+    store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
+    auto dtable = store->get_atomic_multilog(table_name);
     
-    auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+    auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
     std::thread serve_thread([&server] {
         server->serve();
     });
     sleep(1);
 
-    rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+    rpc_client client(SERVER_ADDRESS, SERVER_PORT);
     client.set_current_table(table_name);
 
     client.add_index("a", 1);
@@ -154,10 +153,10 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
 TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
     std::string table_name = "my_table";
 
-    auto store = new dialog_store("/tmp");
-    store->add_table(table_name, schema(), storage::D_IN_MEMORY);
-    auto dtable = store->get_table(table_name);
-    auto server = dialog_server::create(store, SERVER_ADDRESS, 
+    auto store = new confluo_store("/tmp");
+    store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
+    auto dtable = store->get_atomic_multilog(table_name);
+    auto server = rpc_server::create(store, SERVER_ADDRESS, 
             SERVER_PORT);
     std::thread serve_thread([&server] {
         server->serve();
@@ -165,7 +164,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
 
     sleep(1);
 
-    rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+    rpc_client client(SERVER_ADDRESS, SERVER_PORT);
     client.set_current_table(table_name);
 
     client.add_filter("filter1", "a == true");
@@ -250,15 +249,15 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
 
   std::string table_name = "my_table";
 
-  auto store = new dialog_store("/tmp");
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto store = new confluo_store("/tmp");
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
   sleep(1);
 
-  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
 
   client.create_table(
       table_name,
@@ -279,15 +278,15 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   std::string table_name = "my_table";
 
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
-  auto dtable = store->get_table(table_name);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto dtable = store->get_atomic_multilog(table_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
   sleep(1);
 
-  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   int64_t ts = utils::time_utils::cur_ns();
@@ -312,16 +311,16 @@ TEST_F(ClientWriteOpsTest, BufferTest) {
   std::string table_name = "my_table";
 
   auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
-  auto dtable = store->get_table(table_name);
+  auto dtable = store->get_atomic_multilog(table_name);
   auto schema_size = dtable->get_schema().record_size();
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
   sleep(1);
 
-  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   int64_t ts = utils::time_utils::cur_ns();
@@ -356,17 +355,17 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   std::string table_name = "my_table";
 
-  auto store = new dialog_store("/tmp");
-  store->add_table(table_name, schema(), storage::D_IN_MEMORY);
-  auto dtable = store->get_table(table_name);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
+  auto dtable = store->get_atomic_multilog(table_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
   sleep(1);
 
-  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.add_index("a", 1);
@@ -487,17 +486,17 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   std::string table_name = "my_table";
 
-  auto store = new dialog_store("/tmp");
-  store->add_table(table_name, schema(), storage::D_IN_MEMORY);
-  auto dtable = store->get_table(table_name);
-  auto server = dialog_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
+  auto dtable = store->get_atomic_multilog(table_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
   sleep(1);
 
-  rpc_dialog_client client(SERVER_ADDRESS, SERVER_PORT);
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_table(table_name);
 
   client.add_filter("filter1", "a == true");

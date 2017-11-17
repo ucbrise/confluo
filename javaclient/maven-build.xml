@@ -15,7 +15,7 @@
 <!--                                                                        -->
 <!-- ====================================================================== -->
 
-<project name="dialog-client-from-maven" default="package" basedir=".">
+<project name="confluo-client-from-maven" default="package" basedir=".">
 
   <!-- ====================================================================== -->
   <!-- Build environment properties                                           -->
@@ -24,7 +24,7 @@
   <property file="${user.home}/.m2/maven.properties"/>
   <property file="maven-build.properties"/>
 
-  <property name="maven.build.finalName" value="dialog-client-0.1.0"/>
+  <property name="maven.build.finalName" value="confluo-client-0.1.0"/>
   <property name="maven.build.dir" value="target"/>
   <property name="maven.build.outputDir" value="${maven.build.dir}/classes"/>
   <property name="maven.build.srcDir.0" value="src/main/java"/>
