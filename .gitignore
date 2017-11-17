@@ -38,7 +38,7 @@ target
 log
 thrift-gen.files
 .eggs
-pyclient/dialog.egg-info
+pyclient/confluo.egg-info
 pyclient/dist
 
 # Eclipse files
