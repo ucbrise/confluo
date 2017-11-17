@@ -2,7 +2,7 @@
 #define TEST_TABLE_METADATA_TEST_H_
 
 #include "gtest/gtest.h"
-#include "../confluo/atomic_multilog_metadata.h"
+#include "atomic_multilog_metadata.h"
 
 using namespace ::confluo;
 

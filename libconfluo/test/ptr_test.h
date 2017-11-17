@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-#include "../confluo/allocator.h"
+#include "allocator.h"
 #include "ptr_metadata.h"
 
 using namespace ::confluo;

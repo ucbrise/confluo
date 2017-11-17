@@ -1,7 +1,7 @@
 #ifndef TEST_AGGREGATED_REFLOG_TEST_H_
 #define TEST_AGGREGATED_REFLOG_TEST_H_
 
-#include "../confluo/aggregated_reflog.h"
+#include "aggregated_reflog.h"
 
 #include "gtest/gtest.h"
 #include "trigger.h"

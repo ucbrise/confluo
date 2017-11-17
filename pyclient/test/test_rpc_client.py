@@ -11,7 +11,7 @@ from confluo.rpc.schema import schema_builder
 from confluo.rpc.storage import storage_id
 
 class test_rpc_client(unittest.TestCase):
-    SERVER_EXECUTABLE = os.getenv('DIALOG_SERVER_EXEC', 'confluod')
+    SERVER_EXECUTABLE = os.getenv('CONFLUO_SERVER_EXEC', 'confluod')
 
     def start_server(self):
         self.server = subprocess.Popen([self.SERVER_EXECUTABLE, '--data-path', '/tmp'])

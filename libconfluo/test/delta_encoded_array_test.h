@@ -1,7 +1,7 @@
 #ifndef TEST_DELTA_ENCODED_ARRAY_TEST_H_
 #define TEST_DELTA_ENCODED_ARRAY_TEST_H_
 
-#include "../confluo/delta_encoded_array.h"
+#include "delta_encoded_array.h"
 
 #include "gtest/gtest.h"
 

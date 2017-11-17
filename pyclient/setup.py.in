@@ -29,7 +29,7 @@ class ConfluoShell(Command):
         os.execv(python_ex, [ python_ex, "-i", "preamble.py"])
 
 setup(name='confluo',
-      version='${DIALOG_VERSION}',
+      version='${CONFLUO_VERSION}',
       description='Python Client for Confluo',
       author='Anurag Khandelwal',
       author_email='anuragk@berkley.edu',

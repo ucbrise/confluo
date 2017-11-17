@@ -1,7 +1,7 @@
 #ifndef TEST_BITMAP_ARRAY_TEST_H_
 #define TEST_BITMAP_ARRAY_TEST_H_
 
-#include "../confluo/bitmap_array.h"
+#include "bitmap_array.h"
 
 #include "bit_utils.h"
 

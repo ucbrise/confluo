@@ -10,7 +10,7 @@
 #include <stdint.h>
 #endif
 
-// Utility wrappers around all atomic primitives used in DiaLog
+// Utility wrappers around all atomic primitives
 namespace atomic {
 
 // Atomic type

@@ -1,7 +1,7 @@
 #ifndef TEST_COLUMN_TEST_H_
 #define TEST_COLUMN_TEST_H_
 
-#include "../confluo/column.h"
+#include "column.h"
 
 #include "gtest/gtest.h"
 

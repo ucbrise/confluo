@@ -1,7 +1,7 @@
 #ifndef TEST_DIALOG_STORE_TEST_H_
 #define TEST_DIALOG_STORE_TEST_H_
 
-#include "../confluo/confluo_store.h"
+#include "confluo_store.h"
 
 #include "gtest/gtest.h"
 
@@ -10,7 +10,7 @@
 
 using namespace ::confluo;
 
-class DiaLogStoreTest : public testing::Test {
+class ConfluoStoreTest : public testing::Test {
  public:
   static task_pool MGMT_POOL;
   static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
@@ -22,7 +22,7 @@ class DiaLogStoreTest : public testing::Test {
   void test_append_and_get(atomic_multilog& dtable) {
     std::vector<uint64_t> offsets;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      DiaLogStoreTest::generate_bytes(data_, DATA_SIZE, i);
+      ConfluoStoreTest::generate_bytes(data_, DATA_SIZE, i);
       uint64_t offset = dtable.append(data_);
       offsets.push_back(offset);
     }
@@ -126,18 +126,18 @@ class DiaLogStoreTest : public testing::Test {
   }
 };
 
-DiaLogStoreTest::rec DiaLogStoreTest::r;
-std::vector<column_t> DiaLogStoreTest::s = schema();
-task_pool DiaLogStoreTest::MGMT_POOL;
+ConfluoStoreTest::rec ConfluoStoreTest::r;
+std::vector<column_t> ConfluoStoreTest::s = schema();
+task_pool ConfluoStoreTest::MGMT_POOL;
 
-TEST_F(DiaLogStoreTest, AddTableTest) {
+TEST_F(ConfluoStoreTest, AddTableTest) {
   confluo_store store("/tmp");
   int64_t id = store.create_atomic_multilog("my_table", s, 
           storage::storage_id::D_IN_MEMORY);
   ASSERT_EQ(id, store.get_atomic_multilog_id("my_table"));
 }
 
-TEST_F(DiaLogStoreTest, RemoveTableTest) {
+TEST_F(ConfluoStoreTest, RemoveTableTest) {
   confluo_store store("/tmp");
   int64_t id = store.create_atomic_multilog("my_table", s, 
           storage::storage_id::D_IN_MEMORY);

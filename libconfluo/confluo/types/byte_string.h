@@ -89,8 +89,8 @@ class immutable_byte_string {
 //  byte_string(T val)
 //      : parent_t() {
 //    val ^= T(1) << (sizeof(T) * 8 - 1);
-//#if DIALOG_ENDIANNESS == DIALOG_BIG_ENDIAN
-//#elif DIALOG_ENDIANNESS == DIALOG_LITTLE_ENDIAN
+//#if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
+//#elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
 //    val = byte_utils::byte_swap(val);
 //#else
 //    val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);
@@ -103,8 +103,8 @@ class immutable_byte_string {
 //          && !std::is_signed<T>::value, T>::type* = nullptr>
 //  byte_string(T val)
 //      : parent_t() {
-//#if DIALOG_ENDIANNESS == DIALOG_BIG_ENDIAN
-//#elif DIALOG_ENDIANNESS == DIALOG_LITTLE_ENDIAN
+//#if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
+//#elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
 //    val = byte_utils::byte_swap(val);
 //#else
 //    val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);
@@ -192,8 +192,8 @@ class byte_string {
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
     val ^= T(1) << (sizeof(T) * 8 - 1);
-#if DIALOG_ENDIANNESS == DIALOG_BIG_ENDIAN
-#elif DIALOG_ENDIANNESS == DIALOG_LITTLE_ENDIAN
+#if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
+#elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
     val = byte_utils::byte_swap(val);
 #else
     val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);
@@ -207,8 +207,8 @@ class byte_string {
   byte_string(T val)
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
-#if DIALOG_ENDIANNESS == DIALOG_BIG_ENDIAN
-#elif DIALOG_ENDIANNESS == DIALOG_LITTLE_ENDIAN
+#if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
+#elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
     val = byte_utils::byte_swap(val);
 #else
     val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);

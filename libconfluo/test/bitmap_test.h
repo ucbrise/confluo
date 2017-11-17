@@ -1,7 +1,7 @@
 #ifndef TEST_BITMAP_TEST_H_
 #define TEST_BITMAP_TEST_H_
 
-#include "../confluo/bitmap.h"
+#include "bitmap.h"
 
 #include "bit_utils.h"
 

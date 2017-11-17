@@ -67,10 +67,10 @@ if (BUILD_TESTS)
   set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-# DiaLog utils
+# Utilities
 add_subdirectory(libutils)
 
-# DiaLog core
+# Core library
 add_subdirectory(libconfluo)
 
 if (BUILD_RPC)

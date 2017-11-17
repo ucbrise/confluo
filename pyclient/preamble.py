@@ -14,7 +14,7 @@ def rpcConnect(host = 'localhost', port = 9090):
 
 try:
   rpcConnect()
-  print "DiaLog Client is now available as rpc."
+  print "Confluo Client is now available as rpc."
 except Thrift.TException, tx:
   print '%s' % (tx.message)
   print 'Check your server status and retry connecting with rpcConnect(host, port)'

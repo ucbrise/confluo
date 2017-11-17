@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
   opts.add(
       cmd_option("data-path", 'd', false).set_default(".").set_description(
-          "Data path for DiaLog"));
+          "Data path for Confluo"));
 
   cmd_parser parser(argc, argv, opts);
   if (parser.get_flag("help")) {
