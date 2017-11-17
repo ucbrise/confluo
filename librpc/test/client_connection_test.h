@@ -1,9 +1,9 @@
-#ifndef TEST_SERVER_CLIENT_TEST_H_
-#define TEST_SERVER_CLIENT_TEST_H_
+#ifndef RPC_TEST_SERVER_CLIENT_TEST_H_
+#define RPC_TEST_SERVER_CLIENT_TEST_H_
 
 #include "gtest/gtest.h"
 
-#include "configuration_params.h"
+#include "conf/configuration_params.h"
 #include "rpc_client.h"
 #include "rpc_server.h"
 
@@ -38,4 +38,4 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
   }
 }
 
-#endif /* TEST_SERVER_CLIENT_TEST_H_ */
+#endif /* RPC_TEST_SERVER_CLIENT_TEST_H_ */

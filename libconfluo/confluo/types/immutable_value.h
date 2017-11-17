@@ -1,9 +1,9 @@
-#ifndef DIALOG_IMMUTABLE_VALUE_H_
-#define DIALOG_IMMUTABLE_VALUE_H_
+#ifndef CONFLUO_TYPES_IMMUTABLE_VALUE_H_
+#define CONFLUO_TYPES_IMMUTABLE_VALUE_H_
 
 #include <cstdlib>
 
-#include "data_types.h"
+#include "data_type.h"
 #include "type_manager.h"
 #include "string_utils.h"
 
@@ -98,4 +98,4 @@ class immutable_value {
 
 }
 
-#endif /* DIALOG_IMMUTABLE_VALUE_H_ */
+#endif /* CONFLUO_TYPES_IMMUTABLE_VALUE_H_ */

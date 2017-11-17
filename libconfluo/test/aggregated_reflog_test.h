@@ -1,5 +1,5 @@
-#ifndef TEST_AGGREGATED_REFLOG_TEST_H_
-#define TEST_AGGREGATED_REFLOG_TEST_H_
+#ifndef CONFLUO_TEST_AGGREGATED_REFLOG_TEST_H_
+#define CONFLUO_TEST_AGGREGATED_REFLOG_TEST_H_
 
 #include "aggregated_reflog.h"
 
@@ -179,4 +179,4 @@ TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
   }
 }
 
-#endif /* TEST_AGGREGATED_REFLOG_TEST_H_ */
+#endif /* CONFLUO_TEST_AGGREGATED_REFLOG_TEST_H_ */

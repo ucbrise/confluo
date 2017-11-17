@@ -1,9 +1,9 @@
-#ifndef PARSER_EXPRESSION_COMPILER_H_
-#define PARSER_EXPRESSION_COMPILER_H_
+#ifndef CONFLUO_PARSER_EXPRESSION_COMPILER_H_
+#define CONFLUO_PARSER_EXPRESSION_COMPILER_H_
 
-#include "schema_snapshot.h"
+#include "schema/schema.h"
+#include "schema/schema_snapshot.h"
 #include "expression_parser.h"
-#include "schema.h"
 
 namespace confluo {
 namespace parser {
@@ -275,4 +275,4 @@ static compiled_expression compile_expression(const spirit::utree& e,
 }
 }
 
-#endif /* PARSER_EXPRESSION_COMPILER_H_ */
+#endif /* CONFLUO_PARSER_EXPRESSION_COMPILER_H_ */

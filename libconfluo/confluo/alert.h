@@ -1,5 +1,5 @@
-#ifndef DIALOG_ALERT_H_
-#define DIALOG_ALERT_H_
+#ifndef CONFLUO_ALERT_H_
+#define CONFLUO_ALERT_H_
 
 #include "trigger.h"
 #include "types/numeric.h"
@@ -51,4 +51,4 @@ struct alert {
 }
 }
 
-#endif /* DIALOG_ALERT_H_ */
+#endif /* CONFLUO_ALERT_H_ */

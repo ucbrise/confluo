@@ -1,14 +1,16 @@
-#ifndef DIALOG_DIALOG_STORE_H_
-#define DIALOG_DIALOG_STORE_H_
+#ifndef CONFLUO_CONFLUO_STORE_H_
+#define CONFLUO_CONFLUO_STORE_H_
 
 #include <cstdint>
 
-#include "exceptions.h"
 #include "optional.h"
-#include "storage.h"
-#include "task_pool.h"
+#include "exceptions.h"
 #include "atomic_multilog.h"
 #include "file_utils.h"
+#include "storage/storage.h"
+#include "threads/task_pool.h"
+
+using namespace ::utils;
 
 namespace confluo {
 
@@ -131,4 +133,4 @@ class confluo_store {
 
 }
 
-#endif /* DIALOG_DIALOG_STORE_H_ */
+#endif /* CONFLUO_CONFLUO_STORE_H_ */

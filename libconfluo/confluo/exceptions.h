@@ -1,5 +1,5 @@
-#ifndef DIALOG_EXCEPTIONS_H_
-#define DIALOG_EXCEPTIONS_H_
+#ifndef CONFLUO_EXCEPTIONS_H_
+#define CONFLUO_EXCEPTIONS_H_
 
 #include <exception>
 #include <string>
@@ -43,4 +43,4 @@ DEFINE_EXCEPTION(management_exception)
 
 }
 
-#endif /* DIALOG_EXCEPTIONS_H_ */
+#endif /* CONFLUO_EXCEPTIONS_H_ */

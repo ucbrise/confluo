@@ -1,10 +1,10 @@
-#ifndef DIALOG_MUTABLE_VALUE_H_
-#define DIALOG_MUTABLE_VALUE_H_
+#ifndef CONFLUO_TYPES_MUTABLE_VALUE_H_
+#define CONFLUO_TYPES_MUTABLE_VALUE_H_
 
 #include <cstdint>
 
+#include "data_type.h"
 #include "exceptions.h"
-#include "data_types.h"
 #include "immutable_value.h"
 
 namespace confluo {
@@ -240,4 +240,4 @@ class mutable_value : public immutable_value {
 
 }
 
-#endif /* DIALOG_MUTABLE_VALUE_H_ */
+#endif /* CONFLUO_TYPES_MUTABLE_VALUE_H_ */

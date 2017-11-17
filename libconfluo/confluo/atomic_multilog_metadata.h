@@ -1,16 +1,16 @@
-#ifndef DIALOG_TABLE_METADATA_H_
-#define DIALOG_TABLE_METADATA_H_
+#ifndef CONFLUO_ATOMIC_MULTILOG_METADATA_H_
+#define CONFLUO_ATOMIC_MULTILOG_METADATA_H_
 
 #include <cstdint>
 #include <string>
 #include <fstream>
 
-#include "aggregate_types.h"
-#include "schema.h"
-#include "storage.h"
 #include "types/numeric.h"
 #include "types/type_manager.h"
 #include "io_utils.h"
+#include "schema/schema.h"
+#include "storage/storage.h"
+#include "types/aggregate_types.h"
 
 using namespace utils;
 
@@ -248,4 +248,4 @@ class metadata_reader {
 
 }
 
-#endif /* DIALOG_TABLE_METADATA_H_ */
+#endif /* CONFLUO_ATOMIC_MULTILOG_METADATA_H_ */

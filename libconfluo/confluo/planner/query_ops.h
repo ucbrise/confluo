@@ -1,11 +1,11 @@
-#ifndef PLANNER_QUERY_OPS_H_
-#define PLANNER_QUERY_OPS_H_
+#ifndef CONFLUO_PLANNER_QUERY_OPS_H_
+#define CONFLUO_PLANNER_QUERY_OPS_H_
 
-#include "data_log.h"
-#include "radix_tree.h"
-#include "schema.h"
-#include "lazy/stream.h"
-#include "record_offset_range.h"
+#include "container/data_log.h"
+#include "container/lazy/stream.h"
+#include "container/radix_tree.h"
+#include "container/record_offset_range.h"
+#include "schema/schema.h"
 
 namespace confluo {
 namespace planner {
@@ -167,4 +167,4 @@ class index_op : public query_op {
 }
 }
 
-#endif /* PLANNER_QUERY_OPS_H_ */
+#endif /* CONFLUO_PLANNER_QUERY_OPS_H_ */

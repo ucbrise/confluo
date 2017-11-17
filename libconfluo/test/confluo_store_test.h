@@ -1,8 +1,7 @@
-#ifndef TEST_DIALOG_STORE_TEST_H_
-#define TEST_DIALOG_STORE_TEST_H_
+#ifndef CONFLUO_TEST_CONFLUO_STORE_TEST_H_
+#define CONFLUO_TEST_CONFLUO_STORE_TEST_H_
 
 #include "confluo_store.h"
-
 #include "gtest/gtest.h"
 
 #define MAX_RECORDS 2560U
@@ -149,4 +148,4 @@ TEST_F(ConfluoStoreTest, RemoveTableTest) {
   }
 }
 
-#endif /* TEST_DIALOG_STORE_TEST_H_ */
+#endif /* CONFLUO_TEST_CONFLUO_STORE_TEST_H_ */

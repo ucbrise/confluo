@@ -1,12 +1,9 @@
-#ifndef TEST_FILTER_TEST_H_
-#define TEST_FILTER_TEST_H_
+#ifndef CONFLUO_TEST_FILTER_TEST_H_
+#define CONFLUO_TEST_FILTER_TEST_H_
 
 #include "filter.h"
-
 #include "gtest/gtest.h"
-
 #include <thread>
-
 
 using namespace ::confluo::monitor;
 using namespace ::confluo::monolog;
@@ -196,4 +193,4 @@ TEST_F(FilterTest, MultiThreadedTriggerTest) {
   }
 }
 
-#endif // TEST_FILTER_TEST_H_
+#endif // CONFLUO_TEST_FILTER_TEST_H_

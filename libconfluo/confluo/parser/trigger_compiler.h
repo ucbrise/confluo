@@ -1,8 +1,8 @@
-#ifndef PARSER_TRIGGER_COMPILER_H_
-#define PARSER_TRIGGER_COMPILER_H_
+#ifndef CONFLUO_PARSER_TRIGGER_COMPILER_H_
+#define CONFLUO_PARSER_TRIGGER_COMPILER_H_
 
+#include "schema/schema.h"
 #include "aggregate.h"
-#include "schema.h"
 #include "trigger_parser.h"
 #include "types/numeric.h"
 #include "types/relational_ops.h"
@@ -32,4 +32,4 @@ compiled_trigger compile_trigger(const parsed_trigger& t,
 }
 }
 
-#endif /* _TRIGGER_COMPILER_H_ */
+#endif /* CONFLUO_PARSER_TRIGGER_COMPILER_H_ */

@@ -1,7 +1,7 @@
-#ifndef DIALOG_QUERY_PLAN_H_
-#define DIALOG_QUERY_PLAN_H_
+#ifndef CONFLUO_PLANNER_QUERY_PLAN_H_
+#define CONFLUO_PLANNER_QUERY_PLAN_H_
 
-#include "lazy/stream.h"
+#include "container/lazy/stream.h"
 #include "parser/expression_compiler.h"
 #include "query_ops.h"
 
@@ -46,4 +46,4 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
 }
 }
 
-#endif /* DIALOG_QUERY_PLAN_H_ */
+#endif /* CONFLUO_PLANNER_QUERY_PLAN_H_ */

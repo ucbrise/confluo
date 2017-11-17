@@ -1,5 +1,5 @@
-#ifndef DIALOG_KEY_OPS_H_
-#define DIALOG_KEY_OPS_H_
+#ifndef CONFLUO_TYPES_KEY_OPS_H_
+#define CONFLUO_TYPES_KEY_OPS_H_
 
 #include <type_traits>
 
@@ -49,4 +49,4 @@ byte_string key_transform<void>(const immutable_raw_data& data, double bucket_si
 
 }
 
-#endif /* DIALOG_KEY_OPS_H_ */
+#endif /* CONFLUO_TYPES_KEY_OPS_H_ */

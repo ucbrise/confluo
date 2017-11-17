@@ -1,5 +1,5 @@
-#ifndef PARSER_TRIGGER_PARSER_H_
-#define PARSER_TRIGGER_PARSER_H_
+#ifndef CONFLUO_PARSER_TRIGGER_PARSER_H_
+#define CONFLUO_PARSER_TRIGGER_PARSER_H_
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/support_utree.hpp>
@@ -81,4 +81,4 @@ parsed_trigger parse_trigger(const std::string& t) {
 }
 }
 
-#endif /* PARSER_TRIGGER_PARSER_H_ */
+#endif /* CONFLUO_PARSER_TRIGGER_PARSER_H_ */

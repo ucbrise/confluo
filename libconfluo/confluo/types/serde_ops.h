@@ -1,5 +1,5 @@
-#ifndef DIALOG_SERDE_OPS_H_
-#define DIALOG_SERDE_OPS_H_
+#ifndef CONFLUO_TYPES_SERDE_OPS_H_
+#define CONFLUO_TYPES_SERDE_OPS_H_
 
 #include "raw_data.h"
 
@@ -30,4 +30,4 @@ void deserialize<void>(std::istream& in, mutable_raw_data& value) {
 
 }
 
-#endif /* DIALOG_SERDE_OPS_H_ */
+#endif /* CONFLUO_TYPES_SERDE_OPS_H_ */

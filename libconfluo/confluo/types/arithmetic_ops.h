@@ -1,5 +1,5 @@
-#ifndef LIBDIALOG_DIALOG_ARITHMETIC_OPS_H_
-#define LIBDIALOG_DIALOG_ARITHMETIC_OPS_H_
+#ifndef CONFLUO_TYPES_ARITHMETIC_OPS_H_
+#define CONFLUO_TYPES_ARITHMETIC_OPS_H_
 
 #include <cstdint>
 
@@ -340,4 +340,4 @@ static binary_ops_t init_binaryops() {
 
 }
 
-#endif /* LIBDIALOG_DIALOG_ARITHMETIC_OPS_H_ */
+#endif /* CONFLUO_TYPES_ARITHMETIC_OPS_H_ */

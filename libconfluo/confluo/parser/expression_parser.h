@@ -1,5 +1,5 @@
-#ifndef DIALOG_EXPRESSION_PARSER_H_
-#define DIALOG_EXPRESSION_PARSER_H_
+#ifndef CONFLUO_EXPRESSION_PARSER_H_
+#define CONFLUO_EXPRESSION_PARSER_H_
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/support_utree.hpp>
@@ -306,4 +306,4 @@ static spirit::utree parse_expression(const std::string& e) {
 }
 }
 
-#endif /* DIALOG_EXPRESSION_PARSER_H_ */
+#endif /* CONFLUO_EXPRESSION_PARSER_H_ */

@@ -1,12 +1,12 @@
-#ifndef DIALOG_ALERT_INDEX_H_
-#define DIALOG_ALERT_INDEX_H_
+#ifndef CONFLUO_ALERT_INDEX_H_
+#define CONFLUO_ALERT_INDEX_H_
 
-#include "monolog_exp2.h"
 #include "trigger.h"
 #include "types/byte_string.h"
 #include "types/numeric.h"
 #include "alert.h"
-#include "radix_tree.h"
+#include "container/monolog/monolog.h"
+#include "container/radix_tree.h"
 
 namespace confluo {
 namespace monitor {
@@ -58,4 +58,4 @@ class alert_index {
 }
 }
 
-#endif /* DIALOG_ALERT_INDEX_H_ */
+#endif /* CONFLUO_ALERT_INDEX_H_ */

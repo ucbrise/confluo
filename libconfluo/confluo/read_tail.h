@@ -1,11 +1,11 @@
-#ifndef DIALOG_READ_TAIL_H_
-#define DIALOG_READ_TAIL_H_
+#ifndef CONFLUO_READ_TAIL_H_
+#define CONFLUO_READ_TAIL_H_
 
 #include <cstdint>
 #include <thread>
 
 #include "atomic.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 namespace confluo {
 
@@ -49,4 +49,4 @@ class read_tail {
 
 }
 
-#endif /* DIALOG_READ_TAIL_H_ */
+#endif /* CONFLUO_READ_TAIL_H_ */

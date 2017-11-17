@@ -1,5 +1,5 @@
-#ifndef DIALOG_DIALOG_TABLE_H_
-#define DIALOG_DIALOG_TABLE_H_
+#ifndef CONFLUO_ATOMIC_MULTILOG_H_
+#define CONFLUO_ATOMIC_MULTILOG_H_
 
 #include <math.h>
 
@@ -7,32 +7,32 @@
 #include <numeric>
 #include <thread>
 
-#include "configuration_params.h"
+#include "optional.h"
 #include "exceptions.h"
-#include "monolog.h"
 #include "parser/expression_compiler.h"
-#include "radix_tree.h"
-#include "record_batch.h"
-#include "schema.h"
-#include "storage.h"
-#include "string_map.h"
 #include "trigger.h"
 #include "types/type_manager.h"
 #include "alert_index.h"
 #include "atomic_multilog_metadata.h"
-#include "data_log.h"
+#include "conf/configuration_params.h"
+#include "container/data_log.h"
+#include "container/monolog/monolog.h"
+#include "container/radix_tree.h"
+#include "container/string_map.h"
 #include "filter.h"
 #include "filter_log.h"
 #include "index_log.h"
-#include "optional.h"
 #include "parser/schema_parser.h"
 #include "parser/trigger_compiler.h"
-#include "periodic_task.h"
 #include "planner/query_planner.h"
 #include "read_tail.h"
-#include "task_pool.h"
+#include "schema/record_batch.h"
+#include "schema/schema.h"
+#include "storage/storage.h"
 #include "time_utils.h"
 #include "string_utils.h"
+#include "threads/periodic_task.h"
+#include "threads/task_pool.h"
 
 using namespace ::confluo::monolog;
 using namespace ::confluo::index;
@@ -601,4 +601,4 @@ class atomic_multilog {
 
 }
 
-#endif /* DIALOG_DIALOG_TABLE_H_ */
+#endif /* CONFLUO_ATOMIC_MULTILOG_H_ */

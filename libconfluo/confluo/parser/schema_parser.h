@@ -1,5 +1,5 @@
-#ifndef PARSER_SCHEMA_PARSER_H_
-#define PARSER_SCHEMA_PARSER_H_
+#ifndef CONFLUO_PARSER_SCHEMA_PARSER_H_
+#define CONFLUO_PARSER_SCHEMA_PARSER_H_
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/support_utree.hpp>
@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "schema.h"
+#include "schema/schema.h"
 
 namespace confluo {
 namespace parser {
@@ -72,4 +72,4 @@ static std::vector<column_t> parse_schema(const std::string& s) {
 }
 }
 
-#endif /* PARSER_SCHEMA_PARSER_H_ */
+#endif /* CONFLUO_PARSER_SCHEMA_PARSER_H_ */

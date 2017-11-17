@@ -1,10 +1,10 @@
-#ifndef DIALOG_AGGREGATE_H_
-#define DIALOG_AGGREGATE_H_
+#ifndef CONFLUO_AGGREGATE_H_
+#define CONFLUO_AGGREGATE_H_
 
+#include "atomic.h"
+#include "threads/thread_manager.h"
 #include "types/aggregate_ops.h"
 #include "types/numeric.h"
-#include "atomic.h"
-#include "thread_manager.h"
 
 namespace confluo {
 
@@ -205,4 +205,4 @@ class aggregate {
 
 }
 
-#endif /* DIALOG_AGGREGATE_H_ */
+#endif /* CONFLUO_AGGREGATE_H_ */

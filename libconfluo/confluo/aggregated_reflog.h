@@ -1,8 +1,8 @@
-#ifndef DIALOG_AGGREGATED_REFLOG_H_
-#define DIALOG_AGGREGATED_REFLOG_H_
+#ifndef CONFLUO_AGGREGATED_REFLOG_H_
+#define CONFLUO_AGGREGATED_REFLOG_H_
 
 #include "aggregate.h"
-#include "reflog.h"
+#include "container/reflog.h"
 #include "trigger_log.h"
 
 namespace confluo {
@@ -47,4 +47,4 @@ class aggregated_reflog : public reflog {
 
 }
 
-#endif /* DIALOG_AGGREGATED_REFLOG_H_ */
+#endif /* CONFLUO_AGGREGATED_REFLOG_H_ */

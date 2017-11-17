@@ -1,15 +1,14 @@
-#ifndef DIALOG_FILTER_H_
-#define DIALOG_FILTER_H_
+#ifndef CONFLUO_FILTER_H_
+#define CONFLUO_FILTER_H_
 
 #include "aggregated_reflog.h"
-#include "radix_tree.h"
-#include "reflog.h"
-#include "schema.h"
+#include "container/radix_tree.h"
+#include "container/reflog.h"
 #include "trigger.h"
 #include "trigger_log.h"
 #include "parser/expression_compiler.h"
-#include "record_batch.h"
-#include "tiered_index.h"
+#include "schema/record_batch.h"
+#include "schema/schema.h"
 
 // TODO: Update tests
 
@@ -214,4 +213,4 @@ class filter {
 }
 }
 
-#endif /* DIALOG_FILTER_H_ */
+#endif /* CONFLUO_FILTER_H_ */

@@ -1,5 +1,5 @@
-#ifndef DIALOG_TYPE_PROPERTIES_H_
-#define DIALOG_TYPE_PROPERTIES_H_
+#ifndef CONFLUO_TYPES_TYPE_PROPERTIES_H_
+#define CONFLUO_TYPES_TYPE_PROPERTIES_H_
 
 #include "primitive_types.h"
 #include "arithmetic_ops.h"
@@ -111,4 +111,4 @@ static size_t find_type_properties(const std::string& name) {
 
 }
 
-#endif /* DIALOG_TYPE_PROPERTIES_H_ */
+#endif /* CONFLUO_TYPES_TYPE_PROPERTIES_H_ */

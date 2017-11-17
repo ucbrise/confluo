@@ -1,7 +1,7 @@
 #ifndef RPC_RPC_CONFIGURATION_PARAMS_H_
 #define RPC_RPC_CONFIGURATION_PARAMS_H_
 
-#include "configuration_params.h"
+#include "conf/configuration_params.h"
 #include "config_utils.h"
 #include "rpc_defaults.h"
 

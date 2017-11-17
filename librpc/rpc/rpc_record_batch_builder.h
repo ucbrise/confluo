@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-#include "configuration_params.h"
+#include "conf/configuration_params.h"
 
 namespace confluo {
 namespace rpc {

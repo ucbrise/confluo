@@ -1,5 +1,5 @@
-#ifndef TEST_TEST_UTILS_H_
-#define TEST_TEST_UTILS_H_
+#ifndef CONFLUO_TEST_TEST_UTILS_H_
+#define CONFLUO_TEST_TEST_UTILS_H_
 
 #include "gtest/gtest.h"
 
@@ -22,4 +22,4 @@ class test_utils {
 }
 }
 
-#endif /* TEST_TEST_UTILS_H_ */
+#endif /* CONFLUO_TEST_TEST_UTILS_H_ */

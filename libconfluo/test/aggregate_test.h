@@ -1,5 +1,5 @@
-#ifndef TEST_AGGREGATE_TEST_H_
-#define TEST_AGGREGATE_TEST_H_
+#ifndef CONFLUO_TEST_AGGREGATE_TEST_H_
+#define CONFLUO_TEST_AGGREGATE_TEST_H_
 
 #include "aggregate.h"
 
@@ -97,4 +97,4 @@ TEST_F(AggregateTest, CountTest) {
   }
 }
 
-#endif /* TEST_AGGREGATE_TEST_H_ */
+#endif /* CONFLUO_TEST_AGGREGATE_TEST_H_ */

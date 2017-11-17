@@ -1,5 +1,5 @@
-#ifndef DIALOG_STRING_OPS_H_
-#define DIALOG_STRING_OPS_H_
+#ifndef CONFLUO_TYPES_STRING_OPS_H_
+#define CONFLUO_TYPES_STRING_OPS_H_
 
 #include <string>
 
@@ -44,4 +44,4 @@ std::string to_string<std::string>(const immutable_raw_data& data) {
 
 }
 
-#endif /* DIALOG_STRING_OPS_H_ */
+#endif /* CONFLUO_TYPES_STRING_OPS_H_ */

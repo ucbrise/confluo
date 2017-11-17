@@ -1,5 +1,5 @@
-#ifndef TEST_DIALOG_TABLE_TEST_H_
-#define TEST_DIALOG_TABLE_TEST_H_
+#ifndef CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
+#define CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 
 #include "atomic_multilog.h"
 
@@ -735,4 +735,4 @@ TEST_F(AtomicMultilogTest, BatchFilterTest) {
   }
 }
 
-#endif /* TEST_DIALOG_TABLE_TEST_H_ */
+#endif /* CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_ */

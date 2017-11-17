@@ -1,12 +1,12 @@
-#ifndef DIALOG_QUERY_PLANNER_H_
-#define DIALOG_QUERY_PLANNER_H_
+#ifndef CONFLUO_PLANNER_QUERY_PLANNER_H_
+#define CONFLUO_PLANNER_QUERY_PLANNER_H_
 
 #include <unordered_map>
 #include <memory>
 
+#include "container/radix_tree.h"
 #include "exceptions.h"
 #include "index_log.h"
-#include "radix_tree.h"
 #include "query_ops.h"
 #include "query_plan.h"
 
@@ -148,4 +148,4 @@ class query_planner {
 }
 }
 
-#endif /* DIALOG_QUERY_PLANNER_H_ */
+#endif /* CONFLUO_PLANNER_QUERY_PLANNER_H_ */

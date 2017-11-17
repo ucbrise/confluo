@@ -1,8 +1,8 @@
-#ifndef DIALOG_TRIGGER_H_
-#define DIALOG_TRIGGER_H_
+#ifndef CONFLUO_TRIGGER_H_
+#define CONFLUO_TRIGGER_H_
 
 #include "aggregate.h"
-#include "schema_snapshot.h"
+#include "schema/schema_snapshot.h"
 
 namespace confluo {
 namespace monitor {
@@ -186,4 +186,4 @@ struct trigger {
 }
 }
 
-#endif /* DIALOG_TRIGGER_H_ */
+#endif /* CONFLUO_TRIGGER_H_ */

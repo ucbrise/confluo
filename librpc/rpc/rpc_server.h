@@ -1,5 +1,5 @@
-#ifndef RPC_DIALOG_SERVER_H_
-#define RPC_DIALOG_SERVER_H_
+#ifndef RPC_RPC_SERVER_H_
+#define RPC_RPC_SERVER_H_
 
 #include "rpc_service.h"
 #include <thrift/protocol/TBinaryProtocol.h>
@@ -481,4 +481,4 @@ class rpc_server {
 }
 }
 
-#endif /* RPC_DIALOG_SERVER_H_ */
+#endif /* RPC_RPC_SERVER_H_ */

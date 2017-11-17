@@ -1,5 +1,5 @@
-#ifndef DIALOG_DATA_H_
-#define DIALOG_DATA_H_
+#ifndef CONFLUO_TYPES_RAW_DATA_H_
+#define CONFLUO_TYPES_RAW_DATA_H_
 
 #include <string>
 
@@ -134,4 +134,4 @@ inline mutable_raw_data& mutable_raw_data::set<std::string>(const std::string& s
 
 }
 
-#endif /* DIALOG_DATA_H_ */
+#endif /* CONFLUO_TYPES_RAW_DATA_H_ */

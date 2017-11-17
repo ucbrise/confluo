@@ -1,8 +1,8 @@
-#ifndef DIALOG_INDEX_LOG_H_
-#define DIALOG_INDEX_LOG_H_
+#ifndef CONFLUO_INDEX_LOG_H_
+#define CONFLUO_INDEX_LOG_H_
 
-#include "monolog_exp2.h"
-#include "radix_tree.h"
+#include "container/monolog/monolog_exp2.h"
+#include "container/radix_tree.h"
 
 namespace confluo {
 
@@ -10,4 +10,4 @@ typedef monolog::monolog_exp2<index::radix_index*> index_log;
 
 }
 
-#endif /* DIALOG_INDEX_LOG_H_ */
+#endif /* CONFLUO_INDEX_LOG_H_ */

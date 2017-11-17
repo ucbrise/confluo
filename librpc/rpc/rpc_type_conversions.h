@@ -1,9 +1,9 @@
 #ifndef RPC_RPC_TYPE_CONVERSIONS_H_
 #define RPC_RPC_TYPE_CONVERSIONS_H_
 
-#include "record_batch.h"
-#include "schema.h"
-#include "storage.h"
+#include "schema/record_batch.h"
+#include "schema/schema.h"
+#include "storage/storage.h"
 #include "rpc_types.h"
 
 

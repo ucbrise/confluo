@@ -1,5 +1,5 @@
-#ifndef DIALOG_TYPE_MANAGER_H_
-#define DIALOG_TYPE_MANAGER_H_
+#ifndef CONFLUO_TYPES_TYPE_MANAGER_H_
+#define CONFLUO_TYPES_TYPE_MANAGER_H_
 
 #include "exceptions.h"
 #include "type_properties.h"
@@ -81,4 +81,4 @@ static data_type STRING_TYPE(size_t size) {
 
 }
 
-#endif /* DIALOG_THREAD_MANAGER_H_ */
+#endif /* CONFLUO_TYPES_THREAD_MANAGER_H_ */

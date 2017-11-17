@@ -1,5 +1,5 @@
-#ifndef DIALOG_BYTE_STRING_H_
-#define DIALOG_BYTE_STRING_H_
+#ifndef CONFLUO_TYPES_BYTE_STRING_H_
+#define CONFLUO_TYPES_BYTE_STRING_H_
 
 #include <cstring>
 #include <cstdio>
@@ -350,4 +350,4 @@ class byte_string {
 
 }
 
-#endif /* LIBDIALOG_DIALOG_BYTE_STRING_H_ */
+#endif /* CONFLUO_TYPES_BYTE_STRING_H_ */

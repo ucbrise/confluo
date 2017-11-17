@@ -1,5 +1,5 @@
-#ifndef DIALOG_PRIMITIVE_TYPES_H_
-#define DIALOG_PRIMITIVE_TYPES_H_
+#ifndef CONFLUO_TYPES_PRIMITIVE_TYPES_H_
+#define CONFLUO_TYPES_PRIMITIVE_TYPES_H_
 
 #include <limits>
 #include <cstdint>
@@ -64,4 +64,4 @@ static double double_max = std::numeric_limits<double>::max();
 
 }
 
-#endif /* DIALOG_PRIMITIVE_TYPES_H_ */
+#endif /* CONFLUO_TYPES_PRIMITIVE_TYPES_H_ */

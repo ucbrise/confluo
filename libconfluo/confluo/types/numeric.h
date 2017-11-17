@@ -1,7 +1,7 @@
-#ifndef DIALOG_NUMERIC_H_
-#define DIALOG_NUMERIC_H_
+#ifndef CONFLUO_TYPES_NUMERIC_H_
+#define CONFLUO_TYPES_NUMERIC_H_
 
-#include "data_types.h"
+#include "data_type.h"
 #include "immutable_value.h"
 #include "string_utils.h"
 
@@ -268,4 +268,4 @@ class numeric {
 
 }
 
-#endif /* DIALOG_NUMERIC_H_ */
+#endif /* CONFLUO_TYPES_NUMERIC_H_ */

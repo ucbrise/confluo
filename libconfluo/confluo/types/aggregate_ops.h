@@ -1,5 +1,5 @@
-#ifndef DIALOG_AGGREGATE_OPS_H_
-#define DIALOG_AGGREGATE_OPS_H_
+#ifndef CONFLUO_TYPES_AGGREGATE_OPS_H_
+#define CONFLUO_TYPES_AGGREGATE_OPS_H_
 
 #include "aggregate_types.h"
 #include "numeric.h"
@@ -107,4 +107,4 @@ static aggregator invalid_aggregator = { invalid_agg, invalid_zero };
 
 }
 
-#endif /* DIALOG_AGGREGATE_OPS_H_ */
+#endif /* CONFLUO_TYPES_AGGREGATE_OPS_H_ */

@@ -1,5 +1,5 @@
-#ifndef RPC_RPC_DIALOG_CLIENT_H_
-#define RPC_RPC_DIALOG_CLIENT_H_
+#ifndef RPC_RPC_CLIENT_H_
+#define RPC_RPC_CLIENT_H_
 
 #include <thrift/transport/TSocket.h>
 #include <thrift/server/TServer.h>
@@ -263,4 +263,4 @@ protected:
 }
 }
 
-#endif /* RPC_RPC_DIALOG_CLIENT_H_ */
+#endif /* RPC_RPC_CLIENT_H_ */
