@@ -12,6 +12,7 @@
 #include "monolog.h"
 #include "read_tail.h"
 #include "schema.h"
+#include "data.h"
 #include "record_batch.h"
 #include "string_map.h"
 #include "table_metadata.h"
