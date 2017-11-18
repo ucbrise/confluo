@@ -4,9 +4,9 @@
 #include <map>
 #include <vector>
 
-#include "configuration_params.h"
+#include "conf/configuration_params.h"
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class rpc_record_batch_builder {

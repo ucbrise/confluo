@@ -3,16 +3,16 @@
 
 #include <sstream>
 
-#include "dialog_service.h"
+#include "rpc_service.h"
 
 using boost::shared_ptr;
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 
 class rpc_alert_stream {
  public:
-  typedef dialog_serviceClient rpc_client;
+  typedef rpc_serviceClient rpc_client;
 
   rpc_alert_stream(int64_t table_id, shared_ptr<rpc_client> client,
                    rpc_iterator_handle&& handle)

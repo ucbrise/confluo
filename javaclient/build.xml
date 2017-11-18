@@ -4,7 +4,7 @@
 <!-- Ant build file (http://ant.apache.org/) for Ant 1.6.2 or above.        -->
 <!-- ====================================================================== -->
 
-<project name="dialog-client" default="package" basedir=".">
+<project name="confluo-client" default="package" basedir=".">
 
   <!-- ====================================================================== -->
   <!-- Import maven-build.xml into the current project                        -->

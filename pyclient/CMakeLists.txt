@@ -16,7 +16,7 @@ if (PYTHONINTERP_FOUND)
   
   if (BUILD_TESTS)
     add_test(NAME PythonClientTest 
-      COMMAND ${CMAKE_COMMAND} -E env DIALOG_SERVER_EXEC=${PROJECT_BINARY_DIR}/bin/dialogd ${PYTHON_EXECUTABLE} setup.py test 
+      COMMAND ${CMAKE_COMMAND} -E env CONFLUO_SERVER_EXEC=${PROJECT_BINARY_DIR}/bin/confluod ${PYTHON_EXECUTABLE} setup.py test 
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   endif ()
   

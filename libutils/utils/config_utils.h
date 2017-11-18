@@ -1,5 +1,5 @@
-#ifndef DIALOG_CONFIGURATION_PARSER_H_
-#define DIALOG_CONFIGURATION_PARSER_H_
+#ifndef UTILS_CONFIG_UTILS_H_
+#define UTILS_CONFIG_UTILS_H_
 
 #include <cstdlib>
 
@@ -179,4 +179,4 @@ private:
 
 }
 
-#endif /* DIALOG_CONFIGURATION_PARSER_H_ */
+#endif /* UTILS_CONFIG_UTILS_H_ */

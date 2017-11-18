@@ -4,8 +4,8 @@
 #include "gtest/gtest.h"
 
 #include "client_connection_test.h"
-#include "client_readops_test.h"
-#include "client_writeops_test.h"
+#include "client_read_ops_test.h"
+#include "client_write_ops_test.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

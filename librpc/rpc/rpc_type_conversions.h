@@ -1,13 +1,13 @@
 #ifndef RPC_RPC_TYPE_CONVERSIONS_H_
 #define RPC_RPC_TYPE_CONVERSIONS_H_
 
-#include "dialog_types.h"
+#include "schema/record_batch.h"
+#include "schema/schema.h"
+#include "storage/storage.h"
+#include "rpc_types.h"
 
-#include "record_batch.h"
-#include "schema.h"
-#include "storage.h"
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 class rpc_type_conversions {
  public:
