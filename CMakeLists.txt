@@ -35,7 +35,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_DEBUG} -Wall -pedantic -Wextra ${
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wall -pedantic -Wextra ${SUPPRESS_WARN_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Debug)
 
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not allowed.")
@@ -73,9 +73,6 @@ add_subdirectory(libutils)
 # Core library
 add_subdirectory(libconfluo)
 
-# DiaLog examples
-add_subdirectory(examples/libtimeseries)
-
 if (BUILD_RPC)
   # RPC Framework
   add_subdirectory(librpc)
@@ -90,6 +87,9 @@ if (BUILD_RPC)
     add_subdirectory(javaclient)
   endif()
 endif()
+
+# DiaLog examples
+add_subdirectory(examples/libtimeseries)
 
 if (BUILD_DOC)
   add_subdirectory(docs)
