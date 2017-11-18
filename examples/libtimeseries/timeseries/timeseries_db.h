@@ -1,43 +1,27 @@
-#ifndef DIALOG_TIMESERIES_DB_H_
-#define DIALOG_TIMESERIES_DB_H_
+#ifndef EXAMPLES_TIMESERIES_DB_H_
+#define EXAMPLES_TIMESERIES_DB_H_
 
 #include <math.h>
+#include "atomic_multilog.h"
 
-#include <functional>
-#include <numeric>
-#include <thread>
+namespace confluo {
 
-#include "dialog_table.h"
-
-using namespace ::dialog::monolog;
-using namespace ::dialog::index;
-using namespace ::dialog::monitor;
-using namespace ::dialog::parser;
-using namespace ::dialog::planner;
-using namespace ::utils;
-
-namespace dialog {
-
-class timeseries_db : public dialog_table {
+class timeseries_db : public atomic_multilog {
  public:
   timeseries_db(const std::string& table_name,
                 const std::vector<column_t>& table_schema,
                 const std::string& path, const storage::storage_mode& storage,
                 task_pool& task_pool)
-      : dialog_table(table_name, table_schema, path, storage, task_pool) {
+      : atomic_multilog(table_name, table_schema, path, storage, task_pool) {
     // Index the timestamp column by calling add_index
     add_index("TIMESTAMP");
   }
 
-  size_t append(void* data) {
-    return dialog_table::append(data);
-  }
-
-  void get_range(std::vector<data>& out, int64_t ts1, int64_t ts2) {
+  void get_range(std::vector<record_t>& out, int64_t ts1, int64_t ts2) {
     std::string expr = "TIMESTAMP >= " + std::to_string(ts1)
         + " && TIMESTAMP <= " + std::to_string(ts2);
     for (auto r = execute_filter(expr); !r.empty(); r = r.tail()) {
-      out.push_back(r.head().at(0).value().to_data());
+      out.push_back(r.head());
     }
   }
 
@@ -76,4 +60,4 @@ class timeseries_db : public dialog_table {
 
 }
 
-#endif /* DIALOG_TIMESERIES_H_ */
+#endif /* EXAMPLES_TIMESERIES_DB_H_ */

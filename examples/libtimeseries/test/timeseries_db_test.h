@@ -1,7 +1,6 @@
-#ifndef TEST_TIMESERIES_DB_TEST_H_
-#define TEST_TIMESERIES_DB_TEST_H_
+#ifndef EXAMPLES_TEST_TIMESERIES_DB_TEST_H_
+#define EXAMPLES_TEST_TIMESERIES_DB_TEST_H_
 
-#include "dialog_table.h"
 #include "timeseries_db.h"
 
 #include "math.h"
@@ -10,7 +9,7 @@
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
-using namespace ::dialog;
+using namespace ::confluo;
 
 class TimeseriesDBTest : public testing::Test {
  public:
@@ -21,18 +20,18 @@ class TimeseriesDBTest : public testing::Test {
       buf[i] = val_uint8;
   }
 
-  void test_append_and_get(dialog_table& dtable) {
+  void test_append_and_get(atomic_multilog& mlog) {
     std::vector<uint64_t> offsets;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       TimeseriesDBTest::generate_bytes(data_, DATA_SIZE, i);
-      uint64_t offset = dtable.append(data_);
+      uint64_t offset = mlog.append(data_);
       offsets.push_back(offset);
     }
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       ro_data_ptr data_ptr;
-      dtable.read(offsets[i], data_ptr);
+      mlog.read(offsets[i], data_ptr);
       ASSERT_TRUE(data_ptr.get() != nullptr);
       uint8_t expected = i % 256;
       uint8_t* data = data_ptr.get();
@@ -40,7 +39,7 @@ class TimeseriesDBTest : public testing::Test {
         ASSERT_EQ(data[j], expected);
       }
     }
-    ASSERT_EQ(MAX_RECORDS, dtable.num_records());
+    ASSERT_EQ(MAX_RECORDS, mlog.num_records());
   }
 
   static std::vector<column_t> s;
@@ -215,10 +214,10 @@ TEST_F(TimeseriesDBTest, GetRangeTest) {
   int64_t end = r.ts;
 
   size_t num_pts = 4;
-  std::vector<data> data_pts;
-  ts.get_range(data_pts, beg, end);
+  std::vector<record_t> records;
+  ts.get_range(records, beg, end);
 
-  ASSERT_EQ(num_pts, data_pts.size());
+  ASSERT_EQ(num_pts, records.size());
 }
 
 TEST_F(TimeseriesDBTest, GetNearestTest) {
@@ -267,4 +266,4 @@ TEST_F(TimeseriesDBTest, ComputeDiffTest) {
   ASSERT_EQ(expected_size, records.size());
 }
 
-#endif /* TEST_TIMESERIES_DB_TEST_H_ */
+#endif /* EXAMPLES_TEST_TIMESERIES_DB_TEST_H_ */

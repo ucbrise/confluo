@@ -202,10 +202,6 @@ class filter {
     return atomic::load(&is_valid_);
   }
 
-  filter_fn get_filter() {
-      return fn_;
-  }
-
  private:
   compiled_expression exp_;         // The compiled filter expression
   filter_fn fn_;                    // Filter function
