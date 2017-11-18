@@ -1,9 +1,9 @@
 #ifndef TEST_TIMESERIES_DB_TEST_H_
 #define TEST_TIMESERIES_DB_TEST_H_
 
+#include "dialog_table.h"
 #include "timeseries_db.h"
 
-#include "dialog_table.h"
 #include "math.h"
 #include "gtest/gtest.h"
 
@@ -201,6 +201,7 @@ TEST_F(TimeseriesDBTest, GetRangeTest) {
   ts.add_index("h");
 
   int64_t beg = r.ts;
+
   size_t offset = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
   int64_t time = r.ts;
 
@@ -239,6 +240,7 @@ TEST_F(TimeseriesDBTest, GetNearestTest) {
 }
 
 TEST_F(TimeseriesDBTest, ComputeDiffTest) {
+
   std::vector<record_t> records;
   std::vector<uint64_t> offsets;
 
