@@ -191,14 +191,15 @@ class byte_string {
   byte_string(T val)
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
-    val ^= T(1) << (sizeof(T) * 8 - 1);
+    typedef typename std::make_unsigned<T>::type UT;
+    UT uval = val ^ (UT(1) << (sizeof(UT) * 8 - 1));
 #if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
-    val = byte_utils::byte_swap(val);
+    uval = byte_utils::byte_swap(uval);
 #else
-    val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);
+    uval = byte_utils::is_big_endian() ? uval : byte_utils::byte_swap(uval);
 #endif
-    memcpy(data_, &val, size_);
+    memcpy(data_, &uval, size_);
   }
 
   template<typename T, typename std::enable_if<

@@ -12,7 +12,7 @@ typedef byte_string (*key_op_t)(const immutable_raw_data& v, double bucket_size)
 
 template<typename T>
 byte_string key_transform(const immutable_raw_data& v, double bucket_size) {
-  return byte_string(static_cast<T>(v.as<T>() / bucket_size));
+  return byte_string(static_cast<T>(v.as<T>() / static_cast<T>(bucket_size)));
 }
 
 template<>
