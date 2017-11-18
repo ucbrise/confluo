@@ -539,10 +539,18 @@ class byte_string {
     return *this;
   }
 
+<<<<<<< a933a893c205f0dcfc1badccc4132dfc16d9b21e
   /**
    * Copies the byte_string data into an immutable form
    * @return An immutable_byte_string with the same data
    */
+=======
+  template<typename T>
+  inline T as() const {
+    return *reinterpret_cast<T*>(data_);
+  }
+
+>>>>>>> Filter archiver now uses radix tree iterator.
   immutable_byte_string copy() const {
     return immutable_byte_string(data_, size_);
   }

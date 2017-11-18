@@ -46,6 +46,7 @@ class filter {
   // nanosecond time-stamps can be handled by the index.
   typedef index::radix_tree<aggregated_reflog> idx_t;
   typedef idx_t::rt_result range_result;
+  typedef idx_t::rt_reflog_result reflog_result;
 
   /**
    * Constructor that initializes filter with provided compiled expression and
@@ -202,6 +203,18 @@ class filter {
                             uint64_t ts_block_end) const {
     return idx_.range_lookup(byte_string(ts_block_begin),
                              byte_string(ts_block_end));
+  }
+
+  /**
+   * Get the range of reflogs that lie between time-blocks.
+   * @param ts_block_begin beginning time-block
+   * @param ts_block_end end time-block
+   * @return an iterator over reflogs in the time range
+   */
+  reflog_result lookup_range_reflogs(uint64_t ts_block_begin,
+                                     uint64_t ts_block_end) const {
+    return idx_.range_lookup_reflogs(byte_string(ts_block_begin),
+                                     byte_string(ts_block_end));
   }
 
   /**
