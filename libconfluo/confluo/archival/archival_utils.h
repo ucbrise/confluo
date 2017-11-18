@@ -3,7 +3,7 @@
 
 #include "encoder.h"
 #include "incr_file_writer.h"
-#include "reflog.h"
+#include "container/reflog.h"
 
 namespace confluo {
 namespace archival {
@@ -25,7 +25,7 @@ class archival_utils {
    * @return true if reflog is completely archived, otherwise false
    */
   template<encoding_type ENCODING>
-  static size_t archive_reflog(reflog* reflog, utils::incremental_file_writer& writer,
+  static size_t archive_reflog(reflog* reflog, incremental_file_writer& writer,
                                size_t offset, size_t archival_tail = 0) {
     bucket_ptr_t bucket_ptr;
     size_t data_log_tail = 0;

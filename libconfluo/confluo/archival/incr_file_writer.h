@@ -1,9 +1,10 @@
-#ifndef INCR_FILE_WRITER_H_
-#define INCR_FILE_WRITER_H_
+#ifndef CONFLUO_INCR_FILE_WRITER_H_
+#define CONFLUO_INCR_FILE_WRITER_H_
 
 #include "io_utils.h"
 
-namespace utils {
+namespace confluo {
+namespace archival {
 
 class incremental_file_writer {
  public:
@@ -92,5 +93,6 @@ class incremental_file_writer {
 };
 
 }
+}
 
-#endif /* INCR_FILE_WRITER_H_ */
+#endif /* CONFLUO_INCR_FILE_WRITER_H_ */

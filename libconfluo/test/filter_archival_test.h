@@ -5,15 +5,15 @@
 
 #include "encoder.h"
 #include "filter.h"
-#include "filter_archiver.h"
 #include "gtest/gtest.h"
+
+#include "archival/filter_archiver.h"
 #include "read_tail.h"
 
 using namespace ::confluo;
 
 class FilterArchivalTest : public testing::Test {
  public:
-  typedef storage::encoded_ptr<uint64_t> archived_ptr_t;
   typedef archival::filter_log_archiver<archival::encoding_type::IDENTITY> filter_log_archiver_t;
 
   static const uint64_t kMaxEntries = 1e6;
@@ -34,7 +34,7 @@ class FilterArchivalTest : public testing::Test {
   void fill(filter& f) {
     ASSERT_TRUE(thread_manager::register_thread() != -1);
     for (size_t i = 0; i < kMaxEntries / kPerTimeBlock; i++) {
-      for (size_t j = i * 10; j < (i + 1) * 10; j++) {
+      for (size_t j = i * kPerTimeBlock; j < (i + 1) * kPerTimeBlock; j++) {
         data_point p(i * kTimeBlock, j);
         record_t r(j, reinterpret_cast<uint8_t*>(&p), sizeof(data_point));
         r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
@@ -133,11 +133,11 @@ TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
   archiver.archive(4000);
   verify_reflog_archived(first_reflog, 3 * reflog_constants::BUCKET_SIZE);
 
-  // archives multiple buckets in the first reflog
+  // archive multiple buckets in the first reflog
   archiver.archive(8000);
   verify_reflog_archived(first_reflog, 7 * reflog_constants::BUCKET_SIZE);
 
-  // archives across contiguous reflogs
+  // archive across contiguous reflogs
   archiver.archive(20000);
   verify_reflog_archived(first_reflog, 10 * reflog_constants::BUCKET_SIZE);
   verify_reflog_archived(second_reflog, 10 * reflog_constants::BUCKET_SIZE);
@@ -154,7 +154,7 @@ TEST_F(FilterArchivalTest, MultipleReflogsArchivedTest) {
   filters.push_back(&f);
   filter_log_archiver_t archiver("filter_archives", "/tmp", filters, rt);
 
-  // archives across contiguous reflogs
+  // archive across contiguous reflogs
   archiver.archive(32000);
   verify_reflog_archived(f.lookup(0), 10 * reflog_constants::BUCKET_SIZE);
   verify_reflog_archived(f.lookup(1), 10 * reflog_constants::BUCKET_SIZE);

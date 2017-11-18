@@ -1,13 +1,14 @@
 #ifndef CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_
 #define CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_
 
+#include "storage/allocator.h"
 #include "encoder.h"
 #include "file_utils.h"
 #include "incr_file_writer.h"
 #include "io_utils.h"
 #include "mmap_utils.h"
 #include "read_tail.h"
-#include "string_map.h"
+#include "container/string_map.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -75,7 +76,7 @@ class monolog_linear_archiver {
 
  private:
 
-  utils::incremental_file_writer writer_;
+  incremental_file_writer writer_;
   size_t archival_tail_;
 
   read_tail rt_;

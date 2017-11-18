@@ -16,6 +16,7 @@
 #include "parser/expression_compiler_test.h"
 #include "parser/expression_parser_test.h"
 #include "filter_test.h"
+#include "filter_archival_test.h"
 #include "container/flatten_test.h"
 #include "types/immutable_value_test.h"
 #include "schema/index_state_test.h"
