@@ -144,28 +144,36 @@ int64_t get_time(uint8_t* data) {
 }
 
 TEST_F(StreamTest, WriteReadTest) {
-  stream_producer sp("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  stream_consumer sc("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  sc.add_index("a");
-  sc.add_index("b");
-  sc.add_index("c", 1);
-  sc.add_index("d", 2);
-  sc.add_index("e", 100);
-  sc.add_index("f", 0.1);
-  sc.add_index("g", 0.01);
+  atomic_multilog dtable("my_table", s, "/tmp", 
+          storage::IN_MEMORY, MGMT_POOL);
+  
+  dtable.add_index("a");
+  dtable.add_index("b");
+  dtable.add_index("c", 1);
+  dtable.add_index("d", 2);
+  dtable.add_index("e", 100);
+  dtable.add_index("f", 0.1);
+  dtable.add_index("g", 0.01);
 
+  stream_producer sp(&dtable);
+  stream_consumer sc(&dtable);
+
+  std::vector<std::string> expected_strings;
   uint64_t k_max = 100000;
+
   for (uint64_t i = 0; i < k_max; i++) {
-    sp.buffer(record_str(true, '7', i, 14, 1000, 0.7, 0.02, "stream"));
+    std::string record_string = record_str(true, '7', i, 14, 1000, 
+            0.7, 0.02, "stream");
+    sp.buffer(record_string);
+    expected_strings.push_back(record_string);
   }
 
   std::vector<size_t> log_offs = sp.get_log_offsets();
+
   for (uint64_t i = 0; i < k_max; i++) {
     std::string data;
-    sc.read(data, log_offs[i], sizeof(rec));
-    std::string expected = record_str(true, '7', i, 14, 1000, 0.7, 0.02,
-            "stream");
-    ASSERT_STREQ(expected.c_str(), data.c_str());
+    sc.read(data, i * sizeof(rec), sizeof(rec));
+    ASSERT_STREQ(expected_strings[i].c_str(), data.c_str());
   }
 
 }

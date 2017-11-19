@@ -2,36 +2,43 @@
 #define EXAMPLES_STREAM_CONSUMER_H_
 
 #include <math.h>
+#include <map>
 #include "atomic_multilog.h"
 
 namespace confluo {
 
-class stream_consumer : public atomic_multilog {
+class stream_consumer {
  public:
-  stream_consumer(const std::string& table_name,
-                const std::vector<column_t>& table_schema,
-                const std::string& path, const storage::storage_mode& storage,
-                task_pool& task_pool)
-      : atomic_multilog(table_name, table_schema, path, storage, task_pool) {
-        name = table_name;
-        schema_t(cur_schema);
+  stream_consumer(atomic_multilog* dtable) {
+      dtable_ = dtable;
+      READ_BATCH_SIZE = 8;
   }
 
   void read(std::string& _return, uint64_t offset, size_t record_size) {
-      if (name.empty()) {
+      if (dtable_->get_name().empty()) {
           throw illegal_state_exception("Must set table first");
       }
-      ro_data_ptr data;
-      atomic_multilog::read(offset, data);
-      char* rbuf = (char*) data.get();
-      
-      _return = std::string(reinterpret_cast<const char*>(rbuf), 
-              record_size);
+
+      if (read_buffer_.find(offset) == read_buffer_.end()) {
+        ro_data_ptr data;
+
+        for (uint64_t i = 0; i < READ_BATCH_SIZE; i++) {
+            uint64_t map_offset = offset + i * record_size;
+            dtable_->read(map_offset, data);
+            char* rbuf = (char*) data.get();
+
+            std::string result = std::string(
+                    reinterpret_cast<const char*>(rbuf), record_size);
+            read_buffer_[map_offset] = result;
+        }
+      }
+      _return = read_buffer_[offset];
   }
 
  private:
-  std::string name;
-  schema_t cur_schema;
+  atomic_multilog* dtable_;
+  std::map<uint64_t, std::string> read_buffer_;
+  uint64_t READ_BATCH_SIZE;
 
 };
 
