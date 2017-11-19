@@ -88,6 +88,9 @@ if (BUILD_RPC)
   endif()
 endif()
 
+# DiaLog examples
+add_subdirectory(examples/libtimeseries)
+
 if (BUILD_DOC)
   add_subdirectory(docs)
 endif()

@@ -134,7 +134,8 @@ class schema_builder {
       : user_provided_ts_(false),
         offset_(0) {
     // Every schema must have timestamp
-    mutable_value min(LONG_TYPE, LONG_TYPE.zero());
+    // TODO: Replace this with a new timestamp type
+    mutable_value min(LONG_TYPE, LONG_TYPE.min());
     mutable_value max(LONG_TYPE, LONG_TYPE.max());
     columns_.push_back(column_t(0, 0, LONG_TYPE, "TIMESTAMP", min, max));
     offset_ += LONG_TYPE.size;
