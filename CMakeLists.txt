@@ -90,6 +90,7 @@ endif()
 
 # DiaLog examples
 add_subdirectory(examples/libtimeseries)
+add_subdirectory(examples/libstreaming)
 
 if (BUILD_DOC)
   add_subdirectory(docs)
