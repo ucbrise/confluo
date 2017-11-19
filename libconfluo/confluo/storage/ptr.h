@@ -1,10 +1,9 @@
 #ifndef CONFLUO_STORAGE_PTR_H_
 #define CONFLUO_STORAGE_PTR_H_
 
+#include "storage/allocator.h"
 #include "atomic.h"
 #include "encoded_ptr.h"
-#include "exceptions.h"
-#include "storage/allocator.h"
 
 namespace confluo {
 namespace storage {

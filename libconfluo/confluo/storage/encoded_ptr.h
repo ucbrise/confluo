@@ -1,5 +1,5 @@
-#ifndef CONFLUO_ENCODED_PTR_H_
-#define CONFLUO_ENCODED_PTR_H_
+#ifndef CONFLUO_STORAGE_ENCODED_PTR_H_
+#define CONFLUO_STORAGE_ENCODED_PTR_H_
 
 #include "ptr_metadata.h"
 
@@ -60,4 +60,4 @@ class encoded_ptr {
 }
 }
 
-#endif /* CONFLUO_ENCODED_PTR_H_ */
+#endif /* CONFLUO_STORAGE_ENCODED_PTR_H_ */

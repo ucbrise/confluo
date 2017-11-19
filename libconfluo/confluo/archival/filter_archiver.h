@@ -1,5 +1,5 @@
-#ifndef CONFLUO_FILTER_ARCHIVER_H_
-#define CONFLUO_FILTER_ARCHIVER_H_
+#ifndef CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_
+#define CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_
 
 #include "aggregated_reflog.h"
 #include "archival_utils.h"
@@ -100,4 +100,4 @@ class filter_log_archiver {
 }
 }
 
-#endif /* CONFLUO_FILTER_ARCHIVER_H_ */
+#endif /* CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_ */

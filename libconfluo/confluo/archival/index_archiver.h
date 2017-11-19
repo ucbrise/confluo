@@ -1,17 +1,17 @@
-#ifndef LIBDIALOG_DIALOG_ARCHIVAL_INDEX_ARCHIVER_H_
-#define LIBDIALOG_DIALOG_ARCHIVAL_INDEX_ARCHIVER_H_
+#ifndef CONFLUO_ARCHIVAL_INDEX_ARCHIVER_H_
+#define CONFLUO_ARCHIVAL_INDEX_ARCHIVER_H_
 
 #include "aggregated_reflog.h"
 #include "archival_utils.h"
-#include "column.h"
+#include "schema/column.h"
 #include "configuration_params.h"
 #include "encoder.h"
 #include "incr_file_writer.h"
 #include "index_log.h"
 #include "read_tail.h"
-#include "schema.h"
+#include "schema/schema.h"
 
-namespace dialog {
+namespace confluo {
 namespace archival {
 
 template<encoding_type ENCODING>
@@ -101,4 +101,4 @@ class index_log_archiver {
 }
 
 
-#endif /* LIBDIALOG_DIALOG_ARCHIVAL_INDEX_ARCHIVER_H_ */
+#endif /* CONFLUO_ARCHIVAL_INDEX_ARCHIVER_H_ */

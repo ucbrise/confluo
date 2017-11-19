@@ -3,11 +3,10 @@
 
 #include <thread>
 
-#include "encoder.h"
+#include "archival/encoder.h"
 #include "filter.h"
-#include "gtest/gtest.h"
-
 #include "archival/filter_archiver.h"
+#include "gtest/gtest.h"
 #include "read_tail.h"
 
 using namespace ::confluo;

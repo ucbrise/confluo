@@ -1,9 +1,9 @@
-#ifndef CONFLUO_ARCHIVAL_UTILS_H_
-#define CONFLUO_ARCHIVAL_UTILS_H_
+#ifndef CONFLUO_ARCHIVAL_ARCHIVAL_UTILS_H_
+#define CONFLUO_ARCHIVAL_ARCHIVAL_UTILS_H_
 
+#include "encoder.h"
 #include "incr_file_writer.h"
 #include "container/reflog.h"
-#include "encoder.h"
 
 namespace confluo {
 namespace archival {
@@ -79,4 +79,4 @@ class archival_utils {
 }
 }
 
-#endif /* CONFLUO_ARCHIVAL_UTILS_H_ */
+#endif /* CONFLUO_ARCHIVAL_ARCHIVAL_UTILS_H_ */

@@ -1,10 +1,9 @@
 #ifndef TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 #define TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 
-#include "encoder.h"
+#include "archival/encoder.h"
 #include "archival/monolog_linear_archiver.h"
 #include "container/monolog/monolog_linear.h"
-#include "read_tail.h"
 #include "gtest/gtest.h"
 #include "read_tail.h"
 

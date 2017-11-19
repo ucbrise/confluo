@@ -1,5 +1,5 @@
-#ifndef CONFLUO_ENCODER_H_
-#define CONFLUO_ENCODER_H_
+#ifndef CONFLUO_ARCHIVAL_ENCODER_H_
+#define CONFLUO_ARCHIVAL_ENCODER_H_
 
 namespace confluo {
 namespace archival {
@@ -32,4 +32,4 @@ class encoder {
 }
 }
 
-#endif /* CONFLUO_ENCODER_H_ */
+#endif /* CONFLUO_ARCHIVAL_ENCODER_H_ */

@@ -1,5 +1,5 @@
-#ifndef CONFLUO_INCR_FILE_WRITER_H_
-#define CONFLUO_INCR_FILE_WRITER_H_
+#ifndef CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_
+#define CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_
 
 #include "io_utils.h"
 
@@ -95,4 +95,4 @@ class incremental_file_writer {
 }
 }
 
-#endif /* CONFLUO_INCR_FILE_WRITER_H_ */
+#endif /* CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_ */

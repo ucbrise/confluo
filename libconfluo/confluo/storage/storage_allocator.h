@@ -3,10 +3,11 @@
 
 #include <unistd.h>
 
+#include "conf/configuration_params.h"
 #include "exceptions.h"
+#include "memory_stat.h"
 #include "mmap_utils.h"
-#include "storage/memory_stat.h"
-#include "storage/ptr_metadata.h"
+#include "ptr_metadata.h"
 
 namespace confluo {
 namespace storage {

@@ -2,7 +2,6 @@
 #define CONFLUO_STORAGE_MEMPOOL_STAT_H_
 
 #include "atomic.h"
-#include "conf/configuration_params.h"
 
 namespace confluo {
 namespace storage {

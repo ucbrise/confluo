@@ -28,15 +28,14 @@ class AtomicMultilogTest : public testing::Test {
     }
 
     record_t r;
+    read_only_data_log_ptr data_ptr;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      ro_data_ptr data_ptr;
       mlog.read(offsets[i], data_ptr);
-      ASSERT_TRUE(data_ptr.get() != nullptr);
+      decoded_data_log_ptr decoded_ptr = data_ptr.decode_ptr();
+      ASSERT_TRUE(decoded_ptr.get() != nullptr);
       uint8_t expected = i % 256;
-      uint8_t* data = data_ptr.get();
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-
-        ASSERT_EQ(data[j], expected);
+        ASSERT_EQ(decoded_ptr.get()[j], expected);
       }
     }
     ASSERT_EQ(MAX_RECORDS, mlog.num_records());

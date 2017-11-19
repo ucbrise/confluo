@@ -1,5 +1,5 @@
-#ifndef CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_
-#define CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_
+#ifndef CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_
+#define CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_
 
 #include "storage/allocator.h"
 #include "encoder.h"
@@ -8,7 +8,6 @@
 #include "io_utils.h"
 #include "mmap_utils.h"
 #include "read_tail.h"
-#include "container/string_map.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -87,4 +86,4 @@ class monolog_linear_archiver {
 }
 }
 
-#endif /* CONFLUO_MONOLOG_LINEAR_ARCHIVER_H_ */
+#endif /* CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_ */
