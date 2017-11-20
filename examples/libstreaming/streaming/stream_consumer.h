@@ -3,42 +3,44 @@
 
 #include <math.h>
 #include <map>
+
+#include "rpc_client.h"
 #include "atomic_multilog.h"
 
 namespace confluo {
 
-class stream_consumer {
+class stream_consumer : public rpc::rpc_client {
  public:
-  stream_consumer(atomic_multilog* dtable) {
-      dtable_ = dtable;
-      READ_BATCH_SIZE = 8;
+  stream_consumer(const std::string SERVER_ADDRESS, const int SERVER_PORT,
+          uint64_t consumer_prefetch_size) : 
+      rpc_client(SERVER_ADDRESS, SERVER_PORT) {
+      consumer_prefetch_size_ = consumer_prefetch_size;
+      reads = 0;
   }
 
-  void read(std::string& _return, uint64_t offset, size_t record_size) {
-      if (dtable_->get_name().empty()) {
-          throw illegal_state_exception("Must set table first");
-      }
-
-      if (read_buffer_.find(offset) == read_buffer_.end()) {
-        ro_data_ptr data;
-
-        for (uint64_t i = 0; i < READ_BATCH_SIZE; i++) {
-            uint64_t map_offset = offset + i * record_size;
-            dtable_->read(map_offset, data);
-            char* rbuf = (char*) data.get();
-
-            std::string result = std::string(
-                    reinterpret_cast<const char*>(rbuf), record_size);
-            read_buffer_[map_offset] = result;
-        }
-      }
-      _return = read_buffer_[offset];
+  void read_seq(std::string& _return, int64_t offset, size_t record_size) {
+    if (cur_table_id_ == -1) {
+      throw illegal_state_exception("Must set table first");
+    }
+    int64_t& buf_off = read_buffer_.first;
+    std::string& buf = read_buffer_.second;
+    int64_t rbuf_lim = buf_off + buf.size();
+    if (buf_off == -1 || offset < buf_off || offset >= rbuf_lim) {
+      read_buffer_.first = offset;
+      client_->read(buf, cur_table_id_, buf_off, consumer_prefetch_size_);
+      reads++;
+    }
+    _return = buf.substr(offset - buf_off, record_size);
   }
+
+  uint64_t num_read_ops() {
+      return reads;
+  }
+  
 
  private:
-  atomic_multilog* dtable_;
-  std::map<uint64_t, std::string> read_buffer_;
-  uint64_t READ_BATCH_SIZE;
+  uint64_t consumer_prefetch_size_;
+  uint64_t reads;
 
 };
 

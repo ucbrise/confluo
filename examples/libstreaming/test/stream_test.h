@@ -3,6 +3,10 @@
 
 #include "stream_consumer.h"
 #include "stream_producer.h"
+#include "atomic_multilog.h"
+
+#include "rpc_client.h"
+#include "rpc_server.h"
 
 #include "math.h"
 #include "gtest/gtest.h"
@@ -11,40 +15,42 @@
 #define DATA_SIZE   64U
 
 using namespace ::confluo;
+using namespace ::confluo::rpc;
 
 class StreamTest : public testing::Test {
  public:
-  static task_pool MGMT_POOL;
+  const std::string SERVER_ADDRESS = "127.0.0.1";
+  const int SERVER_PORT = 9090;
+
   static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
     for (uint32_t i = 0; i < len; i++)
       buf[i] = val_uint8;
   }
 
-  void test_append_and_get(atomic_multilog& mlog) {
-    std::vector<uint64_t> offsets;
-    for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      StreamTest::generate_bytes(data_, DATA_SIZE, i);
-      uint64_t offset = mlog.append(data_);
+  void test_read(atomic_multilog* dtable, rpc_client& client) {
+    std::vector<int64_t> offsets;
+    for (int64_t i = 0; i < MAX_RECORDS; i++) {
+      generate_bytes(data_, DATA_SIZE, i);
+      int64_t offset = dtable->append(data_);
       offsets.push_back(offset);
     }
 
-    record_t r;
+    std::string buf;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      ro_data_ptr data_ptr;
-      mlog.read(offsets[i], data_ptr);
-      ASSERT_TRUE(data_ptr.get() != nullptr);
+      client.read(buf, offsets[i]);
+      ASSERT_EQ(dtable->record_size(), buf.size());
+      uint8_t* data = reinterpret_cast<uint8_t*>(&buf[0]);
+      ASSERT_TRUE(data != nullptr);
       uint8_t expected = i % 256;
-      uint8_t* data = data_ptr.get();
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-        ASSERT_EQ(data[j], expected);
+        ASSERT_EQ(expected, data[j]);
       }
     }
-    ASSERT_EQ(MAX_RECORDS, mlog.num_records());
+    ASSERT_EQ(MAX_RECORDS, client.num_records());
   }
 
   static std::vector<column_t> s;
-  static int64_t time_count;
 
   struct rec {
     int64_t ts;
@@ -60,15 +66,6 @@ class StreamTest : public testing::Test {
 
   static rec r;
   static char test_str[16];
-
-  static char* test_string(const char* str) {
-    size_t len = std::min(static_cast<size_t>(16), strlen(str));
-    memcpy(test_str, str, len);
-    for (size_t i = len; i < 16; i++) {
-      test_str[i] = '\0';
-    }
-    return test_str;
-  }
 
   static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
                       float f, double g, const char* h) {
@@ -86,6 +83,16 @@ class StreamTest : public testing::Test {
                                 int64_t e, float f, double g, const char* h) {
     void* rbuf = record(a, b, c, d, e, f, g, h);
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
+  }
+
+  static confluo_store* simple_table_store(const std::string& table_name,
+                                          storage::storage_id id) {
+    auto store = new confluo_store("/tmp");
+    store->create_atomic_multilog(
+        table_name,
+        schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+        id);
+    return store;
   }
 
   static std::vector<column_t> schema() {
@@ -131,7 +138,6 @@ class StreamTest : public testing::Test {
 
 StreamTest::rec StreamTest::r;
 std::vector<column_t> StreamTest::s = schema();
-task_pool StreamTest::MGMT_POOL;
 
 int64_t get_time(uint8_t* data) {
   return static_cast<int64_t>(data[0]) | static_cast<int64_t>(data[1]) << 8
@@ -144,22 +150,22 @@ int64_t get_time(uint8_t* data) {
 }
 
 TEST_F(StreamTest, WriteReadTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", 
-          storage::IN_MEMORY, MGMT_POOL);
-  
-  dtable.add_index("a");
-  dtable.add_index("b");
-  dtable.add_index("c", 1);
-  dtable.add_index("d", 2);
-  dtable.add_index("e", 100);
-  dtable.add_index("f", 0.1);
-  dtable.add_index("g", 0.01);
+  std::string table_name = "my_table";
+  auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
 
-  stream_producer sp(&dtable);
-  stream_consumer sc(&dtable);
+  sleep(1);
+
+  stream_producer sp(SERVER_ADDRESS, SERVER_PORT, 
+          static_cast<uint64_t>(10e50));
+
+  sp.set_current_table(table_name);
 
   std::vector<std::string> expected_strings;
-  uint64_t k_max = 100000;
+  uint64_t k_max = 10000;
 
   for (uint64_t i = 0; i < k_max; i++) {
     std::string record_string = record_str(true, '7', i, 14, 1000, 
@@ -168,14 +174,30 @@ TEST_F(StreamTest, WriteReadTest) {
     expected_strings.push_back(record_string);
   }
 
-  std::vector<size_t> log_offs = sp.get_log_offsets();
+  uint64_t error = k_max * 0.1;
+  ASSERT_LE(sp.get_write_ops(), k_max + error);
+
+  sp.disconnect();
+  
+  stream_consumer sc(SERVER_ADDRESS, SERVER_PORT, 
+          rpc_configuration_params::READ_BATCH_SIZE);
+  sc.set_current_table(table_name);
 
   for (uint64_t i = 0; i < k_max; i++) {
     std::string data;
-    sc.read(data, i * sizeof(rec), sizeof(rec));
+    sc.read_seq(data, i * sizeof(rec), sizeof(rec));
+    //std::cout << "I: " << i << std::endl;
     ASSERT_STREQ(expected_strings[i].c_str(), data.c_str());
   }
 
+  ASSERT_LE(sc.num_read_ops(), k_max + error);
+
+  sc.disconnect();
+
+  server->stop();
+  if (serve_thread.joinable()) {
+      serve_thread.join();
+  }
 }
 
 #endif /* EXAMPLES_TEST_STREAM_TEST_H_ */
