@@ -95,6 +95,11 @@ class StreamTest : public testing::Test {
     return store;
   }
 
+  static std::string pad_str(std::string str, size_t size) {
+    str.insert(str.end(), size - str.length(), '\0');
+    return str;
+  }
+
   static std::vector<column_t> schema() {
     schema_builder builder;
     builder.add_column(BOOL_TYPE, "a");
@@ -181,17 +186,59 @@ TEST_F(StreamTest, WriteTest) {
       ASSERT_STREQ(expected_strings[i].c_str(), buf.c_str());
   }
   
-  uint64_t margin = k_max * 0.1;
-  uint64_t records_per_buffer = 20;
-  uint64_t upper_bound_writes = k_max / records_per_buffer + margin;
-  ASSERT_LE(sp.get_write_ops(), upper_bound_writes);
-  
   sp.disconnect();
   server->stop();
   if (serve_thread.joinable()) {
       serve_thread.join();
   }
 }
+
+TEST_F(StreamTest, BufferTest) {
+
+  std::string table_name = "my_table";
+
+  auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
+  auto dtable = store->get_atomic_multilog(table_name);
+  auto schema_size = dtable->get_schema().record_size();
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  sleep(1);
+
+  uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
+  stream_producer client(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
+  client.set_current_table(table_name);
+
+  int64_t ts = utils::time_utils::cur_ns();
+  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
+  client.buffer(ts_str + pad_str("abc", DATA_SIZE));
+  client.buffer(ts_str + pad_str("def", DATA_SIZE));
+  client.buffer(ts_str + pad_str("ghi", DATA_SIZE));
+  client.flush();
+
+  ro_data_ptr ptr;
+
+  dtable->read(0, ptr);
+  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
+  ASSERT_EQ(buf.substr(8, 3), "abc");
+
+  dtable->read(schema_size, ptr);
+  std::string buf2 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
+  ASSERT_EQ(buf2.substr(8, 3), "def");
+
+  dtable->read(schema_size * 2, ptr);
+  std::string buf3 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
+  ASSERT_EQ(buf3.substr(8, 3), "ghi");
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
 
 TEST_F(StreamTest, ReadTest) {
   std::string table_name = "my_table";
@@ -233,16 +280,11 @@ TEST_F(StreamTest, ReadTest) {
 
   std::string data;
   for (uint64_t i = 0; i < k_max; i++) {
-    sc.read_seq(data, i * sizeof(rec), sizeof(rec));
+    sc.consume(data);
     ASSERT_EQ(dtable->record_size(), data.size());
     ASSERT_STREQ(expected_strings[i].c_str(), data.c_str());
   }
   
-  uint64_t margin = k_max * 0.1;
-  uint64_t records_per_buffer = 20;
-  uint64_t upper_bound_reads = k_max / records_per_buffer + margin;
-  ASSERT_LE(sc.num_read_ops(), upper_bound_reads);
-
   sc.disconnect();
 
   server->stop();
@@ -293,20 +335,11 @@ TEST_F(StreamTest, ReadWriteTest) {
 
   std::string data;
   for (uint64_t i = 0; i < k_max; i++) {
-    sc.read_seq(data, i * sizeof(rec), sizeof(rec));
+    sc.consume(data);
     ASSERT_EQ(dtable->record_size(), data.size());
     ASSERT_STREQ(expected_strings[i].c_str(), data.c_str());
   }
   
-  uint64_t margin = k_max * 0.1;
-  uint64_t records_per_buffer = 20;
-  uint64_t upper_bound_reads = k_max / records_per_buffer + margin;
-  ASSERT_LE(sc.num_read_ops(), upper_bound_reads);
-
-  uint64_t upper_bound_writes = k_max / records_per_buffer + margin;
-  ASSERT_LE(sp.get_write_ops(), upper_bound_writes);
-
-
   sc.disconnect();
   sp.disconnect();
 

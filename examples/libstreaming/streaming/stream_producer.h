@@ -10,13 +10,11 @@ namespace confluo {
 
 class stream_producer : public rpc::rpc_client {
  public:
-  stream_producer(const std::string SERVER_ADDRESS, const int SERVER_PORT,
+  stream_producer(const std::string server_address, const int server_port,
           uint64_t buffer_timeout_ms) : 
-      rpc_client(SERVER_ADDRESS, SERVER_PORT) {
-        last_time = utils::time_utils::cur_ms();
+      rpc_client(server_address, server_port) {
+        last_flush_timestamp_ms_ = utils::time_utils::cur_ms();
         buffer_timeout_ms_ = buffer_timeout_ms;
-        writes = 0;
-
   }
 
   void buffer(const std::string& record) {
@@ -25,12 +23,12 @@ class stream_producer : public rpc::rpc_client {
     }
 
     builder_.add_record(record);
-    uint64_t elapsed_time = utils::time_utils::cur_ms() - last_time;
+    uint64_t elapsed_time = utils::time_utils::cur_ms() - 
+        last_flush_timestamp_ms_;
 
     if (builder_.num_records() >= rpc::rpc_configuration_params::WRITE_BATCH_SIZE|| elapsed_time > buffer_timeout_ms_) {
       flush();
-      writes++;
-      last_time = utils::time_utils::cur_ms();
+      last_flush_timestamp_ms_ = utils::time_utils::cur_ms();
     }
   }
   
@@ -38,16 +36,20 @@ class stream_producer : public rpc::rpc_client {
     if (builder_.num_records() > 0) {
       client_->append_batch(cur_table_id_, builder_.get_batch());
     }
+
+    if (builder_.num_records() != 0) {
+        throw illegal_state_exception("Write buffer was not cleared after flush");
+    }
   }
 
-  uint64_t get_write_ops() {
-      return writes;
+  void disconnect() {
+    rpc::rpc_client::disconnect();
+    flush();
   }
-  
+
  private:
-  uint64_t last_time;
+  uint64_t last_flush_timestamp_ms_;
   uint64_t buffer_timeout_ms_;
-  uint64_t writes;
 
 };
 

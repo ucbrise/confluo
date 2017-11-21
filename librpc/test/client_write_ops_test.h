@@ -306,51 +306,6 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   }
 }
 
-TEST_F(ClientWriteOpsTest, BufferTest) {
-
-  std::string table_name = "my_table";
-
-  auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
-  auto schema_size = dtable->get_schema().record_size();
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
-  std::thread serve_thread([&server] {
-    server->serve();
-  });
-
-  sleep(1);
-
-  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_table(table_name);
-
-  int64_t ts = utils::time_utils::cur_ns();
-  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
-  client.buffer(ts_str + pad_str("abc", DATA_SIZE));
-  client.buffer(ts_str + pad_str("def", DATA_SIZE));
-  client.buffer(ts_str + pad_str("ghi", DATA_SIZE));
-  client.flush();
-
-  ro_data_ptr ptr;
-
-  dtable->read(0, ptr);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf.substr(8, 3), "abc");
-
-  dtable->read(schema_size, ptr);
-  std::string buf2 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf2.substr(8, 3), "def");
-
-  dtable->read(schema_size * 2, ptr);
-  std::string buf3 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf3.substr(8, 3), "ghi");
-
-  client.disconnect();
-  server->stop();
-  if (serve_thread.joinable()) {
-    serve_thread.join();
-  }
-}
-
 TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   std::string table_name = "my_table";
