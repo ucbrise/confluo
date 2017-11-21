@@ -85,11 +85,11 @@ class StreamTest : public testing::Test {
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
-  static confluo_store* simple_table_store(const std::string& table_name,
+  static confluo_store* simple_table_store(const std::string& multilog_name,
                                           storage::storage_id id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
-        table_name,
+        multilog_name,
         schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
         id);
     return store;
@@ -145,11 +145,11 @@ StreamTest::rec StreamTest::r;
 std::vector<column_t> StreamTest::s = schema();
 
 TEST_F(StreamTest, WriteTest) {
-  std::string table_name = "my_table";
+  std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(table_name, schema(), 
+  store->create_atomic_multilog(multilog_name, schema(),
         storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  auto dtable = store->get_atomic_multilog(multilog_name);
   
   dtable->add_index("a");
   dtable->add_index("b");
@@ -168,7 +168,7 @@ TEST_F(StreamTest, WriteTest) {
   
   uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
   stream_producer sp(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
-  sp.set_current_table(table_name);
+  sp.set_current_atomic_multilog(multilog_name);
   
   std::vector<std::string> expected_strings;
   uint64_t k_max = 10000;
@@ -195,10 +195,10 @@ TEST_F(StreamTest, WriteTest) {
 
 TEST_F(StreamTest, BufferTest) {
 
-  std::string table_name = "my_table";
+  std::string multilog_name = "my_multilog";
 
-  auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  auto store = simple_table_store(multilog_name, storage::D_IN_MEMORY);
+  auto dtable = store->get_atomic_multilog(multilog_name);
   auto schema_size = dtable->get_schema().record_size();
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -209,7 +209,7 @@ TEST_F(StreamTest, BufferTest) {
 
   uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
   stream_producer client(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
-  client.set_current_table(table_name);
+  client.set_current_atomic_multilog(multilog_name);
 
   int64_t ts = utils::time_utils::cur_ns();
   std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
@@ -241,11 +241,11 @@ TEST_F(StreamTest, BufferTest) {
 
 
 TEST_F(StreamTest, ReadTest) {
-  std::string table_name = "my_table";
+  std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(table_name, schema(), 
+  store->create_atomic_multilog(multilog_name, schema(),
           storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  auto dtable = store->get_atomic_multilog(multilog_name);
 
   dtable->add_index("a");
   dtable->add_index("b");
@@ -265,7 +265,7 @@ TEST_F(StreamTest, ReadTest) {
 
   stream_consumer sc(SERVER_ADDRESS, SERVER_PORT, 
           rpc_configuration_params::READ_BATCH_SIZE);
-  sc.set_current_table(table_name);
+  sc.set_current_atomic_multilog(multilog_name);
 
 
   std::vector<std::string> expected_strings;
@@ -294,11 +294,11 @@ TEST_F(StreamTest, ReadTest) {
 }
 
 TEST_F(StreamTest, ReadWriteTest) {
-  std::string table_name = "my_table";
+  std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(table_name, schema(), 
+  store->create_atomic_multilog(multilog_name, schema(),
           storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  auto dtable = store->get_atomic_multilog(multilog_name);
 
   dtable->add_index("a");
   dtable->add_index("b");
@@ -318,7 +318,7 @@ TEST_F(StreamTest, ReadWriteTest) {
   
   uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
   stream_producer sp(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
-  sp.set_current_table(table_name);
+  sp.set_current_atomic_multilog(multilog_name);
   
   std::vector<std::string> expected_strings;
   uint64_t k_max = 10000;
@@ -331,7 +331,7 @@ TEST_F(StreamTest, ReadWriteTest) {
 
   stream_consumer sc(SERVER_ADDRESS, SERVER_PORT, 
           rpc_configuration_params::READ_BATCH_SIZE);
-  sc.set_current_table(table_name);
+  sc.set_current_atomic_multilog(multilog_name);
 
   std::string data;
   for (uint64_t i = 0; i < k_max; i++) {
