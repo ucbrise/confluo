@@ -307,54 +307,6 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   }
 }
 
-TEST_F(ClientWriteOpsTest, BufferTest) {
-
-  std::string atomic_multilog_name = "my_multilog";
-
-  auto store = simple_table_store(atomic_multilog_name, storage::D_IN_MEMORY);
-  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-  auto schema_size = mlog->get_schema().record_size();
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
-  std::thread serve_thread([&server] {
-    server->serve();
-  });
-
-  sleep(1);
-
-  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_atomic_multilog(atomic_multilog_name);
-
-  int64_t ts = utils::time_utils::cur_ns();
-  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
-  client.buffer(ts_str + pad_str("abc", DATA_SIZE));
-  client.buffer(ts_str + pad_str("def", DATA_SIZE));
-  client.buffer(ts_str + pad_str("ghi", DATA_SIZE));
-  client.flush();
-
-  ro_data_ptr ptr;
-
-  mlog->read(0, ptr);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()),
-  DATA_SIZE);
-  ASSERT_EQ(buf.substr(8, 3), "abc");
-
-  mlog->read(schema_size, ptr);
-  std::string buf2 = std::string(reinterpret_cast<const char*>(ptr.get()),
-  DATA_SIZE);
-  ASSERT_EQ(buf2.substr(8, 3), "def");
-
-  mlog->read(schema_size * 2, ptr);
-  std::string buf3 = std::string(reinterpret_cast<const char*>(ptr.get()),
-  DATA_SIZE);
-  ASSERT_EQ(buf3.substr(8, 3), "ghi");
-
-  client.disconnect();
-  server->stop();
-  if (serve_thread.joinable()) {
-    serve_thread.join();
-  }
-}
-
 TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   std::string atomic_multilog_name = "my_multilog";
