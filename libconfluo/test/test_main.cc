@@ -33,6 +33,7 @@
 #include "atomic_multilog_metadata_test.h"
 #include "threads/task_test.h"
 #include "threads/thread_manager_test.h"
+#include "parser/aggregate_parser_test.h"
 #include "parser/trigger_parser_test.h"
 #include "types/type_manager_test.h"
 
