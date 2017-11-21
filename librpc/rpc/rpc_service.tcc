@@ -325,7 +325,7 @@ uint32_t rpc_service_deregister_handler_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t rpc_service_create_table_args::read(Protocol_* iprot) {
+uint32_t rpc_service_create_atomic_multilog_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -348,8 +348,8 @@ uint32_t rpc_service_create_table_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->table_name);
-          this->__isset.table_name = true;
+          xfer += iprot->readString(this->name);
+          this->__isset.name = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -397,13 +397,13 @@ uint32_t rpc_service_create_table_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_service_create_table_args::write(Protocol_* oprot) const {
+uint32_t rpc_service_create_atomic_multilog_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_service_create_table_args");
+  xfer += oprot->writeStructBegin("rpc_service_create_atomic_multilog_args");
 
-  xfer += oprot->writeFieldBegin("table_name", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->table_name);
+  xfer += oprot->writeFieldBegin("name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->name);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("schema", ::apache::thrift::protocol::T_LIST, 2);
@@ -429,13 +429,13 @@ uint32_t rpc_service_create_table_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_create_table_pargs::write(Protocol_* oprot) const {
+uint32_t rpc_service_create_atomic_multilog_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_service_create_table_pargs");
+  xfer += oprot->writeStructBegin("rpc_service_create_atomic_multilog_pargs");
 
-  xfer += oprot->writeFieldBegin("table_name", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->table_name)));
+  xfer += oprot->writeFieldBegin("name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->name)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("schema", ::apache::thrift::protocol::T_LIST, 2);
@@ -461,7 +461,7 @@ uint32_t rpc_service_create_table_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_create_table_result::read(Protocol_* iprot) {
+uint32_t rpc_service_create_atomic_multilog_result::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -511,11 +511,11 @@ uint32_t rpc_service_create_table_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_service_create_table_result::write(Protocol_* oprot) const {
+uint32_t rpc_service_create_atomic_multilog_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("rpc_service_create_table_result");
+  xfer += oprot->writeStructBegin("rpc_service_create_atomic_multilog_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
@@ -533,7 +533,7 @@ uint32_t rpc_service_create_table_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_create_table_presult::read(Protocol_* iprot) {
+uint32_t rpc_service_create_atomic_multilog_presult::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -584,7 +584,7 @@ uint32_t rpc_service_create_table_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t rpc_service_get_table_info_args::read(Protocol_* iprot) {
+uint32_t rpc_service_get_atomic_multilog_info_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -607,8 +607,8 @@ uint32_t rpc_service_get_table_info_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->table_name);
-          this->__isset.table_name = true;
+          xfer += iprot->readString(this->name);
+          this->__isset.name = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -626,13 +626,13 @@ uint32_t rpc_service_get_table_info_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_service_get_table_info_args::write(Protocol_* oprot) const {
+uint32_t rpc_service_get_atomic_multilog_info_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_service_get_table_info_args");
+  xfer += oprot->writeStructBegin("rpc_service_get_atomic_multilog_info_args");
 
-  xfer += oprot->writeFieldBegin("table_name", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->table_name);
+  xfer += oprot->writeFieldBegin("name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString(this->name);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -642,13 +642,13 @@ uint32_t rpc_service_get_table_info_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_get_table_info_pargs::write(Protocol_* oprot) const {
+uint32_t rpc_service_get_atomic_multilog_info_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_service_get_table_info_pargs");
+  xfer += oprot->writeStructBegin("rpc_service_get_atomic_multilog_info_pargs");
 
-  xfer += oprot->writeFieldBegin("table_name", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->table_name)));
+  xfer += oprot->writeFieldBegin("name", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeString((*(this->name)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -658,7 +658,7 @@ uint32_t rpc_service_get_table_info_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_get_table_info_result::read(Protocol_* iprot) {
+uint32_t rpc_service_get_atomic_multilog_info_result::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -700,11 +700,11 @@ uint32_t rpc_service_get_table_info_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_service_get_table_info_result::write(Protocol_* oprot) const {
+uint32_t rpc_service_get_atomic_multilog_info_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("rpc_service_get_table_info_result");
+  xfer += oprot->writeStructBegin("rpc_service_get_atomic_multilog_info_result");
 
   if (this->__isset.success) {
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
@@ -718,7 +718,7 @@ uint32_t rpc_service_get_table_info_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_get_table_info_presult::read(Protocol_* iprot) {
+uint32_t rpc_service_get_atomic_multilog_info_presult::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -761,7 +761,7 @@ uint32_t rpc_service_get_table_info_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
-uint32_t rpc_service_remove_table_args::read(Protocol_* iprot) {
+uint32_t rpc_service_remove_atomic_multilog_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -784,8 +784,8 @@ uint32_t rpc_service_remove_table_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -803,13 +803,13 @@ uint32_t rpc_service_remove_table_args::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_service_remove_table_args::write(Protocol_* oprot) const {
+uint32_t rpc_service_remove_atomic_multilog_args::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_service_remove_table_args");
+  xfer += oprot->writeStructBegin("rpc_service_remove_atomic_multilog_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -819,13 +819,13 @@ uint32_t rpc_service_remove_table_args::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_remove_table_pargs::write(Protocol_* oprot) const {
+uint32_t rpc_service_remove_atomic_multilog_pargs::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_service_remove_table_pargs");
+  xfer += oprot->writeStructBegin("rpc_service_remove_atomic_multilog_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -835,7 +835,7 @@ uint32_t rpc_service_remove_table_pargs::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_remove_table_result::read(Protocol_* iprot) {
+uint32_t rpc_service_remove_atomic_multilog_result::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -877,11 +877,11 @@ uint32_t rpc_service_remove_table_result::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_service_remove_table_result::write(Protocol_* oprot) const {
+uint32_t rpc_service_remove_atomic_multilog_result::write(Protocol_* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("rpc_service_remove_table_result");
+  xfer += oprot->writeStructBegin("rpc_service_remove_atomic_multilog_result");
 
   if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -895,7 +895,7 @@ uint32_t rpc_service_remove_table_result::write(Protocol_* oprot) const {
 
 
 template <class Protocol_>
-uint32_t rpc_service_remove_table_presult::read(Protocol_* iprot) {
+uint32_t rpc_service_remove_atomic_multilog_presult::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -961,8 +961,8 @@ uint32_t rpc_service_add_index_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -1001,8 +1001,8 @@ uint32_t rpc_service_add_index_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_add_index_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1025,8 +1025,8 @@ uint32_t rpc_service_add_index_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_add_index_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1170,8 +1170,8 @@ uint32_t rpc_service_remove_index_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -1202,8 +1202,8 @@ uint32_t rpc_service_remove_index_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_remove_index_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1222,8 +1222,8 @@ uint32_t rpc_service_remove_index_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_remove_index_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("field_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1363,8 +1363,8 @@ uint32_t rpc_service_add_filter_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -1403,8 +1403,8 @@ uint32_t rpc_service_add_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_add_filter_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1427,8 +1427,8 @@ uint32_t rpc_service_add_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_add_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1572,8 +1572,8 @@ uint32_t rpc_service_remove_filter_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -1604,8 +1604,8 @@ uint32_t rpc_service_remove_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_remove_filter_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1624,8 +1624,8 @@ uint32_t rpc_service_remove_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_remove_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -1742,6 +1742,393 @@ uint32_t rpc_service_remove_filter_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
+uint32_t rpc_service_add_aggregate_args::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->mutlilog_id);
+          this->__isset.mutlilog_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->aggregate_name);
+          this->__isset.aggregate_name = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->filter_name);
+          this->__isset.filter_name = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->aggregate_expr);
+          this->__isset.aggregate_expr = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t rpc_service_add_aggregate_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("rpc_service_add_aggregate_args");
+
+  xfer += oprot->writeFieldBegin("mutlilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->mutlilog_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("aggregate_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->aggregate_name);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString(this->filter_name);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("aggregate_expr", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeString(this->aggregate_expr);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_add_aggregate_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("rpc_service_add_aggregate_pargs");
+
+  xfer += oprot->writeFieldBegin("mutlilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->mutlilog_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("aggregate_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->aggregate_name)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 3);
+  xfer += oprot->writeString((*(this->filter_name)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("aggregate_expr", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeString((*(this->aggregate_expr)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_add_aggregate_result::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t rpc_service_add_aggregate_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("rpc_service_add_aggregate_result");
+
+  if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_add_aggregate_presult::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_remove_aggregate_args::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->aggregate_name);
+          this->__isset.aggregate_name = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t rpc_service_remove_aggregate_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("rpc_service_remove_aggregate_args");
+
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("aggregate_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->aggregate_name);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_remove_aggregate_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("rpc_service_remove_aggregate_pargs");
+
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("aggregate_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->aggregate_name)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_remove_aggregate_result::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t rpc_service_remove_aggregate_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("rpc_service_remove_aggregate_result");
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_remove_aggregate_presult::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
 uint32_t rpc_service_add_trigger_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
@@ -1765,8 +2152,8 @@ uint32_t rpc_service_add_trigger_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -1780,14 +2167,6 @@ uint32_t rpc_service_add_trigger_args::read(Protocol_* iprot) {
         }
         break;
       case 3:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->filter_name);
-          this->__isset.filter_name = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 4:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->trigger_expr);
           this->__isset.trigger_expr = true;
@@ -1813,19 +2192,15 @@ uint32_t rpc_service_add_trigger_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_add_trigger_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->trigger_name);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 3);
-  xfer += oprot->writeString(this->filter_name);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString(this->trigger_expr);
   xfer += oprot->writeFieldEnd();
 
@@ -1841,19 +2216,15 @@ uint32_t rpc_service_add_trigger_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_add_trigger_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->trigger_name)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 3);
-  xfer += oprot->writeString((*(this->filter_name)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 4);
+  xfer += oprot->writeFieldBegin("trigger_expr", ::apache::thrift::protocol::T_STRING, 3);
   xfer += oprot->writeString((*(this->trigger_expr)));
   xfer += oprot->writeFieldEnd();
 
@@ -1990,8 +2361,8 @@ uint32_t rpc_service_remove_trigger_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -2022,8 +2393,8 @@ uint32_t rpc_service_remove_trigger_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_remove_trigger_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -2042,8 +2413,8 @@ uint32_t rpc_service_remove_trigger_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_remove_trigger_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -2183,8 +2554,8 @@ uint32_t rpc_service_append_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -2215,8 +2586,8 @@ uint32_t rpc_service_append_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_append_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 2);
@@ -2235,8 +2606,8 @@ uint32_t rpc_service_append_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_append_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("data", ::apache::thrift::protocol::T_STRING, 2);
@@ -2376,8 +2747,8 @@ uint32_t rpc_service_append_batch_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -2408,8 +2779,8 @@ uint32_t rpc_service_append_batch_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_append_batch_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 2);
@@ -2428,8 +2799,8 @@ uint32_t rpc_service_append_batch_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_append_batch_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("batch", ::apache::thrift::protocol::T_STRUCT, 2);
@@ -2569,8 +2940,8 @@ uint32_t rpc_service_read_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -2609,8 +2980,8 @@ uint32_t rpc_service_read_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_read_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("offset", ::apache::thrift::protocol::T_I64, 2);
@@ -2633,8 +3004,8 @@ uint32_t rpc_service_read_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_read_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("offset", ::apache::thrift::protocol::T_I64, 2);
@@ -2778,8 +3149,8 @@ uint32_t rpc_service_adhoc_filter_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -2810,8 +3181,8 @@ uint32_t rpc_service_adhoc_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_adhoc_filter_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
@@ -2830,8 +3201,8 @@ uint32_t rpc_service_adhoc_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_adhoc_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_expr", ::apache::thrift::protocol::T_STRING, 2);
@@ -2991,8 +3362,8 @@ uint32_t rpc_service_predef_filter_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -3039,8 +3410,8 @@ uint32_t rpc_service_predef_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_predef_filter_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -3067,8 +3438,8 @@ uint32_t rpc_service_predef_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_predef_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -3236,8 +3607,8 @@ uint32_t rpc_service_combined_filter_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -3292,8 +3663,8 @@ uint32_t rpc_service_combined_filter_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_combined_filter_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -3324,8 +3695,8 @@ uint32_t rpc_service_combined_filter_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_combined_filter_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("filter_name", ::apache::thrift::protocol::T_STRING, 2);
@@ -3497,8 +3868,8 @@ uint32_t rpc_service_alerts_by_time_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -3537,8 +3908,8 @@ uint32_t rpc_service_alerts_by_time_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_alerts_by_time_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 2);
@@ -3561,8 +3932,8 @@ uint32_t rpc_service_alerts_by_time_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_alerts_by_time_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 2);
@@ -3726,8 +4097,8 @@ uint32_t rpc_service_get_more_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -3758,8 +4129,8 @@ uint32_t rpc_service_get_more_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_get_more_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("desc", ::apache::thrift::protocol::T_STRUCT, 2);
@@ -3778,8 +4149,8 @@ uint32_t rpc_service_get_more_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_get_more_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("desc", ::apache::thrift::protocol::T_STRUCT, 2);
@@ -3939,8 +4310,8 @@ uint32_t rpc_service_num_records_args::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -3963,8 +4334,8 @@ uint32_t rpc_service_num_records_args::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_num_records_args");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -3979,8 +4350,8 @@ uint32_t rpc_service_num_records_pargs::write(Protocol_* oprot) const {
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("rpc_service_num_records_pargs");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64((*(this->table_id)));
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -4208,20 +4579,20 @@ void rpc_serviceClientT<Protocol_>::recv_deregister_handler()
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
+int64_t rpc_serviceClientT<Protocol_>::create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode)
 {
-  send_create_table(table_name, schema, mode);
-  return recv_create_table();
+  send_create_atomic_multilog(name, schema, mode);
+  return recv_create_atomic_multilog();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
+void rpc_serviceClientT<Protocol_>::send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("create_table", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("create_atomic_multilog", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  rpc_service_create_table_pargs args;
-  args.table_name = &table_name;
+  rpc_service_create_atomic_multilog_pargs args;
+  args.name = &name;
   args.schema = &schema;
   args.mode = &mode;
   args.write(this->oprot_);
@@ -4232,7 +4603,7 @@ void rpc_serviceClientT<Protocol_>::send_create_table(const std::string& table_n
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::recv_create_table()
+int64_t rpc_serviceClientT<Protocol_>::recv_create_atomic_multilog()
 {
 
   int32_t rseqid = 0;
@@ -4252,13 +4623,13 @@ int64_t rpc_serviceClientT<Protocol_>::recv_create_table()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("create_table") != 0) {
+  if (fname.compare("create_atomic_multilog") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
   int64_t _return;
-  rpc_service_create_table_presult result;
+  rpc_service_create_atomic_multilog_presult result;
   result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
@@ -4270,24 +4641,24 @@ int64_t rpc_serviceClientT<Protocol_>::recv_create_table()
   if (result.__isset.ex) {
     throw result.ex;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "create_table failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "create_atomic_multilog failed: unknown result");
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::get_table_info(rpc_table_info& _return, const std::string& table_name)
+void rpc_serviceClientT<Protocol_>::get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name)
 {
-  send_get_table_info(table_name);
-  recv_get_table_info(_return);
+  send_get_atomic_multilog_info(name);
+  recv_get_atomic_multilog_info(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_get_table_info(const std::string& table_name)
+void rpc_serviceClientT<Protocol_>::send_get_atomic_multilog_info(const std::string& name)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("get_atomic_multilog_info", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  rpc_service_get_table_info_pargs args;
-  args.table_name = &table_name;
+  rpc_service_get_atomic_multilog_info_pargs args;
+  args.name = &name;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -4296,7 +4667,7 @@ void rpc_serviceClientT<Protocol_>::send_get_table_info(const std::string& table
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::recv_get_table_info(rpc_table_info& _return)
+void rpc_serviceClientT<Protocol_>::recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return)
 {
 
   int32_t rseqid = 0;
@@ -4316,12 +4687,12 @@ void rpc_serviceClientT<Protocol_>::recv_get_table_info(rpc_table_info& _return)
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("get_table_info") != 0) {
+  if (fname.compare("get_atomic_multilog_info") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  rpc_service_get_table_info_presult result;
+  rpc_service_get_atomic_multilog_info_presult result;
   result.success = &_return;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
@@ -4331,24 +4702,24 @@ void rpc_serviceClientT<Protocol_>::recv_get_table_info(rpc_table_info& _return)
     // _return pointer has now been filled
     return;
   }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_table_info failed: unknown result");
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_atomic_multilog_info failed: unknown result");
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::remove_table(const int64_t table_id)
+void rpc_serviceClientT<Protocol_>::remove_atomic_multilog(const int64_t multilog_id)
 {
-  send_remove_table(table_id);
-  recv_remove_table();
+  send_remove_atomic_multilog(multilog_id);
+  recv_remove_atomic_multilog();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_remove_table(const int64_t table_id)
+void rpc_serviceClientT<Protocol_>::send_remove_atomic_multilog(const int64_t multilog_id)
 {
   int32_t cseqid = 0;
-  this->oprot_->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("remove_atomic_multilog", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  rpc_service_remove_table_pargs args;
-  args.table_id = &table_id;
+  rpc_service_remove_atomic_multilog_pargs args;
+  args.multilog_id = &multilog_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -4357,7 +4728,7 @@ void rpc_serviceClientT<Protocol_>::send_remove_table(const int64_t table_id)
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::recv_remove_table()
+void rpc_serviceClientT<Protocol_>::recv_remove_atomic_multilog()
 {
 
   int32_t rseqid = 0;
@@ -4377,12 +4748,12 @@ void rpc_serviceClientT<Protocol_>::recv_remove_table()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("remove_table") != 0) {
+  if (fname.compare("remove_atomic_multilog") != 0) {
     this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  rpc_service_remove_table_presult result;
+  rpc_service_remove_atomic_multilog_presult result;
   result.read(this->iprot_);
   this->iprot_->readMessageEnd();
   this->iprot_->getTransport()->readEnd();
@@ -4394,20 +4765,20 @@ void rpc_serviceClientT<Protocol_>::recv_remove_table()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
+void rpc_serviceClientT<Protocol_>::add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size)
 {
-  send_add_index(table_id, field_name, bucket_size);
+  send_add_index(multilog_id, field_name, bucket_size);
   recv_add_index();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
+void rpc_serviceClientT<Protocol_>::send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_add_index_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.field_name = &field_name;
   args.bucket_size = &bucket_size;
   args.write(this->oprot_);
@@ -4455,20 +4826,20 @@ void rpc_serviceClientT<Protocol_>::recv_add_index()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::remove_index(const int64_t table_id, const std::string& field_name)
+void rpc_serviceClientT<Protocol_>::remove_index(const int64_t multilog_id, const std::string& field_name)
 {
-  send_remove_index(table_id, field_name);
+  send_remove_index(multilog_id, field_name);
   recv_remove_index();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_remove_index(const int64_t table_id, const std::string& field_name)
+void rpc_serviceClientT<Protocol_>::send_remove_index(const int64_t multilog_id, const std::string& field_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_remove_index_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.field_name = &field_name;
   args.write(this->oprot_);
 
@@ -4515,20 +4886,20 @@ void rpc_serviceClientT<Protocol_>::recv_remove_index()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
+void rpc_serviceClientT<Protocol_>::add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr)
 {
-  send_add_filter(table_id, filter_name, filter_expr);
+  send_add_filter(multilog_id, filter_name, filter_expr);
   recv_add_filter();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
+void rpc_serviceClientT<Protocol_>::send_add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_add_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
@@ -4576,20 +4947,20 @@ void rpc_serviceClientT<Protocol_>::recv_add_filter()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::remove_filter(const int64_t table_id, const std::string& filter_name)
+void rpc_serviceClientT<Protocol_>::remove_filter(const int64_t multilog_id, const std::string& filter_name)
 {
-  send_remove_filter(table_id, filter_name);
+  send_remove_filter(multilog_id, filter_name);
   recv_remove_filter();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_remove_filter(const int64_t table_id, const std::string& filter_name)
+void rpc_serviceClientT<Protocol_>::send_remove_filter(const int64_t multilog_id, const std::string& filter_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_remove_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.write(this->oprot_);
 
@@ -4636,22 +5007,140 @@ void rpc_serviceClientT<Protocol_>::recv_remove_filter()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+void rpc_serviceClientT<Protocol_>::add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr)
 {
-  send_add_trigger(table_id, trigger_name, filter_name, trigger_expr);
+  send_add_aggregate(mutlilog_id, aggregate_name, filter_name, aggregate_expr);
+  recv_add_aggregate();
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::send_add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("add_aggregate", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  rpc_service_add_aggregate_pargs args;
+  args.mutlilog_id = &mutlilog_id;
+  args.aggregate_name = &aggregate_name;
+  args.filter_name = &filter_name;
+  args.aggregate_expr = &aggregate_expr;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::recv_add_aggregate()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("add_aggregate") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  rpc_service_add_aggregate_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  return;
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name)
+{
+  send_remove_aggregate(multilog_id, aggregate_name);
+  recv_remove_aggregate();
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::send_remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("remove_aggregate", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  rpc_service_remove_aggregate_pargs args;
+  args.multilog_id = &multilog_id;
+  args.aggregate_name = &aggregate_name;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::recv_remove_aggregate()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("remove_aggregate") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  rpc_service_remove_aggregate_presult result;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  return;
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr)
+{
+  send_add_trigger(multilog_id, trigger_name, trigger_expr);
   recv_add_trigger();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+void rpc_serviceClientT<Protocol_>::send_add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("add_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_add_trigger_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.trigger_name = &trigger_name;
-  args.filter_name = &filter_name;
   args.trigger_expr = &trigger_expr;
   args.write(this->oprot_);
 
@@ -4698,20 +5187,20 @@ void rpc_serviceClientT<Protocol_>::recv_add_trigger()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::remove_trigger(const int64_t table_id, const std::string& trigger_name)
+void rpc_serviceClientT<Protocol_>::remove_trigger(const int64_t multilog_id, const std::string& trigger_name)
 {
-  send_remove_trigger(table_id, trigger_name);
+  send_remove_trigger(multilog_id, trigger_name);
   recv_remove_trigger();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_remove_trigger(const int64_t table_id, const std::string& trigger_name)
+void rpc_serviceClientT<Protocol_>::send_remove_trigger(const int64_t multilog_id, const std::string& trigger_name)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("remove_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_remove_trigger_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.trigger_name = &trigger_name;
   args.write(this->oprot_);
 
@@ -4758,20 +5247,20 @@ void rpc_serviceClientT<Protocol_>::recv_remove_trigger()
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::append(const int64_t table_id, const std::string& data)
+int64_t rpc_serviceClientT<Protocol_>::append(const int64_t multilog_id, const std::string& data)
 {
-  send_append(table_id, data);
+  send_append(multilog_id, data);
   return recv_append();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_append(const int64_t table_id, const std::string& data)
+void rpc_serviceClientT<Protocol_>::send_append(const int64_t multilog_id, const std::string& data)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("append", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_append_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.data = &data;
   args.write(this->oprot_);
 
@@ -4820,20 +5309,20 @@ int64_t rpc_serviceClientT<Protocol_>::recv_append()
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::append_batch(const int64_t table_id, const rpc_record_batch& batch)
+int64_t rpc_serviceClientT<Protocol_>::append_batch(const int64_t multilog_id, const rpc_record_batch& batch)
 {
-  send_append_batch(table_id, batch);
+  send_append_batch(multilog_id, batch);
   return recv_append_batch();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_append_batch(const int64_t table_id, const rpc_record_batch& batch)
+void rpc_serviceClientT<Protocol_>::send_append_batch(const int64_t multilog_id, const rpc_record_batch& batch)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("append_batch", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_append_batch_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.batch = &batch;
   args.write(this->oprot_);
 
@@ -4882,20 +5371,20 @@ int64_t rpc_serviceClientT<Protocol_>::recv_append_batch()
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords)
+void rpc_serviceClientT<Protocol_>::read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords)
 {
-  send_read(table_id, offset, nrecords);
+  send_read(multilog_id, offset, nrecords);
   recv_read(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords)
+void rpc_serviceClientT<Protocol_>::send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("read", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_read_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.offset = &offset;
   args.nrecords = &nrecords;
   args.write(this->oprot_);
@@ -4945,20 +5434,20 @@ void rpc_serviceClientT<Protocol_>::recv_read(std::string& _return)
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr)
+void rpc_serviceClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr)
 {
-  send_adhoc_filter(table_id, filter_expr);
+  send_adhoc_filter(multilog_id, filter_expr);
   recv_adhoc_filter(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_adhoc_filter(const int64_t table_id, const std::string& filter_expr)
+void rpc_serviceClientT<Protocol_>::send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("adhoc_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_adhoc_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
 
@@ -5010,20 +5499,20 @@ void rpc_serviceClientT<Protocol_>::recv_adhoc_filter(rpc_iterator_handle& _retu
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
-  send_predef_filter(table_id, filter_name, begin_ms, end_ms);
+  send_predef_filter(multilog_id, filter_name, begin_ms, end_ms);
   recv_predef_filter(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceClientT<Protocol_>::send_predef_filter(const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("predef_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_predef_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
@@ -5077,20 +5566,20 @@ void rpc_serviceClientT<Protocol_>::recv_predef_filter(rpc_iterator_handle& _ret
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
-  send_combined_filter(table_id, filter_name, filter_expr, begin_ms, end_ms);
+  send_combined_filter(multilog_id, filter_name, filter_expr, begin_ms, end_ms);
   recv_combined_filter(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceClientT<Protocol_>::send_combined_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("combined_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_combined_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.begin_ms = &begin_ms;
@@ -5145,20 +5634,20 @@ void rpc_serviceClientT<Protocol_>::recv_combined_filter(rpc_iterator_handle& _r
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms)
 {
-  send_alerts_by_time(table_id, begin_ms, end_ms);
+  send_alerts_by_time(multilog_id, begin_ms, end_ms);
   recv_alerts_by_time(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceClientT<Protocol_>::send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("alerts_by_time", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_alerts_by_time_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
   args.write(this->oprot_);
@@ -5211,20 +5700,20 @@ void rpc_serviceClientT<Protocol_>::recv_alerts_by_time(rpc_iterator_handle& _re
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc)
+void rpc_serviceClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc)
 {
-  send_get_more(table_id, desc);
+  send_get_more(multilog_id, desc);
   recv_get_more(_return);
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc)
+void rpc_serviceClientT<Protocol_>::send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("get_more", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_get_more_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.desc = &desc;
   args.write(this->oprot_);
 
@@ -5276,20 +5765,20 @@ void rpc_serviceClientT<Protocol_>::recv_get_more(rpc_iterator_handle& _return)
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::num_records(const int64_t table_id)
+int64_t rpc_serviceClientT<Protocol_>::num_records(const int64_t multilog_id)
 {
-  send_num_records(table_id);
+  send_num_records(multilog_id);
   return recv_num_records();
 }
 
 template <class Protocol_>
-void rpc_serviceClientT<Protocol_>::send_num_records(const int64_t table_id)
+void rpc_serviceClientT<Protocol_>::send_num_records(const int64_t multilog_id)
 {
   int32_t cseqid = 0;
   this->oprot_->writeMessageBegin("num_records", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_num_records_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -5605,41 +6094,41 @@ void rpc_serviceProcessorT<Protocol_>::process_deregister_handler(int32_t seqid,
 }
 
 template <class Protocol_>
-void rpc_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void rpc_serviceProcessorT<Protocol_>::process_create_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("rpc_service.create_table", callContext);
+    ctx = this->eventHandler_->getContext("rpc_service.create_atomic_multilog", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.create_table");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.create_atomic_multilog");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "rpc_service.create_table");
+    this->eventHandler_->preRead(ctx, "rpc_service.create_atomic_multilog");
   }
 
-  rpc_service_create_table_args args;
+  rpc_service_create_atomic_multilog_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "rpc_service.create_table", bytes);
+    this->eventHandler_->postRead(ctx, "rpc_service.create_atomic_multilog", bytes);
   }
 
-  rpc_service_create_table_result result;
+  rpc_service_create_atomic_multilog_result result;
   try {
-    result.success = iface_->create_table(args.table_name, args.schema, args.mode);
+    result.success = iface_->create_atomic_multilog(args.name, args.schema, args.mode);
     result.__isset.success = true;
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "rpc_service.create_table");
+      this->eventHandler_->handlerError(ctx, "rpc_service.create_atomic_multilog");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("create_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("create_atomic_multilog", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5648,56 +6137,56 @@ void rpc_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, ::apa
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "rpc_service.create_table");
+    this->eventHandler_->preWrite(ctx, "rpc_service.create_atomic_multilog");
   }
 
-  oprot->writeMessageBegin("create_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("create_atomic_multilog", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "rpc_service.create_table", bytes);
+    this->eventHandler_->postWrite(ctx, "rpc_service.create_atomic_multilog", bytes);
   }
 }
 
 template <class Protocol_>
-void rpc_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void rpc_serviceProcessorT<Protocol_>::process_create_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("rpc_service.create_table", callContext);
+    ctx = this->eventHandler_->getContext("rpc_service.create_atomic_multilog", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.create_table");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.create_atomic_multilog");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "rpc_service.create_table");
+    this->eventHandler_->preRead(ctx, "rpc_service.create_atomic_multilog");
   }
 
-  rpc_service_create_table_args args;
+  rpc_service_create_atomic_multilog_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "rpc_service.create_table", bytes);
+    this->eventHandler_->postRead(ctx, "rpc_service.create_atomic_multilog", bytes);
   }
 
-  rpc_service_create_table_result result;
+  rpc_service_create_atomic_multilog_result result;
   try {
-    result.success = iface_->create_table(args.table_name, args.schema, args.mode);
+    result.success = iface_->create_atomic_multilog(args.name, args.schema, args.mode);
     result.__isset.success = true;
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "rpc_service.create_table");
+      this->eventHandler_->handlerError(ctx, "rpc_service.create_atomic_multilog");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("create_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("create_atomic_multilog", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5706,53 +6195,53 @@ void rpc_serviceProcessorT<Protocol_>::process_create_table(int32_t seqid, Proto
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "rpc_service.create_table");
+    this->eventHandler_->preWrite(ctx, "rpc_service.create_atomic_multilog");
   }
 
-  oprot->writeMessageBegin("create_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("create_atomic_multilog", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "rpc_service.create_table", bytes);
+    this->eventHandler_->postWrite(ctx, "rpc_service.create_atomic_multilog", bytes);
   }
 }
 
 template <class Protocol_>
-void rpc_serviceProcessorT<Protocol_>::process_get_table_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void rpc_serviceProcessorT<Protocol_>::process_get_atomic_multilog_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("rpc_service.get_table_info", callContext);
+    ctx = this->eventHandler_->getContext("rpc_service.get_atomic_multilog_info", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.get_table_info");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.get_atomic_multilog_info");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "rpc_service.get_table_info");
+    this->eventHandler_->preRead(ctx, "rpc_service.get_atomic_multilog_info");
   }
 
-  rpc_service_get_table_info_args args;
+  rpc_service_get_atomic_multilog_info_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "rpc_service.get_table_info", bytes);
+    this->eventHandler_->postRead(ctx, "rpc_service.get_atomic_multilog_info", bytes);
   }
 
-  rpc_service_get_table_info_result result;
+  rpc_service_get_atomic_multilog_info_result result;
   try {
-    iface_->get_table_info(result.success, args.table_name);
+    iface_->get_atomic_multilog_info(result.success, args.name);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "rpc_service.get_table_info");
+      this->eventHandler_->handlerError(ctx, "rpc_service.get_atomic_multilog_info");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("get_atomic_multilog_info", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5761,53 +6250,53 @@ void rpc_serviceProcessorT<Protocol_>::process_get_table_info(int32_t seqid, ::a
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "rpc_service.get_table_info");
+    this->eventHandler_->preWrite(ctx, "rpc_service.get_atomic_multilog_info");
   }
 
-  oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("get_atomic_multilog_info", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "rpc_service.get_table_info", bytes);
+    this->eventHandler_->postWrite(ctx, "rpc_service.get_atomic_multilog_info", bytes);
   }
 }
 
 template <class Protocol_>
-void rpc_serviceProcessorT<Protocol_>::process_get_table_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void rpc_serviceProcessorT<Protocol_>::process_get_atomic_multilog_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("rpc_service.get_table_info", callContext);
+    ctx = this->eventHandler_->getContext("rpc_service.get_atomic_multilog_info", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.get_table_info");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.get_atomic_multilog_info");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "rpc_service.get_table_info");
+    this->eventHandler_->preRead(ctx, "rpc_service.get_atomic_multilog_info");
   }
 
-  rpc_service_get_table_info_args args;
+  rpc_service_get_atomic_multilog_info_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "rpc_service.get_table_info", bytes);
+    this->eventHandler_->postRead(ctx, "rpc_service.get_atomic_multilog_info", bytes);
   }
 
-  rpc_service_get_table_info_result result;
+  rpc_service_get_atomic_multilog_info_result result;
   try {
-    iface_->get_table_info(result.success, args.table_name);
+    iface_->get_atomic_multilog_info(result.success, args.name);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "rpc_service.get_table_info");
+      this->eventHandler_->handlerError(ctx, "rpc_service.get_atomic_multilog_info");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("get_atomic_multilog_info", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5816,55 +6305,55 @@ void rpc_serviceProcessorT<Protocol_>::process_get_table_info(int32_t seqid, Pro
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "rpc_service.get_table_info");
+    this->eventHandler_->preWrite(ctx, "rpc_service.get_atomic_multilog_info");
   }
 
-  oprot->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("get_atomic_multilog_info", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "rpc_service.get_table_info", bytes);
+    this->eventHandler_->postWrite(ctx, "rpc_service.get_atomic_multilog_info", bytes);
   }
 }
 
 template <class Protocol_>
-void rpc_serviceProcessorT<Protocol_>::process_remove_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void rpc_serviceProcessorT<Protocol_>::process_remove_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("rpc_service.remove_table", callContext);
+    ctx = this->eventHandler_->getContext("rpc_service.remove_atomic_multilog", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.remove_table");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.remove_atomic_multilog");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "rpc_service.remove_table");
+    this->eventHandler_->preRead(ctx, "rpc_service.remove_atomic_multilog");
   }
 
-  rpc_service_remove_table_args args;
+  rpc_service_remove_atomic_multilog_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "rpc_service.remove_table", bytes);
+    this->eventHandler_->postRead(ctx, "rpc_service.remove_atomic_multilog", bytes);
   }
 
-  rpc_service_remove_table_result result;
+  rpc_service_remove_atomic_multilog_result result;
   try {
-    iface_->remove_table(args.table_id);
+    iface_->remove_atomic_multilog(args.multilog_id);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "rpc_service.remove_table");
+      this->eventHandler_->handlerError(ctx, "rpc_service.remove_atomic_multilog");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("remove_atomic_multilog", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5873,55 +6362,55 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_table(int32_t seqid, ::apa
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "rpc_service.remove_table");
+    this->eventHandler_->preWrite(ctx, "rpc_service.remove_atomic_multilog");
   }
 
-  oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("remove_atomic_multilog", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "rpc_service.remove_table", bytes);
+    this->eventHandler_->postWrite(ctx, "rpc_service.remove_atomic_multilog", bytes);
   }
 }
 
 template <class Protocol_>
-void rpc_serviceProcessorT<Protocol_>::process_remove_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+void rpc_serviceProcessorT<Protocol_>::process_remove_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("rpc_service.remove_table", callContext);
+    ctx = this->eventHandler_->getContext("rpc_service.remove_atomic_multilog", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.remove_table");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.remove_atomic_multilog");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "rpc_service.remove_table");
+    this->eventHandler_->preRead(ctx, "rpc_service.remove_atomic_multilog");
   }
 
-  rpc_service_remove_table_args args;
+  rpc_service_remove_atomic_multilog_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "rpc_service.remove_table", bytes);
+    this->eventHandler_->postRead(ctx, "rpc_service.remove_atomic_multilog", bytes);
   }
 
-  rpc_service_remove_table_result result;
+  rpc_service_remove_atomic_multilog_result result;
   try {
-    iface_->remove_table(args.table_id);
+    iface_->remove_atomic_multilog(args.multilog_id);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "rpc_service.remove_table");
+      this->eventHandler_->handlerError(ctx, "rpc_service.remove_atomic_multilog");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("remove_atomic_multilog", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -5930,17 +6419,17 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_table(int32_t seqid, Proto
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "rpc_service.remove_table");
+    this->eventHandler_->preWrite(ctx, "rpc_service.remove_atomic_multilog");
   }
 
-  oprot->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("remove_atomic_multilog", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "rpc_service.remove_table", bytes);
+    this->eventHandler_->postWrite(ctx, "rpc_service.remove_atomic_multilog", bytes);
   }
 }
 
@@ -5968,7 +6457,7 @@ void rpc_serviceProcessorT<Protocol_>::process_add_index(int32_t seqid, ::apache
 
   rpc_service_add_index_result result;
   try {
-    iface_->add_index(args.table_id, args.field_name, args.bucket_size);
+    iface_->add_index(args.multilog_id, args.field_name, args.bucket_size);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6025,7 +6514,7 @@ void rpc_serviceProcessorT<Protocol_>::process_add_index(int32_t seqid, Protocol
 
   rpc_service_add_index_result result;
   try {
-    iface_->add_index(args.table_id, args.field_name, args.bucket_size);
+    iface_->add_index(args.multilog_id, args.field_name, args.bucket_size);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6082,7 +6571,7 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_index(int32_t seqid, ::apa
 
   rpc_service_remove_index_result result;
   try {
-    iface_->remove_index(args.table_id, args.field_name);
+    iface_->remove_index(args.multilog_id, args.field_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6139,7 +6628,7 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_index(int32_t seqid, Proto
 
   rpc_service_remove_index_result result;
   try {
-    iface_->remove_index(args.table_id, args.field_name);
+    iface_->remove_index(args.multilog_id, args.field_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6196,7 +6685,7 @@ void rpc_serviceProcessorT<Protocol_>::process_add_filter(int32_t seqid, ::apach
 
   rpc_service_add_filter_result result;
   try {
-    iface_->add_filter(args.table_id, args.filter_name, args.filter_expr);
+    iface_->add_filter(args.multilog_id, args.filter_name, args.filter_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6253,7 +6742,7 @@ void rpc_serviceProcessorT<Protocol_>::process_add_filter(int32_t seqid, Protoco
 
   rpc_service_add_filter_result result;
   try {
-    iface_->add_filter(args.table_id, args.filter_name, args.filter_expr);
+    iface_->add_filter(args.multilog_id, args.filter_name, args.filter_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6310,7 +6799,7 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_filter(int32_t seqid, ::ap
 
   rpc_service_remove_filter_result result;
   try {
-    iface_->remove_filter(args.table_id, args.filter_name);
+    iface_->remove_filter(args.multilog_id, args.filter_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6367,7 +6856,7 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_filter(int32_t seqid, Prot
 
   rpc_service_remove_filter_result result;
   try {
-    iface_->remove_filter(args.table_id, args.filter_name);
+    iface_->remove_filter(args.multilog_id, args.filter_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6401,6 +6890,228 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_filter(int32_t seqid, Prot
 }
 
 template <class Protocol_>
+void rpc_serviceProcessorT<Protocol_>::process_add_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("rpc_service.add_aggregate", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.add_aggregate");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "rpc_service.add_aggregate");
+  }
+
+  rpc_service_add_aggregate_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "rpc_service.add_aggregate", bytes);
+  }
+
+  rpc_service_add_aggregate_result result;
+  try {
+    iface_->add_aggregate(args.mutlilog_id, args.aggregate_name, args.filter_name, args.aggregate_expr);
+  } catch (rpc_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "rpc_service.add_aggregate");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("add_aggregate", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "rpc_service.add_aggregate");
+  }
+
+  oprot->writeMessageBegin("add_aggregate", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "rpc_service.add_aggregate", bytes);
+  }
+}
+
+template <class Protocol_>
+void rpc_serviceProcessorT<Protocol_>::process_add_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("rpc_service.add_aggregate", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.add_aggregate");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "rpc_service.add_aggregate");
+  }
+
+  rpc_service_add_aggregate_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "rpc_service.add_aggregate", bytes);
+  }
+
+  rpc_service_add_aggregate_result result;
+  try {
+    iface_->add_aggregate(args.mutlilog_id, args.aggregate_name, args.filter_name, args.aggregate_expr);
+  } catch (rpc_management_exception &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "rpc_service.add_aggregate");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("add_aggregate", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "rpc_service.add_aggregate");
+  }
+
+  oprot->writeMessageBegin("add_aggregate", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "rpc_service.add_aggregate", bytes);
+  }
+}
+
+template <class Protocol_>
+void rpc_serviceProcessorT<Protocol_>::process_remove_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("rpc_service.remove_aggregate", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.remove_aggregate");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "rpc_service.remove_aggregate");
+  }
+
+  rpc_service_remove_aggregate_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "rpc_service.remove_aggregate", bytes);
+  }
+
+  rpc_service_remove_aggregate_result result;
+  try {
+    iface_->remove_aggregate(args.multilog_id, args.aggregate_name);
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "rpc_service.remove_aggregate");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("remove_aggregate", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "rpc_service.remove_aggregate");
+  }
+
+  oprot->writeMessageBegin("remove_aggregate", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "rpc_service.remove_aggregate", bytes);
+  }
+}
+
+template <class Protocol_>
+void rpc_serviceProcessorT<Protocol_>::process_remove_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("rpc_service.remove_aggregate", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.remove_aggregate");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "rpc_service.remove_aggregate");
+  }
+
+  rpc_service_remove_aggregate_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "rpc_service.remove_aggregate", bytes);
+  }
+
+  rpc_service_remove_aggregate_result result;
+  try {
+    iface_->remove_aggregate(args.multilog_id, args.aggregate_name);
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "rpc_service.remove_aggregate");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("remove_aggregate", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "rpc_service.remove_aggregate");
+  }
+
+  oprot->writeMessageBegin("remove_aggregate", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "rpc_service.remove_aggregate", bytes);
+  }
+}
+
+template <class Protocol_>
 void rpc_serviceProcessorT<Protocol_>::process_add_trigger(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
@@ -6424,7 +7135,7 @@ void rpc_serviceProcessorT<Protocol_>::process_add_trigger(int32_t seqid, ::apac
 
   rpc_service_add_trigger_result result;
   try {
-    iface_->add_trigger(args.table_id, args.trigger_name, args.filter_name, args.trigger_expr);
+    iface_->add_trigger(args.multilog_id, args.trigger_name, args.trigger_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6481,7 +7192,7 @@ void rpc_serviceProcessorT<Protocol_>::process_add_trigger(int32_t seqid, Protoc
 
   rpc_service_add_trigger_result result;
   try {
-    iface_->add_trigger(args.table_id, args.trigger_name, args.filter_name, args.trigger_expr);
+    iface_->add_trigger(args.multilog_id, args.trigger_name, args.trigger_expr);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6538,7 +7249,7 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_trigger(int32_t seqid, ::a
 
   rpc_service_remove_trigger_result result;
   try {
-    iface_->remove_trigger(args.table_id, args.trigger_name);
+    iface_->remove_trigger(args.multilog_id, args.trigger_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6595,7 +7306,7 @@ void rpc_serviceProcessorT<Protocol_>::process_remove_trigger(int32_t seqid, Pro
 
   rpc_service_remove_trigger_result result;
   try {
-    iface_->remove_trigger(args.table_id, args.trigger_name);
+    iface_->remove_trigger(args.multilog_id, args.trigger_name);
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
     result.__isset.ex = true;
@@ -6652,7 +7363,7 @@ void rpc_serviceProcessorT<Protocol_>::process_append(int32_t seqid, ::apache::t
 
   rpc_service_append_result result;
   try {
-    result.success = iface_->append(args.table_id, args.data);
+    result.success = iface_->append(args.multilog_id, args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6707,7 +7418,7 @@ void rpc_serviceProcessorT<Protocol_>::process_append(int32_t seqid, Protocol_* 
 
   rpc_service_append_result result;
   try {
-    result.success = iface_->append(args.table_id, args.data);
+    result.success = iface_->append(args.multilog_id, args.data);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6762,7 +7473,7 @@ void rpc_serviceProcessorT<Protocol_>::process_append_batch(int32_t seqid, ::apa
 
   rpc_service_append_batch_result result;
   try {
-    result.success = iface_->append_batch(args.table_id, args.batch);
+    result.success = iface_->append_batch(args.multilog_id, args.batch);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6817,7 +7528,7 @@ void rpc_serviceProcessorT<Protocol_>::process_append_batch(int32_t seqid, Proto
 
   rpc_service_append_batch_result result;
   try {
-    result.success = iface_->append_batch(args.table_id, args.batch);
+    result.success = iface_->append_batch(args.multilog_id, args.batch);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6872,7 +7583,7 @@ void rpc_serviceProcessorT<Protocol_>::process_read(int32_t seqid, ::apache::thr
 
   rpc_service_read_result result;
   try {
-    iface_->read(result.success, args.table_id, args.offset, args.nrecords);
+    iface_->read(result.success, args.multilog_id, args.offset, args.nrecords);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6927,7 +7638,7 @@ void rpc_serviceProcessorT<Protocol_>::process_read(int32_t seqid, Protocol_* ip
 
   rpc_service_read_result result;
   try {
-    iface_->read(result.success, args.table_id, args.offset, args.nrecords);
+    iface_->read(result.success, args.multilog_id, args.offset, args.nrecords);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -6982,7 +7693,7 @@ void rpc_serviceProcessorT<Protocol_>::process_adhoc_filter(int32_t seqid, ::apa
 
   rpc_service_adhoc_filter_result result;
   try {
-    iface_->adhoc_filter(result.success, args.table_id, args.filter_expr);
+    iface_->adhoc_filter(result.success, args.multilog_id, args.filter_expr);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7040,7 +7751,7 @@ void rpc_serviceProcessorT<Protocol_>::process_adhoc_filter(int32_t seqid, Proto
 
   rpc_service_adhoc_filter_result result;
   try {
-    iface_->adhoc_filter(result.success, args.table_id, args.filter_expr);
+    iface_->adhoc_filter(result.success, args.multilog_id, args.filter_expr);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7098,7 +7809,7 @@ void rpc_serviceProcessorT<Protocol_>::process_predef_filter(int32_t seqid, ::ap
 
   rpc_service_predef_filter_result result;
   try {
-    iface_->predef_filter(result.success, args.table_id, args.filter_name, args.begin_ms, args.end_ms);
+    iface_->predef_filter(result.success, args.multilog_id, args.filter_name, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7156,7 +7867,7 @@ void rpc_serviceProcessorT<Protocol_>::process_predef_filter(int32_t seqid, Prot
 
   rpc_service_predef_filter_result result;
   try {
-    iface_->predef_filter(result.success, args.table_id, args.filter_name, args.begin_ms, args.end_ms);
+    iface_->predef_filter(result.success, args.multilog_id, args.filter_name, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7214,7 +7925,7 @@ void rpc_serviceProcessorT<Protocol_>::process_combined_filter(int32_t seqid, ::
 
   rpc_service_combined_filter_result result;
   try {
-    iface_->combined_filter(result.success, args.table_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
+    iface_->combined_filter(result.success, args.multilog_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7272,7 +7983,7 @@ void rpc_serviceProcessorT<Protocol_>::process_combined_filter(int32_t seqid, Pr
 
   rpc_service_combined_filter_result result;
   try {
-    iface_->combined_filter(result.success, args.table_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
+    iface_->combined_filter(result.success, args.multilog_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7330,7 +8041,7 @@ void rpc_serviceProcessorT<Protocol_>::process_alerts_by_time(int32_t seqid, ::a
 
   rpc_service_alerts_by_time_result result;
   try {
-    iface_->alerts_by_time(result.success, args.table_id, args.begin_ms, args.end_ms);
+    iface_->alerts_by_time(result.success, args.multilog_id, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7388,7 +8099,7 @@ void rpc_serviceProcessorT<Protocol_>::process_alerts_by_time(int32_t seqid, Pro
 
   rpc_service_alerts_by_time_result result;
   try {
-    iface_->alerts_by_time(result.success, args.table_id, args.begin_ms, args.end_ms);
+    iface_->alerts_by_time(result.success, args.multilog_id, args.begin_ms, args.end_ms);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7446,7 +8157,7 @@ void rpc_serviceProcessorT<Protocol_>::process_get_more(int32_t seqid, ::apache:
 
   rpc_service_get_more_result result;
   try {
-    iface_->get_more(result.success, args.table_id, args.desc);
+    iface_->get_more(result.success, args.multilog_id, args.desc);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7504,7 +8215,7 @@ void rpc_serviceProcessorT<Protocol_>::process_get_more(int32_t seqid, Protocol_
 
   rpc_service_get_more_result result;
   try {
-    iface_->get_more(result.success, args.table_id, args.desc);
+    iface_->get_more(result.success, args.multilog_id, args.desc);
     result.__isset.success = true;
   } catch (rpc_invalid_operation &ex) {
     result.ex = ex;
@@ -7562,7 +8273,7 @@ void rpc_serviceProcessorT<Protocol_>::process_num_records(int32_t seqid, ::apac
 
   rpc_service_num_records_result result;
   try {
-    result.success = iface_->num_records(args.table_id);
+    result.success = iface_->num_records(args.multilog_id);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -7617,7 +8328,7 @@ void rpc_serviceProcessorT<Protocol_>::process_num_records(int32_t seqid, Protoc
 
   rpc_service_num_records_result result;
   try {
-    result.success = iface_->num_records(args.table_id);
+    result.success = iface_->num_records(args.multilog_id);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -7825,21 +8536,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_deregister_handler(const int3
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
+int64_t rpc_serviceConcurrentClientT<Protocol_>::create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode)
 {
-  int32_t seqid = send_create_table(table_name, schema, mode);
-  return recv_create_table(seqid);
+  int32_t seqid = send_create_atomic_multilog(name, schema, mode);
+  return recv_create_atomic_multilog(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("create_table", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("create_atomic_multilog", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  rpc_service_create_table_pargs args;
-  args.table_name = &table_name;
+  rpc_service_create_atomic_multilog_pargs args;
+  args.name = &name;
   args.schema = &schema;
   args.mode = &mode;
   args.write(this->oprot_);
@@ -7853,7 +8564,7 @@ int32_t rpc_serviceConcurrentClientT<Protocol_>::send_create_table(const std::st
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t seqid)
+int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_atomic_multilog(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -7882,7 +8593,7 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("create_table") != 0) {
+      if (fname.compare("create_atomic_multilog") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -7892,7 +8603,7 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
       int64_t _return;
-      rpc_service_create_table_presult result;
+      rpc_service_create_atomic_multilog_presult result;
       result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
@@ -7907,7 +8618,7 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t
         throw result.ex;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "create_table failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "create_atomic_multilog failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -7918,21 +8629,21 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_table(const int32_t
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::get_table_info(rpc_table_info& _return, const std::string& table_name)
+void rpc_serviceConcurrentClientT<Protocol_>::get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name)
 {
-  int32_t seqid = send_get_table_info(table_name);
-  recv_get_table_info(_return, seqid);
+  int32_t seqid = send_get_atomic_multilog_info(name);
+  recv_get_atomic_multilog_info(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_get_table_info(const std::string& table_name)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_get_atomic_multilog_info(const std::string& name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("get_table_info", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("get_atomic_multilog_info", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  rpc_service_get_table_info_pargs args;
-  args.table_name = &table_name;
+  rpc_service_get_atomic_multilog_info_pargs args;
+  args.name = &name;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -7944,7 +8655,7 @@ int32_t rpc_serviceConcurrentClientT<Protocol_>::send_get_table_info(const std::
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::recv_get_table_info(rpc_table_info& _return, const int32_t seqid)
+void rpc_serviceConcurrentClientT<Protocol_>::recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -7973,7 +8684,7 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_get_table_info(rpc_table_info
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("get_table_info") != 0) {
+      if (fname.compare("get_atomic_multilog_info") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -7982,7 +8693,7 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_get_table_info(rpc_table_info
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      rpc_service_get_table_info_presult result;
+      rpc_service_get_atomic_multilog_info_presult result;
       result.success = &_return;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
@@ -7994,7 +8705,7 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_get_table_info(rpc_table_info
         return;
       }
       // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_table_info failed: unknown result");
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_atomic_multilog_info failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
@@ -8005,21 +8716,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_get_table_info(rpc_table_info
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::remove_table(const int64_t table_id)
+void rpc_serviceConcurrentClientT<Protocol_>::remove_atomic_multilog(const int64_t multilog_id)
 {
-  int32_t seqid = send_remove_table(table_id);
-  recv_remove_table(seqid);
+  int32_t seqid = send_remove_atomic_multilog(multilog_id);
+  recv_remove_atomic_multilog(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_table(const int64_t table_id)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_atomic_multilog(const int64_t multilog_id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  this->oprot_->writeMessageBegin("remove_table", ::apache::thrift::protocol::T_CALL, cseqid);
+  this->oprot_->writeMessageBegin("remove_atomic_multilog", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  rpc_service_remove_table_pargs args;
-  args.table_id = &table_id;
+  rpc_service_remove_atomic_multilog_pargs args;
+  args.multilog_id = &multilog_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();
@@ -8031,7 +8742,7 @@ int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_table(const int64_t
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_table(const int32_t seqid)
+void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_atomic_multilog(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -8060,7 +8771,7 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_table(const int32_t se
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("remove_table") != 0) {
+      if (fname.compare("remove_atomic_multilog") != 0) {
         this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         this->iprot_->readMessageEnd();
         this->iprot_->getTransport()->readEnd();
@@ -8069,7 +8780,7 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_table(const int32_t se
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      rpc_service_remove_table_presult result;
+      rpc_service_remove_atomic_multilog_presult result;
       result.read(this->iprot_);
       this->iprot_->readMessageEnd();
       this->iprot_->getTransport()->readEnd();
@@ -8090,21 +8801,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_table(const int32_t se
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
+void rpc_serviceConcurrentClientT<Protocol_>::add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size)
 {
-  int32_t seqid = send_add_index(table_id, field_name, bucket_size);
+  int32_t seqid = send_add_index(multilog_id, field_name, bucket_size);
   recv_add_index(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_add_index_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.field_name = &field_name;
   args.bucket_size = &bucket_size;
   args.write(this->oprot_);
@@ -8177,21 +8888,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_add_index(const int32_t seqid
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::remove_index(const int64_t table_id, const std::string& field_name)
+void rpc_serviceConcurrentClientT<Protocol_>::remove_index(const int64_t multilog_id, const std::string& field_name)
 {
-  int32_t seqid = send_remove_index(table_id, field_name);
+  int32_t seqid = send_remove_index(multilog_id, field_name);
   recv_remove_index(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_index(const int64_t table_id, const std::string& field_name)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_index(const int64_t multilog_id, const std::string& field_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_index", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_remove_index_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.field_name = &field_name;
   args.write(this->oprot_);
 
@@ -8263,21 +8974,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_index(const int32_t se
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
+void rpc_serviceConcurrentClientT<Protocol_>::add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr)
 {
-  int32_t seqid = send_add_filter(table_id, filter_name, filter_expr);
+  int32_t seqid = send_add_filter(multilog_id, filter_name, filter_expr);
   recv_add_filter(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_add_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
@@ -8350,21 +9061,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_add_filter(const int32_t seqi
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::remove_filter(const int64_t table_id, const std::string& filter_name)
+void rpc_serviceConcurrentClientT<Protocol_>::remove_filter(const int64_t multilog_id, const std::string& filter_name)
 {
-  int32_t seqid = send_remove_filter(table_id, filter_name);
+  int32_t seqid = send_remove_filter(multilog_id, filter_name);
   recv_remove_filter(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_filter(const int64_t table_id, const std::string& filter_name)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_filter(const int64_t multilog_id, const std::string& filter_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_remove_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.write(this->oprot_);
 
@@ -8436,23 +9147,192 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_filter(const int32_t s
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+void rpc_serviceConcurrentClientT<Protocol_>::add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr)
 {
-  int32_t seqid = send_add_trigger(table_id, trigger_name, filter_name, trigger_expr);
+  int32_t seqid = send_add_aggregate(mutlilog_id, aggregate_name, filter_name, aggregate_expr);
+  recv_add_aggregate(seqid);
+}
+
+template <class Protocol_>
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("add_aggregate", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  rpc_service_add_aggregate_pargs args;
+  args.mutlilog_id = &mutlilog_id;
+  args.aggregate_name = &aggregate_name;
+  args.filter_name = &filter_name;
+  args.aggregate_expr = &aggregate_expr;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void rpc_serviceConcurrentClientT<Protocol_>::recv_add_aggregate(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("add_aggregate") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      rpc_service_add_aggregate_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void rpc_serviceConcurrentClientT<Protocol_>::remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name)
+{
+  int32_t seqid = send_remove_aggregate(multilog_id, aggregate_name);
+  recv_remove_aggregate(seqid);
+}
+
+template <class Protocol_>
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("remove_aggregate", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  rpc_service_remove_aggregate_pargs args;
+  args.multilog_id = &multilog_id;
+  args.aggregate_name = &aggregate_name;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_aggregate(const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("remove_aggregate") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      rpc_service_remove_aggregate_presult result;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      sentry.commit();
+      return;
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void rpc_serviceConcurrentClientT<Protocol_>::add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr)
+{
+  int32_t seqid = send_add_trigger(multilog_id, trigger_name, trigger_expr);
   recv_add_trigger(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("add_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_add_trigger_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.trigger_name = &trigger_name;
-  args.filter_name = &filter_name;
   args.trigger_expr = &trigger_expr;
   args.write(this->oprot_);
 
@@ -8524,21 +9404,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_add_trigger(const int32_t seq
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::remove_trigger(const int64_t table_id, const std::string& trigger_name)
+void rpc_serviceConcurrentClientT<Protocol_>::remove_trigger(const int64_t multilog_id, const std::string& trigger_name)
 {
-  int32_t seqid = send_remove_trigger(table_id, trigger_name);
+  int32_t seqid = send_remove_trigger(multilog_id, trigger_name);
   recv_remove_trigger(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_trigger(const int64_t table_id, const std::string& trigger_name)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_remove_trigger(const int64_t multilog_id, const std::string& trigger_name)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("remove_trigger", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_remove_trigger_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.trigger_name = &trigger_name;
   args.write(this->oprot_);
 
@@ -8610,21 +9490,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_remove_trigger(const int32_t 
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::append(const int64_t table_id, const std::string& data)
+int64_t rpc_serviceConcurrentClientT<Protocol_>::append(const int64_t multilog_id, const std::string& data)
 {
-  int32_t seqid = send_append(table_id, data);
+  int32_t seqid = send_append(multilog_id, data);
   return recv_append(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_append(const int64_t table_id, const std::string& data)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_append(const int64_t multilog_id, const std::string& data)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("append", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_append_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.data = &data;
   args.write(this->oprot_);
 
@@ -8698,21 +9578,21 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_append(const int32_t seqid
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::append_batch(const int64_t table_id, const rpc_record_batch& batch)
+int64_t rpc_serviceConcurrentClientT<Protocol_>::append_batch(const int64_t multilog_id, const rpc_record_batch& batch)
 {
-  int32_t seqid = send_append_batch(table_id, batch);
+  int32_t seqid = send_append_batch(multilog_id, batch);
   return recv_append_batch(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_append_batch(const int64_t table_id, const rpc_record_batch& batch)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_append_batch(const int64_t multilog_id, const rpc_record_batch& batch)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("append_batch", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_append_batch_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.batch = &batch;
   args.write(this->oprot_);
 
@@ -8786,21 +9666,21 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_append_batch(const int32_t
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords)
+void rpc_serviceConcurrentClientT<Protocol_>::read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords)
 {
-  int32_t seqid = send_read(table_id, offset, nrecords);
+  int32_t seqid = send_read(multilog_id, offset, nrecords);
   recv_read(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("read", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_read_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.offset = &offset;
   args.nrecords = &nrecords;
   args.write(this->oprot_);
@@ -8875,21 +9755,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_read(std::string& _return, co
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr)
+void rpc_serviceConcurrentClientT<Protocol_>::adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr)
 {
-  int32_t seqid = send_adhoc_filter(table_id, filter_expr);
+  int32_t seqid = send_adhoc_filter(multilog_id, filter_expr);
   recv_adhoc_filter(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_adhoc_filter(const int64_t table_id, const std::string& filter_expr)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("adhoc_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_adhoc_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_expr = &filter_expr;
   args.write(this->oprot_);
 
@@ -8967,21 +9847,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_adhoc_filter(rpc_iterator_han
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceConcurrentClientT<Protocol_>::predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
-  int32_t seqid = send_predef_filter(table_id, filter_name, begin_ms, end_ms);
+  int32_t seqid = send_predef_filter(multilog_id, filter_name, begin_ms, end_ms);
   recv_predef_filter(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_predef_filter(const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("predef_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_predef_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
@@ -9061,21 +9941,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_predef_filter(rpc_iterator_ha
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceConcurrentClientT<Protocol_>::combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
-  int32_t seqid = send_combined_filter(table_id, filter_name, filter_expr, begin_ms, end_ms);
+  int32_t seqid = send_combined_filter(multilog_id, filter_name, filter_expr, begin_ms, end_ms);
   recv_combined_filter(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_combined_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("combined_filter", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_combined_filter_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.filter_name = &filter_name;
   args.filter_expr = &filter_expr;
   args.begin_ms = &begin_ms;
@@ -9156,21 +10036,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_combined_filter(rpc_iterator_
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
+void rpc_serviceConcurrentClientT<Protocol_>::alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms)
 {
-  int32_t seqid = send_alerts_by_time(table_id, begin_ms, end_ms);
+  int32_t seqid = send_alerts_by_time(multilog_id, begin_ms, end_ms);
   recv_alerts_by_time(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("alerts_by_time", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_alerts_by_time_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.begin_ms = &begin_ms;
   args.end_ms = &end_ms;
   args.write(this->oprot_);
@@ -9249,21 +10129,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_alerts_by_time(rpc_iterator_h
 }
 
 template <class Protocol_>
-void rpc_serviceConcurrentClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc)
+void rpc_serviceConcurrentClientT<Protocol_>::get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc)
 {
-  int32_t seqid = send_get_more(table_id, desc);
+  int32_t seqid = send_get_more(multilog_id, desc);
   recv_get_more(_return, seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("get_more", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_get_more_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.desc = &desc;
   args.write(this->oprot_);
 
@@ -9341,21 +10221,21 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_get_more(rpc_iterator_handle&
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::num_records(const int64_t table_id)
+int64_t rpc_serviceConcurrentClientT<Protocol_>::num_records(const int64_t multilog_id)
 {
-  int32_t seqid = send_num_records(table_id);
+  int32_t seqid = send_num_records(multilog_id);
   return recv_num_records(seqid);
 }
 
 template <class Protocol_>
-int32_t rpc_serviceConcurrentClientT<Protocol_>::send_num_records(const int64_t table_id)
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_num_records(const int64_t multilog_id)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   this->oprot_->writeMessageBegin("num_records", ::apache::thrift::protocol::T_CALL, cseqid);
 
   rpc_service_num_records_pargs args;
-  args.table_id = &table_id;
+  args.multilog_id = &multilog_id;
   args.write(this->oprot_);
 
   this->oprot_->writeMessageEnd();

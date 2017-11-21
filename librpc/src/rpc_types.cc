@@ -353,51 +353,51 @@ void rpc_record_batch::printTo(std::ostream& out) const {
 }
 
 
-rpc_table_info::~rpc_table_info() throw() {
+rpc_atomic_multilog_info::~rpc_atomic_multilog_info() throw() {
 }
 
 
-void rpc_table_info::__set_table_id(const int64_t val) {
-  this->table_id = val;
+void rpc_atomic_multilog_info::__set_id(const int64_t val) {
+  this->id = val;
 }
 
-void rpc_table_info::__set_schema(const rpc_schema& val) {
+void rpc_atomic_multilog_info::__set_schema(const rpc_schema& val) {
   this->schema = val;
 }
 
-void swap(rpc_table_info &a, rpc_table_info &b) {
+void swap(rpc_atomic_multilog_info &a, rpc_atomic_multilog_info &b) {
   using ::std::swap;
-  swap(a.table_id, b.table_id);
+  swap(a.id, b.id);
   swap(a.schema, b.schema);
   swap(a.__isset, b.__isset);
 }
 
-rpc_table_info::rpc_table_info(const rpc_table_info& other34) {
-  table_id = other34.table_id;
+rpc_atomic_multilog_info::rpc_atomic_multilog_info(const rpc_atomic_multilog_info& other34) {
+  id = other34.id;
   schema = other34.schema;
   __isset = other34.__isset;
 }
-rpc_table_info::rpc_table_info( rpc_table_info&& other35) {
-  table_id = std::move(other35.table_id);
+rpc_atomic_multilog_info::rpc_atomic_multilog_info( rpc_atomic_multilog_info&& other35) {
+  id = std::move(other35.id);
   schema = std::move(other35.schema);
   __isset = std::move(other35.__isset);
 }
-rpc_table_info& rpc_table_info::operator=(const rpc_table_info& other36) {
-  table_id = other36.table_id;
+rpc_atomic_multilog_info& rpc_atomic_multilog_info::operator=(const rpc_atomic_multilog_info& other36) {
+  id = other36.id;
   schema = other36.schema;
   __isset = other36.__isset;
   return *this;
 }
-rpc_table_info& rpc_table_info::operator=(rpc_table_info&& other37) {
-  table_id = std::move(other37.table_id);
+rpc_atomic_multilog_info& rpc_atomic_multilog_info::operator=(rpc_atomic_multilog_info&& other37) {
+  id = std::move(other37.id);
   schema = std::move(other37.schema);
   __isset = std::move(other37.__isset);
   return *this;
 }
-void rpc_table_info::printTo(std::ostream& out) const {
+void rpc_atomic_multilog_info::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
-  out << "rpc_table_info(";
-  out << "table_id=" << to_string(table_id);
+  out << "rpc_atomic_multilog_info(";
+  out << "id=" << to_string(id);
   out << ", " << "schema=" << to_string(schema);
   out << ")";
 }

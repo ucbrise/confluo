@@ -23,7 +23,10 @@
 #include "filter_log.h"
 #include "index_log.h"
 #include "parser/schema_parser.h"
-#include "parser/trigger_compiler.h"
+#include "parser/expression_parser.h"
+#include "parser/expression_compiler.h"
+#include "parser/aggregate_parser.h"
+#include "parser/trigger_parser.h"
 #include "planner/query_planner.h"
 #include "read_tail.h"
 #include "schema/record_batch.h"
@@ -51,7 +54,16 @@ class atomic_multilog {
   typedef metadata_writer metadata_writer_type;
 
   typedef size_t filter_id_t;
-  typedef std::pair<size_t, size_t> trigger_id_t;
+
+  struct aggregate_id_t {
+    filter_id_t filter_idx;
+    size_t aggregate_idx;
+  };
+
+  struct trigger_id_t {
+    aggregate_id_t aggregate_id;
+    size_t trigger_idx;
+  };
 
   typedef alert_index::alert_list alert_list;
 
@@ -117,7 +129,7 @@ class atomic_multilog {
                   ex = management_exception("Index not supported for field type");
                 }
                 col.set_indexed(index_id, bucket_size);
-                metadata_.write_index_info(field_name, bucket_size);
+                metadata_.write_index_metadata(field_name, bucket_size);
               } else {
                 ex = management_exception("Could not index " + field_name + ": already indexed/indexing");
                 return;
@@ -177,27 +189,26 @@ class atomic_multilog {
 
   /**
    * Adds filter to the atomic multilog
-   * @param filter_name The name of the filter
-   * @param filter_expr The expression to filter out elements in the atomic multilog
+   * @param name The name of the filter
+   * @param expr The expression to filter out elements in the atomic multilog
    * @throw ex Management exception
    */
-  void add_filter(const std::string& filter_name,
-                  const std::string& filter_expr) {
+  void add_filter(const std::string& name, const std::string& expr) {
     optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [filter_name, filter_expr, &ex, this] {
+            [name, expr, &ex, this] {
               filter_id_t filter_id;
-              if (filter_map_.get(filter_name, filter_id) != -1) {
-                ex = management_exception("Filter " + filter_name + " already exists.");
+              if (filter_map_.get(name, filter_id) != -1) {
+                ex = management_exception("Filter " + name + " already exists.");
                 return;
               }
-              auto t = parser::parse_expression(filter_expr);
+              auto t = parser::parse_expression(expr);
               auto cexpr = parser::compile_expression(t, schema_);
               filter_id = filters_.push_back(new filter(cexpr, default_filter));
-              metadata_.write_filter_info(filter_name, filter_expr);
-              if (filter_map_.put(filter_name, filter_id) == -1) {
-                ex = management_exception("Could not add filter " + filter_name + " to filter map.");
+              metadata_.write_filter_metadata(name, expr);
+              if (filter_map_.put(name, filter_id) == -1) {
+                ex = management_exception("Could not add filter " + name + " to filter map.");
                 return;
               }
             });
@@ -208,15 +219,15 @@ class atomic_multilog {
 
   /**
    * Removes filter from the atomic multilog
-   * @param filter_name The name of the filter
+   * @param name The name of the filter
    * @throw ex Management exception
    */
-  void remove_filter(const std::string& filter_name) {
+  void remove_filter(const std::string& name) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([filter_name, &ex, this] {
+    auto ret = mgmt_pool_.submit([name, &ex, this] {
       filter_id_t filter_id;
-      if (filter_map_.get(filter_name, filter_id) == -1) {
-        ex = management_exception("Filter " + filter_name + " does not exist.");
+      if (filter_map_.get(name, filter_id) == -1) {
+        ex = management_exception("Filter " + name + " does not exist.");
         return;
       }
       bool success = filters_.at(filter_id)->invalidate();
@@ -224,8 +235,74 @@ class atomic_multilog {
         ex = management_exception("Filter already invalidated.");
         return;
       }
-      filter_map_.remove(filter_name, filter_id);
+      filter_map_.remove(name, filter_id);
     });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
+  }
+
+  /**
+   * Adds aggregate to the atomic multilog
+   *
+   * @param name Name of the aggregate.
+   * @param filter_name Name of filter to add aggregate to.
+   * @param expr Aggregate expression (e.g., min(temp))
+   */
+  void add_aggregate(const std::string& name, const std::string& filter_name,
+                     const std::string& expr) {
+    optional<management_exception> ex;
+    auto ret =
+        mgmt_pool_.submit(
+            [name, filter_name, expr, &ex, this] {
+              aggregate_id_t aggregate_id;
+              if (aggregate_map_.get(name, aggregate_id) != -1) {
+                ex = management_exception("Aggregate " + name + " already exists.");
+                return;
+              }
+              filter_id_t filter_id;
+              if (filter_map_.get(filter_name, filter_id) == -1) {
+                ex = management_exception("Filter " + filter_name + " does not exist.");
+                return;
+              }
+              aggregate_id.filter_idx = filter_id;
+              auto pa = parser::parse_aggregate(expr);
+              const column_t& col = schema_[pa.field_name];
+              aggregate_info *a = new aggregate_info(name, aggregate_type_utils::string_to_agg(pa.agg), col.type(), col.idx());
+              aggregate_id.aggregate_idx = filters_.at(filter_id)->add_aggregate(a);
+              if (aggregate_map_.put(name, aggregate_id) == -1) {
+                ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
+                return;
+              }
+            });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
+  }
+
+  /**
+   * Removes aggregate from the atomic multilog
+   *
+   * @param name The name of the aggregate
+   * @throw Management exception
+   */
+  void remove_aggregate(const std::string& name) {
+    optional<management_exception> ex;
+    auto ret =
+        mgmt_pool_.submit(
+            [name, &ex, this] {
+              aggregate_id_t aggregate_id;
+              if (aggregate_map_.get(name, aggregate_id) == -1) {
+                ex = management_exception("Aggregate " + name + " does not exist.");
+                return;
+              }
+              bool success = filters_.at(aggregate_id.filter_idx)->remove_aggregate(aggregate_id.aggregate_idx);
+              if (!success) {
+                ex = management_exception("Aggregate already invalidated.");
+                return;
+              }
+              aggregate_map_.remove(name, aggregate_id);
+            });
     ret.wait();
     if (ex.has_value())
       throw ex.value();
@@ -234,12 +311,10 @@ class atomic_multilog {
   /**
    * Adds trigger to the atomic multilog
    * @param trigger_name The name of the trigger
-   * @param filter_name The name of the filter
    * @param trigger_expr The trigger expression to be executed
    * @throw ex Management exception
    */
   void add_trigger(const std::string& trigger_name,
-                   const std::string& filter_name,
                    const std::string& trigger_expr,
                    const uint64_t periodicity_ms =
                        configuration_params::MONITOR_PERIODICITY_MS) {
@@ -263,28 +338,28 @@ class atomic_multilog {
     optional<management_exception> ex;
     auto ret =
         mgmt_pool_.submit(
-            [trigger_name, filter_name, trigger_expr, periodicity_ms, &ex, this] {
+            [trigger_name, trigger_expr, periodicity_ms, &ex, this] {
               trigger_id_t trigger_id;
               if (trigger_map_.get(trigger_name, trigger_id) != -1) {
                 ex = management_exception("Trigger " + trigger_name + " already exists.");
                 return;
               }
-              filter_id_t filter_id;
-              if (filter_map_.get(filter_name, filter_id) == -1) {
-                ex = management_exception("Filter " + filter_name + " does not exist.");
+              auto pt = parser::parse_trigger(trigger_expr);
+              std::string aggregate_name = pt.aggregate_name;
+              aggregate_id_t aggregate_id;
+              if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
+                ex = management_exception("Aggregate " + aggregate_name + " does not exist.");
                 return;
               }
-              trigger_id.first = filter_id;
-              auto ct = parser::compile_trigger(parser::parse_trigger(trigger_expr), schema_);
-              const column_t& col = schema_[ct.field_name];
-              trigger* t = new trigger(trigger_name, filter_name, trigger_expr, ct.agg, col.name(), col.idx(), col.type(), ct.relop, ct.threshold, periodicity_ms);
-              trigger_id.second = filters_.at(filter_id)->add_trigger(t);
-              metadata_.write_trigger_info(trigger_name, filter_name, ct.agg, ct.field_name, ct.relop,
-                  ct.threshold, periodicity_ms);
+              trigger_id.aggregate_id = aggregate_id;
+              aggregate_info* a = filters_.at(aggregate_id.filter_idx)->get_aggregate(aggregate_id.aggregate_idx);
+              trigger* t = new trigger(trigger_name, aggregate_name, relop_utils::str_to_op(pt.relop), a->value(pt.threshold), periodicity_ms);
+              trigger_id.trigger_idx = a->add_trigger(t);
               if (trigger_map_.put(trigger_name, trigger_id) == -1) {
-                ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
+                ex = management_exception("Could not add trigger " + trigger_name + " to trigger map.");
                 return;
               }
+              metadata_.write_trigger_metadata(trigger_name, trigger_expr, periodicity_ms);
             });
     ret.wait();
     if (ex.has_value())
@@ -306,7 +381,10 @@ class atomic_multilog {
                 ex = management_exception("Trigger " + trigger_name + " does not exist.");
                 return;
               }
-              bool success = filters_.at(trigger_id.first)->remove_trigger(trigger_id.second);
+              size_t fid = trigger_id.aggregate_id.filter_idx;
+              size_t aid = trigger_id.aggregate_id.aggregate_idx;
+              size_t tid = trigger_id.trigger_idx;
+              bool success = filters_.at(fid)->get_aggregate(aid)->remove_trigger(tid);
               if (!success) {
                 ex = management_exception("Trigger already invalidated.");
                 return;
@@ -546,14 +624,21 @@ class atomic_multilog {
     for (size_t i = 0; i < nfilters; i++) {
       filter* f = filters_.at(i);
       if (f->is_valid()) {
-        size_t ntriggers = f->num_triggers();
-        for (size_t tid = 0; tid < ntriggers; tid++) {
-          trigger* t = f->get_trigger(tid);
-          if (t->is_valid() && cur_ms % t->periodicity_ms() == 0) {
-            for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS;
-                ms <= cur_ms; ms++) {
-              if (ms % t->periodicity_ms() == 0) {
-                check_time_bucket(f, t, tid, cur_ms, version);
+        size_t naggs = f->num_aggregates();
+        for (size_t aid = 0; aid < naggs; aid++) {
+          aggregate_info* a = f->get_aggregate(aid);
+          if (a->is_valid()) {
+            size_t ntriggers = a->num_triggers();
+            for (size_t tid = 0; tid < ntriggers; tid++) {
+              trigger* t = a->get_trigger(tid);
+              if (t->is_valid() && cur_ms % t->periodicity_ms() == 0) {
+                for (uint64_t ms = cur_ms
+                    - configuration_params::MONITOR_WINDOW_MS; ms <= cur_ms;
+                    ms++) {
+                  if (ms % t->periodicity_ms() == 0) {
+                    check_time_bucket(f, t, tid, cur_ms, version);
+                  }
+                }
               }
             }
           }
@@ -570,8 +655,7 @@ class atomic_multilog {
       if (ar != nullptr) {
         numeric agg = ar->get_aggregate(tid, version);
         if (numeric::relop(t->op(), agg, t->threshold())) {
-          alerts_.add_alert(ms, t->trigger_name(), t->trigger_expr(), agg,
-                            version);
+          alerts_.add_alert(ms, t->name(), t->expr(), agg, version);
         }
       }
     }
@@ -590,6 +674,7 @@ class atomic_multilog {
   alert_index alerts_;
 
   string_map<filter_id_t> filter_map_;
+  string_map<aggregate_id_t> aggregate_map_;
   string_map<trigger_id_t> trigger_map_;
 
   query_planner planner_;

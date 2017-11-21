@@ -68,11 +68,12 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  int64_t create_table(const std::string& table_name, const rpc_schema& schema,
+  int64_t create_atomic_multilog(const std::string& name,
+      const rpc_schema& schema,
       const rpc_storage_mode mode) {
     int64_t ret = -1;
     try {
-      ret = store_->create_atomic_multilog(table_name, rpc_type_conversions::convert_schema(schema),
+      ret = store_->create_atomic_multilog(name, rpc_type_conversions::convert_schema(schema),
           rpc_type_conversions::convert_mode(mode));
     } catch(management_exception& ex) {
       rpc_management_exception e;
@@ -82,15 +83,15 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     return ret;
   }
 
-  void get_table_info(rpc_table_info& _return, const std::string& table_name) {
-    _return.table_id = store_->get_atomic_multilog_id(table_name);
-    auto dschema = store_->get_atomic_multilog(_return.table_id)->get_schema().columns();
+  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) {
+    _return.id = store_->get_atomic_multilog_id(name);
+    auto dschema = store_->get_atomic_multilog(_return.id)->get_schema().columns();
     _return.schema = rpc_type_conversions::convert_schema(dschema);
   }
 
-  void remove_table(int64_t table_id) {
+  void remove_atomic_multilog(int64_t id) {
     try {
-      store_->remove_atomic_multilog(table_id);
+      store_->remove_atomic_multilog(id);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -98,9 +99,9 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  void add_index(int64_t table_id, const std::string& field_name, const double bucket_size) {
+  void add_index(int64_t id, const std::string& field_name, const double bucket_size) {
     try {
-      store_->get_atomic_multilog(table_id)->add_index(field_name, bucket_size);
+      store_->get_atomic_multilog(id)->add_index(field_name, bucket_size);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -108,9 +109,9 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  void remove_index(int64_t table_id, const std::string& field_name) {
+  void remove_index(int64_t id, const std::string& field_name) {
     try {
-      store_->get_atomic_multilog(table_id)->remove_index(field_name);
+      store_->get_atomic_multilog(id)->remove_index(field_name);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -118,10 +119,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  void add_filter(int64_t table_id, const std::string& filter_name,
+  void add_filter(int64_t id, const std::string& filter_name,
       const std::string& filter_expr) {
     try {
-      store_->get_atomic_multilog(table_id)->add_filter(filter_name, filter_expr);
+      store_->get_atomic_multilog(id)->add_filter(filter_name, filter_expr);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -133,9 +134,9 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  void remove_filter(int64_t table_id, const std::string& filter_name) {
+  void remove_filter(int64_t id, const std::string& filter_name) {
     try {
-      store_->get_atomic_multilog(table_id)->remove_filter(filter_name);
+      store_->get_atomic_multilog(id)->remove_filter(filter_name);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -143,11 +144,39 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  void add_trigger(int64_t table_id, const std::string& trigger_name,
+  void add_aggregate(int64_t id, const std::string& aggregate_name,
       const std::string& filter_name,
+      const std::string& aggregate_expr) {
+    try {
+      store_->get_atomic_multilog(id)->add_aggregate(aggregate_name,
+          filter_name,
+          aggregate_expr);
+    } catch(management_exception& ex) {
+      rpc_management_exception e;
+      e.msg = ex.what();
+      throw e;
+    } catch(parse_exception& ex) {
+      rpc_management_exception e;
+      e.msg = ex.what();
+      throw e;
+    }
+  }
+
+  void remove_aggregate(int64_t id, const std::string& aggregate_name) {
+    try {
+      store_->get_atomic_multilog(id)->remove_aggregate(aggregate_name);
+    } catch(management_exception& ex) {
+      rpc_management_exception e;
+      e.msg = ex.what();
+      throw e;
+    }
+  }
+
+  void add_trigger(int64_t id, const std::string& trigger_name,
       const std::string& trigger_expr) {
     try {
-      store_->get_atomic_multilog(table_id)->add_trigger(trigger_name, filter_name, trigger_expr);
+      store_->get_atomic_multilog(id)->add_trigger(trigger_name,
+          trigger_expr);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -159,9 +188,9 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  void remove_trigger(int64_t table_id, const std::string& trigger_name) {
+  void remove_trigger(int64_t id, const std::string& trigger_name) {
     try {
-      store_->get_atomic_multilog(table_id)->remove_trigger(trigger_name);
+      store_->get_atomic_multilog(id)->remove_trigger(trigger_name);
     } catch(management_exception& ex) {
       rpc_management_exception e;
       e.msg = ex.what();
@@ -169,33 +198,33 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  int64_t append(int64_t table_id, const std::string& data) {
+  int64_t append(int64_t id, const std::string& data) {
     void* buf = (char*) &data[0];  // XXX: Fix
-    return store_->get_atomic_multilog(table_id)->append(buf);
+    return store_->get_atomic_multilog(id)->append(buf);
   }
 
-  int64_t append_batch(int64_t table_id, const rpc_record_batch& batch) {
+  int64_t append_batch(int64_t id, const rpc_record_batch& batch) {
     record_batch rbatch = rpc_type_conversions::convert_batch(batch);
-    return store_->get_atomic_multilog(table_id)->append_batch(rbatch);
+    return store_->get_atomic_multilog(id)->append_batch(rbatch);
   }
 
-  void read(std::string& _return, int64_t table_id, const int64_t offset, const int64_t nrecords) {
+  void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
     uint64_t limit;
     ro_data_ptr ptr;
-    store_->get_atomic_multilog(table_id)->read(offset, limit, ptr);
+    store_->get_atomic_multilog(id)->read(offset, limit, ptr);
     char* data = reinterpret_cast<char*>(ptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
-        static_cast<size_t>(nrecords * store_->get_atomic_multilog(table_id)->record_size()));
+        static_cast<size_t>(nrecords * store_->get_atomic_multilog(id)->record_size()));
     _return.assign(data, size);
   }
 
-  void adhoc_filter(rpc_iterator_handle& _return,int64_t table_id,
+  void adhoc_filter(rpc_iterator_handle& _return,int64_t id,
       const std::string& filter_expr) {
     bool success = false;
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* table = store_->get_atomic_multilog(table_id);
+    atomic_multilog* mlog = store_->get_atomic_multilog(id);
     try {
-      auto res = table->execute_filter(filter_expr);
+      auto res = mlog->execute_filter(filter_expr);
       auto ret = adhoc_.insert(std::make_pair(it_id, res));
       success = ret.second;
     } catch (parse_exception& ex) {
@@ -210,15 +239,15 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       throw e;
     }
 
-    adhoc_more(_return, table->record_size(), it_id);
+    adhoc_more(_return, mlog->record_size(), it_id);
   }
 
-  void predef_filter(rpc_iterator_handle& _return, int64_t table_id,
+  void predef_filter(rpc_iterator_handle& _return, int64_t id,
       const std::string& filter_name, const int64_t begin_ms,
       const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* table = store_->get_atomic_multilog(table_id);
-    auto res = table->query_filter(filter_name, begin_ms, end_ms);
+    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    auto res = mlog->query_filter(filter_name, begin_ms, end_ms);
     auto ret = predef_.insert(std::make_pair(it_id, res));
     if (!ret.second) {
       rpc_invalid_operation e;
@@ -226,18 +255,18 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       throw e;
     }
 
-    predef_more(_return, table->record_size(), it_id);
+    predef_more(_return, mlog->record_size(), it_id);
   }
 
-  void combined_filter(rpc_iterator_handle& _return, int64_t table_id,
+  void combined_filter(rpc_iterator_handle& _return, int64_t id,
       const std::string& filter_name,
       const std::string& filter_expr, const int64_t begin_ms,
       const int64_t end_ms) {
     bool success = false;
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* table = store_->get_atomic_multilog(table_id);
+    atomic_multilog* mlog = store_->get_atomic_multilog(id);
     try {
-      auto res = table->query_filter(filter_name, filter_expr, begin_ms, end_ms);
+      auto res = mlog->query_filter(filter_name, filter_expr, begin_ms, end_ms);
       auto ret = combined_.insert(std::make_pair(it_id, res));
       success = ret.second;
     } catch (parse_exception& ex) {
@@ -251,13 +280,13 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       throw e;
     }
 
-    combined_more(_return, table->record_size(), it_id);
+    combined_more(_return, mlog->record_size(), it_id);
   }
 
-  void alerts_by_time(rpc_iterator_handle& _return, int64_t table_id,
+  void alerts_by_time(rpc_iterator_handle& _return, int64_t id,
       const int64_t begin_ms, const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    auto alerts = store_->get_atomic_multilog(table_id)->get_alerts(begin_ms, end_ms);
+    auto alerts = store_->get_atomic_multilog(id)->get_alerts(begin_ms, end_ms);
     auto ret = alerts_.insert(std::make_pair(it_id, std::make_pair(alerts.begin(), alerts.end())));
     if (!ret.second) {
       rpc_invalid_operation e;
@@ -268,7 +297,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     alerts_more(_return, it_id);
   }
 
-  void get_more(rpc_iterator_handle& _return, int64_t table_id,
+  void get_more(rpc_iterator_handle& _return, int64_t id,
       const rpc_iterator_descriptor& desc) {
     if (desc.handler_id != handler_id_) {
       rpc_invalid_operation ex;
@@ -276,7 +305,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       throw ex;
     }
 
-    size_t record_size = store_->get_atomic_multilog(table_id)->record_size();
+    size_t record_size = store_->get_atomic_multilog(id)->record_size();
 
     switch (desc.type) {
       case rpc_iterator_type::RPC_ADHOC: {
@@ -302,8 +331,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   // TODO: subscribe to alerts
   // TODO: active alerts
 
-  int64_t num_records(int64_t table_id) {
-    return store_->get_atomic_multilog(table_id)->num_records();
+  int64_t num_records(int64_t id) {
+    return store_->get_atomic_multilog(id)->num_records();
   }
 
 private:
@@ -462,8 +491,7 @@ class rpc_server {
   static shared_ptr<TThreadedServer> create(confluo_store* store,
                                             const std::string& address,
                                             int port) {
-    shared_ptr<rpc_clone_factory> clone_factory(
-        new rpc_clone_factory(store));
+    shared_ptr<rpc_clone_factory> clone_factory(new rpc_clone_factory(store));
     shared_ptr<rpc_serviceProcessorFactory> proc_factory(
         new rpc_serviceProcessorFactory(clone_factory));
     shared_ptr<TServerSocket> sock(new TServerSocket(address, port));

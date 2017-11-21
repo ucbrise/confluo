@@ -23,10 +23,10 @@ TEST_F(AtomicMultilogMetadataTest, ReadWriteTest) {
   schema_t s(builder.get_columns());
 
   w.write_schema(s);
-  w.write_index_info("col1", 0.0);
-  w.write_filter_info("filter1", "col1>0");
-  w.write_trigger_info("trigger1", "filter1", aggregate_id::D_SUM, "col1",
-                       reational_op_id::LT, numeric(3), 10);
+  w.write_index_metadata("col1", 0.0);
+  w.write_filter_metadata("filter1", "d>0");
+  w.write_aggregate_metadata("agg1", "filter1", "SUM(d)");
+  w.write_trigger_metadata("trigger1", "agg1<3", 10);
 
   metadata_reader r("/tmp");
   ASSERT_EQ(metadata_type::D_SCHEMA_METADATA, r.next_type());
@@ -37,30 +37,32 @@ TEST_F(AtomicMultilogMetadataTest, ReadWriteTest) {
     ASSERT_EQ(s[i].name(), schema[i].name());
     ASSERT_EQ(s[i].type().id, schema[i].type().id);
     ASSERT_EQ(s[i].type().size, schema[i].type().size);
-    if (s[i].type().id != primitive_type_id::D_STRING) {
+    if (s[i].type().id != primitive_type::D_STRING) {
       ASSERT_TRUE(s[i].min() == schema[i].min());
       ASSERT_TRUE(s[i].max() == schema[i].max());
     }
   }
 
   ASSERT_EQ(metadata_type::D_INDEX_METADATA, r.next_type());
-  index_info iinfo = r.next_index_info();
+  index_metadata iinfo = r.next_index_metadata();
   ASSERT_EQ("col1", iinfo.field_name());
   ASSERT_EQ(static_cast<double>(0.0), iinfo.bucket_size());
 
   ASSERT_EQ(metadata_type::D_FILTER_METADATA, r.next_type());
-  filter_info finfo = r.next_filter_info();
+  filter_metadata finfo = r.next_filter_metadata();
   ASSERT_EQ("filter1", finfo.filter_name());
-  ASSERT_EQ("col1>0", finfo.expr());
+  ASSERT_EQ("d>0", finfo.expr());
+
+  ASSERT_EQ(metadata_type::D_AGGREGATE_METADATA, r.next_type());
+  aggregate_metadata ainfo = r.next_aggregate_metadata();
+  ASSERT_EQ("agg1", ainfo.aggregate_name());
+  ASSERT_EQ("filter1", ainfo.filter_name());
+  ASSERT_EQ("SUM(d)", ainfo.aggregate_expression());
 
   ASSERT_EQ(metadata_type::D_TRIGGER_METADATA, r.next_type());
-  trigger_info tinfo = r.next_trigger_info();
+  trigger_metadata tinfo = r.next_trigger_metadata();
   ASSERT_EQ("trigger1", tinfo.trigger_name());
-  ASSERT_EQ("filter1", tinfo.filter_name());
-  ASSERT_EQ(aggregate_id::D_SUM, tinfo.agg_id());
-  ASSERT_EQ("col1", tinfo.field_name());
-  ASSERT_EQ(reational_op_id::LT, tinfo.op());
-  ASSERT_TRUE(numeric(3) == tinfo.threshold());
+  ASSERT_EQ("agg1<3", tinfo.trigger_expression());
   ASSERT_EQ(UINT64_C(10), tinfo.periodicity_ms());
 }
 

@@ -6,7 +6,7 @@
 
 namespace confluo {
 
-enum aggregate_id
+enum aggregate_type
   : uint8_t {
     D_SUM = 0,
   D_MIN = 1,
@@ -14,33 +14,33 @@ enum aggregate_id
   D_CNT = 3
 };
 
-class aggop_utils {
+class aggregate_type_utils {
  public:
-  static std::string agg_to_string(aggregate_id agg) {
+  static std::string agg_to_string(aggregate_type agg) {
     switch (agg) {
-      case aggregate_id::D_SUM:
+      case aggregate_type::D_SUM:
         return "SUM";
-      case aggregate_id::D_MIN:
+      case aggregate_type::D_MIN:
         return "MIN";
-      case aggregate_id::D_MAX:
+      case aggregate_type::D_MAX:
         return "MAX";
-      case aggregate_id::D_CNT:
+      case aggregate_type::D_CNT:
         return "CNT";
       default:
         return "**INVALID**";
     }
   }
 
-  static aggregate_id string_to_agg(const std::string& str) {
+  static aggregate_type string_to_agg(const std::string& str) {
     std::string test = utils::string_utils::to_upper(str);
     if (test == "SUM") {
-      return aggregate_id::D_SUM;
+      return aggregate_type::D_SUM;
     } else if (test == "MIN") {
-      return aggregate_id::D_MIN;
+      return aggregate_type::D_MIN;
     } else if (test == "MAX") {
-      return aggregate_id::D_MAX;
+      return aggregate_type::D_MAX;
     } else if (test == "CNT") {
-      return aggregate_id::D_CNT;
+      return aggregate_type::D_CNT;
     } else {
       THROW(parse_exception, "Invalid aggregate function " + str);
     }

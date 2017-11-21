@@ -19,18 +19,18 @@ class AtomicMultilogTest : public testing::Test {
       buf[i] = val_uint8;
   }
 
-  void test_append_and_get(atomic_multilog& dtable) {
+  void test_append_and_get(atomic_multilog& mlog) {
     std::vector<uint64_t> offsets;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       AtomicMultilogTest::generate_bytes(data_, DATA_SIZE, i);
-      uint64_t offset = dtable.append(data_);
+      uint64_t offset = mlog.append(data_);
       offsets.push_back(offset);
     }
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       ro_data_ptr data_ptr;
-      dtable.read(offsets[i], data_ptr);
+      mlog.read(offsets[i], data_ptr);
       ASSERT_TRUE(data_ptr.get() != nullptr);
       uint8_t expected = i % 256;
       uint8_t* data = data_ptr.get();
@@ -39,7 +39,7 @@ class AtomicMultilogTest : public testing::Test {
         ASSERT_EQ(data[j], expected);
       }
     }
-    ASSERT_EQ(MAX_RECORDS, dtable.num_records());
+    ASSERT_EQ(MAX_RECORDS, mlog.num_records());
   }
 
   static std::vector<column_t> s;
@@ -132,107 +132,107 @@ std::vector<column_t> AtomicMultilogTest::s = schema();
 task_pool AtomicMultilogTest::MGMT_POOL;
 
 TEST_F(AtomicMultilogTest, AppendAndGetInMemoryTest) {
-  atomic_multilog dtable(
+  atomic_multilog mlog(
       "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  test_append_and_get(dtable);
+  test_append_and_get(mlog);
 }
 
 TEST_F(AtomicMultilogTest, AppendAndGetDurableTest) {
-  atomic_multilog dtable(
+  atomic_multilog mlog(
       "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE, MGMT_POOL);
-  test_append_and_get(dtable);
+  test_append_and_get(mlog);
 }
 
 TEST_F(AtomicMultilogTest, AppendAndGetDurableRelaxedTest) {
-  atomic_multilog dtable(
+  atomic_multilog mlog(
       "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE_RELAXED, MGMT_POOL);
-  test_append_and_get(dtable);
+  test_append_and_get(mlog);
 }
 
 TEST_F(AtomicMultilogTest, IndexTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  dtable.add_index("a");
-  dtable.add_index("b");
-  dtable.add_index("c", 10);
-  dtable.add_index("d", 2);
-  dtable.add_index("e", 100);
-  dtable.add_index("f", 0.1);
-  dtable.add_index("g", 0.01);
-  dtable.add_index("h");
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  mlog.add_index("a");
+  mlog.add_index("b");
+  mlog.add_index("c", 10);
+  mlog.add_index("d", 2);
+  mlog.add_index("e", 100);
+  mlog.add_index("f", 0.1);
+  mlog.add_index("g", 0.01);
+  mlog.add_index("h");
 
-  dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  dtable.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  dtable.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  dtable.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  dtable.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  dtable.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  dtable.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  mlog.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = dtable.execute_filter("a == true"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("a == true"); !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("b > 4"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("b > 4"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("d == 0"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("d == 0"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("e >= 100"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("e >= 100"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() >= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -241,7 +241,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("a == true && b > 4"); !r.empty();
+  for (auto r = mlog.execute_filter("a == true && b > 4"); !r.empty();
       r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
@@ -250,7 +250,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("a == true && (b > 4 || c <= 30)");
+  for (auto r = mlog.execute_filter("a == true && (b > 4 || c <= 30)");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -261,7 +261,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("a == true && (b > 4 || f > 0.1)");
+  for (auto r = mlog.execute_filter("a == true && (b > 4 || f > 0.1)");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -273,79 +273,83 @@ TEST_F(AtomicMultilogTest, IndexTest) {
 }
 
 TEST_F(AtomicMultilogTest, RemoveIndexTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
 
-  dtable.add_index("a", 1);
-  dtable.add_index("b", 1);
-  dtable.add_index("c", 10);
-  dtable.add_index("d", 2);
-  dtable.add_index("e", 100);
-  dtable.add_index("f", 0.1);
-  dtable.add_index("g", 0.01);
-  dtable.add_index("h", 1);
+  mlog.add_index("a", 1);
+  mlog.add_index("b", 1);
+  mlog.add_index("c", 10);
+  mlog.add_index("d", 2);
+  mlog.add_index("e", 100);
+  mlog.add_index("f", 0.1);
+  mlog.add_index("g", 0.01);
+  mlog.add_index("h", 1);
 
-  dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
 
   try {
-    dtable.remove_index("a");
-    dtable.remove_index("a");
+    mlog.remove_index("a");
+    mlog.remove_index("a");
   } catch (std::exception& e) {
     std::string error_message = "Could not remove index for a:"
         " No index exists";
     ASSERT_STREQ(e.what(), error_message.c_str());
   }
 
-  dtable.remove_index("b");
-  ASSERT_EQ(false, dtable.is_indexed("b"));
-  ASSERT_EQ(true, dtable.is_indexed("c"));
+  mlog.remove_index("b");
+  ASSERT_EQ(false, mlog.is_indexed("b"));
+  ASSERT_EQ(true, mlog.is_indexed("c"));
 }
 
+// TODO: Separate out the tests
+// TODO: Add tests for aggregates only
 TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  dtable.add_filter("filter1", "a == true");
-  dtable.add_filter("filter2", "b > 4");
-
-  dtable.add_trigger("trigger1", "filter2", "SUM(d) >= 10");
-  dtable.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  mlog.add_filter("filter1", "a == true");
+  mlog.add_filter("filter2", "b > 4");
+  mlog.add_aggregate("agg1", "filter1", "SUM(d)");
+  mlog.add_aggregate("agg2", "filter2", "SUM(d)");
+  mlog.add_trigger("trigger1", "agg1 >= 10");
+  mlog.add_trigger("trigger2", "agg2 >= 10");
 
   int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  dtable.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  dtable.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  dtable.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  dtable.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  dtable.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  dtable.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  mlog.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
-  for (auto r = dtable.query_filter("filter1", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
     i++;
   }
 
   try {
-    dtable.remove_filter("filter1");
-    dtable.query_filter("filter1", beg, end);
+    mlog.remove_filter("filter1");
+    mlog.query_filter("filter1", beg, end);
   } catch (std::exception& e) {
     std::string message = "Filter filter1 does not exist.";
     ASSERT_STREQ(e.what(), message.c_str());
   }
 
   try {
-    dtable.remove_filter("filter2");
-    dtable.remove_filter("filter2");
+    mlog.remove_filter("filter2");
+    mlog.remove_filter("filter2");
   } catch (std::exception& ex) {
     std::string message = "Filter filter2 does not exist.";
     ASSERT_STREQ(ex.what(), message.c_str());
   }
 
-  auto before_alerts = dtable.get_alerts(beg, end);
-  dtable.remove_trigger("trigger2");
+  auto before_alerts = mlog.get_alerts(beg, end);
+  mlog.remove_trigger("trigger2");
   sleep(1);
-  auto after_alerts = dtable.get_alerts(beg, end);
+  auto after_alerts = mlog.get_alerts(beg, end);
 
   size_t first_count = 0;
   size_t second_count = 0;
@@ -361,8 +365,8 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
   ASSERT_LE(second_count, first_count);
 
   try {
-    dtable.remove_trigger("trigger1");
-    dtable.remove_trigger("trigger1");
+    mlog.remove_trigger("trigger1");
+    mlog.remove_trigger("trigger1");
   } catch (std::exception& e) {
     std::string message = "Trigger trigger1 does not exist.";
     ASSERT_STREQ(e.what(), message.c_str());
@@ -370,87 +374,105 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
 
 }
 
-TEST_F(AtomicMultilogTest, FilterTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  dtable.add_filter("filter1", "a == true");
-  dtable.add_filter("filter2", "b > 4");
-  dtable.add_filter("filter3", "c <= 30");
-  dtable.add_filter("filter4", "d == 0");
-  dtable.add_filter("filter5", "e <= 100");
-  dtable.add_filter("filter6", "f > 0.1");
-  dtable.add_filter("filter7", "g < 0.06");
-  dtable.add_filter("filter8", "h == zzz");
-  dtable.add_trigger("trigger1", "filter1", "SUM(d) >= 10");
-  dtable.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
-  dtable.add_trigger("trigger3", "filter3", "SUM(d) >= 10");
-  dtable.add_trigger("trigger4", "filter4", "SUM(d) >= 10");
-  dtable.add_trigger("trigger5", "filter5", "SUM(d) >= 10");
-  dtable.add_trigger("trigger6", "filter6", "SUM(d) >= 10");
-  dtable.add_trigger("trigger7", "filter7", "SUM(d) >= 10");
-  dtable.add_trigger("trigger8", "filter8", "SUM(d) >= 10");
+// TODO: Separate out the tests
+// TODO: Add tests for aggregates only
+TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  mlog.add_filter("filter1", "a == true");
+  mlog.add_filter("filter2", "b > 4");
+  mlog.add_filter("filter3", "c <= 30");
+  mlog.add_filter("filter4", "d == 0");
+  mlog.add_filter("filter5", "e <= 100");
+  mlog.add_filter("filter6", "f > 0.1");
+  mlog.add_filter("filter7", "g < 0.06");
+  mlog.add_filter("filter8", "h == zzz");
+  mlog.add_aggregate("agg1", "filter1", "SUM(d)");
+  mlog.add_aggregate("agg2", "filter2", "SUM(d)");
+  mlog.add_aggregate("agg3", "filter3", "SUM(d)");
+  mlog.add_aggregate("agg4", "filter4", "SUM(d)");
+  mlog.add_aggregate("agg5", "filter5", "SUM(d)");
+  mlog.add_aggregate("agg6", "filter6", "SUM(d)");
+  mlog.add_aggregate("agg7", "filter7", "SUM(d)");
+  mlog.add_aggregate("agg8", "filter8", "SUM(d)");
+  mlog.add_trigger("trigger1", "agg1 >= 10");
+  mlog.add_trigger("trigger2", "agg2 >= 10");
+  mlog.add_trigger("trigger3", "agg3 >= 10");
+  mlog.add_trigger("trigger4", "agg4 >= 10");
+  mlog.add_trigger("trigger5", "agg5 >= 10");
+  mlog.add_trigger("trigger6", "agg6 >= 10");
+  mlog.add_trigger("trigger7", "agg7 >= 10");
+  mlog.add_trigger("trigger8", "agg8 >= 10");
 
-  dtable.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  dtable.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  dtable.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  dtable.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  dtable.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  dtable.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  dtable.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  dtable.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  mlog.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
   int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
-  for (auto r = dtable.query_filter("filter1", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter2", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter2", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter3", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter3", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter4", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter4", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter5", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter5", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter6", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter6", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter7", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter7", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter8", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter8", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -459,7 +481,7 @@ TEST_F(AtomicMultilogTest, FilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter1", "b > 4", beg, end); !r.empty();
+  for (auto r = mlog.query_filter("filter1", "b > 4", beg, end); !r.empty();
       r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
@@ -468,7 +490,7 @@ TEST_F(AtomicMultilogTest, FilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter1", "b > 4 || c <= 30", beg, end);
+  for (auto r = mlog.query_filter("filter1", "b > 4 || c <= 30", beg, end);
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -479,7 +501,7 @@ TEST_F(AtomicMultilogTest, FilterTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter1", "b > 4 || f > 0.1", beg, end);
+  for (auto r = mlog.query_filter("filter1", "b > 4 || f > 0.1", beg, end);
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -492,7 +514,7 @@ TEST_F(AtomicMultilogTest, FilterTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  auto alerts = dtable.get_alerts(beg, end);
+  auto alerts = mlog.get_alerts(beg, end);
 
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
@@ -500,78 +522,78 @@ TEST_F(AtomicMultilogTest, FilterTest) {
 }
 
 TEST_F(AtomicMultilogTest, BatchIndexTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  dtable.add_index("a");
-  dtable.add_index("b");
-  dtable.add_index("c", 10);
-  dtable.add_index("d", 2);
-  dtable.add_index("e", 100);
-  dtable.add_index("f", 0.1);
-  dtable.add_index("g", 0.01);
-  dtable.add_index("h");
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  mlog.add_index("a");
+  mlog.add_index("b");
+  mlog.add_index("c", 10);
+  mlog.add_index("d", 2);
+  mlog.add_index("e", 100);
+  mlog.add_index("f", 0.1);
+  mlog.add_index("g", 0.01);
+  mlog.add_index("h");
 
   record_batch batch = get_batch();
 
-  dtable.append_batch(batch);
+  mlog.append_batch(batch);
 
   size_t i = 0;
-  for (auto r = dtable.execute_filter("a == true"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("a == true"); !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("b > 4"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("b > 4"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("d == 0"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("d == 0"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("e >= 100"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("e >= 100"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() >= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -580,7 +602,7 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("a == true && b > 4"); !r.empty();
+  for (auto r = mlog.execute_filter("a == true && b > 4"); !r.empty();
       r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
@@ -589,7 +611,7 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("a == true && (b > 4 || c <= 30)");
+  for (auto r = mlog.execute_filter("a == true && (b > 4 || c <= 30)");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -600,7 +622,7 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("a == true && (b > 4 || f > 0.1)");
+  for (auto r = mlog.execute_filter("a == true && (b > 4 || f > 0.1)");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -611,82 +633,100 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
   ASSERT_EQ(static_cast<size_t>(3), i);
 }
 
-TEST_F(AtomicMultilogTest, BatchFilterTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
-  dtable.add_filter("filter1", "a == true");
-  dtable.add_filter("filter2", "b > 4");
-  dtable.add_filter("filter3", "c <= 30");
-  dtable.add_filter("filter4", "d == 0");
-  dtable.add_filter("filter5", "e <= 100");
-  dtable.add_filter("filter6", "f > 0.1");
-  dtable.add_filter("filter7", "g < 0.06");
-  dtable.add_filter("filter8", "h == zzz");
-  dtable.add_trigger("trigger1", "filter1", "SUM(d) >= 10");
-  dtable.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
-  dtable.add_trigger("trigger3", "filter3", "SUM(d) >= 10");
-  dtable.add_trigger("trigger4", "filter4", "SUM(d) >= 10");
-  dtable.add_trigger("trigger5", "filter5", "SUM(d) >= 10");
-  dtable.add_trigger("trigger6", "filter6", "SUM(d) >= 10");
-  dtable.add_trigger("trigger7", "filter7", "SUM(d) >= 10");
-  dtable.add_trigger("trigger8", "filter8", "SUM(d) >= 10");
+// TODO: Separate out the tests
+// TODO: Add tests for aggregates only
+TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  mlog.add_filter("filter1", "a == true");
+  mlog.add_filter("filter2", "b > 4");
+  mlog.add_filter("filter3", "c <= 30");
+  mlog.add_filter("filter4", "d == 0");
+  mlog.add_filter("filter5", "e <= 100");
+  mlog.add_filter("filter6", "f > 0.1");
+  mlog.add_filter("filter7", "g < 0.06");
+  mlog.add_filter("filter8", "h == zzz");
+  mlog.add_aggregate("agg1", "filter1", "SUM(d)");
+  mlog.add_aggregate("agg2", "filter2", "SUM(d)");
+  mlog.add_aggregate("agg3", "filter3", "SUM(d)");
+  mlog.add_aggregate("agg4", "filter4", "SUM(d)");
+  mlog.add_aggregate("agg5", "filter5", "SUM(d)");
+  mlog.add_aggregate("agg6", "filter6", "SUM(d)");
+  mlog.add_aggregate("agg7", "filter7", "SUM(d)");
+  mlog.add_aggregate("agg8", "filter8", "SUM(d)");
+  mlog.add_trigger("trigger1", "agg1 >= 10");
+  mlog.add_trigger("trigger2", "agg2 >= 10");
+  mlog.add_trigger("trigger3", "agg3 >= 10");
+  mlog.add_trigger("trigger4", "agg4 >= 10");
+  mlog.add_trigger("trigger5", "agg5 >= 10");
+  mlog.add_trigger("trigger6", "agg6 >= 10");
+  mlog.add_trigger("trigger7", "agg7 >= 10");
+  mlog.add_trigger("trigger8", "agg8 >= 10");
 
   record_batch batch = get_batch();
 
-  dtable.append_batch(batch);
+  mlog.append_batch(batch);
   int64_t beg = batch.start_time_block();
   int64_t end = batch.end_time_block();
 
   size_t i = 0;
-  for (auto r = dtable.query_filter("filter1", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter2", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter2", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter3", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter3", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter4", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter4", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter5", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter5", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter6", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter6", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter7", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter7", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter8", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.query_filter("filter8", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -695,7 +735,7 @@ TEST_F(AtomicMultilogTest, BatchFilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter1", "b > 4", beg, end); !r.empty();
+  for (auto r = mlog.query_filter("filter1", "b > 4", beg, end); !r.empty();
       r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
@@ -704,7 +744,7 @@ TEST_F(AtomicMultilogTest, BatchFilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter1", "b > 4 || c <= 30", beg, end);
+  for (auto r = mlog.query_filter("filter1", "b > 4 || c <= 30", beg, end);
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -715,7 +755,7 @@ TEST_F(AtomicMultilogTest, BatchFilterTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable.query_filter("filter1", "b > 4 || f > 0.1", beg, end);
+  for (auto r = mlog.query_filter("filter1", "b > 4 || f > 0.1", beg, end);
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -728,7 +768,7 @@ TEST_F(AtomicMultilogTest, BatchFilterTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  auto alerts = dtable.get_alerts(beg, end);
+  auto alerts = mlog.get_alerts(beg, end);
 
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();

@@ -4,7 +4,6 @@
 #include "aggregated_reflog.h"
 
 #include "gtest/gtest.h"
-#include "trigger.h"
 
 using namespace ::confluo;
 using namespace ::confluo::monitor;
@@ -45,19 +44,11 @@ int32_t AggregatedReflogTest::max[11];
 int64_t AggregatedReflogTest::cnt[11];
 
 TEST_F(AggregatedReflogTest, GetSetTest) {
-  trigger_log log;
-  log.push_back(
-      new trigger("filter", "trigger1", "", aggregate_id::D_SUM, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
-  log.push_back(
-      new trigger("filter", "trigger2", "", aggregate_id::D_MIN, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
-  log.push_back(
-      new trigger("filter", "trigger3", "", aggregate_id::D_MAX, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
-  log.push_back(
-      new trigger("filter", "trigger4", "", aggregate_id::D_CNT, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(INT64_C(10)), 1));
+  aggregate_log log;
+  log.push_back(new aggregate_info("agg1", aggregate_type::D_SUM, INT_TYPE, 0));
+  log.push_back(new aggregate_info("agg2", aggregate_type::D_MIN, INT_TYPE, 0));
+  log.push_back(new aggregate_info("agg3", aggregate_type::D_MAX, INT_TYPE, 0));
+  log.push_back(new aggregate_info("agg4", aggregate_type::D_CNT, INT_TYPE, 0));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(0, 0));
@@ -110,19 +101,11 @@ TEST_F(AggregatedReflogTest, GetSetTest) {
 }
 
 TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
-  trigger_log log;
-  log.push_back(
-      new trigger("filter", "trigger1", "", aggregate_id::D_SUM, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
-  log.push_back(
-      new trigger("filter", "trigger2", "", aggregate_id::D_MIN, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
-  log.push_back(
-      new trigger("filter", "trigger3", "", aggregate_id::D_MAX, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(10), 1));
-  log.push_back(
-      new trigger("filter", "trigger4", "", aggregate_id::D_CNT, "col", 0,
-                  INT_TYPE, reational_op_id::GT, numeric(INT64_C(10)), 1));
+  aggregate_log log;
+  log.push_back(new aggregate_info("agg1", aggregate_type::D_SUM, INT_TYPE, 0));
+  log.push_back(new aggregate_info("agg2", aggregate_type::D_MIN, INT_TYPE, 0));
+  log.push_back(new aggregate_info("agg3", aggregate_type::D_MAX, INT_TYPE, 0));
+  log.push_back(new aggregate_info("agg4", aggregate_type::D_CNT, INT_TYPE, 0));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::int_zero) == ar.get_aggregate(0, 0));

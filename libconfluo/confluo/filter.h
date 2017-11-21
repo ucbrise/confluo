@@ -76,36 +76,42 @@ class filter {
   }
 
   /**
-   * Add a trigger to the filter
+   * Add an aggregate to the filter.
    *
-   * @param t Pointer to trigger
-   * @return Trigger id.
+   * @param a Reference to the aggregate.
+   * @return Aggregate id.
    */
-  size_t add_trigger(trigger* t) {
-    return triggers_.push_back(t);
+  size_t add_aggregate(aggregate_info* a) {
+    return aggregates_.push_back(a);
   }
 
   /**
-   * Invalidate trigger identified by id.
+   * Invalidate aggregate identified by id.
    *
-   * @param id ID for the trigger.
+   * @param id for the aggregate.
    * @return True if invalidation was successful, false otherwise.
    */
-  bool remove_trigger(size_t id) {
-    return triggers_.at(id)->invalidate();
-  }
-
-  trigger* get_trigger(size_t id) {
-    return triggers_.at(id);
+  bool remove_aggregate(size_t id) {
+    return aggregates_.at(id)->invalidate();
   }
 
   /**
+   * Get the aggregate corresponding to id.
    *
-   *
-   * @return
+   * @param id for the aggregate.
+   * @return Reference to aggregate corresponding to id.
    */
-  size_t num_triggers() {
-    return triggers_.size();
+  aggregate_info* get_aggregate(size_t id) {
+    return aggregates_.at(id);
+  }
+
+  /**
+   * Get the number of aggregates associated with this filter.
+   *
+   * @return The number of aggregates associated with this filter.
+   */
+  size_t num_aggregates() const {
+    return aggregates_.size();
   }
 
   /**
@@ -118,18 +124,16 @@ class filter {
     if (exp_.test(r) && fn_(r)) {
       aggregated_reflog* refs = idx_.insert(
           byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS),
-          r.log_offset(), triggers_);
+          r.log_offset(), aggregates_);
       int tid = thread_manager::get_id();
       for (size_t i = 0; i < refs->num_aggregates(); i++) {
-        if (triggers_.at(i)->is_valid()) {
-          size_t field_idx = triggers_.at(i)->field_idx();
-          aggregate_id agg = triggers_.at(i)->agg_id();
-          refs->update_aggregate(
-              tid,
-              i,
-              agg == aggregate_id::D_CNT ?
-                  numeric(INT64_C(1)) : r[field_idx].value(),
-              r.version());
+        if (aggregates_.at(i)->is_valid()) {
+          size_t field_idx = aggregates_.at(i)->field_idx();
+          aggregate_type agg = aggregates_.at(i)->agg_type();
+          numeric val =
+              agg == aggregate_type::D_CNT ?
+                  numeric(INT64_C(1)) : numeric(r[field_idx].value());
+          refs->update_aggregate(tid, i, val, r.version());
         }
       }
     }
@@ -151,19 +155,21 @@ class filter {
       if (exp_.test(snap, cur_rec)) {
         if (refs == nullptr) {
           refs = idx_.get_or_create(
-              byte_string(static_cast<uint64_t>(block.time_block)), triggers_);
+              byte_string(static_cast<uint64_t>(block.time_block)),
+              aggregates_);
           local_aggs.resize(refs->num_aggregates());
         }
         refs->push_back(rec_off);
         for (size_t j = 0; j < local_aggs.size(); j++)
-          if (triggers_.at(j)->is_valid())
-            local_aggs[j] = triggers_.at(j)->agg(local_aggs[j], snap, cur_rec);
+          if (aggregates_.at(j)->is_valid())
+            local_aggs[j] = aggregates_.at(j)->agg(local_aggs[j], snap,
+                                                   cur_rec);
       }
     }
 
     size_t version = log_offset + block.nrecords * record_size;
     for (size_t j = 0; j < local_aggs.size(); j++)
-      if (triggers_.at(j)->is_valid() && !local_aggs[j].type().is_none())
+      if (aggregates_.at(j)->is_valid() && !local_aggs[j].type().is_none())
         refs->update_aggregate(tid, j, local_aggs[j], version);
   }
 
@@ -206,8 +212,8 @@ class filter {
   compiled_expression exp_;         // The compiled filter expression
   filter_fn fn_;                    // Filter function
   idx_t idx_;                       // The filtered data index
-  trigger_log triggers_;
-  atomic::type<bool> is_valid_;     // Is valid
+  aggregate_log aggregates_;        // List of aggregates on this filter
+  atomic::type<bool> is_valid_;     // Marks if the filter is valid or not
 };
 
 }

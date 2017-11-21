@@ -8,11 +8,10 @@ namespace confluo {
 
 class timeseries_db : public atomic_multilog {
  public:
-  timeseries_db(const std::string& table_name,
-                const std::vector<column_t>& table_schema,
+  timeseries_db(const std::string& name, const std::vector<column_t>& schema,
                 const std::string& path, const storage::storage_mode& storage,
                 task_pool& task_pool)
-      : atomic_multilog(table_name, table_schema, path, storage, task_pool) {
+      : atomic_multilog(name, schema, path, storage, task_pool) {
     // Index the timestamp column by calling add_index
     add_index("TIMESTAMP");
   }

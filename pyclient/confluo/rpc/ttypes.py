@@ -568,21 +568,21 @@ class rpc_record_batch(object):
         return not (self == other)
 
 
-class rpc_table_info(object):
+class rpc_atomic_multilog_info(object):
     """
     Attributes:
-     - table_id
+     - id
      - schema
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'id', None, None, ),  # 1
         (2, TType.LIST, 'schema', (TType.STRUCT, (rpc_column, rpc_column.thrift_spec), False), None, ),  # 2
     )
 
-    def __init__(self, table_id=None, schema=None,):
-        self.table_id = table_id
+    def __init__(self, id=None, schema=None,):
+        self.id = id
         self.schema = schema
 
     def read(self, iprot):
@@ -596,7 +596,7 @@ class rpc_table_info(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -619,10 +619,10 @@ class rpc_table_info(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('rpc_table_info')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        oprot.writeStructBegin('rpc_atomic_multilog_info')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I64, 1)
+            oprot.writeI64(self.id)
             oprot.writeFieldEnd()
         if self.schema is not None:
             oprot.writeFieldBegin('schema', TType.LIST, 2)

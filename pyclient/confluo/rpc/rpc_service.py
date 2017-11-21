@@ -25,130 +25,147 @@ class Iface(object):
     def deregister_handler(self):
         pass
 
-    def create_table(self, table_name, schema, mode):
+    def create_atomic_multilog(self, name, schema, mode):
         """
         Parameters:
-         - table_name
+         - name
          - schema
          - mode
         """
         pass
 
-    def get_table_info(self, table_name):
+    def get_atomic_multilog_info(self, name):
         """
         Parameters:
-         - table_name
+         - name
         """
         pass
 
-    def remove_table(self, table_id):
+    def remove_atomic_multilog(self, multilog_id):
         """
         Parameters:
-         - table_id
+         - multilog_id
         """
         pass
 
-    def add_index(self, table_id, field_name, bucket_size):
+    def add_index(self, multilog_id, field_name, bucket_size):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - field_name
          - bucket_size
         """
         pass
 
-    def remove_index(self, table_id, field_name):
+    def remove_index(self, multilog_id, field_name):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - field_name
         """
         pass
 
-    def add_filter(self, table_id, filter_name, filter_expr):
+    def add_filter(self, multilog_id, filter_name, filter_expr):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
          - filter_expr
         """
         pass
 
-    def remove_filter(self, table_id, filter_name):
+    def remove_filter(self, multilog_id, filter_name):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
         """
         pass
 
-    def add_trigger(self, table_id, trigger_name, filter_name, trigger_expr):
+    def add_aggregate(self, mutlilog_id, aggregate_name, filter_name, aggregate_expr):
         """
         Parameters:
-         - table_id
-         - trigger_name
+         - mutlilog_id
+         - aggregate_name
          - filter_name
+         - aggregate_expr
+        """
+        pass
+
+    def remove_aggregate(self, multilog_id, aggregate_name):
+        """
+        Parameters:
+         - multilog_id
+         - aggregate_name
+        """
+        pass
+
+    def add_trigger(self, multilog_id, trigger_name, trigger_expr):
+        """
+        Parameters:
+         - multilog_id
+         - trigger_name
          - trigger_expr
         """
         pass
 
-    def remove_trigger(self, table_id, trigger_name):
+    def remove_trigger(self, multilog_id, trigger_name):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - trigger_name
         """
         pass
 
-    def append(self, table_id, data):
+    def append(self, multilog_id, data):
         """
         Query ops *
 
         Parameters:
-         - table_id
+         - multilog_id
          - data
         """
         pass
 
-    def append_batch(self, table_id, batch):
+    def append_batch(self, multilog_id, batch):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - batch
         """
         pass
 
-    def read(self, table_id, offset, nrecords):
+    def read(self, multilog_id, offset, nrecords):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - offset
          - nrecords
         """
         pass
 
-    def adhoc_filter(self, table_id, filter_expr):
+    def adhoc_filter(self, multilog_id, filter_expr):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_expr
         """
         pass
 
-    def predef_filter(self, table_id, filter_name, begin_ms, end_ms):
+    def predef_filter(self, multilog_id, filter_name, begin_ms, end_ms):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
          - begin_ms
          - end_ms
         """
         pass
 
-    def combined_filter(self, table_id, filter_name, filter_expr, begin_ms, end_ms):
+    def combined_filter(self, multilog_id, filter_name, filter_expr, begin_ms, end_ms):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
          - filter_expr
          - begin_ms
@@ -156,27 +173,27 @@ class Iface(object):
         """
         pass
 
-    def alerts_by_time(self, table_id, begin_ms, end_ms):
+    def alerts_by_time(self, multilog_id, begin_ms, end_ms):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - begin_ms
          - end_ms
         """
         pass
 
-    def get_more(self, table_id, desc):
+    def get_more(self, multilog_id, desc):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - desc
         """
         pass
 
-    def num_records(self, table_id):
+    def num_records(self, multilog_id):
         """
         Parameters:
-         - table_id
+         - multilog_id
         """
         pass
 
@@ -243,27 +260,27 @@ class Client(Iface):
             raise result.ex
         return
 
-    def create_table(self, table_name, schema, mode):
+    def create_atomic_multilog(self, name, schema, mode):
         """
         Parameters:
-         - table_name
+         - name
          - schema
          - mode
         """
-        self.send_create_table(table_name, schema, mode)
-        return self.recv_create_table()
+        self.send_create_atomic_multilog(name, schema, mode)
+        return self.recv_create_atomic_multilog()
 
-    def send_create_table(self, table_name, schema, mode):
-        self._oprot.writeMessageBegin('create_table', TMessageType.CALL, self._seqid)
-        args = create_table_args()
-        args.table_name = table_name
+    def send_create_atomic_multilog(self, name, schema, mode):
+        self._oprot.writeMessageBegin('create_atomic_multilog', TMessageType.CALL, self._seqid)
+        args = create_atomic_multilog_args()
+        args.name = name
         args.schema = schema
         args.mode = mode
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_create_table(self):
+    def recv_create_atomic_multilog(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -271,32 +288,32 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = create_table_result()
+        result = create_atomic_multilog_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "create_table failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "create_atomic_multilog failed: unknown result")
 
-    def get_table_info(self, table_name):
+    def get_atomic_multilog_info(self, name):
         """
         Parameters:
-         - table_name
+         - name
         """
-        self.send_get_table_info(table_name)
-        return self.recv_get_table_info()
+        self.send_get_atomic_multilog_info(name)
+        return self.recv_get_atomic_multilog_info()
 
-    def send_get_table_info(self, table_name):
-        self._oprot.writeMessageBegin('get_table_info', TMessageType.CALL, self._seqid)
-        args = get_table_info_args()
-        args.table_name = table_name
+    def send_get_atomic_multilog_info(self, name):
+        self._oprot.writeMessageBegin('get_atomic_multilog_info', TMessageType.CALL, self._seqid)
+        args = get_atomic_multilog_info_args()
+        args.name = name
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_get_table_info(self):
+    def recv_get_atomic_multilog_info(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -304,30 +321,30 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = get_table_info_result()
+        result = get_atomic_multilog_info_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "get_table_info failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "get_atomic_multilog_info failed: unknown result")
 
-    def remove_table(self, table_id):
+    def remove_atomic_multilog(self, multilog_id):
         """
         Parameters:
-         - table_id
+         - multilog_id
         """
-        self.send_remove_table(table_id)
-        self.recv_remove_table()
+        self.send_remove_atomic_multilog(multilog_id)
+        self.recv_remove_atomic_multilog()
 
-    def send_remove_table(self, table_id):
-        self._oprot.writeMessageBegin('remove_table', TMessageType.CALL, self._seqid)
-        args = remove_table_args()
-        args.table_id = table_id
+    def send_remove_atomic_multilog(self, multilog_id):
+        self._oprot.writeMessageBegin('remove_atomic_multilog', TMessageType.CALL, self._seqid)
+        args = remove_atomic_multilog_args()
+        args.multilog_id = multilog_id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_remove_table(self):
+    def recv_remove_atomic_multilog(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -335,27 +352,27 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = remove_table_result()
+        result = remove_atomic_multilog_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
             raise result.ex
         return
 
-    def add_index(self, table_id, field_name, bucket_size):
+    def add_index(self, multilog_id, field_name, bucket_size):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - field_name
          - bucket_size
         """
-        self.send_add_index(table_id, field_name, bucket_size)
+        self.send_add_index(multilog_id, field_name, bucket_size)
         self.recv_add_index()
 
-    def send_add_index(self, table_id, field_name, bucket_size):
+    def send_add_index(self, multilog_id, field_name, bucket_size):
         self._oprot.writeMessageBegin('add_index', TMessageType.CALL, self._seqid)
         args = add_index_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.field_name = field_name
         args.bucket_size = bucket_size
         args.write(self._oprot)
@@ -377,19 +394,19 @@ class Client(Iface):
             raise result.ex
         return
 
-    def remove_index(self, table_id, field_name):
+    def remove_index(self, multilog_id, field_name):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - field_name
         """
-        self.send_remove_index(table_id, field_name)
+        self.send_remove_index(multilog_id, field_name)
         self.recv_remove_index()
 
-    def send_remove_index(self, table_id, field_name):
+    def send_remove_index(self, multilog_id, field_name):
         self._oprot.writeMessageBegin('remove_index', TMessageType.CALL, self._seqid)
         args = remove_index_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.field_name = field_name
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -410,20 +427,20 @@ class Client(Iface):
             raise result.ex
         return
 
-    def add_filter(self, table_id, filter_name, filter_expr):
+    def add_filter(self, multilog_id, filter_name, filter_expr):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
          - filter_expr
         """
-        self.send_add_filter(table_id, filter_name, filter_expr)
+        self.send_add_filter(multilog_id, filter_name, filter_expr)
         self.recv_add_filter()
 
-    def send_add_filter(self, table_id, filter_name, filter_expr):
+    def send_add_filter(self, multilog_id, filter_name, filter_expr):
         self._oprot.writeMessageBegin('add_filter', TMessageType.CALL, self._seqid)
         args = add_filter_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.filter_name = filter_name
         args.filter_expr = filter_expr
         args.write(self._oprot)
@@ -445,19 +462,19 @@ class Client(Iface):
             raise result.ex
         return
 
-    def remove_filter(self, table_id, filter_name):
+    def remove_filter(self, multilog_id, filter_name):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
         """
-        self.send_remove_filter(table_id, filter_name)
+        self.send_remove_filter(multilog_id, filter_name)
         self.recv_remove_filter()
 
-    def send_remove_filter(self, table_id, filter_name):
+    def send_remove_filter(self, multilog_id, filter_name):
         self._oprot.writeMessageBegin('remove_filter', TMessageType.CALL, self._seqid)
         args = remove_filter_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.filter_name = filter_name
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -478,23 +495,89 @@ class Client(Iface):
             raise result.ex
         return
 
-    def add_trigger(self, table_id, trigger_name, filter_name, trigger_expr):
+    def add_aggregate(self, mutlilog_id, aggregate_name, filter_name, aggregate_expr):
         """
         Parameters:
-         - table_id
-         - trigger_name
+         - mutlilog_id
+         - aggregate_name
          - filter_name
+         - aggregate_expr
+        """
+        self.send_add_aggregate(mutlilog_id, aggregate_name, filter_name, aggregate_expr)
+        self.recv_add_aggregate()
+
+    def send_add_aggregate(self, mutlilog_id, aggregate_name, filter_name, aggregate_expr):
+        self._oprot.writeMessageBegin('add_aggregate', TMessageType.CALL, self._seqid)
+        args = add_aggregate_args()
+        args.mutlilog_id = mutlilog_id
+        args.aggregate_name = aggregate_name
+        args.filter_name = filter_name
+        args.aggregate_expr = aggregate_expr
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_add_aggregate(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = add_aggregate_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def remove_aggregate(self, multilog_id, aggregate_name):
+        """
+        Parameters:
+         - multilog_id
+         - aggregate_name
+        """
+        self.send_remove_aggregate(multilog_id, aggregate_name)
+        self.recv_remove_aggregate()
+
+    def send_remove_aggregate(self, multilog_id, aggregate_name):
+        self._oprot.writeMessageBegin('remove_aggregate', TMessageType.CALL, self._seqid)
+        args = remove_aggregate_args()
+        args.multilog_id = multilog_id
+        args.aggregate_name = aggregate_name
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_remove_aggregate(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = remove_aggregate_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        return
+
+    def add_trigger(self, multilog_id, trigger_name, trigger_expr):
+        """
+        Parameters:
+         - multilog_id
+         - trigger_name
          - trigger_expr
         """
-        self.send_add_trigger(table_id, trigger_name, filter_name, trigger_expr)
+        self.send_add_trigger(multilog_id, trigger_name, trigger_expr)
         self.recv_add_trigger()
 
-    def send_add_trigger(self, table_id, trigger_name, filter_name, trigger_expr):
+    def send_add_trigger(self, multilog_id, trigger_name, trigger_expr):
         self._oprot.writeMessageBegin('add_trigger', TMessageType.CALL, self._seqid)
         args = add_trigger_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.trigger_name = trigger_name
-        args.filter_name = filter_name
         args.trigger_expr = trigger_expr
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -515,19 +598,19 @@ class Client(Iface):
             raise result.ex
         return
 
-    def remove_trigger(self, table_id, trigger_name):
+    def remove_trigger(self, multilog_id, trigger_name):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - trigger_name
         """
-        self.send_remove_trigger(table_id, trigger_name)
+        self.send_remove_trigger(multilog_id, trigger_name)
         self.recv_remove_trigger()
 
-    def send_remove_trigger(self, table_id, trigger_name):
+    def send_remove_trigger(self, multilog_id, trigger_name):
         self._oprot.writeMessageBegin('remove_trigger', TMessageType.CALL, self._seqid)
         args = remove_trigger_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.trigger_name = trigger_name
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -548,21 +631,21 @@ class Client(Iface):
             raise result.ex
         return
 
-    def append(self, table_id, data):
+    def append(self, multilog_id, data):
         """
         Query ops *
 
         Parameters:
-         - table_id
+         - multilog_id
          - data
         """
-        self.send_append(table_id, data)
+        self.send_append(multilog_id, data)
         return self.recv_append()
 
-    def send_append(self, table_id, data):
+    def send_append(self, multilog_id, data):
         self._oprot.writeMessageBegin('append', TMessageType.CALL, self._seqid)
         args = append_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.data = data
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -583,19 +666,19 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "append failed: unknown result")
 
-    def append_batch(self, table_id, batch):
+    def append_batch(self, multilog_id, batch):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - batch
         """
-        self.send_append_batch(table_id, batch)
+        self.send_append_batch(multilog_id, batch)
         return self.recv_append_batch()
 
-    def send_append_batch(self, table_id, batch):
+    def send_append_batch(self, multilog_id, batch):
         self._oprot.writeMessageBegin('append_batch', TMessageType.CALL, self._seqid)
         args = append_batch_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.batch = batch
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -616,20 +699,20 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "append_batch failed: unknown result")
 
-    def read(self, table_id, offset, nrecords):
+    def read(self, multilog_id, offset, nrecords):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - offset
          - nrecords
         """
-        self.send_read(table_id, offset, nrecords)
+        self.send_read(multilog_id, offset, nrecords)
         return self.recv_read()
 
-    def send_read(self, table_id, offset, nrecords):
+    def send_read(self, multilog_id, offset, nrecords):
         self._oprot.writeMessageBegin('read', TMessageType.CALL, self._seqid)
         args = read_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.offset = offset
         args.nrecords = nrecords
         args.write(self._oprot)
@@ -651,19 +734,19 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "read failed: unknown result")
 
-    def adhoc_filter(self, table_id, filter_expr):
+    def adhoc_filter(self, multilog_id, filter_expr):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_expr
         """
-        self.send_adhoc_filter(table_id, filter_expr)
+        self.send_adhoc_filter(multilog_id, filter_expr)
         return self.recv_adhoc_filter()
 
-    def send_adhoc_filter(self, table_id, filter_expr):
+    def send_adhoc_filter(self, multilog_id, filter_expr):
         self._oprot.writeMessageBegin('adhoc_filter', TMessageType.CALL, self._seqid)
         args = adhoc_filter_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.filter_expr = filter_expr
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -686,21 +769,21 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "adhoc_filter failed: unknown result")
 
-    def predef_filter(self, table_id, filter_name, begin_ms, end_ms):
+    def predef_filter(self, multilog_id, filter_name, begin_ms, end_ms):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
          - begin_ms
          - end_ms
         """
-        self.send_predef_filter(table_id, filter_name, begin_ms, end_ms)
+        self.send_predef_filter(multilog_id, filter_name, begin_ms, end_ms)
         return self.recv_predef_filter()
 
-    def send_predef_filter(self, table_id, filter_name, begin_ms, end_ms):
+    def send_predef_filter(self, multilog_id, filter_name, begin_ms, end_ms):
         self._oprot.writeMessageBegin('predef_filter', TMessageType.CALL, self._seqid)
         args = predef_filter_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.filter_name = filter_name
         args.begin_ms = begin_ms
         args.end_ms = end_ms
@@ -725,22 +808,22 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "predef_filter failed: unknown result")
 
-    def combined_filter(self, table_id, filter_name, filter_expr, begin_ms, end_ms):
+    def combined_filter(self, multilog_id, filter_name, filter_expr, begin_ms, end_ms):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - filter_name
          - filter_expr
          - begin_ms
          - end_ms
         """
-        self.send_combined_filter(table_id, filter_name, filter_expr, begin_ms, end_ms)
+        self.send_combined_filter(multilog_id, filter_name, filter_expr, begin_ms, end_ms)
         return self.recv_combined_filter()
 
-    def send_combined_filter(self, table_id, filter_name, filter_expr, begin_ms, end_ms):
+    def send_combined_filter(self, multilog_id, filter_name, filter_expr, begin_ms, end_ms):
         self._oprot.writeMessageBegin('combined_filter', TMessageType.CALL, self._seqid)
         args = combined_filter_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.filter_name = filter_name
         args.filter_expr = filter_expr
         args.begin_ms = begin_ms
@@ -766,20 +849,20 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "combined_filter failed: unknown result")
 
-    def alerts_by_time(self, table_id, begin_ms, end_ms):
+    def alerts_by_time(self, multilog_id, begin_ms, end_ms):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - begin_ms
          - end_ms
         """
-        self.send_alerts_by_time(table_id, begin_ms, end_ms)
+        self.send_alerts_by_time(multilog_id, begin_ms, end_ms)
         return self.recv_alerts_by_time()
 
-    def send_alerts_by_time(self, table_id, begin_ms, end_ms):
+    def send_alerts_by_time(self, multilog_id, begin_ms, end_ms):
         self._oprot.writeMessageBegin('alerts_by_time', TMessageType.CALL, self._seqid)
         args = alerts_by_time_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.begin_ms = begin_ms
         args.end_ms = end_ms
         args.write(self._oprot)
@@ -803,19 +886,19 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "alerts_by_time failed: unknown result")
 
-    def get_more(self, table_id, desc):
+    def get_more(self, multilog_id, desc):
         """
         Parameters:
-         - table_id
+         - multilog_id
          - desc
         """
-        self.send_get_more(table_id, desc)
+        self.send_get_more(multilog_id, desc)
         return self.recv_get_more()
 
-    def send_get_more(self, table_id, desc):
+    def send_get_more(self, multilog_id, desc):
         self._oprot.writeMessageBegin('get_more', TMessageType.CALL, self._seqid)
         args = get_more_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.desc = desc
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -838,18 +921,18 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "get_more failed: unknown result")
 
-    def num_records(self, table_id):
+    def num_records(self, multilog_id):
         """
         Parameters:
-         - table_id
+         - multilog_id
         """
-        self.send_num_records(table_id)
+        self.send_num_records(multilog_id)
         return self.recv_num_records()
 
-    def send_num_records(self, table_id):
+    def send_num_records(self, multilog_id):
         self._oprot.writeMessageBegin('num_records', TMessageType.CALL, self._seqid)
         args = num_records_args()
-        args.table_id = table_id
+        args.multilog_id = multilog_id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -876,13 +959,15 @@ class Processor(Iface, TProcessor):
         self._processMap = {}
         self._processMap["register_handler"] = Processor.process_register_handler
         self._processMap["deregister_handler"] = Processor.process_deregister_handler
-        self._processMap["create_table"] = Processor.process_create_table
-        self._processMap["get_table_info"] = Processor.process_get_table_info
-        self._processMap["remove_table"] = Processor.process_remove_table
+        self._processMap["create_atomic_multilog"] = Processor.process_create_atomic_multilog
+        self._processMap["get_atomic_multilog_info"] = Processor.process_get_atomic_multilog_info
+        self._processMap["remove_atomic_multilog"] = Processor.process_remove_atomic_multilog
         self._processMap["add_index"] = Processor.process_add_index
         self._processMap["remove_index"] = Processor.process_remove_index
         self._processMap["add_filter"] = Processor.process_add_filter
         self._processMap["remove_filter"] = Processor.process_remove_filter
+        self._processMap["add_aggregate"] = Processor.process_add_aggregate
+        self._processMap["remove_aggregate"] = Processor.process_remove_aggregate
         self._processMap["add_trigger"] = Processor.process_add_trigger
         self._processMap["remove_trigger"] = Processor.process_remove_trigger
         self._processMap["append"] = Processor.process_append
@@ -954,13 +1039,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_create_table(self, seqid, iprot, oprot):
-        args = create_table_args()
+    def process_create_atomic_multilog(self, seqid, iprot, oprot):
+        args = create_atomic_multilog_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = create_table_result()
+        result = create_atomic_multilog_result()
         try:
-            result.success = self._handler.create_table(args.table_name, args.schema, args.mode)
+            result.success = self._handler.create_atomic_multilog(args.name, args.schema, args.mode)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -971,18 +1056,18 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("create_table", msg_type, seqid)
+        oprot.writeMessageBegin("create_atomic_multilog", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_get_table_info(self, seqid, iprot, oprot):
-        args = get_table_info_args()
+    def process_get_atomic_multilog_info(self, seqid, iprot, oprot):
+        args = get_atomic_multilog_info_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = get_table_info_result()
+        result = get_atomic_multilog_info_result()
         try:
-            result.success = self._handler.get_table_info(args.table_name)
+            result.success = self._handler.get_atomic_multilog_info(args.name)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -990,18 +1075,18 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("get_table_info", msg_type, seqid)
+        oprot.writeMessageBegin("get_atomic_multilog_info", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_remove_table(self, seqid, iprot, oprot):
-        args = remove_table_args()
+    def process_remove_atomic_multilog(self, seqid, iprot, oprot):
+        args = remove_atomic_multilog_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = remove_table_result()
+        result = remove_atomic_multilog_result()
         try:
-            self._handler.remove_table(args.table_id)
+            self._handler.remove_atomic_multilog(args.multilog_id)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1012,7 +1097,7 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("remove_table", msg_type, seqid)
+        oprot.writeMessageBegin("remove_atomic_multilog", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1023,7 +1108,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = add_index_result()
         try:
-            self._handler.add_index(args.table_id, args.field_name, args.bucket_size)
+            self._handler.add_index(args.multilog_id, args.field_name, args.bucket_size)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1045,7 +1130,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = remove_index_result()
         try:
-            self._handler.remove_index(args.table_id, args.field_name)
+            self._handler.remove_index(args.multilog_id, args.field_name)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1067,7 +1152,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = add_filter_result()
         try:
-            self._handler.add_filter(args.table_id, args.filter_name, args.filter_expr)
+            self._handler.add_filter(args.multilog_id, args.filter_name, args.filter_expr)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1089,7 +1174,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = remove_filter_result()
         try:
-            self._handler.remove_filter(args.table_id, args.filter_name)
+            self._handler.remove_filter(args.multilog_id, args.filter_name)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1105,13 +1190,54 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_add_aggregate(self, seqid, iprot, oprot):
+        args = add_aggregate_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = add_aggregate_result()
+        try:
+            self._handler.add_aggregate(args.mutlilog_id, args.aggregate_name, args.filter_name, args.aggregate_expr)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except rpc_management_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("add_aggregate", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_remove_aggregate(self, seqid, iprot, oprot):
+        args = remove_aggregate_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = remove_aggregate_result()
+        try:
+            self._handler.remove_aggregate(args.multilog_id, args.aggregate_name)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("remove_aggregate", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_add_trigger(self, seqid, iprot, oprot):
         args = add_trigger_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = add_trigger_result()
         try:
-            self._handler.add_trigger(args.table_id, args.trigger_name, args.filter_name, args.trigger_expr)
+            self._handler.add_trigger(args.multilog_id, args.trigger_name, args.trigger_expr)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1133,7 +1259,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = remove_trigger_result()
         try:
-            self._handler.remove_trigger(args.table_id, args.trigger_name)
+            self._handler.remove_trigger(args.multilog_id, args.trigger_name)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1155,7 +1281,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = append_result()
         try:
-            result.success = self._handler.append(args.table_id, args.data)
+            result.success = self._handler.append(args.multilog_id, args.data)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1174,7 +1300,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = append_batch_result()
         try:
-            result.success = self._handler.append_batch(args.table_id, args.batch)
+            result.success = self._handler.append_batch(args.multilog_id, args.batch)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1193,7 +1319,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = read_result()
         try:
-            result.success = self._handler.read(args.table_id, args.offset, args.nrecords)
+            result.success = self._handler.read(args.multilog_id, args.offset, args.nrecords)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1212,7 +1338,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = adhoc_filter_result()
         try:
-            result.success = self._handler.adhoc_filter(args.table_id, args.filter_expr)
+            result.success = self._handler.adhoc_filter(args.multilog_id, args.filter_expr)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1234,7 +1360,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = predef_filter_result()
         try:
-            result.success = self._handler.predef_filter(args.table_id, args.filter_name, args.begin_ms, args.end_ms)
+            result.success = self._handler.predef_filter(args.multilog_id, args.filter_name, args.begin_ms, args.end_ms)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1256,7 +1382,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = combined_filter_result()
         try:
-            result.success = self._handler.combined_filter(args.table_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms)
+            result.success = self._handler.combined_filter(args.multilog_id, args.filter_name, args.filter_expr, args.begin_ms, args.end_ms)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1278,7 +1404,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = alerts_by_time_result()
         try:
-            result.success = self._handler.alerts_by_time(args.table_id, args.begin_ms, args.end_ms)
+            result.success = self._handler.alerts_by_time(args.multilog_id, args.begin_ms, args.end_ms)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1300,7 +1426,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = get_more_result()
         try:
-            result.success = self._handler.get_more(args.table_id, args.desc)
+            result.success = self._handler.get_more(args.multilog_id, args.desc)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1322,7 +1448,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = num_records_result()
         try:
-            result.success = self._handler.num_records(args.table_id)
+            result.success = self._handler.num_records(args.multilog_id)
             msg_type = TMessageType.REPLY
         except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
             raise
@@ -1544,23 +1670,23 @@ class deregister_handler_result(object):
         return not (self == other)
 
 
-class create_table_args(object):
+class create_atomic_multilog_args(object):
     """
     Attributes:
-     - table_name
+     - name
      - schema
      - mode
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRING, 'table_name', 'UTF8', None, ),  # 1
+        (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
         (2, TType.LIST, 'schema', (TType.STRUCT, (rpc_column, rpc_column.thrift_spec), False), None, ),  # 2
         (3, TType.I32, 'mode', None, None, ),  # 3
     )
 
-    def __init__(self, table_name=None, schema=None, mode=None,):
-        self.table_name = table_name
+    def __init__(self, name=None, schema=None, mode=None,):
+        self.name = name
         self.schema = schema
         self.mode = mode
 
@@ -1575,7 +1701,7 @@ class create_table_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.table_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -1603,10 +1729,10 @@ class create_table_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('create_table_args')
-        if self.table_name is not None:
-            oprot.writeFieldBegin('table_name', TType.STRING, 1)
-            oprot.writeString(self.table_name.encode('utf-8') if sys.version_info[0] == 2 else self.table_name)
+        oprot.writeStructBegin('create_atomic_multilog_args')
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 1)
+            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
             oprot.writeFieldEnd()
         if self.schema is not None:
             oprot.writeFieldBegin('schema', TType.LIST, 2)
@@ -1637,7 +1763,7 @@ class create_table_args(object):
         return not (self == other)
 
 
-class create_table_result(object):
+class create_atomic_multilog_result(object):
     """
     Attributes:
      - success
@@ -1682,7 +1808,7 @@ class create_table_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('create_table_result')
+        oprot.writeStructBegin('create_atomic_multilog_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.I64, 0)
             oprot.writeI64(self.success)
@@ -1709,19 +1835,19 @@ class create_table_result(object):
         return not (self == other)
 
 
-class get_table_info_args(object):
+class get_atomic_multilog_info_args(object):
     """
     Attributes:
-     - table_name
+     - name
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.STRING, 'table_name', 'UTF8', None, ),  # 1
+        (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
     )
 
-    def __init__(self, table_name=None,):
-        self.table_name = table_name
+    def __init__(self, name=None,):
+        self.name = name
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1734,7 +1860,7 @@ class get_table_info_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRING:
-                    self.table_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                    self.name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -1746,10 +1872,10 @@ class get_table_info_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('get_table_info_args')
-        if self.table_name is not None:
-            oprot.writeFieldBegin('table_name', TType.STRING, 1)
-            oprot.writeString(self.table_name.encode('utf-8') if sys.version_info[0] == 2 else self.table_name)
+        oprot.writeStructBegin('get_atomic_multilog_info_args')
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 1)
+            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1769,14 +1895,14 @@ class get_table_info_args(object):
         return not (self == other)
 
 
-class get_table_info_result(object):
+class get_atomic_multilog_info_result(object):
     """
     Attributes:
      - success
     """
 
     thrift_spec = (
-        (0, TType.STRUCT, 'success', (rpc_table_info, rpc_table_info.thrift_spec), None, ),  # 0
+        (0, TType.STRUCT, 'success', (rpc_atomic_multilog_info, rpc_atomic_multilog_info.thrift_spec), None, ),  # 0
     )
 
     def __init__(self, success=None,):
@@ -1793,7 +1919,7 @@ class get_table_info_result(object):
                 break
             if fid == 0:
                 if ftype == TType.STRUCT:
-                    self.success = rpc_table_info()
+                    self.success = rpc_atomic_multilog_info()
                     self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1806,7 +1932,7 @@ class get_table_info_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('get_table_info_result')
+        oprot.writeStructBegin('get_atomic_multilog_info_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -1829,19 +1955,19 @@ class get_table_info_result(object):
         return not (self == other)
 
 
-class remove_table_args(object):
+class remove_atomic_multilog_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
     )
 
-    def __init__(self, table_id=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None,):
+        self.multilog_id = multilog_id
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1854,7 +1980,7 @@ class remove_table_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             else:
@@ -1866,10 +1992,10 @@ class remove_table_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('remove_table_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        oprot.writeStructBegin('remove_atomic_multilog_args')
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1889,7 +2015,7 @@ class remove_table_args(object):
         return not (self == other)
 
 
-class remove_table_result(object):
+class remove_atomic_multilog_result(object):
     """
     Attributes:
      - ex
@@ -1927,7 +2053,7 @@ class remove_table_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
-        oprot.writeStructBegin('remove_table_result')
+        oprot.writeStructBegin('remove_atomic_multilog_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -1953,20 +2079,20 @@ class remove_table_result(object):
 class add_index_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - field_name
      - bucket_size
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'field_name', 'UTF8', None, ),  # 2
         (3, TType.DOUBLE, 'bucket_size', None, None, ),  # 3
     )
 
-    def __init__(self, table_id=None, field_name=None, bucket_size=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, field_name=None, bucket_size=None,):
+        self.multilog_id = multilog_id
         self.field_name = field_name
         self.bucket_size = bucket_size
 
@@ -1981,7 +2107,7 @@ class add_index_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2004,9 +2130,9 @@ class add_index_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('add_index_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.field_name is not None:
             oprot.writeFieldBegin('field_name', TType.STRING, 2)
@@ -2098,18 +2224,18 @@ class add_index_result(object):
 class remove_index_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - field_name
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'field_name', 'UTF8', None, ),  # 2
     )
 
-    def __init__(self, table_id=None, field_name=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, field_name=None,):
+        self.multilog_id = multilog_id
         self.field_name = field_name
 
     def read(self, iprot):
@@ -2123,7 +2249,7 @@ class remove_index_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2141,9 +2267,9 @@ class remove_index_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('remove_index_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.field_name is not None:
             oprot.writeFieldBegin('field_name', TType.STRING, 2)
@@ -2231,20 +2357,20 @@ class remove_index_result(object):
 class add_filter_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - filter_name
      - filter_expr
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'filter_name', 'UTF8', None, ),  # 2
         (3, TType.STRING, 'filter_expr', 'UTF8', None, ),  # 3
     )
 
-    def __init__(self, table_id=None, filter_name=None, filter_expr=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, filter_name=None, filter_expr=None,):
+        self.multilog_id = multilog_id
         self.filter_name = filter_name
         self.filter_expr = filter_expr
 
@@ -2259,7 +2385,7 @@ class add_filter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2282,9 +2408,9 @@ class add_filter_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('add_filter_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.filter_name is not None:
             oprot.writeFieldBegin('filter_name', TType.STRING, 2)
@@ -2376,18 +2502,18 @@ class add_filter_result(object):
 class remove_filter_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - filter_name
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'filter_name', 'UTF8', None, ),  # 2
     )
 
-    def __init__(self, table_id=None, filter_name=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, filter_name=None,):
+        self.multilog_id = multilog_id
         self.filter_name = filter_name
 
     def read(self, iprot):
@@ -2401,7 +2527,7 @@ class remove_filter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2419,9 +2545,9 @@ class remove_filter_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('remove_filter_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.filter_name is not None:
             oprot.writeFieldBegin('filter_name', TType.STRING, 2)
@@ -2506,27 +2632,295 @@ class remove_filter_result(object):
         return not (self == other)
 
 
+class add_aggregate_args(object):
+    """
+    Attributes:
+     - mutlilog_id
+     - aggregate_name
+     - filter_name
+     - aggregate_expr
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'mutlilog_id', None, None, ),  # 1
+        (2, TType.STRING, 'aggregate_name', 'UTF8', None, ),  # 2
+        (3, TType.STRING, 'filter_name', 'UTF8', None, ),  # 3
+        (4, TType.STRING, 'aggregate_expr', 'UTF8', None, ),  # 4
+    )
+
+    def __init__(self, mutlilog_id=None, aggregate_name=None, filter_name=None, aggregate_expr=None,):
+        self.mutlilog_id = mutlilog_id
+        self.aggregate_name = aggregate_name
+        self.filter_name = filter_name
+        self.aggregate_expr = aggregate_expr
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.mutlilog_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.aggregate_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.filter_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRING:
+                    self.aggregate_expr = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('add_aggregate_args')
+        if self.mutlilog_id is not None:
+            oprot.writeFieldBegin('mutlilog_id', TType.I64, 1)
+            oprot.writeI64(self.mutlilog_id)
+            oprot.writeFieldEnd()
+        if self.aggregate_name is not None:
+            oprot.writeFieldBegin('aggregate_name', TType.STRING, 2)
+            oprot.writeString(self.aggregate_name.encode('utf-8') if sys.version_info[0] == 2 else self.aggregate_name)
+            oprot.writeFieldEnd()
+        if self.filter_name is not None:
+            oprot.writeFieldBegin('filter_name', TType.STRING, 3)
+            oprot.writeString(self.filter_name.encode('utf-8') if sys.version_info[0] == 2 else self.filter_name)
+            oprot.writeFieldEnd()
+        if self.aggregate_expr is not None:
+            oprot.writeFieldBegin('aggregate_expr', TType.STRING, 4)
+            oprot.writeString(self.aggregate_expr.encode('utf-8') if sys.version_info[0] == 2 else self.aggregate_expr)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class add_aggregate_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.STRUCT, 'ex', (rpc_management_exception, rpc_management_exception.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = rpc_management_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('add_aggregate_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class remove_aggregate_args(object):
+    """
+    Attributes:
+     - multilog_id
+     - aggregate_name
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
+        (2, TType.STRING, 'aggregate_name', 'UTF8', None, ),  # 2
+    )
+
+    def __init__(self, multilog_id=None, aggregate_name=None,):
+        self.multilog_id = multilog_id
+        self.aggregate_name = aggregate_name
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.multilog_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.aggregate_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('remove_aggregate_args')
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
+            oprot.writeFieldEnd()
+        if self.aggregate_name is not None:
+            oprot.writeFieldBegin('aggregate_name', TType.STRING, 2)
+            oprot.writeString(self.aggregate_name.encode('utf-8') if sys.version_info[0] == 2 else self.aggregate_name)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class remove_aggregate_result(object):
+
+    thrift_spec = (
+    )
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('remove_aggregate_result')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
 class add_trigger_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - trigger_name
-     - filter_name
      - trigger_expr
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'trigger_name', 'UTF8', None, ),  # 2
-        (3, TType.STRING, 'filter_name', 'UTF8', None, ),  # 3
-        (4, TType.STRING, 'trigger_expr', 'UTF8', None, ),  # 4
+        (3, TType.STRING, 'trigger_expr', 'UTF8', None, ),  # 3
     )
 
-    def __init__(self, table_id=None, trigger_name=None, filter_name=None, trigger_expr=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, trigger_name=None, trigger_expr=None,):
+        self.multilog_id = multilog_id
         self.trigger_name = trigger_name
-        self.filter_name = filter_name
         self.trigger_expr = trigger_expr
 
     def read(self, iprot):
@@ -2540,7 +2934,7 @@ class add_trigger_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2549,11 +2943,6 @@ class add_trigger_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRING:
-                    self.filter_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
                 if ftype == TType.STRING:
                     self.trigger_expr = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
@@ -2568,20 +2957,16 @@ class add_trigger_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('add_trigger_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.trigger_name is not None:
             oprot.writeFieldBegin('trigger_name', TType.STRING, 2)
             oprot.writeString(self.trigger_name.encode('utf-8') if sys.version_info[0] == 2 else self.trigger_name)
             oprot.writeFieldEnd()
-        if self.filter_name is not None:
-            oprot.writeFieldBegin('filter_name', TType.STRING, 3)
-            oprot.writeString(self.filter_name.encode('utf-8') if sys.version_info[0] == 2 else self.filter_name)
-            oprot.writeFieldEnd()
         if self.trigger_expr is not None:
-            oprot.writeFieldBegin('trigger_expr', TType.STRING, 4)
+            oprot.writeFieldBegin('trigger_expr', TType.STRING, 3)
             oprot.writeString(self.trigger_expr.encode('utf-8') if sys.version_info[0] == 2 else self.trigger_expr)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -2666,18 +3051,18 @@ class add_trigger_result(object):
 class remove_trigger_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - trigger_name
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'trigger_name', 'UTF8', None, ),  # 2
     )
 
-    def __init__(self, table_id=None, trigger_name=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, trigger_name=None,):
+        self.multilog_id = multilog_id
         self.trigger_name = trigger_name
 
     def read(self, iprot):
@@ -2691,7 +3076,7 @@ class remove_trigger_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2709,9 +3094,9 @@ class remove_trigger_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('remove_trigger_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.trigger_name is not None:
             oprot.writeFieldBegin('trigger_name', TType.STRING, 2)
@@ -2799,18 +3184,18 @@ class remove_trigger_result(object):
 class append_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - data
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'data', 'BINARY', None, ),  # 2
     )
 
-    def __init__(self, table_id=None, data=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, data=None,):
+        self.multilog_id = multilog_id
         self.data = data
 
     def read(self, iprot):
@@ -2824,7 +3209,7 @@ class append_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2842,9 +3227,9 @@ class append_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('append_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.data is not None:
             oprot.writeFieldBegin('data', TType.STRING, 2)
@@ -2930,18 +3315,18 @@ class append_result(object):
 class append_batch_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - batch
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRUCT, 'batch', (rpc_record_batch, rpc_record_batch.thrift_spec), None, ),  # 2
     )
 
-    def __init__(self, table_id=None, batch=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, batch=None,):
+        self.multilog_id = multilog_id
         self.batch = batch
 
     def read(self, iprot):
@@ -2955,7 +3340,7 @@ class append_batch_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -2974,9 +3359,9 @@ class append_batch_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('append_batch_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.batch is not None:
             oprot.writeFieldBegin('batch', TType.STRUCT, 2)
@@ -3062,20 +3447,20 @@ class append_batch_result(object):
 class read_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - offset
      - nrecords
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.I64, 'offset', None, None, ),  # 2
         (3, TType.I64, 'nrecords', None, None, ),  # 3
     )
 
-    def __init__(self, table_id=None, offset=None, nrecords=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, offset=None, nrecords=None,):
+        self.multilog_id = multilog_id
         self.offset = offset
         self.nrecords = nrecords
 
@@ -3090,7 +3475,7 @@ class read_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -3113,9 +3498,9 @@ class read_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('read_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.offset is not None:
             oprot.writeFieldBegin('offset', TType.I64, 2)
@@ -3205,18 +3590,18 @@ class read_result(object):
 class adhoc_filter_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - filter_expr
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'filter_expr', 'UTF8', None, ),  # 2
     )
 
-    def __init__(self, table_id=None, filter_expr=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, filter_expr=None,):
+        self.multilog_id = multilog_id
         self.filter_expr = filter_expr
 
     def read(self, iprot):
@@ -3230,7 +3615,7 @@ class adhoc_filter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -3248,9 +3633,9 @@ class adhoc_filter_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('adhoc_filter_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.filter_expr is not None:
             oprot.writeFieldBegin('filter_expr', TType.STRING, 2)
@@ -3350,7 +3735,7 @@ class adhoc_filter_result(object):
 class predef_filter_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - filter_name
      - begin_ms
      - end_ms
@@ -3358,14 +3743,14 @@ class predef_filter_args(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'filter_name', 'UTF8', None, ),  # 2
         (3, TType.I64, 'begin_ms', None, None, ),  # 3
         (4, TType.I64, 'end_ms', None, None, ),  # 4
     )
 
-    def __init__(self, table_id=None, filter_name=None, begin_ms=None, end_ms=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, filter_name=None, begin_ms=None, end_ms=None,):
+        self.multilog_id = multilog_id
         self.filter_name = filter_name
         self.begin_ms = begin_ms
         self.end_ms = end_ms
@@ -3381,7 +3766,7 @@ class predef_filter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -3409,9 +3794,9 @@ class predef_filter_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('predef_filter_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.filter_name is not None:
             oprot.writeFieldBegin('filter_name', TType.STRING, 2)
@@ -3519,7 +3904,7 @@ class predef_filter_result(object):
 class combined_filter_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - filter_name
      - filter_expr
      - begin_ms
@@ -3528,15 +3913,15 @@ class combined_filter_args(object):
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRING, 'filter_name', 'UTF8', None, ),  # 2
         (3, TType.STRING, 'filter_expr', 'UTF8', None, ),  # 3
         (4, TType.I64, 'begin_ms', None, None, ),  # 4
         (5, TType.I64, 'end_ms', None, None, ),  # 5
     )
 
-    def __init__(self, table_id=None, filter_name=None, filter_expr=None, begin_ms=None, end_ms=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, filter_name=None, filter_expr=None, begin_ms=None, end_ms=None,):
+        self.multilog_id = multilog_id
         self.filter_name = filter_name
         self.filter_expr = filter_expr
         self.begin_ms = begin_ms
@@ -3553,7 +3938,7 @@ class combined_filter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -3586,9 +3971,9 @@ class combined_filter_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('combined_filter_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.filter_name is not None:
             oprot.writeFieldBegin('filter_name', TType.STRING, 2)
@@ -3700,20 +4085,20 @@ class combined_filter_result(object):
 class alerts_by_time_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - begin_ms
      - end_ms
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.I64, 'begin_ms', None, None, ),  # 2
         (3, TType.I64, 'end_ms', None, None, ),  # 3
     )
 
-    def __init__(self, table_id=None, begin_ms=None, end_ms=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, begin_ms=None, end_ms=None,):
+        self.multilog_id = multilog_id
         self.begin_ms = begin_ms
         self.end_ms = end_ms
 
@@ -3728,7 +4113,7 @@ class alerts_by_time_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -3751,9 +4136,9 @@ class alerts_by_time_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('alerts_by_time_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.begin_ms is not None:
             oprot.writeFieldBegin('begin_ms', TType.I64, 2)
@@ -3857,18 +4242,18 @@ class alerts_by_time_result(object):
 class get_more_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
      - desc
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
         (2, TType.STRUCT, 'desc', (rpc_iterator_descriptor, rpc_iterator_descriptor.thrift_spec), None, ),  # 2
     )
 
-    def __init__(self, table_id=None, desc=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None, desc=None,):
+        self.multilog_id = multilog_id
         self.desc = desc
 
     def read(self, iprot):
@@ -3882,7 +4267,7 @@ class get_more_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
@@ -3901,9 +4286,9 @@ class get_more_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('get_more_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         if self.desc is not None:
             oprot.writeFieldBegin('desc', TType.STRUCT, 2)
@@ -4003,16 +4388,16 @@ class get_more_result(object):
 class num_records_args(object):
     """
     Attributes:
-     - table_id
+     - multilog_id
     """
 
     thrift_spec = (
         None,  # 0
-        (1, TType.I64, 'table_id', None, None, ),  # 1
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
     )
 
-    def __init__(self, table_id=None,):
-        self.table_id = table_id
+    def __init__(self, multilog_id=None,):
+        self.multilog_id = multilog_id
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -4025,7 +4410,7 @@ class num_records_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.table_id = iprot.readI64()
+                    self.multilog_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             else:
@@ -4038,9 +4423,9 @@ class num_records_args(object):
             oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
             return
         oprot.writeStructBegin('num_records_args')
-        if self.table_id is not None:
-            oprot.writeFieldBegin('table_id', TType.I64, 1)
-            oprot.writeI64(self.table_id)
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
