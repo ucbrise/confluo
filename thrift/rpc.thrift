@@ -137,6 +137,10 @@ service rpc_service {
   rpc_iterator_handle alerts_by_time(1: i64 multilog_id, 2: i64 begin_ms, 
                                      3: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
+  rpc_iterator_handle alerts_by_trigger_and_time(1: i64 multilog_id,
+                                                 2: string trigger_name,
+                                                 3: i64 begin_ms, 4: i64 end_ms)
+          throws (1: rpc_invalid_operation ex),
   rpc_iterator_handle get_more(1: i64 multilog_id, 
                                2: rpc_iterator_descriptor desc)
           throws (1: rpc_invalid_operation ex),

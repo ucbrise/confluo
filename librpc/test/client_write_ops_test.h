@@ -101,151 +101,6 @@ class ClientWriteOpsTest : public testing::Test {
 ClientWriteOpsTest::rec ClientWriteOpsTest::r;
 std::vector<column_t> ClientWriteOpsTest::s = schema();
 
-TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
-  std::string atomic_multilog_name = "my_multilog";
-
-  auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::D_IN_MEMORY);
-  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
-  std::thread serve_thread([&server] {
-    server->serve();
-  });
-  sleep(1);
-
-  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_atomic_multilog(atomic_multilog_name);
-
-  client.add_index("a", 1);
-  client.add_index("b", 1);
-  client.add_index("c", 10);
-  client.add_index("d", 2);
-  client.add_index("e", 100);
-  client.add_index("f", 0.1);
-  client.add_index("g", 0.01);
-  client.add_index("h", 1);
-
-  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-
-  try {
-    client.remove_index("a");
-    client.remove_index("a");
-  } catch (std::exception& e) {
-    std::string error_message = "TException - service has thrown: "
-        "rpc_management_exception(msg=Could not remove index for a:"
-        " No index exists)";
-    ASSERT_STREQ(e.what(), error_message.c_str());
-  }
-
-  client.remove_index("b");
-  ASSERT_EQ(false, mlog->is_indexed("b"));
-  ASSERT_EQ(true, mlog->is_indexed("c"));
-
-  client.disconnect();
-  server->stop();
-  if (serve_thread.joinable()) {
-    serve_thread.join();
-  }
-}
-
-TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
-  std::string atomic_multilog_name = "my_multilog";
-
-  auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::D_IN_MEMORY);
-  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
-  std::thread serve_thread([&server] {
-    server->serve();
-  });
-
-  sleep(1);
-
-  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_atomic_multilog(atomic_multilog_name);
-
-  client.add_filter("filter1", "a == true");
-  client.add_filter("filter2", "b > 4");
-  client.add_aggregate("agg1", "filter1", "SUM(d)");
-  client.add_aggregate("agg2", "filter2", "SUM(d)");
-  client.add_trigger("trigger1", "agg1 >= 10");
-  client.add_trigger("trigger2", "agg2 >= 10");
-
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
-
-  size_t i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty(); r =
-      r.tail()) {
-    i++;
-  }
-
-  try {
-    client.remove_filter("filter1");
-    mlog->query_filter("filter1", beg, end);
-  } catch (std::exception& e) {
-    std::string message = "Filter filter1 does not exist.";
-    ASSERT_STREQ(e.what(), message.c_str());
-  }
-
-  try {
-    client.remove_filter("filter2");
-    client.remove_filter("filter2");
-  } catch (std::exception& ex) {
-    std::string message = "TException - service has thrown: "
-        "rpc_management_exception(msg=Filter filter2 does not "
-        "exist.)";
-    ASSERT_STREQ(ex.what(), message.c_str());
-  }
-
-  auto before_alerts = mlog->get_alerts(beg, end);
-  client.remove_trigger("trigger2");
-  sleep(1);
-  auto after_alerts = mlog->get_alerts(beg, end);
-
-  size_t first_count = 0;
-  size_t second_count = 0;
-
-  for (auto a = before_alerts; !a.empty(); a = a.tail()) {
-    first_count++;
-  }
-
-  for (auto a = after_alerts; !a.empty(); a = a.tail()) {
-    second_count++;
-  }
-
-  ASSERT_LE(second_count, first_count);
-
-  try {
-    client.remove_trigger("trigger1");
-    client.remove_trigger("trigger1");
-  } catch (std::exception& e) {
-    std::string message = "TException - service has thrown: "
-        "rpc_management_exception(msg=Trigger trigger1 does not "
-        "exist.)";
-    ASSERT_STREQ(e.what(), message.c_str());
-  }
-
-  client.disconnect();
-  server->stop();
-  if (serve_thread.joinable()) {
-    serve_thread.join();
-  }
-}
-
 TEST_F(ClientWriteOpsTest, CreateTableTest) {
 
   std::string atomic_multilog_name = "my_multilog";
@@ -618,11 +473,201 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   }
   ASSERT_EQ(size_t(7), alert_count);
 
+  auto a1 = mlog->get_alerts("trigger1", beg, end);
+  ASSERT_TRUE(!a1.empty());
+  ASSERT_EQ("trigger1", a1.head().trigger_name);
+  ASSERT_TRUE(numeric(32) == a1.head().value);
+  ASSERT_TRUE(a1.tail().empty());
+
+  auto a2 = mlog->get_alerts("trigger2", beg, end);
+  ASSERT_TRUE(!a2.empty());
+  ASSERT_EQ("trigger2", a2.head().trigger_name);
+  ASSERT_TRUE(numeric(36) == a2.head().value);
+  ASSERT_TRUE(a2.tail().empty());
+
+  auto a3 = mlog->get_alerts("trigger3", beg, end);
+  ASSERT_TRUE(!a3.empty());
+  ASSERT_EQ("trigger3", a3.head().trigger_name);
+  ASSERT_TRUE(numeric(12) == a3.head().value);
+  ASSERT_TRUE(a3.tail().empty());
+
+  auto a4 = mlog->get_alerts("trigger4", beg, end);
+  ASSERT_TRUE(a4.empty());
+
+  auto a5 = mlog->get_alerts("trigger5", beg, end);
+  ASSERT_TRUE(!a5.empty());
+  ASSERT_EQ("trigger5", a5.head().trigger_name);
+  ASSERT_TRUE(numeric(12) == a5.head().value);
+  ASSERT_TRUE(a5.tail().empty());
+
+  auto a6 = mlog->get_alerts("trigger6", beg, end);
+  ASSERT_TRUE(!a6.empty());
+  ASSERT_EQ("trigger6", a6.head().trigger_name);
+  ASSERT_TRUE(numeric(54) == a6.head().value);
+  ASSERT_TRUE(a6.tail().empty());
+
+  auto a7 = mlog->get_alerts("trigger7", beg, end);
+  ASSERT_TRUE(!a7.empty());
+  ASSERT_EQ("trigger7", a7.head().trigger_name);
+  ASSERT_TRUE(numeric(20) == a7.head().value);
+  ASSERT_TRUE(a7.tail().empty());
+
+  auto a8 = mlog->get_alerts("trigger8", beg, end);
+  ASSERT_TRUE(!a8.empty());
+  ASSERT_EQ("trigger8", a8.head().trigger_name);
+  ASSERT_TRUE(numeric(26) == a8.head().value);
+  ASSERT_TRUE(a8.tail().empty());
+
   client.disconnect();
   server->stop();
 
   if (serve_thread.joinable()) {
     serve_thread.join();
+  }
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
+TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
+  std::string atomic_multilog_name = "my_multilog";
+
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
+
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+  sleep(1);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  client.add_index("a", 1);
+  client.add_index("b", 1);
+  client.add_index("c", 10);
+  client.add_index("d", 2);
+  client.add_index("e", 100);
+  client.add_index("f", 0.1);
+  client.add_index("g", 0.01);
+  client.add_index("h", 1);
+
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+
+  try {
+    client.remove_index("a");
+    client.remove_index("a");
+  } catch (std::exception& e) {
+    std::string error_message = "TException - service has thrown: "
+        "rpc_management_exception(msg=Could not remove index for a:"
+        " No index exists)";
+    ASSERT_STREQ(e.what(), error_message.c_str());
+  }
+
+  client.remove_index("b");
+  ASSERT_EQ(false, mlog->is_indexed("b"));
+  ASSERT_EQ(true, mlog->is_indexed("c"));
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
+TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
+  std::string atomic_multilog_name = "my_multilog";
+
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  sleep(1);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  client.add_filter("filter1", "a == true");
+  client.add_filter("filter2", "b > 4");
+  client.add_aggregate("agg1", "filter1", "SUM(d)");
+  client.add_aggregate("agg2", "filter2", "SUM(d)");
+  client.add_trigger("trigger1", "agg1 >= 10");
+  client.add_trigger("trigger2", "agg2 >= 10");
+
+  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+
+  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+
+  size_t i = 0;
+  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
+    i++;
+  }
+
+  try {
+    client.remove_filter("filter1");
+    mlog->query_filter("filter1", beg, end);
+  } catch (std::exception& e) {
+    std::string message = "Filter filter1 does not exist.";
+    ASSERT_STREQ(e.what(), message.c_str());
+  }
+
+  try {
+    client.remove_filter("filter2");
+    client.remove_filter("filter2");
+  } catch (std::exception& ex) {
+    std::string message = "TException - service has thrown: "
+        "rpc_management_exception(msg=Filter filter2 does not "
+        "exist.)";
+    ASSERT_STREQ(ex.what(), message.c_str());
+  }
+
+  auto before_alerts = mlog->get_alerts(beg, end);
+  client.remove_trigger("trigger2");
+  sleep(1);
+  auto after_alerts = mlog->get_alerts(beg, end);
+
+  size_t first_count = 0;
+  size_t second_count = 0;
+
+  for (auto a = before_alerts; !a.empty(); a = a.tail()) {
+    first_count++;
+  }
+
+  for (auto a = after_alerts; !a.empty(); a = a.tail()) {
+    second_count++;
+  }
+
+  ASSERT_LE(second_count, first_count);
+
+  try {
+    client.remove_trigger("trigger1");
+    client.remove_trigger("trigger1");
+  } catch (std::exception& e) {
+    std::string message = "TException - service has thrown: "
+        "rpc_management_exception(msg=Trigger trigger1 does not "
+        "exist.)";
+    ASSERT_STREQ(e.what(), message.c_str());
   }
 
   client.disconnect();

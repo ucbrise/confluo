@@ -180,7 +180,7 @@ class rpc_client {
       throw illegal_state_exception("Must set atomic multilog first");
     }
     client_->query_aggregate(_return, cur_multilog_id_, aggregate_name,
-                             begin_ms, end_ms);
+        begin_ms, end_ms);
   }
 
   rpc_record_stream adhoc_filter(const std::string& filter_expr) {
@@ -222,6 +222,15 @@ class rpc_client {
     }
     rpc_iterator_handle handle;
     client_->alerts_by_time(handle, cur_multilog_id_, begin_ms, end_ms);
+    return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
+  }
+
+  rpc_alert_stream get_alerts(const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    rpc_iterator_handle handle;
+    client_->alerts_by_trigger_and_time(handle, cur_multilog_id_, trigger_name, begin_ms, end_ms);
     return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
   }
 

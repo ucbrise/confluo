@@ -539,6 +539,31 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   }
   ASSERT_EQ(size_t(7), alert_count);
 
+  // TODO: more rigorous testing on alert values.
+  auto a1 = client.get_alerts("trigger1", beg, end);
+  ASSERT_TRUE(!a1.empty());
+
+  auto a2 = client.get_alerts("trigger2", beg, end);
+  ASSERT_TRUE(!a2.empty());
+
+  auto a3 = client.get_alerts("trigger3", beg, end);
+  ASSERT_TRUE(!a3.empty());
+
+  auto a4 = client.get_alerts("trigger4", beg, end);
+  ASSERT_TRUE(a4.empty());
+
+  auto a5 = client.get_alerts("trigger5", beg, end);
+  ASSERT_TRUE(!a5.empty());
+
+  auto a6 = client.get_alerts("trigger6", beg, end);
+  ASSERT_TRUE(!a6.empty());
+
+  auto a7 = client.get_alerts("trigger7", beg, end);
+  ASSERT_TRUE(!a7.empty());
+
+  auto a8 = client.get_alerts("trigger8", beg, end);
+  ASSERT_TRUE(!a8.empty());
+
   client.disconnect();
   server->stop();
   if (serve_thread.joinable()) {
@@ -836,6 +861,32 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);
+
+  // TODO: more rigorous testing on alert values.
+  auto a1 = client.get_alerts("trigger1", beg, end);
+  ASSERT_TRUE(!a1.empty());
+
+  auto a2 = client.get_alerts("trigger2", beg, end);
+  ASSERT_TRUE(!a2.empty());
+
+  auto a3 = client.get_alerts("trigger3", beg, end);
+  ASSERT_TRUE(!a3.empty());
+
+  auto a4 = client.get_alerts("trigger4", beg, end);
+  ASSERT_TRUE(a4.empty());
+
+  auto a5 = client.get_alerts("trigger5", beg, end);
+  ASSERT_TRUE(!a5.empty());
+
+  auto a6 = client.get_alerts("trigger6", beg, end);
+  ASSERT_TRUE(!a6.empty());
+
+  auto a7 = client.get_alerts("trigger7", beg, end);
+  ASSERT_TRUE(!a7.empty());
+
+  auto a8 = client.get_alerts("trigger8", beg, end);
+  ASSERT_TRUE(!a8.empty());
+
   client.disconnect();
   server->stop();
   if (serve_thread.joinable()) {

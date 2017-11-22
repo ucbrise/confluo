@@ -53,6 +53,7 @@ class rpc_serviceIf {
   virtual void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
   virtual void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
   virtual void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) = 0;
   virtual void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc) = 0;
   virtual int64_t num_records(const int64_t multilog_id) = 0;
 };
@@ -148,6 +149,9 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
     return;
   }
   void alerts_by_time(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+    return;
+  }
+  void alerts_by_trigger_and_time(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* trigger_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
   void get_more(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const rpc_iterator_descriptor& /* desc */) {
@@ -2783,6 +2787,149 @@ class rpc_service_alerts_by_time_presult {
 
 };
 
+typedef struct _rpc_service_alerts_by_trigger_and_time_args__isset {
+  _rpc_service_alerts_by_trigger_and_time_args__isset() : multilog_id(false), trigger_name(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
+  bool trigger_name :1;
+  bool begin_ms :1;
+  bool end_ms :1;
+} _rpc_service_alerts_by_trigger_and_time_args__isset;
+
+class rpc_service_alerts_by_trigger_and_time_args {
+ public:
+
+  rpc_service_alerts_by_trigger_and_time_args(const rpc_service_alerts_by_trigger_and_time_args&);
+  rpc_service_alerts_by_trigger_and_time_args(rpc_service_alerts_by_trigger_and_time_args&&);
+  rpc_service_alerts_by_trigger_and_time_args& operator=(const rpc_service_alerts_by_trigger_and_time_args&);
+  rpc_service_alerts_by_trigger_and_time_args& operator=(rpc_service_alerts_by_trigger_and_time_args&&);
+  rpc_service_alerts_by_trigger_and_time_args() : multilog_id(0), trigger_name(), begin_ms(0), end_ms(0) {
+  }
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_args() throw();
+  int64_t multilog_id;
+  std::string trigger_name;
+  int64_t begin_ms;
+  int64_t end_ms;
+
+  _rpc_service_alerts_by_trigger_and_time_args__isset __isset;
+
+  void __set_multilog_id(const int64_t val);
+
+  void __set_trigger_name(const std::string& val);
+
+  void __set_begin_ms(const int64_t val);
+
+  void __set_end_ms(const int64_t val);
+
+  bool operator == (const rpc_service_alerts_by_trigger_and_time_args & rhs) const
+  {
+    if (!(multilog_id == rhs.multilog_id))
+      return false;
+    if (!(trigger_name == rhs.trigger_name))
+      return false;
+    if (!(begin_ms == rhs.begin_ms))
+      return false;
+    if (!(end_ms == rhs.end_ms))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_alerts_by_trigger_and_time_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_alerts_by_trigger_and_time_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_alerts_by_trigger_and_time_pargs {
+ public:
+
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_pargs() throw();
+  const int64_t* multilog_id;
+  const std::string* trigger_name;
+  const int64_t* begin_ms;
+  const int64_t* end_ms;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_alerts_by_trigger_and_time_result__isset {
+  _rpc_service_alerts_by_trigger_and_time_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_alerts_by_trigger_and_time_result__isset;
+
+class rpc_service_alerts_by_trigger_and_time_result {
+ public:
+
+  rpc_service_alerts_by_trigger_and_time_result(const rpc_service_alerts_by_trigger_and_time_result&);
+  rpc_service_alerts_by_trigger_and_time_result(rpc_service_alerts_by_trigger_and_time_result&&);
+  rpc_service_alerts_by_trigger_and_time_result& operator=(const rpc_service_alerts_by_trigger_and_time_result&);
+  rpc_service_alerts_by_trigger_and_time_result& operator=(rpc_service_alerts_by_trigger_and_time_result&&);
+  rpc_service_alerts_by_trigger_and_time_result() {
+  }
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_result() throw();
+  rpc_iterator_handle success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_alerts_by_trigger_and_time_result__isset __isset;
+
+  void __set_success(const rpc_iterator_handle& val);
+
+  void __set_ex(const rpc_invalid_operation& val);
+
+  bool operator == (const rpc_service_alerts_by_trigger_and_time_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_alerts_by_trigger_and_time_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_alerts_by_trigger_and_time_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_alerts_by_trigger_and_time_presult__isset {
+  _rpc_service_alerts_by_trigger_and_time_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_alerts_by_trigger_and_time_presult__isset;
+
+class rpc_service_alerts_by_trigger_and_time_presult {
+ public:
+
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_presult() throw();
+  rpc_iterator_handle* success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_alerts_by_trigger_and_time_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _rpc_service_get_more_args__isset {
   _rpc_service_get_more_args__isset() : multilog_id(false), desc(false) {}
   bool multilog_id :1;
@@ -3115,6 +3262,9 @@ class rpc_serviceClientT : virtual public rpc_serviceIf {
   void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
   void send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
   void recv_alerts_by_time(rpc_iterator_handle& _return);
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  void send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return);
   void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc);
   void send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc);
   void recv_get_more(rpc_iterator_handle& _return);
@@ -3191,6 +3341,8 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_combined_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_alerts_by_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_alerts_by_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_alerts_by_trigger_and_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_alerts_by_trigger_and_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_get_more(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_more(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -3261,6 +3413,9 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["alerts_by_time"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_alerts_by_time,
       &rpc_serviceProcessorT::process_alerts_by_time);
+    processMap_["alerts_by_trigger_and_time"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_alerts_by_trigger_and_time,
+      &rpc_serviceProcessorT::process_alerts_by_trigger_and_time);
     processMap_["get_more"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_get_more,
       &rpc_serviceProcessorT::process_get_more);
@@ -3496,6 +3651,16 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->alerts_by_trigger_and_time(_return, multilog_id, trigger_name, begin_ms, end_ms);
+    }
+    ifaces_[i]->alerts_by_trigger_and_time(_return, multilog_id, trigger_name, begin_ms, end_ms);
+    return;
+  }
+
   void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -3609,6 +3774,9 @@ class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
   void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
   int32_t send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
   void recv_alerts_by_time(rpc_iterator_handle& _return, const int32_t seqid);
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int32_t seqid);
   void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc);
   int32_t send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc);
   void recv_get_more(rpc_iterator_handle& _return, const int32_t seqid);

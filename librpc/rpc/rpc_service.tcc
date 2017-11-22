@@ -4319,6 +4319,251 @@ uint32_t rpc_service_alerts_by_time_presult::read(Protocol_* iprot) {
 
 
 template <class Protocol_>
+uint32_t rpc_service_alerts_by_trigger_and_time_args::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->multilog_id);
+          this->__isset.multilog_id = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->trigger_name);
+          this->__isset.trigger_name = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->begin_ms);
+          this->__isset.begin_ms = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->end_ms);
+          this->__isset.end_ms = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t rpc_service_alerts_by_trigger_and_time_args::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("rpc_service_alerts_by_trigger_and_time_args");
+
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->multilog_id);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->trigger_name);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64(this->begin_ms);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64(this->end_ms);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_alerts_by_trigger_and_time_pargs::write(Protocol_* oprot) const {
+  uint32_t xfer = 0;
+  apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("rpc_service_alerts_by_trigger_and_time_pargs");
+
+  xfer += oprot->writeFieldBegin("multilog_id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64((*(this->multilog_id)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("trigger_name", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->trigger_name)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("begin_ms", ::apache::thrift::protocol::T_I64, 3);
+  xfer += oprot->writeI64((*(this->begin_ms)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("end_ms", ::apache::thrift::protocol::T_I64, 4);
+  xfer += oprot->writeI64((*(this->end_ms)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_alerts_by_trigger_and_time_result::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->success.read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t rpc_service_alerts_by_trigger_and_time_result::write(Protocol_* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("rpc_service_alerts_by_trigger_and_time_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
+    xfer += this->success.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ex) {
+    xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ex.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+
+template <class Protocol_>
+uint32_t rpc_service_alerts_by_trigger_and_time_presult::read(Protocol_* iprot) {
+
+  apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += (*(this->success)).read(iprot);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ex.read(iprot);
+          this->__isset.ex = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+
+template <class Protocol_>
 uint32_t rpc_service_get_more_args::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
@@ -6009,6 +6254,73 @@ void rpc_serviceClientT<Protocol_>::recv_alerts_by_time(rpc_iterator_handle& _re
     throw result.ex;
   }
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "alerts_by_time failed: unknown result");
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms)
+{
+  send_alerts_by_trigger_and_time(multilog_id, trigger_name, begin_ms, end_ms);
+  recv_alerts_by_trigger_and_time(_return);
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms)
+{
+  int32_t cseqid = 0;
+  this->oprot_->writeMessageBegin("alerts_by_trigger_and_time", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  rpc_service_alerts_by_trigger_and_time_pargs args;
+  args.multilog_id = &multilog_id;
+  args.trigger_name = &trigger_name;
+  args.begin_ms = &begin_ms;
+  args.end_ms = &end_ms;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+}
+
+template <class Protocol_>
+void rpc_serviceClientT<Protocol_>::recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  this->iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(this->iprot_);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("alerts_by_trigger_and_time") != 0) {
+    this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    this->iprot_->readMessageEnd();
+    this->iprot_->getTransport()->readEnd();
+  }
+  rpc_service_alerts_by_trigger_and_time_presult result;
+  result.success = &_return;
+  result.read(this->iprot_);
+  this->iprot_->readMessageEnd();
+  this->iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  if (result.__isset.ex) {
+    throw result.ex;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "alerts_by_trigger_and_time failed: unknown result");
 }
 
 template <class Protocol_>
@@ -8562,6 +8874,122 @@ void rpc_serviceProcessorT<Protocol_>::process_alerts_by_time(int32_t seqid, Pro
 }
 
 template <class Protocol_>
+void rpc_serviceProcessorT<Protocol_>::process_alerts_by_trigger_and_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("rpc_service.alerts_by_trigger_and_time", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.alerts_by_trigger_and_time");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "rpc_service.alerts_by_trigger_and_time");
+  }
+
+  rpc_service_alerts_by_trigger_and_time_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "rpc_service.alerts_by_trigger_and_time", bytes);
+  }
+
+  rpc_service_alerts_by_trigger_and_time_result result;
+  try {
+    iface_->alerts_by_trigger_and_time(result.success, args.multilog_id, args.trigger_name, args.begin_ms, args.end_ms);
+    result.__isset.success = true;
+  } catch (rpc_invalid_operation &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "rpc_service.alerts_by_trigger_and_time");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("alerts_by_trigger_and_time", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "rpc_service.alerts_by_trigger_and_time");
+  }
+
+  oprot->writeMessageBegin("alerts_by_trigger_and_time", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "rpc_service.alerts_by_trigger_and_time", bytes);
+  }
+}
+
+template <class Protocol_>
+void rpc_serviceProcessorT<Protocol_>::process_alerts_by_trigger_and_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("rpc_service.alerts_by_trigger_and_time", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "rpc_service.alerts_by_trigger_and_time");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "rpc_service.alerts_by_trigger_and_time");
+  }
+
+  rpc_service_alerts_by_trigger_and_time_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "rpc_service.alerts_by_trigger_and_time", bytes);
+  }
+
+  rpc_service_alerts_by_trigger_and_time_result result;
+  try {
+    iface_->alerts_by_trigger_and_time(result.success, args.multilog_id, args.trigger_name, args.begin_ms, args.end_ms);
+    result.__isset.success = true;
+  } catch (rpc_invalid_operation &ex) {
+    result.ex = ex;
+    result.__isset.ex = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "rpc_service.alerts_by_trigger_and_time");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("alerts_by_trigger_and_time", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "rpc_service.alerts_by_trigger_and_time");
+  }
+
+  oprot->writeMessageBegin("alerts_by_trigger_and_time", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "rpc_service.alerts_by_trigger_and_time", bytes);
+  }
+}
+
+template <class Protocol_>
 void rpc_serviceProcessorT<Protocol_>::process_get_more(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
@@ -10641,6 +11069,100 @@ void rpc_serviceConcurrentClientT<Protocol_>::recv_alerts_by_time(rpc_iterator_h
       }
       // in a bad state, don't commit
       throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "alerts_by_time failed: unknown result");
+    }
+    // seqid != rseqid
+    this->sync_.updatePending(fname, mtype, rseqid);
+
+    // this will temporarily unlock the readMutex, and let other clients get work done
+    this->sync_.waitForWork(seqid);
+  } // end while(true)
+}
+
+template <class Protocol_>
+void rpc_serviceConcurrentClientT<Protocol_>::alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms)
+{
+  int32_t seqid = send_alerts_by_trigger_and_time(multilog_id, trigger_name, begin_ms, end_ms);
+  recv_alerts_by_trigger_and_time(_return, seqid);
+}
+
+template <class Protocol_>
+int32_t rpc_serviceConcurrentClientT<Protocol_>::send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms)
+{
+  int32_t cseqid = this->sync_.generateSeqId();
+  ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
+  this->oprot_->writeMessageBegin("alerts_by_trigger_and_time", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  rpc_service_alerts_by_trigger_and_time_pargs args;
+  args.multilog_id = &multilog_id;
+  args.trigger_name = &trigger_name;
+  args.begin_ms = &begin_ms;
+  args.end_ms = &end_ms;
+  args.write(this->oprot_);
+
+  this->oprot_->writeMessageEnd();
+  this->oprot_->getTransport()->writeEnd();
+  this->oprot_->getTransport()->flush();
+
+  sentry.commit();
+  return cseqid;
+}
+
+template <class Protocol_>
+void rpc_serviceConcurrentClientT<Protocol_>::recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int32_t seqid)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  // the read mutex gets dropped and reacquired as part of waitForWork()
+  // The destructor of this sentry wakes up other clients
+  ::apache::thrift::async::TConcurrentRecvSentry sentry(&this->sync_, seqid);
+
+  while(true) {
+    if(!this->sync_.getPending(fname, mtype, rseqid)) {
+      this->iprot_->readMessageBegin(fname, mtype, rseqid);
+    }
+    if(seqid == rseqid) {
+      if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+        ::apache::thrift::TApplicationException x;
+        x.read(this->iprot_);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+        sentry.commit();
+        throw x;
+      }
+      if (mtype != ::apache::thrift::protocol::T_REPLY) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+      }
+      if (fname.compare("alerts_by_trigger_and_time") != 0) {
+        this->iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+        this->iprot_->readMessageEnd();
+        this->iprot_->getTransport()->readEnd();
+
+        // in a bad state, don't commit
+        using ::apache::thrift::protocol::TProtocolException;
+        throw TProtocolException(TProtocolException::INVALID_DATA);
+      }
+      rpc_service_alerts_by_trigger_and_time_presult result;
+      result.success = &_return;
+      result.read(this->iprot_);
+      this->iprot_->readMessageEnd();
+      this->iprot_->getTransport()->readEnd();
+
+      if (result.__isset.success) {
+        // _return pointer has now been filled
+        sentry.commit();
+        return;
+      }
+      if (result.__isset.ex) {
+        sentry.commit();
+        throw result.ex;
+      }
+      // in a bad state, don't commit
+      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "alerts_by_trigger_and_time failed: unknown result");
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);

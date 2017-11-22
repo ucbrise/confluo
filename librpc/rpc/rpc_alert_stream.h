@@ -38,8 +38,12 @@ class rpc_alert_stream {
     return *this;
   }
 
-  bool has_more() {
-    return handle_.has_more || !stream_.eof();
+  bool has_more() const {
+    return !stream_.eof() || handle_.has_more;
+  }
+
+  bool empty() const {
+    return !has_more();
   }
 
  private:

@@ -156,6 +156,12 @@ class rpc_client:
             raise ValueError("Must set atomic multilog first.")
         handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, begin_ms, end_ms)
         return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+    
+    def get_alerts(self, trigger_name, begin_ms, end_ms):
+        if self.cur_multilog_id_ == -1:
+            raise ValueError("Must set atomic multilog first.")
+        handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, trigger_name, begin_ms, end_ms)
+        return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
 
     def num_records(self):
         if self.cur_multilog_id_ == -1:

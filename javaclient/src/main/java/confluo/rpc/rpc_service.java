@@ -63,6 +63,8 @@ public class rpc_service {
 
     public rpc_iterator_handle alerts_by_time(long multilog_id, long begin_ms, long end_ms) throws rpc_invalid_operation, org.apache.thrift.TException;
 
+    public rpc_iterator_handle alerts_by_trigger_and_time(long multilog_id, java.lang.String trigger_name, long begin_ms, long end_ms) throws rpc_invalid_operation, org.apache.thrift.TException;
+
     public rpc_iterator_handle get_more(long multilog_id, rpc_iterator_descriptor desc) throws rpc_invalid_operation, org.apache.thrift.TException;
 
     public long num_records(long multilog_id) throws org.apache.thrift.TException;
@@ -112,6 +114,8 @@ public class rpc_service {
     public void combined_filter(long multilog_id, java.lang.String filter_name, java.lang.String filter_expr, long begin_ms, long end_ms, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException;
 
     public void alerts_by_time(long multilog_id, long begin_ms, long end_ms, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException;
+
+    public void alerts_by_trigger_and_time(long multilog_id, java.lang.String trigger_name, long begin_ms, long end_ms, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException;
 
     public void get_more(long multilog_id, rpc_iterator_descriptor desc, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException;
 
@@ -665,6 +669,35 @@ public class rpc_service {
         throw result.ex;
       }
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "alerts_by_time failed: unknown result");
+    }
+
+    public rpc_iterator_handle alerts_by_trigger_and_time(long multilog_id, java.lang.String trigger_name, long begin_ms, long end_ms) throws rpc_invalid_operation, org.apache.thrift.TException
+    {
+      send_alerts_by_trigger_and_time(multilog_id, trigger_name, begin_ms, end_ms);
+      return recv_alerts_by_trigger_and_time();
+    }
+
+    public void send_alerts_by_trigger_and_time(long multilog_id, java.lang.String trigger_name, long begin_ms, long end_ms) throws org.apache.thrift.TException
+    {
+      alerts_by_trigger_and_time_args args = new alerts_by_trigger_and_time_args();
+      args.set_multilog_id(multilog_id);
+      args.set_trigger_name(trigger_name);
+      args.set_begin_ms(begin_ms);
+      args.set_end_ms(end_ms);
+      sendBase("alerts_by_trigger_and_time", args);
+    }
+
+    public rpc_iterator_handle recv_alerts_by_trigger_and_time() throws rpc_invalid_operation, org.apache.thrift.TException
+    {
+      alerts_by_trigger_and_time_result result = new alerts_by_trigger_and_time_result();
+      receiveBase(result, "alerts_by_trigger_and_time");
+      if (result.is_set_success()) {
+        return result.success;
+      }
+      if (result.ex != null) {
+        throw result.ex;
+      }
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "alerts_by_trigger_and_time failed: unknown result");
     }
 
     public rpc_iterator_handle get_more(long multilog_id, rpc_iterator_descriptor desc) throws rpc_invalid_operation, org.apache.thrift.TException
@@ -1497,6 +1530,47 @@ public class rpc_service {
       }
     }
 
+    public void alerts_by_trigger_and_time(long multilog_id, java.lang.String trigger_name, long begin_ms, long end_ms, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      alerts_by_trigger_and_time_call method_call = new alerts_by_trigger_and_time_call(multilog_id, trigger_name, begin_ms, end_ms, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class alerts_by_trigger_and_time_call extends org.apache.thrift.async.TAsyncMethodCall<rpc_iterator_handle> {
+      private long multilog_id;
+      private java.lang.String trigger_name;
+      private long begin_ms;
+      private long end_ms;
+      public alerts_by_trigger_and_time_call(long multilog_id, java.lang.String trigger_name, long begin_ms, long end_ms, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.multilog_id = multilog_id;
+        this.trigger_name = trigger_name;
+        this.begin_ms = begin_ms;
+        this.end_ms = end_ms;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("alerts_by_trigger_and_time", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        alerts_by_trigger_and_time_args args = new alerts_by_trigger_and_time_args();
+        args.set_multilog_id(multilog_id);
+        args.set_trigger_name(trigger_name);
+        args.set_begin_ms(begin_ms);
+        args.set_end_ms(end_ms);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public rpc_iterator_handle getResult() throws rpc_invalid_operation, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new java.lang.IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return (new Client(prot)).recv_alerts_by_trigger_and_time();
+      }
+    }
+
     public void get_more(long multilog_id, rpc_iterator_descriptor desc, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       get_more_call method_call = new get_more_call(multilog_id, desc, resultHandler, this, ___protocolFactory, ___transport);
@@ -1598,6 +1672,7 @@ public class rpc_service {
       processMap.put("predef_filter", new predef_filter());
       processMap.put("combined_filter", new combined_filter());
       processMap.put("alerts_by_time", new alerts_by_time());
+      processMap.put("alerts_by_trigger_and_time", new alerts_by_trigger_and_time());
       processMap.put("get_more", new get_more());
       processMap.put("num_records", new num_records());
       return processMap;
@@ -2090,6 +2165,30 @@ public class rpc_service {
       }
     }
 
+    public static class alerts_by_trigger_and_time<I extends Iface> extends org.apache.thrift.ProcessFunction<I, alerts_by_trigger_and_time_args> {
+      public alerts_by_trigger_and_time() {
+        super("alerts_by_trigger_and_time");
+      }
+
+      public alerts_by_trigger_and_time_args getEmptyArgsInstance() {
+        return new alerts_by_trigger_and_time_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public alerts_by_trigger_and_time_result getResult(I iface, alerts_by_trigger_and_time_args args) throws org.apache.thrift.TException {
+        alerts_by_trigger_and_time_result result = new alerts_by_trigger_and_time_result();
+        try {
+          result.success = iface.alerts_by_trigger_and_time(args.multilog_id, args.trigger_name, args.begin_ms, args.end_ms);
+        } catch (rpc_invalid_operation ex) {
+          result.ex = ex;
+        }
+        return result;
+      }
+    }
+
     public static class get_more<I extends Iface> extends org.apache.thrift.ProcessFunction<I, get_more_args> {
       public get_more() {
         super("get_more");
@@ -2169,6 +2268,7 @@ public class rpc_service {
       processMap.put("predef_filter", new predef_filter());
       processMap.put("combined_filter", new combined_filter());
       processMap.put("alerts_by_time", new alerts_by_time());
+      processMap.put("alerts_by_trigger_and_time", new alerts_by_trigger_and_time());
       processMap.put("get_more", new get_more());
       processMap.put("num_records", new num_records());
       return processMap;
@@ -3508,6 +3608,71 @@ public class rpc_service {
 
       public void start(I iface, alerts_by_time_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException {
         iface.alerts_by_time(args.multilog_id, args.begin_ms, args.end_ms,resultHandler);
+      }
+    }
+
+    public static class alerts_by_trigger_and_time<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, alerts_by_trigger_and_time_args, rpc_iterator_handle> {
+      public alerts_by_trigger_and_time() {
+        super("alerts_by_trigger_and_time");
+      }
+
+      public alerts_by_trigger_and_time_args getEmptyArgsInstance() {
+        return new alerts_by_trigger_and_time_args();
+      }
+
+      public org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+        final org.apache.thrift.AsyncProcessFunction fcall = this;
+        return new org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle>() { 
+          public void onComplete(rpc_iterator_handle o) {
+            alerts_by_trigger_and_time_result result = new alerts_by_trigger_and_time_result();
+            result.success = o;
+            try {
+              fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
+            } catch (org.apache.thrift.transport.TTransportException e) {
+              _LOGGER.error("TTransportException writing to internal frame buffer", e);
+              fb.close();
+            } catch (java.lang.Exception e) {
+              _LOGGER.error("Exception writing to internal frame buffer", e);
+              onError(e);
+            }
+          }
+          public void onError(java.lang.Exception e) {
+            byte msgType = org.apache.thrift.protocol.TMessageType.REPLY;
+            org.apache.thrift.TSerializable msg;
+            alerts_by_trigger_and_time_result result = new alerts_by_trigger_and_time_result();
+            if (e instanceof rpc_invalid_operation) {
+              result.ex = (rpc_invalid_operation) e;
+              result.set_ex_isSet(true);
+              msg = result;
+            } else if (e instanceof org.apache.thrift.transport.TTransportException) {
+              _LOGGER.error("TTransportException inside handler", e);
+              fb.close();
+              return;
+            } else if (e instanceof org.apache.thrift.TApplicationException) {
+              _LOGGER.error("TApplicationException inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = (org.apache.thrift.TApplicationException)e;
+            } else {
+              _LOGGER.error("Exception inside handler", e);
+              msgType = org.apache.thrift.protocol.TMessageType.EXCEPTION;
+              msg = new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, e.getMessage());
+            }
+            try {
+              fcall.sendResponse(fb,msg,msgType,seqid);
+            } catch (java.lang.Exception ex) {
+              _LOGGER.error("Exception writing to internal frame buffer", ex);
+              fb.close();
+            }
+          }
+        };
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public void start(I iface, alerts_by_trigger_and_time_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_iterator_handle> resultHandler) throws org.apache.thrift.TException {
+        iface.alerts_by_trigger_and_time(args.multilog_id, args.trigger_name, args.begin_ms, args.end_ms,resultHandler);
       }
     }
 
@@ -22541,6 +22706,1143 @@ public class rpc_service {
 
       @Override
       public void read(org.apache.thrift.protocol.TProtocol prot, alerts_by_time_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(2);
+        if (incoming.get(0)) {
+          if (struct.success == null) {
+            struct.success = new rpc_iterator_handle();
+          }
+          struct.success.read(iprot);
+          struct.set_success_isSet(true);
+        }
+        if (incoming.get(1)) {
+          if (struct.ex == null) {
+            struct.ex = new rpc_invalid_operation();
+          }
+          struct.ex.read(iprot);
+          struct.set_ex_isSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class alerts_by_trigger_and_time_args implements org.apache.thrift.TBase<alerts_by_trigger_and_time_args, alerts_by_trigger_and_time_args._Fields>, java.io.Serializable, Cloneable, Comparable<alerts_by_trigger_and_time_args>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("alerts_by_trigger_and_time_args");
+
+    private static final org.apache.thrift.protocol.TField MULTILOG_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("multilog_id", org.apache.thrift.protocol.TType.I64, (short)1);
+    private static final org.apache.thrift.protocol.TField TRIGGER_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("trigger_name", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField BEGIN_MS_FIELD_DESC = new org.apache.thrift.protocol.TField("begin_ms", org.apache.thrift.protocol.TType.I64, (short)3);
+    private static final org.apache.thrift.protocol.TField END_MS_FIELD_DESC = new org.apache.thrift.protocol.TField("end_ms", org.apache.thrift.protocol.TType.I64, (short)4);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new alerts_by_trigger_and_time_argsStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new alerts_by_trigger_and_time_argsTupleSchemeFactory();
+
+    private long multilog_id; // required
+    private java.lang.String trigger_name; // required
+    private long begin_ms; // required
+    private long end_ms; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      MULTILOG_ID((short)1, "multilog_id"),
+      TRIGGER_NAME((short)2, "trigger_name"),
+      BEGIN_MS((short)3, "begin_ms"),
+      END_MS((short)4, "end_ms");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // MULTILOG_ID
+            return MULTILOG_ID;
+          case 2: // TRIGGER_NAME
+            return TRIGGER_NAME;
+          case 3: // BEGIN_MS
+            return BEGIN_MS;
+          case 4: // END_MS
+            return END_MS;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    private static final int __MULTILOG_ID_ISSET_ID = 0;
+    private static final int __BEGIN_MS_ISSET_ID = 1;
+    private static final int __END_MS_ISSET_ID = 2;
+    private byte __isset_bitfield = 0;
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.MULTILOG_ID, new org.apache.thrift.meta_data.FieldMetaData("multilog_id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+      tmpMap.put(_Fields.TRIGGER_NAME, new org.apache.thrift.meta_data.FieldMetaData("trigger_name", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.BEGIN_MS, new org.apache.thrift.meta_data.FieldMetaData("begin_ms", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+      tmpMap.put(_Fields.END_MS, new org.apache.thrift.meta_data.FieldMetaData("end_ms", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(alerts_by_trigger_and_time_args.class, metaDataMap);
+    }
+
+    public alerts_by_trigger_and_time_args() {
+    }
+
+    public alerts_by_trigger_and_time_args(
+      long multilog_id,
+      java.lang.String trigger_name,
+      long begin_ms,
+      long end_ms)
+    {
+      this();
+      this.multilog_id = multilog_id;
+      set_multilog_id_isSet(true);
+      this.trigger_name = trigger_name;
+      this.begin_ms = begin_ms;
+      set_begin_ms_isSet(true);
+      this.end_ms = end_ms;
+      set_end_ms_isSet(true);
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public alerts_by_trigger_and_time_args(alerts_by_trigger_and_time_args other) {
+      __isset_bitfield = other.__isset_bitfield;
+      this.multilog_id = other.multilog_id;
+      if (other.is_set_trigger_name()) {
+        this.trigger_name = other.trigger_name;
+      }
+      this.begin_ms = other.begin_ms;
+      this.end_ms = other.end_ms;
+    }
+
+    public alerts_by_trigger_and_time_args deepCopy() {
+      return new alerts_by_trigger_and_time_args(this);
+    }
+
+    @Override
+    public void clear() {
+      set_multilog_id_isSet(false);
+      this.multilog_id = 0;
+      this.trigger_name = null;
+      set_begin_ms_isSet(false);
+      this.begin_ms = 0;
+      set_end_ms_isSet(false);
+      this.end_ms = 0;
+    }
+
+    public long get_multilog_id() {
+      return this.multilog_id;
+    }
+
+    public alerts_by_trigger_and_time_args set_multilog_id(long multilog_id) {
+      this.multilog_id = multilog_id;
+      set_multilog_id_isSet(true);
+      return this;
+    }
+
+    public void unset_multilog_id() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
+    }
+
+    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    public boolean is_set_multilog_id() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
+    }
+
+    public void set_multilog_id_isSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID, value);
+    }
+
+    public java.lang.String get_trigger_name() {
+      return this.trigger_name;
+    }
+
+    public alerts_by_trigger_and_time_args set_trigger_name(java.lang.String trigger_name) {
+      this.trigger_name = trigger_name;
+      return this;
+    }
+
+    public void unset_trigger_name() {
+      this.trigger_name = null;
+    }
+
+    /** Returns true if field trigger_name is set (has been assigned a value) and false otherwise */
+    public boolean is_set_trigger_name() {
+      return this.trigger_name != null;
+    }
+
+    public void set_trigger_name_isSet(boolean value) {
+      if (!value) {
+        this.trigger_name = null;
+      }
+    }
+
+    public long get_begin_ms() {
+      return this.begin_ms;
+    }
+
+    public alerts_by_trigger_and_time_args set_begin_ms(long begin_ms) {
+      this.begin_ms = begin_ms;
+      set_begin_ms_isSet(true);
+      return this;
+    }
+
+    public void unset_begin_ms() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
+    }
+
+    /** Returns true if field begin_ms is set (has been assigned a value) and false otherwise */
+    public boolean is_set_begin_ms() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
+    }
+
+    public void set_begin_ms_isSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __BEGIN_MS_ISSET_ID, value);
+    }
+
+    public long get_end_ms() {
+      return this.end_ms;
+    }
+
+    public alerts_by_trigger_and_time_args set_end_ms(long end_ms) {
+      this.end_ms = end_ms;
+      set_end_ms_isSet(true);
+      return this;
+    }
+
+    public void unset_end_ms() {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __END_MS_ISSET_ID);
+    }
+
+    /** Returns true if field end_ms is set (has been assigned a value) and false otherwise */
+    public boolean is_set_end_ms() {
+      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __END_MS_ISSET_ID);
+    }
+
+    public void set_end_ms_isSet(boolean value) {
+      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __END_MS_ISSET_ID, value);
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case MULTILOG_ID:
+        if (value == null) {
+          unset_multilog_id();
+        } else {
+          set_multilog_id((java.lang.Long)value);
+        }
+        break;
+
+      case TRIGGER_NAME:
+        if (value == null) {
+          unset_trigger_name();
+        } else {
+          set_trigger_name((java.lang.String)value);
+        }
+        break;
+
+      case BEGIN_MS:
+        if (value == null) {
+          unset_begin_ms();
+        } else {
+          set_begin_ms((java.lang.Long)value);
+        }
+        break;
+
+      case END_MS:
+        if (value == null) {
+          unset_end_ms();
+        } else {
+          set_end_ms((java.lang.Long)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case MULTILOG_ID:
+        return get_multilog_id();
+
+      case TRIGGER_NAME:
+        return get_trigger_name();
+
+      case BEGIN_MS:
+        return get_begin_ms();
+
+      case END_MS:
+        return get_end_ms();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case MULTILOG_ID:
+        return is_set_multilog_id();
+      case TRIGGER_NAME:
+        return is_set_trigger_name();
+      case BEGIN_MS:
+        return is_set_begin_ms();
+      case END_MS:
+        return is_set_end_ms();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof alerts_by_trigger_and_time_args)
+        return this.equals((alerts_by_trigger_and_time_args)that);
+      return false;
+    }
+
+    public boolean equals(alerts_by_trigger_and_time_args that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_multilog_id = true;
+      boolean that_present_multilog_id = true;
+      if (this_present_multilog_id || that_present_multilog_id) {
+        if (!(this_present_multilog_id && that_present_multilog_id))
+          return false;
+        if (this.multilog_id != that.multilog_id)
+          return false;
+      }
+
+      boolean this_present_trigger_name = true && this.is_set_trigger_name();
+      boolean that_present_trigger_name = true && that.is_set_trigger_name();
+      if (this_present_trigger_name || that_present_trigger_name) {
+        if (!(this_present_trigger_name && that_present_trigger_name))
+          return false;
+        if (!this.trigger_name.equals(that.trigger_name))
+          return false;
+      }
+
+      boolean this_present_begin_ms = true;
+      boolean that_present_begin_ms = true;
+      if (this_present_begin_ms || that_present_begin_ms) {
+        if (!(this_present_begin_ms && that_present_begin_ms))
+          return false;
+        if (this.begin_ms != that.begin_ms)
+          return false;
+      }
+
+      boolean this_present_end_ms = true;
+      boolean that_present_end_ms = true;
+      if (this_present_end_ms || that_present_end_ms) {
+        if (!(this_present_end_ms && that_present_end_ms))
+          return false;
+        if (this.end_ms != that.end_ms)
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + org.apache.thrift.TBaseHelper.hashCode(multilog_id);
+
+      hashCode = hashCode * 8191 + ((is_set_trigger_name()) ? 131071 : 524287);
+      if (is_set_trigger_name())
+        hashCode = hashCode * 8191 + trigger_name.hashCode();
+
+      hashCode = hashCode * 8191 + org.apache.thrift.TBaseHelper.hashCode(begin_ms);
+
+      hashCode = hashCode * 8191 + org.apache.thrift.TBaseHelper.hashCode(end_ms);
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(alerts_by_trigger_and_time_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(is_set_multilog_id()).compareTo(other.is_set_multilog_id());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (is_set_multilog_id()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.multilog_id, other.multilog_id);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(is_set_trigger_name()).compareTo(other.is_set_trigger_name());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (is_set_trigger_name()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.trigger_name, other.trigger_name);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(is_set_begin_ms()).compareTo(other.is_set_begin_ms());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (is_set_begin_ms()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.begin_ms, other.begin_ms);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(is_set_end_ms()).compareTo(other.is_set_end_ms());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (is_set_end_ms()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.end_ms, other.end_ms);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+    }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("alerts_by_trigger_and_time_args(");
+      boolean first = true;
+
+      sb.append("multilog_id:");
+      sb.append(this.multilog_id);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("trigger_name:");
+      if (this.trigger_name == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.trigger_name);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("begin_ms:");
+      sb.append(this.begin_ms);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("end_ms:");
+      sb.append(this.end_ms);
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bitfield = 0;
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class alerts_by_trigger_and_time_argsStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public alerts_by_trigger_and_time_argsStandardScheme getScheme() {
+        return new alerts_by_trigger_and_time_argsStandardScheme();
+      }
+    }
+
+    private static class alerts_by_trigger_and_time_argsStandardScheme extends org.apache.thrift.scheme.StandardScheme<alerts_by_trigger_and_time_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, alerts_by_trigger_and_time_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // MULTILOG_ID
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.multilog_id = iprot.readI64();
+                struct.set_multilog_id_isSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // TRIGGER_NAME
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.trigger_name = iprot.readString();
+                struct.set_trigger_name_isSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 3: // BEGIN_MS
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.begin_ms = iprot.readI64();
+                struct.set_begin_ms_isSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 4: // END_MS
+              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
+                struct.end_ms = iprot.readI64();
+                struct.set_end_ms_isSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, alerts_by_trigger_and_time_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        oprot.writeFieldBegin(MULTILOG_ID_FIELD_DESC);
+        oprot.writeI64(struct.multilog_id);
+        oprot.writeFieldEnd();
+        if (struct.trigger_name != null) {
+          oprot.writeFieldBegin(TRIGGER_NAME_FIELD_DESC);
+          oprot.writeString(struct.trigger_name);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldBegin(BEGIN_MS_FIELD_DESC);
+        oprot.writeI64(struct.begin_ms);
+        oprot.writeFieldEnd();
+        oprot.writeFieldBegin(END_MS_FIELD_DESC);
+        oprot.writeI64(struct.end_ms);
+        oprot.writeFieldEnd();
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class alerts_by_trigger_and_time_argsTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public alerts_by_trigger_and_time_argsTupleScheme getScheme() {
+        return new alerts_by_trigger_and_time_argsTupleScheme();
+      }
+    }
+
+    private static class alerts_by_trigger_and_time_argsTupleScheme extends org.apache.thrift.scheme.TupleScheme<alerts_by_trigger_and_time_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, alerts_by_trigger_and_time_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.is_set_multilog_id()) {
+          optionals.set(0);
+        }
+        if (struct.is_set_trigger_name()) {
+          optionals.set(1);
+        }
+        if (struct.is_set_begin_ms()) {
+          optionals.set(2);
+        }
+        if (struct.is_set_end_ms()) {
+          optionals.set(3);
+        }
+        oprot.writeBitSet(optionals, 4);
+        if (struct.is_set_multilog_id()) {
+          oprot.writeI64(struct.multilog_id);
+        }
+        if (struct.is_set_trigger_name()) {
+          oprot.writeString(struct.trigger_name);
+        }
+        if (struct.is_set_begin_ms()) {
+          oprot.writeI64(struct.begin_ms);
+        }
+        if (struct.is_set_end_ms()) {
+          oprot.writeI64(struct.end_ms);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, alerts_by_trigger_and_time_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet incoming = iprot.readBitSet(4);
+        if (incoming.get(0)) {
+          struct.multilog_id = iprot.readI64();
+          struct.set_multilog_id_isSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.trigger_name = iprot.readString();
+          struct.set_trigger_name_isSet(true);
+        }
+        if (incoming.get(2)) {
+          struct.begin_ms = iprot.readI64();
+          struct.set_begin_ms_isSet(true);
+        }
+        if (incoming.get(3)) {
+          struct.end_ms = iprot.readI64();
+          struct.set_end_ms_isSet(true);
+        }
+      }
+    }
+
+    private static <S extends org.apache.thrift.scheme.IScheme> S scheme(org.apache.thrift.protocol.TProtocol proto) {
+      return (org.apache.thrift.scheme.StandardScheme.class.equals(proto.getScheme()) ? STANDARD_SCHEME_FACTORY : TUPLE_SCHEME_FACTORY).getScheme();
+    }
+  }
+
+  public static class alerts_by_trigger_and_time_result implements org.apache.thrift.TBase<alerts_by_trigger_and_time_result, alerts_by_trigger_and_time_result._Fields>, java.io.Serializable, Cloneable, Comparable<alerts_by_trigger_and_time_result>   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("alerts_by_trigger_and_time_result");
+
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRUCT, (short)0);
+    private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new alerts_by_trigger_and_time_resultStandardSchemeFactory();
+    private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new alerts_by_trigger_and_time_resultTupleSchemeFactory();
+
+    private rpc_iterator_handle success; // required
+    private rpc_invalid_operation ex; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SUCCESS((short)0, "success"),
+      EX((short)1, "ex");
+
+      private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
+
+      static {
+        for (_Fields field : java.util.EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 0: // SUCCESS
+            return SUCCESS;
+          case 1: // EX
+            return EX;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new java.lang.IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(java.lang.String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final java.lang.String _fieldName;
+
+      _Fields(short thriftId, java.lang.String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public java.lang.String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, rpc_iterator_handle.class)));
+      tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, rpc_invalid_operation.class)));
+      metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(alerts_by_trigger_and_time_result.class, metaDataMap);
+    }
+
+    public alerts_by_trigger_and_time_result() {
+    }
+
+    public alerts_by_trigger_and_time_result(
+      rpc_iterator_handle success,
+      rpc_invalid_operation ex)
+    {
+      this();
+      this.success = success;
+      this.ex = ex;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public alerts_by_trigger_and_time_result(alerts_by_trigger_and_time_result other) {
+      if (other.is_set_success()) {
+        this.success = new rpc_iterator_handle(other.success);
+      }
+      if (other.is_set_ex()) {
+        this.ex = new rpc_invalid_operation(other.ex);
+      }
+    }
+
+    public alerts_by_trigger_and_time_result deepCopy() {
+      return new alerts_by_trigger_and_time_result(this);
+    }
+
+    @Override
+    public void clear() {
+      if (this.success != null) {
+        this.success.clear();
+      }
+      this.ex = null;
+    }
+
+    public rpc_iterator_handle get_success() {
+      return this.success;
+    }
+
+    public alerts_by_trigger_and_time_result set_success(rpc_iterator_handle success) {
+      this.success = success;
+      return this;
+    }
+
+    public void unset_success() {
+      this.success = null;
+    }
+
+    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    public boolean is_set_success() {
+      return this.success != null;
+    }
+
+    public void set_success_isSet(boolean value) {
+      if (!value) {
+        this.success = null;
+      }
+    }
+
+    public rpc_invalid_operation get_ex() {
+      return this.ex;
+    }
+
+    public alerts_by_trigger_and_time_result set_ex(rpc_invalid_operation ex) {
+      this.ex = ex;
+      return this;
+    }
+
+    public void unset_ex() {
+      this.ex = null;
+    }
+
+    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    public boolean is_set_ex() {
+      return this.ex != null;
+    }
+
+    public void set_ex_isSet(boolean value) {
+      if (!value) {
+        this.ex = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, java.lang.Object value) {
+      switch (field) {
+      case SUCCESS:
+        if (value == null) {
+          unset_success();
+        } else {
+          set_success((rpc_iterator_handle)value);
+        }
+        break;
+
+      case EX:
+        if (value == null) {
+          unset_ex();
+        } else {
+          set_ex((rpc_invalid_operation)value);
+        }
+        break;
+
+      }
+    }
+
+    public java.lang.Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SUCCESS:
+        return get_success();
+
+      case EX:
+        return get_ex();
+
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new java.lang.IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SUCCESS:
+        return is_set_success();
+      case EX:
+        return is_set_ex();
+      }
+      throw new java.lang.IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(java.lang.Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof alerts_by_trigger_and_time_result)
+        return this.equals((alerts_by_trigger_and_time_result)that);
+      return false;
+    }
+
+    public boolean equals(alerts_by_trigger_and_time_result that) {
+      if (that == null)
+        return false;
+      if (this == that)
+        return true;
+
+      boolean this_present_success = true && this.is_set_success();
+      boolean that_present_success = true && that.is_set_success();
+      if (this_present_success || that_present_success) {
+        if (!(this_present_success && that_present_success))
+          return false;
+        if (!this.success.equals(that.success))
+          return false;
+      }
+
+      boolean this_present_ex = true && this.is_set_ex();
+      boolean that_present_ex = true && that.is_set_ex();
+      if (this_present_ex || that_present_ex) {
+        if (!(this_present_ex && that_present_ex))
+          return false;
+        if (!this.ex.equals(that.ex))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 1;
+
+      hashCode = hashCode * 8191 + ((is_set_success()) ? 131071 : 524287);
+      if (is_set_success())
+        hashCode = hashCode * 8191 + success.hashCode();
+
+      hashCode = hashCode * 8191 + ((is_set_ex()) ? 131071 : 524287);
+      if (is_set_ex())
+        hashCode = hashCode * 8191 + ex.hashCode();
+
+      return hashCode;
+    }
+
+    @Override
+    public int compareTo(alerts_by_trigger_and_time_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+
+      lastComparison = java.lang.Boolean.valueOf(is_set_success()).compareTo(other.is_set_success());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (is_set_success()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, other.success);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = java.lang.Boolean.valueOf(is_set_ex()).compareTo(other.is_set_ex());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (is_set_ex()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.ex, other.ex);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      scheme(iprot).read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      scheme(oprot).write(oprot, this);
+      }
+
+    @Override
+    public java.lang.String toString() {
+      java.lang.StringBuilder sb = new java.lang.StringBuilder("alerts_by_trigger_and_time_result(");
+      boolean first = true;
+
+      sb.append("success:");
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("ex:");
+      if (this.ex == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.ex);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+      if (success != null) {
+        success.validate();
+      }
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class alerts_by_trigger_and_time_resultStandardSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public alerts_by_trigger_and_time_resultStandardScheme getScheme() {
+        return new alerts_by_trigger_and_time_resultStandardScheme();
+      }
+    }
+
+    private static class alerts_by_trigger_and_time_resultStandardScheme extends org.apache.thrift.scheme.StandardScheme<alerts_by_trigger_and_time_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, alerts_by_trigger_and_time_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 0: // SUCCESS
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                if (struct.success == null) {
+                  struct.success = new rpc_iterator_handle();
+                }
+                struct.success.read(iprot);
+                struct.set_success_isSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 1: // EX
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                if (struct.ex == null) {
+                  struct.ex = new rpc_invalid_operation();
+                }
+                struct.ex.read(iprot);
+                struct.set_ex_isSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, alerts_by_trigger_and_time_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.success != null) {
+          oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
+          struct.success.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        if (struct.ex != null) {
+          oprot.writeFieldBegin(EX_FIELD_DESC);
+          struct.ex.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class alerts_by_trigger_and_time_resultTupleSchemeFactory implements org.apache.thrift.scheme.SchemeFactory {
+      public alerts_by_trigger_and_time_resultTupleScheme getScheme() {
+        return new alerts_by_trigger_and_time_resultTupleScheme();
+      }
+    }
+
+    private static class alerts_by_trigger_and_time_resultTupleScheme extends org.apache.thrift.scheme.TupleScheme<alerts_by_trigger_and_time_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, alerts_by_trigger_and_time_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TTupleProtocol oprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
+        java.util.BitSet optionals = new java.util.BitSet();
+        if (struct.is_set_success()) {
+          optionals.set(0);
+        }
+        if (struct.is_set_ex()) {
+          optionals.set(1);
+        }
+        oprot.writeBitSet(optionals, 2);
+        if (struct.is_set_success()) {
+          struct.success.write(oprot);
+        }
+        if (struct.is_set_ex()) {
+          struct.ex.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, alerts_by_trigger_and_time_result struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {

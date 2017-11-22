@@ -346,6 +346,22 @@ rpc_service_alerts_by_time_presult::~rpc_service_alerts_by_time_presult() throw(
 }
 
 
+rpc_service_alerts_by_trigger_and_time_args::~rpc_service_alerts_by_trigger_and_time_args() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_pargs::~rpc_service_alerts_by_trigger_and_time_pargs() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_result::~rpc_service_alerts_by_trigger_and_time_result() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_presult::~rpc_service_alerts_by_trigger_and_time_presult() throw() {
+}
+
+
 rpc_service_get_more_args::~rpc_service_get_more_args() throw() {
 }
 

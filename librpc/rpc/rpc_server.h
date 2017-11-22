@@ -62,7 +62,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       throw ex;
     } else {
       LOG_INFO << "Deregistered handler thread " << std::this_thread::get_id()
-               << " as " << ret;
+      << " as " << ret;
     }
   }
 
@@ -296,6 +296,21 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const int64_t begin_ms, const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
     auto alerts = store_->get_atomic_multilog(id)->get_alerts(begin_ms, end_ms);
+    auto ret = alerts_.insert(std::make_pair(it_id, alerts));
+    if (!ret.second) {
+      rpc_invalid_operation e;
+      e.msg = "Duplicate rpc_iterator_id assigned";
+      throw e;
+    }
+
+    alerts_more(_return, it_id);
+  }
+
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, int64_t id,
+      const std::string& trigger_name, const int64_t begin_ms,
+      const int64_t end_ms) {
+    rpc_iterator_id it_id = new_iterator_id();
+    auto alerts = store_->get_atomic_multilog(id)->get_alerts(trigger_name, begin_ms, end_ms);
     auto ret = alerts_.insert(std::make_pair(it_id, alerts));
     if (!ret.second) {
       rpc_invalid_operation e;

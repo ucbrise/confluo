@@ -433,10 +433,23 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return Stream of alerts in the time range
    */
-  lazy::stream<alert> get_alerts(uint64_t begin_ms,
-                                 uint64_t end_ms) const {
-    return lazy::container_to_stream(
-        alerts_.get_alerts(begin_ms, end_ms));
+  lazy::stream<alert> get_alerts(uint64_t begin_ms, uint64_t end_ms) const {
+    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms));
+  }
+
+  /**
+   * Gets the stream of alerts corresponding to given trigger in a time-range
+   * @param trigger_name Name of the trigger.
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
+   * @return Stream of alerts in the time range
+   */
+  lazy::stream<alert> get_alerts(const std::string& trigger_name,
+                                 uint64_t begin_ms, uint64_t end_ms) const {
+    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms)).filter(
+        [trigger_name](const alert& a) {
+          return a.trigger_name == trigger_name;
+        });
   }
 
   /**
