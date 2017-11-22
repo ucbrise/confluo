@@ -106,9 +106,10 @@ class atomic_multilog {
   void add_index(const std::string& field_name, double bucket_size =
                      configuration_params::INDEX_BUCKET_SIZE) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([field_name, bucket_size, &ex, this] {
-      add_index_task(field_name, bucket_size, ex);
-    });
+    std::future<void> ret = mgmt_pool_.submit(
+        [field_name, bucket_size, &ex, this] {
+          add_index_task(field_name, bucket_size, ex);
+        });
     ret.wait();
     if (ex.has_value())
       throw ex.value();
@@ -121,7 +122,7 @@ class atomic_multilog {
    */
   void remove_index(const std::string& field_name) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([field_name, &ex, this] {
+    std::future<void> ret = mgmt_pool_.submit([field_name, &ex, this] {
       remove_index_task(field_name, ex);
     });
     ret.wait();
@@ -155,7 +156,7 @@ class atomic_multilog {
    */
   void add_filter(const std::string& name, const std::string& expr) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([name, expr, &ex, this] {
+    std::future<void> ret = mgmt_pool_.submit([name, expr, &ex, this] {
       add_filter_task(name, expr, ex);
     });
     ret.wait();
@@ -170,7 +171,7 @@ class atomic_multilog {
    */
   void remove_filter(const std::string& name) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([name, &ex, this] {
+    std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
       remove_filter_task(name, ex);
     });
     ret.wait();
@@ -188,9 +189,10 @@ class atomic_multilog {
   void add_aggregate(const std::string& name, const std::string& filter_name,
                      const std::string& expr) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([name, filter_name, expr, &ex, this] {
-      add_aggregate_task(name, filter_name, expr, ex);
-    });
+    std::future<void> ret = mgmt_pool_.submit(
+        [name, filter_name, expr, &ex, this] {
+          add_aggregate_task(name, filter_name, expr, ex);
+        });
     ret.wait();
     if (ex.has_value())
       throw ex.value();
@@ -204,7 +206,7 @@ class atomic_multilog {
    */
   void remove_aggregate(const std::string& name) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([name, &ex, this] {
+    std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
       remove_aggregate_task(name, ex);
     });
     ret.wait();
@@ -239,9 +241,10 @@ class atomic_multilog {
     }
 
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([name, expr, periodicity_ms, &ex, this] {
-      add_trigger_task(name, expr, periodicity_ms, ex);
-    });
+    std::future<void> ret = mgmt_pool_.submit(
+        [name, expr, periodicity_ms, &ex, this] {
+          add_trigger_task(name, expr, periodicity_ms, ex);
+        });
     ret.wait();
     if (ex.has_value())
       throw ex.value();
@@ -254,7 +257,7 @@ class atomic_multilog {
    */
   void remove_trigger(const std::string& name) {
     optional<management_exception> ex;
-    auto ret = mgmt_pool_.submit([name, &ex, this] {
+    std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
       remove_trigger_task(name, ex);
     });
     ret.wait();
@@ -355,7 +358,7 @@ class atomic_multilog {
   lazy::stream<record_t> query_filter(const std::string& filter_name,
                                       uint64_t begin_ms,
                                       uint64_t end_ms) const {
-    size_t filter_id;
+    filter_id_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
       throw invalid_operation_exception(
           "Filter " + filter_name + " does not exist.");
@@ -384,7 +387,7 @@ class atomic_multilog {
    * @param expr The filter expression
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
-   * @return A stream contanining the results of the filter
+   * @return A stream containing the results of the filter
    */
   lazy::stream<record_t> query_filter(const std::string& filter_name,
                                       const std::string& expr,
@@ -396,6 +399,32 @@ class atomic_multilog {
       return e.test(r);
     };
     return query_filter(filter_name, begin_ms, end_ms).filter(expr_check);
+  }
+
+  /**
+   * Query a stored aggregate.
+   * @param aggregate_name The name of the aggregate
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
+   * @return The aggregate value for the given time range.
+   */
+  numeric query_aggregate(const std::string& aggregate_name, uint64_t begin_ms,
+                          uint64_t end_ms) {
+    aggregate_id_t aggregate_id;
+    if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
+      throw invalid_operation_exception(
+          "Aggregate " + aggregate_name + " does not exist.");
+    }
+    uint64_t version = rt_.get();
+    size_t fid = aggregate_id.filter_idx;
+    size_t aid = aggregate_id.aggregate_idx;
+    numeric agg;
+    aggregate_info* a = filters_.at(fid)->get_aggregate_info(aid);
+    for (uint64_t t = begin_ms; t <= end_ms; t++) {
+      numeric t_agg = filters_.at(fid)->lookup(t)->get_aggregate(aid, version);
+      agg = a->agg(agg, t_agg);
+    }
+    return agg;
   }
 
   /**
@@ -622,8 +651,9 @@ class atomic_multilog {
       return;
     }
     trigger_id.aggregate_id = aggregate_id;
-    aggregate_info* a = filters_.at(aggregate_id.filter_idx)->get_aggregate(
-        aggregate_id.aggregate_idx);
+    aggregate_info* a =
+        filters_.at(aggregate_id.filter_idx)->get_aggregate_info(
+            aggregate_id.aggregate_idx);
     trigger* t = new trigger(name, aggregate_name,
                              relop_utils::str_to_op(pt.relop),
                              a->value(pt.threshold), periodicity_ms);
@@ -646,7 +676,8 @@ class atomic_multilog {
     size_t fid = trigger_id.aggregate_id.filter_idx;
     size_t aid = trigger_id.aggregate_id.aggregate_idx;
     size_t tid = trigger_id.trigger_idx;
-    bool success = filters_.at(fid)->get_aggregate(aid)->remove_trigger(tid);
+    bool success = filters_.at(fid)->get_aggregate_info(aid)->remove_trigger(
+        tid);
     if (!success) {
       ex = management_exception("Trigger already invalidated.");
       return;
@@ -666,7 +697,7 @@ class atomic_multilog {
       if (f->is_valid()) {
         size_t naggs = f->num_aggregates();
         for (size_t aid = 0; aid < naggs; aid++) {
-          aggregate_info* a = f->get_aggregate(aid);
+          aggregate_info* a = f->get_aggregate_info(aid);
           if (a->is_valid()) {
             size_t ntriggers = a->num_triggers();
             for (size_t tid = 0; tid < ntriggers; tid++) {

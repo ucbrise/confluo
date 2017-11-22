@@ -80,9 +80,26 @@ class AtomicMultilogTest : public testing::Test {
     return reinterpret_cast<void*>(&r);
   }
 
+  static void* record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
+                      int64_t e, float f, double g, const char* h) {
+    r = {ts, a, b, c, d, e, f, g, {}};
+    size_t len = std::min(static_cast<size_t>(16), strlen(h));
+    memcpy(r.h, h, len);
+    for (size_t i = len; i < 16; i++) {
+      r.h[i] = '\0';
+    }
+    return reinterpret_cast<void*>(&r);
+  }
+
   static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-                                int64_t e, float f, double g, const char* h) {
+      int64_t e, float f, double g, const char* h) {
     void* rbuf = record(a, b, c, d, e, f, g, h);
+    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
+  }
+
+  static std::string record_str(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
+      int64_t e, float f, double g, const char* h) {
+    void* rbuf = record(ts, a, b, c, d, e, f, g, h);
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
@@ -115,7 +132,23 @@ class AtomicMultilogTest : public testing::Test {
     return builder.get_batch();
   }
 
- protected:
+  static record_batch get_batch(int64_t ts) {
+    record_batch_builder builder;
+    builder.add_record(record_str(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record_str(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record_str(ts, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record_str(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(
+        record_str(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record_str(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    builder.add_record(
+        record_str(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(
+        record_str(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+    return builder.get_batch();
+  }
+
+protected:
   uint8_t data_[DATA_SIZE];
 
   virtual void SetUp() override {
@@ -312,17 +345,17 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
   mlog.add_trigger("trigger1", "agg1 >= 10");
   mlog.add_trigger("trigger2", "agg2 >= 10");
 
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  mlog.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  mlog.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  mlog.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  mlog.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  mlog.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  mlog.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  mlog.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  mlog.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t now_ns = time_utils::cur_ns();
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = beg;
+  mlog.append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog.append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog.append(record(now_ns, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog.append(record(now_ns, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog.append(record(now_ns, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog.append(record(now_ns, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog.append(record(now_ns, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog.append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
@@ -403,17 +436,19 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   mlog.add_trigger("trigger7", "agg7 >= 10");
   mlog.add_trigger("trigger8", "agg8 >= 10");
 
-  mlog.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  mlog.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  mlog.append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  mlog.append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  mlog.append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  mlog.append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  mlog.append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  mlog.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t now_ns = time_utils::cur_ns();
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = beg;
+  mlog.append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog.append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog.append(record(now_ns, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog.append(record(now_ns, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog.append(record(now_ns, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog.append(record(now_ns, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog.append(record(now_ns, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog.append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
+  // Test filters
   size_t i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
       r.tail()) {
@@ -481,8 +516,8 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter1", "b > 4", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog.query_filter("filter1", "b > 4", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -511,14 +546,35 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
+  // Test aggregates
+  numeric val1 = mlog.query_aggregate("agg1", beg, end);
+  ASSERT_TRUE(numeric(32) == val1);
+  numeric val2 = mlog.query_aggregate("agg2", beg, end);
+  ASSERT_TRUE(numeric(36) == val2);
+  numeric val3 = mlog.query_aggregate("agg3", beg, end);
+  ASSERT_TRUE(numeric(12) == val3);
+  numeric val4 = mlog.query_aggregate("agg4", beg, end);
+  ASSERT_TRUE(numeric(0) == val4);
+  numeric val5 = mlog.query_aggregate("agg5", beg, end);
+  ASSERT_TRUE(numeric(12) == val5);
+  numeric val6 = mlog.query_aggregate("agg6", beg, end);
+  ASSERT_TRUE(numeric(54) == val6);
+  numeric val7 = mlog.query_aggregate("agg7", beg, end);
+  ASSERT_TRUE(numeric(20) == val7);
+  numeric val8 = mlog.query_aggregate("agg8", beg, end);
+  ASSERT_TRUE(numeric(26) == val8);
+
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
   auto alerts = mlog.get_alerts(beg, end);
-
+  size_t alert_count = 0;
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
+    ASSERT_TRUE(a.value >= numeric(10));
+    alert_count++;
   }
+  ASSERT_EQ(size_t(7), alert_count);
 }
 
 TEST_F(AtomicMultilogTest, BatchIndexTest) {
@@ -662,12 +718,14 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   mlog.add_trigger("trigger7", "agg7 >= 10");
   mlog.add_trigger("trigger8", "agg8 >= 10");
 
-  record_batch batch = get_batch();
+  int64_t now_ns = time_utils::cur_ns();
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = beg;
+  record_batch batch = get_batch(now_ns);
 
   mlog.append_batch(batch);
-  int64_t beg = batch.start_time_block();
-  int64_t end = batch.end_time_block();
 
+  // Test filters
   size_t i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
       r.tail()) {
@@ -735,8 +793,8 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter1", "b > 4", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog.query_filter("filter1", "b > 4", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -765,14 +823,35 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
+  // Test aggregates
+  numeric val1 = mlog.query_aggregate("agg1", beg, end);
+  ASSERT_TRUE(numeric(32) == val1);
+  numeric val2 = mlog.query_aggregate("agg2", beg, end);
+  ASSERT_TRUE(numeric(36) == val2);
+  numeric val3 = mlog.query_aggregate("agg3", beg, end);
+  ASSERT_TRUE(numeric(12) == val3);
+  numeric val4 = mlog.query_aggregate("agg4", beg, end);
+  ASSERT_TRUE(numeric(0) == val4);
+  numeric val5 = mlog.query_aggregate("agg5", beg, end);
+  ASSERT_TRUE(numeric(12) == val5);
+  numeric val6 = mlog.query_aggregate("agg6", beg, end);
+  ASSERT_TRUE(numeric(54) == val6);
+  numeric val7 = mlog.query_aggregate("agg7", beg, end);
+  ASSERT_TRUE(numeric(20) == val7);
+  numeric val8 = mlog.query_aggregate("agg8", beg, end);
+  ASSERT_TRUE(numeric(26) == val8);
+
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
   auto alerts = mlog.get_alerts(beg, end);
-
+  size_t alert_count = 0;
   for (const auto& a : alerts) {
     LOG_INFO<< "Alert: " << a.to_string();
+    ASSERT_TRUE(a.value >= numeric(10));
+    alert_count++;
   }
+  ASSERT_EQ(size_t(7), alert_count);
 }
 
 #endif /* CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_ */

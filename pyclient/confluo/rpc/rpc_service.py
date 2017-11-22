@@ -144,6 +144,16 @@ class Iface(object):
         """
         pass
 
+    def query_aggregate(self, multilog_id, aggregate_name, begin_ms, end_ms):
+        """
+        Parameters:
+         - multilog_id
+         - aggregate_name
+         - begin_ms
+         - end_ms
+        """
+        pass
+
     def adhoc_filter(self, multilog_id, filter_expr):
         """
         Parameters:
@@ -734,6 +744,45 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "read failed: unknown result")
 
+    def query_aggregate(self, multilog_id, aggregate_name, begin_ms, end_ms):
+        """
+        Parameters:
+         - multilog_id
+         - aggregate_name
+         - begin_ms
+         - end_ms
+        """
+        self.send_query_aggregate(multilog_id, aggregate_name, begin_ms, end_ms)
+        return self.recv_query_aggregate()
+
+    def send_query_aggregate(self, multilog_id, aggregate_name, begin_ms, end_ms):
+        self._oprot.writeMessageBegin('query_aggregate', TMessageType.CALL, self._seqid)
+        args = query_aggregate_args()
+        args.multilog_id = multilog_id
+        args.aggregate_name = aggregate_name
+        args.begin_ms = begin_ms
+        args.end_ms = end_ms
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_query_aggregate(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = query_aggregate_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "query_aggregate failed: unknown result")
+
     def adhoc_filter(self, multilog_id, filter_expr):
         """
         Parameters:
@@ -973,6 +1022,7 @@ class Processor(Iface, TProcessor):
         self._processMap["append"] = Processor.process_append
         self._processMap["append_batch"] = Processor.process_append_batch
         self._processMap["read"] = Processor.process_read
+        self._processMap["query_aggregate"] = Processor.process_query_aggregate
         self._processMap["adhoc_filter"] = Processor.process_adhoc_filter
         self._processMap["predef_filter"] = Processor.process_predef_filter
         self._processMap["combined_filter"] = Processor.process_combined_filter
@@ -1328,6 +1378,28 @@ class Processor(Iface, TProcessor):
             logging.exception(ex)
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("read", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_query_aggregate(self, seqid, iprot, oprot):
+        args = query_aggregate_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = query_aggregate_result()
+        try:
+            result.success = self._handler.query_aggregate(args.multilog_id, args.aggregate_name, args.begin_ms, args.end_ms)
+            msg_type = TMessageType.REPLY
+        except (TTransport.TTransportException, KeyboardInterrupt, SystemExit):
+            raise
+        except rpc_invalid_operation as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except Exception as ex:
+            msg_type = TMessageType.EXCEPTION
+            logging.exception(ex)
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("query_aggregate", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3568,6 +3640,174 @@ class read_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRING, 0)
             oprot.writeBinary(self.success)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class query_aggregate_args(object):
+    """
+    Attributes:
+     - multilog_id
+     - aggregate_name
+     - begin_ms
+     - end_ms
+    """
+
+    thrift_spec = (
+        None,  # 0
+        (1, TType.I64, 'multilog_id', None, None, ),  # 1
+        (2, TType.STRING, 'aggregate_name', 'UTF8', None, ),  # 2
+        (3, TType.I64, 'begin_ms', None, None, ),  # 3
+        (4, TType.I64, 'end_ms', None, None, ),  # 4
+    )
+
+    def __init__(self, multilog_id=None, aggregate_name=None, begin_ms=None, end_ms=None,):
+        self.multilog_id = multilog_id
+        self.aggregate_name = aggregate_name
+        self.begin_ms = begin_ms
+        self.end_ms = end_ms
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.multilog_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.aggregate_name = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.begin_ms = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I64:
+                    self.end_ms = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('query_aggregate_args')
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
+            oprot.writeFieldEnd()
+        if self.aggregate_name is not None:
+            oprot.writeFieldBegin('aggregate_name', TType.STRING, 2)
+            oprot.writeString(self.aggregate_name.encode('utf-8') if sys.version_info[0] == 2 else self.aggregate_name)
+            oprot.writeFieldEnd()
+        if self.begin_ms is not None:
+            oprot.writeFieldBegin('begin_ms', TType.I64, 3)
+            oprot.writeI64(self.begin_ms)
+            oprot.writeFieldEnd()
+        if self.end_ms is not None:
+            oprot.writeFieldBegin('end_ms', TType.I64, 4)
+            oprot.writeI64(self.end_ms)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class query_aggregate_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+    thrift_spec = (
+        (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
+        (1, TType.STRUCT, 'ex', (rpc_invalid_operation, rpc_invalid_operation.thrift_spec), None, ),  # 1
+    )
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, (self.__class__, self.thrift_spec))
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = rpc_invalid_operation()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, (self.__class__, self.thrift_spec)))
+            return
+        oprot.writeStructBegin('query_aggregate_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRING, 0)
+            oprot.writeString(self.success.encode('utf-8') if sys.version_info[0] == 2 else self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

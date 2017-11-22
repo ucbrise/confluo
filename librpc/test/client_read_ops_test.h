@@ -76,14 +76,31 @@ class ClientReadOpsTest : public testing::Test {
     return reinterpret_cast<void*>(&r);
   }
 
+  static void* record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
+                      int64_t e, float f, double g, const char* h) {
+    r = {ts, a, b, c, d, e, f, g, {}};
+    size_t len = std::min(static_cast<size_t>(16), strlen(h));
+    memcpy(r.h, h, len);
+    for (size_t i = len; i < 16; i++) {
+      r.h[i] = '\0';
+    }
+    return reinterpret_cast<void*>(&r);
+  }
+
   static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-                                int64_t e, float f, double g, const char* h) {
+      int64_t e, float f, double g, const char* h) {
     void* rbuf = record(a, b, c, d, e, f, g, h);
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
+  static std::string record_str(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
+      int64_t e, float f, double g, const char* h) {
+    void* rbuf = record(ts, a, b, c, d, e, f, g, h);
+    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
+  }
+
   static confluo_store* simple_table_store(const std::string& multilog_name,
-                                           storage::storage_id id) {
+      storage::storage_id id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         multilog_name,
@@ -121,7 +138,23 @@ class ClientReadOpsTest : public testing::Test {
     return builder.get_batch();
   }
 
- protected:
+  static record_batch get_batch(int64_t ts) {
+    record_batch_builder builder;
+    builder.add_record(record_str(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record_str(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record_str(ts, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record_str(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(
+        record_str(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record_str(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    builder.add_record(
+        record_str(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(
+        record_str(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+    return builder.get_batch();
+  }
+
+protected:
   uint8_t data_[DATA_SIZE];
 
   virtual void SetUp() override {
@@ -334,7 +367,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   }
 }
 
-TEST_F(ClientReadOpsTest, PreDefFilterTest) {
+TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
@@ -365,16 +398,17 @@ TEST_F(ClientReadOpsTest, PreDefFilterTest) {
   mlog->add_trigger("trigger7", "agg7 >= 10");
   mlog->add_trigger("trigger8", "agg8 >= 10");
 
-  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t now_ns = time_utils::cur_ns();
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = beg;
+  mlog->append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog->append(record(now_ns, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog->append(record(now_ns, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog->append(record(now_ns, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog->append(record(now_ns, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog->append(record(now_ns, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog->append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -385,6 +419,8 @@ TEST_F(ClientReadOpsTest, PreDefFilterTest) {
 
   rpc_client client = rpc_client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
+
+  // Test filters
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
@@ -474,12 +510,34 @@ TEST_F(ClientReadOpsTest, PreDefFilterTest) {
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
+  // Test aggregates
+  std::string val1, val2, val3, val4, val5, val6, val7, val8;
+  client.query_aggregate(val1, "agg1", beg, end);
+  ASSERT_TRUE("int(32)" == val1);
+  client.query_aggregate(val2, "agg2", beg, end);
+  ASSERT_TRUE("int(36)" == val2);
+  client.query_aggregate(val3, "agg3", beg, end);
+  ASSERT_TRUE("int(12)" == val3);
+  client.query_aggregate(val4, "agg4", beg, end);
+  ASSERT_TRUE("int(0)" == val4);
+  client.query_aggregate(val5, "agg5", beg, end);
+  ASSERT_TRUE("int(12)" == val5);
+  client.query_aggregate(val6, "agg6", beg, end);
+  ASSERT_TRUE("int(54)" == val6);
+  client.query_aggregate(val7, "agg7", beg, end);
+  ASSERT_TRUE("int(20)" == val7);
+  client.query_aggregate(val8, "agg8", beg, end);
+  ASSERT_TRUE("int(26)" == val8);
+
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
+  size_t alert_count = 0;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
     LOG_INFO<< "Alert: " << alerts.get();
+    alert_count++;
   }
+  ASSERT_EQ(size_t(7), alert_count);
 
   client.disconnect();
   server->stop();
@@ -612,7 +670,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   }
 }
 
-TEST_F(ClientReadOpsTest, BatchPreDefFilterTest) {
+TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
@@ -644,11 +702,11 @@ TEST_F(ClientReadOpsTest, BatchPreDefFilterTest) {
   mlog->add_trigger("trigger7", "agg7 >= 10");
   mlog->add_trigger("trigger8", "agg8 >= 10");
 
-  record_batch batch = get_batch();
+  int64_t now_ns = time_utils::cur_ns();
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = beg;
+  record_batch batch = get_batch(now_ns);
   mlog->append_batch(batch);
-
-  int64_t beg = batch.start_time_block();
-  int64_t end = batch.end_time_block();
 
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -660,6 +718,7 @@ TEST_F(ClientReadOpsTest, BatchPreDefFilterTest) {
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
 
+  // Test filters
   size_t i = 0;
   for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
@@ -749,13 +808,34 @@ TEST_F(ClientReadOpsTest, BatchPreDefFilterTest) {
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
+  // Test aggregates
+  std::string val1, val2, val3, val4, val5, val6, val7, val8;
+  client.query_aggregate(val1, "agg1", beg, end);
+  ASSERT_TRUE("int(32)" == val1);
+  client.query_aggregate(val2, "agg2", beg, end);
+  ASSERT_TRUE("int(36)" == val2);
+  client.query_aggregate(val3, "agg3", beg, end);
+  ASSERT_TRUE("int(12)" == val3);
+  client.query_aggregate(val4, "agg4", beg, end);
+  ASSERT_TRUE("int(0)" == val4);
+  client.query_aggregate(val5, "agg5", beg, end);
+  ASSERT_TRUE("int(12)" == val5);
+  client.query_aggregate(val6, "agg6", beg, end);
+  ASSERT_TRUE("int(54)" == val6);
+  client.query_aggregate(val7, "agg7", beg, end);
+  ASSERT_TRUE("int(20)" == val7);
+  client.query_aggregate(val8, "agg8", beg, end);
+  ASSERT_TRUE("int(26)" == val8);
+
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
+  size_t alert_count = 0;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
     LOG_INFO<< "Alert: " << alerts.get();
+    alert_count++;
   }
-
+  ASSERT_EQ(size_t(7), alert_count);
   client.disconnect();
   server->stop();
   if (serve_thread.joinable()) {

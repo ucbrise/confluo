@@ -103,6 +103,12 @@ class rpc_client:
             raise ValueError("Record must be of length " + str(schema_rec_size))
         self.builder_.add_record(record)
         
+    def flush(self):
+        if self.cur_multilog_id_ == -1:
+            raise ValueError("Must set atomic multilog first.")
+        if self.builder_.num_records_ > 0:
+            self.client_.append_batch(self.cur_multilog_id_, self.builder_.get_batch())
+        
     def write(self, record):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
@@ -110,12 +116,6 @@ class rpc_client:
         if len(record) != schema_rec_size:
             raise ValueError("Record must be of length " + str(schema_rec_size))
         self.client_.append(self.cur_multilog_id_, record)
-
-    def flush(self):
-        if self.cur_multilog_id_ == -1:
-            raise ValueError("Must set atomic multilog first.")
-        if self.builder_.num_records_ > 0:
-            self.client_.append_batch(self.cur_multilog_id_, self.builder_.get_batch())
             
     def read(self, offset):
         if self.cur_multilog_id_ == -1:
@@ -127,6 +127,11 @@ class rpc_client:
         start = offset - self.read_buf_offset
         stop = start + self.cur_schema_.record_size_ 
         return self.read_buf[start : stop]
+    
+    def query_aggregate(self, aggregate_name, begin_ms, end_ms):
+        if self.cur_multilog_id_ == -1:
+            raise ValueError("Must set atomic multilog first.")
+        return self.client_.query_aggregate(self.cur_multilog_id_, aggregate_name, begin_ms, end_ms)
 
     def adhoc_filter(self, filter_expr):
         if self.cur_multilog_id_ == -1:

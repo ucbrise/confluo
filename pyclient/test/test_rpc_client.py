@@ -275,16 +275,17 @@ class test_rpc_client(unittest.TestCase):
             client.add_trigger("trigger7", "agg7 >= 10")
             client.add_trigger("trigger8", "agg8 >= 10")
 
-            beg_ms = self.time_block(self.now_ns())
-            client.write(self.pack_record(False, "0", 0, 0, 0, 0.0, 0.01, "abc"))
-            client.write(self.pack_record(True, "1", 10, 2, 1, 0.1, 0.02, "defg"))
-            client.write(self.pack_record(False, "2", 20, 4, 10, 0.2, 0.03, "hijkl"))
-            client.write(self.pack_record(True, "3", 30, 6, 100, 0.3, 0.04, "mnopqr"))
-            client.write(self.pack_record(False, "4", 40, 8, 1000, 0.4, 0.05, "stuvwx"))
-            client.write(self.pack_record(True, "5", 50, 10, 10000, 0.5, 0.06, "yyy"))
-            client.write(self.pack_record(False, "6", 60, 12, 100000, 0.6, 0.07, "zzz"))
-            client.write(self.pack_record(True, "7", 70, 14, 1000000, 0.7, 0.08, "zzz"))
-            end_ms = self.time_block(self.now_ns())
+            now = self.now_ns()
+            beg_ms = self.time_block(now)
+            end_ms = self.time_block(now)
+            client.write(self.pack_record_time(now, False, "0", 0, 0, 0, 0.0, 0.01, "abc"))
+            client.write(self.pack_record_time(now, True, "1", 10, 2, 1, 0.1, 0.02, "defg"))
+            client.write(self.pack_record_time(now, False, "2", 20, 4, 10, 0.2, 0.03, "hijkl"))
+            client.write(self.pack_record_time(now, True, "3", 30, 6, 100, 0.3, 0.04, "mnopqr"))
+            client.write(self.pack_record_time(now, False, "4", 40, 8, 1000, 0.4, 0.05, "stuvwx"))
+            client.write(self.pack_record_time(now, True, "5", 50, 10, 10000, 0.5, 0.06, "yyy"))
+            client.write(self.pack_record_time(now, False, "6", 60, 12, 100000, 0.6, 0.07, "zzz"))
+            client.write(self.pack_record_time(now, True, "7", 70, 14, 1000000, 0.7, 0.08, "zzz"))
 
             i = 0
             for record in client.predef_filter("filter1", beg_ms, end_ms):
@@ -347,6 +348,31 @@ class test_rpc_client(unittest.TestCase):
                 assert record.at(2).unpack() > 4 or record.at(6).unpack() > 0.1
                 i += 1
             assert i == 3
+            
+            val1 = client.query_aggregate("agg1", beg_ms, end_ms)
+            assert "int(32)" == val1
+            
+            val2 = client.query_aggregate("agg2", beg_ms, end_ms)
+            assert "int(36)" == val2
+            
+            val3 = client.query_aggregate("agg3", beg_ms, end_ms)
+            assert "int(12)" == val3
+            
+            val4 = client.query_aggregate("agg4", beg_ms, end_ms)
+            assert "int(0)" == val4
+            
+            val5 = client.query_aggregate("agg5", beg_ms, end_ms)
+            assert "int(12)" == val5
+            
+            val6 = client.query_aggregate("agg6", beg_ms, end_ms)
+            assert "int(54)" == val6
+            
+            val7 = client.query_aggregate("agg7", beg_ms, end_ms)
+            assert "int(20)" == val7
+            
+            val8 = client.query_aggregate("agg8", beg_ms, end_ms)
+            assert "int(26)" == val8
+            
         except:
             client.disconnect()
             self.stop_server()
@@ -370,6 +396,19 @@ class test_rpc_client(unittest.TestCase):
     def pack_record(self, a, b, c, d, e, f, g, h):
         rec = ""
         rec += struct.pack("l", self.now_ns())
+        rec += struct.pack("?", a)
+        rec += struct.pack("c", b)
+        rec += struct.pack("h", c)
+        rec += struct.pack("i", d)
+        rec += struct.pack("l", e)
+        rec += struct.pack("f", f)
+        rec += struct.pack("d", g)
+        rec += struct.pack("16s", h)
+        return rec
+    
+    def pack_record_time(self, ts, a, b, c, d, e, f, g, h):
+        rec = ""
+        rec += struct.pack("l", ts)
         rec += struct.pack("?", a)
         rec += struct.pack("c", b)
         rec += struct.pack("h", c)

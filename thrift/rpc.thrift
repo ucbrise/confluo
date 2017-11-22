@@ -122,6 +122,9 @@ service rpc_service {
   
   // Read ops
   binary read(1: i64 multilog_id, 2: i64 offset, 3: i64 nrecords),
+  string query_aggregate(1: i64 multilog_id, 2: string aggregate_name, 
+                         3: i64 begin_ms, 4: i64 end_ms)
+          throws (1: rpc_invalid_operation ex),
   rpc_iterator_handle adhoc_filter(1: i64 multilog_id, 2: string filter_expr)
           throws (1: rpc_invalid_operation ex),
   rpc_iterator_handle predef_filter(1: i64 multilog_id, 2: string filter_name, 

@@ -48,6 +48,7 @@ class rpc_serviceIf {
   virtual int64_t append(const int64_t multilog_id, const std::string& data) = 0;
   virtual int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch) = 0;
   virtual void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) = 0;
+  virtual void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms) = 0;
   virtual void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr) = 0;
   virtual void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
   virtual void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
@@ -132,6 +133,9 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
     return _return;
   }
   void read(std::string& /* _return */, const int64_t /* multilog_id */, const int64_t /* offset */, const int64_t /* nrecords */) {
+    return;
+  }
+  void query_aggregate(std::string& /* _return */, const int64_t /* multilog_id */, const std::string& /* aggregate_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
   void adhoc_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_expr */) {
@@ -2078,6 +2082,149 @@ class rpc_service_read_presult {
 
 };
 
+typedef struct _rpc_service_query_aggregate_args__isset {
+  _rpc_service_query_aggregate_args__isset() : multilog_id(false), aggregate_name(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
+  bool aggregate_name :1;
+  bool begin_ms :1;
+  bool end_ms :1;
+} _rpc_service_query_aggregate_args__isset;
+
+class rpc_service_query_aggregate_args {
+ public:
+
+  rpc_service_query_aggregate_args(const rpc_service_query_aggregate_args&);
+  rpc_service_query_aggregate_args(rpc_service_query_aggregate_args&&);
+  rpc_service_query_aggregate_args& operator=(const rpc_service_query_aggregate_args&);
+  rpc_service_query_aggregate_args& operator=(rpc_service_query_aggregate_args&&);
+  rpc_service_query_aggregate_args() : multilog_id(0), aggregate_name(), begin_ms(0), end_ms(0) {
+  }
+
+  virtual ~rpc_service_query_aggregate_args() throw();
+  int64_t multilog_id;
+  std::string aggregate_name;
+  int64_t begin_ms;
+  int64_t end_ms;
+
+  _rpc_service_query_aggregate_args__isset __isset;
+
+  void __set_multilog_id(const int64_t val);
+
+  void __set_aggregate_name(const std::string& val);
+
+  void __set_begin_ms(const int64_t val);
+
+  void __set_end_ms(const int64_t val);
+
+  bool operator == (const rpc_service_query_aggregate_args & rhs) const
+  {
+    if (!(multilog_id == rhs.multilog_id))
+      return false;
+    if (!(aggregate_name == rhs.aggregate_name))
+      return false;
+    if (!(begin_ms == rhs.begin_ms))
+      return false;
+    if (!(end_ms == rhs.end_ms))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_query_aggregate_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_query_aggregate_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_query_aggregate_pargs {
+ public:
+
+
+  virtual ~rpc_service_query_aggregate_pargs() throw();
+  const int64_t* multilog_id;
+  const std::string* aggregate_name;
+  const int64_t* begin_ms;
+  const int64_t* end_ms;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_query_aggregate_result__isset {
+  _rpc_service_query_aggregate_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_query_aggregate_result__isset;
+
+class rpc_service_query_aggregate_result {
+ public:
+
+  rpc_service_query_aggregate_result(const rpc_service_query_aggregate_result&);
+  rpc_service_query_aggregate_result(rpc_service_query_aggregate_result&&);
+  rpc_service_query_aggregate_result& operator=(const rpc_service_query_aggregate_result&);
+  rpc_service_query_aggregate_result& operator=(rpc_service_query_aggregate_result&&);
+  rpc_service_query_aggregate_result() : success() {
+  }
+
+  virtual ~rpc_service_query_aggregate_result() throw();
+  std::string success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_query_aggregate_result__isset __isset;
+
+  void __set_success(const std::string& val);
+
+  void __set_ex(const rpc_invalid_operation& val);
+
+  bool operator == (const rpc_service_query_aggregate_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_query_aggregate_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_query_aggregate_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_query_aggregate_presult__isset {
+  _rpc_service_query_aggregate_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_query_aggregate_presult__isset;
+
+class rpc_service_query_aggregate_presult {
+ public:
+
+
+  virtual ~rpc_service_query_aggregate_presult() throw();
+  std::string* success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_query_aggregate_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _rpc_service_adhoc_filter_args__isset {
   _rpc_service_adhoc_filter_args__isset() : multilog_id(false), filter_expr(false) {}
   bool multilog_id :1;
@@ -2953,6 +3100,9 @@ class rpc_serviceClientT : virtual public rpc_serviceIf {
   void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   void send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return);
+  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  void send_query_aggregate(const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_query_aggregate(std::string& _return);
   void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr);
   void send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr);
   void recv_adhoc_filter(rpc_iterator_handle& _return);
@@ -3031,6 +3181,8 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_append_batch(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_read(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_read(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_query_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_query_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_adhoc_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_adhoc_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_predef_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -3094,6 +3246,9 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["read"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_read,
       &rpc_serviceProcessorT::process_read);
+    processMap_["query_aggregate"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_query_aggregate,
+      &rpc_serviceProcessorT::process_query_aggregate);
     processMap_["adhoc_filter"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_adhoc_filter,
       &rpc_serviceProcessorT::process_adhoc_filter);
@@ -3291,6 +3446,16 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
+  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->query_aggregate(_return, multilog_id, aggregate_name, begin_ms, end_ms);
+    }
+    ifaces_[i]->query_aggregate(_return, multilog_id, aggregate_name, begin_ms, end_ms);
+    return;
+  }
+
   void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
@@ -3429,6 +3594,9 @@ class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
   void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   int32_t send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return, const int32_t seqid);
+  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_query_aggregate(const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_query_aggregate(std::string& _return, const int32_t seqid);
   void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr);
   int32_t send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr);
   void recv_adhoc_filter(rpc_iterator_handle& _return, const int32_t seqid);

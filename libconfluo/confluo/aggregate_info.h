@@ -93,6 +93,18 @@ class aggregate_info {
   }
 
   /**
+   * Aggregates the data
+   * @param a A numeric
+   * @param b Another numeric
+   * @return An aggregate of the two numerics
+   */
+  numeric agg(const numeric& a, const numeric& b) {
+    return aggregators[agg_type_].agg(
+        a.type().is_none() ? aggregators[agg_type_].zero(field_type_) : a,
+        agg_type_ == aggregate_type::D_CNT ? count_one : b);
+  }
+
+  /**
    * Creates an aggregate using the parsed aggregate information
    *
    * @return The aggregate

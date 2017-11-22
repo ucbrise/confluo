@@ -64,7 +64,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       ex.msg = "Could not deregister handler";
       throw ex;
     } else {
-      LOG_INFO << "Deregistered handler thread " << std::this_thread::get_id() << " as " << ret;
+      LOG_INFO << "Deregistered handler thread " << std::this_thread::get_id()
+               << " as " << ret;
     }
   }
 
@@ -73,7 +74,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const rpc_storage_mode mode) {
     int64_t ret = -1;
     try {
-      ret = store_->create_atomic_multilog(name, rpc_type_conversions::convert_schema(schema),
+      ret = store_->create_atomic_multilog(name,
+          rpc_type_conversions::convert_schema(schema),
           rpc_type_conversions::convert_mode(mode));
     } catch(management_exception& ex) {
       rpc_management_exception e;
@@ -208,14 +210,24 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     return store_->get_atomic_multilog(id)->append_batch(rbatch);
   }
 
-  void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
+  void read(std::string& _return, int64_t id, const int64_t offset,
+      const int64_t nrecords) {
     uint64_t limit;
     ro_data_ptr ptr;
-    store_->get_atomic_multilog(id)->read(offset, limit, ptr);
+    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    mlog->read(offset, limit, ptr);
     char* data = reinterpret_cast<char*>(ptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
-        static_cast<size_t>(nrecords * store_->get_atomic_multilog(id)->record_size()));
+        static_cast<size_t>(nrecords * mlog->record_size()));
     _return.assign(data, size);
+  }
+
+  void query_aggregate(std::string& _return, int64_t id,
+      const std::string& aggregate_name,
+      const int64_t begin_ms,
+      const int64_t end_ms) {
+    atomic_multilog* m = store_->get_atomic_multilog(id);
+    _return = m->query_aggregate(aggregate_name, begin_ms, end_ms).to_string();
   }
 
   void adhoc_filter(rpc_iterator_handle& _return,int64_t id,

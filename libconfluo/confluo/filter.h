@@ -101,7 +101,7 @@ class filter {
    * @param id for the aggregate.
    * @return Reference to aggregate corresponding to id.
    */
-  aggregate_info* get_aggregate(size_t id) {
+  aggregate_info* get_aggregate_info(size_t id) {
     return aggregates_.at(id);
   }
 

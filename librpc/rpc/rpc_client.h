@@ -174,6 +174,15 @@ class rpc_client {
     client_->read(_return, cur_multilog_id_, offset, nrecords);
   }
 
+  void query_aggregate(std::string& _return, const std::string& aggregate_name,
+      int64_t begin_ms, int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->query_aggregate(_return, cur_multilog_id_, aggregate_name,
+                             begin_ms, end_ms);
+  }
+
   rpc_record_stream adhoc_filter(const std::string& filter_expr) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
