@@ -9,6 +9,7 @@ from confluo.rpc import data_types
 from confluo.rpc.schema import schema
 from confluo.rpc.schema import schema_builder
 from confluo.rpc.storage import storage_id
+from thrift.transport import TTransport
 
 class test_rpc_client(unittest.TestCase):
     SERVER_EXECUTABLE = os.getenv('CONFLUO_SERVER_EXEC', 'confluod')
@@ -27,7 +28,7 @@ class test_rpc_client(unittest.TestCase):
             try:
                 c = rpc_client.rpc_client("127.0.0.1", 9090)
                 check = False
-            except TTransportException as e:
+            except TTransport.TTransportException as e:
                 time.sleep(0.1)
                 
     def wait_for_process_death(self, pid):
