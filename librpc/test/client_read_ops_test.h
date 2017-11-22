@@ -7,6 +7,7 @@
 #include "atomic_multilog.h"
 #include "rpc_client.h"
 #include "rpc_server.h"
+#include "rpc_test_utils.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -177,7 +178,7 @@ TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
@@ -200,7 +201,7 @@ TEST_F(ClientReadOpsTest, ReadDurableTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
@@ -223,7 +224,7 @@ TEST_F(ClientReadOpsTest, ReadDurableRelaxedTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
@@ -267,7 +268,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
@@ -415,7 +416,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client = rpc_client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
@@ -595,7 +596,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);
@@ -738,7 +739,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(multilog_name);

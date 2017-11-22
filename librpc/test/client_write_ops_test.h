@@ -6,6 +6,7 @@
 #include "atomic_multilog.h"
 #include "rpc_client.h"
 #include "rpc_server.h"
+#include "rpc_test_utils.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -111,7 +112,7 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
 
@@ -140,7 +141,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);
@@ -175,7 +176,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);
@@ -307,7 +308,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);
@@ -544,7 +545,7 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
   std::thread serve_thread([&server] {
     server->serve();
   });
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);
@@ -594,7 +595,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);

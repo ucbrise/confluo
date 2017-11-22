@@ -12,14 +12,36 @@ from confluo.rpc.storage import storage_id
 
 class test_rpc_client(unittest.TestCase):
     SERVER_EXECUTABLE = os.getenv('CONFLUO_SERVER_EXEC', 'confluod')
+    
+    def check_pid(self, pid):
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
+        
+    def wait_till_server_ready(self):
+        check = True
+        while check:
+            try:
+                c = rpc_client.rpc_client("127.0.0.1", 9090)
+                check = False
+            except TTransportException as e:
+                time.sleep(0.1)
+                
+    def wait_for_process_death(self, pid):
+        while not self.check_pid(pid):
+            time.sleep(0.1)
 
     def start_server(self):
         self.server = subprocess.Popen([self.SERVER_EXECUTABLE, '--data-path', '/tmp'])
-        time.sleep(1)
+        self.wait_till_server_ready()
 
     def stop_server(self):
+        pid = self.server.pid
         self.server.kill()
-        time.sleep(1)
+        self.wait_for_process_death(pid)
 
     def test_conncurrent_connections(self):
         self.start_server()

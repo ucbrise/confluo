@@ -11,6 +11,8 @@
 #include "math.h"
 #include "gtest/gtest.h"
 
+#include "streaming_test_utils.h"
+
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
 
@@ -164,7 +166,7 @@ TEST_F(StreamTest, WriteTest) {
   std::thread serve_thread([&server] {
     server->serve();
   });
-  sleep(1);
+  streaming_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
   
   uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
   stream_producer sp(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
@@ -205,7 +207,7 @@ TEST_F(StreamTest, BufferTest) {
     server->serve();
   });
 
-  sleep(1);
+  streaming_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
   stream_producer client(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
@@ -261,7 +263,7 @@ TEST_F(StreamTest, ReadTest) {
     server->serve();
   });
 
-  sleep(1);
+  streaming_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   stream_consumer sc(SERVER_ADDRESS, SERVER_PORT, 
           rpc_configuration_params::READ_BATCH_SIZE);
@@ -314,7 +316,7 @@ TEST_F(StreamTest, ReadWriteTest) {
     server->serve();
   });
 
-  sleep(1);
+  streaming_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
   
   uint64_t buffer_timeout = static_cast<uint64_t>(1e30);
   stream_producer sp(SERVER_ADDRESS, SERVER_PORT, buffer_timeout);
