@@ -387,11 +387,11 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
   size_t first_count = 0;
   size_t second_count = 0;
 
-  for (const auto& a : before_alerts) {
+  for (auto a = before_alerts; !a.empty(); a = a.tail()) {
     first_count++;
   }
 
-  for (const auto& a : after_alerts) {
+  for (auto a = after_alerts; !a.empty(); a = a.tail()) {
     second_count++;
   }
 
@@ -408,7 +408,6 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
 }
 
 // TODO: Separate out the tests
-// TODO: Add tests for aggregates only
 TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   mlog.add_filter("filter1", "a == true");
@@ -567,11 +566,10 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  auto alerts = mlog.get_alerts(beg, end);
   size_t alert_count = 0;
-  for (const auto& a : alerts) {
-    LOG_INFO<< "Alert: " << a.to_string();
-    ASSERT_TRUE(a.value >= numeric(10));
+  for (auto a = mlog.get_alerts(beg, end); !a.empty(); a = a.tail()) {
+    LOG_INFO<< "Alert: " << a.head().to_string();
+    ASSERT_TRUE(a.head().value >= numeric(10));
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);
@@ -844,11 +842,10 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  auto alerts = mlog.get_alerts(beg, end);
   size_t alert_count = 0;
-  for (const auto& a : alerts) {
-    LOG_INFO<< "Alert: " << a.to_string();
-    ASSERT_TRUE(a.value >= numeric(10));
+  for (auto a = mlog.get_alerts(beg, end); !a.empty(); a = a.tail()) {
+    LOG_INFO<< "Alert: " << a.head().to_string();
+    ASSERT_TRUE(a.head().value >= numeric(10));
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);

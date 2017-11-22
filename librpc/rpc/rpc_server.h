@@ -32,13 +32,10 @@ namespace rpc {
 
 class rpc_service_handler : virtual public rpc_serviceIf {
  public:
-  typedef atomic_multilog::alert_list::iterator alert_iterator;
-  typedef std::pair<alert_iterator, alert_iterator> alert_entry;
-
   typedef std::map<rpc_iterator_id, lazy::stream<record_t>> adhoc_map;
   typedef std::map<rpc_iterator_id, lazy::stream<record_t>> predef_map;
   typedef std::map<rpc_iterator_id, lazy::stream<record_t>> combined_map;
-  typedef std::map<rpc_iterator_id, alert_entry> alerts_map;
+  typedef std::map<rpc_iterator_id, lazy::stream<alert>> alerts_map;
 
   rpc_service_handler(confluo_store* store)
       : handler_id_(-1),
@@ -299,7 +296,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const int64_t begin_ms, const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
     auto alerts = store_->get_atomic_multilog(id)->get_alerts(begin_ms, end_ms);
-    auto ret = alerts_.insert(std::make_pair(it_id, std::make_pair(alerts.begin(), alerts.end())));
+    auto ret = alerts_.insert(std::make_pair(it_id, alerts));
     if (!ret.second) {
       rpc_invalid_operation e;
       e.msg = "Duplicate rpc_iterator_id assigned";
@@ -445,13 +442,13 @@ private:
       auto& res = alerts_.at(it_id);
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       size_t i = 0;
-      for (auto& it = res.first; it != res.second && i < to_read; ++i, ++it) {
-        const alert& a = *it;
+      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
+        alert a = res.head();
         _return.data.append(a.to_string());
         _return.data.push_back('\n');
       }
       _return.num_entries = i;
-      _return.has_more = res.first != res.second;
+      _return.has_more = !res.empty();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";

@@ -188,8 +188,8 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
     i++;
   }
 
@@ -219,11 +219,11 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   size_t first_count = 0;
   size_t second_count = 0;
 
-  for (const auto& a : before_alerts) {
+  for (auto a = before_alerts; !a.empty(); a = a.tail()) {
     first_count++;
   }
 
-  for (const auto& a : after_alerts) {
+  for (auto a = after_alerts; !a.empty(); a = a.tail()) {
     second_count++;
   }
 
@@ -493,64 +493,64 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter2", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter2", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter3", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter3", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter4", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter4", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter5", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter5", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter6", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter6", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter7", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter7", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter8", beg, end); !r.empty();
-      r = r.tail()) {
+  for (auto r = mlog->query_filter("filter8", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -589,13 +589,34 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
+  // Test aggregates
+  numeric val1 = mlog->query_aggregate("agg1", beg, end);
+  ASSERT_TRUE(numeric(32) == val1);
+  numeric val2 = mlog->query_aggregate("agg2", beg, end);
+  ASSERT_TRUE(numeric(36) == val2);
+  numeric val3 = mlog->query_aggregate("agg3", beg, end);
+  ASSERT_TRUE(numeric(12) == val3);
+  numeric val4 = mlog->query_aggregate("agg4", beg, end);
+  ASSERT_TRUE(numeric(0) == val4);
+  numeric val5 = mlog->query_aggregate("agg5", beg, end);
+  ASSERT_TRUE(numeric(12) == val5);
+  numeric val6 = mlog->query_aggregate("agg6", beg, end);
+  ASSERT_TRUE(numeric(54) == val6);
+  numeric val7 = mlog->query_aggregate("agg7", beg, end);
+  ASSERT_TRUE(numeric(20) == val7);
+  numeric val8 = mlog->query_aggregate("agg8", beg, end);
+  ASSERT_TRUE(numeric(26) == val8);
+
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  auto alerts = mlog->get_alerts(beg, end);
-  for (const auto& a : alerts) {
-    LOG_INFO<< "Alert: " << a.to_string();
+  size_t alert_count = 0;
+  for (auto a = mlog->get_alerts(beg, end); !a.empty(); a = a.tail()) {
+    LOG_INFO<< "Alert: " << a.head().to_string();
+    ASSERT_TRUE(a.head().value >= numeric(10));
+    alert_count++;
   }
+  ASSERT_EQ(size_t(7), alert_count);
 
   client.disconnect();
   server->stop();

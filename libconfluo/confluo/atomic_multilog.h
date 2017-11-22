@@ -428,13 +428,15 @@ class atomic_multilog {
   }
 
   /**
-   * Gets the alert list
-   * @param ts_block_begin The beginning of the block
-   * @param ts_block_end The end of the block
-   * @return A list of alerts in the block range
+   * Gets the stream of alerts corresponding to a time-range
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
+   * @return Stream of alerts in the time range
    */
-  alert_list get_alerts(uint64_t ts_block_begin, uint64_t ts_block_end) const {
-    return alerts_.get_alerts(ts_block_begin, ts_block_end);
+  lazy::stream<alert> get_alerts(uint64_t begin_ms,
+                                 uint64_t end_ms) const {
+    return lazy::container_to_stream(
+        alerts_.get_alerts(begin_ms, end_ms));
   }
 
   /**
