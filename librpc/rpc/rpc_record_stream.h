@@ -12,10 +12,10 @@ class rpc_record_stream {
  public:
   typedef rpc_serviceClient thrift_client;
 
-  rpc_record_stream(int64_t table_id, const schema_t& schema,
+  rpc_record_stream(int64_t multilog_id, const schema_t& schema,
                     shared_ptr<thrift_client> client,
                     rpc_iterator_handle&& handle)
-      : table_id_(table_id),
+      : multilog_id_(multilog_id),
         schema_(schema),
         handle_(std::move(handle)),
         cur_off_(0),
@@ -30,7 +30,7 @@ class rpc_record_stream {
     if (has_more()) {
       cur_off_ += schema_.record_size();
       if (cur_off_ == handle_.data.size() && handle_.has_more) {
-        client_->get_more(handle_, table_id_, handle_.desc);
+        client_->get_more(handle_, multilog_id_, handle_.desc);
         cur_off_ = 0;
       }
     }
@@ -42,7 +42,7 @@ class rpc_record_stream {
   }
 
  private:
-  int64_t table_id_;
+  int64_t multilog_id_;
   schema_t schema_;
   rpc_iterator_handle handle_;
   size_t cur_off_;

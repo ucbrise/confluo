@@ -27,31 +27,35 @@ class rpc_serviceIf {
    */
   virtual void register_handler() = 0;
   virtual void deregister_handler() = 0;
-  virtual int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
-  virtual void get_table_info(rpc_table_info& _return, const std::string& table_name) = 0;
-  virtual void remove_table(const int64_t table_id) = 0;
-  virtual void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size) = 0;
-  virtual void remove_index(const int64_t table_id, const std::string& field_name) = 0;
-  virtual void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr) = 0;
-  virtual void remove_filter(const int64_t table_id, const std::string& filter_name) = 0;
-  virtual void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr) = 0;
-  virtual void remove_trigger(const int64_t table_id, const std::string& trigger_name) = 0;
+  virtual int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
+  virtual void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) = 0;
+  virtual void remove_atomic_multilog(const int64_t multilog_id) = 0;
+  virtual void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size) = 0;
+  virtual void remove_index(const int64_t multilog_id, const std::string& field_name) = 0;
+  virtual void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr) = 0;
+  virtual void remove_filter(const int64_t multilog_id, const std::string& filter_name) = 0;
+  virtual void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr) = 0;
+  virtual void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name) = 0;
+  virtual void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr) = 0;
+  virtual void remove_trigger(const int64_t multilog_id, const std::string& trigger_name) = 0;
 
   /**
    * Query ops *
    * 
-   * @param table_id
+   * @param multilog_id
    * @param data
    */
-  virtual int64_t append(const int64_t table_id, const std::string& data) = 0;
-  virtual int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) = 0;
-  virtual void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords) = 0;
-  virtual void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr) = 0;
-  virtual void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc) = 0;
-  virtual int64_t num_records(const int64_t table_id) = 0;
+  virtual int64_t append(const int64_t multilog_id, const std::string& data) = 0;
+  virtual int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch) = 0;
+  virtual void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) = 0;
+  virtual void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr) = 0;
+  virtual void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) = 0;
+  virtual void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc) = 0;
+  virtual int64_t num_records(const int64_t multilog_id) = 0;
 };
 
 class rpc_serviceIfFactory {
@@ -87,61 +91,73 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
   void deregister_handler() {
     return;
   }
-  int64_t create_table(const std::string& /* table_name */, const rpc_schema& /* schema */, const rpc_storage_mode /* mode */) {
+  int64_t create_atomic_multilog(const std::string& /* name */, const rpc_schema& /* schema */, const rpc_storage_mode /* mode */) {
     int64_t _return = 0;
     return _return;
   }
-  void get_table_info(rpc_table_info& /* _return */, const std::string& /* table_name */) {
+  void get_atomic_multilog_info(rpc_atomic_multilog_info& /* _return */, const std::string& /* name */) {
     return;
   }
-  void remove_table(const int64_t /* table_id */) {
+  void remove_atomic_multilog(const int64_t /* multilog_id */) {
     return;
   }
-  void add_index(const int64_t /* table_id */, const std::string& /* field_name */, const double /* bucket_size */) {
+  void add_index(const int64_t /* multilog_id */, const std::string& /* field_name */, const double /* bucket_size */) {
     return;
   }
-  void remove_index(const int64_t /* table_id */, const std::string& /* field_name */) {
+  void remove_index(const int64_t /* multilog_id */, const std::string& /* field_name */) {
     return;
   }
-  void add_filter(const int64_t /* table_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */) {
+  void add_filter(const int64_t /* multilog_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */) {
     return;
   }
-  void remove_filter(const int64_t /* table_id */, const std::string& /* filter_name */) {
+  void remove_filter(const int64_t /* multilog_id */, const std::string& /* filter_name */) {
     return;
   }
-  void add_trigger(const int64_t /* table_id */, const std::string& /* trigger_name */, const std::string& /* filter_name */, const std::string& /* trigger_expr */) {
+  void add_aggregate(const int64_t /* mutlilog_id */, const std::string& /* aggregate_name */, const std::string& /* filter_name */, const std::string& /* aggregate_expr */) {
     return;
   }
-  void remove_trigger(const int64_t /* table_id */, const std::string& /* trigger_name */) {
+  void remove_aggregate(const int64_t /* multilog_id */, const std::string& /* aggregate_name */) {
     return;
   }
-  int64_t append(const int64_t /* table_id */, const std::string& /* data */) {
+  void add_trigger(const int64_t /* multilog_id */, const std::string& /* trigger_name */, const std::string& /* trigger_expr */) {
+    return;
+  }
+  void remove_trigger(const int64_t /* multilog_id */, const std::string& /* trigger_name */) {
+    return;
+  }
+  int64_t append(const int64_t /* multilog_id */, const std::string& /* data */) {
     int64_t _return = 0;
     return _return;
   }
-  int64_t append_batch(const int64_t /* table_id */, const rpc_record_batch& /* batch */) {
+  int64_t append_batch(const int64_t /* multilog_id */, const rpc_record_batch& /* batch */) {
     int64_t _return = 0;
     return _return;
   }
-  void read(std::string& /* _return */, const int64_t /* table_id */, const int64_t /* offset */, const int64_t /* nrecords */) {
+  void read(std::string& /* _return */, const int64_t /* multilog_id */, const int64_t /* offset */, const int64_t /* nrecords */) {
     return;
   }
-  void adhoc_filter(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const std::string& /* filter_expr */) {
+  void query_aggregate(std::string& /* _return */, const int64_t /* multilog_id */, const std::string& /* aggregate_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  void predef_filter(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const std::string& /* filter_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void adhoc_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_expr */) {
     return;
   }
-  void combined_filter(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void predef_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  void alerts_by_time(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void combined_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  void get_more(rpc_iterator_handle& /* _return */, const int64_t /* table_id */, const rpc_iterator_descriptor& /* desc */) {
+  void alerts_by_time(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
     return;
   }
-  int64_t num_records(const int64_t /* table_id */) {
+  void alerts_by_trigger_and_time(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* trigger_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+    return;
+  }
+  void get_more(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const rpc_iterator_descriptor& /* desc */) {
+    return;
+  }
+  int64_t num_records(const int64_t /* multilog_id */) {
     int64_t _return = 0;
     return _return;
   }
@@ -351,39 +367,39 @@ class rpc_service_deregister_handler_presult {
 
 };
 
-typedef struct _rpc_service_create_table_args__isset {
-  _rpc_service_create_table_args__isset() : table_name(false), schema(false), mode(false) {}
-  bool table_name :1;
+typedef struct _rpc_service_create_atomic_multilog_args__isset {
+  _rpc_service_create_atomic_multilog_args__isset() : name(false), schema(false), mode(false) {}
+  bool name :1;
   bool schema :1;
   bool mode :1;
-} _rpc_service_create_table_args__isset;
+} _rpc_service_create_atomic_multilog_args__isset;
 
-class rpc_service_create_table_args {
+class rpc_service_create_atomic_multilog_args {
  public:
 
-  rpc_service_create_table_args(const rpc_service_create_table_args&);
-  rpc_service_create_table_args(rpc_service_create_table_args&&);
-  rpc_service_create_table_args& operator=(const rpc_service_create_table_args&);
-  rpc_service_create_table_args& operator=(rpc_service_create_table_args&&);
-  rpc_service_create_table_args() : table_name(), mode((rpc_storage_mode)0) {
+  rpc_service_create_atomic_multilog_args(const rpc_service_create_atomic_multilog_args&);
+  rpc_service_create_atomic_multilog_args(rpc_service_create_atomic_multilog_args&&);
+  rpc_service_create_atomic_multilog_args& operator=(const rpc_service_create_atomic_multilog_args&);
+  rpc_service_create_atomic_multilog_args& operator=(rpc_service_create_atomic_multilog_args&&);
+  rpc_service_create_atomic_multilog_args() : name(), mode((rpc_storage_mode)0) {
   }
 
-  virtual ~rpc_service_create_table_args() throw();
-  std::string table_name;
+  virtual ~rpc_service_create_atomic_multilog_args() throw();
+  std::string name;
   rpc_schema schema;
   rpc_storage_mode mode;
 
-  _rpc_service_create_table_args__isset __isset;
+  _rpc_service_create_atomic_multilog_args__isset __isset;
 
-  void __set_table_name(const std::string& val);
+  void __set_name(const std::string& val);
 
   void __set_schema(const rpc_schema& val);
 
   void __set_mode(const rpc_storage_mode val);
 
-  bool operator == (const rpc_service_create_table_args & rhs) const
+  bool operator == (const rpc_service_create_atomic_multilog_args & rhs) const
   {
-    if (!(table_name == rhs.table_name))
+    if (!(name == rhs.name))
       return false;
     if (!(schema == rhs.schema))
       return false;
@@ -391,11 +407,11 @@ class rpc_service_create_table_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_create_table_args &rhs) const {
+  bool operator != (const rpc_service_create_atomic_multilog_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_create_table_args & ) const;
+  bool operator < (const rpc_service_create_atomic_multilog_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -405,12 +421,12 @@ class rpc_service_create_table_args {
 };
 
 
-class rpc_service_create_table_pargs {
+class rpc_service_create_atomic_multilog_pargs {
  public:
 
 
-  virtual ~rpc_service_create_table_pargs() throw();
-  const std::string* table_name;
+  virtual ~rpc_service_create_atomic_multilog_pargs() throw();
+  const std::string* name;
   const rpc_schema* schema;
   const rpc_storage_mode* mode;
 
@@ -419,33 +435,33 @@ class rpc_service_create_table_pargs {
 
 };
 
-typedef struct _rpc_service_create_table_result__isset {
-  _rpc_service_create_table_result__isset() : success(false), ex(false) {}
+typedef struct _rpc_service_create_atomic_multilog_result__isset {
+  _rpc_service_create_atomic_multilog_result__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _rpc_service_create_table_result__isset;
+} _rpc_service_create_atomic_multilog_result__isset;
 
-class rpc_service_create_table_result {
+class rpc_service_create_atomic_multilog_result {
  public:
 
-  rpc_service_create_table_result(const rpc_service_create_table_result&);
-  rpc_service_create_table_result(rpc_service_create_table_result&&);
-  rpc_service_create_table_result& operator=(const rpc_service_create_table_result&);
-  rpc_service_create_table_result& operator=(rpc_service_create_table_result&&);
-  rpc_service_create_table_result() : success(0) {
+  rpc_service_create_atomic_multilog_result(const rpc_service_create_atomic_multilog_result&);
+  rpc_service_create_atomic_multilog_result(rpc_service_create_atomic_multilog_result&&);
+  rpc_service_create_atomic_multilog_result& operator=(const rpc_service_create_atomic_multilog_result&);
+  rpc_service_create_atomic_multilog_result& operator=(rpc_service_create_atomic_multilog_result&&);
+  rpc_service_create_atomic_multilog_result() : success(0) {
   }
 
-  virtual ~rpc_service_create_table_result() throw();
+  virtual ~rpc_service_create_atomic_multilog_result() throw();
   int64_t success;
   rpc_management_exception ex;
 
-  _rpc_service_create_table_result__isset __isset;
+  _rpc_service_create_atomic_multilog_result__isset __isset;
 
   void __set_success(const int64_t val);
 
   void __set_ex(const rpc_management_exception& val);
 
-  bool operator == (const rpc_service_create_table_result & rhs) const
+  bool operator == (const rpc_service_create_atomic_multilog_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
@@ -453,11 +469,11 @@ class rpc_service_create_table_result {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_create_table_result &rhs) const {
+  bool operator != (const rpc_service_create_atomic_multilog_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_create_table_result & ) const;
+  bool operator < (const rpc_service_create_atomic_multilog_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -466,60 +482,60 @@ class rpc_service_create_table_result {
 
 };
 
-typedef struct _rpc_service_create_table_presult__isset {
-  _rpc_service_create_table_presult__isset() : success(false), ex(false) {}
+typedef struct _rpc_service_create_atomic_multilog_presult__isset {
+  _rpc_service_create_atomic_multilog_presult__isset() : success(false), ex(false) {}
   bool success :1;
   bool ex :1;
-} _rpc_service_create_table_presult__isset;
+} _rpc_service_create_atomic_multilog_presult__isset;
 
-class rpc_service_create_table_presult {
+class rpc_service_create_atomic_multilog_presult {
  public:
 
 
-  virtual ~rpc_service_create_table_presult() throw();
+  virtual ~rpc_service_create_atomic_multilog_presult() throw();
   int64_t* success;
   rpc_management_exception ex;
 
-  _rpc_service_create_table_presult__isset __isset;
+  _rpc_service_create_atomic_multilog_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
 
 };
 
-typedef struct _rpc_service_get_table_info_args__isset {
-  _rpc_service_get_table_info_args__isset() : table_name(false) {}
-  bool table_name :1;
-} _rpc_service_get_table_info_args__isset;
+typedef struct _rpc_service_get_atomic_multilog_info_args__isset {
+  _rpc_service_get_atomic_multilog_info_args__isset() : name(false) {}
+  bool name :1;
+} _rpc_service_get_atomic_multilog_info_args__isset;
 
-class rpc_service_get_table_info_args {
+class rpc_service_get_atomic_multilog_info_args {
  public:
 
-  rpc_service_get_table_info_args(const rpc_service_get_table_info_args&);
-  rpc_service_get_table_info_args(rpc_service_get_table_info_args&&);
-  rpc_service_get_table_info_args& operator=(const rpc_service_get_table_info_args&);
-  rpc_service_get_table_info_args& operator=(rpc_service_get_table_info_args&&);
-  rpc_service_get_table_info_args() : table_name() {
+  rpc_service_get_atomic_multilog_info_args(const rpc_service_get_atomic_multilog_info_args&);
+  rpc_service_get_atomic_multilog_info_args(rpc_service_get_atomic_multilog_info_args&&);
+  rpc_service_get_atomic_multilog_info_args& operator=(const rpc_service_get_atomic_multilog_info_args&);
+  rpc_service_get_atomic_multilog_info_args& operator=(rpc_service_get_atomic_multilog_info_args&&);
+  rpc_service_get_atomic_multilog_info_args() : name() {
   }
 
-  virtual ~rpc_service_get_table_info_args() throw();
-  std::string table_name;
+  virtual ~rpc_service_get_atomic_multilog_info_args() throw();
+  std::string name;
 
-  _rpc_service_get_table_info_args__isset __isset;
+  _rpc_service_get_atomic_multilog_info_args__isset __isset;
 
-  void __set_table_name(const std::string& val);
+  void __set_name(const std::string& val);
 
-  bool operator == (const rpc_service_get_table_info_args & rhs) const
+  bool operator == (const rpc_service_get_atomic_multilog_info_args & rhs) const
   {
-    if (!(table_name == rhs.table_name))
+    if (!(name == rhs.name))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_get_table_info_args &rhs) const {
+  bool operator != (const rpc_service_get_atomic_multilog_info_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_get_table_info_args & ) const;
+  bool operator < (const rpc_service_get_atomic_multilog_info_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -529,51 +545,51 @@ class rpc_service_get_table_info_args {
 };
 
 
-class rpc_service_get_table_info_pargs {
+class rpc_service_get_atomic_multilog_info_pargs {
  public:
 
 
-  virtual ~rpc_service_get_table_info_pargs() throw();
-  const std::string* table_name;
+  virtual ~rpc_service_get_atomic_multilog_info_pargs() throw();
+  const std::string* name;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _rpc_service_get_table_info_result__isset {
-  _rpc_service_get_table_info_result__isset() : success(false) {}
+typedef struct _rpc_service_get_atomic_multilog_info_result__isset {
+  _rpc_service_get_atomic_multilog_info_result__isset() : success(false) {}
   bool success :1;
-} _rpc_service_get_table_info_result__isset;
+} _rpc_service_get_atomic_multilog_info_result__isset;
 
-class rpc_service_get_table_info_result {
+class rpc_service_get_atomic_multilog_info_result {
  public:
 
-  rpc_service_get_table_info_result(const rpc_service_get_table_info_result&);
-  rpc_service_get_table_info_result(rpc_service_get_table_info_result&&);
-  rpc_service_get_table_info_result& operator=(const rpc_service_get_table_info_result&);
-  rpc_service_get_table_info_result& operator=(rpc_service_get_table_info_result&&);
-  rpc_service_get_table_info_result() {
+  rpc_service_get_atomic_multilog_info_result(const rpc_service_get_atomic_multilog_info_result&);
+  rpc_service_get_atomic_multilog_info_result(rpc_service_get_atomic_multilog_info_result&&);
+  rpc_service_get_atomic_multilog_info_result& operator=(const rpc_service_get_atomic_multilog_info_result&);
+  rpc_service_get_atomic_multilog_info_result& operator=(rpc_service_get_atomic_multilog_info_result&&);
+  rpc_service_get_atomic_multilog_info_result() {
   }
 
-  virtual ~rpc_service_get_table_info_result() throw();
-  rpc_table_info success;
+  virtual ~rpc_service_get_atomic_multilog_info_result() throw();
+  rpc_atomic_multilog_info success;
 
-  _rpc_service_get_table_info_result__isset __isset;
+  _rpc_service_get_atomic_multilog_info_result__isset __isset;
 
-  void __set_success(const rpc_table_info& val);
+  void __set_success(const rpc_atomic_multilog_info& val);
 
-  bool operator == (const rpc_service_get_table_info_result & rhs) const
+  bool operator == (const rpc_service_get_atomic_multilog_info_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_get_table_info_result &rhs) const {
+  bool operator != (const rpc_service_get_atomic_multilog_info_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_get_table_info_result & ) const;
+  bool operator < (const rpc_service_get_atomic_multilog_info_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -582,58 +598,58 @@ class rpc_service_get_table_info_result {
 
 };
 
-typedef struct _rpc_service_get_table_info_presult__isset {
-  _rpc_service_get_table_info_presult__isset() : success(false) {}
+typedef struct _rpc_service_get_atomic_multilog_info_presult__isset {
+  _rpc_service_get_atomic_multilog_info_presult__isset() : success(false) {}
   bool success :1;
-} _rpc_service_get_table_info_presult__isset;
+} _rpc_service_get_atomic_multilog_info_presult__isset;
 
-class rpc_service_get_table_info_presult {
+class rpc_service_get_atomic_multilog_info_presult {
  public:
 
 
-  virtual ~rpc_service_get_table_info_presult() throw();
-  rpc_table_info* success;
+  virtual ~rpc_service_get_atomic_multilog_info_presult() throw();
+  rpc_atomic_multilog_info* success;
 
-  _rpc_service_get_table_info_presult__isset __isset;
+  _rpc_service_get_atomic_multilog_info_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
 
 };
 
-typedef struct _rpc_service_remove_table_args__isset {
-  _rpc_service_remove_table_args__isset() : table_id(false) {}
-  bool table_id :1;
-} _rpc_service_remove_table_args__isset;
+typedef struct _rpc_service_remove_atomic_multilog_args__isset {
+  _rpc_service_remove_atomic_multilog_args__isset() : multilog_id(false) {}
+  bool multilog_id :1;
+} _rpc_service_remove_atomic_multilog_args__isset;
 
-class rpc_service_remove_table_args {
+class rpc_service_remove_atomic_multilog_args {
  public:
 
-  rpc_service_remove_table_args(const rpc_service_remove_table_args&);
-  rpc_service_remove_table_args(rpc_service_remove_table_args&&);
-  rpc_service_remove_table_args& operator=(const rpc_service_remove_table_args&);
-  rpc_service_remove_table_args& operator=(rpc_service_remove_table_args&&);
-  rpc_service_remove_table_args() : table_id(0) {
+  rpc_service_remove_atomic_multilog_args(const rpc_service_remove_atomic_multilog_args&);
+  rpc_service_remove_atomic_multilog_args(rpc_service_remove_atomic_multilog_args&&);
+  rpc_service_remove_atomic_multilog_args& operator=(const rpc_service_remove_atomic_multilog_args&);
+  rpc_service_remove_atomic_multilog_args& operator=(rpc_service_remove_atomic_multilog_args&&);
+  rpc_service_remove_atomic_multilog_args() : multilog_id(0) {
   }
 
-  virtual ~rpc_service_remove_table_args() throw();
-  int64_t table_id;
+  virtual ~rpc_service_remove_atomic_multilog_args() throw();
+  int64_t multilog_id;
 
-  _rpc_service_remove_table_args__isset __isset;
+  _rpc_service_remove_atomic_multilog_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
-  bool operator == (const rpc_service_remove_table_args & rhs) const
+  bool operator == (const rpc_service_remove_atomic_multilog_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_table_args &rhs) const {
+  bool operator != (const rpc_service_remove_atomic_multilog_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_table_args & ) const;
+  bool operator < (const rpc_service_remove_atomic_multilog_args & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -643,51 +659,51 @@ class rpc_service_remove_table_args {
 };
 
 
-class rpc_service_remove_table_pargs {
+class rpc_service_remove_atomic_multilog_pargs {
  public:
 
 
-  virtual ~rpc_service_remove_table_pargs() throw();
-  const int64_t* table_id;
+  virtual ~rpc_service_remove_atomic_multilog_pargs() throw();
+  const int64_t* multilog_id;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
 
 };
 
-typedef struct _rpc_service_remove_table_result__isset {
-  _rpc_service_remove_table_result__isset() : ex(false) {}
+typedef struct _rpc_service_remove_atomic_multilog_result__isset {
+  _rpc_service_remove_atomic_multilog_result__isset() : ex(false) {}
   bool ex :1;
-} _rpc_service_remove_table_result__isset;
+} _rpc_service_remove_atomic_multilog_result__isset;
 
-class rpc_service_remove_table_result {
+class rpc_service_remove_atomic_multilog_result {
  public:
 
-  rpc_service_remove_table_result(const rpc_service_remove_table_result&);
-  rpc_service_remove_table_result(rpc_service_remove_table_result&&);
-  rpc_service_remove_table_result& operator=(const rpc_service_remove_table_result&);
-  rpc_service_remove_table_result& operator=(rpc_service_remove_table_result&&);
-  rpc_service_remove_table_result() {
+  rpc_service_remove_atomic_multilog_result(const rpc_service_remove_atomic_multilog_result&);
+  rpc_service_remove_atomic_multilog_result(rpc_service_remove_atomic_multilog_result&&);
+  rpc_service_remove_atomic_multilog_result& operator=(const rpc_service_remove_atomic_multilog_result&);
+  rpc_service_remove_atomic_multilog_result& operator=(rpc_service_remove_atomic_multilog_result&&);
+  rpc_service_remove_atomic_multilog_result() {
   }
 
-  virtual ~rpc_service_remove_table_result() throw();
+  virtual ~rpc_service_remove_atomic_multilog_result() throw();
   rpc_management_exception ex;
 
-  _rpc_service_remove_table_result__isset __isset;
+  _rpc_service_remove_atomic_multilog_result__isset __isset;
 
   void __set_ex(const rpc_management_exception& val);
 
-  bool operator == (const rpc_service_remove_table_result & rhs) const
+  bool operator == (const rpc_service_remove_atomic_multilog_result & rhs) const
   {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_table_result &rhs) const {
+  bool operator != (const rpc_service_remove_atomic_multilog_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_table_result & ) const;
+  bool operator < (const rpc_service_remove_atomic_multilog_result & ) const;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -696,19 +712,19 @@ class rpc_service_remove_table_result {
 
 };
 
-typedef struct _rpc_service_remove_table_presult__isset {
-  _rpc_service_remove_table_presult__isset() : ex(false) {}
+typedef struct _rpc_service_remove_atomic_multilog_presult__isset {
+  _rpc_service_remove_atomic_multilog_presult__isset() : ex(false) {}
   bool ex :1;
-} _rpc_service_remove_table_presult__isset;
+} _rpc_service_remove_atomic_multilog_presult__isset;
 
-class rpc_service_remove_table_presult {
+class rpc_service_remove_atomic_multilog_presult {
  public:
 
 
-  virtual ~rpc_service_remove_table_presult() throw();
+  virtual ~rpc_service_remove_atomic_multilog_presult() throw();
   rpc_management_exception ex;
 
-  _rpc_service_remove_table_presult__isset __isset;
+  _rpc_service_remove_atomic_multilog_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -716,8 +732,8 @@ class rpc_service_remove_table_presult {
 };
 
 typedef struct _rpc_service_add_index_args__isset {
-  _rpc_service_add_index_args__isset() : table_id(false), field_name(false), bucket_size(false) {}
-  bool table_id :1;
+  _rpc_service_add_index_args__isset() : multilog_id(false), field_name(false), bucket_size(false) {}
+  bool multilog_id :1;
   bool field_name :1;
   bool bucket_size :1;
 } _rpc_service_add_index_args__isset;
@@ -729,17 +745,17 @@ class rpc_service_add_index_args {
   rpc_service_add_index_args(rpc_service_add_index_args&&);
   rpc_service_add_index_args& operator=(const rpc_service_add_index_args&);
   rpc_service_add_index_args& operator=(rpc_service_add_index_args&&);
-  rpc_service_add_index_args() : table_id(0), field_name(), bucket_size(0) {
+  rpc_service_add_index_args() : multilog_id(0), field_name(), bucket_size(0) {
   }
 
   virtual ~rpc_service_add_index_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string field_name;
   double bucket_size;
 
   _rpc_service_add_index_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_field_name(const std::string& val);
 
@@ -747,7 +763,7 @@ class rpc_service_add_index_args {
 
   bool operator == (const rpc_service_add_index_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(field_name == rhs.field_name))
       return false;
@@ -774,7 +790,7 @@ class rpc_service_add_index_pargs {
 
 
   virtual ~rpc_service_add_index_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* field_name;
   const double* bucket_size;
 
@@ -844,8 +860,8 @@ class rpc_service_add_index_presult {
 };
 
 typedef struct _rpc_service_remove_index_args__isset {
-  _rpc_service_remove_index_args__isset() : table_id(false), field_name(false) {}
-  bool table_id :1;
+  _rpc_service_remove_index_args__isset() : multilog_id(false), field_name(false) {}
+  bool multilog_id :1;
   bool field_name :1;
 } _rpc_service_remove_index_args__isset;
 
@@ -856,22 +872,22 @@ class rpc_service_remove_index_args {
   rpc_service_remove_index_args(rpc_service_remove_index_args&&);
   rpc_service_remove_index_args& operator=(const rpc_service_remove_index_args&);
   rpc_service_remove_index_args& operator=(rpc_service_remove_index_args&&);
-  rpc_service_remove_index_args() : table_id(0), field_name() {
+  rpc_service_remove_index_args() : multilog_id(0), field_name() {
   }
 
   virtual ~rpc_service_remove_index_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string field_name;
 
   _rpc_service_remove_index_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_field_name(const std::string& val);
 
   bool operator == (const rpc_service_remove_index_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(field_name == rhs.field_name))
       return false;
@@ -896,7 +912,7 @@ class rpc_service_remove_index_pargs {
 
 
   virtual ~rpc_service_remove_index_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* field_name;
 
   template <class Protocol_>
@@ -965,8 +981,8 @@ class rpc_service_remove_index_presult {
 };
 
 typedef struct _rpc_service_add_filter_args__isset {
-  _rpc_service_add_filter_args__isset() : table_id(false), filter_name(false), filter_expr(false) {}
-  bool table_id :1;
+  _rpc_service_add_filter_args__isset() : multilog_id(false), filter_name(false), filter_expr(false) {}
+  bool multilog_id :1;
   bool filter_name :1;
   bool filter_expr :1;
 } _rpc_service_add_filter_args__isset;
@@ -978,17 +994,17 @@ class rpc_service_add_filter_args {
   rpc_service_add_filter_args(rpc_service_add_filter_args&&);
   rpc_service_add_filter_args& operator=(const rpc_service_add_filter_args&);
   rpc_service_add_filter_args& operator=(rpc_service_add_filter_args&&);
-  rpc_service_add_filter_args() : table_id(0), filter_name(), filter_expr() {
+  rpc_service_add_filter_args() : multilog_id(0), filter_name(), filter_expr() {
   }
 
   virtual ~rpc_service_add_filter_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string filter_name;
   std::string filter_expr;
 
   _rpc_service_add_filter_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
@@ -996,7 +1012,7 @@ class rpc_service_add_filter_args {
 
   bool operator == (const rpc_service_add_filter_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
       return false;
@@ -1023,7 +1039,7 @@ class rpc_service_add_filter_pargs {
 
 
   virtual ~rpc_service_add_filter_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* filter_name;
   const std::string* filter_expr;
 
@@ -1093,8 +1109,8 @@ class rpc_service_add_filter_presult {
 };
 
 typedef struct _rpc_service_remove_filter_args__isset {
-  _rpc_service_remove_filter_args__isset() : table_id(false), filter_name(false) {}
-  bool table_id :1;
+  _rpc_service_remove_filter_args__isset() : multilog_id(false), filter_name(false) {}
+  bool multilog_id :1;
   bool filter_name :1;
 } _rpc_service_remove_filter_args__isset;
 
@@ -1105,22 +1121,22 @@ class rpc_service_remove_filter_args {
   rpc_service_remove_filter_args(rpc_service_remove_filter_args&&);
   rpc_service_remove_filter_args& operator=(const rpc_service_remove_filter_args&);
   rpc_service_remove_filter_args& operator=(rpc_service_remove_filter_args&&);
-  rpc_service_remove_filter_args() : table_id(0), filter_name() {
+  rpc_service_remove_filter_args() : multilog_id(0), filter_name() {
   }
 
   virtual ~rpc_service_remove_filter_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string filter_name;
 
   _rpc_service_remove_filter_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
   bool operator == (const rpc_service_remove_filter_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
       return false;
@@ -1145,7 +1161,7 @@ class rpc_service_remove_filter_pargs {
 
 
   virtual ~rpc_service_remove_filter_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* filter_name;
 
   template <class Protocol_>
@@ -1213,11 +1229,248 @@ class rpc_service_remove_filter_presult {
 
 };
 
-typedef struct _rpc_service_add_trigger_args__isset {
-  _rpc_service_add_trigger_args__isset() : table_id(false), trigger_name(false), filter_name(false), trigger_expr(false) {}
-  bool table_id :1;
-  bool trigger_name :1;
+typedef struct _rpc_service_add_aggregate_args__isset {
+  _rpc_service_add_aggregate_args__isset() : mutlilog_id(false), aggregate_name(false), filter_name(false), aggregate_expr(false) {}
+  bool mutlilog_id :1;
+  bool aggregate_name :1;
   bool filter_name :1;
+  bool aggregate_expr :1;
+} _rpc_service_add_aggregate_args__isset;
+
+class rpc_service_add_aggregate_args {
+ public:
+
+  rpc_service_add_aggregate_args(const rpc_service_add_aggregate_args&);
+  rpc_service_add_aggregate_args(rpc_service_add_aggregate_args&&);
+  rpc_service_add_aggregate_args& operator=(const rpc_service_add_aggregate_args&);
+  rpc_service_add_aggregate_args& operator=(rpc_service_add_aggregate_args&&);
+  rpc_service_add_aggregate_args() : mutlilog_id(0), aggregate_name(), filter_name(), aggregate_expr() {
+  }
+
+  virtual ~rpc_service_add_aggregate_args() throw();
+  int64_t mutlilog_id;
+  std::string aggregate_name;
+  std::string filter_name;
+  std::string aggregate_expr;
+
+  _rpc_service_add_aggregate_args__isset __isset;
+
+  void __set_mutlilog_id(const int64_t val);
+
+  void __set_aggregate_name(const std::string& val);
+
+  void __set_filter_name(const std::string& val);
+
+  void __set_aggregate_expr(const std::string& val);
+
+  bool operator == (const rpc_service_add_aggregate_args & rhs) const
+  {
+    if (!(mutlilog_id == rhs.mutlilog_id))
+      return false;
+    if (!(aggregate_name == rhs.aggregate_name))
+      return false;
+    if (!(filter_name == rhs.filter_name))
+      return false;
+    if (!(aggregate_expr == rhs.aggregate_expr))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_add_aggregate_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_add_aggregate_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_add_aggregate_pargs {
+ public:
+
+
+  virtual ~rpc_service_add_aggregate_pargs() throw();
+  const int64_t* mutlilog_id;
+  const std::string* aggregate_name;
+  const std::string* filter_name;
+  const std::string* aggregate_expr;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_add_aggregate_result__isset {
+  _rpc_service_add_aggregate_result__isset() : ex(false) {}
+  bool ex :1;
+} _rpc_service_add_aggregate_result__isset;
+
+class rpc_service_add_aggregate_result {
+ public:
+
+  rpc_service_add_aggregate_result(const rpc_service_add_aggregate_result&);
+  rpc_service_add_aggregate_result(rpc_service_add_aggregate_result&&);
+  rpc_service_add_aggregate_result& operator=(const rpc_service_add_aggregate_result&);
+  rpc_service_add_aggregate_result& operator=(rpc_service_add_aggregate_result&&);
+  rpc_service_add_aggregate_result() {
+  }
+
+  virtual ~rpc_service_add_aggregate_result() throw();
+  rpc_management_exception ex;
+
+  _rpc_service_add_aggregate_result__isset __isset;
+
+  void __set_ex(const rpc_management_exception& val);
+
+  bool operator == (const rpc_service_add_aggregate_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_add_aggregate_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_add_aggregate_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_add_aggregate_presult__isset {
+  _rpc_service_add_aggregate_presult__isset() : ex(false) {}
+  bool ex :1;
+} _rpc_service_add_aggregate_presult__isset;
+
+class rpc_service_add_aggregate_presult {
+ public:
+
+
+  virtual ~rpc_service_add_aggregate_presult() throw();
+  rpc_management_exception ex;
+
+  _rpc_service_add_aggregate_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _rpc_service_remove_aggregate_args__isset {
+  _rpc_service_remove_aggregate_args__isset() : multilog_id(false), aggregate_name(false) {}
+  bool multilog_id :1;
+  bool aggregate_name :1;
+} _rpc_service_remove_aggregate_args__isset;
+
+class rpc_service_remove_aggregate_args {
+ public:
+
+  rpc_service_remove_aggregate_args(const rpc_service_remove_aggregate_args&);
+  rpc_service_remove_aggregate_args(rpc_service_remove_aggregate_args&&);
+  rpc_service_remove_aggregate_args& operator=(const rpc_service_remove_aggregate_args&);
+  rpc_service_remove_aggregate_args& operator=(rpc_service_remove_aggregate_args&&);
+  rpc_service_remove_aggregate_args() : multilog_id(0), aggregate_name() {
+  }
+
+  virtual ~rpc_service_remove_aggregate_args() throw();
+  int64_t multilog_id;
+  std::string aggregate_name;
+
+  _rpc_service_remove_aggregate_args__isset __isset;
+
+  void __set_multilog_id(const int64_t val);
+
+  void __set_aggregate_name(const std::string& val);
+
+  bool operator == (const rpc_service_remove_aggregate_args & rhs) const
+  {
+    if (!(multilog_id == rhs.multilog_id))
+      return false;
+    if (!(aggregate_name == rhs.aggregate_name))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_remove_aggregate_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_remove_aggregate_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_remove_aggregate_pargs {
+ public:
+
+
+  virtual ~rpc_service_remove_aggregate_pargs() throw();
+  const int64_t* multilog_id;
+  const std::string* aggregate_name;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_remove_aggregate_result {
+ public:
+
+  rpc_service_remove_aggregate_result(const rpc_service_remove_aggregate_result&);
+  rpc_service_remove_aggregate_result(rpc_service_remove_aggregate_result&&);
+  rpc_service_remove_aggregate_result& operator=(const rpc_service_remove_aggregate_result&);
+  rpc_service_remove_aggregate_result& operator=(rpc_service_remove_aggregate_result&&);
+  rpc_service_remove_aggregate_result() {
+  }
+
+  virtual ~rpc_service_remove_aggregate_result() throw();
+
+  bool operator == (const rpc_service_remove_aggregate_result & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const rpc_service_remove_aggregate_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_remove_aggregate_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_remove_aggregate_presult {
+ public:
+
+
+  virtual ~rpc_service_remove_aggregate_presult() throw();
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _rpc_service_add_trigger_args__isset {
+  _rpc_service_add_trigger_args__isset() : multilog_id(false), trigger_name(false), trigger_expr(false) {}
+  bool multilog_id :1;
+  bool trigger_name :1;
   bool trigger_expr :1;
 } _rpc_service_add_trigger_args__isset;
 
@@ -1228,32 +1481,27 @@ class rpc_service_add_trigger_args {
   rpc_service_add_trigger_args(rpc_service_add_trigger_args&&);
   rpc_service_add_trigger_args& operator=(const rpc_service_add_trigger_args&);
   rpc_service_add_trigger_args& operator=(rpc_service_add_trigger_args&&);
-  rpc_service_add_trigger_args() : table_id(0), trigger_name(), filter_name(), trigger_expr() {
+  rpc_service_add_trigger_args() : multilog_id(0), trigger_name(), trigger_expr() {
   }
 
   virtual ~rpc_service_add_trigger_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string trigger_name;
-  std::string filter_name;
   std::string trigger_expr;
 
   _rpc_service_add_trigger_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_trigger_name(const std::string& val);
-
-  void __set_filter_name(const std::string& val);
 
   void __set_trigger_expr(const std::string& val);
 
   bool operator == (const rpc_service_add_trigger_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(trigger_name == rhs.trigger_name))
-      return false;
-    if (!(filter_name == rhs.filter_name))
       return false;
     if (!(trigger_expr == rhs.trigger_expr))
       return false;
@@ -1278,9 +1526,8 @@ class rpc_service_add_trigger_pargs {
 
 
   virtual ~rpc_service_add_trigger_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* trigger_name;
-  const std::string* filter_name;
   const std::string* trigger_expr;
 
   template <class Protocol_>
@@ -1349,8 +1596,8 @@ class rpc_service_add_trigger_presult {
 };
 
 typedef struct _rpc_service_remove_trigger_args__isset {
-  _rpc_service_remove_trigger_args__isset() : table_id(false), trigger_name(false) {}
-  bool table_id :1;
+  _rpc_service_remove_trigger_args__isset() : multilog_id(false), trigger_name(false) {}
+  bool multilog_id :1;
   bool trigger_name :1;
 } _rpc_service_remove_trigger_args__isset;
 
@@ -1361,22 +1608,22 @@ class rpc_service_remove_trigger_args {
   rpc_service_remove_trigger_args(rpc_service_remove_trigger_args&&);
   rpc_service_remove_trigger_args& operator=(const rpc_service_remove_trigger_args&);
   rpc_service_remove_trigger_args& operator=(rpc_service_remove_trigger_args&&);
-  rpc_service_remove_trigger_args() : table_id(0), trigger_name() {
+  rpc_service_remove_trigger_args() : multilog_id(0), trigger_name() {
   }
 
   virtual ~rpc_service_remove_trigger_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string trigger_name;
 
   _rpc_service_remove_trigger_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_trigger_name(const std::string& val);
 
   bool operator == (const rpc_service_remove_trigger_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(trigger_name == rhs.trigger_name))
       return false;
@@ -1401,7 +1648,7 @@ class rpc_service_remove_trigger_pargs {
 
 
   virtual ~rpc_service_remove_trigger_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* trigger_name;
 
   template <class Protocol_>
@@ -1470,8 +1717,8 @@ class rpc_service_remove_trigger_presult {
 };
 
 typedef struct _rpc_service_append_args__isset {
-  _rpc_service_append_args__isset() : table_id(false), data(false) {}
-  bool table_id :1;
+  _rpc_service_append_args__isset() : multilog_id(false), data(false) {}
+  bool multilog_id :1;
   bool data :1;
 } _rpc_service_append_args__isset;
 
@@ -1482,22 +1729,22 @@ class rpc_service_append_args {
   rpc_service_append_args(rpc_service_append_args&&);
   rpc_service_append_args& operator=(const rpc_service_append_args&);
   rpc_service_append_args& operator=(rpc_service_append_args&&);
-  rpc_service_append_args() : table_id(0), data() {
+  rpc_service_append_args() : multilog_id(0), data() {
   }
 
   virtual ~rpc_service_append_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string data;
 
   _rpc_service_append_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_data(const std::string& val);
 
   bool operator == (const rpc_service_append_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(data == rhs.data))
       return false;
@@ -1522,7 +1769,7 @@ class rpc_service_append_pargs {
 
 
   virtual ~rpc_service_append_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* data;
 
   template <class Protocol_>
@@ -1591,8 +1838,8 @@ class rpc_service_append_presult {
 };
 
 typedef struct _rpc_service_append_batch_args__isset {
-  _rpc_service_append_batch_args__isset() : table_id(false), batch(false) {}
-  bool table_id :1;
+  _rpc_service_append_batch_args__isset() : multilog_id(false), batch(false) {}
+  bool multilog_id :1;
   bool batch :1;
 } _rpc_service_append_batch_args__isset;
 
@@ -1603,22 +1850,22 @@ class rpc_service_append_batch_args {
   rpc_service_append_batch_args(rpc_service_append_batch_args&&);
   rpc_service_append_batch_args& operator=(const rpc_service_append_batch_args&);
   rpc_service_append_batch_args& operator=(rpc_service_append_batch_args&&);
-  rpc_service_append_batch_args() : table_id(0) {
+  rpc_service_append_batch_args() : multilog_id(0) {
   }
 
   virtual ~rpc_service_append_batch_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   rpc_record_batch batch;
 
   _rpc_service_append_batch_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_batch(const rpc_record_batch& val);
 
   bool operator == (const rpc_service_append_batch_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(batch == rhs.batch))
       return false;
@@ -1643,7 +1890,7 @@ class rpc_service_append_batch_pargs {
 
 
   virtual ~rpc_service_append_batch_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const rpc_record_batch* batch;
 
   template <class Protocol_>
@@ -1712,8 +1959,8 @@ class rpc_service_append_batch_presult {
 };
 
 typedef struct _rpc_service_read_args__isset {
-  _rpc_service_read_args__isset() : table_id(false), offset(false), nrecords(false) {}
-  bool table_id :1;
+  _rpc_service_read_args__isset() : multilog_id(false), offset(false), nrecords(false) {}
+  bool multilog_id :1;
   bool offset :1;
   bool nrecords :1;
 } _rpc_service_read_args__isset;
@@ -1725,17 +1972,17 @@ class rpc_service_read_args {
   rpc_service_read_args(rpc_service_read_args&&);
   rpc_service_read_args& operator=(const rpc_service_read_args&);
   rpc_service_read_args& operator=(rpc_service_read_args&&);
-  rpc_service_read_args() : table_id(0), offset(0), nrecords(0) {
+  rpc_service_read_args() : multilog_id(0), offset(0), nrecords(0) {
   }
 
   virtual ~rpc_service_read_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   int64_t offset;
   int64_t nrecords;
 
   _rpc_service_read_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_offset(const int64_t val);
 
@@ -1743,7 +1990,7 @@ class rpc_service_read_args {
 
   bool operator == (const rpc_service_read_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(offset == rhs.offset))
       return false;
@@ -1770,7 +2017,7 @@ class rpc_service_read_pargs {
 
 
   virtual ~rpc_service_read_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const int64_t* offset;
   const int64_t* nrecords;
 
@@ -1839,9 +2086,152 @@ class rpc_service_read_presult {
 
 };
 
+typedef struct _rpc_service_query_aggregate_args__isset {
+  _rpc_service_query_aggregate_args__isset() : multilog_id(false), aggregate_name(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
+  bool aggregate_name :1;
+  bool begin_ms :1;
+  bool end_ms :1;
+} _rpc_service_query_aggregate_args__isset;
+
+class rpc_service_query_aggregate_args {
+ public:
+
+  rpc_service_query_aggregate_args(const rpc_service_query_aggregate_args&);
+  rpc_service_query_aggregate_args(rpc_service_query_aggregate_args&&);
+  rpc_service_query_aggregate_args& operator=(const rpc_service_query_aggregate_args&);
+  rpc_service_query_aggregate_args& operator=(rpc_service_query_aggregate_args&&);
+  rpc_service_query_aggregate_args() : multilog_id(0), aggregate_name(), begin_ms(0), end_ms(0) {
+  }
+
+  virtual ~rpc_service_query_aggregate_args() throw();
+  int64_t multilog_id;
+  std::string aggregate_name;
+  int64_t begin_ms;
+  int64_t end_ms;
+
+  _rpc_service_query_aggregate_args__isset __isset;
+
+  void __set_multilog_id(const int64_t val);
+
+  void __set_aggregate_name(const std::string& val);
+
+  void __set_begin_ms(const int64_t val);
+
+  void __set_end_ms(const int64_t val);
+
+  bool operator == (const rpc_service_query_aggregate_args & rhs) const
+  {
+    if (!(multilog_id == rhs.multilog_id))
+      return false;
+    if (!(aggregate_name == rhs.aggregate_name))
+      return false;
+    if (!(begin_ms == rhs.begin_ms))
+      return false;
+    if (!(end_ms == rhs.end_ms))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_query_aggregate_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_query_aggregate_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_query_aggregate_pargs {
+ public:
+
+
+  virtual ~rpc_service_query_aggregate_pargs() throw();
+  const int64_t* multilog_id;
+  const std::string* aggregate_name;
+  const int64_t* begin_ms;
+  const int64_t* end_ms;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_query_aggregate_result__isset {
+  _rpc_service_query_aggregate_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_query_aggregate_result__isset;
+
+class rpc_service_query_aggregate_result {
+ public:
+
+  rpc_service_query_aggregate_result(const rpc_service_query_aggregate_result&);
+  rpc_service_query_aggregate_result(rpc_service_query_aggregate_result&&);
+  rpc_service_query_aggregate_result& operator=(const rpc_service_query_aggregate_result&);
+  rpc_service_query_aggregate_result& operator=(rpc_service_query_aggregate_result&&);
+  rpc_service_query_aggregate_result() : success() {
+  }
+
+  virtual ~rpc_service_query_aggregate_result() throw();
+  std::string success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_query_aggregate_result__isset __isset;
+
+  void __set_success(const std::string& val);
+
+  void __set_ex(const rpc_invalid_operation& val);
+
+  bool operator == (const rpc_service_query_aggregate_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_query_aggregate_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_query_aggregate_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_query_aggregate_presult__isset {
+  _rpc_service_query_aggregate_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_query_aggregate_presult__isset;
+
+class rpc_service_query_aggregate_presult {
+ public:
+
+
+  virtual ~rpc_service_query_aggregate_presult() throw();
+  std::string* success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_query_aggregate_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _rpc_service_adhoc_filter_args__isset {
-  _rpc_service_adhoc_filter_args__isset() : table_id(false), filter_expr(false) {}
-  bool table_id :1;
+  _rpc_service_adhoc_filter_args__isset() : multilog_id(false), filter_expr(false) {}
+  bool multilog_id :1;
   bool filter_expr :1;
 } _rpc_service_adhoc_filter_args__isset;
 
@@ -1852,22 +2242,22 @@ class rpc_service_adhoc_filter_args {
   rpc_service_adhoc_filter_args(rpc_service_adhoc_filter_args&&);
   rpc_service_adhoc_filter_args& operator=(const rpc_service_adhoc_filter_args&);
   rpc_service_adhoc_filter_args& operator=(rpc_service_adhoc_filter_args&&);
-  rpc_service_adhoc_filter_args() : table_id(0), filter_expr() {
+  rpc_service_adhoc_filter_args() : multilog_id(0), filter_expr() {
   }
 
   virtual ~rpc_service_adhoc_filter_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string filter_expr;
 
   _rpc_service_adhoc_filter_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_filter_expr(const std::string& val);
 
   bool operator == (const rpc_service_adhoc_filter_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_expr == rhs.filter_expr))
       return false;
@@ -1892,7 +2282,7 @@ class rpc_service_adhoc_filter_pargs {
 
 
   virtual ~rpc_service_adhoc_filter_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* filter_expr;
 
   template <class Protocol_>
@@ -1969,8 +2359,8 @@ class rpc_service_adhoc_filter_presult {
 };
 
 typedef struct _rpc_service_predef_filter_args__isset {
-  _rpc_service_predef_filter_args__isset() : table_id(false), filter_name(false), begin_ms(false), end_ms(false) {}
-  bool table_id :1;
+  _rpc_service_predef_filter_args__isset() : multilog_id(false), filter_name(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
   bool filter_name :1;
   bool begin_ms :1;
   bool end_ms :1;
@@ -1983,18 +2373,18 @@ class rpc_service_predef_filter_args {
   rpc_service_predef_filter_args(rpc_service_predef_filter_args&&);
   rpc_service_predef_filter_args& operator=(const rpc_service_predef_filter_args&);
   rpc_service_predef_filter_args& operator=(rpc_service_predef_filter_args&&);
-  rpc_service_predef_filter_args() : table_id(0), filter_name(), begin_ms(0), end_ms(0) {
+  rpc_service_predef_filter_args() : multilog_id(0), filter_name(), begin_ms(0), end_ms(0) {
   }
 
   virtual ~rpc_service_predef_filter_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string filter_name;
   int64_t begin_ms;
   int64_t end_ms;
 
   _rpc_service_predef_filter_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
@@ -2004,7 +2394,7 @@ class rpc_service_predef_filter_args {
 
   bool operator == (const rpc_service_predef_filter_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
       return false;
@@ -2033,7 +2423,7 @@ class rpc_service_predef_filter_pargs {
 
 
   virtual ~rpc_service_predef_filter_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* filter_name;
   const int64_t* begin_ms;
   const int64_t* end_ms;
@@ -2112,8 +2502,8 @@ class rpc_service_predef_filter_presult {
 };
 
 typedef struct _rpc_service_combined_filter_args__isset {
-  _rpc_service_combined_filter_args__isset() : table_id(false), filter_name(false), filter_expr(false), begin_ms(false), end_ms(false) {}
-  bool table_id :1;
+  _rpc_service_combined_filter_args__isset() : multilog_id(false), filter_name(false), filter_expr(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
   bool filter_name :1;
   bool filter_expr :1;
   bool begin_ms :1;
@@ -2127,11 +2517,11 @@ class rpc_service_combined_filter_args {
   rpc_service_combined_filter_args(rpc_service_combined_filter_args&&);
   rpc_service_combined_filter_args& operator=(const rpc_service_combined_filter_args&);
   rpc_service_combined_filter_args& operator=(rpc_service_combined_filter_args&&);
-  rpc_service_combined_filter_args() : table_id(0), filter_name(), filter_expr(), begin_ms(0), end_ms(0) {
+  rpc_service_combined_filter_args() : multilog_id(0), filter_name(), filter_expr(), begin_ms(0), end_ms(0) {
   }
 
   virtual ~rpc_service_combined_filter_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   std::string filter_name;
   std::string filter_expr;
   int64_t begin_ms;
@@ -2139,7 +2529,7 @@ class rpc_service_combined_filter_args {
 
   _rpc_service_combined_filter_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_filter_name(const std::string& val);
 
@@ -2151,7 +2541,7 @@ class rpc_service_combined_filter_args {
 
   bool operator == (const rpc_service_combined_filter_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
       return false;
@@ -2182,7 +2572,7 @@ class rpc_service_combined_filter_pargs {
 
 
   virtual ~rpc_service_combined_filter_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const std::string* filter_name;
   const std::string* filter_expr;
   const int64_t* begin_ms;
@@ -2262,8 +2652,8 @@ class rpc_service_combined_filter_presult {
 };
 
 typedef struct _rpc_service_alerts_by_time_args__isset {
-  _rpc_service_alerts_by_time_args__isset() : table_id(false), begin_ms(false), end_ms(false) {}
-  bool table_id :1;
+  _rpc_service_alerts_by_time_args__isset() : multilog_id(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
   bool begin_ms :1;
   bool end_ms :1;
 } _rpc_service_alerts_by_time_args__isset;
@@ -2275,17 +2665,17 @@ class rpc_service_alerts_by_time_args {
   rpc_service_alerts_by_time_args(rpc_service_alerts_by_time_args&&);
   rpc_service_alerts_by_time_args& operator=(const rpc_service_alerts_by_time_args&);
   rpc_service_alerts_by_time_args& operator=(rpc_service_alerts_by_time_args&&);
-  rpc_service_alerts_by_time_args() : table_id(0), begin_ms(0), end_ms(0) {
+  rpc_service_alerts_by_time_args() : multilog_id(0), begin_ms(0), end_ms(0) {
   }
 
   virtual ~rpc_service_alerts_by_time_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   int64_t begin_ms;
   int64_t end_ms;
 
   _rpc_service_alerts_by_time_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_begin_ms(const int64_t val);
 
@@ -2293,7 +2683,7 @@ class rpc_service_alerts_by_time_args {
 
   bool operator == (const rpc_service_alerts_by_time_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(begin_ms == rhs.begin_ms))
       return false;
@@ -2320,7 +2710,7 @@ class rpc_service_alerts_by_time_pargs {
 
 
   virtual ~rpc_service_alerts_by_time_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const int64_t* begin_ms;
   const int64_t* end_ms;
 
@@ -2397,9 +2787,152 @@ class rpc_service_alerts_by_time_presult {
 
 };
 
+typedef struct _rpc_service_alerts_by_trigger_and_time_args__isset {
+  _rpc_service_alerts_by_trigger_and_time_args__isset() : multilog_id(false), trigger_name(false), begin_ms(false), end_ms(false) {}
+  bool multilog_id :1;
+  bool trigger_name :1;
+  bool begin_ms :1;
+  bool end_ms :1;
+} _rpc_service_alerts_by_trigger_and_time_args__isset;
+
+class rpc_service_alerts_by_trigger_and_time_args {
+ public:
+
+  rpc_service_alerts_by_trigger_and_time_args(const rpc_service_alerts_by_trigger_and_time_args&);
+  rpc_service_alerts_by_trigger_and_time_args(rpc_service_alerts_by_trigger_and_time_args&&);
+  rpc_service_alerts_by_trigger_and_time_args& operator=(const rpc_service_alerts_by_trigger_and_time_args&);
+  rpc_service_alerts_by_trigger_and_time_args& operator=(rpc_service_alerts_by_trigger_and_time_args&&);
+  rpc_service_alerts_by_trigger_and_time_args() : multilog_id(0), trigger_name(), begin_ms(0), end_ms(0) {
+  }
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_args() throw();
+  int64_t multilog_id;
+  std::string trigger_name;
+  int64_t begin_ms;
+  int64_t end_ms;
+
+  _rpc_service_alerts_by_trigger_and_time_args__isset __isset;
+
+  void __set_multilog_id(const int64_t val);
+
+  void __set_trigger_name(const std::string& val);
+
+  void __set_begin_ms(const int64_t val);
+
+  void __set_end_ms(const int64_t val);
+
+  bool operator == (const rpc_service_alerts_by_trigger_and_time_args & rhs) const
+  {
+    if (!(multilog_id == rhs.multilog_id))
+      return false;
+    if (!(trigger_name == rhs.trigger_name))
+      return false;
+    if (!(begin_ms == rhs.begin_ms))
+      return false;
+    if (!(end_ms == rhs.end_ms))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_alerts_by_trigger_and_time_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_alerts_by_trigger_and_time_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_alerts_by_trigger_and_time_pargs {
+ public:
+
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_pargs() throw();
+  const int64_t* multilog_id;
+  const std::string* trigger_name;
+  const int64_t* begin_ms;
+  const int64_t* end_ms;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_alerts_by_trigger_and_time_result__isset {
+  _rpc_service_alerts_by_trigger_and_time_result__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_alerts_by_trigger_and_time_result__isset;
+
+class rpc_service_alerts_by_trigger_and_time_result {
+ public:
+
+  rpc_service_alerts_by_trigger_and_time_result(const rpc_service_alerts_by_trigger_and_time_result&);
+  rpc_service_alerts_by_trigger_and_time_result(rpc_service_alerts_by_trigger_and_time_result&&);
+  rpc_service_alerts_by_trigger_and_time_result& operator=(const rpc_service_alerts_by_trigger_and_time_result&);
+  rpc_service_alerts_by_trigger_and_time_result& operator=(rpc_service_alerts_by_trigger_and_time_result&&);
+  rpc_service_alerts_by_trigger_and_time_result() {
+  }
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_result() throw();
+  rpc_iterator_handle success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_alerts_by_trigger_and_time_result__isset __isset;
+
+  void __set_success(const rpc_iterator_handle& val);
+
+  void __set_ex(const rpc_invalid_operation& val);
+
+  bool operator == (const rpc_service_alerts_by_trigger_and_time_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_alerts_by_trigger_and_time_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_alerts_by_trigger_and_time_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_alerts_by_trigger_and_time_presult__isset {
+  _rpc_service_alerts_by_trigger_and_time_presult__isset() : success(false), ex(false) {}
+  bool success :1;
+  bool ex :1;
+} _rpc_service_alerts_by_trigger_and_time_presult__isset;
+
+class rpc_service_alerts_by_trigger_and_time_presult {
+ public:
+
+
+  virtual ~rpc_service_alerts_by_trigger_and_time_presult() throw();
+  rpc_iterator_handle* success;
+  rpc_invalid_operation ex;
+
+  _rpc_service_alerts_by_trigger_and_time_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
 typedef struct _rpc_service_get_more_args__isset {
-  _rpc_service_get_more_args__isset() : table_id(false), desc(false) {}
-  bool table_id :1;
+  _rpc_service_get_more_args__isset() : multilog_id(false), desc(false) {}
+  bool multilog_id :1;
   bool desc :1;
 } _rpc_service_get_more_args__isset;
 
@@ -2410,22 +2943,22 @@ class rpc_service_get_more_args {
   rpc_service_get_more_args(rpc_service_get_more_args&&);
   rpc_service_get_more_args& operator=(const rpc_service_get_more_args&);
   rpc_service_get_more_args& operator=(rpc_service_get_more_args&&);
-  rpc_service_get_more_args() : table_id(0) {
+  rpc_service_get_more_args() : multilog_id(0) {
   }
 
   virtual ~rpc_service_get_more_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
   rpc_iterator_descriptor desc;
 
   _rpc_service_get_more_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   void __set_desc(const rpc_iterator_descriptor& val);
 
   bool operator == (const rpc_service_get_more_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(desc == rhs.desc))
       return false;
@@ -2450,7 +2983,7 @@ class rpc_service_get_more_pargs {
 
 
   virtual ~rpc_service_get_more_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
   const rpc_iterator_descriptor* desc;
 
   template <class Protocol_>
@@ -2527,8 +3060,8 @@ class rpc_service_get_more_presult {
 };
 
 typedef struct _rpc_service_num_records_args__isset {
-  _rpc_service_num_records_args__isset() : table_id(false) {}
-  bool table_id :1;
+  _rpc_service_num_records_args__isset() : multilog_id(false) {}
+  bool multilog_id :1;
 } _rpc_service_num_records_args__isset;
 
 class rpc_service_num_records_args {
@@ -2538,19 +3071,19 @@ class rpc_service_num_records_args {
   rpc_service_num_records_args(rpc_service_num_records_args&&);
   rpc_service_num_records_args& operator=(const rpc_service_num_records_args&);
   rpc_service_num_records_args& operator=(rpc_service_num_records_args&&);
-  rpc_service_num_records_args() : table_id(0) {
+  rpc_service_num_records_args() : multilog_id(0) {
   }
 
   virtual ~rpc_service_num_records_args() throw();
-  int64_t table_id;
+  int64_t multilog_id;
 
   _rpc_service_num_records_args__isset __isset;
 
-  void __set_table_id(const int64_t val);
+  void __set_multilog_id(const int64_t val);
 
   bool operator == (const rpc_service_num_records_args & rhs) const
   {
-    if (!(table_id == rhs.table_id))
+    if (!(multilog_id == rhs.multilog_id))
       return false;
     return true;
   }
@@ -2573,7 +3106,7 @@ class rpc_service_num_records_pargs {
 
 
   virtual ~rpc_service_num_records_pargs() throw();
-  const int64_t* table_id;
+  const int64_t* multilog_id;
 
   template <class Protocol_>
   uint32_t write(Protocol_* oprot) const;
@@ -2672,59 +3205,71 @@ class rpc_serviceClientT : virtual public rpc_serviceIf {
   void deregister_handler();
   void send_deregister_handler();
   void recv_deregister_handler();
-  int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
-  void send_create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
-  int64_t recv_create_table();
-  void get_table_info(rpc_table_info& _return, const std::string& table_name);
-  void send_get_table_info(const std::string& table_name);
-  void recv_get_table_info(rpc_table_info& _return);
-  void remove_table(const int64_t table_id);
-  void send_remove_table(const int64_t table_id);
-  void recv_remove_table();
-  void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
-  void send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
+  int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
+  void send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int64_t recv_create_atomic_multilog();
+  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name);
+  void send_get_atomic_multilog_info(const std::string& name);
+  void recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return);
+  void remove_atomic_multilog(const int64_t multilog_id);
+  void send_remove_atomic_multilog(const int64_t multilog_id);
+  void recv_remove_atomic_multilog();
+  void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
+  void send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
   void recv_add_index();
-  void remove_index(const int64_t table_id, const std::string& field_name);
-  void send_remove_index(const int64_t table_id, const std::string& field_name);
+  void remove_index(const int64_t multilog_id, const std::string& field_name);
+  void send_remove_index(const int64_t multilog_id, const std::string& field_name);
   void recv_remove_index();
-  void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
-  void send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
+  void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
+  void send_add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
   void recv_add_filter();
-  void remove_filter(const int64_t table_id, const std::string& filter_name);
-  void send_remove_filter(const int64_t table_id, const std::string& filter_name);
+  void remove_filter(const int64_t multilog_id, const std::string& filter_name);
+  void send_remove_filter(const int64_t multilog_id, const std::string& filter_name);
   void recv_remove_filter();
-  void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
-  void send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
+  void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
+  void send_add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
+  void recv_add_aggregate();
+  void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
+  void send_remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
+  void recv_remove_aggregate();
+  void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
+  void send_add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
   void recv_add_trigger();
-  void remove_trigger(const int64_t table_id, const std::string& trigger_name);
-  void send_remove_trigger(const int64_t table_id, const std::string& trigger_name);
+  void remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
+  void send_remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
   void recv_remove_trigger();
-  int64_t append(const int64_t table_id, const std::string& data);
-  void send_append(const int64_t table_id, const std::string& data);
+  int64_t append(const int64_t multilog_id, const std::string& data);
+  void send_append(const int64_t multilog_id, const std::string& data);
   int64_t recv_append();
-  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch);
-  void send_append_batch(const int64_t table_id, const rpc_record_batch& batch);
+  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
+  void send_append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
   int64_t recv_append_batch();
-  void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords);
-  void send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords);
+  void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
+  void send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return);
-  void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr);
-  void send_adhoc_filter(const int64_t table_id, const std::string& filter_expr);
+  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  void send_query_aggregate(const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_query_aggregate(std::string& _return);
+  void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr);
+  void send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr);
   void recv_adhoc_filter(rpc_iterator_handle& _return);
-  void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  void send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  void send_predef_filter(const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
   void recv_predef_filter(rpc_iterator_handle& _return);
-  void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  void send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  void send_combined_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
   void recv_combined_filter(rpc_iterator_handle& _return);
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
-  void send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
+  void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
+  void send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
   void recv_alerts_by_time(rpc_iterator_handle& _return);
-  void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc);
-  void send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc);
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  void send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return);
+  void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc);
+  void send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc);
   void recv_get_more(rpc_iterator_handle& _return);
-  int64_t num_records(const int64_t table_id);
-  void send_num_records(const int64_t table_id);
+  int64_t num_records(const int64_t multilog_id);
+  void send_num_records(const int64_t multilog_id);
   int64_t recv_num_records();
  protected:
   boost::shared_ptr< Protocol_> piprot_;
@@ -2758,12 +3303,12 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_register_handler(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_deregister_handler(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_deregister_handler(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_create_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_create_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_get_table_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_table_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_table(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_table(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_create_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_create_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_get_atomic_multilog_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_atomic_multilog_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_remove_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_remove_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_add_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_index(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2772,6 +3317,10 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_add_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_remove_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_add_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_add_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_remove_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_remove_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_add_trigger(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_trigger(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_trigger(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2782,6 +3331,8 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_append_batch(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_read(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_read(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_query_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_query_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_adhoc_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_adhoc_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_predef_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2790,6 +3341,8 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_combined_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_alerts_by_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_alerts_by_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_alerts_by_trigger_and_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_alerts_by_trigger_and_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_get_more(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_more(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -2803,15 +3356,15 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["deregister_handler"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_deregister_handler,
       &rpc_serviceProcessorT::process_deregister_handler);
-    processMap_["create_table"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_create_table,
-      &rpc_serviceProcessorT::process_create_table);
-    processMap_["get_table_info"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_get_table_info,
-      &rpc_serviceProcessorT::process_get_table_info);
-    processMap_["remove_table"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_remove_table,
-      &rpc_serviceProcessorT::process_remove_table);
+    processMap_["create_atomic_multilog"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_create_atomic_multilog,
+      &rpc_serviceProcessorT::process_create_atomic_multilog);
+    processMap_["get_atomic_multilog_info"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_get_atomic_multilog_info,
+      &rpc_serviceProcessorT::process_get_atomic_multilog_info);
+    processMap_["remove_atomic_multilog"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_remove_atomic_multilog,
+      &rpc_serviceProcessorT::process_remove_atomic_multilog);
     processMap_["add_index"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_add_index,
       &rpc_serviceProcessorT::process_add_index);
@@ -2824,6 +3377,12 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["remove_filter"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_remove_filter,
       &rpc_serviceProcessorT::process_remove_filter);
+    processMap_["add_aggregate"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_add_aggregate,
+      &rpc_serviceProcessorT::process_add_aggregate);
+    processMap_["remove_aggregate"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_remove_aggregate,
+      &rpc_serviceProcessorT::process_remove_aggregate);
     processMap_["add_trigger"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_add_trigger,
       &rpc_serviceProcessorT::process_add_trigger);
@@ -2839,6 +3398,9 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["read"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_read,
       &rpc_serviceProcessorT::process_read);
+    processMap_["query_aggregate"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_query_aggregate,
+      &rpc_serviceProcessorT::process_query_aggregate);
     processMap_["adhoc_filter"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_adhoc_filter,
       &rpc_serviceProcessorT::process_adhoc_filter);
@@ -2851,6 +3413,9 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["alerts_by_time"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_alerts_by_time,
       &rpc_serviceProcessorT::process_alerts_by_time);
+    processMap_["alerts_by_trigger_and_time"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_alerts_by_trigger_and_time,
+      &rpc_serviceProcessorT::process_alerts_by_trigger_and_time);
     processMap_["get_more"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_get_more,
       &rpc_serviceProcessorT::process_get_more);
@@ -2908,173 +3473,211 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->deregister_handler();
   }
 
-  int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode) {
+  int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->create_table(table_name, schema, mode);
+      ifaces_[i]->create_atomic_multilog(name, schema, mode);
     }
-    return ifaces_[i]->create_table(table_name, schema, mode);
+    return ifaces_[i]->create_atomic_multilog(name, schema, mode);
   }
 
-  void get_table_info(rpc_table_info& _return, const std::string& table_name) {
+  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_table_info(_return, table_name);
+      ifaces_[i]->get_atomic_multilog_info(_return, name);
     }
-    ifaces_[i]->get_table_info(_return, table_name);
+    ifaces_[i]->get_atomic_multilog_info(_return, name);
     return;
   }
 
-  void remove_table(const int64_t table_id) {
+  void remove_atomic_multilog(const int64_t multilog_id) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_table(table_id);
+      ifaces_[i]->remove_atomic_multilog(multilog_id);
     }
-    ifaces_[i]->remove_table(table_id);
+    ifaces_[i]->remove_atomic_multilog(multilog_id);
   }
 
-  void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size) {
+  void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_index(table_id, field_name, bucket_size);
+      ifaces_[i]->add_index(multilog_id, field_name, bucket_size);
     }
-    ifaces_[i]->add_index(table_id, field_name, bucket_size);
+    ifaces_[i]->add_index(multilog_id, field_name, bucket_size);
   }
 
-  void remove_index(const int64_t table_id, const std::string& field_name) {
+  void remove_index(const int64_t multilog_id, const std::string& field_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_index(table_id, field_name);
+      ifaces_[i]->remove_index(multilog_id, field_name);
     }
-    ifaces_[i]->remove_index(table_id, field_name);
+    ifaces_[i]->remove_index(multilog_id, field_name);
   }
 
-  void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr) {
+  void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_filter(table_id, filter_name, filter_expr);
+      ifaces_[i]->add_filter(multilog_id, filter_name, filter_expr);
     }
-    ifaces_[i]->add_filter(table_id, filter_name, filter_expr);
+    ifaces_[i]->add_filter(multilog_id, filter_name, filter_expr);
   }
 
-  void remove_filter(const int64_t table_id, const std::string& filter_name) {
+  void remove_filter(const int64_t multilog_id, const std::string& filter_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_filter(table_id, filter_name);
+      ifaces_[i]->remove_filter(multilog_id, filter_name);
     }
-    ifaces_[i]->remove_filter(table_id, filter_name);
+    ifaces_[i]->remove_filter(multilog_id, filter_name);
   }
 
-  void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr) {
+  void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->add_trigger(table_id, trigger_name, filter_name, trigger_expr);
+      ifaces_[i]->add_aggregate(mutlilog_id, aggregate_name, filter_name, aggregate_expr);
     }
-    ifaces_[i]->add_trigger(table_id, trigger_name, filter_name, trigger_expr);
+    ifaces_[i]->add_aggregate(mutlilog_id, aggregate_name, filter_name, aggregate_expr);
   }
 
-  void remove_trigger(const int64_t table_id, const std::string& trigger_name) {
+  void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->remove_trigger(table_id, trigger_name);
+      ifaces_[i]->remove_aggregate(multilog_id, aggregate_name);
     }
-    ifaces_[i]->remove_trigger(table_id, trigger_name);
+    ifaces_[i]->remove_aggregate(multilog_id, aggregate_name);
   }
 
-  int64_t append(const int64_t table_id, const std::string& data) {
+  void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->append(table_id, data);
+      ifaces_[i]->add_trigger(multilog_id, trigger_name, trigger_expr);
     }
-    return ifaces_[i]->append(table_id, data);
+    ifaces_[i]->add_trigger(multilog_id, trigger_name, trigger_expr);
   }
 
-  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch) {
+  void remove_trigger(const int64_t multilog_id, const std::string& trigger_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->append_batch(table_id, batch);
+      ifaces_[i]->remove_trigger(multilog_id, trigger_name);
     }
-    return ifaces_[i]->append_batch(table_id, batch);
+    ifaces_[i]->remove_trigger(multilog_id, trigger_name);
   }
 
-  void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords) {
+  int64_t append(const int64_t multilog_id, const std::string& data) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->read(_return, table_id, offset, nrecords);
+      ifaces_[i]->append(multilog_id, data);
     }
-    ifaces_[i]->read(_return, table_id, offset, nrecords);
+    return ifaces_[i]->append(multilog_id, data);
+  }
+
+  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->append_batch(multilog_id, batch);
+    }
+    return ifaces_[i]->append_batch(multilog_id, batch);
+  }
+
+  void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->read(_return, multilog_id, offset, nrecords);
+    }
+    ifaces_[i]->read(_return, multilog_id, offset, nrecords);
     return;
   }
 
-  void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr) {
+  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->adhoc_filter(_return, table_id, filter_expr);
+      ifaces_[i]->query_aggregate(_return, multilog_id, aggregate_name, begin_ms, end_ms);
     }
-    ifaces_[i]->adhoc_filter(_return, table_id, filter_expr);
+    ifaces_[i]->query_aggregate(_return, multilog_id, aggregate_name, begin_ms, end_ms);
     return;
   }
 
-  void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) {
+  void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->predef_filter(_return, table_id, filter_name, begin_ms, end_ms);
+      ifaces_[i]->adhoc_filter(_return, multilog_id, filter_expr);
     }
-    ifaces_[i]->predef_filter(_return, table_id, filter_name, begin_ms, end_ms);
+    ifaces_[i]->adhoc_filter(_return, multilog_id, filter_expr);
     return;
   }
 
-  void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) {
+  void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->combined_filter(_return, table_id, filter_name, filter_expr, begin_ms, end_ms);
+      ifaces_[i]->predef_filter(_return, multilog_id, filter_name, begin_ms, end_ms);
     }
-    ifaces_[i]->combined_filter(_return, table_id, filter_name, filter_expr, begin_ms, end_ms);
+    ifaces_[i]->predef_filter(_return, multilog_id, filter_name, begin_ms, end_ms);
     return;
   }
 
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms) {
+  void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->alerts_by_time(_return, table_id, begin_ms, end_ms);
+      ifaces_[i]->combined_filter(_return, multilog_id, filter_name, filter_expr, begin_ms, end_ms);
     }
-    ifaces_[i]->alerts_by_time(_return, table_id, begin_ms, end_ms);
+    ifaces_[i]->combined_filter(_return, multilog_id, filter_name, filter_expr, begin_ms, end_ms);
     return;
   }
 
-  void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc) {
+  void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_more(_return, table_id, desc);
+      ifaces_[i]->alerts_by_time(_return, multilog_id, begin_ms, end_ms);
     }
-    ifaces_[i]->get_more(_return, table_id, desc);
+    ifaces_[i]->alerts_by_time(_return, multilog_id, begin_ms, end_ms);
     return;
   }
 
-  int64_t num_records(const int64_t table_id) {
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->num_records(table_id);
+      ifaces_[i]->alerts_by_trigger_and_time(_return, multilog_id, trigger_name, begin_ms, end_ms);
     }
-    return ifaces_[i]->num_records(table_id);
+    ifaces_[i]->alerts_by_trigger_and_time(_return, multilog_id, trigger_name, begin_ms, end_ms);
+    return;
+  }
+
+  void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_more(_return, multilog_id, desc);
+    }
+    ifaces_[i]->get_more(_return, multilog_id, desc);
+    return;
+  }
+
+  int64_t num_records(const int64_t multilog_id) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->num_records(multilog_id);
+    }
+    return ifaces_[i]->num_records(multilog_id);
   }
 
 };
@@ -3114,59 +3717,71 @@ class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
   void deregister_handler();
   int32_t send_deregister_handler();
   void recv_deregister_handler(const int32_t seqid);
-  int64_t create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
-  int32_t send_create_table(const std::string& table_name, const rpc_schema& schema, const rpc_storage_mode mode);
-  int64_t recv_create_table(const int32_t seqid);
-  void get_table_info(rpc_table_info& _return, const std::string& table_name);
-  int32_t send_get_table_info(const std::string& table_name);
-  void recv_get_table_info(rpc_table_info& _return, const int32_t seqid);
-  void remove_table(const int64_t table_id);
-  int32_t send_remove_table(const int64_t table_id);
-  void recv_remove_table(const int32_t seqid);
-  void add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
-  int32_t send_add_index(const int64_t table_id, const std::string& field_name, const double bucket_size);
+  int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int32_t send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int64_t recv_create_atomic_multilog(const int32_t seqid);
+  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name);
+  int32_t send_get_atomic_multilog_info(const std::string& name);
+  void recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const int32_t seqid);
+  void remove_atomic_multilog(const int64_t multilog_id);
+  int32_t send_remove_atomic_multilog(const int64_t multilog_id);
+  void recv_remove_atomic_multilog(const int32_t seqid);
+  void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
+  int32_t send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
   void recv_add_index(const int32_t seqid);
-  void remove_index(const int64_t table_id, const std::string& field_name);
-  int32_t send_remove_index(const int64_t table_id, const std::string& field_name);
+  void remove_index(const int64_t multilog_id, const std::string& field_name);
+  int32_t send_remove_index(const int64_t multilog_id, const std::string& field_name);
   void recv_remove_index(const int32_t seqid);
-  void add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
-  int32_t send_add_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr);
+  void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
+  int32_t send_add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
   void recv_add_filter(const int32_t seqid);
-  void remove_filter(const int64_t table_id, const std::string& filter_name);
-  int32_t send_remove_filter(const int64_t table_id, const std::string& filter_name);
+  void remove_filter(const int64_t multilog_id, const std::string& filter_name);
+  int32_t send_remove_filter(const int64_t multilog_id, const std::string& filter_name);
   void recv_remove_filter(const int32_t seqid);
-  void add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
-  int32_t send_add_trigger(const int64_t table_id, const std::string& trigger_name, const std::string& filter_name, const std::string& trigger_expr);
+  void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
+  int32_t send_add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
+  void recv_add_aggregate(const int32_t seqid);
+  void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
+  int32_t send_remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
+  void recv_remove_aggregate(const int32_t seqid);
+  void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
+  int32_t send_add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
   void recv_add_trigger(const int32_t seqid);
-  void remove_trigger(const int64_t table_id, const std::string& trigger_name);
-  int32_t send_remove_trigger(const int64_t table_id, const std::string& trigger_name);
+  void remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
+  int32_t send_remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
   void recv_remove_trigger(const int32_t seqid);
-  int64_t append(const int64_t table_id, const std::string& data);
-  int32_t send_append(const int64_t table_id, const std::string& data);
+  int64_t append(const int64_t multilog_id, const std::string& data);
+  int32_t send_append(const int64_t multilog_id, const std::string& data);
   int64_t recv_append(const int32_t seqid);
-  int64_t append_batch(const int64_t table_id, const rpc_record_batch& batch);
-  int32_t send_append_batch(const int64_t table_id, const rpc_record_batch& batch);
+  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
+  int32_t send_append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
   int64_t recv_append_batch(const int32_t seqid);
-  void read(std::string& _return, const int64_t table_id, const int64_t offset, const int64_t nrecords);
-  int32_t send_read(const int64_t table_id, const int64_t offset, const int64_t nrecords);
+  void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
+  int32_t send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   void recv_read(std::string& _return, const int32_t seqid);
-  void adhoc_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_expr);
-  int32_t send_adhoc_filter(const int64_t table_id, const std::string& filter_expr);
+  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_query_aggregate(const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_query_aggregate(std::string& _return, const int32_t seqid);
+  void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr);
+  int32_t send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr);
   void recv_adhoc_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void predef_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_predef_filter(const int64_t table_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_predef_filter(const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
   void recv_predef_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void combined_filter(rpc_iterator_handle& _return, const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_combined_filter(const int64_t table_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_combined_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
   void recv_combined_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_alerts_by_time(const int64_t table_id, const int64_t begin_ms, const int64_t end_ms);
+  void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
   void recv_alerts_by_time(rpc_iterator_handle& _return, const int32_t seqid);
-  void get_more(rpc_iterator_handle& _return, const int64_t table_id, const rpc_iterator_descriptor& desc);
-  int32_t send_get_more(const int64_t table_id, const rpc_iterator_descriptor& desc);
+  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  int32_t send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
+  void recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int32_t seqid);
+  void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc);
+  int32_t send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc);
   void recv_get_more(rpc_iterator_handle& _return, const int32_t seqid);
-  int64_t num_records(const int64_t table_id);
-  int32_t send_num_records(const int64_t table_id);
+  int64_t num_records(const int64_t multilog_id);
+  int32_t send_num_records(const int64_t multilog_id);
   int64_t recv_num_records(const int32_t seqid);
  protected:
   boost::shared_ptr< Protocol_> piprot_;

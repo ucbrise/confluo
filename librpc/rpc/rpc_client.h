@@ -31,12 +31,12 @@ class rpc_client {
   typedef rpc_serviceClient thrift_client;
 
   rpc_client()
-      : cur_table_id_(-1),
+      : cur_multilog_id_(-1),
         read_buffer_(std::make_pair(INT64_C(-1), "")) {
   }
 
   rpc_client(const std::string& host, int port)
-      : cur_table_id_(-1),
+      : cur_multilog_id_(-1),
         read_buffer_(std::make_pair(INT64_C(-1), "")) {
     connect(host, port);
   }
@@ -65,84 +65,100 @@ class rpc_client {
     client_->register_handler();
   }
 
-  void create_table(const std::string& table_name, const schema_t& schema,
+  void create_atomic_multilog(const std::string& name, const schema_t& schema,
       const storage::storage_id mode) {
     cur_schema_ = schema;
-    cur_table_id_ = client_->create_table(table_name,
+    cur_multilog_id_ = client_->create_atomic_multilog(name,
         rpc_type_conversions::convert_schema(schema.columns()),
         rpc_type_conversions::convert_mode(mode));
   }
 
-  void set_current_table(const std::string& table_name) {
-    rpc_table_info info;
-    client_->get_table_info(info, table_name);
+  void set_current_atomic_multilog(const std::string& name) {
+    rpc_atomic_multilog_info info;
+    client_->get_atomic_multilog_info(info, name);
     cur_schema_ = schema_t(rpc_type_conversions::convert_schema(info.schema));
-    cur_table_id_ = info.table_id;
+    cur_multilog_id_ = info.id;
   }
 
-  void remove_table() {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+  void remove_atomic_multilog() {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->remove_table(cur_table_id_);
-    cur_table_id_ = -1;
+    client_->remove_atomic_multilog(cur_multilog_id_);
+    cur_multilog_id_ = -1;
   }
 
   void add_index(const std::string& field_name, const double bucket_size = 1.0) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->add_index(cur_table_id_, field_name, bucket_size);
+    client_->add_index(cur_multilog_id_, field_name, bucket_size);
   }
 
   void remove_index(const std::string& field_name) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->remove_index(cur_table_id_, field_name);
+    client_->remove_index(cur_multilog_id_, field_name);
   }
 
   void add_filter(const std::string& filter_name,
       const std::string& filter_expr) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->add_filter(cur_table_id_, filter_name, filter_expr);
+    client_->add_filter(cur_multilog_id_, filter_name, filter_expr);
   }
 
   void remove_filter(const std::string& filter_name) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->remove_filter(cur_table_id_, filter_name);
+    client_->remove_filter(cur_multilog_id_, filter_name);
+  }
+
+  void add_aggregate(const std::string& aggregate_name,
+      const std::string& filter_name,
+      const std::string& aggregate_expr) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->add_aggregate(cur_multilog_id_, aggregate_name, filter_name,
+        aggregate_expr);
+  }
+
+  void remove_aggregate(const std::string& aggregate_name) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->remove_aggregate(cur_multilog_id_, aggregate_name);
   }
 
   void add_trigger(const std::string& trigger_name,
-      const std::string& filter_name,
       const std::string& trigger_expr) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->add_trigger(cur_table_id_, trigger_name, filter_name, trigger_expr);
+    client_->add_trigger(cur_multilog_id_, trigger_name, trigger_expr);
   }
 
   void remove_trigger(const std::string& trigger_name) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->remove_trigger(cur_table_id_, trigger_name);
+    client_->remove_trigger(cur_multilog_id_, trigger_name);
   }
 
   void write(const std::string& record) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
     if (record.length() != cur_schema_.record_size()) {
       throw illegal_state_exception("Record size incorrect; expected="
           + std::to_string(cur_schema_.record_size())
           + ", got=" + std::to_string(record.length()));
     }
-    client_->append(cur_table_id_, record);
+    client_->append(cur_multilog_id_, record);
   }
 
   /** Query ops **/
@@ -152,63 +168,81 @@ class rpc_client {
   }
 
   void read_batch(std::string& _return, int64_t offset, size_t nrecords) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    client_->read(_return, cur_table_id_, offset, nrecords);
+    client_->read(_return, cur_multilog_id_, offset, nrecords);
+  }
+
+  void query_aggregate(std::string& _return, const std::string& aggregate_name,
+      int64_t begin_ms, int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->query_aggregate(_return, cur_multilog_id_, aggregate_name,
+        begin_ms, end_ms);
   }
 
   rpc_record_stream adhoc_filter(const std::string& filter_expr) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
     rpc_iterator_handle handle;
-    client_->adhoc_filter(handle, cur_table_id_, filter_expr);
-    return rpc_record_stream(cur_table_id_, cur_schema_, client_, std::move(handle));
+    client_->adhoc_filter(handle, cur_multilog_id_, filter_expr);
+    return rpc_record_stream(cur_multilog_id_, cur_schema_, client_, std::move(handle));
   }
 
   rpc_record_stream predef_filter(const std::string& filter_name,
       const int64_t begin_ms,
       const int64_t end_ms) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
     rpc_iterator_handle handle;
-    client_->predef_filter(handle, cur_table_id_, filter_name, begin_ms, end_ms);
-    return rpc_record_stream(cur_table_id_, cur_schema_, client_, std::move(handle));
+    client_->predef_filter(handle, cur_multilog_id_, filter_name, begin_ms, end_ms);
+    return rpc_record_stream(cur_multilog_id_, cur_schema_, client_, std::move(handle));
   }
 
   rpc_record_stream combined_filter(const std::string& filter_name,
       const std::string& filter_expr,
       const int64_t begin_ms,
       const int64_t end_ms) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
     rpc_iterator_handle handle;
-    client_->combined_filter(handle, cur_table_id_, filter_name, filter_expr, begin_ms,
+    client_->combined_filter(handle, cur_multilog_id_, filter_name, filter_expr, begin_ms,
         end_ms);
-    return rpc_record_stream(cur_table_id_, cur_schema_, client_, std::move(handle));
+    return rpc_record_stream(cur_multilog_id_, cur_schema_, client_, std::move(handle));
   }
 
   rpc_alert_stream get_alerts(const int64_t begin_ms, const int64_t end_ms) {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
     rpc_iterator_handle handle;
-    client_->alerts_by_time(handle, cur_table_id_, begin_ms, end_ms);
-    return rpc_alert_stream(cur_table_id_, client_, std::move(handle));
+    client_->alerts_by_time(handle, cur_multilog_id_, begin_ms, end_ms);
+    return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
+  }
+
+  rpc_alert_stream get_alerts(const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    rpc_iterator_handle handle;
+    client_->alerts_by_trigger_and_time(handle, cur_multilog_id_, trigger_name, begin_ms, end_ms);
+    return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
   }
 
   int64_t num_records() {
-    if (cur_table_id_ == -1) {
-      throw illegal_state_exception("Must set table first");
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
     }
-    return client_->num_records(cur_table_id_);
+    return client_->num_records(cur_multilog_id_);
   }
 
 protected:
-  int64_t cur_table_id_;
+  int64_t cur_multilog_id_;
   schema_t cur_schema_;
 
   // Write buffer

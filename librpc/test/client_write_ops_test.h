@@ -6,6 +6,7 @@
 #include "atomic_multilog.h"
 #include "rpc_client.h"
 #include "rpc_server.h"
+#include "rpc_test_utils.h"
 
 #define MAX_RECORDS 2560U
 #define DATA_SIZE   64U
@@ -63,11 +64,11 @@ class ClientWriteOpsTest : public testing::Test {
     return str;
   }
 
-  static confluo_store* simple_table_store(std::string table_name,
-                                          storage::storage_id id) {
+  static confluo_store* simple_table_store(std::string atomic_multilog_name,
+                                           storage::storage_id id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
-        table_name,
+        atomic_multilog_name,
         schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
         id);
     return store;
@@ -101,153 +102,9 @@ class ClientWriteOpsTest : public testing::Test {
 ClientWriteOpsTest::rec ClientWriteOpsTest::r;
 std::vector<column_t> ClientWriteOpsTest::s = schema();
 
-TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
-    std::string table_name = "my_table";
-
-    auto store = new confluo_store("/tmp");
-    store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
-    auto dtable = store->get_atomic_multilog(table_name);
-    
-    auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
-    std::thread serve_thread([&server] {
-        server->serve();
-    });
-    sleep(1);
-
-    rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-    client.set_current_table(table_name);
-
-    client.add_index("a", 1);
-    client.add_index("b", 1);
-    client.add_index("c", 10);
-    client.add_index("d", 2);
-    client.add_index("e", 100);
-    client.add_index("f", 0.1);
-    client.add_index("g", 0.01);
-    client.add_index("h", 1);
-
-    dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-
-    try {
-        client.remove_index("a");
-        client.remove_index("a");
-    } catch (std::exception& e) {
-        std::string error_message = "TException - service has thrown: " \
-            "rpc_management_exception(msg=Could not remove index for a:" \
-            " No index exists)";
-        ASSERT_STREQ(e.what(), error_message.c_str());
-    }
-
-    client.remove_index("b");
-    ASSERT_EQ(false, dtable->is_indexed("b"));
-    ASSERT_EQ(true, dtable->is_indexed("c"));
-
-    client.disconnect();
-    server->stop();
-    if (serve_thread.joinable()) {
-        serve_thread.join();
-    }
-}
-
-TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
-    std::string table_name = "my_table";
-
-    auto store = new confluo_store("/tmp");
-    store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
-    auto dtable = store->get_atomic_multilog(table_name);
-    auto server = rpc_server::create(store, SERVER_ADDRESS, 
-            SERVER_PORT);
-    std::thread serve_thread([&server] {
-        server->serve();
-    });
-
-    sleep(1);
-
-    rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-    client.set_current_table(table_name);
-
-    client.add_filter("filter1", "a == true");
-    client.add_filter("filter2", "b > 4");
-    
-    client.add_trigger("trigger1", "filter2", "SUM(d) >= 10");
-    client.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
-    
-    int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-    dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    dtable->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    dtable->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-    dtable->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    dtable->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    dtable->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-
-    int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
-
-    size_t i = 0;
-    for (auto r = dtable->query_filter("filter1", beg, end); 
-            !r.empty(); r = r.tail()) {
-        i++;
-    }
-
-    try {
-        client.remove_filter("filter1");
-        dtable->query_filter("filter1", beg, end);
-    } catch (std::exception& e) {
-        std::string message = "Filter filter1 does not exist.";
-        ASSERT_STREQ(e.what(), message.c_str());
-    }
-
-
-    try {
-        client.remove_filter("filter2");
-        client.remove_filter("filter2");
-    } catch (std::exception& ex) {
-        std::string message = "TException - service has thrown: " \
-            "rpc_management_exception(msg=Filter filter2 does not " \
-            "exist.)";
-        ASSERT_STREQ(ex.what(), message.c_str());
-    }
-
-    auto before_alerts = dtable->get_alerts(beg, end);
-    client.remove_trigger("trigger2");
-    sleep(1);
-    auto after_alerts = dtable->get_alerts(beg, end);
-    
-    size_t first_count = 0;
-    size_t second_count = 0;
-
-    for (const auto& a : before_alerts) {
-        first_count++;
-    }
-
-    for (const auto& a : after_alerts) {
-        second_count++;
-    }
-    
-    ASSERT_LE(second_count, first_count);
-
-    try {
-        client.remove_trigger("trigger1");
-        client.remove_trigger("trigger1");
-    } catch (std::exception& e) {
-        std::string message = "TException - service has thrown: " \
-            "rpc_management_exception(msg=Trigger trigger1 does not " \
-            "exist.)";
-        ASSERT_STREQ(e.what(), message.c_str());
-    }
-  
-    client.disconnect();
-    server->stop();
-    if (serve_thread.joinable()) {
-        serve_thread.join();
-    }
-}
-
 TEST_F(ClientWriteOpsTest, CreateTableTest) {
 
-  std::string table_name = "my_table";
+  std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -255,12 +112,12 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
 
-  client.create_table(
-      table_name,
+  client.create_atomic_multilog(
+      atomic_multilog_name,
       schema_t(
           schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
       storage::D_IN_MEMORY);
@@ -275,26 +132,26 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
 
 TEST_F(ClientWriteOpsTest, WriteTest) {
 
-  std::string table_name = "my_table";
+  std::string atomic_multilog_name = "my_multilog";
 
-  auto store = simple_table_store(table_name, storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  auto store = simple_table_store(atomic_multilog_name, storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_table(table_name);
+  client.set_current_atomic_multilog(atomic_multilog_name);
 
   int64_t ts = utils::time_utils::cur_ns();
   std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
   client.write(ts_str + pad_str("abc", DATA_SIZE));
 
   ro_data_ptr ptr;
-  dtable->read(0, ptr);
+  mlog->read(0, ptr);
   std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()),
   DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
@@ -308,20 +165,21 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
 
 TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
-  std::string table_name = "my_table";
+  std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_table(table_name);
+  client.set_current_atomic_multilog(atomic_multilog_name);
 
   client.add_index("a", 1);
   client.add_index("b", 1);
@@ -332,66 +190,66 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   client.add_index("g", 0.01);
   client.add_index("h", 1);
 
-  dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-  dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  dtable->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  dtable->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  dtable->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  dtable->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  dtable->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = dtable->execute_filter("a == true"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("a == true"); !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("b > 4"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("b > 4"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("d == 0"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("d == 0"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -400,7 +258,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("a == true && b > 4"); !r.empty();
+  for (auto r = mlog->execute_filter("a == true && b > 4"); !r.empty();
       r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
@@ -409,7 +267,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("a == true && (b > 4 || c <= 30)");
+  for (auto r = mlog->execute_filter("a == true && (b > 4 || c <= 30)");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -420,7 +278,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->execute_filter("a == true && (b > 4 || f > 0.1)");
+  for (auto r = mlog->execute_filter("a == true && (b > 4 || f > 0.1)");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -439,21 +297,21 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
 TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
-  std::string table_name = "my_table";
+  std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(table_name, schema(), storage::D_IN_MEMORY);
-  auto dtable = store->get_atomic_multilog(table_name);
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
-  client.set_current_table(table_name);
-
+  client.set_current_atomic_multilog(atomic_multilog_name);
   client.add_filter("filter1", "a == true");
   client.add_filter("filter2", "b > 4");
   client.add_filter("filter3", "c <= 30");
@@ -462,77 +320,93 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   client.add_filter("filter6", "f > 0.1");
   client.add_filter("filter7", "g < 0.06");
   client.add_filter("filter8", "h == zzz");
-  client.add_trigger("trigger1", "filter1", "SUM(d) >= 10");
-  client.add_trigger("trigger2", "filter2", "SUM(d) >= 10");
-  client.add_trigger("trigger3", "filter3", "SUM(d) >= 10");
-  client.add_trigger("trigger4", "filter4", "SUM(d) >= 10");
-  client.add_trigger("trigger5", "filter5", "SUM(d) >= 10");
-  client.add_trigger("trigger6", "filter6", "SUM(d) >= 10");
-  client.add_trigger("trigger7", "filter7", "SUM(d) >= 10");
-  client.add_trigger("trigger8", "filter8", "SUM(d) >= 10");
+  client.add_aggregate("agg1", "filter1", "SUM(d)");
+  client.add_aggregate("agg2", "filter2", "SUM(d)");
+  client.add_aggregate("agg3", "filter3", "SUM(d)");
+  client.add_aggregate("agg4", "filter4", "SUM(d)");
+  client.add_aggregate("agg5", "filter5", "SUM(d)");
+  client.add_aggregate("agg6", "filter6", "SUM(d)");
+  client.add_aggregate("agg7", "filter7", "SUM(d)");
+  client.add_aggregate("agg8", "filter8", "SUM(d)");
+  client.add_trigger("trigger1", "agg1 >= 10");
+  client.add_trigger("trigger2", "agg2 >= 10");
+  client.add_trigger("trigger3", "agg3 >= 10");
+  client.add_trigger("trigger4", "agg4 >= 10");
+  client.add_trigger("trigger5", "agg5 >= 10");
+  client.add_trigger("trigger6", "agg6 >= 10");
+  client.add_trigger("trigger7", "agg7 >= 10");
+  client.add_trigger("trigger8", "agg8 >= 10");
 
-  dtable->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
-  dtable->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-  dtable->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-  dtable->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-  dtable->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-  dtable->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-  dtable->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-  dtable->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
   int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
 
   size_t i = 0;
-  for (auto r = dtable->query_filter("filter1", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter2", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter2", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter3", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter3", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter4", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter4", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter5", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter5", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter6", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter6", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter7", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter7", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter8", beg, end); !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter8", beg, end); !r.empty(); r =
+      r.tail()) {
     ASSERT_TRUE(
         r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -541,8 +415,8 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter1", "b > 4", beg, end);
-      !r.empty(); r = r.tail()) {
+  for (auto r = mlog->query_filter("filter1", "b > 4", beg, end); !r.empty();
+      r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -550,7 +424,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter1", "b > 4 || c <= 30", beg, end);
+  for (auto r = mlog->query_filter("filter1", "b > 4 || c <= 30", beg, end);
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -561,7 +435,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = dtable->query_filter("filter1", "b > 4 || f > 0.1", beg, end);
+  for (auto r = mlog->query_filter("filter1", "b > 4 || f > 0.1", beg, end);
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -571,19 +445,230 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
+  // Test aggregates
+  numeric val1 = mlog->query_aggregate("agg1", beg, end);
+  ASSERT_TRUE(numeric(32) == val1);
+  numeric val2 = mlog->query_aggregate("agg2", beg, end);
+  ASSERT_TRUE(numeric(36) == val2);
+  numeric val3 = mlog->query_aggregate("agg3", beg, end);
+  ASSERT_TRUE(numeric(12) == val3);
+  numeric val4 = mlog->query_aggregate("agg4", beg, end);
+  ASSERT_TRUE(numeric(0) == val4);
+  numeric val5 = mlog->query_aggregate("agg5", beg, end);
+  ASSERT_TRUE(numeric(12) == val5);
+  numeric val6 = mlog->query_aggregate("agg6", beg, end);
+  ASSERT_TRUE(numeric(54) == val6);
+  numeric val7 = mlog->query_aggregate("agg7", beg, end);
+  ASSERT_TRUE(numeric(20) == val7);
+  numeric val8 = mlog->query_aggregate("agg8", beg, end);
+  ASSERT_TRUE(numeric(26) == val8);
+
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
 
-  auto alerts = dtable->get_alerts(beg, end);
-  for (const auto& a : alerts) {
-    LOG_INFO<< "Alert: " << a.to_string();
+  size_t alert_count = 0;
+  for (auto a = mlog->get_alerts(beg, end); !a.empty(); a = a.tail()) {
+    LOG_INFO<< "Alert: " << a.head().to_string();
+    ASSERT_TRUE(a.head().value >= numeric(10));
+    alert_count++;
   }
+  ASSERT_EQ(size_t(7), alert_count);
+
+  auto a1 = mlog->get_alerts("trigger1", beg, end);
+  ASSERT_TRUE(!a1.empty());
+  ASSERT_EQ("trigger1", a1.head().trigger_name);
+  ASSERT_TRUE(numeric(32) == a1.head().value);
+  ASSERT_TRUE(a1.tail().empty());
+
+  auto a2 = mlog->get_alerts("trigger2", beg, end);
+  ASSERT_TRUE(!a2.empty());
+  ASSERT_EQ("trigger2", a2.head().trigger_name);
+  ASSERT_TRUE(numeric(36) == a2.head().value);
+  ASSERT_TRUE(a2.tail().empty());
+
+  auto a3 = mlog->get_alerts("trigger3", beg, end);
+  ASSERT_TRUE(!a3.empty());
+  ASSERT_EQ("trigger3", a3.head().trigger_name);
+  ASSERT_TRUE(numeric(12) == a3.head().value);
+  ASSERT_TRUE(a3.tail().empty());
+
+  auto a4 = mlog->get_alerts("trigger4", beg, end);
+  ASSERT_TRUE(a4.empty());
+
+  auto a5 = mlog->get_alerts("trigger5", beg, end);
+  ASSERT_TRUE(!a5.empty());
+  ASSERT_EQ("trigger5", a5.head().trigger_name);
+  ASSERT_TRUE(numeric(12) == a5.head().value);
+  ASSERT_TRUE(a5.tail().empty());
+
+  auto a6 = mlog->get_alerts("trigger6", beg, end);
+  ASSERT_TRUE(!a6.empty());
+  ASSERT_EQ("trigger6", a6.head().trigger_name);
+  ASSERT_TRUE(numeric(54) == a6.head().value);
+  ASSERT_TRUE(a6.tail().empty());
+
+  auto a7 = mlog->get_alerts("trigger7", beg, end);
+  ASSERT_TRUE(!a7.empty());
+  ASSERT_EQ("trigger7", a7.head().trigger_name);
+  ASSERT_TRUE(numeric(20) == a7.head().value);
+  ASSERT_TRUE(a7.tail().empty());
+
+  auto a8 = mlog->get_alerts("trigger8", beg, end);
+  ASSERT_TRUE(!a8.empty());
+  ASSERT_EQ("trigger8", a8.head().trigger_name);
+  ASSERT_TRUE(numeric(26) == a8.head().value);
+  ASSERT_TRUE(a8.tail().empty());
 
   client.disconnect();
   server->stop();
 
   if (serve_thread.joinable()) {
     serve_thread.join();
+  }
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
+TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
+  std::string atomic_multilog_name = "my_multilog";
+
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
+
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  client.add_index("a", 1);
+  client.add_index("b", 1);
+  client.add_index("c", 10);
+  client.add_index("d", 2);
+  client.add_index("e", 100);
+  client.add_index("f", 0.1);
+  client.add_index("g", 0.01);
+  client.add_index("h", 1);
+
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+
+  try {
+    client.remove_index("a");
+    client.remove_index("a");
+  } catch (std::exception& e) {
+    std::string error_message = "TException - service has thrown: "
+        "rpc_management_exception(msg=Could not remove index for a:"
+        " No index exists)";
+    ASSERT_STREQ(e.what(), error_message.c_str());
+  }
+
+  client.remove_index("b");
+  ASSERT_EQ(false, mlog->is_indexed("b"));
+  ASSERT_EQ(true, mlog->is_indexed("c"));
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
+TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
+  std::string atomic_multilog_name = "my_multilog";
+
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::D_IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  client.add_filter("filter1", "a == true");
+  client.add_filter("filter2", "b > 4");
+  client.add_aggregate("agg1", "filter1", "SUM(d)");
+  client.add_aggregate("agg2", "filter2", "SUM(d)");
+  client.add_trigger("trigger1", "agg1 >= 10");
+  client.add_trigger("trigger2", "agg2 >= 10");
+
+  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+
+  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+
+  size_t i = 0;
+  for (auto r = mlog->query_filter("filter1", beg, end); !r.empty(); r =
+      r.tail()) {
+    i++;
+  }
+
+  try {
+    client.remove_filter("filter1");
+    mlog->query_filter("filter1", beg, end);
+  } catch (std::exception& e) {
+    std::string message = "Filter filter1 does not exist.";
+    ASSERT_STREQ(e.what(), message.c_str());
+  }
+
+  try {
+    client.remove_filter("filter2");
+    client.remove_filter("filter2");
+  } catch (std::exception& ex) {
+    std::string message = "TException - service has thrown: "
+        "rpc_management_exception(msg=Filter filter2 does not "
+        "exist.)";
+    ASSERT_STREQ(ex.what(), message.c_str());
+  }
+
+  auto before_alerts = mlog->get_alerts(beg, end);
+  client.remove_trigger("trigger2");
+  sleep(1);
+  auto after_alerts = mlog->get_alerts(beg, end);
+
+  size_t first_count = 0;
+  size_t second_count = 0;
+
+  for (auto a = before_alerts; !a.empty(); a = a.tail()) {
+    first_count++;
+  }
+
+  for (auto a = after_alerts; !a.empty(); a = a.tail()) {
+    second_count++;
+  }
+
+  ASSERT_LE(second_count, first_count);
+
+  try {
+    client.remove_trigger("trigger1");
+    client.remove_trigger("trigger1");
+  } catch (std::exception& e) {
+    std::string message = "TException - service has thrown: "
+        "rpc_management_exception(msg=Trigger trigger1 does not "
+        "exist.)";
+    ASSERT_STREQ(e.what(), message.c_str());
   }
 
   client.disconnect();

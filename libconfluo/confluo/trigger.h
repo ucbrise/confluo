@@ -2,6 +2,7 @@
 #define CONFLUO_TRIGGER_H_
 
 #include "aggregate.h"
+#include "types/relational_ops.h"
 #include "schema/schema_snapshot.h"
 
 namespace confluo {
@@ -11,28 +12,19 @@ struct trigger {
  public:
   /**
    * Constructor that initializes a trigger
-   * @param trigger_name The name of the trigger
-   * @param filter_name The name of the filter
-   * @param trigger_expr The trigger expression
-   * @param agg The aggregate
-   * @param field_name The field name to act on
-   * @param field_idx The field index
-   * @param field_type The type of the field
-   * @param op The operation to perform
-   * @param threshold The threshold for the trigger
+   *
+   * @param name The name of the trigger
+   * @param aggregate_name The name of the aggregate on which the trigger
+   *        is defined
+   * @param op Trigger's relational operator
+   * @param threshold Trigger's threshold
+   * @param periodicity Trigger's periodicity
    */
-  trigger(const std::string& trigger_name, const std::string& filter_name,
-          const std::string& trigger_expr, aggregate_id agg,
-          const std::string& field_name, size_t field_idx,
-          const data_type& field_type, reational_op_id op,
-          const numeric& threshold, const uint64_t periodicity_ms)
-      : trigger_name_(trigger_name),
-        filter_name_(filter_name),
-        trigger_expr_(trigger_expr),
-        agg_id_(agg),
-        field_name_(field_name),
-        field_idx_(field_idx),
-        field_type_(field_type),
+  trigger(const std::string& name, const std::string& aggregate_name,
+          reational_op_id op, const numeric& threshold,
+          const uint64_t periodicity_ms)
+      : name_(name),
+        aggregate_name_(aggregate_name),
         op_(op),
         threshold_(threshold),
         periodicity_ms_(periodicity_ms),
@@ -40,61 +32,28 @@ struct trigger {
   }
 
   /**
-   * Creates an aggregate for the trigger
-   * @return The aggregate
-   */
-  aggregate create_aggregate() {
-    return
-        agg_id_ == aggregate_id::D_CNT ?
-            aggregate(LONG_TYPE, agg_id_) : aggregate(field_type_, agg_id_);
-  }
-
-  /**
    * Gets the trigger name
    * @return The trigger name
    */
-  std::string trigger_name() const {
-    return trigger_name_;
+  std::string name() const {
+    return name_;
+  }
+
+  /**
+   * Constructs the trigger expression
+   * @return The trigger expression
+   */
+  std::string expr() const {
+    return aggregate_name_ + " " + relop_utils::op_to_str(op_) + " "
+        + threshold_.to_string();
   }
 
   /**
    * Gets the filter name
    * @return The filter name
    */
-  std::string filter_name() const {
-    return filter_name_;
-  }
-
-  /**
-   * Gets the trigger expression
-   * @return The trigger expression
-   */
-  std::string trigger_expr() const {
-    return trigger_expr_;
-  }
-
-  /**
-   * Gets the id of the aggregate
-   * @return The aggregate id
-   */
-  aggregate_id agg_id() const {
-    return agg_id_;
-  }
-
-  /**
-   * Gets the field index
-   * @return The field index
-   */
-  size_t field_idx() const {
-    return field_idx_;
-  }
-
-  /**
-   * Gets the type of the field
-   * @return The field type
-   */
-  data_type field_type() const {
-    return field_type_;
+  std::string aggregate_name() const {
+    return aggregate_name_;
   }
 
   /**
@@ -113,30 +72,12 @@ struct trigger {
     return threshold_;
   }
 
+  /**
+   * Get the periodicity for the trigger in milliseconds.
+   * @return The periodicity for the trigger in milliseconds.
+   */
   uint64_t periodicity_ms() const {
     return periodicity_ms_;
-  }
-
-  /**
-   * Gets the aggregate defined zero
-   * @return The aggregate zero
-   */
-  numeric zero() {
-    return aggregators[agg_id_].zero(field_type_);
-  }
-
-  /**
-   * Aggregates the data
-   * @param a The numeric
-   * @param s The snapshot of the schema
-   * @param data The data
-   * @return An aggregate of the data based on the numeric
-   */
-  numeric agg(const numeric& a, const schema_snapshot& s, void* data) {
-    numeric b(s.get(data, field_idx_));
-    return aggregators[agg_id_].agg(
-        a.type().is_none() ? zero() : a,
-        agg_id_ == aggregate_id::D_CNT ? count_one : b);
   }
 
   /**
@@ -164,25 +105,19 @@ struct trigger {
    * @return The string representation
    */
   std::string to_string() const {
-    return "Trigger Name: " + trigger_name_ + " Filter Name: " + filter_name_
-        + " Trigger Expression: " + aggop_utils::agg_to_string(agg_id_) + "("
-        + field_name_ + ") " + relop_utils::op_to_str(op_) + " "
-        + threshold_.to_string();
+    return "{ name: \"" + name() + "\", expression: \"" + expr() + "\"}";
   }
 
  private:
-  std::string trigger_name_;
-  std::string filter_name_;
-  std::string trigger_expr_;
-  aggregate_id agg_id_;
-  std::string field_name_;
-  uint32_t field_idx_;
-  data_type field_type_;
+  std::string name_;
+  std::string aggregate_name_;
   reational_op_id op_;
   numeric threshold_;
+
   uint64_t periodicity_ms_;
   atomic::type<bool> is_valid_;
 };
+
 }
 }
 

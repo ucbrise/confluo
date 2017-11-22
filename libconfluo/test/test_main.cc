@@ -1,6 +1,7 @@
 
 #define GTEST_HAS_TR1_TUPLE 0
 
+#include "error_handling.h"
 #include "gtest/gtest.h"
 #include "aggregate_test.h"
 #include "aggregated_reflog_test.h"
@@ -33,11 +34,12 @@
 #include "atomic_multilog_metadata_test.h"
 #include "threads/task_test.h"
 #include "threads/thread_manager_test.h"
-#include "parser/trigger_compiler_test.h"
+#include "parser/aggregate_parser_test.h"
 #include "parser/trigger_parser_test.h"
 #include "types/type_manager_test.h"
 
 int main(int argc, char** argv) {
+  utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

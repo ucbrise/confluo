@@ -1,5 +1,5 @@
-#ifndef CONFLUO_PARSER_TRIGGER_PARSER_H_
-#define CONFLUO_PARSER_TRIGGER_PARSER_H_
+#ifndef CONFLUO_PARSER_AGGREGATE_PARSER_H_
+#define CONFLUO_PARSER_AGGREGATE_PARSER_H_
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/support_utree.hpp>
@@ -11,20 +11,16 @@
 namespace confluo {
 namespace parser {
 
-struct parsed_trigger {
-  std::string aggregate_name;
-  std::string relop;
-  std::string threshold;
+struct parsed_aggregate {
+  std::string agg;
+  std::string field_name;
 };
 
 }
 }
 
-BOOST_FUSION_ADAPT_STRUCT(
-    confluo::parser::parsed_trigger,
-    (std::string, aggregate_name)
-    (std::string, relop)
-    (std::string, threshold))
+BOOST_FUSION_ADAPT_STRUCT(confluo::parser::parsed_aggregate,
+                          (std::string, agg) (std::string, field_name))
 
 namespace confluo {
 namespace parser {
@@ -35,10 +31,11 @@ namespace spirit = boost::spirit;
 namespace phx = boost::phoenix;
 
 template<typename I>
-class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()> {
+class aggregate_parser : public qi::grammar<I, ascii::space_type,
+    parsed_aggregate()> {
  public:
-  trigger_parser()
-      : trigger_parser::base_type(trig) {
+  aggregate_parser()
+      : aggregate_parser::base_type(agg) {
     using qi::alpha;
     using qi::alnum;
     using qi::char_;
@@ -46,26 +43,24 @@ class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()
     using qi::string;
     using qi::raw;
 
-    trig = identifier >> op >> thresh;
+    agg = agg_type >> '(' >> identifier >> ')';
+    agg_type = +alpha;
     identifier = (alpha | char_("_")) >> *(alnum | char_("_"));
-    op = +char_("<>=!");
-    thresh = raw[double_];
   }
 
-  qi::rule<I, ascii::space_type, parsed_trigger()> trig;
+  qi::rule<I, ascii::space_type, parsed_aggregate()> agg;
+  qi::rule<I, ascii::space_type, std::string()> agg_type;
   qi::rule<I, ascii::space_type, std::string()> identifier;
-  qi::rule<I, ascii::space_type, std::string()> op;
-  qi::rule<I, ascii::space_type, std::string()> thresh;
 };
 
-parsed_trigger parse_trigger(const std::string& t) {
+parsed_aggregate parse_aggregate(const std::string& t) {
   using boost::spirit::ascii::space;
   typedef std::string::const_iterator iterator_type;
-  typedef trigger_parser<iterator_type> grammar;
+  typedef aggregate_parser<iterator_type> grammar;
   grammar g;
   std::string::const_iterator iter = t.begin();
   std::string::const_iterator end = t.end();
-  parsed_trigger pt;
+  parsed_aggregate pt;
   bool r = phrase_parse(iter, end, g, space, pt);
   if (iter != end || !r) {
     std::string rest(iter, end);
@@ -77,4 +72,4 @@ parsed_trigger parse_trigger(const std::string& t) {
 }
 }
 
-#endif /* CONFLUO_PARSER_TRIGGER_PARSER_H_ */
+#endif /* CONFLUO_PARSER_AGGREGATE_PARSER_H_ */

@@ -2,8 +2,8 @@
 #define CONFLUO_AGGREGATED_REFLOG_H_
 
 #include "aggregate.h"
+#include "aggregate_info.h"
 #include "container/reflog.h"
-#include "trigger_log.h"
 
 namespace confluo {
 
@@ -18,22 +18,22 @@ class aggregated_reflog : public reflog {
   typedef reflog::iterator iterator;
   typedef reflog::const_iterator const_iterator;
 
-  aggregated_reflog(const trigger_log& triggers)
+  aggregated_reflog(const aggregate_log& aggregates)
       : reflog(),
-        num_aggregates_(triggers.size()),
-        aggregates_(new aggregate[triggers.size()]) {
+        num_aggregates_(aggregates.size()),
+        aggregates_(new aggregate[aggregates.size()]) {
     for (size_t i = 0; i < num_aggregates_; i++) {
-      aggregates_[i] = triggers.at(i)->create_aggregate();
+      aggregates_[i] = aggregates.at(i)->create_aggregate();
     }
   }
 
-  inline void update_aggregate(int thread_id, size_t trigger_id,
-                               const numeric& value, uint64_t version) {
-    aggregates_[trigger_id].update(thread_id, value, version);
+  inline void update_aggregate(int thread_id, size_t aid, const numeric& value,
+                               uint64_t version) {
+    aggregates_[aid].update(thread_id, value, version);
   }
 
-  inline numeric get_aggregate(size_t trigger_id, uint64_t version) const {
-    return aggregates_[trigger_id].get(version);
+  inline numeric get_aggregate(size_t aid, uint64_t version) const {
+    return aggregates_[aid].get(version);
   }
 
   inline size_t num_aggregates() const {

@@ -143,7 +143,7 @@ int64_t get_time(uint8_t* data) {
 }
 
 TEST_F(TimeseriesDBTest, AppendTest) {
-  timeseries_db ts("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  timeseries_db ts("my_multilog", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   ts.add_index("a");
   ts.add_index("b");
   ts.add_index("c", 10);
@@ -189,7 +189,7 @@ TEST_F(TimeseriesDBTest, AppendTest) {
 }
 
 TEST_F(TimeseriesDBTest, GetRangeTest) {
-  timeseries_db ts("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  timeseries_db ts("my_multilog", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   ts.add_index("a");
   ts.add_index("b");
   ts.add_index("c", 10);
@@ -221,7 +221,7 @@ TEST_F(TimeseriesDBTest, GetRangeTest) {
 }
 
 TEST_F(TimeseriesDBTest, GetNearestTest) {
-  timeseries_db ts1("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  timeseries_db ts1("my_multilog", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   ts1.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t beg = r.ts;
   ts1.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -243,7 +243,7 @@ TEST_F(TimeseriesDBTest, ComputeDiffTest) {
   std::vector<record_t> records;
   std::vector<uint64_t> offsets;
 
-  timeseries_db ts1("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  timeseries_db ts1("my_multilog", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
   ts1.append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t from_version = ts1.get_version();
   offsets.push_back(ts1.append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg")));

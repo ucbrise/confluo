@@ -501,7 +501,7 @@ uint32_t rpc_record_batch::write(Protocol_* oprot) const {
 }
 
 template <class Protocol_>
-uint32_t rpc_table_info::read(Protocol_* iprot) {
+uint32_t rpc_atomic_multilog_info::read(Protocol_* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -524,8 +524,8 @@ uint32_t rpc_table_info::read(Protocol_* iprot) {
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->table_id);
-          this->__isset.table_id = true;
+          xfer += iprot->readI64(this->id);
+          this->__isset.id = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -563,13 +563,13 @@ uint32_t rpc_table_info::read(Protocol_* iprot) {
 }
 
 template <class Protocol_>
-uint32_t rpc_table_info::write(Protocol_* oprot) const {
+uint32_t rpc_atomic_multilog_info::write(Protocol_* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("rpc_table_info");
+  xfer += oprot->writeStructBegin("rpc_atomic_multilog_info");
 
-  xfer += oprot->writeFieldBegin("table_id", ::apache::thrift::protocol::T_I64, 1);
-  xfer += oprot->writeI64(this->table_id);
+  xfer += oprot->writeFieldBegin("id", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->id);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldBegin("schema", ::apache::thrift::protocol::T_LIST, 2);

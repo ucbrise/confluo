@@ -1,7 +1,7 @@
 class record_stream:
     
-    def __init__(self, table_id, schema, client, handle):
-        self.table_id_ = table_id
+    def __init__(self, multilog_id, schema, client, handle):
+        self.multilog_id_ = multilog_id
         self.schema_ = schema
         self.client_ = client
         self.handle_ = handle
@@ -12,7 +12,7 @@ class record_stream:
             yield self.schema_.apply(0, self.handle_.data[self.cur_off_:])
             self.cur_off_ += self.schema_.record_size_
             if self.cur_off_ == len(self.handle_.data) and self.handle_.has_more:
-                self.handle_ = client_.get_more(self.table_id_, self.handle_.desc)
+                self.handle_ = client_.get_more(self.multilog_id_, self.handle_.desc)
                 self.cur_off_ = 0
 
     def has_more(self):
@@ -20,8 +20,8 @@ class record_stream:
 
 class alert_stream:
 
-    def __init__(self, table_id, client, handle):
-        self.table_id_ = table_id
+    def __init__(self, multilog_id, client, handle):
+        self.multilog_id_ = multilog_id
         self.client_ = client
         self.handle_ = handle
         self.stream_ = handle.data
@@ -33,7 +33,7 @@ class alert_stream:
             self.stream_ = self.stream_[end_idx:]
             yield alert
             if not alert and self.handle_.has_more: 
-                self.handle_ = self.client_.get_more(self.table_id_, self.handle_.desc)
+                self.handle_ = self.client_.get_more(self.multilog_id_, self.handle_.desc)
                 self.stream_ = self.handle_.data
 
     def has_more(self):

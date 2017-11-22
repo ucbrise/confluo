@@ -69,9 +69,9 @@ class aggregate_list {
    * @param type The type of Aggregate
    * @param id Aggregate ID.
    */
-  aggregate_list(data_type type, aggregate_id id)
+  aggregate_list(data_type type, aggregate_type atype)
       : head_(nullptr),
-        agg_(aggregators[id]),
+        agg_(aggregators[atype]),
         type_(type) {
   }
 
@@ -79,7 +79,7 @@ class aggregate_list {
    * Default destructor.
    */
   ~aggregate_list() = default;
-    
+
   /**
    * Initializes the type and aggregate of the list
    * @param type The type of the aggregate
@@ -89,17 +89,17 @@ class aggregate_list {
     type_ = type;
     agg_ = agg;
   }
-    
+
   /**
    * Initializes the type of Aggregate and the id
    * @param type The type of the aggregate
    * @param id The Aggregate id
    */
-  void init(data_type type, aggregate_id id) {
+  void init(data_type type, aggregate_type atype) {
     type_ = type;
-    agg_ = aggregators[id];
+    agg_ = aggregators[atype];
   }
-    
+
   /**
    * Gets the 0th aggregate given the type of the aggregate
    * @return The 0th aggregate
@@ -178,12 +178,12 @@ class aggregate {
         aggs_(nullptr) {
   }
 
-  aggregate(const data_type& type, aggregate_id id)
+  aggregate(const data_type& type, aggregate_type atype)
       : type_(type),
-        agg_(aggregators[id]),
+        agg_(aggregators[atype]),
         aggs_(new aggregate_list[thread_manager::get_max_concurrency()]) {
     for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
-      aggs_[i].init(type, id);
+      aggs_[i].init(type, atype);
   }
 
   void update(int thread_id, const numeric& value, uint64_t version) {

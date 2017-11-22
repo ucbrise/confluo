@@ -6,7 +6,7 @@
 
 namespace confluo {
 
-enum primitive_type_id
+enum primitive_type
   : uint16_t {
     D_NONE = 0,
   D_BOOL = 1,

@@ -21,12 +21,13 @@ enum metadata_type
     D_SCHEMA_METADATA = 0,
   D_INDEX_METADATA = 1,
   D_FILTER_METADATA = 2,
-  D_TRIGGER_METADATA = 3
+  D_AGGREGATE_METADATA = 3,
+  D_TRIGGER_METADATA = 4
 };
 
-struct index_info {
+struct index_metadata {
  public:
-  index_info(const std::string& field_name, double bucket_size)
+  index_metadata(const std::string& field_name, double bucket_size)
       : field_name_(field_name),
         bucket_size_(bucket_size) {
   }
@@ -44,9 +45,9 @@ struct index_info {
   double bucket_size_;
 };
 
-struct filter_info {
+struct filter_metadata {
  public:
-  filter_info(const std::string& filter_name, const std::string& expr)
+  filter_metadata(const std::string& filter_name, const std::string& expr)
       : filter_name_(filter_name),
         expr_(expr) {
   }
@@ -64,43 +65,48 @@ struct filter_info {
   std::string expr_;
 };
 
-struct trigger_info {
+struct aggregate_metadata {
  public:
-  trigger_info(const std::string& trigger_name, const std::string& filter_name,
-               aggregate_id agg_id, const std::string& field_name,
-               reational_op_id op, const numeric& threshold,
-               uint64_t periodicity_ms)
-      : trigger_id_(trigger_name),
-        filter_id_(filter_name),
-        agg_id_(agg_id),
-        field_name_(field_name),
-        op_(op),
-        threshold_(threshold),
+  aggregate_metadata(const std::string& name, const std::string& filter_name,
+                     const std::string& expr)
+      : name_(name),
+        filter_name_(filter_name),
+        expr_(expr) {
+  }
+
+  const std::string& aggregate_name() const {
+    return name_;
+  }
+
+  const std::string& filter_name() const {
+    return filter_name_;
+  }
+
+  const std::string& aggregate_expression() const {
+    return expr_;
+  }
+
+ private:
+  std::string name_;
+  std::string filter_name_;
+  std::string expr_;
+};
+
+struct trigger_metadata {
+ public:
+  trigger_metadata(const std::string& name, const std::string& expr,
+                   uint64_t periodicity_ms)
+      : name_(name),
+        expr_(expr),
         periodicity_ms_(periodicity_ms) {
   }
 
   const std::string& trigger_name() const {
-    return trigger_id_;
+    return name_;
   }
 
-  const std::string& filter_name() const {
-    return filter_id_;
-  }
-
-  aggregate_id agg_id() const {
-    return agg_id_;
-  }
-
-  reational_op_id op() const {
-    return op_;
-  }
-
-  const std::string& field_name() const {
-    return field_name_;
-  }
-
-  const numeric& threshold() const {
-    return threshold_;
+  const std::string& trigger_expression() const {
+    return expr_;
   }
 
   uint64_t periodicity_ms() const {
@@ -108,12 +114,8 @@ struct trigger_info {
   }
 
  private:
-  std::string trigger_id_;
-  std::string filter_id_;
-  aggregate_id agg_id_;
-  std::string field_name_;
-  reational_op_id op_;
-  numeric threshold_;
+  std::string name_;
+  std::string expr_;
   uint64_t periodicity_ms_;
 };
 
@@ -145,7 +147,7 @@ class metadata_writer {
     }
   }
 
-  void write_index_info(const std::string& name, double bucket_size) {
+  void write_index_metadata(const std::string& name, double bucket_size) {
     if (id_ != storage::storage_id::D_IN_MEMORY) {
       metadata_type type = metadata_type::D_INDEX_METADATA;
       io_utils::write(out_, type);
@@ -155,32 +157,37 @@ class metadata_writer {
     }
   }
 
-  void write_filter_info(const std::string& filter_name,
-                         const std::string& expr) {
+  void write_filter_metadata(const std::string& name, const std::string& expr) {
     if (id_ != storage::storage_id::D_IN_MEMORY) {
       metadata_type type = metadata_type::D_FILTER_METADATA;
       io_utils::write(out_, type);
+      io_utils::write(out_, name);
+      io_utils::write(out_, expr);
+      io_utils::flush(out_);
+    }
+  }
+
+  void write_aggregate_metadata(const std::string& name,
+                                const std::string& filter_name,
+                                const std::string& expr) {
+    if (id_ != storage::storage_id::D_IN_MEMORY) {
+      metadata_type type = metadata_type::D_AGGREGATE_METADATA;
+      io_utils::write(out_, type);
+      io_utils::write(out_, name);
       io_utils::write(out_, filter_name);
       io_utils::write(out_, expr);
       io_utils::flush(out_);
     }
   }
 
-  void write_trigger_info(const std::string& trigger_name,
-                          const std::string& filter_name, aggregate_id agg_id,
-                          const std::string& field_name, reational_op_id op,
-                          const numeric& threshold,
-                          const uint64_t periodicity_ms) {
+  void write_trigger_metadata(const std::string& trigger_name,
+                              const std::string& trigger_expr,
+                              const uint64_t periodicity_ms) {
     if (id_ != storage::storage_id::D_IN_MEMORY) {
       metadata_type type = metadata_type::D_TRIGGER_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, trigger_name);
-      io_utils::write(out_, filter_name);
-      io_utils::write(out_, agg_id);
-      io_utils::write(out_, field_name);
-      io_utils::write(out_, op);
-      threshold.type().serialize(out_);
-      threshold.type().serialize_op()(out_, threshold.to_data());
+      io_utils::write(out_, trigger_expr);
       io_utils::write(out_, periodicity_ms);
       io_utils::flush(out_);
     }
@@ -214,31 +221,30 @@ class metadata_reader {
     return schema_t(builder.get_columns());
   }
 
-  index_info next_index_info() {
+  index_metadata next_index_metadata() {
     std::string field_name = io_utils::read<std::string>(in_);
     double bucket_size = io_utils::read<double>(in_);
-    return index_info(field_name, bucket_size);
+    return index_metadata(field_name, bucket_size);
   }
 
-  filter_info next_filter_info() {
+  filter_metadata next_filter_metadata() {
     std::string filter_name = io_utils::read<std::string>(in_);
     std::string expr = io_utils::read<std::string>(in_);
-    return filter_info(filter_name, expr);
+    return filter_metadata(filter_name, expr);
   }
 
-  trigger_info next_trigger_info() {
-    std::string trigger_name = io_utils::read<std::string>(in_);
+  aggregate_metadata next_aggregate_metadata() {
+    std::string name = io_utils::read<std::string>(in_);
     std::string filter_name = io_utils::read<std::string>(in_);
-    aggregate_id agg_id = io_utils::read<aggregate_id>(in_);
-    std::string field_name = io_utils::read<std::string>(in_);
-    reational_op_id op = io_utils::read<reational_op_id>(in_);
-    data_type type = data_type::deserialize(in_);
-    mutable_raw_data threshold_data(type.size);
-    type.deserialize_op()(in_, threshold_data);
-    numeric threshold(type, threshold_data.ptr);
+    std::string expr = io_utils::read<std::string>(in_);
+    return aggregate_metadata(name, filter_name, expr);
+  }
+
+  trigger_metadata next_trigger_metadata() {
+    std::string trigger_name = io_utils::read<std::string>(in_);
+    std::string trigger_expr = io_utils::read<std::string>(in_);
     uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
-    return trigger_info(trigger_name, filter_name, agg_id, field_name, op,
-                        threshold, periodicity_ms);
+    return trigger_metadata(trigger_name, trigger_expr, periodicity_ms);
   }
 
  private:

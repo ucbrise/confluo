@@ -38,25 +38,10 @@ class confluo_store {
                                  const storage::storage_id storage_type) {
     optional<management_exception> ex;
     storage::storage_mode mode = storage::STORAGE_MODES[storage_type];
-    auto ret =
-        mgmt_pool_.submit(
-            [&name, &schema, &mode, &ex, this]() -> int64_t {
-              size_t id;
-              if (multilog_map_.get(name, id) != -1) {
-                ex = management_exception("Table " + name + " already exists.");
-                return INT64_C(-1);
-              }
-              utils::file_utils::create_dir(data_path_ + "/" + name);
-              atomic_multilog* t = new atomic_multilog(name, schema, data_path_ + "/" + name,
-                  mode, mgmt_pool_);
-              id = atomic_multilogs_.push_back(t);
-              if (multilog_map_.put(name, id) == -1) {
-                ex = management_exception("Could not add atomic multilog " + name + " to atomic multilog map");
-                return INT64_C(-1);
-              }
-              return id;
-            });
-
+    std::future<int64_t> ret = mgmt_pool_.submit(
+        [&name, &schema, &storage_type, &ex, this]() -> int64_t {
+          return create_atomic_multilog_task(name, schema, storage_type, ex);
+        });
     int64_t id = ret.get();
     if (ex.has_value())
       throw ex.value();
@@ -92,7 +77,8 @@ class confluo_store {
    */
   atomic_multilog* get_atomic_multilog(int64_t id) {
     if (id >= static_cast<int64_t>(atomic_multilogs_.size())) {
-      throw management_exception("No such atomic multilog with id " + std::to_string(id));
+      throw management_exception(
+          "No such atomic multilog with id " + std::to_string(id));
     }
     return atomic_multilogs_[id];
   }
@@ -120,6 +106,30 @@ class confluo_store {
   }
 
  private:
+  int64_t create_atomic_multilog_task(const std::string& name,
+                                      const std::vector<column_t>& schema,
+                                      const storage::storage_id storage_type,
+                                      optional<management_exception>& ex) {
+    storage::storage_mode mode = storage::STORAGE_MODES[storage_type];
+    size_t id;
+    if (multilog_map_.get(name, id) != -1) {
+      ex = management_exception("Table " + name + " already exists.");
+      return INT64_C(-1);
+    }
+    utils::file_utils::create_dir(data_path_ + "/" + name);
+    atomic_multilog* t = new atomic_multilog(name, schema,
+                                             data_path_ + "/" + name, mode,
+                                             mgmt_pool_);
+    id = atomic_multilogs_.push_back(t);
+    if (multilog_map_.put(name, id) == -1) {
+      ex = management_exception(
+          "Could not add atomic multilog " + name + " to atomic multilog map");
+      return INT64_C(-1);
+    }
+    return id;
+
+  }
+
   // Metadata
   std::string data_path_;
 

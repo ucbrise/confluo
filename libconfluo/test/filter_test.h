@@ -157,39 +157,37 @@ TEST_F(FilterTest, FilterExpressionTest) {
   }
 }
 
-TEST_F(FilterTest, TriggerTest) {
+TEST_F(FilterTest, AggregateTest) {
   std::string expr("value >= 50000");
   auto cexpr = get_expr(expr);
   filter f(cexpr);
-  trigger *t = new trigger("filter", "trigger1", "", aggregate_id::D_MAX,
-                           "value", 0, LONG_TYPE, reational_op_id::GE,
-                           numeric(static_cast<int64_t>(90000)), 1);
-
-  f.add_trigger(t);
+  aggregate_info *a = new aggregate_info("agg1", aggregate_type::D_MAX,
+                                         LONG_TYPE, 0);
+  size_t aid = f.add_aggregate(a);
+  ASSERT_EQ(0, aid);
   fill(f);
   uint64_t version = kMaxEntries + sizeof(data_point);
   for (size_t t = 50; t < 100; t++) {
     const aggregated_reflog* ar = f.lookup(t);
     int64_t expected = ((t + 1) * kTimeBlock - 1) * 1000;
-    ASSERT_TRUE(numeric(expected) == ar->get_aggregate(0, version));
+    ASSERT_TRUE(numeric(expected) == ar->get_aggregate(aid, version));
   }
 }
 
-TEST_F(FilterTest, MultiThreadedTriggerTest) {
+TEST_F(FilterTest, MultiThreadedAggregateTest) {
   std::string expr("value >= 50000");
   auto cexpr = get_expr(expr);
   filter f(cexpr);
-  trigger *t = new trigger("filter", "trigger1", "", aggregate_id::D_MAX,
-                           "value", 0, LONG_TYPE, reational_op_id::GE,
-                           numeric(static_cast<int64_t>(90000)), 1);
-
-  f.add_trigger(t);
+  aggregate_info *a = new aggregate_info("agg1", aggregate_type::D_MAX,
+                                         LONG_TYPE, 0);
+  size_t aid = f.add_aggregate(a);
+  ASSERT_EQ(0, aid);
   fill_mt(f, 4);
   uint64_t version = 4 * kMaxEntries + sizeof(data_point);
   for (size_t t = 50; t < 100; t++) {
     const aggregated_reflog* ar = f.lookup(t);
     int64_t expected = ((t + 1) * kTimeBlock - 1) * 1000;
-    ASSERT_TRUE(numeric(expected) == ar->get_aggregate(0, version));
+    ASSERT_TRUE(numeric(expected) == ar->get_aggregate(aid, version));
   }
 }
 

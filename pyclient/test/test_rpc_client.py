@@ -9,17 +9,40 @@ from confluo.rpc import data_types
 from confluo.rpc.schema import schema
 from confluo.rpc.schema import schema_builder
 from confluo.rpc.storage import storage_id
+from thrift.transport import TTransport
 
 class test_rpc_client(unittest.TestCase):
     SERVER_EXECUTABLE = os.getenv('CONFLUO_SERVER_EXEC', 'confluod')
+    
+    def check_pid(self, pid):
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
+        
+    def wait_till_server_ready(self):
+        check = True
+        while check:
+            try:
+                c = rpc_client.rpc_client("127.0.0.1", 9090)
+                check = False
+            except TTransport.TTransportException as e:
+                time.sleep(0.1)
+                
+    def wait_for_process_death(self, pid):
+        while not self.check_pid(pid):
+            time.sleep(0.1)
 
     def start_server(self):
         self.server = subprocess.Popen([self.SERVER_EXECUTABLE, '--data-path', '/tmp'])
-        time.sleep(1)
+        self.wait_till_server_ready()
 
     def stop_server(self):
+        pid = self.server.pid
         self.server.kill()
-        time.sleep(1)
+        self.wait_for_process_death(pid)
 
     def test_conncurrent_connections(self):
         self.start_server()
@@ -34,14 +57,14 @@ class test_rpc_client(unittest.TestCase):
 
         self.stop_server()
 
-    def test_create_table(self):
+    def test_create_atomic_multilog(self):
         self.start_server()
         client = rpc_client.rpc_client("127.0.0.1", 9090) 
 
         try:
             builder = schema_builder() 
-            table_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
+            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
         except:
             client.disconnect()
             self.stop_server()
@@ -56,8 +79,8 @@ class test_rpc_client(unittest.TestCase):
 
         try:
             builder = schema_builder() 
-            table_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
+            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
 
             client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
             buf = client.read(0)
@@ -76,8 +99,8 @@ class test_rpc_client(unittest.TestCase):
 
         try:
             builder = schema_builder() 
-            table_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_table("my_table", table_schema, storage_id.DURABLE_RELAXED)
+            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.DURABLE_RELAXED)
 
             client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
             buf = client.read(0)
@@ -96,8 +119,8 @@ class test_rpc_client(unittest.TestCase):
 
         try:
             builder = schema_builder() 
-            table_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_table("my_table", table_schema, storage_id.DURABLE)
+            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.DURABLE)
 
             client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
             buf = client.read(0)
@@ -116,8 +139,8 @@ class test_rpc_client(unittest.TestCase):
 
         try:
             builder = schema_builder() 
-            table_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
+            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
 
             client.buffer(struct.pack("l", self.now_ns()) + "abcdefgh")
             client.buffer(struct.pack("l", self.now_ns()) + "ijklmnop")
@@ -126,9 +149,9 @@ class test_rpc_client(unittest.TestCase):
 
             buf = client.read(0)
             assert buf[8:] == "abcdefgh"
-            buf = client.read(table_schema.record_size_)
+            buf = client.read(multilog_schema.record_size_)
             assert buf[8:] == "ijklmnop"
-            buf = client.read(table_schema.record_size_ * 2)
+            buf = client.read(multilog_schema.record_size_ * 2)
             assert buf[8:] == "qrstuvwx"
         except:
             client.disconnect()
@@ -144,8 +167,8 @@ class test_rpc_client(unittest.TestCase):
         client = rpc_client.rpc_client("127.0.0.1", 9090) 
     
         try:
-            table_schema = schema(self.build_schema())
-            client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
+            multilog_schema = schema(self.build_schema())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
 
             client.add_index("a", 1)
             client.add_index("b", 1)
@@ -247,8 +270,8 @@ class test_rpc_client(unittest.TestCase):
         client = rpc_client.rpc_client("127.0.0.1", 9090) 
     
         try:
-            table_schema = schema(self.build_schema())
-            client.create_table("my_table", table_schema, storage_id.IN_MEMORY)
+            multilog_schema = schema(self.build_schema())
+            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
 
             client.add_filter("filter1", "a == true")
             client.add_filter("filter2", "b > 4")
@@ -258,25 +281,34 @@ class test_rpc_client(unittest.TestCase):
             client.add_filter("filter6", "f > 0.1")
             client.add_filter("filter7", "g < 0.06")
             client.add_filter("filter8", "h == zzz")
-            client.add_trigger("trigger1", "filter1", "SUM(d) >= 10")
-            client.add_trigger("trigger2", "filter2", "SUM(d) >= 10")
-            client.add_trigger("trigger3", "filter3", "SUM(d) >= 10")
-            client.add_trigger("trigger4", "filter4", "SUM(d) >= 10")
-            client.add_trigger("trigger5", "filter5", "SUM(d) >= 10")
-            client.add_trigger("trigger6", "filter6", "SUM(d) >= 10")
-            client.add_trigger("trigger7", "filter7", "SUM(d) >= 10")
-            client.add_trigger("trigger8", "filter8", "SUM(d) >= 10")
+            client.add_aggregate("agg1", "filter1", "SUM(d)")
+            client.add_aggregate("agg2", "filter2", "SUM(d)")
+            client.add_aggregate("agg3", "filter3", "SUM(d)")
+            client.add_aggregate("agg4", "filter4", "SUM(d)")
+            client.add_aggregate("agg5", "filter5", "SUM(d)")
+            client.add_aggregate("agg6", "filter6", "SUM(d)")
+            client.add_aggregate("agg7", "filter7", "SUM(d)")
+            client.add_aggregate("agg8", "filter8", "SUM(d)")
+            client.add_trigger("trigger1", "agg1 >= 10")
+            client.add_trigger("trigger2", "agg2 >= 10")
+            client.add_trigger("trigger3", "agg3 >= 10")
+            client.add_trigger("trigger4", "agg4 >= 10")
+            client.add_trigger("trigger5", "agg5 >= 10")
+            client.add_trigger("trigger6", "agg6 >= 10")
+            client.add_trigger("trigger7", "agg7 >= 10")
+            client.add_trigger("trigger8", "agg8 >= 10")
 
-            beg_ms = self.time_block(self.now_ns())
-            client.write(self.pack_record(False, "0", 0, 0, 0, 0.0, 0.01, "abc"))
-            client.write(self.pack_record(True, "1", 10, 2, 1, 0.1, 0.02, "defg"))
-            client.write(self.pack_record(False, "2", 20, 4, 10, 0.2, 0.03, "hijkl"))
-            client.write(self.pack_record(True, "3", 30, 6, 100, 0.3, 0.04, "mnopqr"))
-            client.write(self.pack_record(False, "4", 40, 8, 1000, 0.4, 0.05, "stuvwx"))
-            client.write(self.pack_record(True, "5", 50, 10, 10000, 0.5, 0.06, "yyy"))
-            client.write(self.pack_record(False, "6", 60, 12, 100000, 0.6, 0.07, "zzz"))
-            client.write(self.pack_record(True, "7", 70, 14, 1000000, 0.7, 0.08, "zzz"))
-            end_ms = self.time_block(self.now_ns())
+            now = self.now_ns()
+            beg_ms = self.time_block(now)
+            end_ms = self.time_block(now)
+            client.write(self.pack_record_time(now, False, "0", 0, 0, 0, 0.0, 0.01, "abc"))
+            client.write(self.pack_record_time(now, True, "1", 10, 2, 1, 0.1, 0.02, "defg"))
+            client.write(self.pack_record_time(now, False, "2", 20, 4, 10, 0.2, 0.03, "hijkl"))
+            client.write(self.pack_record_time(now, True, "3", 30, 6, 100, 0.3, 0.04, "mnopqr"))
+            client.write(self.pack_record_time(now, False, "4", 40, 8, 1000, 0.4, 0.05, "stuvwx"))
+            client.write(self.pack_record_time(now, True, "5", 50, 10, 10000, 0.5, 0.06, "yyy"))
+            client.write(self.pack_record_time(now, False, "6", 60, 12, 100000, 0.6, 0.07, "zzz"))
+            client.write(self.pack_record_time(now, True, "7", 70, 14, 1000000, 0.7, 0.08, "zzz"))
 
             i = 0
             for record in client.predef_filter("filter1", beg_ms, end_ms):
@@ -339,6 +371,31 @@ class test_rpc_client(unittest.TestCase):
                 assert record.at(2).unpack() > 4 or record.at(6).unpack() > 0.1
                 i += 1
             assert i == 3
+            
+            val1 = client.query_aggregate("agg1", beg_ms, end_ms)
+            assert "int(32)" == val1
+            
+            val2 = client.query_aggregate("agg2", beg_ms, end_ms)
+            assert "int(36)" == val2
+            
+            val3 = client.query_aggregate("agg3", beg_ms, end_ms)
+            assert "int(12)" == val3
+            
+            val4 = client.query_aggregate("agg4", beg_ms, end_ms)
+            assert "int(0)" == val4
+            
+            val5 = client.query_aggregate("agg5", beg_ms, end_ms)
+            assert "int(12)" == val5
+            
+            val6 = client.query_aggregate("agg6", beg_ms, end_ms)
+            assert "int(54)" == val6
+            
+            val7 = client.query_aggregate("agg7", beg_ms, end_ms)
+            assert "int(20)" == val7
+            
+            val8 = client.query_aggregate("agg8", beg_ms, end_ms)
+            assert "int(26)" == val8
+            
         except:
             client.disconnect()
             self.stop_server()
@@ -362,6 +419,19 @@ class test_rpc_client(unittest.TestCase):
     def pack_record(self, a, b, c, d, e, f, g, h):
         rec = ""
         rec += struct.pack("l", self.now_ns())
+        rec += struct.pack("?", a)
+        rec += struct.pack("c", b)
+        rec += struct.pack("h", c)
+        rec += struct.pack("i", d)
+        rec += struct.pack("l", e)
+        rec += struct.pack("f", f)
+        rec += struct.pack("d", g)
+        rec += struct.pack("16s", h)
+        return rec
+    
+    def pack_record_time(self, ts, a, b, c, d, e, f, g, h):
+        rec = ""
+        rec += struct.pack("l", ts)
         rec += struct.pack("?", a)
         rec += struct.pack("c", b)
         rec += struct.pack("h", c)

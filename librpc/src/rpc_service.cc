@@ -42,51 +42,51 @@ rpc_service_deregister_handler_presult::~rpc_service_deregister_handler_presult(
 }
 
 
-rpc_service_create_table_args::~rpc_service_create_table_args() throw() {
+rpc_service_create_atomic_multilog_args::~rpc_service_create_atomic_multilog_args() throw() {
 }
 
 
-rpc_service_create_table_pargs::~rpc_service_create_table_pargs() throw() {
+rpc_service_create_atomic_multilog_pargs::~rpc_service_create_atomic_multilog_pargs() throw() {
 }
 
 
-rpc_service_create_table_result::~rpc_service_create_table_result() throw() {
+rpc_service_create_atomic_multilog_result::~rpc_service_create_atomic_multilog_result() throw() {
 }
 
 
-rpc_service_create_table_presult::~rpc_service_create_table_presult() throw() {
+rpc_service_create_atomic_multilog_presult::~rpc_service_create_atomic_multilog_presult() throw() {
 }
 
 
-rpc_service_get_table_info_args::~rpc_service_get_table_info_args() throw() {
+rpc_service_get_atomic_multilog_info_args::~rpc_service_get_atomic_multilog_info_args() throw() {
 }
 
 
-rpc_service_get_table_info_pargs::~rpc_service_get_table_info_pargs() throw() {
+rpc_service_get_atomic_multilog_info_pargs::~rpc_service_get_atomic_multilog_info_pargs() throw() {
 }
 
 
-rpc_service_get_table_info_result::~rpc_service_get_table_info_result() throw() {
+rpc_service_get_atomic_multilog_info_result::~rpc_service_get_atomic_multilog_info_result() throw() {
 }
 
 
-rpc_service_get_table_info_presult::~rpc_service_get_table_info_presult() throw() {
+rpc_service_get_atomic_multilog_info_presult::~rpc_service_get_atomic_multilog_info_presult() throw() {
 }
 
 
-rpc_service_remove_table_args::~rpc_service_remove_table_args() throw() {
+rpc_service_remove_atomic_multilog_args::~rpc_service_remove_atomic_multilog_args() throw() {
 }
 
 
-rpc_service_remove_table_pargs::~rpc_service_remove_table_pargs() throw() {
+rpc_service_remove_atomic_multilog_pargs::~rpc_service_remove_atomic_multilog_pargs() throw() {
 }
 
 
-rpc_service_remove_table_result::~rpc_service_remove_table_result() throw() {
+rpc_service_remove_atomic_multilog_result::~rpc_service_remove_atomic_multilog_result() throw() {
 }
 
 
-rpc_service_remove_table_presult::~rpc_service_remove_table_presult() throw() {
+rpc_service_remove_atomic_multilog_presult::~rpc_service_remove_atomic_multilog_presult() throw() {
 }
 
 
@@ -151,6 +151,38 @@ rpc_service_remove_filter_result::~rpc_service_remove_filter_result() throw() {
 
 
 rpc_service_remove_filter_presult::~rpc_service_remove_filter_presult() throw() {
+}
+
+
+rpc_service_add_aggregate_args::~rpc_service_add_aggregate_args() throw() {
+}
+
+
+rpc_service_add_aggregate_pargs::~rpc_service_add_aggregate_pargs() throw() {
+}
+
+
+rpc_service_add_aggregate_result::~rpc_service_add_aggregate_result() throw() {
+}
+
+
+rpc_service_add_aggregate_presult::~rpc_service_add_aggregate_presult() throw() {
+}
+
+
+rpc_service_remove_aggregate_args::~rpc_service_remove_aggregate_args() throw() {
+}
+
+
+rpc_service_remove_aggregate_pargs::~rpc_service_remove_aggregate_pargs() throw() {
+}
+
+
+rpc_service_remove_aggregate_result::~rpc_service_remove_aggregate_result() throw() {
+}
+
+
+rpc_service_remove_aggregate_presult::~rpc_service_remove_aggregate_presult() throw() {
 }
 
 
@@ -234,6 +266,22 @@ rpc_service_read_presult::~rpc_service_read_presult() throw() {
 }
 
 
+rpc_service_query_aggregate_args::~rpc_service_query_aggregate_args() throw() {
+}
+
+
+rpc_service_query_aggregate_pargs::~rpc_service_query_aggregate_pargs() throw() {
+}
+
+
+rpc_service_query_aggregate_result::~rpc_service_query_aggregate_result() throw() {
+}
+
+
+rpc_service_query_aggregate_presult::~rpc_service_query_aggregate_presult() throw() {
+}
+
+
 rpc_service_adhoc_filter_args::~rpc_service_adhoc_filter_args() throw() {
 }
 
@@ -295,6 +343,22 @@ rpc_service_alerts_by_time_result::~rpc_service_alerts_by_time_result() throw() 
 
 
 rpc_service_alerts_by_time_presult::~rpc_service_alerts_by_time_presult() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_args::~rpc_service_alerts_by_trigger_and_time_args() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_pargs::~rpc_service_alerts_by_trigger_and_time_pargs() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_result::~rpc_service_alerts_by_trigger_and_time_result() throw() {
+}
+
+
+rpc_service_alerts_by_trigger_and_time_presult::~rpc_service_alerts_by_trigger_and_time_presult() throw() {
 }
 
 
