@@ -11,11 +11,12 @@ namespace confluo {
 
 class stream_consumer : public rpc::rpc_client {
  public:
-  stream_consumer(const std::string server_address, const int server_port,
-          uint64_t prefetch_size) : 
-      rpc_client(server_address, server_port) {
-      prefetch_size_ = prefetch_size;
-      offset_ = 0;
+  stream_consumer(const std::string server_address, int server_port,
+                  uint64_t prefetch_size)
+      : rpc_client(server_address, server_port),
+        read_buffer_(std::make_pair(INT64_C(-1), "")) {
+    prefetch_size_ = prefetch_size;
+    offset_ = 0;
   }
 
   void consume(std::string& _return) {
@@ -34,9 +35,10 @@ class stream_consumer : public rpc::rpc_client {
   }
 
  private:
+  // Read buffer
+  std::pair<int64_t, std::string> read_buffer_;
   uint64_t prefetch_size_;
   int64_t offset_;
-
 };
 
 }

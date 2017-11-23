@@ -11,7 +11,6 @@
 #include "rpc_types.h"
 #include "rpc_type_conversions.h"
 #include "rpc_record_stream.h"
-#include "rpc_record_batch_builder.h"
 #include "rpc_alert_stream.h"
 
 #include "logger.h"
@@ -31,13 +30,11 @@ class rpc_client {
   typedef rpc_serviceClient thrift_client;
 
   rpc_client()
-      : cur_multilog_id_(-1),
-        read_buffer_(std::make_pair(INT64_C(-1), "")) {
+      : cur_multilog_id_(-1) {
   }
 
   rpc_client(const std::string& host, int port)
-      : cur_multilog_id_(-1),
-        read_buffer_(std::make_pair(INT64_C(-1), "")) {
+      : cur_multilog_id_(-1) {
     connect(host, port);
   }
 
@@ -244,12 +241,6 @@ class rpc_client {
 protected:
   int64_t cur_multilog_id_;
   schema_t cur_schema_;
-
-  // Write buffer
-  rpc_record_batch_builder builder_;
-
-  // Read buffer
-  std::pair<int64_t, std::string> read_buffer_;
 
   shared_ptr<TSocket> socket_;
   shared_ptr<TTransport> transport_;

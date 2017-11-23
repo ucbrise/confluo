@@ -14,7 +14,8 @@ using namespace ::confluo::rpc;
 using namespace ::utils;
 
 int main(int argc, char **argv) {
-  utils::error_handling::install_signal_handler(SIGSEGV, SIGKILL, SIGSTOP);
+  utils::error_handling::install_signal_handler(argv[0], SIGSEGV, SIGKILL,
+                                                SIGSTOP);
 
   cmd_options opts;
   opts.add(
