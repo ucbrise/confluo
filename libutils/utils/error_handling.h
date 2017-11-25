@@ -31,69 +31,88 @@ class error_handling {
 
   static std::string stacktrace() {
     std::ostringstream out;
-    out << "stack trace (executable: " << exec_path << "): \n";
+    out << "stack trace: \n";
 
     // storage array for stack trace address data
-    char buf[1024];
-    void* addr_list[MAX_FRAMES + 1];
+    void* addrlist[MAX_FRAMES + 1];
 
     // retrieve current stack addresses
-    int addr_len = backtrace(addr_list, sizeof(addr_list) / sizeof(void*));
+    int addrlen = backtrace(addrlist, sizeof(addrlist) / sizeof(void*));
 
-    if (addr_len == 0) {
+    if (addrlen == 0) {
       out << "  <empty, possibly corrupt>\n";
       return out.str();
     }
 
     // resolve addresses into strings containing "filename(function+address)",
     // this array must be free()-ed
-    char** symbol_list = backtrace_symbols(addr_list, addr_len);
-    for (int i = 1; i < addr_len; i++) {
-      Dl_info info;
-      if (dladdr(addr_list[i], &info) && info.dli_sname) {
-        char *demangled = NULL;
-        int status = -1;
-        if (info.dli_sname[0] == '_') {
-          demangled = abi::__cxa_demangle(info.dli_sname, NULL, 0, &status);
-        }
-        snprintf(
-            buf,
-            sizeof(buf),
-            "%-3d %*p %s+%zd",
-            i,
-            int(2 + sizeof(void*) * 2),
-            addr_list[i],
-            status == 0 ? demangled :
-            info.dli_sname == 0 ? symbol_list[i] : info.dli_sname,
-            (char *) addr_list[i] - (char *) info.dli_saddr);
-        if (demangled)
-          free(demangled);
-      } else {
-        snprintf(buf, sizeof(buf), "%-3d %*p %s", i, int(2 + sizeof(void*) * 2),
-                 addr_list[i], symbol_list[i]);
-      }
-      out << buf;
+    char** symbollist = backtrace_symbols(addrlist, addrlen);
 
-      char atos_cmd[256];
-#ifdef __linux__
-      sprintf(atos_cmd, "addr2line %p -e %s", addr_list[i], exec_path);
-#else
-#ifdef __APPLE__
-      sprintf(atos_cmd, "gaddr2line %p -e %s", addr_list[i], exec_path);
-#endif
-#endif
-      FILE* cmd = popen(atos_cmd, "r");
-      if (cmd) {
-        char buf[256];
-        fscanf(cmd, "%256s", buf);
-        pclose(cmd);
-        out << " (" << buf << ")\n";
+    // allocate string which will be filled with the demangled function name
+    size_t funcnamesize = 256;
+    char* funcname = (char*) malloc(funcnamesize);
+
+    // iterate over the returned symbol lines. skip the first, it is the
+    // address of this function.
+    for (int i = 1; i < addrlen; i++) {
+      char *begin_name = 0, *begin_offset = 0, *end_offset = 0;
+
+      // find parentheses and +address offset surrounding the mangled name:
+      // ./module(function+0x15c) [0x8048a6d]
+      for (char *p = symbollist[i]; *p; ++p) {
+        if (*p == '(')
+          begin_name = p;
+        else if (*p == '+')
+          begin_offset = p;
+        else if (*p == ')' && begin_offset) {
+          end_offset = p;
+          break;
+        }
+      }
+
+      if (begin_name && begin_offset && end_offset
+          && begin_name < begin_offset) {
+        *begin_name++ = '\0';
+        *begin_offset++ = '\0';
+        *end_offset = '\0';
+
+        // mangled name is now in [begin_name, begin_offset) and caller
+        // offset in [begin_offset, end_offset). now apply
+        // __cxa_demangle():
+
+        int status;
+        char* ret = abi::__cxa_demangle(begin_name, funcname, &funcnamesize,
+                                        &status);
+        if (status == 0) {
+          funcname = ret;  // use possibly realloc()-ed string
+          out << "  " << symbollist[i] << ": " << funcname << "+"
+              << begin_offset;
+        } else {
+          // demangling failed. Output function name as a C function with
+          // no arguments.
+          out << "  " << symbollist[i] << ": " << begin_name << "()+"
+              << begin_offset;
+        }
+
+        char syscom[256];
+        sprintf(syscom, "addr2line %p -e %s", addrlist[i], symbollist[i]);
+        FILE* cmd = popen(syscom, "r");
+        if (cmd) {
+          char buf[256];
+          fscanf(cmd, "%256s", buf);
+          pclose(cmd);
+          out << "(" << buf << ")\n";
+        } else {
+          out << "\n";
+        }
       } else {
-        out << "\n";
+        // couldn't parse the line? print the whole line.
+        out << "  " << symbollist[i] << "\n";
       }
     }
 
-    free(symbol_list);
+    free(funcname);
+    free(symbollist);
     return out.str();
   }
 
