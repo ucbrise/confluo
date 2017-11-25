@@ -1,6 +1,6 @@
 # Confluo
 
-[![Build Status](https://amplab.cs.berkeley.edu/jenkins/job/dialog/badge/icon)](https://amplab.cs.berkeley.edu/jenkins/job/dialog/)
+[![Build Status](https://amplab.cs.berkeley.edu/jenkins/job/confluo/badge/icon)](https://amplab.cs.berkeley.edu/jenkins/job/confluo/)
 [![License](http://img.shields.io/:license-Apache%202-red.svg)](LICENSE)
 
 Confluo is a system for real-time monitoring and analysis of data, that supports:
