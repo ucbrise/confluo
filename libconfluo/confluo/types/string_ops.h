@@ -9,22 +9,23 @@ using namespace utils;
 
 namespace confluo {
 
-typedef void (*parse_op_t)(const std::string&, mutable_raw_data&);
+typedef void (*parse_op_t)(const std::string&, void*);
 typedef std::string (*to_string_op_t)(const immutable_raw_data&);
 
 template<typename T>
-void parse(const std::string& str, mutable_raw_data& out) {
-  out.set(string_utils::lexical_cast<T>(str));
+void parse(const std::string& str, void* out) {
+  T val = string_utils::lexical_cast<T>(str);
+  memcpy(out, &val, sizeof(T));
 }
 
 template<>
-void parse<void>(const std::string& str, mutable_raw_data& out) {
+void parse<void>(const std::string& str, void* out) {
   THROW(unsupported_exception, "Cannot parse none type");
 }
 
 template<>
-void parse<std::string>(const std::string& str, mutable_raw_data& out) {
-  out.set(str);
+void parse<std::string>(const std::string& str, void* out) {
+  memcpy(out, str.data(), str.length());
 }
 
 template<typename T>

@@ -12,7 +12,8 @@ namespace confluo {
 class mutable_value : public immutable_value {
  public:
   mutable_value(data_type type = NONE_TYPE)
-      : immutable_value(type, type.is_none() ? nullptr : new uint8_t[type.size]) {
+      : immutable_value(type,
+                        type.is_none() ? nullptr : new uint8_t[type.size]()) {
   }
 
   mutable_value(const data_type& type, immutable_raw_data value)
@@ -97,21 +98,15 @@ class mutable_value : public immutable_value {
     other.ptr_ = nullptr;
   }
 
-  mutable_value(const data_type& type, mutable_raw_data&& data)
-      : immutable_value(type, data.ptr) {
-    data.ptr = nullptr;
-    data.size = 0;
-  }
-
   ~mutable_value() {
     if (ptr_ != nullptr && !type_.is_none())
       delete[] reinterpret_cast<uint8_t*>(ptr_);
   }
 
   static mutable_value parse(const std::string& str, const data_type& type) {
-    mutable_raw_data data(type.size);
-    type.parse_op()(str, data);
-    return mutable_value(type, std::move(data));
+    mutable_value value(type);
+    type.parse_op()(str, value.ptr_);
+    return value;
   }
 
   immutable_value copy() const {

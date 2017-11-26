@@ -57,8 +57,9 @@ class ip_address {
     THROW(unsupported_exception, "not valid ip");
   }
 
-  static void parse_ip(const std::string& str, mutable_raw_data& out) {
-    out.set(ip_address::from_string(str));
+  static void parse_ip(const std::string& str, void* out) {
+    ip_address ip = ip_address::from_string(str);
+    memcpy(out, &ip, sizeof(ip));
   }
 
   std::string repr() {

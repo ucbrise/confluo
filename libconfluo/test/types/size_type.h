@@ -59,16 +59,13 @@ class size_type {
     THROW(unsupported_exception, "invalid size string");
   }
 
-  static void parse_bytes(const std::string& str, mutable_raw_data& out) {
-    out.set(size_type::from_string(str));
+  static void parse_bytes(const std::string& str, void* out) {
+    size_type sz = size_type::from_string(str);
+    memcpy(out, &sz, sizeof(size_type));
   }
 
   static std::string size_to_string(const immutable_raw_data& data) {
     return data.as<size_type>().to_string();
-  }
-
-  static mutable_raw_data parse_bytes(uint64_t _bytes) {
-    return mutable_raw_data(sizeof(size_type)).set(_bytes);
   }
 
   std::string repr() const {

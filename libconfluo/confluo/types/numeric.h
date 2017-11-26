@@ -70,9 +70,9 @@ class numeric {
   }
 
   static numeric parse(const std::string& str, const data_type& type) {
-    mutable_raw_data data(type.size);
-    type.parse_op()(str, data);
-    return numeric(type, data.ptr);
+    numeric value(type);
+    type.parse_op()(str, value.data_);
+    return value;
   }
 
   inline immutable_raw_data to_data() const {

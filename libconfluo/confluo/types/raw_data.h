@@ -36,7 +36,7 @@ struct mutable_raw_data {
   }
 
   mutable_raw_data(size_t sz)
-      : ptr(new uint8_t[sz]()),
+      : ptr(sz ? new uint8_t[sz]() : nullptr),
         size(sz) {
   }
 

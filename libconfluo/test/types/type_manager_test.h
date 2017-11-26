@@ -28,11 +28,10 @@ type_properties ip_type_properties("ip_address", sizeof(ip_address),
                                    &confluo::deserialize<ip_address>);
 
 type_properties size_type_properties("size_type", sizeof(size_type),
-                                     &limits::ulong_min,
-                                     &limits::ulong_max,
-                                     &limits::ulong_one,
-                                     &limits::ulong_zero, true, get_reops(),
-                                     get_unarops(), get_binarops(), get_keops(),
+                                     &limits::ulong_min, &limits::ulong_max,
+                                     &limits::ulong_one, &limits::ulong_zero,
+                                     true, get_reops(), get_unarops(),
+                                     get_binarops(), get_keops(),
                                      &size_type::parse_bytes,
                                      &size_type::size_to_string,
                                      &confluo::serialize<size_type>,
@@ -158,18 +157,13 @@ TEST_F(TypeManagerTest, FilterTest) {
 }
 
 TEST_F(TypeManagerTest, IPAddressTest) {
-  mutable_raw_data d1(addr_type.size), d2(addr_type.size), d3(addr_type.size);
-  ip_address::parse_ip("69.89.31.226", d1);
-  ip_address::parse_ip("216.65.216.164", d2);
-  ip_address::parse_ip("172.16.254.1", d3);
+  mutable_value n1 = mutable_value::parse("69.89.31.226", addr_type);
+  mutable_value n2 = mutable_value::parse("216.65.216.164", addr_type);
+  mutable_value n3 = mutable_value::parse("172.16.254.1", addr_type);
 
-  mutable_value n1(addr_type, std::move(d1));
-  mutable_value n2(addr_type, std::move(d2));
-  mutable_value n3(addr_type, std::move(d3));
-
-  ASSERT_EQ(9, n1.type().id);
-  ASSERT_EQ(9, n2.type().id);
-  ASSERT_EQ(9, n3.type().id);
+  ASSERT_TRUE(addr_type == n1.type());
+  ASSERT_TRUE(addr_type == n2.type());
+  ASSERT_TRUE(addr_type == n3.type());
 
   ASSERT_EQ(1163468770, n1.as<ip_address>().get_address());
   ASSERT_EQ(3628193956, n2.as<ip_address>().get_address());
@@ -183,16 +177,12 @@ TEST_F(TypeManagerTest, IPAddressTest) {
   ASSERT_FALSE(n3 > n2);
   ASSERT_FALSE(n1 > n2);
 
-  mutable_raw_data d4 = ip_address::parse_ip_value(UINT32_C(1163468770));
-  mutable_raw_data d5 = ip_address::parse_ip_value(UINT32_C(3628193956));
-  mutable_raw_data d6 = ip_address::parse_ip_value(
-      static_cast<uint32_t>(4791662726));
-
-  ip_address addr(1163468770);
-  ASSERT_TRUE(mutable_value(n1.type(), &addr) == n1);
-  ASSERT_TRUE(mutable_value(n1.type(), std::move(d4)) == n1);
-  ASSERT_TRUE(mutable_value(n2.type(), std::move(d5)) == n2);
-  ASSERT_TRUE(mutable_value(n3.type(), std::move(d6)) == (n1 + n2));
+  ip_address addr1(1163468770);
+  ip_address addr2(3628193956);
+  ip_address addr3(static_cast<uint32_t>(4791662726));
+  ASSERT_TRUE(mutable_value(n1.type(), &addr1) == n1);
+  ASSERT_TRUE(mutable_value(n2.type(), &addr2) == n2);
+  ASSERT_TRUE(mutable_value(n3.type(), &addr3) == (n1 + n2));
 
   mutable_value val1 = mutable_value::parse("42.35.109.253", n1.type());
   ASSERT_EQ(706964989, val1.as<ip_address>().get_address());
@@ -211,18 +201,13 @@ TEST_F(TypeManagerTest, IPAddressTest) {
 }
 
 TEST_F(TypeManagerTest, SizeTypeTest) {
-  mutable_raw_data d1(sz_type.size), d2(sz_type.size), d3(sz_type.size);
-  size_type::parse_bytes("3mb", d1);
-  size_type::parse_bytes("10gb", d2);
-  size_type::parse_bytes("3072kb", d3);
+  mutable_value n1 = mutable_value::parse("3mb", sz_type);
+  mutable_value n2 = mutable_value::parse("10gb", sz_type);
+  mutable_value n3 = mutable_value::parse("3072kb", sz_type);
 
-  mutable_value n1(sz_type, std::move(d1));
-  mutable_value n2(sz_type, std::move(d2));
-  mutable_value n3(sz_type, std::move(d3));
-
-  ASSERT_EQ(10, n1.type().id);
-  ASSERT_EQ(10, n2.type().id);
-  ASSERT_EQ(10, n3.type().id);
+  ASSERT_TRUE(sz_type == n1.type());
+  ASSERT_TRUE(sz_type == n2.type());
+  ASSERT_TRUE(sz_type == n3.type());
 
   ASSERT_TRUE(3145728 == n1.as<size_type>().get_bytes());
   ASSERT_TRUE(10737418240 == n2.as<size_type>().get_bytes());
@@ -236,21 +221,19 @@ TEST_F(TypeManagerTest, SizeTypeTest) {
   ASSERT_FALSE(n3 > n2);
   ASSERT_FALSE(n1 > n3);
 
-  mutable_raw_data d4(sz_type.size), d5(sz_type.size), d6(sz_type.size);
-  size_type::parse_bytes("3145728b", d4);
-  size_type::parse_bytes("10737418240b", d5);
-  size_type::parse_bytes("10740563968b", d6);
+  mutable_value n4 = mutable_value::parse("3145728b", sz_type);
+  mutable_value n5 = mutable_value::parse("10737418240b", sz_type);
+  mutable_value n6 = mutable_value::parse("10740563968b", sz_type);
 
   size_type sz(3145728);
   ASSERT_TRUE(mutable_value(n1.type(), &sz) == n1);
-  ASSERT_TRUE(mutable_value(n1.type(), std::move(d4)) == n1);
-  ASSERT_TRUE(mutable_value(n2.type(), std::move(d5)) == n2);
-  ASSERT_TRUE(mutable_value(n3.type(), std::move(d6)) == (n1 + n2));
+  ASSERT_TRUE(n4 == n1);
+  ASSERT_TRUE(n5 == n2);
+  ASSERT_TRUE(n6 == (n1 + n2));
 
-  mutable_value val1 = mutable_value::parse("15pb", n1.type());
-  mutable_raw_data d7(sz_type.size);
-  size_type::parse_bytes("16888498602639360b", d7);
-
+  mutable_value val1 = mutable_value::parse("15pb", sz_type);
+  mutable_value val2 = mutable_value::parse("16888498602639360b", sz_type);
+  ASSERT_TRUE(val1 == val2);
   ASSERT_TRUE(16888498602639360 == val1.as<size_type>().get_bytes());
 
   ASSERT_TRUE(test::test_utils::test_fail([]() {
@@ -379,12 +362,12 @@ TEST_F(TypeManagerTest, SerializeTest) {
   std::ofstream outfile("/tmp/test.txt", std::ofstream::binary);
   int32_t val = 390;
   immutable_raw_data d1(&val, INT_TYPE.size);
-  mutable_raw_data d11(addr_type.size);
-  ip_address::parse_ip("69.89.31.226", d11);
+  ip_address ip;
+  ip_address::parse_ip("69.89.31.226", &ip);
 
   ASSERT_EQ(390, d1.as<int>());
   INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile, d11.immutable());
+  addr_type.serialize_op()(outfile, immutable_raw_data(&ip, sizeof(ip_address)));
   outfile.close();
 
   std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
@@ -404,13 +387,13 @@ TEST_F(TypeManagerTest, DeserializeTest) {
 
   int val = -490;
   immutable_raw_data d1 = immutable_raw_data(&val, INT_TYPE.size);
-  mutable_raw_data d11(addr_type.size);
-  ip_address::parse_ip("69.89.31.226", d11);
+  ip_address ip;
+  ip_address::parse_ip("69.89.31.226", &ip);
 
   ASSERT_EQ(-490, d1.as<int>());
 
   INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile, d11.immutable());
+  addr_type.serialize_op()(outfile, immutable_raw_data(&ip, sizeof(ip_address)));
   outfile.close();
 
   std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
