@@ -97,12 +97,14 @@ class StreamTest : public testing::Test {
   }
 
   static record_data make_simple_record(int64_t ts, const std::string& str) {
-    char data[sizeof(int64_t) + DATA_SIZE];
-    memcpy(data, &ts, sizeof(int64_t));
-    memcpy(data + sizeof(int64_t), str.data(), str.length());
-    memset(data + sizeof(int64_t) + str.length(), '\0',
-           sizeof(int64_t) + DATA_SIZE - str.length());
-    return record_data(data, sizeof(int64_t) + DATA_SIZE);
+    record_data data;
+    data.resize(sizeof(int64_t) + DATA_SIZE);
+    size_t len = std::min(str.length(), static_cast<size_t>(DATA_SIZE));
+    memcpy(&data[0], &ts, sizeof(int64_t));
+    memcpy(&data[0] + sizeof(int64_t), str.data(), len);
+    memset(&data[0] + sizeof(int64_t) + len, '\0',
+           sizeof(int64_t) + DATA_SIZE - len);
+    return data;
   }
 
   static std::vector<column_t> schema() {
@@ -319,8 +321,7 @@ TEST_F(StreamTest, ReadWriteTest) {
   std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
   for (uint64_t i = 0; i < k_max; i++) {
-    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02,
-                                           "stream");
+    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
     sp.buffer(rdata);
     expected_records.push_back(rdata);
   }
