@@ -316,6 +316,41 @@ class atomic_multilog {
     return offset;
   }
 
+  // TODO: Add a std::tuple based variant
+  // TODO: Add a JSON based variant
+  /**
+   * Appends a record to the atomic multilog
+   * @param record The record to be stored
+   * @return The offset in data log where the record is written
+   */
+  size_t append(const std::vector<std::string>& record) {
+    if (record.size() == schema_.size()) {
+      // Timestamp is provided
+      void* buf = new uint8_t[schema_.record_size()];
+      for (size_t i = 0; i < schema_.size(); i++) {
+        void* field_ptr = reinterpret_cast<uint8_t*>(buf) + schema_[i].offset();
+        schema_[i].type().parse_op()(record.at(i), field_ptr);
+      }
+      size_t off = append(buf);
+      delete[] reinterpret_cast<uint8_t*>(buf);
+      return off;
+    } else if (record.size() == schema_.size() - 1) {
+      // Timestamp is not provided -- generate one
+      void* buf = new uint8_t[schema_.record_size()];
+      uint64_t ts = time_utils::cur_ns();
+      memcpy(buf, &ts, sizeof(uint64_t));
+      for (size_t i = 1; i < schema_.size(); i++) {
+        void* field_ptr = reinterpret_cast<uint8_t*>(buf) + schema_[i].offset();
+        schema_[i].type().parse_op()(record.at(i), field_ptr);
+      }
+      size_t off = append(buf);
+      delete[] reinterpret_cast<uint8_t*>(buf);
+      return off;
+    } else {
+      THROW(invalid_operation_exception, "Record does not match schema");
+    }
+  }
+
   /**
    * Reads the data from the atomic multilog
    * @param offset The location of where the data is stored
@@ -446,10 +481,10 @@ class atomic_multilog {
    */
   lazy::stream<alert> get_alerts(const std::string& trigger_name,
                                  uint64_t begin_ms, uint64_t end_ms) const {
-    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms)).filter(
-        [trigger_name](const alert& a) {
-          return a.trigger_name == trigger_name;
-        });
+    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms))
+        .filter([trigger_name](const alert& a) {
+      return a.trigger_name == trigger_name;
+    });
   }
 
   /**
