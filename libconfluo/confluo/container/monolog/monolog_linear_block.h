@@ -169,12 +169,13 @@ class monolog_block {
     data_.swap_ptr(ptr);
   }
 
- private:
+private:
   void try_allocate(__atomic_block_copy_ref& copy) {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
       T* ptr = storage_.allocate_block(path_, file_size);
+      memset(ptr, '\0', sizeof(T) * file_size);
       data_.atomic_init(ptr);
       data_.atomic_copy(copy);
       return;
@@ -182,7 +183,7 @@ class monolog_block {
 
     // Someone else is initializing, stall until initialized
     while (data_.atomic_load() == nullptr)
-      ;
+    ;
 
     data_.atomic_copy(copy);
   }
@@ -192,6 +193,7 @@ class monolog_block {
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
       T* ptr = storage_.allocate_block(path_, file_size);
+      memset(ptr, '\0', sizeof(T) * file_size);
       data_.atomic_init(ptr);
       return ptr;
     }
@@ -199,7 +201,7 @@ class monolog_block {
     // Someone else is initializing, stall until initialized
     T* ptr;
     while ((ptr = data_.atomic_load()) == nullptr)
-      ;
+    ;
     return ptr;
   }
 

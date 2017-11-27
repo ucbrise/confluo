@@ -59,9 +59,15 @@ class ClientWriteOpsTest : public testing::Test {
     return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
   }
 
-  static std::string pad_str(std::string str, size_t size) {
-    str.insert(str.end(), size - str.length(), '\0');
-    return str;
+  static record_data make_simple_record(int64_t ts, const std::string& str) {
+    record_data data;
+    data.resize(sizeof(int64_t) + DATA_SIZE);
+    size_t len = std::min(str.length(), static_cast<size_t>(DATA_SIZE));
+    memcpy(&data[0], &ts, sizeof(int64_t));
+    memcpy(&data[0] + sizeof(int64_t), str.data(), len);
+    memset(&data[0] + sizeof(int64_t) + len, '\0',
+           sizeof(int64_t) + DATA_SIZE - len);
+    return data;
   }
 
   static confluo_store* simple_table_store(std::string atomic_multilog_name,
@@ -147,8 +153,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   client.set_current_atomic_multilog(atomic_multilog_name);
 
   int64_t ts = utils::time_utils::cur_ns();
-  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
-  client.write(ts_str + pad_str("abc", DATA_SIZE));
+  client.append(make_simple_record(ts, "abc"));
 
   ro_data_ptr ptr;
   mlog->read(0, ptr);

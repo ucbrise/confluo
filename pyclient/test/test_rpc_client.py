@@ -13,14 +13,6 @@ from thrift.transport import TTransport
 
 class test_rpc_client(unittest.TestCase):
     SERVER_EXECUTABLE = os.getenv('CONFLUO_SERVER_EXEC', 'confluod')
-    
-    def check_pid(self, pid):
-        try:
-            os.kill(pid, 0)
-        except OSError:
-            return False
-        else:
-            return True
         
     def wait_till_server_ready(self):
         check = True
@@ -30,10 +22,6 @@ class test_rpc_client(unittest.TestCase):
                 check = False
             except TTransport.TTransportException as e:
                 time.sleep(0.1)
-                
-    def wait_for_process_death(self, pid):
-        while not self.check_pid(pid):
-            time.sleep(0.1)
 
     def start_server(self):
         self.server = subprocess.Popen([self.SERVER_EXECUTABLE, '--data-path', '/tmp'])
@@ -42,7 +30,7 @@ class test_rpc_client(unittest.TestCase):
     def stop_server(self):
         pid = self.server.pid
         self.server.kill()
-        self.wait_for_process_death(pid)
+        self.server.wait()
 
     def test_conncurrent_connections(self):
         self.start_server()

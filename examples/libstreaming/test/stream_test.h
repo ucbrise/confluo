@@ -38,7 +38,7 @@ class StreamTest : public testing::Test {
       offsets.push_back(offset);
     }
 
-    std::string buf;
+    record_data buf;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       client.read(buf, offsets[i]);
       ASSERT_EQ(dtable->record_size(), buf.size());
@@ -81,10 +81,9 @@ class StreamTest : public testing::Test {
     return reinterpret_cast<void*>(&r);
   }
 
-  static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
+  static record_data record_buf(bool a, int8_t b, int16_t c, int32_t d,
                                 int64_t e, float f, double g, const char* h) {
-    void* rbuf = record(a, b, c, d, e, f, g, h);
-    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
+    return record_data(record(a, b, c, d, e, f, g, h), sizeof(rec));
   }
 
   static confluo_store* simple_table_store(const std::string& multilog_name,
@@ -97,9 +96,15 @@ class StreamTest : public testing::Test {
     return store;
   }
 
-  static std::string pad_str(std::string str, size_t size) {
-    str.insert(str.end(), size - str.length(), '\0');
-    return str;
+  static record_data make_simple_record(int64_t ts, const std::string& str) {
+    record_data data;
+    data.resize(sizeof(int64_t) + DATA_SIZE);
+    size_t len = std::min(str.length(), static_cast<size_t>(DATA_SIZE));
+    memcpy(&data[0], &ts, sizeof(int64_t));
+    memcpy(&data[0] + sizeof(int64_t), str.data(), len);
+    memset(&data[0] + sizeof(int64_t) + len, '\0',
+           sizeof(int64_t) + DATA_SIZE - len);
+    return data;
   }
 
   static std::vector<column_t> schema() {
@@ -115,19 +120,16 @@ class StreamTest : public testing::Test {
     return builder.get_columns();
   }
 
-  static record_batch get_batch() {
-    record_batch_builder builder;
-    builder.add_record(record_str(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-    builder.add_record(
-        record_str(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    builder.add_record(
-        record_str(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(
-        record_str(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  static record_batch get_batch(const atomic_multilog& mlog) {
+    record_batch_builder builder = mlog.get_batch_builder();
+    builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    builder.add_record(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
@@ -171,21 +173,20 @@ TEST_F(StreamTest, WriteTest) {
   stream_producer sp(SERVER_ADDRESS, SERVER_PORT, 20, buffer_timeout);
   sp.set_current_atomic_multilog(multilog_name);
 
-  std::vector<std::string> expected_strings;
+  std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
   for (uint64_t i = 0; i < k_max; i++) {
-    std::string record_string = record_str(true, '7', i, 14, 1000, 0.7, 0.02,
-                                           "stream");
-    sp.buffer(record_string);
-    expected_strings.push_back(record_string);
+    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
+    sp.buffer(rdata);
+    expected_records.push_back(rdata);
   }
   sp.flush();
 
-  std::string buf;
+  record_data buf;
   for (uint64_t i = 0; i < k_max; i++) {
     sp.read(buf, i * sizeof(rec));
     ASSERT_EQ(dtable->record_size(), buf.size());
-    ASSERT_STREQ(expected_strings[i].c_str(), buf.c_str());
+    ASSERT_STREQ(expected_records[i].c_str(), buf.c_str());
   }
 
   sp.disconnect();
@@ -214,10 +215,9 @@ TEST_F(StreamTest, BufferTest) {
   client.set_current_atomic_multilog(multilog_name);
 
   int64_t ts = utils::time_utils::cur_ns();
-  std::string ts_str = std::string(reinterpret_cast<const char*>(&ts), 8);
-  client.buffer(ts_str + pad_str("abc", DATA_SIZE));
-  client.buffer(ts_str + pad_str("def", DATA_SIZE));
-  client.buffer(ts_str + pad_str("ghi", DATA_SIZE));
+  client.buffer(make_simple_record(ts, "abc"));
+  client.buffer(make_simple_record(ts, "def"));
+  client.buffer(make_simple_record(ts, "ghi"));
   client.flush();
 
   ro_data_ptr ptr;
@@ -269,21 +269,19 @@ TEST_F(StreamTest, ReadTest) {
   stream_consumer sc(SERVER_ADDRESS, SERVER_PORT, 128);
   sc.set_current_atomic_multilog(multilog_name);
 
-  std::vector<std::string> expected_strings;
+  std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
-
   for (uint64_t i = 0; i < k_max; i++) {
-    std::string record_string = record_str(true, '7', i, 14, 1000, 0.7, 0.02,
-                                           "stream");
-    sc.write(record_string);
-    expected_strings.push_back(record_string);
+    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
+    sc.append(rdata);
+    expected_records.push_back(rdata);
   }
 
   std::string data;
   for (uint64_t i = 0; i < k_max; i++) {
     sc.consume(data);
     ASSERT_EQ(dtable->record_size(), data.size());
-    ASSERT_STREQ(expected_strings[i].c_str(), data.c_str());
+    ASSERT_STREQ(expected_records[i].c_str(), data.c_str());
   }
 
   sc.disconnect();
@@ -320,13 +318,12 @@ TEST_F(StreamTest, ReadWriteTest) {
   stream_producer sp(SERVER_ADDRESS, SERVER_PORT, 20, buffer_timeout);
   sp.set_current_atomic_multilog(multilog_name);
 
-  std::vector<std::string> expected_strings;
+  std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
   for (uint64_t i = 0; i < k_max; i++) {
-    std::string record_string = record_str(true, '7', i, 14, 1000, 0.7, 0.02,
-                                           "stream");
-    sp.buffer(record_string);
-    expected_strings.push_back(record_string);
+    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
+    sp.buffer(rdata);
+    expected_records.push_back(rdata);
   }
 
   stream_consumer sc(SERVER_ADDRESS, SERVER_PORT, 128);
@@ -336,7 +333,7 @@ TEST_F(StreamTest, ReadWriteTest) {
   for (uint64_t i = 0; i < k_max; i++) {
     sc.consume(data);
     ASSERT_EQ(dtable->record_size(), data.size());
-    ASSERT_STREQ(expected_strings[i].c_str(), data.c_str());
+    ASSERT_STREQ(expected_records[i].c_str(), data.c_str());
   }
 
   sc.disconnect();

@@ -267,6 +267,14 @@ class atomic_multilog {
 
   // Query ops
   /**
+   * Get a record batch builder.
+   * @return The record batch builder
+   */
+  record_batch_builder get_batch_builder() const {
+    return record_batch_builder(schema_);
+  }
+
+  /**
    * Appends a batch of records to the atomic multilog
    * @param batch The record batch to be added
    * @return The offset where the batch is located
@@ -316,6 +324,20 @@ class atomic_multilog {
     return offset;
   }
 
+  // TODO: Add a std::tuple based variant
+  // TODO: Add a JSON based variant
+  /**
+   * Appends a record to the atomic multilog
+   * @param record The record to be stored
+   * @return The offset in data log where the record is written
+   */
+  size_t append(const std::vector<std::string>& record) {
+    void* buf = schema_.record_vector_to_data(record);
+    size_t off = append(buf);
+    delete[] reinterpret_cast<uint8_t*>(buf);
+    return off;
+  }
+
   /**
    * Reads the data from the atomic multilog
    * @param offset The location of where the data is stored
@@ -340,6 +362,29 @@ class atomic_multilog {
   void read(uint64_t offset, ro_data_ptr& ptr) const {
     uint64_t version;
     read(offset, version, ptr);
+  }
+
+  /**
+   * Read the record given the offset into the data log
+   * @param offset The offset of the data into the data log
+   * @param version The current version
+   * @return Return the corresponding record.
+   */
+  std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
+    ro_data_ptr rptr;
+    read(offset, version, rptr);
+    return schema_.data_to_record_vector(rptr.get());
+  }
+
+  /**
+   * Read the record given the offset into the data log
+   * @param offset The offset of the data into the data log
+   * @param version The current version
+   * @return Return the corresponding record.
+   */
+  std::vector<std::string> read(uint64_t offset) const {
+    uint64_t version;
+    return read(offset, version);
   }
 
   /**
@@ -446,10 +491,10 @@ class atomic_multilog {
    */
   lazy::stream<alert> get_alerts(const std::string& trigger_name,
                                  uint64_t begin_ms, uint64_t end_ms) const {
-    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms)).filter(
-        [trigger_name](const alert& a) {
-          return a.trigger_name == trigger_name;
-        });
+    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms))
+        .filter([trigger_name](const alert& a) {
+      return a.trigger_name == trigger_name;
+    });
   }
 
   /**
@@ -768,7 +813,8 @@ class atomic_multilog {
   // Manangement
   task_pool& mgmt_pool_;
   periodic_task monitor_task_;
-};
+}
+;
 
 }
 

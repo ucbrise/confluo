@@ -19,7 +19,6 @@ class error_handling {
   static char exec_path[1024];
 
   static inline void install_signal_handler(const char* exec) {
-    realpath(exec, exec_path);
   }
 
   template<typename ...args>
