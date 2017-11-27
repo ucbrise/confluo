@@ -78,12 +78,6 @@ class ConfluoStoreTest : public testing::Test {
     return reinterpret_cast<void*>(&r);
   }
 
-  static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-                                int64_t e, float f, double g, const char* h) {
-    void* rbuf = record(a, b, c, d, e, f, g, h);
-    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
-  }
-
   static std::vector<column_t> schema() {
     schema_builder builder;
     builder.add_column(BOOL_TYPE, "a");
@@ -98,18 +92,15 @@ class ConfluoStoreTest : public testing::Test {
   }
 
   static record_batch get_batch() {
-    record_batch_builder builder;
-    builder.add_record(record_str(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-    builder.add_record(
-        record_str(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    builder.add_record(
-        record_str(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(
-        record_str(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+    record_batch_builder builder(s);
+    builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    builder.add_record(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
@@ -131,20 +122,20 @@ task_pool ConfluoStoreTest::MGMT_POOL;
 
 TEST_F(ConfluoStoreTest, AddTableTest) {
   confluo_store store("/tmp");
-  int64_t id = store.create_atomic_multilog("my_table", s, 
-          storage::storage_id::D_IN_MEMORY);
+  int64_t id = store.create_atomic_multilog("my_table", s,
+                                            storage::storage_id::D_IN_MEMORY);
   ASSERT_EQ(id, store.get_atomic_multilog_id("my_table"));
 }
 
 TEST_F(ConfluoStoreTest, RemoveTableTest) {
   confluo_store store("/tmp");
-  int64_t id = store.create_atomic_multilog("my_table", s, 
-          storage::storage_id::D_IN_MEMORY);
+  int64_t id = store.create_atomic_multilog("my_table", s,
+                                            storage::storage_id::D_IN_MEMORY);
   ASSERT_NE(-1, store.remove_atomic_multilog(id));
   try {
     store.remove_atomic_multilog("my_table");
   } catch (std::exception& e) {
-      ASSERT_STREQ("No such atomic multilog my_table", e.what());
+    ASSERT_STREQ("No such atomic multilog my_table", e.what());
   }
 }
 

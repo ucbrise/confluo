@@ -91,18 +91,6 @@ class AtomicMultilogTest : public testing::Test {
     return reinterpret_cast<void*>(&r);
   }
 
-  static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-      int64_t e, float f, double g, const char* h) {
-    void* rbuf = record(a, b, c, d, e, f, g, h);
-    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
-  }
-
-  static std::string record_str(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
-      int64_t e, float f, double g, const char* h) {
-    void* rbuf = record(ts, a, b, c, d, e, f, g, h);
-    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
-  }
-
   static std::vector<column_t> schema() {
     schema_builder builder;
     builder.add_column(BOOL_TYPE, "a");
@@ -116,35 +104,34 @@ class AtomicMultilogTest : public testing::Test {
     return builder.get_columns();
   }
 
-  static record_batch get_batch() {
-    record_batch_builder builder;
-    builder.add_record(record_str(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  static record_batch build_batch(const atomic_multilog& mlog) {
+    record_batch_builder builder = mlog.get_batch_builder();
+    builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
     builder.add_record(
-        record_str(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+        record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
     builder.add_record(
-        record_str(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+        record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
     builder.add_record(
-        record_str(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+        record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
-  static record_batch get_batch(int64_t ts) {
-    record_batch_builder builder;
-    builder.add_record(record_str(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(ts, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  static record_batch build_batch(const atomic_multilog& mlog, int64_t ts) {
+    record_batch_builder builder = mlog.get_batch_builder();
+    builder.add_record(record(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(ts, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(record(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
     builder.add_record(
-        record_str(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+        record(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
     builder.add_record(
-        record_str(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(
-        record_str(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+        record(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
@@ -186,6 +173,102 @@ TEST_F(AtomicMultilogTest, AppendAndGetDurableRelaxedTest) {
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE_RELAXED, MGMT_POOL);
   test_append_and_get(mlog);
+}
+
+TEST_F(AtomicMultilogTest, AppendAndGetRecordTest1) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+
+  typedef std::vector<std::string> rec_vector;
+  rec_vector rec1 { "false", "0", "0", "0", "0", "0.000000", "0.010000", "abc" };
+  rec_vector rec2 { "true", "1", "10", "2", "1", "0.100000", "0.020000", "defg" };
+  rec_vector rec3 { "false", "2", "20", "4", "10", "0.200000", "0.030000",
+      "hijkl" };
+  rec_vector rec4 { "true", "3", "30", "6", "100", "0.300000", "0.040000",
+      "mnopqr" };
+  rec_vector rec5 { "false", "4", "40", "8", "1000", "0.400000", "0.050000",
+      "stuvwx" };
+  rec_vector rec6 { "true", "5", "50", "10", "10000", "0.500000", "0.060000",
+      "yyy" };
+  rec_vector rec7 { "false", "6", "60", "12", "100000", "0.600000", "0.070000",
+      "zzz" };
+  rec_vector rec8 { "true", "7", "70", "14", "1000000", "0.700000", "0.080000",
+      "zzz" };
+
+  ASSERT_EQ(mlog.record_size() * 0, mlog.append(rec1));
+  ASSERT_EQ(mlog.record_size() * 1, mlog.append(rec2));
+  ASSERT_EQ(mlog.record_size() * 2, mlog.append(rec3));
+  ASSERT_EQ(mlog.record_size() * 3, mlog.append(rec4));
+  ASSERT_EQ(mlog.record_size() * 4, mlog.append(rec5));
+  ASSERT_EQ(mlog.record_size() * 5, mlog.append(rec6));
+  ASSERT_EQ(mlog.record_size() * 6, mlog.append(rec7));
+  ASSERT_EQ(mlog.record_size() * 7, mlog.append(rec8));
+
+  rec_vector res1 = mlog.read(mlog.record_size() * 0);
+  rec_vector res2 = mlog.read(mlog.record_size() * 1);
+  rec_vector res3 = mlog.read(mlog.record_size() * 2);
+  rec_vector res4 = mlog.read(mlog.record_size() * 3);
+  rec_vector res5 = mlog.read(mlog.record_size() * 4);
+  rec_vector res6 = mlog.read(mlog.record_size() * 5);
+  rec_vector res7 = mlog.read(mlog.record_size() * 6);
+  rec_vector res8 = mlog.read(mlog.record_size() * 7);
+
+  ASSERT_EQ(rec1, rec_vector(res1.begin() + 1, res1.end()));
+  ASSERT_EQ(rec2, rec_vector(res2.begin() + 1, res2.end()));
+  ASSERT_EQ(rec3, rec_vector(res3.begin() + 1, res3.end()));
+  ASSERT_EQ(rec4, rec_vector(res4.begin() + 1, res4.end()));
+  ASSERT_EQ(rec5, rec_vector(res5.begin() + 1, res5.end()));
+  ASSERT_EQ(rec6, rec_vector(res6.begin() + 1, res6.end()));
+  ASSERT_EQ(rec7, rec_vector(res7.begin() + 1, res7.end()));
+  ASSERT_EQ(rec8, rec_vector(res8.begin() + 1, res8.end()));
+}
+
+TEST_F(AtomicMultilogTest, AppendAndGetRecordTest2) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+
+  typedef std::vector<std::string> rec_vector;
+  rec_vector rec1 { "0", "false", "0", "0", "0", "0", "0.000000", "0.010000",
+      "abc" };
+  rec_vector rec2 { "0", "true", "1", "10", "2", "1", "0.100000", "0.020000",
+      "defg" };
+  rec_vector rec3 { "0", "false", "2", "20", "4", "10", "0.200000", "0.030000",
+      "hijkl" };
+  rec_vector rec4 { "0", "true", "3", "30", "6", "100", "0.300000", "0.040000",
+      "mnopqr" };
+  rec_vector rec5 { "0", "false", "4", "40", "8", "1000", "0.400000",
+      "0.050000", "stuvwx" };
+  rec_vector rec6 { "0", "true", "5", "50", "10", "10000", "0.500000",
+      "0.060000", "yyy" };
+  rec_vector rec7 { "0", "false", "6", "60", "12", "100000", "0.600000",
+      "0.070000", "zzz" };
+  rec_vector rec8 { "0", "true", "7", "70", "14", "1000000", "0.700000",
+      "0.080000", "zzz" };
+
+  ASSERT_EQ(mlog.record_size() * 0, mlog.append(rec1));
+  ASSERT_EQ(mlog.record_size() * 1, mlog.append(rec2));
+  ASSERT_EQ(mlog.record_size() * 2, mlog.append(rec3));
+  ASSERT_EQ(mlog.record_size() * 3, mlog.append(rec4));
+  ASSERT_EQ(mlog.record_size() * 4, mlog.append(rec5));
+  ASSERT_EQ(mlog.record_size() * 5, mlog.append(rec6));
+  ASSERT_EQ(mlog.record_size() * 6, mlog.append(rec7));
+  ASSERT_EQ(mlog.record_size() * 7, mlog.append(rec8));
+
+  rec_vector res1 = mlog.read(mlog.record_size() * 0);
+  rec_vector res2 = mlog.read(mlog.record_size() * 1);
+  rec_vector res3 = mlog.read(mlog.record_size() * 2);
+  rec_vector res4 = mlog.read(mlog.record_size() * 3);
+  rec_vector res5 = mlog.read(mlog.record_size() * 4);
+  rec_vector res6 = mlog.read(mlog.record_size() * 5);
+  rec_vector res7 = mlog.read(mlog.record_size() * 6);
+  rec_vector res8 = mlog.read(mlog.record_size() * 7);
+
+  ASSERT_EQ(rec1, res1);
+  ASSERT_EQ(rec2, res2);
+  ASSERT_EQ(rec3, res3);
+  ASSERT_EQ(rec4, res4);
+  ASSERT_EQ(rec5, res5);
+  ASSERT_EQ(rec6, res6);
+  ASSERT_EQ(rec7, res7);
+  ASSERT_EQ(rec8, res8);
 }
 
 TEST_F(AtomicMultilogTest, IndexTest) {
@@ -631,7 +714,7 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
   mlog.add_index("g", 0.01);
   mlog.add_index("h");
 
-  record_batch batch = get_batch();
+  record_batch batch = build_batch(mlog);
 
   mlog.append_batch(batch);
 
@@ -764,7 +847,7 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   int64_t now_ns = time_utils::cur_ns();
   int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
   int64_t end = beg;
-  record_batch batch = get_batch(now_ns);
+  record_batch batch = build_batch(mlog, now_ns);
 
   mlog.append_batch(batch);
 

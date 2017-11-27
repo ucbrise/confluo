@@ -65,11 +65,11 @@ class ExpressionCompilerTest : public testing::Test {
   }
 
   static void check_predicate(const compiled_predicate& c) {
-    if (c.to_string() == "A==bool(1)") {
+    if (c.to_string() == "A==bool(true)") {
       ASSERT_EQ("A", c.field_name());
       ASSERT_TRUE(BOOL_TYPE == c.value().type());
       ASSERT_EQ(reational_op_id::EQ, c.op());
-    } else if (c.to_string() == "B<char(53)") {
+    } else if (c.to_string() == "B<char(5)") {
       ASSERT_EQ("B", c.field_name());
       ASSERT_TRUE(CHAR_TYPE == c.value().type());
       ASSERT_EQ(reational_op_id::LT, c.op());

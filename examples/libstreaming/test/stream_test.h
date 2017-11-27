@@ -115,19 +115,16 @@ class StreamTest : public testing::Test {
     return builder.get_columns();
   }
 
-  static record_batch get_batch() {
-    record_batch_builder builder;
-    builder.add_record(record_str(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-    builder.add_record(
-        record_str(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    builder.add_record(
-        record_str(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(
-        record_str(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+  static record_batch get_batch(const atomic_multilog& mlog) {
+    record_batch_builder builder = mlog.get_batch_builder();
+    builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+    builder.add_record(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+    builder.add_record(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 

@@ -22,7 +22,8 @@ struct immutable_raw_data {
 
 template<>
 inline std::string immutable_raw_data::as<std::string>() const {
-  return std::string(reinterpret_cast<const char *>(ptr), size);
+  const char* buf = reinterpret_cast<const char *>(ptr);
+  return std::string(buf, size);
 }
 
 struct mutable_raw_data {

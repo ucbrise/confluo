@@ -88,18 +88,6 @@ class ClientReadOpsTest : public testing::Test {
     return reinterpret_cast<void*>(&r);
   }
 
-  static std::string record_str(bool a, int8_t b, int16_t c, int32_t d,
-      int64_t e, float f, double g, const char* h) {
-    void* rbuf = record(a, b, c, d, e, f, g, h);
-    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
-  }
-
-  static std::string record_str(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
-      int64_t e, float f, double g, const char* h) {
-    void* rbuf = record(ts, a, b, c, d, e, f, g, h);
-    return std::string(reinterpret_cast<const char*>(rbuf), sizeof(rec));
-  }
-
   static confluo_store* simple_table_store(const std::string& multilog_name,
       storage::storage_id id) {
     auto store = new confluo_store("/tmp");
@@ -123,35 +111,35 @@ class ClientReadOpsTest : public testing::Test {
     return builder.get_columns();
   }
 
-  static record_batch get_batch() {
-    record_batch_builder builder;
-    builder.add_record(record_str(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  static record_batch build_batch(const atomic_multilog& mlog) {
+    record_batch_builder builder = mlog.get_batch_builder();
+    builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
     builder.add_record(
-        record_str(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+        record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
     builder.add_record(
-        record_str(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+        record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
     builder.add_record(
-        record_str(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+        record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
-  static record_batch get_batch(int64_t ts) {
-    record_batch_builder builder;
-    builder.add_record(record_str(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record_str(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record_str(ts, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record_str(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  static record_batch build_batch(const atomic_multilog& mlog, int64_t ts) {
+    record_batch_builder builder = mlog.get_batch_builder();
+    builder.add_record(record(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+    builder.add_record(record(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+    builder.add_record(record(ts, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+    builder.add_record(record(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
     builder.add_record(
-        record_str(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record_str(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+        record(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
     builder.add_record(
-        record_str(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+        record(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
     builder.add_record(
-        record_str(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+        record(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
@@ -588,7 +576,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   mlog->add_index("g", 0.01);
   mlog->add_index("h");
 
-  record_batch batch = get_batch();
+  record_batch batch = build_batch(*mlog);
   mlog->append_batch(batch);
 
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -731,7 +719,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   int64_t now_ns = time_utils::cur_ns();
   int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
   int64_t end = beg;
-  record_batch batch = get_batch(now_ns);
+  record_batch batch = build_batch(*mlog, now_ns);
   mlog->append_batch(batch);
 
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);

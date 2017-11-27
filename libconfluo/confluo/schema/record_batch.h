@@ -3,6 +3,9 @@
 
 #include <map>
 #include <vector>
+#include <sstream>
+
+#include "schema/schema.h"
 
 namespace confluo {
 
@@ -29,28 +32,33 @@ class record_batch_builder {
  public:
   static const int64_t TIME_BLOCK = 1e6;
 
-  record_batch_builder() = default;
+  /**
+   * Constructor for record batch builder
+   * @param schema Schema for the atomic multilog
+   */
+  record_batch_builder(const schema_t& schema)
+      : schema_(schema) {
+
+  }
+
+  /**
+   * Adds record data to the batch
+   * @param rec The record data to be added
+   */
+  void add_record(const void* data) {
+    size_t record_size = schema_.record_size();
+    int64_t ts = *reinterpret_cast<const int64_t*>(data);
+    int64_t time_block = ts / TIME_BLOCK;
+    batch_sizes_[time_block] += record_size;
+    batch_[time_block].write(reinterpret_cast<const char*>(data), record_size);
+  }
 
   /**
    * Adds record to the batch
    * @param rec The record to be added
    */
-  void add_record(const std::string& rec) {
-    int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
-    int64_t time_block = ts / TIME_BLOCK;
-    batch_sizes_[time_block] += rec.size();
-    batch_[time_block].push_back(rec);
-  }
-
-  /**
-   * Moves a record to the batch
-   * @param rec The record to be moved
-   */
-  void add_record(std::string&& rec) {
-    int64_t ts = *reinterpret_cast<const int64_t*>(rec.data());
-    int64_t time_block = ts / TIME_BLOCK;
-    batch_sizes_[time_block] += rec.size();
-    batch_[time_block].push_back(std::move(rec));
+  void add_record(const std::vector<std::string>& rec) {
+    add_record(schema_.record_vector_to_data(rec));
   }
 
   /**
@@ -62,18 +70,12 @@ class record_batch_builder {
     batch.blocks.resize(batch_.size());
     batch.nrecords = 0;
     size_t i = 0;
-    for (auto entry : batch_) {
+    for (auto& entry : batch_) {
       batch.blocks[i].time_block = entry.first;
-      batch.blocks[i].nrecords = entry.second.size();
-      batch.blocks[i].data.resize(batch_sizes_[entry.first]);
-      char* buf = &(batch.blocks[i].data[0]);
-      size_t accum = 0;
-      for (size_t j = 0; j < entry.second.size(); j++) {
-        void* dst = buf + accum;
-        memcpy(dst, entry.second[j].data(), entry.second[j].size());
-        accum += entry.second[j].size();
-        batch.nrecords++;
-      }
+      batch.blocks[i].data = entry.second.str();
+      batch.blocks[i].nrecords = batch.blocks[i].data.size()
+          / schema_.record_size();
+      batch.nrecords += batch.blocks[i].nrecords;
       i++;
     }
     return batch;
@@ -81,7 +83,8 @@ class record_batch_builder {
 
  private:
   std::map<int64_t, size_t> batch_sizes_;
-  std::map<int64_t, std::vector<std::string>> batch_;
+  std::map<int64_t, std::stringstream> batch_;
+  const schema_t& schema_;
 };
 
 const int64_t record_batch_builder::TIME_BLOCK;
