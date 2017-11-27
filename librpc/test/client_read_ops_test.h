@@ -34,7 +34,7 @@ class ClientReadOpsTest : public testing::Test {
       offsets.push_back(offset);
     }
 
-    std::string buf;
+    record_data buf;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       client.read(buf, offsets[i]);
       ASSERT_EQ(mlog->record_size(), buf.size());

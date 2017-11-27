@@ -15,10 +15,11 @@ class stream_producer : public rpc::rpc_client {
       : rpc_client(server_address, server_port),
         batch_size_(batch_size),
         last_flush_timestamp_ms_(utils::time_utils::cur_ms()),
-        buffer_timeout_ms_(buffer_timeout_ms) {
+        buffer_timeout_ms_(buffer_timeout_ms),
+        batch_builder_(cur_schema_) {
   }
 
-  void buffer(const std::string& record) {
+  void buffer(const rpc::record_data& record) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set table first");
     }

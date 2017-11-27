@@ -146,13 +146,42 @@ class schema_t {
     }
   }
 
-  std::vector<std::string> data_to_record_vector(const void* data) const {
-    std::vector<std::string> ret;
+  void record_vector_to_data(std::string& out,
+                             const std::vector<std::string>& record) const {
+    if (record.size() == columns_.size()) {
+      // Timestamp is provided
+      out.resize(record_size_);
+      for (size_t i = 0; i < columns_.size(); i++) {
+        void* fptr = reinterpret_cast<uint8_t*>(&out[0]) + columns_[i].offset();
+        columns_[i].type().parse_op()(record.at(i), fptr);
+      }
+    } else if (record.size() == columns_.size() - 1) {
+      // Timestamp is not provided -- generate one
+      out.resize(record_size_);
+      uint64_t ts = time_utils::cur_ns();
+      memcpy(&out[0], &ts, sizeof(uint64_t));
+      for (size_t i = 1; i < columns_.size(); i++) {
+        void* fptr = reinterpret_cast<uint8_t*>(&out[0]) + columns_[i].offset();
+        columns_[i].type().parse_op()(record.at(i - 1), fptr);
+      }
+    } else {
+      THROW(invalid_operation_exception, "Record does not match schema");
+    }
+  }
+
+  void data_to_record_vector(std::vector<std::string>& ret,
+                             const void* data) const {
     for (size_t i = 0; i < size(); i++) {
-      const void* fptr = reinterpret_cast<const uint8_t*>(data) + columns_[i].offset();
+      const void* fptr = reinterpret_cast<const uint8_t*>(data)
+          + columns_[i].offset();
       data_type ftype = columns_[i].type();
       ret.push_back(ftype.to_string_op()(immutable_raw_data(fptr, ftype.size)));
     }
+  }
+
+  std::vector<std::string> data_to_record_vector(const void* data) const {
+    std::vector<std::string> ret;
+    data_to_record_vector(ret, data);
     return ret;
   }
 

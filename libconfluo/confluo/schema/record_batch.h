@@ -58,7 +58,9 @@ class record_batch_builder {
    * @param rec The record to be added
    */
   void add_record(const std::vector<std::string>& rec) {
-    add_record(schema_.record_vector_to_data(rec));
+    void* data = schema_.record_vector_to_data(rec);
+    add_record(data);
+    delete[] reinterpret_cast<uint8_t*>(data);
   }
 
   /**

@@ -10,6 +10,7 @@
 #include "rpc_configuration_params.h"
 #include "rpc_types.h"
 #include "rpc_type_conversions.h"
+#include "rpc_record_batch_builder.h"
 #include "rpc_record_stream.h"
 #include "rpc_alert_stream.h"
 
@@ -146,7 +147,23 @@ class rpc_client {
     client_->remove_trigger(cur_multilog_id_, trigger_name);
   }
 
-  void write(const std::string& record) {
+  /** Query ops **/
+  // Write ops
+  rpc_record_batch_builder get_batch_builder() const {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    return rpc_record_batch_builder(cur_schema_);
+  }
+
+  void append_batch(const rpc_record_batch& batch) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->append_batch(cur_multilog_id_, batch);
+  }
+
+  void append(const record_data& record) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
     }
@@ -158,17 +175,45 @@ class rpc_client {
     client_->append(cur_multilog_id_, record);
   }
 
-  /** Query ops **/
-  // Read op
-  void read(std::string& _return, int64_t offset) {
+  void append(const std::vector<std::string>& record) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    record_data rdata;
+    cur_schema_.record_vector_to_data(rdata, record);
+    if (rdata.length() != cur_schema_.record_size()) {
+      throw illegal_state_exception("Record size incorrect; expected="
+          + std::to_string(cur_schema_.record_size())
+          + ", got=" + std::to_string(rdata.length()));
+    }
+    client_->append(cur_multilog_id_, rdata);
+  }
+
+  // Read ops
+  void read(record_data& _return, int64_t offset) {
     read_batch(_return, offset, 1);
   }
 
-  void read_batch(std::string& _return, int64_t offset, size_t nrecords) {
+  void read(std::vector<std::string>& _return, int64_t offset) {
+    record_data rdata;
+    read_batch(rdata, offset, 1);
+    cur_schema_.data_to_record_vector(_return, rdata.data());
+  }
+
+  void read_batch(record_data& _return, int64_t offset, size_t nrecords) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
     }
     client_->read(_return, cur_multilog_id_, offset, nrecords);
+  }
+
+  void read_batch(std::vector<std::vector<std::string>>& _return, int64_t offset, size_t nrecords) {
+    record_data rdata;
+    read_batch(rdata, offset, nrecords);
+    size_t nread = rdata.size() / cur_schema_.record_size();
+    for (size_t i = 0; i < nread; i++) {
+      _return.push_back(cur_schema_.data_to_record_vector(rdata.data() + i * cur_schema_.record_size()));
+    }
   }
 
   void query_aggregate(std::string& _return, const std::string& aggregate_name,
