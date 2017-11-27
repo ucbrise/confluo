@@ -12,33 +12,6 @@ native operations can be supported; these properties are summarised in the
 [`type_properties`](../libconfluo/confluo/types/type_properties.h) 
 struct:
 
-```cpp
-struct type_properties {
-  std::string name;
-  size_t size;
-
-  void* min;
-  void* max;
-  void* one;
-  void* zero;
-
-  bool is_numeric;
-
-  rel_ops_t relational_ops;
-  unary_ops_t unary_ops;
-  binary_ops_t binary_ops;
-  key_op_t key_transform_op;
-
-  parse_op_t parse_op;
-  to_string_op_t to_string_op;
-
-  serialize_op_t serialize_op;
-  deserialize_op_t deserialize_op;
-
-  ...
-}
-```
-
 * `std::string name` - A unique name for the type
 * `size_t size` -  The size of underlying representation for fixed sized types. This should be set to zero for 
 dynamically sized types (e.g., see definintion for [`STRING`](../libconfluo/confluo/types/type_properties.h) type).
@@ -97,15 +70,6 @@ Atomic MultiLog. From here on out, appending records to the
 Atomic MultiLog, along with operations like filters and triggers, will work out
 of the box.
 
-Check [type_manager_test.h][../libconfluo/test/types/type_manager_test.h] for
+See [type_manager_test.h](../libconfluo/test/types/type_manager_test.h) for
 examples of how to build a schema and add records with user-defined
 types.
-
-
-
-
-
-
-
-
-
