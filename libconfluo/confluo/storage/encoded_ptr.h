@@ -17,10 +17,18 @@ class encoded_ptr {
   }
 
   /**
-   * @return internal encoded pointer
+   * @return encoded pointer
    */
-  void* internal_ptr() const {
+  void* ptr() const {
     return ptr_;
+  }
+
+  /**
+   * @return encoded pointer
+   */
+  template<typename U>
+  void* ptr_as() const {
+    return static_cast<U*>(ptr_);
   }
 
   // Encode/decode member functions

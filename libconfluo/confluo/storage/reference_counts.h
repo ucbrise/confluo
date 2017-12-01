@@ -14,11 +14,12 @@ class reference_counts {
   }
 
   inline void increment_first() {
+    atomic::faa(&ref_counts_, FIRST_DELTA);
 
   }
 
   inline void increment_second() {
-
+    atomic::faa(&ref_counts_, SECOND_DELTA);
   }
 
   inline void increment_both() {
