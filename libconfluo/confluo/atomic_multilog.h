@@ -378,7 +378,7 @@ class atomic_multilog {
    * @param version The tail pointer's location
    * @param ptr The read-only pointer to store in
    */
-  void read(uint64_t offset, uint64_t& version, storage::read_only_ptr<uint8_t>& ptr) const {
+  void read(uint64_t offset, uint64_t& version, storage::read_only_encoded_ptr<uint8_t>& ptr) const {
     version = rt_.get();
     if (offset < version) {
       data_log_.cptr(offset, ptr);
@@ -392,7 +392,7 @@ class atomic_multilog {
    * @param offset The location of the data
    * @param ptr The read-only pointer to store in
    */
-  void read(uint64_t offset, storage::read_only_ptr<uint8_t>& ptr) const {
+  void read(uint64_t offset, storage::read_only_encoded_ptr<uint8_t>& ptr) const {
     uint64_t version;
     read(offset, version, ptr);
   }

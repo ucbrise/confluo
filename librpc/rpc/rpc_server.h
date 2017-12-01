@@ -348,7 +348,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     uint64_t limit;
-    storage::read_only_ptr<uint8_t> ptr;
+    storage::read_only_encoded_ptr<uint8_t> ptr;
     mlog->read(offset, limit, ptr);
     auto decoded_ptr = ptr.decode_ptr();
     char* data = reinterpret_cast<char*>(decoded_ptr.get());

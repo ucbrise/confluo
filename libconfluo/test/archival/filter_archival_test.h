@@ -62,15 +62,15 @@ class FilterArchivalTest : public testing::Test {
 
   void verify_reflog_archived(reflog const* reflog, size_t reflog_archival_tail) {
     for (uint32_t i = 0; i < reflog_archival_tail; i += reflog_constants::BUCKET_SIZE) {
-      storage::read_only_ptr<uint64_t> bucket_ptr;
+      storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
-      void* ptr = bucket_ptr.get().internal_ptr();
+      void* ptr = bucket_ptr.get().ptr();
       ASSERT_EQ(storage::ptr_metadata::get(ptr)->state_, storage::state_type::D_ARCHIVED);
     }
     for (uint32_t i = reflog_archival_tail; i < reflog->size(); i += reflog_constants::BUCKET_SIZE) {
-      storage::read_only_ptr<uint64_t> bucket_ptr;
+      storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
-      void* ptr = bucket_ptr.get().internal_ptr();
+      void* ptr = bucket_ptr.get().ptr();
       ASSERT_EQ(storage::ptr_metadata::get(ptr)->state_, storage::state_type::D_IN_MEMORY);
     }
   }

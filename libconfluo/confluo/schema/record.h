@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "../storage/ptr.h"
+#include "storage/swappable_encoded_ptr.h"
 
 namespace confluo {
 
@@ -50,7 +50,7 @@ struct record_t {
    * @param data raw pointer to data
    * @param size size of data
    */
-  record_t(size_t log_offset, storage::read_only_ptr<uint8_t> data, size_t size)
+  record_t(size_t log_offset, storage::read_only_encoded_ptr<uint8_t> data, size_t size)
       : timestamp_(*reinterpret_cast<int64_t*>(data.decode_ptr().get())),
         log_offset_(log_offset),
         data_(data.decode_ptr().get()), // TODO since unique_ptr, can't just use rvalue
@@ -220,7 +220,7 @@ struct record_t {
   int64_t timestamp_;
   size_t log_offset_;
   uint8_t* data_;
-  storage::read_only_ptr<uint8_t> ptr_;
+  storage::read_only_encoded_ptr<uint8_t> ptr_;
   size_t size_;
   uint64_t version_;
   std::vector<field_t> fields_;

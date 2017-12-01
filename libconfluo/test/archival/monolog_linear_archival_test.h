@@ -2,9 +2,9 @@
 #define TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 
 #include "archival/encoder.h"
-#include "archival/monolog_linear_archiver.h"
-#include "container/monolog/monolog_linear.h"
 #include "gtest/gtest.h"
+#include "container/monolog/monolog_linear.h"
+#include "archival/monolog_linear_archiver.h"
 #include "read_tail.h"
 
 using namespace ::confluo;
@@ -92,9 +92,9 @@ TEST_F(DataArchivalTest, ArchivePastReadTailTest) {
   verify(log, 0, 7 * BLOCK_SIZE);
 
   // make sure last block wasn't archived
-  storage::read_only_ptr<uint8_t> ptr;
+  storage::read_only_encoded_ptr<uint8_t> ptr;
   log.ptr(7 * BLOCK_SIZE, ptr);
-  ASSERT_EQ(storage::ptr_metadata::get(ptr.get().internal_ptr())->state_, storage::state_type::D_IN_MEMORY);
+  ASSERT_EQ(storage::ptr_metadata::get(ptr.get().ptr())->state_, storage::state_type::D_IN_MEMORY);
 }
 
 #endif /* TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_ */

@@ -144,14 +144,14 @@ class schema_t {
   }
 
   /**
-   * Applies the data in the record to the schema
+   * Applies the schema on raw data to get a record
    *
    * @param offset The offset of the record from the log
    * @param data The data the record contains
    *
    * @return Record containing the data
    */
-  record_t apply(size_t offset, storage::read_only_ptr<uint8_t>& data) const {
+  record_t apply(size_t offset, storage::read_only_encoded_ptr<uint8_t>& data) const {
     record_t r(offset, data, record_size_);
     r.reserve(columns_.size());
     for (uint16_t i = 0; i < columns_.size(); i++)
@@ -160,7 +160,9 @@ class schema_t {
   }
 
   /**
-   * Unsafe apply of the data to the schema
+   * Applies the schema on raw data to get a record.
+   * Note that usage of the record relies on the lifetime of
+   * the data buffer.
    *
    * @param offset The offset of the data
    * @param data The data to be added to the schema

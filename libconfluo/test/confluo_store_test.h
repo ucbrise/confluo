@@ -28,7 +28,7 @@ class ConfluoStoreTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      storage::read_only_ptr<uint8_t> ptr;
+      storage::read_only_encoded_ptr<uint8_t> ptr;
       dtable.read(offsets[i], ptr);
       auto decoded_ptr = ptr.decode_ptr();
       uint8_t* data = decoded_ptr.get();
