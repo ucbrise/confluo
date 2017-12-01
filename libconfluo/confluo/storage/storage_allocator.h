@@ -34,7 +34,7 @@ class storage_allocator {
    * @param size size in bytes to allocate
    * @return pointer to allocated memory
    */
-  void* alloc(size_t size) {
+  void* alloc(size_t size, uint8_t state = state_type::D_IN_MEMORY) {
     if (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
       THROW(memory_exception, "Max memory reached!");
     }
@@ -113,8 +113,8 @@ class storage_allocator {
   }
 
   /**
-   * Deallocate memory allocated by this allocator.
-   * @param ptr pointer to allocated memory
+   * Deallocate or unmap pointer returned by this allocator.
+   * @param ptr pointer to memory
    */
   void dealloc(void* ptr) {
     ptr_metadata* md = ptr_metadata::get(ptr);

@@ -21,9 +21,7 @@ class index_archiver {
   index_archiver(const std::string& path, index::radix_index* index, const column_t& column)
       : index_(index),
         column_(column),
-        writer_(path + "/index_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
-    file_utils::create_dir(path);
-    writer_.init();
+        writer_(path, "index_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
   }
 
   void archive(size_t offset) {
@@ -31,7 +29,7 @@ class index_archiver {
     byte_string max = column_.max().to_key(column_.index_bucket_size());
     auto reflogs = index_->range_lookup_reflogs(min, max);
     for (reflog& refs : reflogs) {
-      archival_utils::archive_reflog<ENCODING>(refs, writer_, offset);
+      archival_utils::archive_reflog<ENCODING>(refs, writer_, 0, offset);
     }
     writer_.close();
   }
