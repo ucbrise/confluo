@@ -17,32 +17,50 @@ class filter_archiver {
  public:
   filter_archiver(const std::string& path, monitor::filter* filter)
       : filter_(filter),
-        writer_(path + "/filter_data_", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
-        reflog_tail_(0),
+        reflog_writer_(path, "filter_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+        aggregate_writer_(path, "filter_agg", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+        refs_size_off_(),
+        refs_tail_(0),
         ts_tail_(0) {
-    file_utils::create_dir(path);
-    writer_.init();
   }
 
+  /**
+   * Archive filter up to a data log offset.
+   * Reflog archival format: [timestamp][reflog_size][reflog]...
+   * Aggregate archival format: [timestamp][num_aggregates][aggregates]...
+   * @param offset data log offset
+   */
   void archive(size_t offset) {
-    auto reflogs = filter_->lookup_range_reflogs(ts_tail_, (size_t) -1);
+    auto reflogs = filter_->lookup_range_reflogs(ts_tail_, (uint64_t) -1);
     for (auto it = reflogs.begin(); it != reflogs.end(); it++) {
       auto& refs = *it;
       ts_tail_ = it.key().template as<uint64_t>();
-      reflog_tail_ = archival_utils::archive_reflog<ENCODING>(refs, writer_, offset, reflog_tail_);
-      if (reflog_tail_ < refs.size()) {
+      if (refs_tail_ == 0) {
+        reflog_writer_.append<uint64_t>(ts_tail_);
+        refs_size_off_ = reflog_writer_.append<size_t>(0);
+      }
+      refs_tail_ = archival_utils::archive_reflog<ENCODING>(refs, reflog_writer_, refs_tail_, offset);
+      reflog_writer_.overwrite<size_t>(refs_size_off_, refs_tail_);
+      if (refs_tail_ < refs.size()) {
         break;
       }
-      reflog_tail_ = 0;
+      aggregate_writer_.append<uint64_t>(ts_tail_);
+      aggregate_writer_.append<size_t>(refs.num_aggregates());
+      archival_utils::archive_reflog_aggregates(refs, aggregate_writer_, refs_tail_);
+      aggregate_writer_.update_metadata(ts_tail_);
+      refs_tail_ = 0;
     }
-    writer_.close();
+    reflog_writer_.close();
+    aggregate_writer_.close();
   }
 
  private:
   monitor::filter* filter_;
-  incremental_file_writer writer_;
+  incremental_file_writer reflog_writer_;
+  incremental_file_writer aggregate_writer_;
+  incremental_file_offset refs_size_off_;
 
-  size_t reflog_tail_; // data in the current reflog up to this tail has been archived
+  size_t refs_tail_; // data in the current reflog up to this tail has been archived
   uint64_t ts_tail_; // reflogs in the filter up to this time stamp have been archived
 
 };
@@ -51,10 +69,7 @@ template<encoding_type ENCODING>
 class filter_log_archiver {
 
  public:
-  filter_log_archiver(const std::string& name,
-                      const std::string& path,
-                      filter_log& filters,
-                      read_tail& rt)
+  filter_log_archiver(const std::string& name, const std::string& path, filter_log& filters, read_tail& rt)
       : path_(path + "/" + name + "/"),
         filter_archivers_(),
         filters_(filters),
@@ -83,6 +98,10 @@ class filter_log_archiver {
   }
 
  private:
+  /**
+   * Initialize archivers for filters that haven't
+   * already had archivers initialized for.
+   */
   void init_new_archivers() {
     for (size_t i = filter_archivers_.size(); i < filters_.size(); i++) {
       std::string filter_path = path_ + "/filter_" + std::to_string(i) + "/";
