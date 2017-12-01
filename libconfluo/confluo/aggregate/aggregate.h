@@ -6,12 +6,17 @@
 #include "aggregate_ops.h"
 #include "aggregate_manager.h"
 #include "types/numeric.h"
+#include "threads/thread_manager.h"
 
 namespace confluo {
 
 class aggregate;
 
 struct aggregate_node {
+
+  aggregate_node()
+      : aggregate_node(NONE_TYPE, 0, nullptr) {
+  }
 
   /**
    * Constructor for an aggregate_node
@@ -191,19 +196,34 @@ class aggregate {
   aggregate()
       : type_(NONE_TYPE),
         agg_(invalid_aggregator),
-        aggs_(nullptr) {
-  }
-
-  aggregate(const data_type& type, const aggregator& agg)
-      : type_(type),
-        agg_(agg),
-        aggs_(new aggregate_list[thread_manager::get_max_concurrency()]) {
-    for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
-      aggs_[i].init(type, agg);
+        aggs_(nullptr),
+        concurrency_(0) {
   }
 
   void seq_update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].seq_update(value, version);
+  }
+
+  aggregate(const data_type& type, const aggregator& agg,
+            int concurrency = thread_manager::get_max_concurrency())
+      : type_(type),
+        agg_(agg),
+        aggs_(new aggregate_list[concurrency]),
+        concurrency_(concurrency) {
+    for (int i = 0; i < concurrency_; i++)
+      aggs_[i].init(type, agg_);
+  }
+
+// TODO for some reason this results in a segfault
+// even though the delete is successful. Fix this.
+//    ~aggregate() {
+//      if (aggs_ != nullptr) {
+//        delete[] aggs_;
+//      }
+//    }
+
+  void update(int thread_id, const numeric& value, uint64_t version) {
+    aggs_[thread_id].update(value, version);
   }
 
   void comb_update(int thread_id, const numeric& value, uint64_t version) {
@@ -219,7 +239,9 @@ class aggregate {
    */
   numeric get(uint64_t version) const {
     numeric val = agg_.zero;
-    for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
+//    for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
+//      val = agg_.comb_op(val, aggs_[i].get(version));
+    for (int i = 0; i < concurrency_; i++)
       val = agg_.comb_op(val, aggs_[i].get(version));
     return val;
   }
@@ -228,6 +250,7 @@ class aggregate {
   data_type type_;
   aggregator agg_;
   aggregate_list* aggs_;
+  int concurrency_;
 };
 
 }
