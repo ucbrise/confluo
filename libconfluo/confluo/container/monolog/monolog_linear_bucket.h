@@ -2,29 +2,29 @@
 #define CONFLUO_CONTAINER_MONOLOG_MONOLOG_LINEAR_BLOCK_H_
 
 #include "atomic.h"
-#include "storage/ptr.h"
-#include "storage/storage.h"
 #include "io_utils.h"
+#include "storage/storage.h"
+#include "storage/swappable_encoded_ptr.h"
 
 namespace confluo {
 namespace monolog {
 
 using namespace ::utils;
-// TODO standardize naming conventions between monolog_exp2_linear and monolog_linear
+
 template<typename T, size_t BUFFER_SIZE = 1048576>
-class monolog_block {
+class monolog_linear_bucket {
  public:
-  typedef storage::swappable_ptr<T> __atomic_block_ref;
-  typedef storage::read_only_ptr<T> __atomic_block_copy_ref;
+  typedef storage::swappable_encoded_ptr<T> __atomic_block_ref;
+  typedef storage::read_only_encoded_ptr<T> __atomic_block_copy_ref;
 
   typedef bool block_state;
   static const block_state UNINIT = false;
   static const block_state INIT = true;
 
   /**
-   * Default constructor for the monolog block.
+   * Default constructor for the monolog linear bucket.
    */
-  monolog_block()
+  monolog_linear_bucket()
       : path_(""),
         state_(UNINIT),
         data_(),
@@ -33,15 +33,14 @@ class monolog_block {
   }
 
   /**
-   * Constructor to initialize the monolog block with specified path, size and
-   * storage mode.
+   * Constructor to initialize the monolog_linear bucket with
+   * specified path, size and storage mode.
    *
    * @param path The data path for the monolog block.
    * @param size The size of the monolog block.
    * @param storage The storage mode of the monolog block.
    */
-  monolog_block(const std::string& path, size_t size,
-                const storage::storage_mode& storage)
+  monolog_linear_bucket(const std::string& path, size_t size, const storage::storage_mode& storage)
       : path_(path),
         state_(UNINIT),
         data_(nullptr),
@@ -52,9 +51,9 @@ class monolog_block {
   /**
    * Copy constructor.
    *
-   * @param other Another monolog block.
+   * @param other Another monolog_linear bucket.
    */
-  monolog_block(const monolog_block<T, BUFFER_SIZE>& other)
+  monolog_linear_bucket(const monolog_linear_bucket<T, BUFFER_SIZE>& other)
       : path_(other.path_),
         state_(other.state_),
         size_(other.size_),
@@ -108,7 +107,7 @@ class monolog_block {
    */
   void set(size_t i, const T& val) {
     storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
-    if (enc_ptr.internal_ptr() == nullptr) {
+    if (enc_ptr.ptr() == nullptr) {
       enc_ptr = try_allocate();
     }
     enc_ptr.encode(i, val);
@@ -133,7 +132,7 @@ class monolog_block {
    */
   void write(size_t offset, const T* data, size_t len) {
     storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
-    if (enc_ptr.internal_ptr() == nullptr) {
+    if (enc_ptr.ptr() == nullptr) {
       enc_ptr = try_allocate();
     }
     enc_ptr.encode(offset, data, len);
@@ -176,7 +175,7 @@ class monolog_block {
 
   void ptr(size_t offset, __atomic_block_copy_ref& data_ptr) {
     data_.atomic_copy(data_ptr, offset);
-    if (data_ptr.get().internal_ptr() == nullptr) {
+    if (data_ptr.get().ptr() == nullptr) {
       try_allocate(data_ptr, offset);
     }
   }
@@ -193,11 +192,11 @@ class monolog_block {
   /**
    * operator=
    *
-   * @param other Another monolog block
+   * @param other Another monolog_linear bucket
    *
-   * @return Reference to updated monolog block.
+   * @return Reference to updated monolog_linear bucket.
    */
-  monolog_block& operator=(const monolog_block<T, BUFFER_SIZE>& other) {
+  monolog_linear_bucket& operator=(const monolog_linear_bucket<T, BUFFER_SIZE>& other) {
     path_ = other.path_;
     atomic::init(&state_, atomic::load(&other.state_));
     __atomic_block_copy_ref copy;
@@ -210,7 +209,7 @@ class monolog_block {
    * Ensure that the monolog block is allocated.
    */
   void ensure_alloc() {
-    if (data_.atomic_load().internal_ptr() == nullptr) {
+    if (data_.atomic_load().ptr() == nullptr) {
       __atomic_block_copy_ref copy;
       try_allocate(copy);
     }
@@ -233,7 +232,7 @@ class monolog_block {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      void* data_ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
+      void* data_ptr = storage::STORAGE_FNS[mode_].allocate_bucket(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
       storage::encoded_ptr<T> enc_ptr(ptr);
       data_.atomic_init(ptr);
@@ -242,7 +241,7 @@ class monolog_block {
     }
 
     // Someone else is initializing, stall until initialized
-    while (data_.atomic_load().internal_ptr() == nullptr)
+    while (data_.atomic_load().ptr() == nullptr)
       ;
 
     data_.atomic_copy(copy);
@@ -256,7 +255,7 @@ class monolog_block {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      void* data_ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
+      void* data_ptr = storage::STORAGE_FNS[mode_].allocate_bucket(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
       storage::encoded_ptr<T> enc_ptr(ptr);
       data_.atomic_init(enc_ptr);
@@ -265,7 +264,7 @@ class monolog_block {
 
     // Someone else is initializing, stall until initialized
     storage::encoded_ptr<T> enc_ptr;
-    while ((enc_ptr = data_.atomic_load()).internal_ptr() == nullptr)
+    while ((enc_ptr = data_.atomic_load()).ptr() == nullptr)
       ;
     return enc_ptr;
   }
@@ -278,10 +277,10 @@ class monolog_block {
 };
 
 template<typename T, size_t BUFFER_SIZE>
-const bool monolog_block<T, BUFFER_SIZE>::INIT;
+const bool monolog_linear_bucket<T, BUFFER_SIZE>::INIT;
 
 template<typename T, size_t BUFFER_SIZE>
-const bool monolog_block<T, BUFFER_SIZE>::UNINIT;
+const bool monolog_linear_bucket<T, BUFFER_SIZE>::UNINIT;
 
 }
 }

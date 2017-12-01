@@ -6,128 +6,12 @@
 
 #include "atomic.h"
 #include "bit_utils.h"
+#include "monolog_iterator.h"
 
 using namespace utils;
 
 namespace confluo {
 namespace monolog {
-
-/**
- * Iterator over monolog data.
- */
-template<typename monolog_impl>
-class monolog_iterator : public std::iterator<std::input_iterator_tag,
-    typename monolog_impl::value_type, typename monolog_impl::difference_type,
-    typename monolog_impl::pointer, typename monolog_impl::reference> {
- public:
-  typedef typename monolog_impl::value_type value_type;
-  typedef typename monolog_impl::difference_type difference_type;
-  typedef typename monolog_impl::pointer pointer;
-  typedef typename monolog_impl::reference reference;
-
-  /**
-   * Initializes an empty monolog iterator
-   */
-  monolog_iterator()
-      : impl_(nullptr),
-        pos_(0) {
-  }
-
-  /**
-   * Constructs a iterator from a monolog implementation
-   *
-   * @param impl The monolog implementation
-   * @param pos The position of the iterator in the monolog
-   */
-  monolog_iterator(const monolog_impl* impl, size_t pos)
-      : impl_(impl),
-        pos_(pos) {
-  }
-
-  /**
-   * Dereferences the pointer at a given position
-   *
-   * @return The reference at the position
-   */
-  reference operator*() const {
-    return impl_->get(pos_);
-  }
-
-  /**
-   * Gets the pointer at a given position
-   *
-   * @return The pointer at the given position
-   */
-  pointer operator->() const {
-    return impl_->ptr(pos_);
-  }
-
-  /**
-   * Advances the monolog iterator
-   *
-   * @return This advanced monolog iterator
-   */
-  monolog_iterator& operator++() {
-    pos_++;
-    return *this;
-  }
-
-  /**
-   * Advances the monolog iterator by a specified amount
-   *
-   * @param int The amount to advance the monolog iterator by
-   *
-   * @return This advanced monolog iterator
-   */
-  monolog_iterator operator++(int) {
-    monolog_iterator it = *this;
-    ++(*this);
-    return it;
-  }
-
-  /**
-   * Checks whether the other monolog iterator is equal to this monolog
-   * iterator
-   *
-   * @param other The other monolog iterator
-   *
-   * @return True if this monolog iterator is equal to the other monolog
-   * iterator, false otherwise
-   */
-  bool operator==(monolog_iterator other) const {
-    return (impl_ == other.impl_) && (pos_ == other.pos_);
-  }
-
-  /**
-   * Checks whether the other monolog iterator is not equal to this
-   * monolog iterator
-   *
-   * @param other The other monolog iterator
-   *
-   * @return True if this monolog iterator is not equal to the other
-   * monolog iterator
-   */
-  bool operator!=(monolog_iterator other) const {
-    return !(*this == other);
-  }
-
-  /**
-   * Assigns another monolog iterator to this monolog iterator
-   *
-   * @param other The other monolog iterator
-   *
-   * @return This updated monolog iterator
-   */
-  monolog_iterator& operator=(const monolog_iterator& other) {
-    impl_ = other.impl_;
-    pos_ = other.pos_;
-    return *this;
-  }
-
- private:
-  const monolog_impl* impl_;
-  size_t pos_;
-};
 
 /**
  * @class

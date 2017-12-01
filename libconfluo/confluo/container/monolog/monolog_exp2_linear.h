@@ -4,11 +4,12 @@
 #include <array>
 #include <vector>
 
-#include "atomic.h"
 #include "storage/allocator.h"
+#include "atomic.h"
 #include "bit_utils.h"
 #include "storage/encoded_ptr.h"
-#include "storage/ptr.h"
+#include "monolog_iterator.h"
+#include "storage/swappable_encoded_ptr.h"
 
 using namespace utils;
 
@@ -26,9 +27,9 @@ namespace monolog {
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
-  typedef storage::swappable_ptr<T> __atomic_bucket_ref;
-  typedef storage::read_only_ptr<T> __atomic_bucket_copy_ref;
-  typedef atomic::type<__atomic_bucket_ref *> __atomic_bucket_container_ref;
+  typedef storage::swappable_encoded_ptr<T> __atomic_bucket_ref;
+  typedef storage::read_only_encoded_ptr<T> __atomic_bucket_copy_ref;
+  typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
   /**
    * Default constructor
@@ -108,7 +109,7 @@ class monolog_exp2_linear_base {
     }
 
     storage::encoded_ptr<T> enc_ptr = container[bucket_idx].atomic_load();
-    if (enc_ptr.internal_ptr() == nullptr) {
+    if (enc_ptr.ptr() == nullptr) {
       enc_ptr = try_allocate_bucket(container, bucket_idx);
     }
     enc_ptr.encode(bucket_off, val);
@@ -158,7 +159,7 @@ class monolog_exp2_linear_base {
       }
 
       storage::encoded_ptr<T> bucket = container[bucket_idx].atomic_load();
-      if (bucket.internal_ptr() == nullptr) {
+      if (bucket.ptr() == nullptr) {
         bucket = try_allocate_bucket(container, bucket_idx);
       }
 
@@ -240,26 +241,6 @@ class monolog_exp2_linear_base {
     return atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_get_decode(bucket_off);
   }
 
-//  T& operator[](size_t idx) {
-//    size_t pos = idx + FCS;
-//    size_t hibit = bit_utils::highest_bit(pos);
-//    size_t highest_cleared = pos ^ (1 << hibit);
-//    size_t bucket_idx = highest_cleared / BUCKET_SIZE;
-//    size_t bucket_off = highest_cleared % BUCKET_SIZE;
-//    size_t container_idx = hibit - fcs_hibit_;
-//
-//    __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
-//    if (container == nullptr) {
-//      container = try_allocate_container(container_idx);
-//    }
-//    __atomic_bucket_copy_ref bucket;
-//    container[bucket_idx].atomic_copy(bucket);
-//    if (bucket.get().get() == nullptr) {
-//      try_allocate_bucket(container, bucket_idx, bucket);
-//    }
-//    return bucket.get()[bucket_off];
-//  }
-
   /**
    * Copies a contiguous region of the MonoLog base into the provided buffer.
    * The buffer should have sufficient space to hold the data requested, otherwise
@@ -309,7 +290,7 @@ class monolog_exp2_linear_base {
         bucket_size += num_buckets * sizeof(__atomic_bucket_ref);
         for (size_t j = 0; j < num_buckets; j++) {
           __atomic_bucket_copy_ref* bucket = container[j].atomic_copy();
-          if (bucket->get().internal_ptr() != nullptr) {
+          if (bucket->get().ptr() != nullptr) {
             data_size += BUCKET_SIZE * sizeof(T);
           }
         }
@@ -402,7 +383,7 @@ protected:
         copy, bucket_offset);
   }
 
-private:
+ private:
   static const size_t FCB = 16;
   static const size_t FCB_HIBIT = 4;
   static const size_t FCS = FCB * BUCKET_SIZE;
@@ -419,8 +400,7 @@ private:
  * - Write operations are atomic
  */
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
-class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
-    BUCKET_SIZE> {
+class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;
@@ -429,8 +409,11 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   typedef T difference_type;
   typedef T* pointer;
   typedef T reference;
-  typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> iterator;
-  typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
+  typedef monolog_exp2_linear<T, NCONTAINERS, BUCKET_SIZE> this_type;
+  typedef monolog_iterator<this_type> iterator;
+  typedef monolog_iterator<this_type> const_iterator;
+  typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> bucket_iterator;
+  typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> const_bucket_iterator;
 
   /**
    * Constructs a relaxed monolog implementation
@@ -515,6 +498,14 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
    */
   iterator end() const {
     return iterator(this, size());
+  }
+
+  iterator begin_bucket() const {
+    return bucket_iterator(this, 0);
+  }
+
+  iterator end_bucket() const {
+    return bucket_iterator(this, size() + BUCKET_SIZE - (size() % BUCKET_SIZE));
   }
 
  private:

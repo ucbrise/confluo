@@ -4,20 +4,19 @@
 #include <array>
 #include <vector>
 
+#include "../../storage/swappable_encoded_ptr.h"
 #include "atomic.h"
-#include "monolog_linear_block.h"
-#include "storage/ptr.h"
+#include "monolog_linear_bucket.h"
 #include "storage/storage.h"
 
 namespace confluo {
 namespace monolog {
 
 /**
- * Monolog linear base class. The monolog grow linearly, block-by-block, as
+ * Monolog linear base class. The monolog grow linearly, bucket-by-bucket, as
  * space runs out in previous blocks.
  */
-template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
-    size_t BUFFER_SIZE = 1048576>
+template<typename T, size_t MAX_BUCKETS = 4096, size_t BUCKET_SIZE = 268435456, size_t BUFFER_SIZE = 1048576>
 class monolog_linear_base {
  public:
   monolog_linear_base() = default;
@@ -46,12 +45,11 @@ class monolog_linear_base {
             const storage::storage_mode& storage) {
     name_ = name;
     data_path_ = data_path;
-    for (size_t i = 0; i < MAX_BLOCKS; i++) {
-      std::string block_path = data_path + "/" + name + "_" + std::to_string(i)
-          + ".dat";
-      blocks_[i].init(block_path, BLOCK_SIZE, storage);
+    for (size_t i = 0; i < MAX_BUCKETS; i++) {
+      std::string bucket_path = data_path + "/" + name + "_" + std::to_string(i) + ".dat";
+      buckets_[i].init(bucket_path, BUCKET_SIZE, storage);
     }
-    blocks_[0].ensure_alloc();
+    buckets_[0].ensure_alloc();
   }
 
   /**
@@ -78,10 +76,10 @@ class monolog_linear_base {
    * @param end_idx end index
    */
   void ensure_alloc(size_t start_idx, size_t end_idx) {
-    size_t bucket_idx1 = start_idx / BLOCK_SIZE;
-    size_t bucket_idx2 = end_idx / BLOCK_SIZE;
+    size_t bucket_idx1 = start_idx / BUCKET_SIZE;
+    size_t bucket_idx2 = end_idx / BUCKET_SIZE;
     for (size_t i = bucket_idx1; i <= bucket_idx2; i++) {
-      blocks_[i].ensure_alloc();
+      buckets_[i].ensure_alloc();
     }
   }
 
@@ -91,7 +89,7 @@ class monolog_linear_base {
    * @param val value to set
    */
   void set(size_t idx, const T& val) {
-    blocks_[idx / BLOCK_SIZE].set(idx % BLOCK_SIZE, val);
+    buckets_[idx / BUCKET_SIZE].set(idx % BUCKET_SIZE, val);
   }
 
   /**
@@ -101,7 +99,7 @@ class monolog_linear_base {
    * @param val value to set
    */
   void set_unsafe(size_t idx, const T val) {
-    blocks_[idx / BLOCK_SIZE].set_unsafe(idx % BLOCK_SIZE, val);
+    buckets_[idx / BUCKET_SIZE].set_unsafe(idx % BUCKET_SIZE, val);
   }
 
   /**
@@ -113,10 +111,10 @@ class monolog_linear_base {
   void write(size_t idx, const T* data, size_t len) {
     size_t remaining = len;
     while (remaining) {
-      size_t bucket_idx = idx / BLOCK_SIZE;
-      size_t bucket_off = idx % BLOCK_SIZE;
-      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
-      blocks_[bucket_idx].write(bucket_off, data + len - remaining, bucket_len);
+      size_t bucket_idx = idx / BUCKET_SIZE;
+      size_t bucket_off = idx % BUCKET_SIZE;
+      size_t bucket_len = std::min(BUCKET_SIZE - bucket_off, remaining);
+      buckets_[bucket_idx].write(bucket_off, data + len - remaining, bucket_len);
       idx += bucket_len;
       remaining -= bucket_len;
     }
@@ -132,12 +130,10 @@ class monolog_linear_base {
   void write_unsafe(size_t idx, const T* data, size_t len) {
     size_t remaining = len;
     while (remaining) {
-      size_t bucket_idx = idx / BLOCK_SIZE;
-      size_t bucket_off = idx % BLOCK_SIZE;
-      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
-      blocks_[bucket_idx].write_unsafe(bucket_off, data + len - remaining,
-                                       bucket_len);
-
+      size_t bucket_idx = idx / BUCKET_SIZE;
+      size_t bucket_off = idx % BUCKET_SIZE;
+      size_t bucket_len = std::min(BUCKET_SIZE - bucket_off, remaining);
+      buckets_[bucket_idx].write_unsafe(bucket_off, data + len - remaining, bucket_len);
       idx += bucket_len;
       remaining -= bucket_len;
     }
@@ -149,7 +145,7 @@ class monolog_linear_base {
    * @param len length of data to flush
    */
   void flush(size_t idx, size_t len) {
-    blocks_[idx / BLOCK_SIZE].flush(idx % BLOCK_SIZE, len);
+    buckets_[idx / BUCKET_SIZE].flush(idx % BUCKET_SIZE, len);
   }
 
   /**
@@ -158,7 +154,7 @@ class monolog_linear_base {
    * @return data
    */
   const T get(size_t idx) const {
-    return blocks_[idx / BLOCK_SIZE].at(idx % BLOCK_SIZE);
+    return buckets_[idx / BUCKET_SIZE].at(idx % BUCKET_SIZE);
   }
 
   /**
@@ -170,10 +166,10 @@ class monolog_linear_base {
   void read(size_t offset, T* data, size_t len) const {
     size_t remaining = len;
     while (remaining) {
-      size_t bucket_idx = offset / BLOCK_SIZE;
-      size_t bucket_off = offset % BLOCK_SIZE;
-      size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
-      blocks_[bucket_idx].read(bucket_off, data + len - remaining, bucket_len);
+      size_t bucket_idx = offset / BUCKET_SIZE;
+      size_t bucket_off = offset % BUCKET_SIZE;
+      size_t bucket_len = std::min(BUCKET_SIZE - bucket_off, remaining);
+      buckets_[bucket_idx].read(bucket_off, data + len - remaining, bucket_len);
       offset += bucket_len;
       remaining -= bucket_len;
     }
@@ -184,8 +180,8 @@ class monolog_linear_base {
    * @param idx monolog index
    * @param data_ptr read-only pointer to store in
    */
-  void ptr(size_t idx, storage::read_only_ptr<T>& data_ptr) {
-    blocks_[idx / BLOCK_SIZE].ptr(idx % BLOCK_SIZE, data_ptr);
+  void ptr(size_t idx, storage::read_only_encoded_ptr<T>& data_ptr) {
+    buckets_[idx / BUCKET_SIZE].ptr(idx % BUCKET_SIZE, data_ptr);
   }
 
   /**
@@ -193,8 +189,8 @@ class monolog_linear_base {
    * @param idx monolog index
    * @param data_ptr read-only pointer to store in
    */
-  void cptr(size_t idx, storage::read_only_ptr<T>& data_ptr) const {
-    blocks_[idx / BLOCK_SIZE].cptr(idx % BLOCK_SIZE, data_ptr);
+  void cptr(size_t idx, storage::read_only_encoded_ptr<T>& data_ptr) const {
+    buckets_[idx / BUCKET_SIZE].cptr(idx % BUCKET_SIZE, data_ptr);
   }
 
   /**
@@ -203,16 +199,16 @@ class monolog_linear_base {
    * @return Reference to requested data.
    */
   T& operator[](size_t idx) {
-    return blocks_[idx / BLOCK_SIZE][idx % BLOCK_SIZE];
+    return buckets_[idx / BUCKET_SIZE][idx % BUCKET_SIZE];
   }
 
   /**
-   * Swap block pointer
-   * @param block_idx index of monolog block
+   * Swap bucket pointer
+   * @param bucket_idx index of monolog bucket
    * @param ptr new pointer
    */
-  void swap_block_ptr(size_t block_idx, storage::encoded_ptr<T> ptr) {
-    blocks_[block_idx].swap_ptr(ptr);
+  void swap_bucket_ptr(size_t bucket_idx, storage::encoded_ptr<T> ptr) {
+    buckets_[bucket_idx].swap_ptr(ptr);
   }
 
   /**
@@ -221,30 +217,26 @@ class monolog_linear_base {
    * @return storage size of the monolog.
    */
   size_t storage_size() const {
-    size_t bucket_size = blocks_.size() * sizeof(monolog_block<T, BLOCK_SIZE> );
+    size_t bucket_size = buckets_.size() * sizeof(monolog_linear_bucket<T, BUCKET_SIZE>);
     size_t data_size = 0;
-    for (size_t i = 0; i < blocks_.size(); i++)
-      data_size += blocks_[i].storage_size();
+    for (size_t i = 0; i < buckets_.size(); i++)
+      data_size += buckets_[i].storage_size();
     return bucket_size + data_size;
   }
 
  protected:
   std::string name_;
   std::string data_path_;
-  std::array<monolog_block<T, BUFFER_SIZE>, MAX_BLOCKS> blocks_;
-
- private:
+  std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS> buckets_;
 
 };
 
 /**
- * Monolog linear class. The monolog grow linearly, block-by-block, as
- * space runs out in previous blocks.
+ * Monolog linear class. The monolog grows linearly, bucket-by-bucket,
+ * as space runs out in previous blocks.
  */
-template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
-    size_t BUFFER_SIZE = 1048576>
-class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
-    BUFFER_SIZE> {
+template<typename T, size_t MAX_BUCKETS = 4096, size_t BUCKET_SIZE = 268435456, size_t BUFFER_SIZE = 1048576>
+class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;
@@ -253,16 +245,17 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   typedef T difference_type;
   typedef T* pointer;
   typedef T reference;
-  typedef monolog_iterator<
-      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>> iterator;
-  typedef monolog_iterator<
-      monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>> const_iterator;
+  typedef monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE> this_type;
+  typedef monolog_iterator<this_type> iterator;
+  typedef monolog_iterator<this_type> const_iterator;
+  typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> bucket_iterator;
+  typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> const_bucket_iterator;
 
   /**
    * Default constructor.
    */
   monolog_linear()
-      : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(),
+      : monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>(),
         tail_(0UL) {
   }
 
@@ -276,9 +269,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
    */
   monolog_linear(const std::string& name, const std::string& data_path,
                  const storage::storage_mode& storage = storage::IN_MEMORY)
-      : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(name,
-                                                                    data_path,
-                                                                    storage),
+      : monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>(name, data_path, storage),
         tail_(0UL) {
   }
 
@@ -373,6 +364,14 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
    */
   iterator end() const {
     return iterator(this, size());
+  }
+
+  iterator begin_bucket() const {
+    return bucket_iterator(this, 0);
+  }
+
+  iterator end_bucket() const {
+    return bucket_iterator(this, size() + BUCKET_SIZE - (size() % BUCKET_SIZE));
   }
 
  private:
