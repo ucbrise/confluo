@@ -28,7 +28,8 @@ typedef monolog::monolog_linear<uint8_t,
                                 data_log_constants::BUFFER_SIZE> data_log;
 
 typedef storage::read_only_encoded_ptr<uint8_t> read_only_data_log_ptr;
-typedef read_only_data_log_ptr::decoded_ptr decoded_data_log_ptr;
+typedef storage::encoded_ptr<uint8_t> encoded_data_log_ptr;
+typedef storage::decoded_ptr<uint8_t> decoded_data_log_ptr;
 
 }
 

@@ -18,8 +18,6 @@ namespace storage {
 template<typename T>
 class read_only_encoded_ptr {
  public:
-  typedef typename encoded_ptr<T>::decoded_ptr decoded_ptr;
-
   read_only_encoded_ptr()
       : enc_ptr_(),
         offset_(0),
@@ -98,7 +96,7 @@ class read_only_encoded_ptr {
     enc_ptr_.encode(idx + offset_, len, data);
   }
 
-  decoded_ptr decode_ptr(size_t idx = 0) const {
+  decoded_ptr<T> decode_ptr(size_t idx = 0) const {
     return enc_ptr_.decode_ptr(idx + offset_);
   }
 

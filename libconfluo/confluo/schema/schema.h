@@ -291,8 +291,7 @@ class schema_t {
   void data_to_record_vector(std::vector<std::string>& ret,
                              const void* data) const {
     for (size_t i = 0; i < size(); i++) {
-      const void* fptr = reinterpret_cast<const uint8_t*>(data)
-          + columns_[i].offset();
+      const void* fptr = reinterpret_cast<const uint8_t*>(data) + columns_[i].offset();
       data_type ftype = columns_[i].type();
       ret.push_back(ftype.to_string_op()(immutable_raw_data(fptr, ftype.size)));
     }

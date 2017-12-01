@@ -30,11 +30,12 @@ class TimeseriesDBTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      ro_data_ptr data_ptr;
+      read_only_data_log_ptr data_ptr;
       mlog.read(offsets[i], data_ptr);
-      ASSERT_TRUE(data_ptr.get() != nullptr);
+      decoded_data_log_ptr decoded_ptr = data_ptr.decode_ptr();
+      ASSERT_TRUE(decoded_ptr.get() != nullptr);
       uint8_t expected = i % 256;
-      uint8_t* data = data_ptr.get();
+      uint8_t* data = decoded_ptr.get();
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(data[j], expected);
       }
@@ -156,25 +157,29 @@ TEST_F(TimeseriesDBTest, AppendTest) {
   size_t offset3 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
   int64_t end = r.ts;
 
-  ro_data_ptr ptr;
-  ts.read(offset, ptr);
-  uint8_t* data = ptr.get();
+  read_only_data_log_ptr data_ptr;
+  ts.read(offset, data_ptr);
+  decoded_data_log_ptr decoded_ptr = data_ptr.decode_ptr();
+  uint8_t* data = decoded_ptr.get();
   // 64 bits = 8 bytes
   int64_t calculated = get_time(data);
   ASSERT_EQ(time, calculated);
 
-  ts.read(offset1, ptr);
-  data = ptr.get();
+  ts.read(offset1, data_ptr);
+  decoded_ptr = data_ptr.decode_ptr();
+  data = decoded_ptr.get();
   calculated = get_time(data);
   ASSERT_EQ(time1, calculated);
 
-  ts.read(offset2, ptr);
-  data = ptr.get();
+  ts.read(offset2, data_ptr);
+  decoded_ptr = data_ptr.decode_ptr();
+  data = decoded_ptr.get();
   calculated = get_time(data);
   ASSERT_EQ(time2, calculated);
 
-  ts.read(offset3, ptr);
-  data = ptr.get();
+  ts.read(offset3, data_ptr);
+  decoded_ptr = data_ptr.decode_ptr();
+  data = decoded_ptr.get();
   calculated = get_time(data);
   ASSERT_EQ(end, calculated);
 }

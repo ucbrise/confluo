@@ -38,8 +38,7 @@ class aggregated_reflog : public reflog {
    */
   aggregated_reflog(const aggregate_log& aggregates)
       : reflog(),
-        num_aggregates_(aggregates.size()),
-        aggregates_(new aggregate[aggregates.size()]) {
+        num_aggregates_(aggregates.size()) {
     aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(sizeof(aggregate) * num_aggregates_));
     for (size_t i = 0; i < num_aggregates_; i++)
       aggs[i] = aggregates.at(i)->create_aggregate();

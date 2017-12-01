@@ -404,9 +404,10 @@ class atomic_multilog {
    * @return Return the corresponding record.
    */
   std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
-    ro_data_ptr rptr;
+    read_only_data_log_ptr rptr;
     read(offset, version, rptr);
-    return schema_.data_to_record_vector(rptr.get());
+    decoded_data_log_ptr dec_ptr = rptr.decode_ptr();
+    return schema_.data_to_record_vector(dec_ptr.get());
   }
 
   /**

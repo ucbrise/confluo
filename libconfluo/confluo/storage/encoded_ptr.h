@@ -6,12 +6,15 @@
 namespace confluo {
 namespace storage {
 
+// TODO may need to inherit from unique_ptr so we can provide a default
+//  constructor in order to make things cleaner for the caller.
+template <typename T>
+using decoded_ptr = typename std::unique_ptr<T, void (*)(T*)>;
+
 // TODO split into interface and 2 implementations, one for in-memory and one for archived representations.
 template<typename T>
 class encoded_ptr {
  public:
-  typedef std::unique_ptr<T, void (*)(T*)> decoded_ptr;
-
   encoded_ptr(void* ptr = nullptr, size_t offset = 0)
       : ptr_(ptr) {
   }
@@ -49,9 +52,9 @@ class encoded_ptr {
     memcpy(buffer, &static_cast<T*>(ptr_)[idx], sizeof(T) * len);
   }
 
-  decoded_ptr decode_ptr(size_t idx = 0) const {
+  decoded_ptr<T> decode_ptr(size_t idx = 0) const {
     T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + idx;
-    return decoded_ptr(ptr, no_op_delete);
+    return decoded_ptr<T>(ptr, no_op_delete);
   }
 
  private:

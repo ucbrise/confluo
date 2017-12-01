@@ -220,20 +220,23 @@ TEST_F(StreamTest, BufferTest) {
   client.buffer(make_simple_record(ts, "ghi"));
   client.flush();
 
-  ro_data_ptr ptr;
+  read_only_data_log_ptr ptr;
 
   dtable->read(0, ptr);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()),
+  decoded_data_log_ptr decoded = ptr.decode_ptr();
+  std::string buf = std::string(reinterpret_cast<const char*>(decoded.get()),
   DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
   dtable->read(schema_size, ptr);
-  std::string buf2 = std::string(reinterpret_cast<const char*>(ptr.get()),
+  decoded = ptr.decode_ptr();
+  std::string buf2 = std::string(reinterpret_cast<const char*>(decoded.get()),
   DATA_SIZE);
   ASSERT_EQ(buf2.substr(8, 3), "def");
 
   dtable->read(schema_size * 2, ptr);
-  std::string buf3 = std::string(reinterpret_cast<const char*>(ptr.get()),
+  decoded = ptr.decode_ptr();
+  std::string buf3 = std::string(reinterpret_cast<const char*>(decoded.get()),
   DATA_SIZE);
   ASSERT_EQ(buf3.substr(8, 3), "ghi");
 

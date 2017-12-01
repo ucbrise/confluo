@@ -13,10 +13,10 @@ using namespace ::confluo::storage;
 
 class archival_utils {
  public:
-  typedef storage::read_only_encoded_ptr<uint64_t> bucket_ptr_t;
-  typedef bucket_ptr_t::decoded_ptr decoded_ptr_t;
+  typedef storage::read_only_encoded_ptr<uint64_t> reflog_bucket_ptr_t;
+  typedef storage::decoded_ptr<uint64_t> decoded_reflog_ptr_t;
+  typedef encoded_ptr<uint64_t> encoded_reflog_ptr_t;
   typedef encoder::raw_encoded_ptr raw_encoded_ptr_t;
-  typedef encoded_ptr<uint64_t> encoded_ptr_t;
 
   /**
    * Archive buckets of a monolog_linear until a given offset.
@@ -62,13 +62,13 @@ class archival_utils {
   template<encoding_type ENCODING>
   static size_t archive_reflog(reflog& reflog, incremental_file_writer& writer, size_t start,
                                size_t data_log_stop) {
-    bucket_ptr_t bucket_ptr;
+    reflog_bucket_ptr_t bucket_ptr;
     size_t archival_tail = start;
     size_t data_log_archival_tail = 0;
     // TODO replace w/ iterator
     while (data_log_archival_tail < data_log_stop && archival_tail < reflog.size()) {
       reflog.ptr(archival_tail, bucket_ptr);
-      decoded_ptr_t decoded_ptr = bucket_ptr.decode_ptr();
+      decoded_reflog_ptr_t decoded_ptr = bucket_ptr.decode_ptr();
       auto* metadata = ptr_metadata::get(bucket_ptr.get().ptr());
       uint64_t* data = decoded_ptr.get();
 
@@ -89,7 +89,7 @@ class archival_utils {
       writer.flush();
 
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), encoded_size, state_type::D_ARCHIVED);
-      reflog.swap_bucket_ptr(archival_tail, encoded_ptr_t(encoded_bucket));
+      reflog.swap_bucket_ptr(archival_tail, encoded_reflog_ptr_t(encoded_bucket));
       archival_tail += reflog_constants::BUCKET_SIZE;
     }
     return archival_tail;
