@@ -3,7 +3,7 @@
 In this quickstart, we will download and setup Confluo,
 load some sample data and query the data.
 
-# Pre-requisites
+## Pre-requisites
 
 * MacOS X or Unix-based OS; Windows is not yet supported.
 * C++ compiler that supports C++11 standard
@@ -18,7 +18,7 @@ For java client, you will additionally require:
 * Java 1.7 or later
 * ant 1.6.2 or later
 
-# Download and Install
+## Download and Install
 
 To download and install Confluo, use the following commands:
 
@@ -31,7 +31,7 @@ cmake ..
 make -j && make test && make install
 ```
 
-# Using Confluo
+## Using Confluo
 
 Confluo can be used in two modes -- embedded and stand-alone. In the embedded mode,
 Confluo is used as a header-only library in C++, allowing Confluo to use the same
@@ -39,7 +39,7 @@ address-space as the application process. In the stand-alone mode, Confluo runs
 as a daemon server process, allowing clients to communicate with it using 
 [Apache Thrift](https://thrift.apache.org) protocol.
 
-## Embedded Mode
+### Embedded Mode
 
 In order to use Confluo in the embedded mode, you simply need to include
 Confluo's header files under libconfluo/confluo, use the Confluo C++ API in 
@@ -190,7 +190,7 @@ See [`confluo_store.h`](https://github.com/ucbrise/confluo/blob/single-machine/l
 and [`atomic_multilog.h`](https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/atomic_multilog.h)
 to see all the APIs described here, along with variations and other caveats.
 
-## Stand-alone Mode
+### Stand-alone Mode
 
 In the stand-alone mode, Confluo runs as a daemon server, serving client requests
 using Apache Thrift protocol. To start the server, run:

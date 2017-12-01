@@ -1,0 +1,83 @@
+site_name: Confluo
+docs_dir: @CMAKE_CURRENT_SOURCE_DIR@/src
+site_dir: @CMAKE_CURRENT_BINARY_DIR@/site
+repo_url: https://github.com/ucbrise/confluo/
+markdown_extensions:
+  - admonition
+  - codehilite
+pages:
+  - Overview: index.md
+  - User Guide:
+    - Quick Start: quick_start.md
+    - Installation: install.md
+    - Modes of Operation: modes_of_operation.md
+    - Loading Data: 
+      - Overview: loading_data.md
+      - Schema: schema.md
+      - Type System: type_system.md
+    - Querying Data:
+      - Overview: queries.md
+      - Online Queries: online_queries.md
+      - Offline Queries: offline_queries.md
+    - Archiving Data: data_archival.md
+  - API Docs:
+    - C++: cpp_api.md
+    - Client APIs:
+      - Overview: client_api.md
+      - C++: cpp_client_api.md
+      - Python: python_client_api.md
+      - Java: java_client_api.md
+theme:
+  name: null
+  custom_dir: @CMAKE_CURRENT_SOURCE_DIR@/material-theme
+  
+  # Language for theme localization
+  language: en
+
+  # Feature flags for functionality that alters behavior significantly, and thus
+  # may be a matter of taste
+  feature:
+
+    # Another layer on top of the main navigation for larger screens in the form
+    # of tabs, especially useful for larger documentation projects
+    tabs: false
+
+  # Sets the primary and accent color palettes as defined in the Material Design
+  # documentation - possible values can be looked up in the getting started guide
+  palette:
+
+    # Primary color used for header, sidebar and links, default: indigo
+    primary: blue
+
+    # Accent color for highlighting user interaction, default: indigo
+    accent: red
+
+  # Fonts used by Material, automatically loaded from Google Fonts - see the site
+  # for a list of available fonts
+  font:
+
+    # Default font for text
+    text: Roboto
+
+    # Fixed-width font for code listings
+    code: Roboto Mono
+
+  # Favicon to be rendered
+  favicon: theme/assets/images/favicon.png
+
+  # The logo of the documentation shown in the header and navigation can either
+  # be a Material Icon ligature or an image URL
+  logo:
+    icon: "\uE80C"
+
+  # Material includes the search in the header as a partial, not as a separate
+  # template, so it's correct that search.html is missing
+  include_search_page: false
+
+  # Material doesn't use MkDocs search functionality but provides its own. For
+  # this reason, only the search index needs to be built
+  search_index_only: true
+
+  # Static pages to build
+  static_templates:
+    - 404.html
