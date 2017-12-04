@@ -42,7 +42,7 @@ requirements; the supported options are:
 * `BUILD_TESTS`: Builds all tests (ON by default)
 * `BUILD_RPC`: Builds the rpc daemon and client libraries (ON by default)
 * `BUILD_EXAMPLES`: Builds Confluo examples (ON by default)
-* `BUILD_DOCS`: Builds Confluo documentation (ON by default)
+* `BUILD_DOC`: Builds Confluo documentation (OFF by default)
 * `WITH_PY_CLIENT`: Builds Confluo python rpc client (ON by default)
 * `WITH_JAVA_CLIENT`: Builds Confluo java rpc client (ON by default)
 

@@ -43,7 +43,7 @@ as a daemon server process, allowing clients to communicate with it using
 
 ### Embedded Mode
 
-In order to use Confluo in the embedded mode, you simply need to include
+In order to use Confluo in the embedded mode, we simply need to include
 Confluo's header files under libconfluo/confluo, use the Confluo C++ API in 
 a C++ application, and compile using a modern C++ compiler. The entry point 
 header file to include is `confluo_store.h`. 

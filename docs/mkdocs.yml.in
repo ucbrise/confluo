@@ -15,12 +15,11 @@ pages:
     - Quick Start: quick_start.md
     - Installation: install.md
     - Modes of Operation: modes_of_operation.md
-    - Loading Data: 
-      - Overview: loading_data.md
-      - Schema: schema.md
+    - Data Storage and Loading: 
+      - Data Storage Overview: loading_data.md
       - Type System: type_system.md
     - Querying Data:
-      - Overview: queries.md
+      - Queries Overview: queries.md
       - Online Queries: online_queries.md
       - Offline Queries: offline_queries.md
     - Archiving Data: data_archival.md
@@ -51,10 +50,10 @@ theme:
   palette:
 
     # Primary color used for header, sidebar and links, default: indigo
-    primary: blue
+    primary: light green
 
     # Accent color for highlighting user interaction, default: indigo
-    accent: red
+    accent: orange
 
   # Fonts used by Material, automatically loaded from Google Fonts - see the site
   # for a list of available fonts
@@ -72,7 +71,7 @@ theme:
   # The logo of the documentation shown in the header and navigation can either
   # be a Material Icon ligature or an image URL
   logo:
-    icon: "\uE80C"
+    icon: "\uE0B3"
 
   # Material includes the search in the header as a partial, not as a separate
   # template, so it's correct that search.html is missing
