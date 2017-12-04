@@ -1,7 +1,7 @@
 # Quick Start
 
-In this quickstart, we will download and setup Confluo,
-load some sample data and query the data.
+In this Quick Start, we will take a look at how to download and setup Confluo,
+load some sample data, and query it.
 
 ## Pre-requisites
 
@@ -11,10 +11,12 @@ load some sample data and query the data.
 * Boost 1.53 or later
 
 For python client, you will additionally require:
+
 * Python 2.7 or later
 * Python Packages: six 1.7.2 or later
 
 For java client, you will additionally require:
+
 * Java 1.7 or later
 * ant 1.6.2 or later
 
@@ -57,8 +59,9 @@ We then create a new Atomic MultiLog within the Store (synonymous to a database
 table); this requires three parameters: name, schema, and the storage mode:
 
 ```cpp
-store.create_atomic_multilog("my_multilog", "{ type: CHAR, msg: STRING(100) }", 
-    confluo::storage::storage_id::D_IN_MEMORY);
+std::string schema("{ type: CHAR, msg: STRING(100) }");
+auto storage_mode = confluo::storage::IN_MEMORY;
+store.create_atomic_multilog("my_multilog", schema, storage_mode);
 ```
 
 Our simple schema only contains two attributes: a character type attribute, and 
@@ -164,7 +167,7 @@ operation also returns a lazily evaluated record stream.
 
 We query aggregates as follows:
 ```cpp
-auto value = mlog->query_aggregate("latest_a", 0, UINT64_MAX);
+auto value = mlog->get_aggregate("latest_a", 0, UINT64_MAX);
 std::cout << value.to_string();
 ```
 
@@ -176,15 +179,15 @@ which is a wrapper around numeric values.
 Finally, we can query the generated alerts by triggers we have installed as 
 follows:
 ```cpp
-auto alert_stream = mlog->get_alerts("trigger_a", 0, UINT64_MAX);
+auto alert_stream = mlog->get_alerts(0, UINT64_MAX, "trigger_a");
 for (auto s = alert_stream; !s.empty(); s = s.tail()) {
   std::cout << s.head().to_string();
 }
 ```
 
-The query takes a trigger name as its first argument, and begin and end timestamps as its
-second and third arguments respectively. The query returns a lazy stream over 
-generated alerts for this trigger in the specified time-range.
+The query takes and begin and end timestamps as its first and second arguments,
+and an optional trigger name as its third argument. The query returns a lazy 
+stream over generated alerts for this trigger in the specified time-range.
 
 See [`confluo_store.h`](https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/conflu_store.h)
 and [`atomic_multilog.h`](https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/atomic_multilog.h)

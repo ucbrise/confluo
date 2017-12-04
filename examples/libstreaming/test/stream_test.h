@@ -87,7 +87,7 @@ class StreamTest : public testing::Test {
   }
 
   static confluo_store* simple_table_store(const std::string& multilog_name,
-                                           storage::storage_id id) {
+                                           storage::storage_mode id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         multilog_name,
@@ -151,7 +151,7 @@ std::vector<column_t> StreamTest::s = schema();
 TEST_F(StreamTest, WriteTest) {
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto dtable = store->get_atomic_multilog(multilog_name);
 
   dtable->add_index("a");
@@ -200,7 +200,7 @@ TEST_F(StreamTest, BufferTest) {
 
   std::string multilog_name = "my_multilog";
 
-  auto store = simple_table_store(multilog_name, storage::D_IN_MEMORY);
+  auto store = simple_table_store(multilog_name, storage::IN_MEMORY);
   auto dtable = store->get_atomic_multilog(multilog_name);
   auto schema_size = dtable->get_schema().record_size();
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -247,7 +247,7 @@ TEST_F(StreamTest, BufferTest) {
 TEST_F(StreamTest, ReadTest) {
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto dtable = store->get_atomic_multilog(multilog_name);
 
   dtable->add_index("a");
@@ -295,7 +295,7 @@ TEST_F(StreamTest, ReadTest) {
 TEST_F(StreamTest, ReadWriteTest) {
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto dtable = store->get_atomic_multilog(multilog_name);
 
   dtable->add_index("a");

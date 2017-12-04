@@ -85,7 +85,7 @@ class rpc_client:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_aggregate(self.cur_multilog_id_, aggregate_name)
 
-    def add_trigger(self, trigger_name, trigger_expr):
+    def install_trigger(self, trigger_name, trigger_expr):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         self.client_.add_trigger(self.cur_multilog_id_, trigger_name, trigger_expr)
@@ -128,40 +128,36 @@ class rpc_client:
         stop = start + self.cur_schema_.record_size_ 
         return self.read_buf[start : stop]
     
-    def query_aggregate(self, aggregate_name, begin_ms, end_ms):
+    def get_aggregate(self, aggregate_name, begin_ms, end_ms):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         return self.client_.query_aggregate(self.cur_multilog_id_, aggregate_name, begin_ms, end_ms)
 
-    def adhoc_filter(self, filter_expr):
+    def execute_filter(self, filter_expr):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         handle = self.client_.adhoc_filter(self.cur_multilog_id_, filter_expr)
         return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
 
-    def predef_filter(self, filter_name, begin_ms, end_ms):
+    def query_filter(self, filter_name, begin_ms, end_ms, filter_expr = ""):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
-        handle = self.client_.predef_filter(self.cur_multilog_id_, filter_name, begin_ms, end_ms)
-        return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+        if filter_expr == "":
+            handle = self.client_.predef_filter(self.cur_multilog_id_, filter_name, begin_ms, end_ms)
+            return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+        else:
+            handle = self.client_.combined_filter(self.cur_multilog_id_, filter_name, filter_expr, begin_ms, end_ms)
+            return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
 
-    def combined_filter(self, filter_name, filter_expr, begin_ms, end_ms):
+    def get_alerts(self, begin_ms, end_ms, trigger_name = ""):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
-        handle = self.client_.combined_filter(self.cur_multilog_id_, filter_name, filter_expr, begin_ms, end_ms)
-        return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
-
-    def get_alerts(self, begin_ms, end_ms):
-        if self.cur_multilog_id_ == -1:
-            raise ValueError("Must set atomic multilog first.")
-        handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, begin_ms, end_ms)
-        return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
-    
-    def get_alerts(self, trigger_name, begin_ms, end_ms):
-        if self.cur_multilog_id_ == -1:
-            raise ValueError("Must set atomic multilog first.")
-        handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, trigger_name, begin_ms, end_ms)
-        return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+        if trigger_name == "":
+            handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, begin_ms, end_ms)
+            return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+        else:
+            handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, trigger_name, begin_ms, end_ms)
+            return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
 
     def num_records(self):
         if self.cur_multilog_id_ == -1:

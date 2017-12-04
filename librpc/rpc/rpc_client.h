@@ -64,7 +64,7 @@ class rpc_client {
   }
 
   void create_atomic_multilog(const std::string& name, const schema_t& schema,
-      const storage::storage_id mode) {
+      const storage::storage_mode mode) {
     cur_schema_ = schema;
     cur_multilog_id_ = client_->create_atomic_multilog(name,
         rpc_type_conversions::convert_schema(schema.columns()),
@@ -132,7 +132,7 @@ class rpc_client {
     client_->remove_aggregate(cur_multilog_id_, aggregate_name);
   }
 
-  void add_trigger(const std::string& trigger_name,
+  void install_trigger(const std::string& trigger_name,
       const std::string& trigger_expr) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -216,7 +216,7 @@ class rpc_client {
     }
   }
 
-  void query_aggregate(std::string& _return, const std::string& aggregate_name,
+  void get_aggregate(std::string& _return, const std::string& aggregate_name,
       int64_t begin_ms, int64_t end_ms) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -225,7 +225,7 @@ class rpc_client {
         begin_ms, end_ms);
   }
 
-  rpc_record_stream adhoc_filter(const std::string& filter_expr) {
+  rpc_record_stream execute_filter(const std::string& filter_expr) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
     }
@@ -234,7 +234,7 @@ class rpc_client {
     return rpc_record_stream(cur_multilog_id_, cur_schema_, client_, std::move(handle));
   }
 
-  rpc_record_stream predef_filter(const std::string& filter_name,
+  rpc_record_stream query_filter(const std::string& filter_name,
       const int64_t begin_ms,
       const int64_t end_ms) {
     if (cur_multilog_id_ == -1) {
@@ -245,15 +245,14 @@ class rpc_client {
     return rpc_record_stream(cur_multilog_id_, cur_schema_, client_, std::move(handle));
   }
 
-  rpc_record_stream combined_filter(const std::string& filter_name,
-      const std::string& filter_expr,
+  rpc_record_stream query_filter(const std::string& filter_name,
       const int64_t begin_ms,
-      const int64_t end_ms) {
+      const int64_t end_ms, const std::string& additional_filter_expr) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
     }
     rpc_iterator_handle handle;
-    client_->combined_filter(handle, cur_multilog_id_, filter_name, filter_expr, begin_ms,
+    client_->combined_filter(handle, cur_multilog_id_, filter_name, additional_filter_expr, begin_ms,
         end_ms);
     return rpc_record_stream(cur_multilog_id_, cur_schema_, client_, std::move(handle));
   }
@@ -267,7 +266,7 @@ class rpc_client {
     return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
   }
 
-  rpc_alert_stream get_alerts(const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) {
+  rpc_alert_stream get_alerts(const int64_t begin_ms, const int64_t end_ms, const std::string& trigger_name) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
     }

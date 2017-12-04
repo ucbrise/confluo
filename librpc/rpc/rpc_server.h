@@ -174,7 +174,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void add_trigger(int64_t id, const std::string& trigger_name,
       const std::string& trigger_expr) {
     try {
-      store_->get_atomic_multilog(id)->add_trigger(trigger_name,
+      store_->get_atomic_multilog(id)->install_trigger(trigger_name,
           trigger_expr);
     } catch(management_exception& ex) {
       rpc_management_exception e;
@@ -224,7 +224,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const int64_t begin_ms,
       const int64_t end_ms) {
     atomic_multilog* m = store_->get_atomic_multilog(id);
-    _return = m->query_aggregate(aggregate_name, begin_ms, end_ms).to_string();
+    _return = m->get_aggregate(aggregate_name, begin_ms, end_ms).to_string();
   }
 
   void adhoc_filter(rpc_iterator_handle& _return,int64_t id,
@@ -275,7 +275,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     rpc_iterator_id it_id = new_iterator_id();
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     try {
-      auto res = mlog->query_filter(filter_name, filter_expr, begin_ms, end_ms);
+      auto res = mlog->query_filter(filter_name, begin_ms, end_ms, filter_expr);
       auto ret = combined_.insert(std::make_pair(it_id, res));
       success = ret.second;
     } catch (parse_exception& ex) {
@@ -310,7 +310,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const std::string& trigger_name, const int64_t begin_ms,
       const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    auto alerts = store_->get_atomic_multilog(id)->get_alerts(trigger_name, begin_ms, end_ms);
+    auto alerts = store_->get_atomic_multilog(id)->get_alerts(begin_ms, end_ms, trigger_name);
     auto ret = alerts_.insert(std::make_pair(it_id, alerts));
     if (!ret.second) {
       rpc_invalid_operation e;

@@ -123,14 +123,14 @@ task_pool ConfluoStoreTest::MGMT_POOL;
 TEST_F(ConfluoStoreTest, AddTableTest) {
   confluo_store store("/tmp");
   int64_t id = store.create_atomic_multilog("my_table", s,
-                                            storage::storage_id::D_IN_MEMORY);
+                                            storage::storage_mode::IN_MEMORY);
   ASSERT_EQ(id, store.get_atomic_multilog_id("my_table"));
 }
 
 TEST_F(ConfluoStoreTest, RemoveTableTest) {
   confluo_store store("/tmp");
   int64_t id = store.create_atomic_multilog("my_table", s,
-                                            storage::storage_id::D_IN_MEMORY);
+                                            storage::storage_mode::IN_MEMORY);
   ASSERT_NE(-1, store.remove_atomic_multilog(id));
   try {
     store.remove_atomic_multilog("my_table");

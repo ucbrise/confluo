@@ -26,7 +26,7 @@ class monolog_block {
         state_(UNINIT),
         data_(),
         size_(0),
-        storage_(storage::IN_MEMORY) {
+        mode_(storage::IN_MEMORY) {
   }
 
   monolog_block(const std::string& path, size_t size,
@@ -35,24 +35,24 @@ class monolog_block {
         state_(UNINIT),
         data_(nullptr),
         size_(size),
-        storage_(storage) {
+        mode_(storage) {
   }
 
   monolog_block(const monolog_block<T, BUFFER_SIZE>& other)
       : path_(other.path_),
         state_(other.state_),
         size_(other.size_),
-        storage_(other.storage_) {
+        mode_(other.mode_) {
     __atomic_block_copy_ref copy;
     other.data_.atomic_copy(copy);
     data_.atomic_init(copy.ptr_);
   }
 
   void init(const std::string& path, const size_t size,
-            const storage::storage_mode& storage) {
+            const storage::storage_mode& mode) {
     path_ = path;
     size_ = size;
-    storage_ = storage;
+    mode_ = mode;
   }
 
   size_t storage_size() const {
@@ -64,7 +64,7 @@ class monolog_block {
   void flush(size_t offset, size_t len) {
     __atomic_block_copy_ref copy;
     data_.atomic_copy(copy);
-    storage_.flush(copy.get() + offset, len * sizeof(T));
+    storage::STORAGE_FNS[mode_].flush(copy.get() + offset, len * sizeof(T));
   }
 
   /**
@@ -174,7 +174,7 @@ private:
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      T* ptr = storage_.allocate_block(path_, file_size);
+      T* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
       data_.atomic_init(ptr);
       data_.atomic_copy(copy);
@@ -192,7 +192,7 @@ private:
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      T* ptr = storage_.allocate_block(path_, file_size);
+      T* ptr = storage::STORAGE_FNS[mode_].allocate_block(path_, file_size);
       memset(ptr, '\0', sizeof(T) * file_size);
       data_.atomic_init(ptr);
       return ptr;
@@ -209,7 +209,7 @@ private:
   atomic::type<block_state> state_;
   __atomic_block_ref data_;
   size_t size_;
-  storage::storage_mode storage_;
+  storage::storage_mode mode_;
 };
 
 template<typename T, size_t BUFFER_SIZE>

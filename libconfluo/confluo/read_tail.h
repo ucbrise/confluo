@@ -13,18 +13,16 @@ class read_tail {
  public:
   read_tail() {
     read_tail_ = nullptr;
-    storage_ = storage::IN_MEMORY;
+    mode_ = storage::IN_MEMORY;
   }
 
-  read_tail(const std::string& data_path,
-            const storage::storage_mode& storage) {
-    init(data_path, storage);
+  read_tail(const std::string& data_path, const storage::storage_mode& mode) {
+    init(data_path, mode);
   }
 
-  void init(const std::string& data_path,
-            const storage::storage_mode& storage) {
-    storage_ = storage;
-    read_tail_ = (atomic::type<uint64_t>*) storage_.allocate(
+  void init(const std::string& data_path, const storage::storage_mode& mode) {
+    mode_ = mode;
+    read_tail_ = (atomic::type<uint64_t>*) storage::STORAGE_FNS[mode_].allocate(
         data_path + "/read_tail", sizeof(uint64_t));
     atomic::store(read_tail_, UINT64_C(0));
   }
@@ -39,12 +37,12 @@ class read_tail {
       expected = old_tail;
       std::this_thread::yield();
     }
-    storage_.flush(read_tail_, sizeof(uint64_t));
+    storage::STORAGE_FNS[mode_].flush(read_tail_, sizeof(uint64_t));
   }
 
  private:
   atomic::type<uint64_t>* read_tail_;
-  storage::storage_mode storage_;
+  storage::storage_mode mode_;
 };
 
 }
