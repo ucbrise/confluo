@@ -5,6 +5,10 @@ repo_url: https://github.com/ucbrise/confluo/
 markdown_extensions:
   - admonition
   - codehilite
+  - meta
+  - footnotes
+  - toc:
+      permalink: true
 pages:
   - Overview: index.md
   - User Guide:
