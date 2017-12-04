@@ -54,7 +54,6 @@ class test_rpc_client(unittest.TestCase):
             multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
             client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
         except:
-            client.disconnect()
             self.stop_server()
             raise
 
@@ -72,9 +71,8 @@ class test_rpc_client(unittest.TestCase):
 
             client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
             buf = client.read(0)
-            assert buf[8:] == "abcdefgh"
+            self.assertTrue(buf[8:] == "abcdefgh")
         except:
-            client.disconnect()
             self.stop_server()
             raise
         
@@ -92,9 +90,8 @@ class test_rpc_client(unittest.TestCase):
 
             client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
             buf = client.read(0)
-            assert buf[8:] == "abcdefgh"
+            self.assertTrue(buf[8:] == "abcdefgh")
         except:
-            client.disconnect()
             self.stop_server()
             raise
         
@@ -112,44 +109,15 @@ class test_rpc_client(unittest.TestCase):
 
             client.write(struct.pack("l", self.now_ns()) + "abcdefgh")
             buf = client.read(0)
-            assert buf[8:] == "abcdefgh"
+            self.assertTrue(buf[8:] == "abcdefgh")
         except:
-            client.disconnect()
             self.stop_server()
             raise
         
         client.disconnect()
         self.stop_server()
 
-    def test_read_buffer(self):
-        self.start_server()
-        client = rpc_client.rpc_client("127.0.0.1", 9090) 
-
-        try:
-            builder = schema_builder() 
-            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
-
-            client.buffer(struct.pack("l", self.now_ns()) + "abcdefgh")
-            client.buffer(struct.pack("l", self.now_ns()) + "ijklmnop")
-            client.buffer(struct.pack("l", self.now_ns()) + "qrstuvwx")
-            client.flush()
-
-            buf = client.read(0)
-            assert buf[8:] == "abcdefgh"
-            buf = client.read(multilog_schema.record_size_)
-            assert buf[8:] == "ijklmnop"
-            buf = client.read(multilog_schema.record_size_ * 2)
-            assert buf[8:] == "qrstuvwx"
-        except:
-            client.disconnect()
-            self.stop_server()
-            raise
-        
-        client.disconnect()
-        self.stop_server()
-
-    def test_adhoc_filter(self):
+    def test_execute_filter(self):
 
         self.start_server()
         client = rpc_client.rpc_client("127.0.0.1", 9090) 
@@ -177,82 +145,81 @@ class test_rpc_client(unittest.TestCase):
             client.write(self.pack_record(True, "7", 70, 14, 1000000, 0.7, 0.08, "zzz"))
 
             i = 0
-            for record in client.adhoc_filter("a == true"):
-                assert record.at(1).unpack() == True
+            for record in client.execute_filter("a == true"):
+                self.assertTrue(record.at(1).unpack() == True)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
 
             i = 0
-            for record in client.adhoc_filter("b > 4"):
-                assert record.at(2).unpack() > 4
+            for record in client.execute_filter("b > 4"):
+                self.assertTrue(record.at(2).unpack() > 4)
                 i += 1
-            assert i == 3
+            self.assertTrue(i == 3)
 
             i = 0
-            for record in client.adhoc_filter("c <= 30"):
-                assert record.at(3).unpack() <= 30
+            for record in client.execute_filter("c <= 30"):
+                self.assertTrue(record.at(3).unpack() <= 30)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
             
             i = 0
-            for record in client.adhoc_filter("d == 0"):
-                assert record.at(4).unpack() == 0
+            for record in client.execute_filter("d == 0"):
+                self.assertTrue(record.at(4).unpack() == 0)
                 i += 1
-            assert i == 1
+            self.assertTrue(i == 1)
             
             i = 0
-            for record in client.adhoc_filter("e <= 100"):
-                assert record.at(5).unpack() <= 100
+            for record in client.execute_filter("e <= 100"):
+                self.assertTrue(record.at(5).unpack() <= 100)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
 
             i = 0
-            for record in client.adhoc_filter("f > 0.1"):
-                assert record.at(6).unpack() > 0.1
+            for record in client.execute_filter("f > 0.1"):
+                self.assertTrue(record.at(6).unpack() > 0.1)
                 i += 1
-            assert i == 6
+            self.assertTrue(i == 6)
 
             i = 0
-            for record in client.adhoc_filter("g < 0.06"):
-                assert record.at(7).unpack() < 0.06
+            for record in client.execute_filter("g < 0.06"):
+                self.assertTrue(record.at(7).unpack() < 0.06)
                 i += 1
-            assert i == 5
+            self.assertTrue(i == 5)
 
             i = 0
-            for record in client.adhoc_filter("h == zzz"):
-                assert record.at(8).unpack()[:3] == "zzz"
+            for record in client.execute_filter("h == zzz"):
+                self.assertTrue(record.at(8).unpack()[:3] == "zzz")
                 i += 1
-            assert i == 2
+            self.assertTrue(i == 2)
 
             i = 0
-            for record in client.adhoc_filter("a == true && b > 4"):
-                assert record.at(1).unpack() == True
-                assert record.at(2).unpack() > 4
+            for record in client.execute_filter("a == true && b > 4"):
+                self.assertTrue(record.at(1).unpack() == True)
+                self.assertTrue(record.at(2).unpack() > 4)
                 i += 1
-            assert i == 2
+            self.assertTrue(i == 2)
 
             i = 0
-            for record in client.adhoc_filter("a == true && (b > 4 || c <= 30)"):
-                assert record.at(1).unpack() == True
-                assert record.at(2).unpack() > 4 or record.at(3).unpack() <= 30
+            for record in client.execute_filter("a == true && (b > 4 || c <= 30)"):
+                self.assertTrue(record.at(1).unpack() == True)
+                self.assertTrue(record.at(2).unpack() > 4 or record.at(3).unpack() <= 30)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
             
             i = 0
-            for record in client.adhoc_filter("a == true && (b > 4 || f > 0.1)"):
-                assert record.at(1).unpack() == True
-                assert record.at(2).unpack() > 4 or record.at(6).unpack() > 0.1
+            for record in client.execute_filter("a == true && (b > 4 || f > 0.1)"):
+                self.assertTrue(record.at(1).unpack() == True)
+                self.assertTrue(record.at(2).unpack() > 4 or record.at(6).unpack() > 0.1)
                 i += 1
-            assert i == 3
+            self.assertTrue(i == 3)
         except:
-            client.disconnect()
             self.stop_server()
             raise
 
         client.disconnect()
         self.stop_server()
 
-    def test_predef_filter(self):
+    def test_query_filter(self):
 
         self.start_server()
         client = rpc_client.rpc_client("127.0.0.1", 9090) 
@@ -277,14 +244,14 @@ class test_rpc_client(unittest.TestCase):
             client.add_aggregate("agg6", "filter6", "SUM(d)")
             client.add_aggregate("agg7", "filter7", "SUM(d)")
             client.add_aggregate("agg8", "filter8", "SUM(d)")
-            client.add_trigger("trigger1", "agg1 >= 10")
-            client.add_trigger("trigger2", "agg2 >= 10")
-            client.add_trigger("trigger3", "agg3 >= 10")
-            client.add_trigger("trigger4", "agg4 >= 10")
-            client.add_trigger("trigger5", "agg5 >= 10")
-            client.add_trigger("trigger6", "agg6 >= 10")
-            client.add_trigger("trigger7", "agg7 >= 10")
-            client.add_trigger("trigger8", "agg8 >= 10")
+            client.install_trigger("trigger1", "agg1 >= 10")
+            client.install_trigger("trigger2", "agg2 >= 10")
+            client.install_trigger("trigger3", "agg3 >= 10")
+            client.install_trigger("trigger4", "agg4 >= 10")
+            client.install_trigger("trigger5", "agg5 >= 10")
+            client.install_trigger("trigger6", "agg6 >= 10")
+            client.install_trigger("trigger7", "agg7 >= 10")
+            client.install_trigger("trigger8", "agg8 >= 10")
 
             now = self.now_ns()
             beg_ms = self.time_block(now)
@@ -299,93 +266,92 @@ class test_rpc_client(unittest.TestCase):
             client.write(self.pack_record_time(now, True, "7", 70, 14, 1000000, 0.7, 0.08, "zzz"))
 
             i = 0
-            for record in client.predef_filter("filter1", beg_ms, end_ms):
-                assert record.at(1).unpack() == True
+            for record in client.query_filter("filter1", beg_ms, end_ms):
+                self.assertTrue(record.at(1).unpack() == True)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
 
             i = 0
-            for record in client.predef_filter("filter2", beg_ms, end_ms):
-                assert record.at(2).unpack() > 4
+            for record in client.query_filter("filter2", beg_ms, end_ms):
+                self.assertTrue(record.at(2).unpack() > 4)
                 i += 1
-            assert i == 3
+            self.assertTrue(i == 3)
 
             i = 0
-            for record in client.predef_filter("filter3", beg_ms, end_ms):
-                assert record.at(3).unpack() <= 30
+            for record in client.query_filter("filter3", beg_ms, end_ms):
+                self.assertTrue(record.at(3).unpack() <= 30)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
 
             i = 0
-            for record in client.predef_filter("filter4", beg_ms, end_ms):
-                assert record.at(4).unpack() == 0
+            for record in client.query_filter("filter4", beg_ms, end_ms):
+                self.assertTrue(record.at(4).unpack() == 0)
                 i += 1
-            assert i == 1
+            self.assertTrue(i == 1)
 
             i = 0
-            for record in client.predef_filter("filter5", beg_ms, end_ms):
-                assert record.at(5).unpack() <= 100
+            for record in client.query_filter("filter5", beg_ms, end_ms):
+                self.assertTrue(record.at(5).unpack() <= 100)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
 
             i = 0
-            for record in client.predef_filter("filter6", beg_ms, end_ms):
-                assert record.at(6).unpack() > 0.1
+            for record in client.query_filter("filter6", beg_ms, end_ms):
+                self.assertTrue(record.at(6).unpack() > 0.1)
                 i += 1
-            assert i == 6
+            self.assertTrue(i == 6)
 
             i = 0
-            for record in client.predef_filter("filter7", beg_ms, end_ms):
-                assert record.at(7).unpack() < 0.06
+            for record in client.query_filter("filter7", beg_ms, end_ms):
+                self.assertTrue(record.at(7).unpack() < 0.06)
                 i += 1
-            assert i == 5
+            self.assertTrue(i == 5)
 
             i = 0
-            for record in client.predef_filter("filter8", beg_ms, end_ms):
-                assert record.at(8).unpack()[:3] == "zzz"
+            for record in client.query_filter("filter8", beg_ms, end_ms):
+                self.assertTrue(record.at(8).unpack()[:3] == "zzz")
                 i += 1
-            assert i == 2
+            self.assertTrue(i == 2)
 
             i = 0
-            for record in client.combined_filter("filter1", "b > 4 || c <= 30", beg_ms, end_ms):
-                assert record.at(1).unpack() == True
-                assert record.at(2).unpack() > 4 or record.at(3).unpack() <= 30
+            for record in client.query_filter("filter1", beg_ms, end_ms, "b > 4 || c <= 30"):
+                self.assertTrue(record.at(1).unpack() == True)
+                self.assertTrue(record.at(2).unpack() > 4 or record.at(3).unpack() <= 30)
                 i += 1
-            assert i == 4
+            self.assertTrue(i == 4)
 
             i = 0
-            for record in client.combined_filter("filter1", "b > 4 || f > 0.1", beg_ms, end_ms):
-                assert record.at(1).unpack() == True
-                assert record.at(2).unpack() > 4 or record.at(6).unpack() > 0.1
+            for record in client.query_filter("filter1", beg_ms, end_ms, "b > 4 || f > 0.1"):
+                self.assertTrue(record.at(1).unpack() == True)
+                self.assertTrue(record.at(2).unpack() > 4 or record.at(6).unpack() > 0.1)
                 i += 1
-            assert i == 3
+            self.assertTrue(i == 3)
             
-            val1 = client.query_aggregate("agg1", beg_ms, end_ms)
-            assert "int(32)" == val1
+            val1 = client.get_aggregate("agg1", beg_ms, end_ms)
+            self.assertTrue("int(32)" == val1)
             
-            val2 = client.query_aggregate("agg2", beg_ms, end_ms)
-            assert "int(36)" == val2
+            val2 = client.get_aggregate("agg2", beg_ms, end_ms)
+            self.assertTrue("int(36)" == val2)
             
-            val3 = client.query_aggregate("agg3", beg_ms, end_ms)
-            assert "int(12)" == val3
+            val3 = client.get_aggregate("agg3", beg_ms, end_ms)
+            self.assertTrue("int(12)" == val3)
             
-            val4 = client.query_aggregate("agg4", beg_ms, end_ms)
-            assert "int(0)" == val4
+            val4 = client.get_aggregate("agg4", beg_ms, end_ms)
+            self.assertTrue("int(0)" == val4)
             
-            val5 = client.query_aggregate("agg5", beg_ms, end_ms)
-            assert "int(12)" == val5
+            val5 = client.get_aggregate("agg5", beg_ms, end_ms)
+            self.assertTrue("int(12)" == val5)
             
-            val6 = client.query_aggregate("agg6", beg_ms, end_ms)
-            assert "int(54)" == val6
+            val6 = client.get_aggregate("agg6", beg_ms, end_ms)
+            self.assertTrue("int(54)" == val6)
             
-            val7 = client.query_aggregate("agg7", beg_ms, end_ms)
-            assert "int(20)" == val7
+            val7 = client.get_aggregate("agg7", beg_ms, end_ms)
+            self.assertTrue("int(20)" == val7)
             
-            val8 = client.query_aggregate("agg8", beg_ms, end_ms)
-            assert "int(26)" == val8
+            val8 = client.get_aggregate("agg8", beg_ms, end_ms)
+            self.assertTrue("int(26)" == val8)
             
         except:
-            client.disconnect()
             self.stop_server()
             raise
 

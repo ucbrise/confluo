@@ -71,7 +71,7 @@ class ClientWriteOpsTest : public testing::Test {
   }
 
   static confluo_store* simple_table_store(std::string atomic_multilog_name,
-                                           storage::storage_id id) {
+                                           storage::storage_mode id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         atomic_multilog_name,
@@ -126,7 +126,7 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
       atomic_multilog_name,
       schema_t(
           schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
-      storage::D_IN_MEMORY);
+      storage::IN_MEMORY);
 
   client.disconnect();
   server->stop();
@@ -140,7 +140,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
 
   std::string atomic_multilog_name = "my_multilog";
 
-  auto store = simple_table_store(atomic_multilog_name, storage::D_IN_MEMORY);
+  auto store = simple_table_store(atomic_multilog_name, storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -174,7 +174,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::D_IN_MEMORY);
+                                storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -306,7 +306,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::D_IN_MEMORY);
+                                storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -333,14 +333,14 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   client.add_aggregate("agg6", "filter6", "SUM(d)");
   client.add_aggregate("agg7", "filter7", "SUM(d)");
   client.add_aggregate("agg8", "filter8", "SUM(d)");
-  client.add_trigger("trigger1", "agg1 >= 10");
-  client.add_trigger("trigger2", "agg2 >= 10");
-  client.add_trigger("trigger3", "agg3 >= 10");
-  client.add_trigger("trigger4", "agg4 >= 10");
-  client.add_trigger("trigger5", "agg5 >= 10");
-  client.add_trigger("trigger6", "agg6 >= 10");
-  client.add_trigger("trigger7", "agg7 >= 10");
-  client.add_trigger("trigger8", "agg8 >= 10");
+  client.install_trigger("trigger1", "agg1 >= 10");
+  client.install_trigger("trigger2", "agg2 >= 10");
+  client.install_trigger("trigger3", "agg3 >= 10");
+  client.install_trigger("trigger4", "agg4 >= 10");
+  client.install_trigger("trigger5", "agg5 >= 10");
+  client.install_trigger("trigger6", "agg6 >= 10");
+  client.install_trigger("trigger7", "agg7 >= 10");
+  client.install_trigger("trigger8", "agg8 >= 10");
 
   mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
@@ -420,7 +420,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter1", "b > 4", beg, end); !r.empty();
+  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4"); !r.empty();
       r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
@@ -429,7 +429,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter1", "b > 4 || c <= 30", beg, end);
+  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4 || c <= 30");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -440,7 +440,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter1", "b > 4 || f > 0.1", beg, end);
+  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4 || f > 0.1");
       !r.empty(); r = r.tail()) {
     ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -451,21 +451,21 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   // Test aggregates
-  numeric val1 = mlog->query_aggregate("agg1", beg, end);
+  numeric val1 = mlog->get_aggregate("agg1", beg, end);
   ASSERT_TRUE(numeric(32) == val1);
-  numeric val2 = mlog->query_aggregate("agg2", beg, end);
+  numeric val2 = mlog->get_aggregate("agg2", beg, end);
   ASSERT_TRUE(numeric(36) == val2);
-  numeric val3 = mlog->query_aggregate("agg3", beg, end);
+  numeric val3 = mlog->get_aggregate("agg3", beg, end);
   ASSERT_TRUE(numeric(12) == val3);
-  numeric val4 = mlog->query_aggregate("agg4", beg, end);
+  numeric val4 = mlog->get_aggregate("agg4", beg, end);
   ASSERT_TRUE(numeric(0) == val4);
-  numeric val5 = mlog->query_aggregate("agg5", beg, end);
+  numeric val5 = mlog->get_aggregate("agg5", beg, end);
   ASSERT_TRUE(numeric(12) == val5);
-  numeric val6 = mlog->query_aggregate("agg6", beg, end);
+  numeric val6 = mlog->get_aggregate("agg6", beg, end);
   ASSERT_TRUE(numeric(54) == val6);
-  numeric val7 = mlog->query_aggregate("agg7", beg, end);
+  numeric val7 = mlog->get_aggregate("agg7", beg, end);
   ASSERT_TRUE(numeric(20) == val7);
-  numeric val8 = mlog->query_aggregate("agg8", beg, end);
+  numeric val8 = mlog->get_aggregate("agg8", beg, end);
   ASSERT_TRUE(numeric(26) == val8);
 
   // Test triggers
@@ -479,46 +479,46 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   }
   ASSERT_EQ(size_t(7), alert_count);
 
-  auto a1 = mlog->get_alerts("trigger1", beg, end);
+  auto a1 = mlog->get_alerts(beg, end, "trigger1");
   ASSERT_TRUE(!a1.empty());
   ASSERT_EQ("trigger1", a1.head().trigger_name);
   ASSERT_TRUE(numeric(32) == a1.head().value);
   ASSERT_TRUE(a1.tail().empty());
 
-  auto a2 = mlog->get_alerts("trigger2", beg, end);
+  auto a2 = mlog->get_alerts(beg, end, "trigger2");
   ASSERT_TRUE(!a2.empty());
   ASSERT_EQ("trigger2", a2.head().trigger_name);
   ASSERT_TRUE(numeric(36) == a2.head().value);
   ASSERT_TRUE(a2.tail().empty());
 
-  auto a3 = mlog->get_alerts("trigger3", beg, end);
+  auto a3 = mlog->get_alerts(beg, end, "trigger3");
   ASSERT_TRUE(!a3.empty());
   ASSERT_EQ("trigger3", a3.head().trigger_name);
   ASSERT_TRUE(numeric(12) == a3.head().value);
   ASSERT_TRUE(a3.tail().empty());
 
-  auto a4 = mlog->get_alerts("trigger4", beg, end);
+  auto a4 = mlog->get_alerts(beg, end, "trigger4");
   ASSERT_TRUE(a4.empty());
 
-  auto a5 = mlog->get_alerts("trigger5", beg, end);
+  auto a5 = mlog->get_alerts(beg, end, "trigger5");
   ASSERT_TRUE(!a5.empty());
   ASSERT_EQ("trigger5", a5.head().trigger_name);
   ASSERT_TRUE(numeric(12) == a5.head().value);
   ASSERT_TRUE(a5.tail().empty());
 
-  auto a6 = mlog->get_alerts("trigger6", beg, end);
+  auto a6 = mlog->get_alerts(beg, end, "trigger6");
   ASSERT_TRUE(!a6.empty());
   ASSERT_EQ("trigger6", a6.head().trigger_name);
   ASSERT_TRUE(numeric(54) == a6.head().value);
   ASSERT_TRUE(a6.tail().empty());
 
-  auto a7 = mlog->get_alerts("trigger7", beg, end);
+  auto a7 = mlog->get_alerts(beg, end, "trigger7");
   ASSERT_TRUE(!a7.empty());
   ASSERT_EQ("trigger7", a7.head().trigger_name);
   ASSERT_TRUE(numeric(20) == a7.head().value);
   ASSERT_TRUE(a7.tail().empty());
 
-  auto a8 = mlog->get_alerts("trigger8", beg, end);
+  auto a8 = mlog->get_alerts(beg, end, "trigger8");
   ASSERT_TRUE(!a8.empty());
   ASSERT_EQ("trigger8", a8.head().trigger_name);
   ASSERT_TRUE(numeric(26) == a8.head().value);
@@ -543,7 +543,7 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
 
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::D_IN_MEMORY);
+                                storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
 
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
@@ -593,7 +593,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
 
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::D_IN_MEMORY);
+                                storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -609,8 +609,8 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   client.add_filter("filter2", "b > 4");
   client.add_aggregate("agg1", "filter1", "SUM(d)");
   client.add_aggregate("agg2", "filter2", "SUM(d)");
-  client.add_trigger("trigger1", "agg1 >= 10");
-  client.add_trigger("trigger2", "agg2 >= 10");
+  client.install_trigger("trigger1", "agg1 >= 10");
+  client.install_trigger("trigger2", "agg2 >= 10");
 
   int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
   mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));

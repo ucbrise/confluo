@@ -35,12 +35,11 @@ class confluo_store {
    */
   int64_t create_atomic_multilog(const std::string& name,
                                  const std::vector<column_t>& schema,
-                                 const storage::storage_id storage_type) {
+                                 const storage::storage_mode mode) {
     optional<management_exception> ex;
-    storage::storage_mode mode = storage::STORAGE_MODES[storage_type];
     std::future<int64_t> ret = mgmt_pool_.submit(
-        [&name, &schema, &storage_type, &ex, this]() -> int64_t {
-          return create_atomic_multilog_task(name, schema, storage_type, ex);
+        [&name, &schema, &mode, &ex, this]() -> int64_t {
+          return create_atomic_multilog_task(name, schema, mode, ex);
         });
     int64_t id = ret.get();
     if (ex.has_value())
@@ -58,12 +57,12 @@ class confluo_store {
    */
   int64_t create_atomic_multilog(const std::string& name,
                                  const std::string& schema,
-                                 const storage::storage_id storage_type) {
+                                 const storage::storage_mode mode =
+                                     storage::IN_MEMORY) {
     optional<management_exception> ex;
-    storage::storage_mode mode = storage::STORAGE_MODES[storage_type];
     std::future<int64_t> ret = mgmt_pool_.submit(
-        [&name, &schema, &storage_type, &ex, this]() -> int64_t {
-          return create_atomic_multilog_task(name, schema, storage_type, ex);
+        [&name, &schema, &mode, &ex, this]() -> int64_t {
+          return create_atomic_multilog_task(name, schema, mode, ex);
         });
     int64_t id = ret.get();
     if (ex.has_value())
@@ -131,9 +130,8 @@ class confluo_store {
  private:
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::vector<column_t>& schema,
-                                      const storage::storage_id storage_type,
+                                      const storage::storage_mode mode,
                                       optional<management_exception>& ex) {
-    storage::storage_mode mode = storage::STORAGE_MODES[storage_type];
     size_t id;
     if (multilog_map_.get(name, id) != -1) {
       ex = management_exception("Table " + name + " already exists.");
@@ -155,9 +153,8 @@ class confluo_store {
 
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::string& schema,
-                                      const storage::storage_id storage_type,
+                                      const storage::storage_mode mode,
                                       optional<management_exception>& ex) {
-    storage::storage_mode mode = storage::STORAGE_MODES[storage_type];
     size_t id;
     if (multilog_map_.get(name, id) != -1) {
       ex = management_exception("Table " + name + " already exists.");

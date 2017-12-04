@@ -126,16 +126,16 @@ class metadata_writer {
    * @param path The path of where the metadata is
    * @param id The id of the storage type 
    */
-  metadata_writer(const std::string& path, storage::storage_id id)
+  metadata_writer(const std::string& path, storage::storage_mode id)
       : filename_(path + "/metadata"),
         id_(id) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       out_.open(filename_);
     }
   }
 
   void write_schema(const schema_t& schema) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_SCHEMA_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, schema.columns().size());
@@ -148,7 +148,7 @@ class metadata_writer {
   }
 
   void write_index_metadata(const std::string& name, double bucket_size) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_INDEX_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -158,7 +158,7 @@ class metadata_writer {
   }
 
   void write_filter_metadata(const std::string& name, const std::string& expr) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_FILTER_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -170,7 +170,7 @@ class metadata_writer {
   void write_aggregate_metadata(const std::string& name,
                                 const std::string& filter_name,
                                 const std::string& expr) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_AGGREGATE_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -183,7 +183,7 @@ class metadata_writer {
   void write_trigger_metadata(const std::string& trigger_name,
                               const std::string& trigger_expr,
                               const uint64_t periodicity_ms) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_TRIGGER_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, trigger_name);
@@ -196,7 +196,7 @@ class metadata_writer {
  private:
   std::string filename_;
   std::ofstream out_;
-  storage::storage_id id_;
+  storage::storage_mode id_;
 };
 
 class metadata_reader {

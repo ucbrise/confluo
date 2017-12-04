@@ -82,7 +82,7 @@ class atomic_multilog {
         schema_(schema),
         data_log_("data_log", path, mode),
         rt_(path, mode),
-        metadata_(path, mode.id),
+        metadata_(path, mode),
         planner_(&data_log_, &indexes_, &schema_),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
@@ -220,9 +220,9 @@ class atomic_multilog {
    * @param expr The trigger expression to be executed
    * @throw ex Management exception
    */
-  void add_trigger(const std::string& name, const std::string& expr,
-                   const uint64_t periodicity_ms =
-                       configuration_params::MONITOR_PERIODICITY_MS) {
+  void install_trigger(const std::string& name, const std::string& expr,
+                       const uint64_t periodicity_ms =
+                           configuration_params::MONITOR_PERIODICITY_MS) {
 
     if (periodicity_ms < configuration_params::MONITOR_PERIODICITY_MS) {
       throw management_exception(
@@ -400,6 +400,13 @@ class atomic_multilog {
     return plan.execute(version);
   }
 
+  /**
+   * Queries an existing filter
+   * @param filter_name Name of the filter
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
+   * @return A stream containing the results of the filter
+   */
   lazy::stream<record_t> query_filter(const std::string& filter_name,
                                       uint64_t begin_ms,
                                       uint64_t end_ms) const {
@@ -427,18 +434,17 @@ class atomic_multilog {
   }
 
   /**
-   * Executes a query filter expression
+   * Queries an existing filter
    * @param filter_name The name of the filter
-   * @param expr The filter expression
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
+   * @param additional_filter_expr Additional filter expression
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(const std::string& filter_name,
-                                      const std::string& expr,
-                                      uint64_t begin_ms,
-                                      uint64_t end_ms) const {
-    auto t = parser::parse_expression(expr);
+  lazy::stream<record_t> query_filter(
+      const std::string& filter_name, uint64_t begin_ms, uint64_t end_ms,
+      const std::string& additional_filter_expr) const {
+    auto t = parser::parse_expression(additional_filter_expr);
     auto e = parser::compile_expression(t, schema_);
     auto expr_check = [e](const record_t& r) -> bool {
       return e.test(r);
@@ -453,8 +459,8 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return The aggregate value for the given time range.
    */
-  numeric query_aggregate(const std::string& aggregate_name, uint64_t begin_ms,
-                          uint64_t end_ms) {
+  numeric get_aggregate(const std::string& aggregate_name, uint64_t begin_ms,
+                        uint64_t end_ms) {
     aggregate_id_t aggregate_id;
     if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
       throw invalid_operation_exception(
@@ -484,13 +490,13 @@ class atomic_multilog {
 
   /**
    * Gets the stream of alerts corresponding to given trigger in a time-range
-   * @param trigger_name Name of the trigger.
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
+   * @param trigger_name Name of the trigger.
    * @return Stream of alerts in the time range
    */
-  lazy::stream<alert> get_alerts(const std::string& trigger_name,
-                                 uint64_t begin_ms, uint64_t end_ms) const {
+  lazy::stream<alert> get_alerts(uint64_t begin_ms, uint64_t end_ms,
+                                 const std::string& trigger_name) const {
     return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms))
         .filter([trigger_name](const alert& a) {
       return a.trigger_name == trigger_name;

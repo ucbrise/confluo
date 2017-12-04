@@ -89,9 +89,11 @@ if (BUILD_RPC)
   endif()
 endif()
 
-# DiaLog examples
-add_subdirectory(examples/libtimeseries)
-add_subdirectory(examples/libstreaming)
+# Confluo examples
+if (BUILD_EXAMPLES)
+  add_subdirectory(examples/libtimeseries)
+  add_subdirectory(examples/libstreaming)
+endif()
 
 if (BUILD_DOC)
   add_subdirectory(docs)

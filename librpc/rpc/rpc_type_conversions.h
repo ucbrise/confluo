@@ -46,11 +46,11 @@ class rpc_type_conversions {
     return schema;
   }
 
-  static storage::storage_id convert_mode(const rpc_storage_mode& mode) {
-    return static_cast<storage::storage_id>(mode);
+  static storage::storage_mode convert_mode(const rpc_storage_mode& mode) {
+    return static_cast<storage::storage_mode>(mode);
   }
 
-  static rpc_storage_mode convert_mode(const storage::storage_id& mode) {
+  static rpc_storage_mode convert_mode(const storage::storage_mode& mode) {
     return static_cast<rpc_storage_mode>(mode);
   }
 };

@@ -36,14 +36,14 @@ typedef uint8_t* (*allocate_block_fn)(const std::string& path, size_t size);
 typedef void (*free_fn)(void* ptr, size_t size);
 typedef void (*flush_fn)(void* ptr, size_t size);
 
-enum storage_id {
-  D_IN_MEMORY = 0,
-  D_DURABLE_RELAXED = 1,
-  D_DURABLE = 2
+enum storage_mode {
+  IN_MEMORY = 0,
+  DURABLE_RELAXED = 1,
+  DURABLE = 2
 };
 
-struct storage_mode {
-  storage_id id;
+struct storage_functions {
+  storage_mode mode;
   allocate_fn allocate;
   allocate_block_fn allocate_block;
   free_fn free;
@@ -59,11 +59,19 @@ struct in_memory {
    *
    * @param path Backing file (unused).
    * @param size Size of requested memory.
+   * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
     return malloc(size);
   }
 
+  /**
+   * Allocates a block of new memory.
+   *
+   * @param path Backing file (unused).
+   * @param size Size of requested block.
+   * @return Allocated block.
+   */
   inline static uint8_t* allocate_block(const std::string& path, size_t size) {
     return ALLOCATOR.alloc<uint8_t>(size / sizeof(uint8_t));
   }
@@ -100,6 +108,7 @@ struct durable_relaxed {
    *
    * @param path Backing file.
    * @param size Size of requested memory.
+   * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
     int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
@@ -109,8 +118,15 @@ struct durable_relaxed {
     return data;
   }
 
+  /**
+   * Allocates a block of new memory.
+   *
+   * @param path Backing file.
+   * @param size Size of requested block.
+   * @return Allocated block.
+   */
   inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap<uint8_t>(path, size/sizeof(uint8_t));
+    return ALLOCATOR.mmap<uint8_t>(path, size / sizeof(uint8_t));
   }
 
   /**
@@ -145,6 +161,7 @@ struct durable {
    *
    * @param path Backing file.
    * @param size Size of requested memory.
+   * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
     int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
@@ -154,8 +171,15 @@ struct durable {
     return data;
   }
 
+  /**
+   * Allocates a block of new memory.
+   *
+   * @param path Backing file.
+   * @param size Size of requested block.
+   * @return Allocated block.
+   */
   inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap<uint8_t>(path, size/sizeof(uint8_t));
+    return ALLOCATOR.mmap<uint8_t>(path, size / sizeof(uint8_t));
   }
 
   /**
@@ -179,16 +203,19 @@ struct durable {
   }
 };
 
-static storage_mode IN_MEMORY = { storage_id::D_IN_MEMORY, in_memory::allocate, in_memory::allocate_block,
-    in_memory::free_mem, in_memory::flush };
+static storage_functions IN_MEMORY_FNS = { storage_mode::IN_MEMORY,
+    in_memory::allocate, in_memory::allocate_block, in_memory::free_mem,
+    in_memory::flush };
 
-static storage_mode DURABLE_RELAXED = { storage_id::D_DURABLE_RELAXED, durable_relaxed::allocate,
-    durable_relaxed::allocate_block, durable_relaxed::free, durable_relaxed::flush };
+static storage_functions DURABLE_RELAXED_FNS = { storage_mode::DURABLE_RELAXED,
+    durable_relaxed::allocate, durable_relaxed::allocate_block,
+    durable_relaxed::free, durable_relaxed::flush };
 
-static storage_mode DURABLE = { storage_id::D_DURABLE, durable::allocate, durable::allocate_block,
-    durable::free, durable::flush };
+static storage_functions DURABLE_FNS = { storage_mode::DURABLE,
+    durable::allocate, durable::allocate_block, durable::free, durable::flush };
 
-static storage_mode STORAGE_MODES[3] = { IN_MEMORY, DURABLE_RELAXED, DURABLE };
+static storage_functions STORAGE_FNS[3] = { IN_MEMORY_FNS, DURABLE_RELAXED_FNS,
+    DURABLE_FNS };
 
 }
 }

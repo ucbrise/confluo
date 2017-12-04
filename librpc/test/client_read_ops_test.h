@@ -89,7 +89,7 @@ class ClientReadOpsTest : public testing::Test {
   }
 
   static confluo_store* simple_table_store(const std::string& multilog_name,
-      storage::storage_id id) {
+      storage::storage_mode id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         multilog_name,
@@ -160,7 +160,7 @@ std::vector<column_t> ClientReadOpsTest::s = schema();
 
 TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
   std::string multilog_name = "my_multilog";
-  auto store = simple_table_store(multilog_name, storage::D_IN_MEMORY);
+  auto store = simple_table_store(multilog_name, storage::IN_MEMORY);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
@@ -183,7 +183,7 @@ TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
 
 TEST_F(ClientReadOpsTest, ReadDurableTest) {
   std::string multilog_name = "my_multilog";
-  auto store = simple_table_store(multilog_name, storage::D_DURABLE);
+  auto store = simple_table_store(multilog_name, storage::DURABLE);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
@@ -206,7 +206,7 @@ TEST_F(ClientReadOpsTest, ReadDurableTest) {
 
 TEST_F(ClientReadOpsTest, ReadDurableRelaxedTest) {
   std::string multilog_name = "my_multilog";
-  auto store = simple_table_store(multilog_name, storage::D_DURABLE_RELAXED);
+  auto store = simple_table_store(multilog_name, storage::DURABLE_RELAXED);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
@@ -230,7 +230,7 @@ TEST_F(ClientReadOpsTest, ReadDurableRelaxedTest) {
 TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(multilog_name);
 
   mlog->add_index("a");
@@ -262,56 +262,56 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   client.set_current_atomic_multilog(multilog_name);
 
   size_t i = 0;
-  for (auto r = client.adhoc_filter("a == true"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("a == true"); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("b > 4"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("b > 4"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("c <= 30"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("c <= 30"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("d == 0"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("d == 0"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("e <= 100"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("e <= 100"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("f > 0.1"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("f > 0.1"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("g < 0.06"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("g < 0.06"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("h == zzz"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("h == zzz"); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -320,7 +320,8 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && b > 4"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("a == true && b > 4"); r.has_more();
+      ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -328,7 +329,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && (b > 4 || c <= 30)");
+  for (auto r = client.execute_filter("a == true && (b > 4 || c <= 30)");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -339,7 +340,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && (b > 4 || f > 0.1)");
+  for (auto r = client.execute_filter("a == true && (b > 4 || f > 0.1)");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -359,7 +360,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
 TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(multilog_name);
 
   mlog->add_filter("filter1", "a == true");
@@ -378,14 +379,14 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   mlog->add_aggregate("agg6", "filter6", "SUM(d)");
   mlog->add_aggregate("agg7", "filter7", "SUM(d)");
   mlog->add_aggregate("agg8", "filter8", "SUM(d)");
-  mlog->add_trigger("trigger1", "agg1 >= 10");
-  mlog->add_trigger("trigger2", "agg2 >= 10");
-  mlog->add_trigger("trigger3", "agg3 >= 10");
-  mlog->add_trigger("trigger4", "agg4 >= 10");
-  mlog->add_trigger("trigger5", "agg5 >= 10");
-  mlog->add_trigger("trigger6", "agg6 >= 10");
-  mlog->add_trigger("trigger7", "agg7 >= 10");
-  mlog->add_trigger("trigger8", "agg8 >= 10");
+  mlog->install_trigger("trigger1", "agg1 >= 10");
+  mlog->install_trigger("trigger2", "agg2 >= 10");
+  mlog->install_trigger("trigger3", "agg3 >= 10");
+  mlog->install_trigger("trigger4", "agg4 >= 10");
+  mlog->install_trigger("trigger5", "agg5 >= 10");
+  mlog->install_trigger("trigger6", "agg6 >= 10");
+  mlog->install_trigger("trigger7", "agg7 >= 10");
+  mlog->install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
   int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
@@ -411,56 +412,56 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   // Test filters
   size_t i = 0;
-  for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter2", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter2", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter3", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter3", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter4", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter4", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter5", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter5", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter6", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter6", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter7", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter7", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter8", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter8", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -469,8 +470,8 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4", beg, end);
-      r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter1", beg, end, "b > 4"); r.has_more();
+      ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -478,7 +479,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4 || c <= 30", beg, end);
+  for (auto r = client.query_filter("filter1", beg, end, "b > 4 || c <= 30");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -489,7 +490,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4 || f > 0.1", beg, end);
+  for (auto r = client.query_filter("filter1", beg, end, "b > 4 || f > 0.1");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -501,21 +502,21 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   // Test aggregates
   std::string val1, val2, val3, val4, val5, val6, val7, val8;
-  client.query_aggregate(val1, "agg1", beg, end);
+  client.get_aggregate(val1, "agg1", beg, end);
   ASSERT_TRUE("int(32)" == val1);
-  client.query_aggregate(val2, "agg2", beg, end);
+  client.get_aggregate(val2, "agg2", beg, end);
   ASSERT_TRUE("int(36)" == val2);
-  client.query_aggregate(val3, "agg3", beg, end);
+  client.get_aggregate(val3, "agg3", beg, end);
   ASSERT_TRUE("int(12)" == val3);
-  client.query_aggregate(val4, "agg4", beg, end);
+  client.get_aggregate(val4, "agg4", beg, end);
   ASSERT_TRUE("int(0)" == val4);
-  client.query_aggregate(val5, "agg5", beg, end);
+  client.get_aggregate(val5, "agg5", beg, end);
   ASSERT_TRUE("int(12)" == val5);
-  client.query_aggregate(val6, "agg6", beg, end);
+  client.get_aggregate(val6, "agg6", beg, end);
   ASSERT_TRUE("int(54)" == val6);
-  client.query_aggregate(val7, "agg7", beg, end);
+  client.get_aggregate(val7, "agg7", beg, end);
   ASSERT_TRUE("int(20)" == val7);
-  client.query_aggregate(val8, "agg8", beg, end);
+  client.get_aggregate(val8, "agg8", beg, end);
   ASSERT_TRUE("int(26)" == val8);
 
   // Test triggers
@@ -529,28 +530,28 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   ASSERT_EQ(size_t(7), alert_count);
 
   // TODO: more rigorous testing on alert values.
-  auto a1 = client.get_alerts("trigger1", beg, end);
+  auto a1 = client.get_alerts(beg, end, "trigger1");
   ASSERT_TRUE(!a1.empty());
 
-  auto a2 = client.get_alerts("trigger2", beg, end);
+  auto a2 = client.get_alerts(beg, end, "trigger2");
   ASSERT_TRUE(!a2.empty());
 
-  auto a3 = client.get_alerts("trigger3", beg, end);
+  auto a3 = client.get_alerts(beg, end, "trigger3");
   ASSERT_TRUE(!a3.empty());
 
-  auto a4 = client.get_alerts("trigger4", beg, end);
+  auto a4 = client.get_alerts(beg, end, "trigger4");
   ASSERT_TRUE(a4.empty());
 
-  auto a5 = client.get_alerts("trigger5", beg, end);
+  auto a5 = client.get_alerts(beg, end, "trigger5");
   ASSERT_TRUE(!a5.empty());
 
-  auto a6 = client.get_alerts("trigger6", beg, end);
+  auto a6 = client.get_alerts(beg, end, "trigger6");
   ASSERT_TRUE(!a6.empty());
 
-  auto a7 = client.get_alerts("trigger7", beg, end);
+  auto a7 = client.get_alerts(beg, end, "trigger7");
   ASSERT_TRUE(!a7.empty());
 
-  auto a8 = client.get_alerts("trigger8", beg, end);
+  auto a8 = client.get_alerts(beg, end, "trigger8");
   ASSERT_TRUE(!a8.empty());
 
   client.disconnect();
@@ -564,7 +565,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
 
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(multilog_name);
 
   mlog->add_index("a");
@@ -590,56 +591,56 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   client.set_current_atomic_multilog(multilog_name);
 
   size_t i = 0;
-  for (auto r = client.adhoc_filter("a == true"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("a == true"); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("b > 4"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("b > 4"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("c <= 30"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("c <= 30"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("d == 0"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("d == 0"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("e <= 100"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("e <= 100"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("f > 0.1"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("f > 0.1"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("g < 0.06"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("g < 0.06"); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("h == zzz"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("h == zzz"); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -648,7 +649,8 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && b > 4"); r.has_more(); ++r) {
+  for (auto r = client.execute_filter("a == true && b > 4"); r.has_more();
+      ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -656,7 +658,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && (b > 4 || c <= 30)");
+  for (auto r = client.execute_filter("a == true && (b > 4 || c <= 30)");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -667,7 +669,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.adhoc_filter("a == true && (b > 4 || f > 0.1)");
+  for (auto r = client.execute_filter("a == true && (b > 4 || f > 0.1)");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -688,7 +690,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(multilog_name, schema(), storage::D_IN_MEMORY);
+  store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(multilog_name);
 
   mlog->add_filter("filter1", "a == true");
@@ -707,14 +709,14 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   mlog->add_aggregate("agg6", "filter6", "SUM(d)");
   mlog->add_aggregate("agg7", "filter7", "SUM(d)");
   mlog->add_aggregate("agg8", "filter8", "SUM(d)");
-  mlog->add_trigger("trigger1", "agg1 >= 10");
-  mlog->add_trigger("trigger2", "agg2 >= 10");
-  mlog->add_trigger("trigger3", "agg3 >= 10");
-  mlog->add_trigger("trigger4", "agg4 >= 10");
-  mlog->add_trigger("trigger5", "agg5 >= 10");
-  mlog->add_trigger("trigger6", "agg6 >= 10");
-  mlog->add_trigger("trigger7", "agg7 >= 10");
-  mlog->add_trigger("trigger8", "agg8 >= 10");
+  mlog->install_trigger("trigger1", "agg1 >= 10");
+  mlog->install_trigger("trigger2", "agg2 >= 10");
+  mlog->install_trigger("trigger3", "agg3 >= 10");
+  mlog->install_trigger("trigger4", "agg4 >= 10");
+  mlog->install_trigger("trigger5", "agg5 >= 10");
+  mlog->install_trigger("trigger6", "agg6 >= 10");
+  mlog->install_trigger("trigger7", "agg7 >= 10");
+  mlog->install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
   int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
@@ -734,56 +736,56 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   // Test filters
   size_t i = 0;
-  for (auto r = client.predef_filter("filter1", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter1", beg, end); r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter2", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter2", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter3", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter3", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter4", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter4", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter5", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter5", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter6", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter6", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter7", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter7", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(r.get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = client.predef_filter("filter8", beg, end); r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter8", beg, end); r.has_more(); ++r) {
     ASSERT_TRUE(
         r.get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
@@ -792,8 +794,8 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4", beg, end);
-      r.has_more(); ++r) {
+  for (auto r = client.query_filter("filter1", beg, end, "b > 4"); r.has_more();
+      ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -801,7 +803,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4 || c <= 30", beg, end);
+  for (auto r = client.query_filter("filter1", beg, end, "b > 4 || c <= 30");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -812,7 +814,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = client.combined_filter("filter1", "b > 4 || f > 0.1", beg, end);
+  for (auto r = client.query_filter("filter1", beg, end, "b > 4 || f > 0.1");
       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
@@ -824,21 +826,21 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   // Test aggregates
   std::string val1, val2, val3, val4, val5, val6, val7, val8;
-  client.query_aggregate(val1, "agg1", beg, end);
+  client.get_aggregate(val1, "agg1", beg, end);
   ASSERT_TRUE("int(32)" == val1);
-  client.query_aggregate(val2, "agg2", beg, end);
+  client.get_aggregate(val2, "agg2", beg, end);
   ASSERT_TRUE("int(36)" == val2);
-  client.query_aggregate(val3, "agg3", beg, end);
+  client.get_aggregate(val3, "agg3", beg, end);
   ASSERT_TRUE("int(12)" == val3);
-  client.query_aggregate(val4, "agg4", beg, end);
+  client.get_aggregate(val4, "agg4", beg, end);
   ASSERT_TRUE("int(0)" == val4);
-  client.query_aggregate(val5, "agg5", beg, end);
+  client.get_aggregate(val5, "agg5", beg, end);
   ASSERT_TRUE("int(12)" == val5);
-  client.query_aggregate(val6, "agg6", beg, end);
+  client.get_aggregate(val6, "agg6", beg, end);
   ASSERT_TRUE("int(54)" == val6);
-  client.query_aggregate(val7, "agg7", beg, end);
+  client.get_aggregate(val7, "agg7", beg, end);
   ASSERT_TRUE("int(20)" == val7);
-  client.query_aggregate(val8, "agg8", beg, end);
+  client.get_aggregate(val8, "agg8", beg, end);
   ASSERT_TRUE("int(26)" == val8);
 
   // Test triggers
@@ -852,28 +854,28 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   ASSERT_EQ(size_t(7), alert_count);
 
   // TODO: more rigorous testing on alert values.
-  auto a1 = client.get_alerts("trigger1", beg, end);
+  auto a1 = client.get_alerts(beg, end, "trigger1");
   ASSERT_TRUE(!a1.empty());
 
-  auto a2 = client.get_alerts("trigger2", beg, end);
+  auto a2 = client.get_alerts(beg, end, "trigger2");
   ASSERT_TRUE(!a2.empty());
 
-  auto a3 = client.get_alerts("trigger3", beg, end);
+  auto a3 = client.get_alerts(beg, end, "trigger3");
   ASSERT_TRUE(!a3.empty());
 
-  auto a4 = client.get_alerts("trigger4", beg, end);
+  auto a4 = client.get_alerts(beg, end, "trigger4");
   ASSERT_TRUE(a4.empty());
 
-  auto a5 = client.get_alerts("trigger5", beg, end);
+  auto a5 = client.get_alerts(beg, end, "trigger5");
   ASSERT_TRUE(!a5.empty());
 
-  auto a6 = client.get_alerts("trigger6", beg, end);
+  auto a6 = client.get_alerts(beg, end, "trigger6");
   ASSERT_TRUE(!a6.empty());
 
-  auto a7 = client.get_alerts("trigger7", beg, end);
+  auto a7 = client.get_alerts(beg, end, "trigger7");
   ASSERT_TRUE(!a7.empty());
 
-  auto a8 = client.get_alerts("trigger8", beg, end);
+  auto a8 = client.get_alerts(beg, end, "trigger8");
   ASSERT_TRUE(!a8.empty());
 
   client.disconnect();

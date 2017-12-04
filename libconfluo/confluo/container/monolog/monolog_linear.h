@@ -14,7 +14,8 @@
 namespace confluo {
 namespace monolog {
 
-template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456, size_t BUFFER_SIZE = 1048576>
+template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
+    size_t BUFFER_SIZE = 1048576>
 class monolog_linear_base {
  public:
   monolog_linear_base() = default;
@@ -29,7 +30,8 @@ class monolog_linear_base {
     name_ = name;
     data_path_ = data_path;
     for (size_t i = 0; i < MAX_BLOCKS; i++) {
-      std::string block_path = data_path + "/" + name + "_" + std::to_string(i) + ".dat";
+      std::string block_path = data_path + "/" + name + "_" + std::to_string(i)
+          + ".dat";
       blocks_[i].init(block_path, BLOCK_SIZE, storage);
     }
     blocks_[0].ensure_alloc();
@@ -106,7 +108,8 @@ class monolog_linear_base {
       size_t bucket_idx = idx / BLOCK_SIZE;
       size_t bucket_off = idx % BLOCK_SIZE;
       size_t bucket_len = std::min(BLOCK_SIZE - bucket_off, remaining);
-      blocks_[bucket_idx].write_unsafe(bucket_off, data + len - remaining, bucket_len);
+      blocks_[bucket_idx].write_unsafe(bucket_off, data + len - remaining,
+                                       bucket_len);
 
       idx += bucket_len;
       remaining -= bucket_len;
@@ -174,7 +177,7 @@ class monolog_linear_base {
    * @return storage size of the monolog
    */
   size_t storage_size() const {
-    size_t bucket_size = blocks_.size() * sizeof(monolog_block<T, BLOCK_SIZE>);
+    size_t bucket_size = blocks_.size() * sizeof(monolog_block<T, BLOCK_SIZE> );
     size_t data_size = 0;
     for (size_t i = 0; i < blocks_.size(); i++)
       data_size += blocks_[i].storage_size();
@@ -192,7 +195,8 @@ class monolog_linear_base {
 
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
     size_t BUFFER_SIZE = 1048576>
-class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE> {
+class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
+    BUFFER_SIZE> {
  public:
   // Type definitions
   typedef size_t size_type;
