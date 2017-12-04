@@ -117,33 +117,6 @@ class test_rpc_client(unittest.TestCase):
         client.disconnect()
         self.stop_server()
 
-    def test_read_buffer(self):
-        self.start_server()
-        client = rpc_client.rpc_client("127.0.0.1", 9090) 
-
-        try:
-            builder = schema_builder() 
-            multilog_schema = schema(builder.add_column(data_types.STRING_TYPE(8), "msg").build())
-            client.create_atomic_multilog("my_multilog", multilog_schema, storage_id.IN_MEMORY)
-
-            client.buffer(struct.pack("l", self.now_ns()) + "abcdefgh")
-            client.buffer(struct.pack("l", self.now_ns()) + "ijklmnop")
-            client.buffer(struct.pack("l", self.now_ns()) + "qrstuvwx")
-            client.flush()
-
-            buf = client.read(0)
-            self.assertTrue(buf[8:] == "abcdefgh")
-            buf = client.read(multilog_schema.record_size_)
-            self.assertTrue(buf[8:] == "ijklmnop")
-            buf = client.read(multilog_schema.record_size_ * 2)
-            self.assertTrue(buf[8:] == "qrstuvwx")
-        except:
-            self.stop_server()
-            raise
-        
-        client.disconnect()
-        self.stop_server()
-
     def test_execute_filter(self):
 
         self.start_server()

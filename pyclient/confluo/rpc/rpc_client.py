@@ -14,9 +14,6 @@ class rpc_client:
         logging.basicConfig(level=logging.INFO)  # TODO: Read from configuration file
         self.LOG = logging.getLogger(__name__)
         self.connect(host, port)
-        self.builder_ = rpc_record_batch_builder()
-        self.read_buf = ""
-        self.read_buf_offset = -1
         self.cur_multilog_id_ = -1
 
     def close(self):
@@ -94,39 +91,21 @@ class rpc_client:
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_trigger(self.cur_multilog_id_, trigger_name)
-
-    def buffer(self, record):
-        if self.cur_multilog_id_ == -1:
-            raise ValueError("Must set atomic multilog first.")
-        schema_rec_size = self.cur_schema_.record_size_
-        if len(record) != schema_rec_size:
-            raise ValueError("Record must be of length " + str(schema_rec_size))
-        self.builder_.add_record(record)
         
-    def flush(self):
-        if self.cur_multilog_id_ == -1:
-            raise ValueError("Must set atomic multilog first.")
-        if self.builder_.num_records_ > 0:
-            self.client_.append_batch(self.cur_multilog_id_, self.builder_.get_batch())
+    def get_batch_builder(self):
+        return rpc_record_batch_builder()
         
     def write(self, record):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
-        schema_rec_size = self.cur_schema_.record_size_
-        if len(record) != schema_rec_size:
-            raise ValueError("Record must be of length " + str(schema_rec_size))
+        if len(record) != self.cur_schema_.record_size_:
+            raise ValueError("Record must be of length " + str(self.cur_schema_.record_size_))
         self.client_.append(self.cur_multilog_id_, record)
             
     def read(self, offset):
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
-        rbuf_lim = self.read_buf_offset + len(self.read_buf)
-        if self.read_buf_offset == -1 or offset < self.read_buf_offset or offset >= rbuf_lim:
-            self.read_buf_offset = offset
-            self.read_buf = self.client_.read(self.cur_multilog_id_, offset, rpc_configuration_params.READ_BATCH_SIZE)
-        start = offset - self.read_buf_offset
-        stop = start + self.cur_schema_.record_size_ 
-        return self.read_buf[start : stop]
+        return self.client_.read(self.cur_multilog_id_, offset, self.cur_schema_.record_size_)
     
     def get_aggregate(self, aggregate_name, begin_ms, end_ms):
         if self.cur_multilog_id_ == -1:
