@@ -1,0 +1,1471 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../theme/assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.2.0">
+    
+    
+      
+        <title>Data Storage Overview - Confluo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.5d3fffba.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.fbd935c7.css">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+    
+    
+    
+      <body data-md-color-primary="light-green" data-md-color-accent="orange">
+    
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href=".." title="Confluo" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                Confluo
+              </span>
+              <span class="md-header-nav__topic">
+                Data Storage Overview
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">&#xE5CD;</button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/ucbrise/confluo/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </span>
+    Confluo
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/ucbrise/confluo/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
+    <label class="md-nav__link" for="nav-2">
+      User Guide
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        User Guide
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../quick_start/" title="Quick Start" class="md-nav__link">
+      Quick Start
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../install/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../modes_of_operation/" title="Modes of Operation" class="md-nav__link">
+      Modes of Operation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-4" type="checkbox" id="nav-2-4" checked>
+    
+    <label class="md-nav__link" for="nav-2-4">
+      Data Storage and Loading
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
+      <label class="md-nav__title" for="nav-2-4">
+        Data Storage and Loading
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Data Storage Overview
+      </label>
+    
+    <a href="./" title="Data Storage Overview" class="md-nav__link md-nav__link--active">
+      Data Storage Overview
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#attributes" title="Attributes" class="md-nav__link">
+    Attributes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema" title="Schema" class="md-nav__link">
+    Schema
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#atomic-multilog" title="Atomic MultiLog" class="md-nav__link">
+    Atomic MultiLog
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-data-a-performance-monitoring-and-diagnosis-example" title="Loading Data: A Performance Monitoring and Diagnosis Example" class="md-nav__link">
+    Loading Data: A Performance Monitoring and Diagnosis Example
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded mode" class="md-nav__link">
+    Embedded mode
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-confluo-store" title="Creating a New Confluo Store" class="md-nav__link">
+    Creating a New Confluo Store
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-atomic-multilog" title="Creating a New Atomic MultiLog" class="md-nav__link">
+    Creating a New Atomic MultiLog
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-indexes" title="Adding Indexes" class="md-nav__link">
+    Adding Indexes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-filters" title="Adding Filters" class="md-nav__link">
+    Adding Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-aggregates" title="Adding Aggregates" class="md-nav__link">
+    Adding Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-triggers" title="Installing Triggers" class="md-nav__link">
+    Installing Triggers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-sample-data-into-atomic-multilog" title="Loading sample data into Atomic MultiLog" class="md-nav__link">
+    Loading sample data into Atomic MultiLog
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#appending-string-vectors" title="Appending String Vectors" class="md-nav__link">
+    Appending String Vectors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appending-raw-bytes" title="Appending Raw bytes" class="md-nav__link">
+    Appending Raw bytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batched-appends" title="Batched Appends" class="md-nav__link">
+    Batched Appends
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-client-connection" title="Creating a Client Connection" class="md-nav__link">
+    Creating a Client Connection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-atomic-multilog_1" title="Creating a New Atomic MultiLog" class="md-nav__link">
+    Creating a New Atomic MultiLog
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-indexes_1" title="Adding Indexes" class="md-nav__link">
+    Adding Indexes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-filters_1" title="Adding Filters" class="md-nav__link">
+    Adding Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-aggregates_1" title="Adding Aggregates" class="md-nav__link">
+    Adding Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-triggers_1" title="Installing Triggers" class="md-nav__link">
+    Installing Triggers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-sample-data-into-atomic-multilog_1" title="Loading sample data into Atomic MultiLog" class="md-nav__link">
+    Loading sample data into Atomic MultiLog
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#appending-string-vectors_1" title="Appending String Vectors" class="md-nav__link">
+    Appending String Vectors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appending-raw-bytes_1" title="Appending Raw bytes" class="md-nav__link">
+    Appending Raw bytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batched-appends_1" title="Batched Appends" class="md-nav__link">
+    Batched Appends
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../type_system/" title="Type System" class="md-nav__link">
+      Type System
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-5" type="checkbox" id="nav-2-5">
+    
+    <label class="md-nav__link" for="nav-2-5">
+      Querying Data
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="6">
+      <label class="md-nav__title" for="nav-2-5">
+        Querying Data
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../queries/" title="Queries Overview" class="md-nav__link">
+      Queries Overview
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../online_queries/" title="Online Queries" class="md-nav__link">
+      Online Queries
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../offline_queries/" title="Offline Queries" class="md-nav__link">
+      Offline Queries
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../data_archival/" title="Archiving Data" class="md-nav__link">
+      Archiving Data
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      API Docs
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        API Docs
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../cpp_api/" title="C++" class="md-nav__link">
+      C++
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3-2" type="checkbox" id="nav-3-2">
+    
+    <label class="md-nav__link" for="nav-3-2">
+      Client APIs
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="3">
+      <label class="md-nav__title" for="nav-3-2">
+        Client APIs
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../client_api/" title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../cpp_client_api/" title="C++" class="md-nav__link">
+      C++
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../python_client_api/" title="Python" class="md-nav__link">
+      Python
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../java_client_api/" title="Java" class="md-nav__link">
+      Java
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#attributes" title="Attributes" class="md-nav__link">
+    Attributes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema" title="Schema" class="md-nav__link">
+    Schema
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#atomic-multilog" title="Atomic MultiLog" class="md-nav__link">
+    Atomic MultiLog
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-data-a-performance-monitoring-and-diagnosis-example" title="Loading Data: A Performance Monitoring and Diagnosis Example" class="md-nav__link">
+    Loading Data: A Performance Monitoring and Diagnosis Example
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded mode" class="md-nav__link">
+    Embedded mode
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-confluo-store" title="Creating a New Confluo Store" class="md-nav__link">
+    Creating a New Confluo Store
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-atomic-multilog" title="Creating a New Atomic MultiLog" class="md-nav__link">
+    Creating a New Atomic MultiLog
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-indexes" title="Adding Indexes" class="md-nav__link">
+    Adding Indexes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-filters" title="Adding Filters" class="md-nav__link">
+    Adding Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-aggregates" title="Adding Aggregates" class="md-nav__link">
+    Adding Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-triggers" title="Installing Triggers" class="md-nav__link">
+    Installing Triggers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-sample-data-into-atomic-multilog" title="Loading sample data into Atomic MultiLog" class="md-nav__link">
+    Loading sample data into Atomic MultiLog
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#appending-string-vectors" title="Appending String Vectors" class="md-nav__link">
+    Appending String Vectors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appending-raw-bytes" title="Appending Raw bytes" class="md-nav__link">
+    Appending Raw bytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batched-appends" title="Batched Appends" class="md-nav__link">
+    Batched Appends
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-client-connection" title="Creating a Client Connection" class="md-nav__link">
+    Creating a Client Connection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-atomic-multilog_1" title="Creating a New Atomic MultiLog" class="md-nav__link">
+    Creating a New Atomic MultiLog
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-indexes_1" title="Adding Indexes" class="md-nav__link">
+    Adding Indexes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-filters_1" title="Adding Filters" class="md-nav__link">
+    Adding Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-aggregates_1" title="Adding Aggregates" class="md-nav__link">
+    Adding Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-triggers_1" title="Installing Triggers" class="md-nav__link">
+    Installing Triggers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-sample-data-into-atomic-multilog_1" title="Loading sample data into Atomic MultiLog" class="md-nav__link">
+    Loading sample data into Atomic MultiLog
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#appending-string-vectors_1" title="Appending String Vectors" class="md-nav__link">
+    Appending String Vectors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appending-raw-bytes_1" title="Appending Raw bytes" class="md-nav__link">
+    Appending Raw bytes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batched-appends_1" title="Batched Appends" class="md-nav__link">
+    Batched Appends
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/ucbrise/confluo/edit/master/docs/loading_data.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <h1 id="data-storage-and-loading">Data Storage and Loading<a class="headerlink" href="#data-storage-and-loading" title="Permanent link">&para;</a></h1>
+<p>Confluo operates on <em>data streams</em>. Each stream comprises of records, each of
+which follows a pre-defined schema over a collection of strongly-typed 
+attributes.</p>
+<h2 id="attributes">Attributes<a class="headerlink" href="#attributes" title="Permanent link">&para;</a></h2>
+<p>Confluo currently supports only <em>bounded-width</em> attributes<sup id="fnref:1"><a class="footnote-ref" href="#fn:1" rel="footnote">1</a></sup>. An attribute 
+is said to have bounded-width if all records in a single stream use some 
+maximum number of bits to represent that attribute; this includes primitive 
+data types such as binary, integral or floating-point values, or 
+domain-specific types such as IP addresses, ports, sensor readings, etc. 
+Confluo also requires each record in the stream to have a 8-byte nano-second 
+precision timestamp attribute; if the application does not assign timestamps, 
+Confluo internally assigns one during the write operation. </p>
+<h2 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
+<p>A schema in Confluo is a collection of strongly-typed attributes. It is specified
+via JSON like semantics; for instance, consider the example below for a simple schema 
+with three attributes: </p>
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+  <span class="err">timestamp:</span> <span class="err">LONG,</span>
+  <span class="err">op_latency_ms:</span> <span class="err">DOUBLE,</span>
+  <span class="err">cpu_util:</span> <span class="err">DOUBLE,</span>
+  <span class="err">mem_avail:</span> <span class="err">DOUBLE,</span>
+  <span class="err">log_msg:</span> <span class="err">STRING(100)</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>The first attribute is timestamp with a 8-byte signed integer type; the second, third and
+fourth attributes correspond to operation latency (in ms), CPU utilization and available 
+memory respectively, all with double precision floating-point type. The final attribute is a
+log message, with a string type upper bound by 100 characters. Note that each of the 
+attributes must have types associated with them, and each record in a
+stream with this schema must have its attributes in this order. While Confluo natively 
+supports common primitive types, you can add custom bounded-width data types to Confluo's
+type system. More details can be found at the <a href="../type_system/">Confluo Type-System</a> guide.</p>
+<h2 id="atomic-multilog">Atomic MultiLog<a class="headerlink" href="#atomic-multilog" title="Permanent link">&para;</a></h2>
+<p>Atomic MultiLogs are the basic storage abstraction in Confluo, and are similar in
+interface to database tables. In order to store data from different streams, 
+applications can create an Atomic MultiLog with a pre-specified schema, 
+and write data streams that conform to the schema to the Atomic MultiLog.</p>
+<p>To support queries, applications can add an index for individual attributes in the schema. 
+Confluo also employs a match-action language with three main elements: <em>filter</em>, 
+<em>aggregate</em>  and <em>trigger</em>. </p>
+<ul>
+<li>A Confluo filter is an expression comprising of relational and boolean operators 
+(see Table below) over arbitrary subset of bounded-width attributes, and identifies records 
+that match the expression. </li>
+<li>A Confluo aggregate evaluates a computable function on an attribute for all records that 
+match a certain filter expression. </li>
+<li>Finally, a Confluo trigger is a boolean conditional (e.g., &lt;, &gt;, =, etc.) evaluated over 
+a Confluo aggregate. </li>
+</ul>
+<p><strong>Relational Operators in Filters</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Equality</td>
+<td><code>dst_port=80</code></td>
+</tr>
+<tr>
+<td>Range</td>
+<td><code>cpu_util&gt;0.8</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Boolean Operators in Filters</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conjunction</td>
+<td><code>volt&gt;200 &amp;&amp; temp&gt;100</code></td>
+</tr>
+<tr>
+<td>Disjunction</td>
+<td><code>cpu_util&gt;0.8 || mem_avail&lt;0.1</code></td>
+</tr>
+<tr>
+<td>Negation</td>
+<td><code>transport_protocol != TCP</code></td>
+</tr>
+</tbody>
+</table>
+<p>Confluo supports indexes, filters, aggregates and triggers only on bounded-width
+attributes in the schema. Once added, each of these are evaluated and updated 
+upon arrival of each new batch of data records.</p>
+<h2 id="loading-data-a-performance-monitoring-and-diagnosis-example">Loading Data: A Performance Monitoring and Diagnosis Example<a class="headerlink" href="#loading-data-a-performance-monitoring-and-diagnosis-example" title="Permanent link">&para;</a></h2>
+<p>We will now see how we can create Atomic MultiLogs, add indexes, filters, aggregate and triggers on them,
+and finally load some data into them, for both embedded and stand-alone modes of operation. We will work
+with the example of a performance monitoring and diagnosis tool using Confluo.</p>
+<h3 id="embedded-mode">Embedded mode<a class="headerlink" href="#embedded-mode" title="Permanent link">&para;</a></h3>
+<p>In order to use Confluo in the embedded mode, we simply need to include
+Confluo's header files under libconfluo/confluo, use the Confluo C++ API in 
+a C++ application, and compile using a modern C++ compiler. The entry point 
+header file to include is <code>confluo_store.h</code>. </p>
+<h4 id="creating-a-new-confluo-store">Creating a New Confluo Store<a class="headerlink" href="#creating-a-new-confluo-store" title="Permanent link">&para;</a></h4>
+<p>We will first create a new Confluo Store with the data path for it to use 
+as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">confluo_store</span> <span class="n">store</span><span class="p">(</span><span class="s">&quot;/path/to/data&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h4 id="creating-a-new-atomic-multilog">Creating a New Atomic MultiLog<a class="headerlink" href="#creating-a-new-atomic-multilog" title="Permanent link">&para;</a></h4>
+<p>We then create a new Atomic MultiLog within the Store (synonymous to a database
+table); this requires three parameters: a name for the Atomic MultiLog, a fixed
+schema, and a storage mode:</p>
+<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">schema</span> <span class="o">=</span> <span class="s">&quot;{</span>
+  <span class="nl">timestamp</span><span class="p">:</span> <span class="n">LONG</span><span class="p">,</span>
+  <span class="nl">op_latency_ms</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
+  <span class="nl">cpu_util</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
+  <span class="nl">mem_avail</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
+  <span class="nl">log_msg</span><span class="p">:</span> <span class="n">STRING</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="p">}</span><span class="s">&quot;;</span>
+<span class="k">auto</span> <span class="n">storage_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">;</span>
+<span class="n">store</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Our Atomic MultiLog adopts the same schema outlined <a href="./#schema">above</a>. The 
+storage mode is set to in-memory, but can be of the following types:</p>
+<table>
+<thead>
+<tr>
+<th align="center">Storage Mode</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">IN_MEMORY</td>
+<td align="left">All data is written purely in memory, and no attempt is made at persisting data to secondary storage.</td>
+</tr>
+<tr>
+<td align="center">DURABLE</td>
+<td align="left">Only the raw data (i.e., raw bytes corresponding to each record) is persisted to secondary storage for each write. The write is not considered complete unless its effects have been persisted to secondary storage.</td>
+</tr>
+<tr>
+<td align="center">DURABLE_RELAXED</td>
+<td align="left">Only the raw data (i.e., raw bytes corresponding to each record) is persisted to secondary storage; however, the data is buffered in memory and only persisted periodically, instead of persisting data for every write. This generally leads to better write performance.</td>
+</tr>
+</tbody>
+</table>
+<p>We then obtain a reference to our newly created Atomic MultiLog:</p>
+<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">atomic_multilog</span><span class="o">*</span> <span class="n">mlog</span> <span class="o">=</span> <span class="n">store</span><span class="p">.</span><span class="n">get_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h4 id="adding-indexes">Adding Indexes<a class="headerlink" href="#adding-indexes" title="Permanent link">&para;</a></h4>
+<p>We can define indexes on the Atomic MultiLog as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_index</span><span class="p">(</span><span class="s">&quot;op_latency_ms&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>to add an index on <code>op_latency_ms</code> attribute. </p>
+<h4 id="adding-filters">Adding Filters<a class="headerlink" href="#adding-filters" title="Permanent link">&para;</a></h4>
+<p>We can also install filters as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>to explicitly filter out records that indicate low system resources (CPU 
+utilization &gt; 80%, Available Memory &lt; 10%), using a filter named <code>low_resources</code>. </p>
+<h4 id="adding-aggregates">Adding Aggregates<a class="headerlink" href="#adding-aggregates" title="Permanent link">&para;</a></h4>
+<p>Additionally, we can add aggregates on filters as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;MAX(op_latency_ms)&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>This adds a new stored aggregate <code>max_latency_ms</code> on the filter 
+<code>low_resources</code> we defined before. In essence, it records the highest 
+operation latency reported in any record that also indicated low 
+available resources.</p>
+<h4 id="installing-triggers">Installing Triggers<a class="headerlink" href="#installing-triggers" title="Permanent link">&para;</a></h4>
+<p>Finally, we can install a trigger on aggregates as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">install_trigger</span><span class="p">(</span><span class="s">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s">&quot;max_latency &gt; 1000&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p>This installs a trigger <code>high_latency_trigger</code> on the aggregate 
+<code>max_latency_ms</code>, which should generate an alert whenever the 
+condition <code>max_latency_ms &gt; 1000</code> is satisfied, i.e.,
+whenever the maximum latency for an operation exceeds 1s and
+the available resources are low.</p>
+<h4 id="loading-sample-data-into-atomic-multilog">Loading sample data into Atomic MultiLog<a class="headerlink" href="#loading-sample-data-into-atomic-multilog" title="Permanent link">&para;</a></h4>
+<p>We are now ready to load some data into this Atomic MultiLog. Atomic MutliLogs
+only support addition of new data via <em>appends</em>. However, new data can be
+appended in several ways:</p>
+<h5 id="appending-string-vectors">Appending String Vectors<a class="headerlink" href="#appending-string-vectors" title="Permanent link">&para;</a></h5>
+<p>This version of <code>append</code> method takes a vector of strings as its input, where
+the vector corresponds to a single record. The number of entries in the
+vector must match the number of entries in the schema, with the exception
+of the timestamp --- if the timestamp is not provided, Confluo will automatically
+assign one.</p>
+<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.5&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span>  <span class="s">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">});</span>
+<span class="kt">size_t</span> <span class="n">off2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;500&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.05&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span><span class="p">});</span>
+<span class="kt">size_t</span> <span class="n">off3</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;1001&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.03&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">});</span>
+</pre></div>
+
+
+<p>Also note that the operation returns a unique offset corresponding to each append
+operation. This forms the "key" for records stored in the Atomic MultiLog -- records
+can be retrieved by specifying their corresponding offsets.</p>
+<h5 id="appending-raw-bytes">Appending Raw bytes<a class="headerlink" href="#appending-raw-bytes" title="Permanent link">&para;</a></h5>
+<p>This version of <code>append</code> takes as its input a pointer to a C/C++ struct, that maps
+exactly to the Atomic MultiLog's schema. For instance, our schema would map to the following
+C/C++ struct:</p>
+<div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">perf_log_record</span> <span class="p">{</span>
+  <span class="kt">int64_t</span> <span class="n">timestamp</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">op_latency_ms</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">cpu_util</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mem_avail</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">log_msg</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Note that <code>log_msg</code> maps to a <code>char[100]</code> rather than an <code>std::string</code>. To add a new record, we
+would populate a struct instance, and pass its reference to the append function:</p>
+<div class="codehilite"><pre><span></span><span class="kt">int64_t</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">();</span>
+<span class="n">perf_log_record</span> <span class="n">rec</span> <span class="o">=</span> <span class="p">{</span> <span class="n">ts</span><span class="p">,</span> <span class="mf">2000.0</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span> <span class="p">};</span>
+<span class="kt">size_t</span> <span class="n">off4</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Note that this is a more efficient variant of append, since it avoids the overheads of parsing 
+strings to the corresponding attribute data types.</p>
+<h5 id="batched-appends">Batched Appends<a class="headerlink" href="#batched-appends" title="Permanent link">&para;</a></h5>
+<p>It is also possible to batch multiple record appends into a single append. The first
+step in building a batch is to obtain a batch builder:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">batch_bldr</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_batch_builder</span><span class="p">();</span>
+</pre></div>
+
+
+<p>The batch builder supports adding new records via both string vector and raw byte interfaces:</p>
+<div class="codehilite"><pre><span></span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">({</span> <span class="s">&quot;400&quot;</span><span class="p">,</span> <span class="s">&quot;0.85&quot;</span><span class="p">,</span> <span class="s">&quot;0.07&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4} down&quot;</span><span class="p">});</span>
+<span class="n">perf_log_record</span> <span class="n">rec</span> <span class="o">=</span> <span class="p">{</span> <span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">(),</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span> <span class="p">};</span>
+<span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Once the batch is populated, we can append the batch to the Atomic MultiLog as follows:</p>
+<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off5</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append_batch</span><span class="p">(</span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">get_batch</span><span class="p">());</span>
+</pre></div>
+
+
+<p>To understand how we can query the data we have loaded so far, read the guide on <a href="../queries/">Confluo Queries</a>.</p>
+<h3 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h3>
+<p>In the stand-alone mode, Confluo runs as a daemon server, serving client requests
+using Apache Thrift protocol. To start the server, run:</p>
+<div class="codehilite"><pre><span></span>confuod --address<span class="o">=</span><span class="m">127</span>.0.0.1 --port<span class="o">=</span><span class="m">9090</span>
+</pre></div>
+
+
+<p>Once the server daemon is running, you can send requests to it using the 
+C++/Python/Java client APIs. We will focus on the C++ Client API, although 
+the Python/Java API is almost identical. In fact, even the C++ Client API is 
+almost identical to the embedded mode API.</p>
+<p>We look at the same performance monitoring and diagnosis tool example for the
+stand-alone mode. The relevant header file to include for the C++ Client API is
+<code>rpc_client.h</code>.</p>
+<h4 id="creating-a-client-connection">Creating a Client Connection<a class="headerlink" href="#creating-a-client-connection" title="Permanent link">&para;</a></h4>
+<p>To begin with, we first have to establish a client connection with the server.</p>
+<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">rpc</span><span class="o">::</span><span class="n">rpc_client</span> <span class="n">client</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">9090</span><span class="p">);</span>
+</pre></div>
+
+
+<p>The first argument to the <code>rpc_client</code> constructor corresponds to the server
+hostname, while the second argument corresponds to the server port.</p>
+<h4 id="creating-a-new-atomic-multilog_1">Creating a New Atomic MultiLog<a class="headerlink" href="#creating-a-new-atomic-multilog_1" title="Permanent link">&para;</a></h4>
+<p>We then create a new Atomic MultiLog within the Store (synonymous to a database
+table); as before, this requires three parameters: a name for the Atomic 
+MultiLog, a fixed schema, and a storage mode:</p>
+<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">schema</span> <span class="o">=</span> <span class="s">&quot;{</span>
+  <span class="nl">timestamp</span><span class="p">:</span> <span class="n">LONG</span><span class="p">,</span>
+  <span class="nl">op_latency_ms</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
+  <span class="nl">cpu_util</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
+  <span class="nl">mem_avail</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
+  <span class="nl">log_msg</span><span class="p">:</span> <span class="n">STRING</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="p">}</span><span class="s">&quot;;</span>
+<span class="k">auto</span> <span class="n">storage_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">;</span>
+<span class="n">client</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">);</span>
+</pre></div>
+
+
+<p>This operation also internally sets the current Atomic MultiLog 
+for the client to the one we just created (i.e., <code>perf_log</code>). It
+is also possible to explicitly set the current Atomic MultiLog for
+the client as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is necessary to set the current Atomic MultiLog for the <code>rpc_client</code>;
+issuing requests via the client without setting the current Atomic MultiLog
+will result in exceptions.</p>
+</div>
+<h4 id="adding-indexes_1">Adding Indexes<a class="headerlink" href="#adding-indexes_1" title="Permanent link">&para;</a></h4>
+<p>We can define indexes as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_index</span><span class="p">(</span><span class="s">&quot;op_latency_ms&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h4 id="adding-filters_1">Adding Filters<a class="headerlink" href="#adding-filters_1" title="Permanent link">&para;</a></h4>
+<p>We can also install filters as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h4 id="adding-aggregates_1">Adding Aggregates<a class="headerlink" href="#adding-aggregates_1" title="Permanent link">&para;</a></h4>
+<p>Additionally, we can add aggregates on filters as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;MAX(op_latency_ms)&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h4 id="installing-triggers_1">Installing Triggers<a class="headerlink" href="#installing-triggers_1" title="Permanent link">&para;</a></h4>
+<p>Finally, we can install a trigger on an aggregate as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">install_trigger</span><span class="p">(</span><span class="s">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s">&quot;max_latency &gt; 1000&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h4 id="loading-sample-data-into-atomic-multilog_1">Loading sample data into Atomic MultiLog<a class="headerlink" href="#loading-sample-data-into-atomic-multilog_1" title="Permanent link">&para;</a></h4>
+<p>We are now ready to load some data into the Atomic MultiLog on the server. </p>
+<h5 id="appending-string-vectors_1">Appending String Vectors<a class="headerlink" href="#appending-string-vectors_1" title="Permanent link">&para;</a></h5>
+<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off1</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.5&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span>  <span class="s">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">});</span>
+<span class="kt">size_t</span> <span class="n">off2</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;500&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.05&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span><span class="p">});</span>
+<span class="kt">size_t</span> <span class="n">off3</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;1001&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.03&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">});</span>
+</pre></div>
+
+
+<h5 id="appending-raw-bytes_1">Appending Raw bytes<a class="headerlink" href="#appending-raw-bytes_1" title="Permanent link">&para;</a></h5>
+<p>As with the embedded mode, this version of <code>append</code> takes as its input a pointer to a C/C++ struct that maps
+<em>exactly</em> to the Atomic MultiLog's schema. Our schema would map to the following C/C++ struct:</p>
+<div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">perf_log_record</span> <span class="p">{</span>
+  <span class="kt">int64_t</span> <span class="n">timestamp</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">op_latency_ms</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">cpu_util</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mem_avail</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">log_msg</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>Unlike the embedded interface, to add a new record, we now have to wrap the struct reference in a <code>record_data</code> object:</p>
+<div class="codehilite"><pre><span></span><span class="kt">int64_t</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">();</span>
+<span class="n">perf_log_record</span> <span class="n">rec</span> <span class="o">=</span> <span class="p">{</span> <span class="n">ts</span><span class="p">,</span> <span class="mf">2000.0</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span> <span class="p">};</span>
+<span class="kt">size_t</span> <span class="n">off4</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">confluo</span><span class="o">::</span><span class="n">rpc</span><span class="o">::</span><span class="n">record_data</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">rec</span><span class="p">)));</span>
+</pre></div>
+
+
+<p>As before, this is a more efficient variant of append, since it avoids the overheads of parsing 
+strings to the corresponding attribute data types.</p>
+<h5 id="batched-appends_1">Batched Appends<a class="headerlink" href="#batched-appends_1" title="Permanent link">&para;</a></h5>
+<p>It is also possible to batch multiple record appends into a single append operation via the client API. 
+This is particularly useful since batching helps amortize the cost of network latency.</p>
+<p>The first step in building a batch is to obtain a batch builder:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">batch_bldr</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_batch_builder</span><span class="p">();</span>
+</pre></div>
+
+
+<p>The batch builder supports adding new records via both string vector and raw byte interfaces:</p>
+<div class="codehilite"><pre><span></span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">({</span> <span class="s">&quot;400&quot;</span><span class="p">,</span> <span class="s">&quot;0.85&quot;</span><span class="p">,</span> <span class="s">&quot;0.07&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4} down&quot;</span><span class="p">});</span>
+<span class="n">perf_log_record</span> <span class="n">rec</span> <span class="o">=</span> <span class="p">{</span> <span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">(),</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span> <span class="p">};</span>
+<span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">(</span><span class="n">confluo</span><span class="o">::</span><span class="n">rpc</span><span class="o">::</span><span class="n">record_data</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">rec</span><span class="p">)));</span>
+</pre></div>
+
+
+<p>Once the batch is populated, we can append the batch as follows:</p>
+<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off5</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append_batch</span><span class="p">(</span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">get_batch</span><span class="p">());</span>
+</pre></div>
+
+
+<p>Details on querying the data via the client interface can be found in the guide on <a href="../queries/">Confluo Queries</a>.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>We plan on adding support for variable width data types in a future relase.&#160;<a class="footnote-backref" href="#fnref:1" rev="footnote" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+                
+                  
+                
+              
+              
+                
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../modes_of_operation/" title="Modes of Operation" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Modes of Operation
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../type_system/" title="Type System" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Type System
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.e8b9464e.js"></script>
+      
+      <script>app.initialize({version:"0.17.2",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>
