@@ -194,10 +194,10 @@ class rpc_client {
     read_batch(_return, offset, 1);
   }
 
-  void read(std::vector<std::string>& _return, int64_t offset) {
+  std::vector<std::string> read(int64_t offset) {
     record_data rdata;
     read_batch(rdata, offset, 1);
-    cur_schema_.data_to_record_vector(_return, rdata.data());
+    return cur_schema_.data_to_record_vector(rdata.data());
   }
 
   void read_batch(record_data& _return, int64_t offset, size_t nrecords) {
@@ -207,22 +207,26 @@ class rpc_client {
     client_->read(_return, cur_multilog_id_, offset, nrecords);
   }
 
-  void read_batch(std::vector<std::vector<std::string>>& _return, int64_t offset, size_t nrecords) {
+  std::vector<std::vector<std::string>> read_batch(int64_t offset, size_t nrecords) {
     record_data rdata;
     read_batch(rdata, offset, nrecords);
+    std::vector<std::vector<std::string>> _return;
     size_t nread = rdata.size() / cur_schema_.record_size();
     for (size_t i = 0; i < nread; i++) {
       _return.push_back(cur_schema_.data_to_record_vector(rdata.data() + i * cur_schema_.record_size()));
     }
+    return _return;
   }
 
-  void get_aggregate(std::string& _return, const std::string& aggregate_name,
+  std::string get_aggregate(const std::string& aggregate_name,
       int64_t begin_ms, int64_t end_ms) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
     }
+    std::string _return;
     client_->query_aggregate(_return, cur_multilog_id_, aggregate_name,
         begin_ms, end_ms);
+    return _return;
   }
 
   rpc_record_stream execute_filter(const std::string& filter_expr) {
