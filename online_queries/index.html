@@ -424,6 +424,33 @@
     Stand-alone Mode
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#querying-pre-defined-filters_1" title="Querying Pre-defined Filters" class="md-nav__link">
+    Querying Pre-defined Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-pre-defined-aggregates_1" title="Obtaining Pre-defined Aggregates" class="md-nav__link">
+    Obtaining Pre-defined Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-alerts-from-a-pre-defined-trigger_1" title="Obtaining Alerts from a Pre-defined Trigger" class="md-nav__link">
+    Obtaining Alerts from a Pre-defined Trigger
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
       
@@ -636,6 +663,33 @@
     Stand-alone Mode
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#querying-pre-defined-filters_1" title="Querying Pre-defined Filters" class="md-nav__link">
+    Querying Pre-defined Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-pre-defined-aggregates_1" title="Obtaining Pre-defined Aggregates" class="md-nav__link">
+    Obtaining Pre-defined Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-alerts-from-a-pre-defined-trigger_1" title="Obtaining Alerts from a Pre-defined Trigger" class="md-nav__link">
+    Obtaining Alerts from a Pre-defined Trigger
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
       
@@ -672,8 +726,8 @@ have been added to it as outlined in <a href="../loading_data/">Data Storage</a>
 
 <h3 id="querying-pre-defined-filters">Querying Pre-defined Filters<a class="headerlink" href="#querying-pre-defined-filters" title="Permanent link">&para;</a></h3>
 <p>We can query a pre-defined filter as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream1</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
   <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
@@ -712,6 +766,47 @@ MultiLog as follows:</p>
 and an optional trigger name as its third argument. The query returns a lazy 
 stream over generated alerts for this trigger in the specified time-range.</p>
 <h2 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h2>
+<p>The API for Stand-alone mode of operation is quite similar to the embedded mode.
+We only focus on the C++ Client API, since Python and Java Client APIs are
+almost identical to the C++ Client API.</p>
+<p>As with the embedded mode, we work with the assumption that the client is connected to the server, 
+has already created the Atomic MultiLog, and added all relevant filters, aggregates and triggers.
+Also, the current Atomic MultiLog for the client has been set to <code>perf_log</code> as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h3 id="querying-pre-defined-filters_1">Querying Pre-defined Filters<a class="headerlink" href="#querying-pre-defined-filters_1" title="Permanent link">&para;</a></h3>
+<p>We can query a pre-defined filter as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>This operation returns a lazy stream of records, which automatically fetches
+more data from the server as the clients consumes them.</p>
+<h3 id="obtaining-pre-defined-aggregates_1">Obtaining Pre-defined Aggregates<a class="headerlink" href="#obtaining-pre-defined-aggregates_1" title="Permanent link">&para;</a></h3>
+<p>We can obtian a pre-defined aggregate as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">value</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">value</span><span class="p">;</span>
+</pre></div>
+
+
+<p>The operation returns a string representation of the aggregate.</p>
+<h3 id="obtaining-alerts-from-a-pre-defined-trigger_1">Obtaining Alerts from a Pre-defined Trigger<a class="headerlink" href="#obtaining-alerts-from-a-pre-defined-trigger_1" title="Permanent link">&para;</a></h3>
+<p>Finally, we can obtain alerts generated by triggers installed on an Atomic 
+MultiLog as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">alert_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">alert_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Similar to the filter query, this operation returns a lazy stream of alerts, 
+which automatically fetches more data from the server as the clients consumes them.</p>
                 
                   
                 
