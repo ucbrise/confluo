@@ -1,6 +1,8 @@
 site_name: Confluo
 docs_dir: @CMAKE_CURRENT_SOURCE_DIR@/src
 site_dir: @CMAKE_CURRENT_BINARY_DIR@/site
+site_author: 'Anurag Khandelwal'
+repo_name: ucbrise/confluo
 repo_url: https://github.com/ucbrise/confluo/
 markdown_extensions:
   - admonition
@@ -10,12 +12,15 @@ markdown_extensions:
   - toc:
       permalink: true
 pages:
-  - Overview: index.md
+  - About: index.md
+  - Research Papers: research.md
+  - Contributing: contributing.md
+  - Contact: contact.md
   - User Guide:
     - Quick Start: quick_start.md
     - Installation: install.md
     - Modes of Operation: modes_of_operation.md
-    - Data Storage and Loading: 
+    - Data Storage: 
       - Data Storage Overview: loading_data.md
       - Type System: type_system.md
     - Querying Data:
@@ -43,7 +48,7 @@ theme:
 
     # Another layer on top of the main navigation for larger screens in the form
     # of tabs, especially useful for larger documentation projects
-    tabs: false
+    tabs: true
 
   # Sets the primary and accent color palettes as defined in the Material Design
   # documentation - possible values can be looked up in the getting started guide
@@ -60,10 +65,10 @@ theme:
   font:
 
     # Default font for text
-    text: Roboto
+    text: Lato
 
     # Fixed-width font for code listings
-    code: Roboto Mono
+    code: Inconsolata
 
   # Favicon to be rendered
   favicon: theme/assets/images/favicon.png

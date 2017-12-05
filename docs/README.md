@@ -7,7 +7,7 @@ Confluo uses:
 
 as a part of its build. 
 
-By default, if the `BUILD_DOCS` variable is set to `ON` while configuring the
+If the `BUILD_DOCS` variable is set to `ON` while configuring the
 build using CMake, the documentation is automatically built with the source.
 
 Confluo documentation is spread across text files formatted using markdown. You

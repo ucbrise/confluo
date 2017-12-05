@@ -1,4 +1,6 @@
-# Confluo Overview
+# Confluo
+
+## Overview
 
 Confluo is a system for real-time monitoring and analysis of data, that supports:
 
@@ -11,7 +13,7 @@ Confluo is a system for real-time monitoring and analysis of data, that supports
 * [Quick Start](quick_start.md)
 * [Installation](install.md)
 * [Modes of Operation](modes_of_operation.md)
-* [Data Storage and Loading](loading_data.md)
+* [Data Storage](loading_data.md)
     - [Type System](type_system.md)
 * [Querying Data](queries.md)
     - [Online Queries](online_queries.md)

@@ -1,4 +1,4 @@
-# Data Storage and Loading
+# Data Storage
 
 Confluo operates on _data streams_. Each stream comprises of records, each of
 which follows a pre-defined schema over a collection of strongly-typed 
@@ -80,7 +80,7 @@ Confluo supports indexes, filters, aggregates and triggers only on bounded-width
 attributes in the schema. Once added, each of these are evaluated and updated 
 upon arrival of each new batch of data records.
 
-## Loading Data: A Performance Monitoring and Diagnosis Example
+## A Performance Monitoring and Diagnosis Example
 
 We will now see how we can create Atomic MultiLogs, add indexes, filters, aggregate and triggers on them,
 and finally load some data into them, for both embedded and stand-alone modes of operation. We will work
