@@ -282,11 +282,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-4" type="checkbox" id="nav-2-4">
     
     <label class="md-nav__link" for="nav-2-4">
-      Data Storage and Loading
+      Data Storage
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
       <label class="md-nav__title" for="nav-2-4">
-        Data Storage and Loading
+        Data Storage
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -379,9 +379,43 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Offline Queries
+      </label>
+    
     <a href="./" title="Offline Queries" class="md-nav__link md-nav__link--active">
       Offline Queries
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded Mode" class="md-nav__link">
+    Embedded Mode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -533,6 +567,27 @@
     
   
   
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded Mode" class="md-nav__link">
+    Embedded Mode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -547,6 +602,29 @@
                 
                 
                 <h1 id="offline-queries">Offline Queries<a class="headerlink" href="#offline-queries" title="Permanent link">&para;</a></h1>
+<h2 id="embedded-mode">Embedded Mode<a class="headerlink" href="#embedded-mode" title="Permanent link">&para;</a></h2>
+<p>Now we take a look at how we can query the data in the Atomic MultiLog. First,
+it is straightforward to retrieve records given their offsets:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off1</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">record2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off2</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">record3</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off3</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Each of <code>record1</code>, <code>record2</code>, and <code>record3</code> are vectors of strings.</p>
+<p>We can query indexed attributes as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">execute_filter</span><span class="p">(</span><span class="s">&quot;type == b&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream1</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Note that the operation returns a lazily evaluated stream, which supports
+functional style operations like map, filter, etc. See 
+<a href="https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/container/lazy/stream.h">Stream API</a>
+for more details.</p>
+<h2 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h2>
                 
                   
                 

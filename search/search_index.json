@@ -2,7 +2,7 @@
     "docs": [
         {
             "location": "/", 
-            "text": "Confluo Overview\n\n\nConfluo is a system for real-time monitoring and analysis of data, that supports:\n\n\n\n\nhigh-throughput concurrent writes of millions of data points from multiple data streams;\n\n\nonline queries at millisecond timescale; and \n\n\nad-hoc queries using minimal CPU resources.\n\n\n\n\nUser Guide\n\n\n\n\nQuick Start\n\n\nInstallation\n\n\nModes of Operation\n\n\nData Storage and Loading\n\n\nType System\n\n\n\n\n\n\nQuerying Data\n\n\nOnline Queries\n\n\nOffline Queries\n\n\n\n\n\n\nArchiving Data\n\n\n\n\nAPI Docs\n\n\n\n\nC++ API\n\n\nClient APIs\n\n\nC++ Client API\n\n\nPython Client API\n\n\nJava Client API", 
+            "text": "Confluo Overview\n\n\nConfluo is a system for real-time monitoring and analysis of data, that supports:\n\n\n\n\nhigh-throughput concurrent writes of millions of data points from multiple data streams;\n\n\nonline queries at millisecond timescale; and \n\n\nad-hoc queries using minimal CPU resources.\n\n\n\n\nUser Guide\n\n\n\n\nQuick Start\n\n\nInstallation\n\n\nModes of Operation\n\n\nData Storage\n\n\nType System\n\n\n\n\n\n\nQuerying Data\n\n\nOnline Queries\n\n\nOffline Queries\n\n\n\n\n\n\nArchiving Data\n\n\n\n\nAPI Docs\n\n\n\n\nC++ API\n\n\nClient APIs\n\n\nC++ Client API\n\n\nPython Client API\n\n\nJava Client API", 
             "title": "Overview"
         }, 
         {
@@ -12,7 +12,7 @@
         }, 
         {
             "location": "/#user-guide", 
-            "text": "Quick Start  Installation  Modes of Operation  Data Storage and Loading  Type System    Querying Data  Online Queries  Offline Queries    Archiving Data", 
+            "text": "Quick Start  Installation  Modes of Operation  Data Storage  Type System    Querying Data  Online Queries  Offline Queries    Archiving Data", 
             "title": "User Guide"
         }, 
         {
@@ -57,12 +57,12 @@
         }, 
         {
             "location": "/install/", 
-            "text": "Installation\n\n\nBefore you can install Confluo, make sure you have the following prerequisites:\n\n\n\n\nMacOS X or Unix-based OS; Windows is not yet supported.\n\n\nC++ compiler that supports C++11 standard\n\n\nCMake 2.8 or later\n\n\nBoost 1.53 or later\n\n\n\n\nFor python client, you will additionally require:\n\n Python 2.7 or later\n\n Python Packages: six 1.7.2 or later\n\n\nFor java client, you will additionally require:\n\n Java 1.7 or later\n\n ant 1.6.2 or later\n\n\nDownload\n\n\nYou can obtain the latest version of Confluo by cloning the GitHub repository:\n\n\ngit clone https://github.com/ucbrise/confluo.git\n\n\n\n\n\nConfigure\n\n\nTo configure the build, Confluo uses CMake as its build system. Confluo only \nsupports out of source builds; the simplest way to configure the build would be \nas follows:\n\n\ncd\n confluo\nmkdir -p build\n\ncd\n build\ncmake ..\n\n\n\n\n\nIt is possible to configure the build specifying certain options based on \nrequirements; the supported options are:\n\n\n\n\nBUILD_TESTS\n: Builds all tests (ON by default)\n\n\nBUILD_RPC\n: Builds the rpc daemon and client libraries (ON by default)\n\n\nBUILD_EXAMPLES\n: Builds Confluo examples (ON by default)\n\n\nBUILD_DOC\n: Builds Confluo documentation (OFF by default)\n\n\nWITH_PY_CLIENT\n: Builds Confluo python rpc client (ON by default)\n\n\nWITH_JAVA_CLIENT\n: Builds Confluo java rpc client (ON by default)\n\n\n\n\nIn order to explicitly enable or disable any of these options, set the value of\nthe corresponding variable to \nON\n or \nOFF\n as follows:\n\n\ncmake -DBUILD_TESTS\n=\nOFF\n\n\n\n\n\nFinally, you can configure the install location for Confluo by modifying the\n\nCMAKE_INSTALL_PREFIX\n variable (which is set to /usr/local by default):\n\n\ncmake -DCMAKE_INSTALL_PREFIX\n=\n/path/to/installation\n\n\n\n\n\nInstall\n\n\nOnce the build is configured, you can proceed to compile, test and install \nConfluo. \n\n\nTo build, use:\n\n\nmake\n\n\n\n\n\nor \n\n\nmake -j\n{\nNUM_CORES\n}\n\n\n\n\n\n\nto speed up the build on multi-core systems.\n\n\nTo run the various unit tests, run:\n\n\nmake \ntest\n\n\n\n\n\n\nand finally, to install, use:\n\n\nmake install", 
+            "text": "Installation\n\n\nBefore you can install Confluo, make sure you have the following prerequisites:\n\n\n\n\nMacOS X or Unix-based OS; Windows is not yet supported.\n\n\nC++ compiler that supports C++11 standard\n\n\nCMake 2.8 or later\n\n\nBoost 1.53 or later\n\n\n\n\nFor python client, you will additionally require:\n\n\n\n\nPython 2.7 or later\n\n\nPython Packages: six 1.7.2 or later\n\n\n\n\nFor java client, you will additionally require:\n\n\n\n\nJava 1.7 or later\n\n\nant 1.6.2 or later\n\n\n\n\nDownload\n\n\nYou can obtain the latest version of Confluo by cloning the GitHub repository:\n\n\ngit clone https://github.com/ucbrise/confluo.git\n\n\n\n\n\nConfigure\n\n\nTo configure the build, Confluo uses CMake as its build system. Confluo only \nsupports out of source builds; the simplest way to configure the build would be \nas follows:\n\n\ncd\n confluo\nmkdir -p build\n\ncd\n build\ncmake ..\n\n\n\n\n\nIt is possible to configure the build specifying certain options based on \nrequirements; the supported options are:\n\n\n\n\nBUILD_TESTS\n: Builds all tests (ON by default)\n\n\nBUILD_RPC\n: Builds the rpc daemon and client libraries (ON by default)\n\n\nBUILD_EXAMPLES\n: Builds Confluo examples (ON by default)\n\n\nBUILD_DOC\n: Builds Confluo documentation (OFF by default)\n\n\nWITH_PY_CLIENT\n: Builds Confluo python rpc client (ON by default)\n\n\nWITH_JAVA_CLIENT\n: Builds Confluo java rpc client (ON by default)\n\n\n\n\nIn order to explicitly enable or disable any of these options, set the value of\nthe corresponding variable to \nON\n or \nOFF\n as follows:\n\n\ncmake -DBUILD_TESTS\n=\nOFF\n\n\n\n\n\nFinally, you can configure the install location for Confluo by modifying the\n\nCMAKE_INSTALL_PREFIX\n variable (which is set to /usr/local by default):\n\n\ncmake -DCMAKE_INSTALL_PREFIX\n=\n/path/to/installation\n\n\n\n\n\nInstall\n\n\nOnce the build is configured, you can proceed to compile, test and install \nConfluo. \n\n\nTo build, use:\n\n\nmake\n\n\n\n\n\nor \n\n\nmake -j\n{\nNUM_CORES\n}\n\n\n\n\n\n\nto speed up the build on multi-core systems.\n\n\nTo run the various unit tests, run:\n\n\nmake \ntest\n\n\n\n\n\n\nand finally, to install, use:\n\n\nmake install", 
             "title": "Installation"
         }, 
         {
             "location": "/install/#installation", 
-            "text": "Before you can install Confluo, make sure you have the following prerequisites:   MacOS X or Unix-based OS; Windows is not yet supported.  C++ compiler that supports C++11 standard  CMake 2.8 or later  Boost 1.53 or later   For python client, you will additionally require:  Python 2.7 or later  Python Packages: six 1.7.2 or later  For java client, you will additionally require:  Java 1.7 or later  ant 1.6.2 or later", 
+            "text": "Before you can install Confluo, make sure you have the following prerequisites:   MacOS X or Unix-based OS; Windows is not yet supported.  C++ compiler that supports C++11 standard  CMake 2.8 or later  Boost 1.53 or later   For python client, you will additionally require:   Python 2.7 or later  Python Packages: six 1.7.2 or later   For java client, you will additionally require:   Java 1.7 or later  ant 1.6.2 or later", 
             "title": "Installation"
         }, 
         {
@@ -82,13 +82,28 @@
         }, 
         {
             "location": "/modes_of_operation/", 
-            "text": "Modes of Operation\n\n\nConfluo can be used in two modes -- embedded and stand-alone. \n\n\nIn the \nembedded mode\n, Confluo is used as a header-only library in C++, allowing Confluo\nto use the same address-space as the application process. This enables ultra low-latency \nwrites and queries, but only supports applications written in C++.\n\n\nOn the other hand, Confluo also supports a \nstand-alone mode\n, where Confluo runs as a daemon \nserver process and allows clients to communicate with it using \n\nApache Thrift\n protocol. Operations now incur higher latencies\n(due to serialization/deserialization overheads), but can now operate over the network, \nand allows Confluo to store data from applications written in different languages.\n\n\nRead more on how you can perform different operations with the two modes of operation:\n\n\n\n\nData Storage and Loading Data\n\n\nQuerying Data\n\n\nOnline Queries\n\n\nOffline Queries", 
+            "text": "Modes of Operation\n\n\nConfluo can be used in two modes -- embedded and stand-alone. \n\n\nEmbedded Mode\n\n\nIn the \nembedded mode\n, Confluo is used as a header-only library in C++, allowing Confluo\nto use the same address-space as the application process. This enables ultra low-latency \nwrites and queries, but only supports applications written in C++.\n\n\nStand-alone Mode\n\n\nConfluo also supports a \nstand-alone mode\n, where Confluo runs as a daemon \nserver process and allows clients to communicate with it using \n\nApache Thrift\n protocol. Operations now incur higher latencies\n(due to serialization/deserialization overheads), but can now operate over the network, \nand allows Confluo to store data from applications written in different languages.\n\n\nMore on Usage\n\n\nRead more on how you can perform different operations with the two modes of operation:\n\n\n\n\nData Storage and Loading Data\n\n\nQuerying Data\n\n\nOnline Queries\n\n\nOffline Queries", 
             "title": "Modes of Operation"
         }, 
         {
             "location": "/modes_of_operation/#modes-of-operation", 
-            "text": "Confluo can be used in two modes -- embedded and stand-alone.   In the  embedded mode , Confluo is used as a header-only library in C++, allowing Confluo\nto use the same address-space as the application process. This enables ultra low-latency \nwrites and queries, but only supports applications written in C++.  On the other hand, Confluo also supports a  stand-alone mode , where Confluo runs as a daemon \nserver process and allows clients to communicate with it using  Apache Thrift  protocol. Operations now incur higher latencies\n(due to serialization/deserialization overheads), but can now operate over the network, \nand allows Confluo to store data from applications written in different languages.  Read more on how you can perform different operations with the two modes of operation:   Data Storage and Loading Data  Querying Data  Online Queries  Offline Queries", 
+            "text": "Confluo can be used in two modes -- embedded and stand-alone.", 
             "title": "Modes of Operation"
+        }, 
+        {
+            "location": "/modes_of_operation/#embedded-mode", 
+            "text": "In the  embedded mode , Confluo is used as a header-only library in C++, allowing Confluo\nto use the same address-space as the application process. This enables ultra low-latency \nwrites and queries, but only supports applications written in C++.", 
+            "title": "Embedded Mode"
+        }, 
+        {
+            "location": "/modes_of_operation/#stand-alone-mode", 
+            "text": "Confluo also supports a  stand-alone mode , where Confluo runs as a daemon \nserver process and allows clients to communicate with it using  Apache Thrift  protocol. Operations now incur higher latencies\n(due to serialization/deserialization overheads), but can now operate over the network, \nand allows Confluo to store data from applications written in different languages.", 
+            "title": "Stand-alone Mode"
+        }, 
+        {
+            "location": "/modes_of_operation/#more-on-usage", 
+            "text": "Read more on how you can perform different operations with the two modes of operation:   Data Storage and Loading Data  Querying Data  Online Queries  Offline Queries", 
+            "title": "More on Usage"
         }, 
         {
             "location": "/loading_data/", 
@@ -242,27 +257,52 @@
         }, 
         {
             "location": "/queries/", 
-            "text": "Querying Data", 
+            "text": "Querying Data\n\n\nQueries in Confluo can either be \nonline\n or \noffline\n. Online queries are executed as new data records\nare written to an Atomic MultiLog, while offline queries are evaluated on already written records.\nIn essence, online queries are similar to continuous queries databases.\n\n\nIn order to support online and offline queries, Confluo makes use of indexes, filters, aggregates \nand triggers. The interface for adding these elements to an Atomic MultiLog was described in the \nguide on \nData Storage and Loading\n.\n\n\nTo see how Confluo supports online and offline queries, see the individual guides at:\n\n\n\n\nOnline Queries\n\n\nOffline Queries", 
             "title": "Queries Overview"
         }, 
         {
             "location": "/queries/#querying-data", 
-            "text": "", 
+            "text": "Queries in Confluo can either be  online  or  offline . Online queries are executed as new data records\nare written to an Atomic MultiLog, while offline queries are evaluated on already written records.\nIn essence, online queries are similar to continuous queries databases.  In order to support online and offline queries, Confluo makes use of indexes, filters, aggregates \nand triggers. The interface for adding these elements to an Atomic MultiLog was described in the \nguide on  Data Storage and Loading .  To see how Confluo supports online and offline queries, see the individual guides at:   Online Queries  Offline Queries", 
             "title": "Querying Data"
         }, 
         {
             "location": "/online_queries/", 
-            "text": "Online Queries", 
+            "text": "Online Queries\n\n\nOnline queries on Confluo are executed automatically as new records are written \ninto an Atomic MultiLog. Therefore, these queries need to be pre-defined; the \nguide on \nData Storage\n describes how we can define filters,\naggregates and triggers for online evaluation. In this guide, we will look\nat how we can retrieve the results of these online queries.\n\n\nEmbedded Mode\n\n\nWe begin with the embedded mode of operation. We work with the assumption that\nthe Atomic MultiLog has already been created, and filters, aggregates and triggers\nhave been added to it as outlined in \nData Storage\n.\n\n\nTo start with, we have a reference to the Atomic MultiLog as follows:\n\n\nconfluo\n::\natomic_multilog\n*\n \nmlog\n \n=\n \nstore\n.\nget_atomic_multilog\n(\nperf_log\n);\n\n\n\n\n\n\nQuerying Pre-defined Filters\n\n\nWe can query a pre-defined filter as follows:\n\n\nauto\n \nrecord_stream1\n \n=\n \nmlog\n-\nquery_filter\n(\nlow_resources\n,\n \n0\n,\n \nUINT64_MAX\n);\n\n\nfor\n \n(\nauto\n \ns\n \n=\n \nrecord_stream1\n;\n \n!\ns\n.\nempty\n();\n \ns\n \n=\n \ns\n.\ntail\n())\n \n{\n\n  \nstd\n::\ncout\n \n \ns\n.\nhead\n().\nto_string\n();\n\n\n}\n\n\n\n\n\n\nThe first parameter corresponds to the name of the filter to be queried, while \nthe second and third parameters correspond to the begining timestamp and end \ntimestamp to consider for records in the filter. We've specified them to capture\nall possible values of timestamp. This operation returns a lazily evaluated record \nstream which supports functional semantics such as filter, map, etc. See Confluo's\n\nStream API\n \nfor more details on how to work with lazy streams.\n\n\nObtaining Pre-defined Aggregates\n\n\nWe can obtian a pre-defined aggregate as follows:\n\n\nauto\n \nvalue\n \n=\n \nmlog\n-\nget_aggregate\n(\nmax_latency_ms\n,\n \n0\n,\n \nUINT64_MAX\n);\n\n\nstd\n::\ncout\n \n \nvalue\n.\nto_string\n();\n\n\n\n\n\n\nThe operation takes the name of the aggregate as its first parameter, while the \nsecond and third parameters correspond to begin and end timestmaps, as with \npre-defined filters. The query returns a \n\nnumeric\n \nobject, which is a wrapper around numeric values in C++.\n\n\nObtaining Alerts from a Pre-defined Trigger\n\n\nFinally, we can obtain alerts generated by triggers installed on an Atomic \nMultiLog as follows:\n\n\nauto\n \nalert_stream\n \n=\n \nmlog\n-\nget_alerts\n(\n0\n,\n \nUINT64_MAX\n,\n \nhigh_latency_trigger\n);\n\n\nfor\n \n(\nauto\n \ns\n \n=\n \nalert_stream\n;\n \n!\ns\n.\nempty\n();\n \ns\n \n=\n \ns\n.\ntail\n())\n \n{\n\n  \nstd\n::\ncout\n \n \ns\n.\nhead\n().\nto_string\n();\n\n\n}\n\n\n\n\n\n\nThe query takes begin and end timestamps as its first and second arguments,\nand an optional trigger name as its third argument. The query returns a lazy \nstream over generated alerts for this trigger in the specified time-range.\n\n\nStand-alone Mode", 
             "title": "Online Queries"
         }, 
         {
             "location": "/online_queries/#online-queries", 
-            "text": "", 
+            "text": "Online queries on Confluo are executed automatically as new records are written \ninto an Atomic MultiLog. Therefore, these queries need to be pre-defined; the \nguide on  Data Storage  describes how we can define filters,\naggregates and triggers for online evaluation. In this guide, we will look\nat how we can retrieve the results of these online queries.", 
             "title": "Online Queries"
         }, 
         {
+            "location": "/online_queries/#embedded-mode", 
+            "text": "We begin with the embedded mode of operation. We work with the assumption that\nthe Atomic MultiLog has already been created, and filters, aggregates and triggers\nhave been added to it as outlined in  Data Storage .  To start with, we have a reference to the Atomic MultiLog as follows:  confluo :: atomic_multilog *   mlog   =   store . get_atomic_multilog ( perf_log );", 
+            "title": "Embedded Mode"
+        }, 
+        {
+            "location": "/online_queries/#querying-pre-defined-filters", 
+            "text": "We can query a pre-defined filter as follows:  auto   record_stream1   =   mlog - query_filter ( low_resources ,   0 ,   UINT64_MAX );  for   ( auto   s   =   record_stream1 ;   ! s . empty ();   s   =   s . tail ())   { \n   std :: cout     s . head (). to_string ();  }   The first parameter corresponds to the name of the filter to be queried, while \nthe second and third parameters correspond to the begining timestamp and end \ntimestamp to consider for records in the filter. We've specified them to capture\nall possible values of timestamp. This operation returns a lazily evaluated record \nstream which supports functional semantics such as filter, map, etc. See Confluo's Stream API  \nfor more details on how to work with lazy streams.", 
+            "title": "Querying Pre-defined Filters"
+        }, 
+        {
+            "location": "/online_queries/#obtaining-pre-defined-aggregates", 
+            "text": "We can obtian a pre-defined aggregate as follows:  auto   value   =   mlog - get_aggregate ( max_latency_ms ,   0 ,   UINT64_MAX );  std :: cout     value . to_string ();   The operation takes the name of the aggregate as its first parameter, while the \nsecond and third parameters correspond to begin and end timestmaps, as with \npre-defined filters. The query returns a  numeric  \nobject, which is a wrapper around numeric values in C++.", 
+            "title": "Obtaining Pre-defined Aggregates"
+        }, 
+        {
+            "location": "/online_queries/#obtaining-alerts-from-a-pre-defined-trigger", 
+            "text": "Finally, we can obtain alerts generated by triggers installed on an Atomic \nMultiLog as follows:  auto   alert_stream   =   mlog - get_alerts ( 0 ,   UINT64_MAX ,   high_latency_trigger );  for   ( auto   s   =   alert_stream ;   ! s . empty ();   s   =   s . tail ())   { \n   std :: cout     s . head (). to_string ();  }   The query takes begin and end timestamps as its first and second arguments,\nand an optional trigger name as its third argument. The query returns a lazy \nstream over generated alerts for this trigger in the specified time-range.", 
+            "title": "Obtaining Alerts from a Pre-defined Trigger"
+        }, 
+        {
+            "location": "/online_queries/#stand-alone-mode", 
+            "text": "", 
+            "title": "Stand-alone Mode"
+        }, 
+        {
             "location": "/offline_queries/", 
-            "text": "Offline Queries", 
+            "text": "Offline Queries\n\n\nEmbedded Mode\n\n\nNow we take a look at how we can query the data in the Atomic MultiLog. First,\nit is straightforward to retrieve records given their offsets:\n\n\nauto\n \nrecord1\n \n=\n \nmlog\n-\nread\n(\noff1\n);\n\n\nauto\n \nrecord2\n \n=\n \nmlog\n-\nread\n(\noff2\n);\n\n\nauto\n \nrecord3\n \n=\n \nmlog\n-\nread\n(\noff3\n);\n\n\n\n\n\n\nEach of \nrecord1\n, \nrecord2\n, and \nrecord3\n are vectors of strings.\n\n\nWe can query indexed attributes as follows:\n\n\nauto\n \nrecord_stream1\n \n=\n \nmlog\n-\nexecute_filter\n(\ntype == b\n);\n\n\nfor\n \n(\nauto\n \ns\n \n=\n \nrecord_stream1\n;\n \n!\ns\n.\nempty\n();\n \ns\n \n=\n \ns\n.\ntail\n())\n \n{\n\n  \nstd\n::\ncout\n \n \ns\n.\nhead\n().\nto_string\n();\n\n\n}\n\n\n\n\n\n\nNote that the operation returns a lazily evaluated stream, which supports\nfunctional style operations like map, filter, etc. See \n\nStream API\n\nfor more details.\n\n\nStand-alone Mode", 
             "title": "Offline Queries"
         }, 
         {
@@ -271,13 +311,23 @@
             "title": "Offline Queries"
         }, 
         {
+            "location": "/offline_queries/#embedded-mode", 
+            "text": "Now we take a look at how we can query the data in the Atomic MultiLog. First,\nit is straightforward to retrieve records given their offsets:  auto   record1   =   mlog - read ( off1 );  auto   record2   =   mlog - read ( off2 );  auto   record3   =   mlog - read ( off3 );   Each of  record1 ,  record2 , and  record3  are vectors of strings.  We can query indexed attributes as follows:  auto   record_stream1   =   mlog - execute_filter ( type == b );  for   ( auto   s   =   record_stream1 ;   ! s . empty ();   s   =   s . tail ())   { \n   std :: cout     s . head (). to_string ();  }   Note that the operation returns a lazily evaluated stream, which supports\nfunctional style operations like map, filter, etc. See  Stream API \nfor more details.", 
+            "title": "Embedded Mode"
+        }, 
+        {
+            "location": "/offline_queries/#stand-alone-mode", 
+            "text": "", 
+            "title": "Stand-alone Mode"
+        }, 
+        {
             "location": "/data_archival/", 
-            "text": "Archiving Data", 
+            "text": "Archiving Data\n\n\n\n\nNote\n\n\nThis is work in progress.\n\n\n\n\nDocumentation for Data Archival will be added soon.", 
             "title": "Archiving Data"
         }, 
         {
             "location": "/data_archival/#archiving-data", 
-            "text": "", 
+            "text": "Note  This is work in progress.   Documentation for Data Archival will be added soon.", 
             "title": "Archiving Data"
         }, 
         {

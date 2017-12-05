@@ -282,11 +282,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-4" type="checkbox" id="nav-2-4">
     
     <label class="md-nav__link" for="nav-2-4">
-      Data Storage and Loading
+      Data Storage
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
       <label class="md-nav__title" for="nav-2-4">
-        Data Storage and Loading
+        Data Storage
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -367,9 +367,70 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Online Queries
+      </label>
+    
     <a href="./" title="Online Queries" class="md-nav__link md-nav__link--active">
       Online Queries
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded Mode" class="md-nav__link">
+    Embedded Mode
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#querying-pre-defined-filters" title="Querying Pre-defined Filters" class="md-nav__link">
+    Querying Pre-defined Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-pre-defined-aggregates" title="Obtaining Pre-defined Aggregates" class="md-nav__link">
+    Obtaining Pre-defined Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-alerts-from-a-pre-defined-trigger" title="Obtaining Alerts from a Pre-defined Trigger" class="md-nav__link">
+    Obtaining Alerts from a Pre-defined Trigger
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -533,6 +594,54 @@
     
   
   
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded Mode" class="md-nav__link">
+    Embedded Mode
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#querying-pre-defined-filters" title="Querying Pre-defined Filters" class="md-nav__link">
+    Querying Pre-defined Filters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-pre-defined-aggregates" title="Obtaining Pre-defined Aggregates" class="md-nav__link">
+    Obtaining Pre-defined Aggregates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obtaining-alerts-from-a-pre-defined-trigger" title="Obtaining Alerts from a Pre-defined Trigger" class="md-nav__link">
+    Obtaining Alerts from a Pre-defined Trigger
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -547,6 +656,62 @@
                 
                 
                 <h1 id="online-queries">Online Queries<a class="headerlink" href="#online-queries" title="Permanent link">&para;</a></h1>
+<p>Online queries on Confluo are executed automatically as new records are written 
+into an Atomic MultiLog. Therefore, these queries need to be pre-defined; the 
+guide on <a href="../loading_data/">Data Storage</a> describes how we can define filters,
+aggregates and triggers for online evaluation. In this guide, we will look
+at how we can retrieve the results of these online queries.</p>
+<h2 id="embedded-mode">Embedded Mode<a class="headerlink" href="#embedded-mode" title="Permanent link">&para;</a></h2>
+<p>We begin with the embedded mode of operation. We work with the assumption that
+the Atomic MultiLog has already been created, and filters, aggregates and triggers
+have been added to it as outlined in <a href="../loading_data/">Data Storage</a>.</p>
+<p>To start with, we have a reference to the Atomic MultiLog as follows:</p>
+<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">atomic_multilog</span><span class="o">*</span> <span class="n">mlog</span> <span class="o">=</span> <span class="n">store</span><span class="p">.</span><span class="n">get_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<h3 id="querying-pre-defined-filters">Querying Pre-defined Filters<a class="headerlink" href="#querying-pre-defined-filters" title="Permanent link">&para;</a></h3>
+<p>We can query a pre-defined filter as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream1</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>The first parameter corresponds to the name of the filter to be queried, while 
+the second and third parameters correspond to the begining timestamp and end 
+timestamp to consider for records in the filter. We've specified them to capture
+all possible values of timestamp. This operation returns a lazily evaluated record 
+stream which supports functional semantics such as filter, map, etc. See Confluo's
+<a href="https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/container/lazy/stream.h">Stream API</a> 
+for more details on how to work with lazy streams.</p>
+<h3 id="obtaining-pre-defined-aggregates">Obtaining Pre-defined Aggregates<a class="headerlink" href="#obtaining-pre-defined-aggregates" title="Permanent link">&para;</a></h3>
+<p>We can obtian a pre-defined aggregate as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">value</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">value</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
+</pre></div>
+
+
+<p>The operation takes the name of the aggregate as its first parameter, while the 
+second and third parameters correspond to begin and end timestmaps, as with 
+pre-defined filters. The query returns a 
+<a href="https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/types/numeric.h"><code>numeric</code></a> 
+object, which is a wrapper around numeric values in C++.</p>
+<h3 id="obtaining-alerts-from-a-pre-defined-trigger">Obtaining Alerts from a Pre-defined Trigger<a class="headerlink" href="#obtaining-alerts-from-a-pre-defined-trigger" title="Permanent link">&para;</a></h3>
+<p>Finally, we can obtain alerts generated by triggers installed on an Atomic 
+MultiLog as follows:</p>
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">alert_stream</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">alert_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>The query takes begin and end timestamps as its first and second arguments,
+and an optional trigger name as its third argument. The query returns a lazy 
+stream over generated alerts for this trigger in the specified time-range.</p>
+<h2 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h2>
                 
                   
                 

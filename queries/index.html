@@ -282,11 +282,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-4" type="checkbox" id="nav-2-4">
     
     <label class="md-nav__link" for="nav-2-4">
-      Data Storage and Loading
+      Data Storage
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
       <label class="md-nav__title" for="nav-2-4">
-        Data Storage and Loading
+        Data Storage
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -547,6 +547,17 @@
                 
                 
                 <h1 id="querying-data">Querying Data<a class="headerlink" href="#querying-data" title="Permanent link">&para;</a></h1>
+<p>Queries in Confluo can either be <em>online</em> or <em>offline</em>. Online queries are executed as new data records
+are written to an Atomic MultiLog, while offline queries are evaluated on already written records.
+In essence, online queries are similar to continuous queries databases.</p>
+<p>In order to support online and offline queries, Confluo makes use of indexes, filters, aggregates 
+and triggers. The interface for adding these elements to an Atomic MultiLog was described in the 
+guide on <a href="../loading_data/">Data Storage and Loading</a>.</p>
+<p>To see how Confluo supports online and offline queries, see the individual guides at:</p>
+<ul>
+<li><a href="../online_queries/">Online Queries</a></li>
+<li><a href="../offline_queries/">Offline Queries</a></li>
+</ul>
                 
                   
                 

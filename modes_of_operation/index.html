@@ -274,9 +274,50 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Modes of Operation
+      </label>
+    
     <a href="./" title="Modes of Operation" class="md-nav__link md-nav__link--active">
       Modes of Operation
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded Mode" class="md-nav__link">
+    Embedded Mode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-on-usage" title="More on Usage" class="md-nav__link">
+    More on Usage
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -291,11 +332,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-4" type="checkbox" id="nav-2-4">
     
     <label class="md-nav__link" for="nav-2-4">
-      Data Storage and Loading
+      Data Storage
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
       <label class="md-nav__title" for="nav-2-4">
-        Data Storage and Loading
+        Data Storage
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -531,6 +572,34 @@
     
   
   
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-mode" title="Embedded Mode" class="md-nav__link">
+    Embedded Mode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stand-alone-mode" title="Stand-alone Mode" class="md-nav__link">
+    Stand-alone Mode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-on-usage" title="More on Usage" class="md-nav__link">
+    More on Usage
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -546,14 +615,17 @@
                 
                 <h1 id="modes-of-operation">Modes of Operation<a class="headerlink" href="#modes-of-operation" title="Permanent link">&para;</a></h1>
 <p>Confluo can be used in two modes -- embedded and stand-alone. </p>
+<h2 id="embedded-mode">Embedded Mode<a class="headerlink" href="#embedded-mode" title="Permanent link">&para;</a></h2>
 <p>In the <em>embedded mode</em>, Confluo is used as a header-only library in C++, allowing Confluo
 to use the same address-space as the application process. This enables ultra low-latency 
 writes and queries, but only supports applications written in C++.</p>
-<p>On the other hand, Confluo also supports a <em>stand-alone mode</em>, where Confluo runs as a daemon 
+<h2 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h2>
+<p>Confluo also supports a <em>stand-alone mode</em>, where Confluo runs as a daemon 
 server process and allows clients to communicate with it using 
 <a href="https://thrift.apache.org">Apache Thrift</a> protocol. Operations now incur higher latencies
 (due to serialization/deserialization overheads), but can now operate over the network, 
 and allows Confluo to store data from applications written in different languages.</p>
+<h2 id="more-on-usage">More on Usage<a class="headerlink" href="#more-on-usage" title="Permanent link">&para;</a></h2>
 <p>Read more on how you can perform different operations with the two modes of operation:</p>
 <ul>
 <li><a href="../loading_data/">Data Storage and Loading Data</a></li>
