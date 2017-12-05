@@ -176,7 +176,7 @@ class byte_string {
  public:
   byte_string()
       : size_(0),
-        data_(nullptr) {
+        data_(new uint8_t[size_]) {
   }
 
   byte_string(bool val)

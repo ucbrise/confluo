@@ -2,16 +2,21 @@
 
 Confluo can be used in two modes -- embedded and stand-alone. 
 
+## Embedded Mode
+
 In the _embedded mode_, Confluo is used as a header-only library in C++, allowing Confluo
 to use the same address-space as the application process. This enables ultra low-latency 
 writes and queries, but only supports applications written in C++.
 
+## Stand-alone Mode
 
-On the other hand, Confluo also supports a _stand-alone mode_, where Confluo runs as a daemon 
+Confluo also supports a _stand-alone mode_, where Confluo runs as a daemon 
 server process and allows clients to communicate with it using 
 [Apache Thrift](https://thrift.apache.org) protocol. Operations now incur higher latencies
 (due to serialization/deserialization overheads), but can now operate over the network, 
 and allows Confluo to store data from applications written in different languages.
+
+## More on Usage
 
 Read more on how you can perform different operations with the two modes of operation:
 

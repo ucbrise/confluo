@@ -37,8 +37,12 @@ class rpc_record_stream {
     return *this;
   }
 
-  bool has_more() {
+  bool has_more() const {
     return handle_.has_more || cur_off_ != handle_.data.size();
+  }
+
+  bool empty() const {
+    return !has_more();
   }
 
  private:

@@ -8,10 +8,12 @@ Before you can install Confluo, make sure you have the following prerequisites:
 * Boost 1.53 or later
 
 For python client, you will additionally require:
+
 * Python 2.7 or later
 * Python Packages: six 1.7.2 or later
 
 For java client, you will additionally require:
+
 * Java 1.7 or later
 * ant 1.6.2 or later
 
