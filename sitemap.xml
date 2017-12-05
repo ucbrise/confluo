@@ -4,7 +4,31 @@
     
     <url>
      <loc>/</loc>
-     <lastmod>2017-12-04</lastmod>
+     <lastmod>2017-12-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/research/</loc>
+     <lastmod>2017-12-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/contributing/</loc>
+     <lastmod>2017-12-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/contact/</loc>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -13,19 +37,19 @@
         
     <url>
      <loc>/quick_start/</loc>
-     <lastmod>2017-12-04</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/install/</loc>
-     <lastmod>2017-12-04</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>/modes_of_operation/</loc>
-     <lastmod>2017-12-04</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -43,7 +67,7 @@
         
     <url>
      <loc>/data_archival/</loc>
-     <lastmod>2017-12-04</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
@@ -53,7 +77,7 @@
         
     <url>
      <loc>/cpp_api/</loc>
-     <lastmod>2017-12-04</lastmod>
+     <lastmod>2017-12-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
