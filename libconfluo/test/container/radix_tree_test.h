@@ -49,7 +49,7 @@ TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
 
   auto res1 = tree.range_lookup_reflogs(byte_string(0), byte_string(16));
   ASSERT_EQ(static_cast<size_t>(3), res1.count());
-  uint64_t i = 0;
+  int32_t i = 0;
   for (auto it = res1.begin(); it != res1.end(); ++it) {
     const auto& refs = *it;
     ASSERT_EQ(i, refs.at(0));
