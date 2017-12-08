@@ -1,8 +1,10 @@
-#ifndef CONFLUO_ARCHIVAL_ENCODER_H_
-#define CONFLUO_ARCHIVAL_ENCODER_H_
+#ifndef CONFLUO_STORAGE_ENCODER_H_
+#define CONFLUO_STORAGE_ENCODER_H_
+
+#include "ptr_metadata.h"
 
 namespace confluo {
-namespace archival {
+namespace storage {
 
 enum encoding_type {
   IDENTITY
@@ -32,4 +34,4 @@ class encoder {
 }
 }
 
-#endif /* CONFLUO_ARCHIVAL_ENCODER_H_ */
+#endif /* CONFLUO_STORAGE_ENCODER_H_ */

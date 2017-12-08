@@ -11,7 +11,6 @@ namespace storage {
 template <typename T>
 using decoded_ptr = typename std::unique_ptr<T, void (*)(T*)>;
 
-// TODO split into interface and 2 implementations, one for in-memory and one for archived representations.
 template<typename T>
 class encoded_ptr {
  public:
@@ -64,7 +63,7 @@ class encoded_ptr {
    */
   static void no_op_delete(T* ptr) { }
 
-  void* ptr_; // internal encoded pointer
+  void* ptr_;
 
 };
 

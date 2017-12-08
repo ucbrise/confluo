@@ -86,7 +86,7 @@ class storage_allocator {
    *
    * @param path path of file
    * @param offset file offset (does not need to be page aligned)
-   * @param size size to allocate
+   * @param size size to mmap, exclusive of metadata
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
