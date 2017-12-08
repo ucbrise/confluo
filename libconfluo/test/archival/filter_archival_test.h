@@ -3,11 +3,10 @@
 
 #include <thread>
 
-#include "archival/encoder.h"
+#include "storage/encoder.h"
 #include "filter.h"
 #include "archival/filter_archiver.h"
 #include "gtest/gtest.h"
-#include "read_tail.h"
 
 using namespace ::confluo;
 
@@ -81,16 +80,34 @@ class FilterArchivalTest : public testing::Test {
 
 };
 
-TEST_F(FilterArchivalTest, FilterCorrectnessTest) {
+TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
   read_tail rt("/tmp", storage::IN_MEMORY);
-  rt.advance(0, 1e5);
 
   filter f(filter_none);
   fill(f);
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("filter_archives", "/tmp", filters, rt);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
+
+  reflog const* first_reflog = f.lookup(0);
+
+  verify(f);
+  archiver.archive(32768);
+  verify(f);
+
+//  verify_reflog_archived(first_reflog, 0);
+}
+
+TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
+  read_tail rt("/tmp", storage::IN_MEMORY);
+
+  filter f(filter_none);
+  fill(f);
+
+  filter_log filters;
+  filters.push_back(&f);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
 
   reflog const* first_reflog = f.lookup(0);
 
@@ -106,14 +123,13 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTest) {
 
 TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
-  rt.advance(0, 1e5);
 
   filter f(filter_none);
   fill(f);
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("filter_archives", "/tmp", filters, rt);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
 
   reflog const* first_reflog = f.lookup(0);
   reflog const* second_reflog = f.lookup(1);
@@ -144,14 +160,13 @@ TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
 
 TEST_F(FilterArchivalTest, MultipleReflogsArchivedTest) {
   read_tail rt("/tmp", storage::IN_MEMORY);
-  rt.advance(0, 1e5);
 
   filter f(filter_none);
   fill(f);
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("filter_archives", "/tmp", filters, rt);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
 
   // archive across contiguous reflogs
   archiver.archive(32000);

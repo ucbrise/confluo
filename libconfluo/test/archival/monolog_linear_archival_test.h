@@ -1,11 +1,11 @@
 #ifndef TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 #define TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_
 
-#include "archival/encoder.h"
 #include "gtest/gtest.h"
+
+#include "storage/encoder.h"
 #include "container/monolog/monolog_linear.h"
 #include "archival/monolog_linear_archiver.h"
-#include "read_tail.h"
 
 using namespace ::confluo;
 
@@ -39,12 +39,10 @@ class DataArchivalTest : public testing::Test {
  * Verifies that data is written to disk correctly.
  */
 TEST_F(DataArchivalTest, ArchivalTest) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, log);
+  small_monolog_archiver archiver("/tmp/data_log/", log);
 
   write_to_log(log);
-  rt.advance(0, ARRAY_SIZE * sizeof(uint8_t));
 
   archiver.archive(2 * BLOCK_SIZE);
   // TODO read from file
@@ -60,12 +58,10 @@ TEST_F(DataArchivalTest, ArchivalTest) {
  * Verifies that monolog pointer is swapped.
  */
 TEST_F(DataArchivalTest, PtrSwapTest) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, log);
+  small_monolog_archiver archiver("/tmp/data_log/", log);
 
   write_to_log(log);
-  rt.advance(0, ARRAY_SIZE * sizeof(uint8_t));
 
   archiver.archive(2 * BLOCK_SIZE);
   verify(log, 0, 2 * BLOCK_SIZE);
@@ -75,26 +71,6 @@ TEST_F(DataArchivalTest, PtrSwapTest) {
 
   archiver.archive(8 * BLOCK_SIZE);
   verify(log, 4 * BLOCK_SIZE, 8 * BLOCK_SIZE);
-}
-
-/**
- * Verifies that the archiver never archives past the read tail.
- */
-TEST_F(DataArchivalTest, ArchivePastReadTailTest) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
-  small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("data_archives", "/tmp", rt, log);
-
-  write_to_log(log);
-  rt.advance(0, 7 * BLOCK_SIZE);
-
-  archiver.archive(ARRAY_SIZE);
-  verify(log, 0, 7 * BLOCK_SIZE);
-
-  // make sure last block wasn't archived
-  storage::read_only_encoded_ptr<uint8_t> ptr;
-  log.ptr(7 * BLOCK_SIZE, ptr);
-  ASSERT_EQ(storage::ptr_metadata::get(ptr.get().ptr())->state_, storage::state_type::D_IN_MEMORY);
 }
 
 #endif /* TEST_MONOLOG_LINEAR_ARCHIVAL_TEST_H_ */
