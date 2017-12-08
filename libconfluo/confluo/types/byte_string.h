@@ -141,6 +141,7 @@ class immutable_byte_string {
     return str;
   }
 
+  // TODO probably shouldn't be exposed since its immutable, fix later
   uint8_t* data() {
     return data_;
   }

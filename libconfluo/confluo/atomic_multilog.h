@@ -7,6 +7,8 @@
 #include <numeric>
 #include <thread>
 
+#include "archival/archiver.h"
+#include "archival/load_utils.h"
 #include "optional.h"
 #include "exceptions.h"
 #include "parser/expression_compiler.h"
@@ -39,6 +41,7 @@
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
 
+using namespace ::confluo::archival;
 using namespace ::confluo::monolog;
 using namespace ::confluo::index;
 using namespace ::confluo::monitor;
@@ -121,17 +124,76 @@ class atomic_multilog {
         rt_(path, mode),
         metadata_(path, mode),
         planner_(&data_log_, &indexes_, &schema_),
+        archiver_(new archiver(path, rt_, data_log_, filters_, indexes_, schema_)),
+        archival_task_("archival"),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     metadata_.write_schema(schema_);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
+//    archival_task_.start(std::bind(&archival::archival_manager::archive), <--- TODO fix this
+//                         configuration_params::ARCHIVAL_PERIODICITY_MS);
   }
 
   atomic_multilog(const std::string& name, const std::string& schema,
                   const std::string& path, const storage::storage_mode& mode,
                   task_pool& pool)
       : atomic_multilog(name, parser::parse_schema(schema), path, mode, pool) {
+  }
+
+//  atomic_multilog(const std::string& name, const std::string& path)
+//      : name_(name) {
+//    load(path);
+//    // TODO other initialization
+//  }
+
+  void load(const std::string& path) {
+    metadata_reader reader(path);
+
+    // redirect metadata writer temporarily to prevent duplicate writes
+    metadata_writer writer = metadata_;
+    metadata_ = metadata_writer("", storage::storage_id::D_IN_MEMORY);
+
+    while (reader.has_next()) {
+      switch (reader.next_type()) {
+        case D_SCHEMA_METADATA: {
+          schema_ = reader.next_schema();
+          break;
+        }
+        case D_FILTER_METADATA: {
+          auto filter_metadata = reader.next_filter_metadata();
+          add_filter(filter_metadata.filter_name(), filter_metadata.expr());
+          break;
+        }
+        case D_INDEX_METADATA: {
+          auto index_metadata = reader.next_index_metadata();
+          add_index(index_metadata.field_name(), index_metadata.bucket_size());
+          break;
+        }
+        case D_AGGREGATE_METADATA: {
+          auto agg_metadata = reader.next_aggregate_metadata();
+          add_aggregate(agg_metadata.aggregate_name(), agg_metadata.filter_name(),
+                        agg_metadata.aggregate_expression());
+          break;
+        }
+        case D_TRIGGER_METADATA: {
+          auto trigger_metadata = reader.next_trigger_metadata();
+          add_trigger(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
+                      trigger_metadata.periodicity_ms());
+          break;
+        }
+      }
+    }
+    metadata_ = writer;
+    // TODO: more prep before calling load, for ex: read the read_tail in etc
+
+    archiver_ = new archiver(path, rt_, data_log_, filters_, indexes_, schema_);
+    load_utils::load_monolog_linear<uint8_t,
+                                    data_log_constants::MAX_BUCKETS,
+                                    data_log_constants::BUCKET_SIZE,
+                                    data_log_constants::BUFFER_SIZE>(archiver_->data_log_path(), data_log_);
+    load_utils::load_replay_filter_log(archiver_->filter_log_path(), filters_, data_log_, schema_);
+    load_utils::load_replay_index_log(archiver_->index_log_path(), indexes_, data_log_, schema_);
   }
 
   // Management ops
@@ -936,6 +998,10 @@ class atomic_multilog {
   string_map<trigger_id_t> trigger_map_;
 
   query_planner planner_;
+
+  // Archival
+  archiver* archiver_;
+  periodic_task archival_task_;
 
   // Manangement
   task_pool& mgmt_pool_;

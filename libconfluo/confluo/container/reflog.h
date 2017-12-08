@@ -1,6 +1,8 @@
 #ifndef CONFLUO_CONTAINER_REFLOG_H_
 #define CONFLUO_CONTAINER_REFLOG_H_
 
+#include "storage/swappable_encoded_ptr.h"
+#include "storage/encoded_ptr.h"
 #include "monolog/monolog.h"
 
 using namespace ::confluo::monolog;
@@ -23,6 +25,10 @@ const size_t reflog_constants::BUCKET_SIZE;
 typedef monolog_exp2_linear<uint64_t,
                             reflog_constants::NCONTAINERS,
                             reflog_constants::BUCKET_SIZE> reflog;
+
+typedef storage::read_only_encoded_ptr<uint64_t> read_only_reflog_ptr;
+typedef storage::encoded_ptr<uint64_t> encoded_reflog_ptr;
+typedef storage::decoded_ptr<uint64_t> decoded_reflog_ptr;
 
 }
 

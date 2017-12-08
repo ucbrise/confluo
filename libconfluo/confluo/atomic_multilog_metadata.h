@@ -234,10 +234,40 @@ class metadata_writer {
   }
 
   /**
-   * Writes the schema metadata
+   * Initializes the schema metadata writer
    *
    * @param schema The schema
    */
+  metadata_writer(const metadata_writer& other)
+      : filename_(other.filename_) {
+    if (id_ != storage::storage_id::D_IN_MEMORY) {
+      out_.close();
+      id_ = other.id_;
+      out_.open(filename_);
+    } else {
+      id_ = other.id_;
+    }
+  }
+
+  ~metadata_writer() {
+    if (id_ != storage::storage_id::D_IN_MEMORY) {
+      out_.close();
+    }
+  }
+
+  metadata_writer& operator=(const metadata_writer& other) {
+    if (id_ != storage::storage_id::D_IN_MEMORY) {
+      out_.close();
+      filename_ = other.filename_;
+      id_ = other.id_;
+      out_.open(filename_);
+    } else {
+      filename_ = other.filename_;
+      id_ = other.id_;
+    }
+    return *this;
+  }
+
   void write_schema(const schema_t& schema) {
     if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_SCHEMA_METADATA;
@@ -343,6 +373,10 @@ class metadata_reader {
   metadata_reader(const std::string& path)
       : filename_(path + "/metadata"),
         in_(filename_) {
+  }
+
+  bool has_next() {
+    return !in_.eof();
   }
 
   /**
