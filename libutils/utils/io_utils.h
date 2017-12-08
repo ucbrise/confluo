@@ -22,6 +22,13 @@ class io_utils {
     return val;
   }
 
+  static std::string read(std::istream& in, size_t length) {
+    std::string value;
+    value.resize(length);
+    in.read(&value[0], length);
+    return value;
+  }
+
   static void flush(std::ostream& out) {
     out.flush();
   }
@@ -29,8 +36,7 @@ class io_utils {
 };
 
 template<>
-void io_utils::write<std::string>(std::ostream& out,
-                                         const std::string& value) {
+void io_utils::write<std::string>(std::ostream& out, const std::string& value) {
   size_t size = value.length();
   out.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
   out.write(value.c_str(), value.length());
