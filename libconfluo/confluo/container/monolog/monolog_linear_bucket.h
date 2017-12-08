@@ -223,6 +223,10 @@ class monolog_linear_bucket {
     data_.swap_ptr(enc_ptr);
   }
 
+  void init_ptr(storage::encoded_ptr<T> enc_ptr) {
+    data_.atomic_init(enc_ptr);
+  }
+
  private:
   /**
    * Try to allocate space for block.

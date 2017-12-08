@@ -40,14 +40,6 @@ class monolog_exp2_linear_base {
     for (auto& x : bucket_containers_) {
       atomic::init(&x, null_ptr);
     }
-
-    void* first_bucket_data = ALLOCATOR.alloc(sizeof(T) * BUCKET_SIZE);
-    memset(first_bucket_data, 0xFF, sizeof(T) * BUCKET_SIZE);
-    storage::encoded_ptr<T> enc_ptr(first_bucket_data);
-
-    __atomic_bucket_ref* first_container = new __atomic_bucket_ref[FCB]();
-    first_container[0].atomic_init(enc_ptr);
-    atomic::init(&bucket_containers_[0], first_container);
   }
 
   /**
@@ -80,7 +72,7 @@ class monolog_exp2_linear_base {
     size_t bucket_idx2 = highest_cleared2 / BUCKET_SIZE;
     size_t container_idx1 = hibit1 - fcs_hibit_;
     size_t container_idx2 = hibit2 - fcs_hibit_;
-
+    // TODO fix this
     for (size_t i = container_idx1; i <= container_idx2; i++) {
       __atomic_bucket_ref* container = atomic::load(&bucket_containers_[i]);
       if (container == nullptr) {
@@ -300,9 +292,8 @@ class monolog_exp2_linear_base {
     return container_size + bucket_size + data_size;
   }
 
-  // TODO remove const from here and add non-const methods in radix tree instead
-  // Also this method takes in the monolog idx, but monolog_linear used bucket_idx, fix this
-  void swap_bucket_ptr(size_t idx, storage::encoded_ptr<T> data) const {
+  // This method takes in the monolog idx, but monolog_linear used bucket_idx, fix this
+  void swap_bucket_ptr(size_t idx, storage::encoded_ptr<T> data) {
     size_t pos = idx + FCS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
@@ -310,6 +301,22 @@ class monolog_exp2_linear_base {
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
     size_t container_idx = hibit - fcs_hibit_;
     atomic::load(&bucket_containers_[container_idx])[bucket_idx].swap_ptr(data);
+  }
+
+  // This method takes in the monolog idx, but monolog_linear used bucket_idx, fix this
+  void init_bucket_ptr(size_t idx, storage::encoded_ptr<T> data) {
+    size_t pos = idx + FCS;
+    size_t hibit = bit_utils::highest_bit(pos);
+    size_t highest_cleared = pos ^ (1 << hibit);
+    size_t bucket_idx = highest_cleared / BUCKET_SIZE;
+    size_t bucket_off = highest_cleared % BUCKET_SIZE;
+    size_t container_idx = hibit - fcs_hibit_;
+
+    __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
+    if (container == nullptr) {
+      container = try_allocate_container(container_idx);
+    }
+    container[bucket_idx].atomic_init(data);
   }
 
 protected:

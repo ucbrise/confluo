@@ -239,6 +239,11 @@ class filter {
     return atomic::load(&is_valid_);
   }
 
+  // TODO can this be exposed
+  idx_t* data() {
+    return &idx_;
+  }
+
  private:
   compiled_expression exp_;         // The compiled filter expression
   filter_fn fn_;                    // Filter function

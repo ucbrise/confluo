@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 
-#include "../../storage/swappable_encoded_ptr.h"
+#include "storage/swappable_encoded_ptr.h"
 #include "atomic.h"
 #include "monolog_linear_bucket.h"
 #include "storage/storage.h"
@@ -71,7 +71,7 @@ class monolog_linear_base {
   }
 
   /**
-   * Ensures containers are allocated to cover the range of indexes given.
+   * Ensures buckets are allocated to cover the range of indexes given.
    * @param start_idx start index
    * @param end_idx end index
    */
@@ -203,7 +203,20 @@ class monolog_linear_base {
   }
 
   /**
-   * Swap bucket pointer
+   * Get the storage size of the monolog.
+   *
+   * @return storage size of the monolog
+   */
+  size_t storage_size() const {
+    size_t bucket_size = buckets_.size() * sizeof(monolog_linear_bucket<T, BUCKET_SIZE>);
+    size_t data_size = 0;
+    for (size_t i = 0; i < buckets_.size(); i++)
+      data_size += buckets_[i].storage_size();
+    return bucket_size + data_size;
+  }
+
+  /**
+   * Swap bucket pointer. Should be used only by archiver.
    * @param bucket_idx index of monolog bucket
    * @param ptr new pointer
    */
@@ -212,16 +225,12 @@ class monolog_linear_base {
   }
 
   /**
-   * Get the storage size of the monolog.
-   *
-   * @return storage size of the monolog.
+   * Initialize bucket pointer. Should be used only by loader.
+   * @param bucket_idx index of monolog bucket
+   * @param ptr new pointer
    */
-  size_t storage_size() const {
-    size_t bucket_size = buckets_.size() * sizeof(monolog_linear_bucket<T, BUCKET_SIZE>);
-    size_t data_size = 0;
-    for (size_t i = 0; i < buckets_.size(); i++)
-      data_size += buckets_[i].storage_size();
-    return bucket_size + data_size;
+  void init_bucket_ptr(size_t bucket_idx, storage::encoded_ptr<T> ptr) {
+    buckets_[bucket_idx].init_ptr(ptr);
   }
 
  protected:
