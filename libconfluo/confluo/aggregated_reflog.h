@@ -31,6 +31,12 @@ class aggregated_reflog : public reflog {
   /** The type of constant iterator for the reflog */
   typedef reflog::const_iterator const_iterator;
 
+  aggregated_reflog()
+      : reflog(),
+        num_aggregates_(0),
+        aggregates_(nullptr) {
+  }
+
   /**
    * Constructs a reflog of aggregates from a log of aggregates
    *
@@ -49,14 +55,6 @@ class aggregated_reflog : public reflog {
     delete aggregates_;
   }
 
-  inline void seq_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_->atomic_load()[aid].seq_update(thread_id, value, version);
-  }
-
-  inline void comb_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_->atomic_load()[aid].comb_update(thread_id, value, version);
-  }
-
   /**
    * Gets the specified aggregate
    *
@@ -66,18 +64,40 @@ class aggregated_reflog : public reflog {
    * @return A numeric that contains the aggregate value
    */
   inline numeric get_aggregate(size_t aid, uint64_t version) const {
-    return aggregates_->atomic_load()[aid].get(version);
+    storage::read_only_ptr<aggregate> copy;
+    aggregates_->atomic_copy(copy);
+    return copy.get()[aid].get(version);
   }
 
   /**
    * Updates an aggregate. Assumes no contention with archiver calling swap_aggregates.
+   * Note: this assumption allows for update without performing a pointer copy.
    * @param thread_id thread id
-   * @param trigger_id trigger id
+   * @param aid aggregate id
    * @param value value to update with
    * @param version data log version
    */
-  inline void update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_->atomic_load()[aid].update(thread_id, value, version);
+  inline void seq_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
+    aggregates_->atomic_load()[aid].seq_update(thread_id, value, version);
+  }
+
+  /**
+   * Updates an aggregate. Assumes no contention with archiver calling swap_aggregates.
+   * Note: this assumption allows for update without performing a pointer copy.
+   * @param thread_id thread id
+   * @param aid aggregate id
+   * @param value value to update with
+   * @param version data log version
+   */
+  inline void comb_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
+    aggregates_->atomic_load()[aid].comb_update(thread_id, value, version);
+  }
+
+  // TODO remove below convenience funcs
+
+  void init_aggregates(size_t num_aggregates, aggregate* aggregates) {
+    num_aggregates_ = num_aggregates;
+    aggregates_ = new storage::swappable_ptr<aggregate>(aggregates);
   }
 
   /**
@@ -87,12 +107,6 @@ class aggregated_reflog : public reflog {
    */
   inline void swap_aggregates(aggregate* new_aggregates) {
     aggregates_->swap_ptr(new_aggregates);
-  }
-
-  inline numeric get_aggregate(size_t trigger_id, uint64_t version) const {
-    storage::read_only_ptr<aggregate> copy;
-    aggregates_->atomic_copy(copy);
-    return copy.get()[trigger_id].get(version);
   }
 
   /**

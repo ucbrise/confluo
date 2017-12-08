@@ -200,10 +200,6 @@ class aggregate {
         concurrency_(0) {
   }
 
-  void seq_update(int thread_id, const numeric& value, uint64_t version) {
-    aggs_[thread_id].seq_update(value, version);
-  }
-
   aggregate(const data_type& type, const aggregator& agg,
             int concurrency = thread_manager::get_max_concurrency())
       : type_(type),
@@ -222,8 +218,8 @@ class aggregate {
 //      }
 //    }
 
-  void update(int thread_id, const numeric& value, uint64_t version) {
-    aggs_[thread_id].update(value, version);
+  void seq_update(int thread_id, const numeric& value, uint64_t version) {
+    aggs_[thread_id].seq_update(value, version);
   }
 
   void comb_update(int thread_id, const numeric& value, uint64_t version) {

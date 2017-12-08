@@ -1,15 +1,18 @@
 #ifndef CONFLUO_ARCHIVAL_ARCHIVAL_UTILS_H_
 #define CONFLUO_ARCHIVAL_ARCHIVAL_UTILS_H_
 
-#include "encoder.h"
-#include "incr_file_writer.h"
+#include "aggregated_reflog.h"
+#include "storage/allocator.h"
+#include "storage/encoder.h"
 #include "container/reflog.h"
+#include "io/incr_file_writer.h"
+#include "metadata.h"
 
 namespace confluo {
 namespace archival {
 
 using namespace ::utils;
-using namespace ::confluo::storage;
+using namespace storage;
 
 class archival_utils {
  public:
@@ -20,6 +23,7 @@ class archival_utils {
 
   /**
    * Archive buckets of a monolog_linear until a given offset.
+   * Format: [bucket][bucket][bucket]...
    * @param monolog monolog_linear to archive
    * @param writer archival output
    * @param start monolog offset to start archival from
@@ -38,30 +42,39 @@ class archival_utils {
       auto* metadata = storage::ptr_metadata::get(bucket_ptr.get().ptr());
       T* data = decoded_ptr.get();
 
+      if (metadata->state_ != state_type::D_IN_MEMORY) {
+        archival_tail += BUCKET_SIZE;
+        continue;
+      }
+
       size_t encoded_size;
       encoder::raw_encoded_ptr raw_encoded_bucket = encoder::encode<T, ENCODING>(data, encoded_size);
       auto off = writer.append<ptr_metadata, uint8_t>(metadata, 1, raw_encoded_bucket.get(), encoded_size);
-      writer.update_metadata(archival_tail);
+
+      auto archival_metadata = monolog_linear_archival_metadata(archival_tail);
+      writer.update_header<monolog_linear_archival_metadata>(archival_metadata);
       writer.flush();
 
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), encoded_size, state_type::D_ARCHIVED);
-      monolog.swap_bucket_ptr(archival_tail / BUCKET_SIZE, storage::encoded_ptr<T>(encoded_bucket));
+      monolog.swap_bucket_ptr(archival_tail / BUCKET_SIZE, encoded_ptr<T>(encoded_bucket));
       archival_tail += BUCKET_SIZE;
     }
     return archival_tail;
   }
 
   /**
-   * Archives a reflog.
-   * @param reflog aggregated_reflog to archive
+   * Archives a reflog corresponding to a radix tree key.
+   * Archival Format: [radix_tree_key][bucket_index][bucket]...
+   * @param radix_tree_key key to which reflog belongs to in radix_tree
+   * @param reflog reflog to archive
    * @param writer archival output
    * @param start reflog offset to start archival from
    * @param data_log_stop data log offset to archive up until
    * @return reflog offset archived up to
    */
   template<encoding_type ENCODING>
-  static size_t archive_reflog(reflog& reflog, incremental_file_writer& writer, size_t start,
-                               size_t data_log_stop) {
+  static size_t archive_reflog(byte_string radix_tree_key, reflog& reflog, incremental_file_writer& writer,
+                               size_t start, size_t data_log_stop) {
     reflog_bucket_ptr_t bucket_ptr;
     size_t archival_tail = start;
     size_t data_log_archival_tail = 0;
@@ -82,14 +95,23 @@ class archival_utils {
         break;
       }
 
+      auto key_copy = radix_tree_key.copy();
+      size_t key_size = key_copy.size();
+      uint8_t* key = key_copy.data();
+
+      // TODO abstract into metadata as well
+      writer.append<uint8_t>(key, key_size);
+      writer.append<size_t>(archival_tail);
+
       size_t encoded_size;
       raw_encoded_ptr_t raw_encoded_bucket = encoder::encode<uint64_t, ENCODING>(data, encoded_size);
       auto off = writer.append<ptr_metadata, uint8_t>(metadata, 1, raw_encoded_bucket.get(), encoded_size);
-      writer.update_metadata(data_log_archival_tail);
+      writer.update_header(reflog_archival_header(key_size, key, archival_tail).to_string());
       writer.flush();
 
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), encoded_size, state_type::D_ARCHIVED);
       reflog.swap_bucket_ptr(archival_tail, encoded_reflog_ptr_t(encoded_bucket));
+
       archival_tail += reflog_constants::BUCKET_SIZE;
     }
     return archival_tail;
@@ -97,19 +119,30 @@ class archival_utils {
 
   /**
    * Archive aggregates of an aggregated reflog.
-   * @param key
+   * @param radix_tree_key key to which reflog belongs to in radix_tree
    * @param reflog aggregated reflog
-   * @param writer writer
+   * @param writer archival output
    * @param version version to get aggregates for
    */
-  static void archive_reflog_aggregates(aggregated_reflog& reflog, incremental_file_writer& writer,
-                                        size_t version) {
+  static void archive_reflog_aggregates(byte_string radix_tree_key, aggregated_reflog& reflog,
+                                        size_t version, incremental_file_writer& writer) {
+
     size_t num_aggs = reflog.num_aggregates();
     numeric* collapsed_aggregates = new numeric[num_aggs];
     for (size_t i = 0; i < num_aggs; i++) {
       collapsed_aggregates[i] = reflog.get_aggregate(i, version);
     }
+
+    auto key_copy = radix_tree_key.copy();
+    size_t key_size = key_copy.size();
+    uint8_t* key = key_copy.data();
+
+    // TODO abstract into metadata
+    writer.append<uint8_t>(key, key_size);
+    writer.append<size_t>(version);
+    writer.append<size_t>(num_aggs);
     writer.append<numeric>(collapsed_aggregates, num_aggs);
+    writer.update_header(reflog_aggregates_archival_header(key_size, key).to_string());
     writer.flush();
 
     size_t alloc_size = sizeof(aggregate) * num_aggs;
@@ -118,6 +151,7 @@ class archival_utils {
       new (archived_aggs + i) aggregate(collapsed_aggregates[i].type(), D_SUM, 1);
       archived_aggs[i].update(0, collapsed_aggregates[i], version);
     }
+
     reflog.swap_aggregates(archived_aggs);
     delete[] collapsed_aggregates;
   }
@@ -125,7 +159,7 @@ class archival_utils {
  private:
   static uint64_t max_in_reflog_bucket(uint64_t* data) {
     uint64_t max = 0;
-    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && data[i] != (uint64_t) -1; i++)
+    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && data[i] != limits::ulong_max; i++)
       max = std::max(max, data[i]);
     return max;
   }
