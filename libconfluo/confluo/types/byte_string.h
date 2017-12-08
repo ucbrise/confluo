@@ -141,6 +141,14 @@ class immutable_byte_string {
     return str;
   }
 
+  uint8_t* data() {
+    return data_;
+  }
+
+  size_t size() {
+    return size_;
+  }
+
  private:
   uint8_t* data_;
   size_t size_;

@@ -154,9 +154,10 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   int64_t ts = utils::time_utils::cur_ns();
   client.append(make_simple_record(ts, "abc"));
 
-  storage::read_only_encoded_ptr<uint8_t> ptr;
+  read_only_data_log_ptr ptr;
   mlog->read(0, ptr);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.decode_ptr().get()), DATA_SIZE);
+  decoded_data_log_ptr decoded_ptr = ptr.decode_ptr();
+  std::string buf = std::string(reinterpret_cast<const char*>(decoded_ptr.get()), DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
   client.disconnect();
