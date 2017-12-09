@@ -240,7 +240,7 @@ class metadata_writer {
    */
   metadata_writer(const metadata_writer& other)
       : filename_(other.filename_) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       out_.close();
       id_ = other.id_;
       out_.open(filename_);
@@ -250,13 +250,13 @@ class metadata_writer {
   }
 
   ~metadata_writer() {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       out_.close();
     }
   }
 
   metadata_writer& operator=(const metadata_writer& other) {
-    if (id_ != storage::storage_id::D_IN_MEMORY) {
+    if (id_ != storage::storage_mode::IN_MEMORY) {
       out_.close();
       filename_ = other.filename_;
       id_ = other.id_;

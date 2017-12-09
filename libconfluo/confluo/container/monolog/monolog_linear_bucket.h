@@ -237,9 +237,9 @@ class monolog_linear_bucket {
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
       void* data_ptr = storage::STORAGE_FNS[mode_].allocate_bucket(path_, file_size);
-      memset(ptr, '\0', sizeof(T) * file_size);
-      storage::encoded_ptr<T> enc_ptr(ptr);
-      data_.atomic_init(ptr);
+      memset(data_ptr, '\0', sizeof(T) * file_size);
+      storage::encoded_ptr<T> enc_ptr(data_ptr);
+      data_.atomic_init(enc_ptr);
       data_.atomic_copy(copy);
       return;
     }
@@ -260,8 +260,8 @@ class monolog_linear_bucket {
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
       void* data_ptr = storage::STORAGE_FNS[mode_].allocate_bucket(path_, file_size);
-      memset(ptr, '\0', sizeof(T) * file_size);
-      storage::encoded_ptr<T> enc_ptr(ptr);
+      memset(data_ptr, '\0', sizeof(T) * file_size);
+      storage::encoded_ptr<T> enc_ptr(data_ptr);
       data_.atomic_init(enc_ptr);
       return enc_ptr;
     }

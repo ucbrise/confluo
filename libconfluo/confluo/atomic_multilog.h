@@ -152,7 +152,7 @@ class atomic_multilog {
 
     // redirect metadata writer temporarily to prevent duplicate writes
     metadata_writer writer = metadata_;
-    metadata_ = metadata_writer("", storage::storage_id::D_IN_MEMORY);
+    metadata_ = metadata_writer("", storage::storage_mode::IN_MEMORY);
 
     while (reader.has_next()) {
       switch (reader.next_type()) {
@@ -178,8 +178,9 @@ class atomic_multilog {
         }
         case D_TRIGGER_METADATA: {
           auto trigger_metadata = reader.next_trigger_metadata();
-          add_trigger(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
-                      trigger_metadata.periodicity_ms());
+          optional<management_exception> ex;
+          add_trigger_task(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
+                           trigger_metadata.periodicity_ms(), ex);
           break;
         }
       }
@@ -869,8 +870,7 @@ class atomic_multilog {
    * @param ex The exception when the trigger cannot be added
    */
   void add_trigger_task(const std::string& name, const std::string& expr,
-                        uint64_t periodicity_ms,
-                        optional<management_exception>& ex) {
+                        uint64_t periodicity_ms, optional<management_exception>& ex) {
     trigger_id_t trigger_id;
     if (trigger_map_.get(name, trigger_id) != -1) {
       ex = management_exception("Trigger " + name + " already exists.");

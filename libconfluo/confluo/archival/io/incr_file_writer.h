@@ -8,6 +8,7 @@
 namespace confluo {
 namespace archival {
 
+// TODO modify to work when dir exists so archival for loaded data works
 class incremental_file_writer {
  public:
   incremental_file_writer(std::string path, std::string file_prefix,
