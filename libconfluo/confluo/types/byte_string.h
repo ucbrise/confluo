@@ -141,15 +141,6 @@ class immutable_byte_string {
     return str;
   }
 
-  // TODO probably shouldn't be exposed since its immutable, fix later
-  uint8_t* data() {
-    return data_;
-  }
-
-  size_t size() {
-    return size_;
-  }
-
  private:
   uint8_t* data_;
   size_t size_;
@@ -548,20 +539,25 @@ class byte_string {
     return *this;
   }
 
-<<<<<<< a933a893c205f0dcfc1badccc4132dfc16d9b21e
-  /**
-   * Copies the byte_string data into an immutable form
-   * @return An immutable_byte_string with the same data
-   */
-=======
   template<typename T>
   inline T as() const {
     return *reinterpret_cast<T*>(data_);
   }
 
->>>>>>> Filter archiver now uses radix tree iterator.
+  /**
+   * Copies the byte_string data into an immutable form
+   * @return An immutable_byte_string with the same data
+   */
   immutable_byte_string copy() const {
     return immutable_byte_string(data_, size_);
+  }
+
+  uint8_t* data() {
+    return data_;
+  }
+
+  size_t size() {
+    return size_;
   }
 
   /**

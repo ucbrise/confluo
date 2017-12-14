@@ -24,7 +24,7 @@ class load_utils {
   static void load_monolog_linear(const std::string& path,
                                   monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE>& log) {
     incremental_file_reader reader(path, "data_log", ".dat");
-    auto archival_metadata = reader.read_header<monolog_linear_archival_metadata>();
+    auto archival_metadata = reader.read_metadata<monolog_linear_archival_metadata>();
 
     size_t load_offset = 0;
     while (reader.has_more() && load_offset < archival_metadata.archival_tail()) {
@@ -44,7 +44,7 @@ class load_utils {
       THROW(illegal_state_exception, "Archived data could not be loaded!");
     }
     if (reader.has_more()) {
-      // TODO truncate all files after as well
+      // TODO truncate all files after as wells
       incremental_file_offset off = reader.tell();
       std::string path = off.path();
       file_utils::truncate_file(path, off.offset());
@@ -116,7 +116,7 @@ class load_utils {
   template<typename radix_tree>
   static size_t load_radix_tree(incremental_file_reader& reflog_reader, radix_tree* index) {
 
-    auto archival_metadata = reflog_archival_header(reflog_reader.read_header<std::string>());
+    auto archival_metadata = reflog_archival_metadata(reflog_reader.read_metadata<std::string>());
     size_t key_size = archival_metadata.key_size();
     byte_string archival_tail_key = archival_metadata.archival_tail_key();
     size_t archival_tail = archival_metadata.reflog_archival_tail();
@@ -157,7 +157,7 @@ class load_utils {
 
   template<typename radix_tree>
   static size_t load_radix_tree_reflog_aggs(incremental_file_reader& aggs_reader, radix_tree* index) {
-    auto archival_metadata = reflog_aggregates_archival_header(aggs_reader.read_header<std::string>());
+    auto archival_metadata = reflog_aggregates_archival_metadata(aggs_reader.read_metadata<std::string>());
     size_t key_size = archival_metadata.key_size();
     byte_string archival_tail_key = archival_metadata.archival_tail_key();
 

@@ -49,7 +49,6 @@ class monolog_linear_base {
       std::string bucket_path = data_path + "/" + name + "_" + std::to_string(i) + ".dat";
       buckets_[i].init(bucket_path, BUCKET_SIZE, storage);
     }
-    buckets_[0].ensure_alloc();
   }
 
   /**

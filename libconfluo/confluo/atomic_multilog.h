@@ -124,7 +124,7 @@ class atomic_multilog {
         rt_(path, mode),
         metadata_(path, mode),
         planner_(&data_log_, &indexes_, &schema_),
-        archiver_(new archiver(path, rt_, data_log_, filters_, indexes_, schema_)),
+        archiver_(path, rt_, data_log_, filters_, indexes_, schema_),
         archival_task_("archival"),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
@@ -141,19 +141,28 @@ class atomic_multilog {
       : atomic_multilog(name, parser::parse_schema(schema), path, mode, pool) {
   }
 
-//  atomic_multilog(const std::string& name, const std::string& path)
-//      : name_(name) {
-//    load(path);
-//    // TODO other initialization
-//  }
+  atomic_multilog(const std::string& name, const std::string& path,
+                  const storage::storage_mode& mode, task_pool& pool)
+      : name_(name),
+        schema_(),
+        data_log_("data_log", path, mode),
+        rt_(path, mode),
+        metadata_(),
+        planner_(&data_log_, &indexes_, &schema_),
+        archiver_(path, rt_, data_log_, filters_, indexes_, schema_),
+        archival_task_("archival"),
+        mgmt_pool_(pool),
+        monitor_task_("monitor") {
+    load(path);
+    metadata_ = metadata_writer(path, mode);
+    monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
+                        configuration_params::MONITOR_PERIODICITY_MS);
+    //    archival_task_.start(std::bind(&archival::archival_manager::archive),
+    //                         configuration_params::ARCHIVAL_PERIODICITY_MS);
+  }
 
   void load(const std::string& path) {
     metadata_reader reader(path);
-
-    // redirect metadata writer temporarily to prevent duplicate writes
-    metadata_writer writer = metadata_;
-    metadata_ = metadata_writer("", storage::storage_mode::IN_MEMORY);
-
     while (reader.has_next()) {
       switch (reader.next_type()) {
         case D_SCHEMA_METADATA: {
@@ -185,16 +194,12 @@ class atomic_multilog {
         }
       }
     }
-    metadata_ = writer;
-    // TODO: more prep before calling load, for ex: read the read_tail in etc
-
-    archiver_ = new archiver(path, rt_, data_log_, filters_, indexes_, schema_);
     load_utils::load_monolog_linear<uint8_t,
                                     data_log_constants::MAX_BUCKETS,
                                     data_log_constants::BUCKET_SIZE,
-                                    data_log_constants::BUFFER_SIZE>(archiver_->data_log_path(), data_log_);
-    load_utils::load_replay_filter_log(archiver_->filter_log_path(), filters_, data_log_, schema_);
-    load_utils::load_replay_index_log(archiver_->index_log_path(), indexes_, data_log_, schema_);
+                                    data_log_constants::BUFFER_SIZE>(archiver_.data_log_path(), data_log_);
+    load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
+    load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
   }
 
   // Management ops
@@ -1000,7 +1005,7 @@ class atomic_multilog {
   query_planner planner_;
 
   // Archival
-  archiver* archiver_;
+  archiver archiver_;
   periodic_task archival_task_;
 
   // Manangement

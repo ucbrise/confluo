@@ -220,6 +220,10 @@ struct trigger_metadata {
  */
 class metadata_writer {
  public:
+  metadata_writer()
+      : metadata_writer("", storage::storage_mode::IN_MEMORY) {
+  }
+
   /**
    * Constructor that initializes metadata writer
    * @param path The path of where the metadata is
