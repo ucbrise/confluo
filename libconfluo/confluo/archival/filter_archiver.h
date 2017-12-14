@@ -22,6 +22,8 @@ class filter_archiver {
         aggregate_writer_(path, "filter_agg", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         refs_tail_(0),
         ts_tail_(0) {
+    refs_writer_.close();
+    aggregate_writer_.close();
   }
 
   /**
@@ -32,15 +34,17 @@ class filter_archiver {
    */
   void archive(size_t offset) {
     auto reflogs = filter_->lookup_range_reflogs(ts_tail_, limits::long_max);
+    refs_writer_.open();
+    aggregate_writer_.open();
     for (auto it = reflogs.begin(); it != reflogs.end(); ++it) {
       auto& refs = *it;
       byte_string key = it.key();
       ts_tail_ = key.template as<uint64_t>();
-      refs_tail_ = archival_utils::archive_reflog<ENCODING>(key, refs, refs_writer_, refs_tail_, offset);
+      refs_tail_ = radix_tree_archival_utils::archive_reflog<ENCODING>(key, refs, refs_writer_, refs_tail_, offset);
       if (refs_tail_ < refs.size()) {
         break;
       }
-      archival_utils::archive_reflog_aggregates(ts_tail_, refs, refs_tail_, aggregate_writer_);
+      radix_tree_archival_utils::archive_reflog_aggregates(ts_tail_, refs, refs_tail_, aggregate_writer_);
       refs_tail_ = 0;
     }
     refs_writer_.close();
@@ -65,7 +69,6 @@ class filter_log_archiver {
       : path_(path),
         filter_archivers_(),
         filters_(filters) {
-    file_utils::create_dir(path_);
   }
 
   ~filter_log_archiver() {

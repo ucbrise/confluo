@@ -29,6 +29,7 @@ class monolog_linear_archiver {
       : writer_(path, "monolog_linear", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         archival_tail_(0),
         log_(log) {
+    writer_.close();
   }
 
   /**
@@ -36,8 +37,10 @@ class monolog_linear_archiver {
    * @param offset monolog offset
    */
   void archive(size_t offset) {
+    writer_.open();
     archival_utils::archive_monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE, ENCODING>(
                                               log_, writer_, archival_tail_, offset);
+    writer_.close();
   }
 
  private:

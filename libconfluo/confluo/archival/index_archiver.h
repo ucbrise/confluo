@@ -22,15 +22,17 @@ class index_archiver {
       : index_(index),
         column_(column),
         writer_(path, "index_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
+    writer_.close();
   }
 
   void archive(size_t offset) {
+    writer_.open();
     byte_string min = column_.min().to_key(column_.index_bucket_size());
     byte_string max = column_.max().to_key(column_.index_bucket_size());
     auto reflogs = index_->range_lookup_reflogs(min, max);
     for (auto it = reflogs.begin(); it != reflogs.end(); it++) {
       auto& refs = *it;
-      archival_utils::archive_reflog<ENCODING>(it.key(), refs, writer_, 0, offset);
+      radix_tree_archival_utils::archive_reflog<ENCODING>(it.key(), refs, writer_, 0, offset);
     }
     writer_.close();
   }
@@ -51,7 +53,6 @@ class index_log_archiver {
        index_archivers_(),
        indexes_(indexes),
        schema_(schema) {
-   file_utils::create_dir(path_);
  }
 
   ~index_log_archiver() {

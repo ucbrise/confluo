@@ -1,6 +1,9 @@
 #ifndef UTILS_FILE_UTILS_H_
 #define UTILS_FILE_UTILS_H_
 
+#include <stdio.h>
+#include <dirent.h>
+
 #include <unistd.h>
 #include <cstdlib>
 #include <string>
@@ -39,6 +42,17 @@ class file_utils {
         *p = '/';
       }
     mkdir(tmp, S_IRWXU);
+  }
+
+  static void clear_dir(const std::string& path) {
+    DIR *dir = opendir(path.c_str());
+    struct dirent *next_file;
+    char filepath[256];
+    while ((next_file = readdir(dir)) != nullptr) {
+      sprintf(filepath, "%s/%s", path.c_str(), next_file->d_name);
+      std::remove(filepath);
+    }
+    closedir(dir);
   }
 
   static bool exists_file(const std::string& path) {
