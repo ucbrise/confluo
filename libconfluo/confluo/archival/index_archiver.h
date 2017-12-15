@@ -48,7 +48,11 @@ template<encoding_type ENCODING>
 class index_log_archiver {
 
  public:
-  index_log_archiver(const std::string& path, index_log& indexes, schema_t& schema)
+  index_log_archiver()
+      : index_log_archiver("", nullptr, nullptr) {
+  }
+
+  index_log_archiver(const std::string& path, index_log* indexes, schema_t* schema)
      : path_(path),
        index_archivers_(),
        indexes_(indexes),
@@ -62,8 +66,8 @@ class index_log_archiver {
 
   void archive(size_t offset) {
     init_new_archivers();
-    for (size_t i = 0; i < schema_.size(); i++) {
-      auto& col = schema_[i];
+    for (size_t i = 0; i < schema_->size(); i++) {
+      auto& col = (*schema_)[i];
       if (col.is_indexed()) {
         index_archivers_.at(col.index_id())->archive(offset);
       }
@@ -72,20 +76,20 @@ class index_log_archiver {
 
  private:
   void init_new_archivers() {
-    for (size_t i = 0; i < schema_.size(); i++) {
-      auto& col = schema_[i];
+    for (size_t i = 0; i < schema_->size(); i++) {
+      auto& col = (*schema_)[i];
       auto id = col.index_id();
       if (col.is_indexed() && index_archivers_[id] == nullptr) {
         std::string index_path = path_ + "/index_" + std::to_string(i) + "/";
-        index_archivers_[id] = new index_archiver<ENCODING>(index_path, indexes_.at(i), col);
+        index_archivers_[id] = new index_archiver<ENCODING>(index_path, indexes_->at(i), col);
       }
     }
   }
 
   std::string path_;
-  monolog::monolog_exp2<index_archiver<ENCODING>*> index_archivers_;
-  index_log& indexes_;
-  schema_t& schema_;
+  std::vector<index_archiver<ENCODING>*> index_archivers_;
+  index_log* indexes_;
+  schema_t* schema_;
 
 };
 

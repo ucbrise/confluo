@@ -124,7 +124,7 @@ class atomic_multilog {
         rt_(path, mode),
         metadata_(path, mode),
         planner_(&data_log_, &indexes_, &schema_),
-        archiver_(path, rt_, data_log_, filters_, indexes_, schema_),
+        archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
         archival_task_("archival"),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
@@ -154,7 +154,7 @@ class atomic_multilog {
         monitor_task_("monitor") {
     load(path);
     metadata_ = metadata_writer(path, mode);
-    archiver_ = archiver(path, rt_, data_log_, filters_, indexes_, schema_, false);
+    archiver_ = archiver(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
     //    archival_task_.start(std::bind(&archival::archival_manager::archive),

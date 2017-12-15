@@ -11,8 +11,12 @@ namespace archival {
 
 class archiver {
  public:
-  archiver(const std::string& path, read_tail& rt, data_log& log,
-           filter_log& filters, index_log& indexes, schema_t& schema,
+  archiver()
+       : archiver("", read_tail(), nullptr, nullptr, nullptr, nullptr) {
+  }
+
+  archiver(const std::string& path, read_tail rt, data_log* log,
+           filter_log* filters, index_log* indexes, schema_t* schema,
            bool clear = true)
       : path_(path),
         rt_(rt),
@@ -29,8 +33,8 @@ class archiver {
     }
   }
 
-  void archive(size_t data_log_offset) {
-    data_log_offset = std::min(data_log_offset, (size_t) rt_.get());
+  void archive(size_t data_log_offset, read_tail& rt) {
+    data_log_offset = std::min(data_log_offset, (size_t) rt.get());
     data_log_archiver_.archive(data_log_offset);
     filter_log_archiver_.archive(data_log_offset);
     index_log_archiver_.archive(data_log_offset);
@@ -50,7 +54,7 @@ class archiver {
 
  private:
   std::string path_;
-  read_tail& rt_;
+  read_tail rt_;
   data_log_archiver data_log_archiver_;
   filter_log_archiver<IDENTITY> filter_log_archiver_;
   index_log_archiver<IDENTITY> index_log_archiver_;

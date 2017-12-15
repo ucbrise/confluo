@@ -40,7 +40,7 @@ class DataArchivalTest : public testing::Test {
  */
 TEST_F(DataArchivalTest, ArchivalTest) {
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("/tmp/data_log/", log);
+  small_monolog_archiver archiver("/tmp/data_log/", &log);
 
   write_to_log(log);
 
@@ -59,7 +59,7 @@ TEST_F(DataArchivalTest, ArchivalTest) {
  */
 TEST_F(DataArchivalTest, PtrSwapTest) {
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
-  small_monolog_archiver archiver("/tmp/data_log/", log);
+  small_monolog_archiver archiver("/tmp/data_log/", &log);
 
   write_to_log(log);
 

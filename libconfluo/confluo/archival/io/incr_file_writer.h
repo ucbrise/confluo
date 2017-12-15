@@ -10,7 +10,7 @@ namespace archival {
 
 class incremental_file_writer {
  public:
-  incremental_file_writer(const std::string&  path, const std::string& file_prefix,
+  incremental_file_writer(const std::string& path, const std::string& file_prefix,
                           const std::string& file_suffix, size_t max_file_size)
       : file_num_(0),
         dir_path_(path),
@@ -18,6 +18,30 @@ class incremental_file_writer {
         file_suffix_(file_suffix),
         max_file_size_(max_file_size) {
     init();
+  }
+
+  incremental_file_writer(const incremental_file_writer& other)
+      : file_num_(0),
+        dir_path_(other.dir_path_),
+        file_prefix_(other.file_prefix_),
+        file_suffix_(other.file_suffix_),
+        max_file_size_(other.max_file_size_) {
+    open();
+  }
+
+  ~incremental_file_writer() {
+    close();
+  }
+
+  incremental_file_writer& operator=(const incremental_file_writer& other) {
+    close();
+    file_num_ = other.file_num_;
+    dir_path_ = other.dir_path_;
+    file_prefix_ = other.file_prefix_;
+    file_suffix_ = other.file_suffix_;
+    max_file_size_ = other.max_file_size_;
+    open();
+    return *this;
   }
 
   template<typename T>
@@ -88,8 +112,10 @@ class incremental_file_writer {
   }
 
   void close() {
-    cur_ofs_.close();
-    metadata_ofs_.close();
+    if (cur_ofs_.is_open())
+      cur_ofs_.close();
+    if (metadata_ofs_.is_open())
+      metadata_ofs_.close();
   }
 
  private:
@@ -117,7 +143,6 @@ class incremental_file_writer {
 
   incremental_file_offset open_new_next() {
     cur_ofs_.close();
-    // TODO update metadata
     file_num_++;
     cur_ofs_.open(cur_path(), std::ios::out | std::ios::trunc);
     return tell();

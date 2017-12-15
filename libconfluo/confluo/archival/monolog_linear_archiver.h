@@ -25,7 +25,7 @@ class monolog_linear_archiver {
    * @param path directory path to archive in
    * @param log monolog to archive
    */
-  monolog_linear_archiver(const std::string& path, monolog& log)
+  monolog_linear_archiver(const std::string& path, monolog* log)
       : writer_(path, "monolog_linear", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         archival_tail_(0),
         log_(log) {
@@ -46,7 +46,7 @@ class monolog_linear_archiver {
  private:
   incremental_file_writer writer_;
   size_t archival_tail_;
-  monolog& log_;
+  monolog* log_;
 
 };
 

@@ -148,7 +148,7 @@ class swappable_encoded_ptr {
  public:
   swappable_encoded_ptr()
      : ref_counts_(),
-       enc_ptr_() {
+       enc_ptr_(encoded_ptr<T>()) {
   }
 
   /**

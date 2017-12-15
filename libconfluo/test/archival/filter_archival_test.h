@@ -81,14 +81,12 @@ class FilterArchivalTest : public testing::Test {
 };
 
 TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
-
   filter f(filter_none);
   fill(f);
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
 
   reflog const* first_reflog = f.lookup(0);
 
@@ -100,14 +98,12 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
 }
 
 TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
-
   filter f(filter_none);
   fill(f);
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
 
   reflog const* first_reflog = f.lookup(0);
 
@@ -122,14 +118,12 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
 }
 
 TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
-
   filter f(filter_none);
   fill(f);
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
 
   reflog const* first_reflog = f.lookup(0);
   reflog const* second_reflog = f.lookup(1);
@@ -166,7 +160,7 @@ TEST_F(FilterArchivalTest, MultipleReflogsArchivedTest) {
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", filters);
+  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
 
   // archive across contiguous reflogs
   archiver.archive(32000);

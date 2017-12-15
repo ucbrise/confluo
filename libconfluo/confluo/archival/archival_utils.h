@@ -126,13 +126,13 @@ class archival_utils {
    * @return monolog offset archived up to
    */
   template<typename T, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUFFER_SIZE, encoding_type ENCODING>
-  static size_t archive_monolog_linear(monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>& monolog,
+  static size_t archive_monolog_linear(monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>* monolog,
                                        incremental_file_writer& writer, size_t start, size_t stop) {
     // TODO replace with bucket iterator later
     size_t archival_tail = start;
     storage::read_only_encoded_ptr<T> bucket_ptr;
     while (archival_tail < stop) {
-      monolog.ptr(archival_tail, bucket_ptr);
+      monolog->ptr(archival_tail, bucket_ptr);
       auto decoded_ptr = bucket_ptr.decode_ptr();
       auto* metadata = storage::ptr_metadata::get(bucket_ptr.get().ptr());
       T* data = decoded_ptr.get();
@@ -150,7 +150,7 @@ class archival_utils {
       writer.update_metadata<monolog_linear_archival_metadata>(archival_metadata);
 
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), encoded_size, state_type::D_ARCHIVED);
-      monolog.swap_bucket_ptr(archival_tail / BUCKET_SIZE, encoded_ptr<T>(encoded_bucket));
+      monolog->swap_bucket_ptr(archival_tail / BUCKET_SIZE, encoded_ptr<T>(encoded_bucket));
       archival_tail += BUCKET_SIZE;
     }
     return archival_tail;

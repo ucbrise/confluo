@@ -65,7 +65,11 @@ template<encoding_type ENCODING>
 class filter_log_archiver {
 
  public:
-  filter_log_archiver(const std::string& path, filter_log& filters)
+  filter_log_archiver()
+      : filter_log_archiver("", nullptr) {
+  }
+
+  filter_log_archiver(const std::string& path, filter_log* filters)
       : path_(path),
         filter_archivers_(),
         filters_(filters) {
@@ -82,8 +86,8 @@ class filter_log_archiver {
    */
   void archive(size_t offset) {
     init_new_archivers();
-    for (size_t i = 0; i < filters_.size(); i++) {
-      if (filters_.at(i)->is_valid())
+    for (size_t i = 0; i < filters_->size(); i++) {
+      if (filters_->at(i)->is_valid())
         filter_archivers_.at(i)->archive(offset);
     }
   }
@@ -94,15 +98,15 @@ class filter_log_archiver {
    * already had archivers initialized for.
    */
   void init_new_archivers() {
-    for (size_t i = filter_archivers_.size(); i < filters_.size(); i++) {
+    for (size_t i = filter_archivers_.size(); i < filters_->size(); i++) {
       std::string filter_path = path_ + "/filter_" + std::to_string(i) + "/";
-      filter_archivers_.push_back(new filter_archiver<ENCODING>(filter_path, filters_.at(i)));
+      filter_archivers_.push_back(new filter_archiver<ENCODING>(filter_path, filters_->at(i)));
     }
   }
 
   std::string path_;
-  monolog::monolog_exp2<filter_archiver<ENCODING>*> filter_archivers_;
-  filter_log& filters_;
+  std::vector<filter_archiver<ENCODING>*> filter_archivers_;
+  filter_log* filters_;
 
 };
 
