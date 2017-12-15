@@ -7,6 +7,7 @@
 #include <numeric>
 #include <thread>
 
+#include "archival/archival_mode.h"
 #include "archival/archiver.h"
 #include "archival/load_utils.h"
 #include "optional.h"
@@ -116,13 +117,13 @@ class atomic_multilog {
    * @param pool The pool of tasks
    */
   atomic_multilog(const std::string& name, const std::vector<column_t>& schema,
-                  const std::string& path, const storage::storage_mode& mode,
-                  task_pool& pool)
+                  const std::string& path, const storage::storage_mode& storage_mode,
+                  const archival::archival_mode& archival_mode, task_pool& pool)
       : name_(name),
         schema_(schema),
-        data_log_("data_log", path, mode),
-        rt_(path, mode),
-        metadata_(path, mode),
+        data_log_("data_log", path, storage_mode),
+        rt_(path, storage_mode),
+        metadata_(path, storage_mode),
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
         archival_task_("archival"),
@@ -131,16 +132,27 @@ class atomic_multilog {
     metadata_.write_schema(schema_);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
-//    archival_task_.start(std::bind(&archival::archival_manager::archive), <--- TODO fix this
-//                         configuration_params::ARCHIVAL_PERIODICITY_MS);
+    if (archival_mode == archival_mode::ON) {
+    archival_task_.start([this]() {
+                            archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
+                         },
+                         configuration_params::ARCHIVAL_PERIODICITY_MS);
+    }
   }
 
   atomic_multilog(const std::string& name, const std::string& schema,
-                  const std::string& path, const storage::storage_mode& mode,
-                  task_pool& pool)
-      : atomic_multilog(name, parser::parse_schema(schema), path, mode, pool) {
+                  const std::string& path, const storage::storage_mode& storage_mode,
+                  const archival::archival_mode& archival_mode, task_pool& pool)
+      : atomic_multilog(name, parser::parse_schema(schema), path, storage_mode, archival_mode, pool) {
   }
 
+  /**
+   * Constructor that initializes atomic multilog from existing archives.
+   * @param name The atomic multilog name
+   * @param path The path of the atomic multilog
+   * @param mode The storage mode of the atomic multilog
+   * @param pool The pool of tasks
+   */
   atomic_multilog(const std::string& name, const std::string& path,
                   const storage::storage_mode& mode, task_pool& pool)
       : name_(name),
@@ -157,8 +169,10 @@ class atomic_multilog {
     archiver_ = archiver(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
-    //    archival_task_.start(std::bind(&archival::archival_manager::archive),
-    //                         configuration_params::ARCHIVAL_PERIODICITY_MS);
+    archival_task_.start([this]() {
+                            archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
+                         },
+                         configuration_params::ARCHIVAL_PERIODICITY_MS);
   }
 
   void load(const std::string& path) {

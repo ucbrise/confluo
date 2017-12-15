@@ -33,8 +33,12 @@ class archiver {
     }
   }
 
-  void archive(size_t data_log_offset, read_tail& rt) {
-    data_log_offset = std::min(data_log_offset, (size_t) rt.get());
+  void archive_by(size_t data_log_window) {
+    archive(data_log_archiver_.tail() + data_log_window);
+  }
+
+  void archive(size_t data_log_offset) {
+    data_log_offset = std::min(data_log_offset, (size_t) rt_.get());
     data_log_archiver_.archive(data_log_offset);
     filter_log_archiver_.archive(data_log_offset);
     index_log_archiver_.archive(data_log_offset);

@@ -43,6 +43,10 @@ class monolog_linear_archiver {
     writer_.close();
   }
 
+  size_t tail() {
+    return archival_tail_;
+  }
+
  private:
   incremental_file_writer writer_;
   size_t archival_tail_;
