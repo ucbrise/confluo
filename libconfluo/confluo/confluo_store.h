@@ -38,11 +38,12 @@ class confluo_store {
    */
   int64_t create_atomic_multilog(const std::string& name,
                                  const std::vector<column_t>& schema,
-                                 const storage::storage_mode mode) {
+                                 const storage::storage_mode mode = storage::IN_MEMORY,
+                                 const archival::archival_mode archival_mode = archival_mode::OFF) {
     optional<management_exception> ex;
     std::future<int64_t> ret = mgmt_pool_.submit(
-        [&name, &schema, &mode, &ex, this]() -> int64_t {
-          return create_atomic_multilog_task(name, schema, mode, ex);
+        [&name, &schema, &mode, &archival_mode, &ex, this]() -> int64_t {
+          return create_atomic_multilog_task(name, schema, mode, archival_mode, ex);
         });
     int64_t id = ret.get();
     if (ex.has_value())
@@ -60,12 +61,12 @@ class confluo_store {
    */
   int64_t create_atomic_multilog(const std::string& name,
                                  const std::string& schema,
-                                 const storage::storage_mode mode =
-                                     storage::IN_MEMORY) {
+                                 const storage::storage_mode mode = storage::IN_MEMORY,
+                                 const archival::archival_mode archival_mode = archival_mode::OFF) {
     optional<management_exception> ex;
     std::future<int64_t> ret = mgmt_pool_.submit(
-        [&name, &schema, &mode, &ex, this]() -> int64_t {
-          return create_atomic_multilog_task(name, schema, mode, ex);
+        [&name, &schema, &mode, &archival_mode, &ex, this]() -> int64_t {
+          return create_atomic_multilog_task(name, schema, mode, archival_mode, ex);
         });
     int64_t id = ret.get();
     if (ex.has_value())
@@ -144,6 +145,7 @@ class confluo_store {
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::vector<column_t>& schema,
                                       const storage::storage_mode mode,
+                                      const archival::archival_mode archival_mode,
                                       optional<management_exception>& ex) {
     size_t id;
     if (multilog_map_.get(name, id) != -1) {
@@ -151,9 +153,8 @@ class confluo_store {
       return INT64_C(-1);
     }
     utils::file_utils::create_dir(data_path_ + "/" + name);
-    atomic_multilog* t = new atomic_multilog(name, schema,
-                                             data_path_ + "/" + name, mode,
-                                             mgmt_pool_);
+    atomic_multilog* t = new atomic_multilog(name, schema, data_path_ + "/" + name,
+                                             mode, archival_mode, mgmt_pool_);
     id = atomic_multilogs_.push_back(t);
     if (multilog_map_.put(name, id) == -1) {
       ex = management_exception(
@@ -177,6 +178,7 @@ class confluo_store {
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::string& schema,
                                       const storage::storage_mode mode,
+                                      const archival::archival_mode archival_mode,
                                       optional<management_exception>& ex) {
     size_t id;
     if (multilog_map_.get(name, id) != -1) {
@@ -184,9 +186,8 @@ class confluo_store {
       return INT64_C(-1);
     }
     utils::file_utils::create_dir(data_path_ + "/" + name);
-    atomic_multilog* t = new atomic_multilog(name, schema,
-                                             data_path_ + "/" + name, mode,
-                                             mgmt_pool_);
+    atomic_multilog* t = new atomic_multilog(name, schema, data_path_ + "/" + name,
+                                             mode, archival_mode, mgmt_pool_);
     id = atomic_multilogs_.push_back(t);
     if (multilog_map_.put(name, id) == -1) {
       ex = management_exception(

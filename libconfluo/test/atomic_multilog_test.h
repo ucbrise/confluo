@@ -487,7 +487,7 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
 
 // TODO: Separate out the tests
 TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_filter("filter1", "a == true");
   mlog.add_filter("filter2", "b > 4");
   mlog.add_filter("filter3", "c <= 30");
@@ -512,6 +512,8 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   mlog.install_trigger("trigger6", "agg6 >= 10");
   mlog.install_trigger("trigger7", "agg7 >= 10");
   mlog.install_trigger("trigger8", "agg8 >= 10");
+
+  sleep(1);
 
   int64_t now_ns = time_utils::cur_ns();
   int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
@@ -642,7 +644,7 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   ASSERT_TRUE(numeric(26) == val8);
 
   // Test triggers
-  sleep(1);  // To make sure all triggers have been evaluated
+  sleep(3);  // To make sure all triggers have been evaluated
 
   size_t alert_count = 0;
   for (auto a = mlog.get_alerts(beg, end); a->has_more(); a->advance()) {
@@ -820,7 +822,7 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
 // TODO: Separate out the tests
 // TODO: Add tests for aggregates only
 TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_filter("filter1", "a == true");
   mlog.add_filter("filter2", "b > 4");
   mlog.add_filter("filter3", "c <= 30");

@@ -11,7 +11,7 @@ class timeseries_db : public atomic_multilog {
   timeseries_db(const std::string& name, const std::vector<column_t>& schema,
                 const std::string& path, const storage::storage_mode& storage,
                 task_pool& task_pool)
-      : atomic_multilog(name, schema, path, storage, task_pool) {
+      : atomic_multilog(name, schema, path, storage, archival_mode::OFF, task_pool) {
     // Index the timestamp column by calling add_index
     add_index("TIMESTAMP");
   }

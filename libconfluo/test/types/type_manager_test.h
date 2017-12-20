@@ -127,7 +127,7 @@ TEST_F(TypeManagerTest, RegisterTest) {
 }
 
 TEST_F(TypeManagerTest, FilterTest) {
-  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog dtable("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   dtable.add_index("a");
   dtable.add_index("b");
   dtable.add_index("c");
