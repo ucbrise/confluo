@@ -20,12 +20,9 @@ class archiver {
            bool clear = true)
       : path_(path),
         rt_(rt),
-        data_log_archiver_(data_log_path(), log),
-        filter_log_archiver_(filter_log_path(), filters),
-        index_log_archiver_(index_log_path(), indexes, schema) {
-    file_utils::create_dir(data_log_path());
-    file_utils::create_dir(filter_log_path());
-    file_utils::create_dir(index_log_path());
+        data_log_archiver_(data_log_path(), log, clear),
+        filter_log_archiver_(filter_log_path(), filters, clear),
+        index_log_archiver_(index_log_path(), indexes, schema, clear) {
     if (clear) {
       file_utils::clear_dir(data_log_path());
       file_utils::clear_dir(filter_log_path());

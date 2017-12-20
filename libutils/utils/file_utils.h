@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 
 #include "assertions.h"
+#include "boost/filesystem.hpp"
 
 namespace utils {
 
@@ -45,14 +46,7 @@ class file_utils {
   }
 
   static void clear_dir(const std::string& path) {
-    DIR *dir = opendir(path.c_str());
-    struct dirent *next_file;
-    char filepath[256];
-    while ((next_file = readdir(dir)) != nullptr) {
-      sprintf(filepath, "%s/%s", path.c_str(), next_file->d_name);
-      std::remove(filepath);
-    }
-    closedir(dir);
+    boost::filesystem::remove_all(path);
   }
 
   static bool exists_file(const std::string& path) {

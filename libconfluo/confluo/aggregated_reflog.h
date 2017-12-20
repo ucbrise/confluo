@@ -114,6 +114,12 @@ class aggregated_reflog : public reflog {
    *
    * @return The number of aggregates
    */
+  inline numeric get_aggregate(size_t aid, uint64_t version) const {
+    storage::read_only_ptr<aggregate> copy;
+    aggregates_->atomic_copy(copy);
+    return copy.get()[aid].get(version);
+  }
+
   inline size_t num_aggregates() const {
     return num_aggregates_;
   }

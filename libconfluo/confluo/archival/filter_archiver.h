@@ -19,9 +19,11 @@ class filter_archiver {
   filter_archiver(const std::string& path, monitor::filter* filter)
       : filter_(filter),
         refs_writer_(path, "filter_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
-        aggregate_writer_(path, "filter_agg", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+        aggregate_writer_(path, "filter_aggs", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         refs_tail_(0),
         ts_tail_(0) {
+    refs_writer_.init();
+    aggregate_writer_.init();
     refs_writer_.close();
     aggregate_writer_.close();
   }
@@ -44,7 +46,7 @@ class filter_archiver {
       if (refs_tail_ < refs.size()) {
         break;
       }
-      radix_tree_archival_utils::archive_reflog_aggregates(ts_tail_, refs, refs_tail_, aggregate_writer_);
+      radix_tree_archival_utils::archive_reflog_aggregates(key, refs, refs_tail_, aggregate_writer_);
       refs_tail_ = 0;
     }
     refs_writer_.close();
@@ -66,13 +68,17 @@ class filter_log_archiver {
 
  public:
   filter_log_archiver()
-      : filter_log_archiver("", nullptr) {
+      : filter_log_archiver("", nullptr, false) {
   }
 
-  filter_log_archiver(const std::string& path, filter_log* filters)
+  filter_log_archiver(const std::string& path, filter_log* filters, bool clear = true)
       : path_(path),
         filter_archivers_(),
         filters_(filters) {
+    if (clear) {
+      file_utils::clear_dir(path);
+    }
+    file_utils::create_dir(path);
   }
 
   ~filter_log_archiver() {
@@ -100,6 +106,7 @@ class filter_log_archiver {
   void init_new_archivers() {
     for (size_t i = filter_archivers_.size(); i < filters_->size(); i++) {
       std::string filter_path = path_ + "/filter_" + std::to_string(i) + "/";
+      file_utils::create_dir(filter_path);
       filter_archivers_.push_back(new filter_archiver<ENCODING>(filter_path, filters_->at(i)));
     }
   }

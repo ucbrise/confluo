@@ -35,17 +35,18 @@ class radix_tree_archival_utils {
   static size_t archive_reflog(byte_string key, reflog& reflog, incremental_file_writer& writer,
                                size_t start, size_t data_log_stop) {
     reflog_bucket_ptr_t bucket_ptr;
-    size_t archival_tail = start;
+    size_t archival_tail_beg = start;
+    size_t archival_tail_end = start;
     size_t data_log_archival_tail = 0;
     // TODO replace w/ iterator
-    while (data_log_archival_tail < data_log_stop && archival_tail < reflog.size()) {
-      reflog.ptr(archival_tail, bucket_ptr);
+    while (data_log_archival_tail < data_log_stop && archival_tail_beg < reflog.size()) {
+      reflog.ptr(archival_tail_beg, bucket_ptr);
       decoded_reflog_ptr_t decoded_ptr = bucket_ptr.decode_ptr();
       auto* metadata = ptr_metadata::get(bucket_ptr.get().ptr());
       uint64_t* data = decoded_ptr.get();
 
       if (metadata->state_ != state_type::D_IN_MEMORY) {
-        archival_tail += reflog_constants::BUCKET_SIZE;
+        archival_tail_beg += reflog_constants::BUCKET_SIZE;
         continue;
       }
 
@@ -55,20 +56,23 @@ class radix_tree_archival_utils {
       }
 
       // TODO abstract into metadata as well
+      archival_tail_end = std::min(archival_tail_beg + reflog_constants::BUCKET_SIZE, reflog.size());
       writer.append<uint8_t>(key.data(), key.size());
-      writer.append<size_t>(archival_tail);
+      writer.append<size_t>(archival_tail_beg);
+      writer.append<size_t>(archival_tail_end);
 
       size_t encoded_size;
       raw_encoded_ptr_t raw_encoded_bucket = encoder::encode<uint64_t, ENCODING>(data, encoded_size);
       auto off = writer.append<ptr_metadata, uint8_t>(metadata, 1, raw_encoded_bucket.get(), encoded_size);
-      writer.update_metadata(reflog_archival_metadata(key, archival_tail).to_string());
+      auto archival_metadata = reflog_archival_metadata(key, archival_tail_beg, data_log_archival_tail);
+      writer.update_metadata(archival_metadata.to_string());
 
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), encoded_size, state_type::D_ARCHIVED);
-      reflog.swap_bucket_ptr(archival_tail, encoded_reflog_ptr_t(encoded_bucket));
+      reflog.swap_bucket_ptr(archival_tail_beg, encoded_reflog_ptr_t(encoded_bucket));
 
-      archival_tail += reflog_constants::BUCKET_SIZE;
+      archival_tail_beg = archival_tail_end;
     }
-    return archival_tail;
+    return archival_tail_beg;
   }
 
   /**
@@ -82,27 +86,25 @@ class radix_tree_archival_utils {
                                         size_t version, incremental_file_writer& writer) {
 
     size_t num_aggs = reflog.num_aggregates();
-    numeric* collapsed_aggregates = new numeric[num_aggs];
-    for (size_t i = 0; i < num_aggs; i++) {
-      collapsed_aggregates[i] = reflog.get_aggregate(i, version);
-    }
-
     // TODO abstract into metadata
     writer.append<uint8_t>(radix_tree_key.data(), radix_tree_key.size());
     writer.append<size_t>(version);
     writer.append<size_t>(num_aggs);
-    writer.append<numeric>(collapsed_aggregates, num_aggs);
-    writer.update_metadata(reflog_aggregates_archival_metadata(radix_tree_key).to_string());
 
-    size_t alloc_size = sizeof(aggregate) * num_aggs;
-    aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, state_type::D_ARCHIVED));
-    for (size_t i = 0; i < num_aggs; i++) {
-      new (archived_aggs + i) aggregate(collapsed_aggregates[i].type(), D_SUM, 1);
-      archived_aggs[i].update(0, collapsed_aggregates[i], version);
+    if (num_aggs > 0) {
+      size_t alloc_size = sizeof(aggregate) * num_aggs;
+      aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, state_type::D_ARCHIVED));
+
+      for (size_t i = 0; i < num_aggs; i++) {
+        numeric collapsed_aggregate = reflog.get_aggregate(i, version);
+        writer.append<data_type>(collapsed_aggregate.type());
+        writer.append<uint8_t>(collapsed_aggregate.data(), collapsed_aggregate.type().size);
+        new (archived_aggs + i) aggregate(collapsed_aggregate.type(), D_SUM, 1);
+        archived_aggs[i].update(0, collapsed_aggregate, version);
+      }
+      reflog.swap_aggregates(archived_aggs);
     }
-
-    reflog.swap_aggregates(archived_aggs);
-    delete[] collapsed_aggregates;
+    writer.update_metadata(reflog_aggregates_archival_metadata(radix_tree_key).to_string());
   }
 
  private:
@@ -146,7 +148,7 @@ class archival_utils {
       encoder::raw_encoded_ptr raw_encoded_bucket = encoder::encode<T, ENCODING>(data, encoded_size);
       auto off = writer.append<ptr_metadata, uint8_t>(metadata, 1, raw_encoded_bucket.get(), encoded_size);
 
-      auto archival_metadata = monolog_linear_archival_metadata(archival_tail);
+      auto archival_metadata = monolog_linear_archival_metadata(archival_tail + BUCKET_SIZE);
       writer.update_metadata<monolog_linear_archival_metadata>(archival_metadata);
 
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), encoded_size, state_type::D_ARCHIVED);

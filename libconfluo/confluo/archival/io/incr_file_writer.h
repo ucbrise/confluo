@@ -17,7 +17,6 @@ class incremental_file_writer {
         file_prefix_(file_prefix),
         file_suffix_(file_suffix),
         max_file_size_(max_file_size) {
-    init();
   }
 
   incremental_file_writer(const incremental_file_writer& other)
@@ -26,7 +25,6 @@ class incremental_file_writer {
         file_prefix_(other.file_prefix_),
         file_suffix_(other.file_suffix_),
         max_file_size_(other.max_file_size_) {
-    open();
   }
 
   ~incremental_file_writer() {
@@ -42,6 +40,18 @@ class incremental_file_writer {
     max_file_size_ = other.max_file_size_;
     open();
     return *this;
+  }
+
+  void init() {
+    if (file_utils::exists_file(metadata_path())) {
+      std::ifstream metadata_ifs(metadata_path());
+      file_num_ = io_utils::read<size_t>(metadata_ifs);
+      open();
+    } else {
+      cur_ofs_.open(cur_path());
+      metadata_ofs_.open(metadata_path());
+      update_last_file();
+    }
   }
 
   template<typename T>
@@ -119,18 +129,6 @@ class incremental_file_writer {
   }
 
  private:
-  void init() {
-    if (file_utils::exists_file(metadata_path())) {
-      std::ifstream metadata_ifs(metadata_path());
-      file_num_ = io_utils::read<size_t>(metadata_ifs);
-      open();
-    } else {
-      cur_ofs_.open(cur_path());
-      metadata_ofs_.open(metadata_path());
-      update_last_file();
-    }
-  }
-
   void update_last_file() {
     metadata_ofs_.seekp(0);
     io_utils::write<size_t>(metadata_ofs_, file_num_);
@@ -138,7 +136,8 @@ class incremental_file_writer {
   }
 
   bool fits_in_cur_file(size_t append_size) {
-    return ((size_t) cur_ofs_.tellp()) + append_size > max_file_size_;
+    size_t off = cur_ofs_.tellp();
+    return off + append_size < max_file_size_;
   }
 
   incremental_file_offset open_new_next() {

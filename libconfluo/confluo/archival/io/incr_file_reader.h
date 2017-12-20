@@ -22,6 +22,11 @@ class incremental_file_reader {
     last_file_num_ = io_utils::read<size_t>(metadata_ifs);
   }
 
+  ~incremental_file_reader() {
+    if (is_open())
+      close();
+  }
+
   template<typename T>
   incremental_file_offset advance(size_t len) {
     if (cur_ifs_.eof())
@@ -69,27 +74,37 @@ class incremental_file_reader {
     return incremental_file_offset(cur_path(), cur_ifs_.tellg());
   }
 
-  bool has_more() const {
-    if (!cur_ifs_.eof())
-      return true;
-    return file_num_ < last_file_num_;
+  bool has_more() {
+    size_t off = cur_ifs_.tellg();
+    return off < eof_offset() || file_num_ < last_file_num_;
   }
 
   void open() {
     cur_ifs_.open(cur_path());
   }
 
+  bool is_open() {
+    return cur_ifs_.is_open();
+  }
+
   void close() {
     cur_ifs_.close();
   }
 
- private:
   size_t eof_offset() {
     size_t cur_off = cur_ifs_.tellg();
     cur_ifs_.seekg(0, std::ios::end);
     size_t end_off = cur_ifs_.tellg();
     cur_ifs_.seekg(cur_off);
     return end_off;
+  }
+
+ private:
+
+  // Note: std::ios::eof depends on last op
+  bool eof() {
+    size_t off = cur_ifs_.tellg();
+    return off == eof_offset();
   }
 
   void open_next() {

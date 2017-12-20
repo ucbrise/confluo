@@ -22,13 +22,18 @@ class monolog_linear_archiver {
 
   /**
    * Constructor.
-   * @param path directory path to archive in
+   * @param path directory to archive in
    * @param log monolog to archive
    */
-  monolog_linear_archiver(const std::string& path, monolog* log)
+  monolog_linear_archiver(const std::string& path, monolog* log, bool clear = true)
       : writer_(path, "monolog_linear", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         archival_tail_(0),
         log_(log) {
+    if (clear) {
+      file_utils::clear_dir(path);
+    }
+    file_utils::create_dir(path);
+    writer_.init();
     writer_.close();
   }
 

@@ -18,13 +18,24 @@ template<encoding_type ENCODING>
 class index_archiver {
 
  public:
+  /**
+   * Constructor
+   * @param path directory to archive in
+   * @param index index to archive
+   * @param column column corresponding to the index
+   */
   index_archiver(const std::string& path, index::radix_index* index, const column_t column)
       : index_(index),
         column_(column),
         writer_(path, "index_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
+    writer_.init();
     writer_.close();
   }
 
+  /**
+   * Archive index up to a data log offset.
+   * @param offset data log offset
+   */
   void archive(size_t offset) {
     writer_.open();
     byte_string min = column_.min().to_key(column_.index_bucket_size());
@@ -49,14 +60,25 @@ class index_log_archiver {
 
  public:
   index_log_archiver()
-      : index_log_archiver("", nullptr, nullptr) {
+      : index_log_archiver("", nullptr, nullptr, false) {
   }
 
-  index_log_archiver(const std::string& path, index_log* indexes, schema_t* schema)
+  /**
+   * Constructor.
+   * @param path directory to archive in
+   * @param indexes index log to archive
+   * @param schema data schema
+   * @param clear clear current archives if any exist
+   */
+  index_log_archiver(const std::string& path, index_log* indexes, schema_t* schema, bool clear = true)
      : path_(path),
        index_archivers_(),
        indexes_(indexes),
        schema_(schema) {
+    if (clear) {
+      file_utils::clear_dir(path);
+    }
+    file_utils::create_dir(path);
  }
 
   ~index_log_archiver() {
@@ -64,6 +86,10 @@ class index_log_archiver {
       delete archiver;
   }
 
+  /**
+   * Archive every index in the index log up to a data log offset.
+   * @param offset data log offset
+   */
   void archive(size_t offset) {
     init_new_archivers();
     for (size_t i = 0; i < schema_->size(); i++) {
@@ -75,12 +101,16 @@ class index_log_archiver {
   }
 
  private:
+  /**
+   * Initialize archivers for new indexes.
+   */
   void init_new_archivers() {
     for (size_t i = 0; i < schema_->size(); i++) {
       auto& col = (*schema_)[i];
       auto id = col.index_id();
       if (col.is_indexed() && index_archivers_[id] == nullptr) {
         std::string index_path = path_ + "/index_" + std::to_string(i) + "/";
+        file_utils::create_dir(index_path);
         index_archivers_[id] = new index_archiver<ENCODING>(index_path, indexes_->at(i), col);
       }
     }

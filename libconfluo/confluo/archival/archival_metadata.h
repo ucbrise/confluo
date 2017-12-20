@@ -63,15 +63,17 @@ class reflog_archival_metadata {
       : metadata_(metadata) {
   }
 
-  reflog_archival_metadata(byte_string byte_str, size_t archival_tail)
-      : reflog_archival_metadata(byte_str.size(), byte_str.data(), archival_tail) {
+  reflog_archival_metadata(byte_string byte_str, size_t archival_tail, size_t data_log_tail)
+      : reflog_archival_metadata(byte_str.size(), byte_str.data(), archival_tail, data_log_tail) {
   }
 
-  reflog_archival_metadata(size_t key_size, uint8_t* archival_tail_key, size_t archival_tail) {
+  reflog_archival_metadata(size_t key_size, uint8_t* archival_tail_key,
+                           size_t archival_tail, size_t data_log_tail) {
     metadata_ = "";
     metadata_.append(reinterpret_cast<const char*>(&key_size), sizeof(key_size));
     metadata_.append(reinterpret_cast<const char*>(archival_tail_key), key_size);
     metadata_.append(reinterpret_cast<const char*>(&archival_tail), sizeof(archival_tail));
+    metadata_.append(reinterpret_cast<const char*>(&data_log_tail), sizeof(data_log_tail));
   }
 
   std::string to_string() {
@@ -88,6 +90,10 @@ class reflog_archival_metadata {
 
   size_t reflog_archival_tail() {
     return *reinterpret_cast<const size_t*>(metadata_.c_str() + sizeof(size_t) + this->key_size());
+  }
+
+  size_t data_log_archival_tail() {
+    return *reinterpret_cast<const size_t*>(metadata_.c_str() + 2 * sizeof(size_t) + this->key_size());
   }
 
  private:
