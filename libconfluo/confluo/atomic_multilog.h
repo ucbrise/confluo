@@ -117,13 +117,13 @@ class atomic_multilog {
    * @param pool The pool of tasks
    */
   atomic_multilog(const std::string& name, const std::vector<column_t>& schema,
-                  const std::string& path, const storage::storage_mode& storage_mode,
-                  const archival::archival_mode& archival_mode, task_pool& pool)
+                  const std::string& path, const storage::storage_mode& s_mode,
+                  const archival_mode& a_mode, task_pool& pool)
       : name_(name),
         schema_(schema),
-        data_log_("data_log", path, storage_mode),
-        rt_(path, storage_mode),
-        metadata_(path, storage_mode),
+        data_log_("data_log", path, s_mode),
+        rt_(path, s_mode),
+        metadata_(path, s_mode),
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
         archival_task_("archival"),
@@ -132,7 +132,7 @@ class atomic_multilog {
     metadata_.write_schema(schema_);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
-    if (archival_mode == archival_mode::ON) {
+    if (a_mode == archival_mode::ON) {
     archival_task_.start([this]() {
                             archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
                          },
@@ -142,8 +142,8 @@ class atomic_multilog {
 
   atomic_multilog(const std::string& name, const std::string& schema,
                   const std::string& path, const storage::storage_mode& storage_mode,
-                  const archival::archival_mode& archival_mode, task_pool& pool)
-      : atomic_multilog(name, parser::parse_schema(schema), path, storage_mode, archival_mode, pool) {
+                  const archival_mode& a_mode, task_pool& pool)
+      : atomic_multilog(name, parser::parse_schema(schema), path, storage_mode, a_mode, pool) {
   }
 
   /**
@@ -986,11 +986,14 @@ class atomic_multilog {
    * @param time_bucket The time_bucket to check
    * @param version The version to check
    */
-  void check_time_bucket(filter* f, trigger* t, size_t tid,
-                         uint64_t time_bucket, uint64_t version) {
+  void check_time_bucket(filter* f, trigger* t, size_t tid, uint64_t time_bucket, uint64_t version) {
     size_t window_size = t->periodicity_ms();
+//    LOG_INFO << "checking for window from " << (time_bucket - window_size) << " to " << time_bucket;
     for (uint64_t ms = time_bucket - window_size; ms <= time_bucket; ms++) {
       const aggregated_reflog* ar = f->lookup(ms);
+      if (ar == nullptr) {
+        LOG_INFO << f << " contains nothing for " << ms << ".";
+      }
       if (ar != nullptr) {
         numeric agg = ar->get_aggregate(tid, version);
         if (numeric::relop(t->op(), agg, t->threshold())) {
