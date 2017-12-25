@@ -51,6 +51,11 @@ class monolog_linear_base {
     }
   }
 
+  void pre_alloc() {
+    buckets_[0].ensure_alloc();
+  }
+
+
   /**
    * Get the name of the monolog.
    *

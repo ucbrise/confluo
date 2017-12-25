@@ -129,14 +129,13 @@ class atomic_multilog {
         archival_task_("archival"),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
+    data_log_.pre_alloc();
     metadata_.write_schema(schema_);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
     if (a_mode == archival_mode::ON) {
-    archival_task_.start([this]() {
-                            archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
-                         },
-                         configuration_params::ARCHIVAL_PERIODICITY_MS);
+      archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
+                           configuration_params::ARCHIVAL_PERIODICITY_MS);
     }
   }
 
@@ -165,13 +164,11 @@ class atomic_multilog {
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     load(path);
-    metadata_ = metadata_writer(path, mode);
+    metadata_ = metadata_writer(path, mode); // metadata shouldn't be written until after load
     archiver_ = archiver(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
-    archival_task_.start([this]() {
-                            archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
-                         },
+    archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
                          configuration_params::ARCHIVAL_PERIODICITY_MS);
   }
 
@@ -208,10 +205,7 @@ class atomic_multilog {
         }
       }
     }
-    load_utils::load_monolog_linear<uint8_t,
-                                    data_log_constants::MAX_BUCKETS,
-                                    data_log_constants::BUCKET_SIZE,
-                                    data_log_constants::BUFFER_SIZE>(archiver_.data_log_path(), data_log_);
+    load_utils::load_data_log(archiver_.data_log_path(), data_log_);
     load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
     load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
   }
@@ -944,6 +938,10 @@ class atomic_multilog {
     trigger_map_.remove(name, trigger_id);
   }
 
+  void archival_task() {
+    archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
+  }
+
   /**
    * Monitors the task executed on the atomic multilog
    */
@@ -988,12 +986,8 @@ class atomic_multilog {
    */
   void check_time_bucket(filter* f, trigger* t, size_t tid, uint64_t time_bucket, uint64_t version) {
     size_t window_size = t->periodicity_ms();
-//    LOG_INFO << "checking for window from " << (time_bucket - window_size) << " to " << time_bucket;
     for (uint64_t ms = time_bucket - window_size; ms <= time_bucket; ms++) {
       const aggregated_reflog* ar = f->lookup(ms);
-      if (ar == nullptr) {
-        LOG_INFO << f << " contains nothing for " << ms << ".";
-      }
       if (ar != nullptr) {
         numeric agg = ar->get_aggregate(tid, version);
         if (numeric::relop(t->op(), agg, t->threshold())) {
