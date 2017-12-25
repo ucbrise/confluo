@@ -2,11 +2,11 @@
 #define CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_
 
 #include "aggregated_reflog.h"
-#include "archival_utils.h"
 #include "conf/configuration_params.h"
 #include "storage/encoder.h"
 #include "filter.h"
 #include "filter_log.h"
+#include "radix_tree_archival_utils.h"
 #include "read_tail.h"
 
 namespace confluo {
@@ -18,8 +18,8 @@ class filter_archiver {
  public:
   filter_archiver(const std::string& path, monitor::filter* filter)
       : filter_(filter),
-        refs_writer_(path, "filter_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
-        aggregate_writer_(path, "filter_aggs", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+        refs_writer_(path, "filter_data", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+        aggregate_writer_(path, "filter_aggs", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         refs_tail_(0),
         ts_tail_(0) {
     refs_writer_.init();
@@ -78,7 +78,6 @@ class filter_log_archiver {
     if (clear) {
       file_utils::clear_dir(path);
     }
-    file_utils::create_dir(path);
   }
 
   ~filter_log_archiver() {

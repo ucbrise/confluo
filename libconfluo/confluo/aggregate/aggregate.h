@@ -147,8 +147,7 @@ class aggregate_list {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
     numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
-    aggregate_node *node = new aggregate_node(agg_.seq_op(old_agg, value),
-                                              version, cur_head);
+    aggregate_node *node = new aggregate_node(agg_.seq_op(old_agg, value), version, cur_head);
     atomic::store(&head_, node);
   }
 

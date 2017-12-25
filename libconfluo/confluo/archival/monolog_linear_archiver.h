@@ -1,10 +1,12 @@
 #ifndef CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_
 #define CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_
 
-#include "archival_utils.h"
+#include "storage/allocator.h"
 #include "storage/encoder.h"
 #include "file_utils.h"
+#include "io/incr_file_utils.h"
 #include "io/incr_file_writer.h"
+#include "monolog_archival_utils.h"
 #include "read_tail.h"
 
 namespace confluo {
@@ -26,13 +28,12 @@ class monolog_linear_archiver {
    * @param log monolog to archive
    */
   monolog_linear_archiver(const std::string& path, monolog* log, bool clear = true)
-      : writer_(path, "monolog_linear", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+      : writer_(path, "monolog_linear", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
         archival_tail_(0),
         log_(log) {
     if (clear) {
       file_utils::clear_dir(path);
     }
-    file_utils::create_dir(path);
     writer_.init();
     writer_.close();
   }
@@ -43,7 +44,7 @@ class monolog_linear_archiver {
    */
   void archive(size_t offset) {
     writer_.open();
-    archival_utils::archive_monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE, ENCODING>(
+    monolog_linear_archival_utils::archive<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE, ENCODING>(
                                               log_, writer_, archival_tail_, offset);
     writer_.close();
   }

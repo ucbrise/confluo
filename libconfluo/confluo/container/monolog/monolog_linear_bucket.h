@@ -210,8 +210,7 @@ class monolog_linear_bucket {
    */
   void ensure_alloc() {
     if (data_.atomic_load().ptr() == nullptr) {
-      __atomic_block_copy_ref copy;
-      try_allocate(copy);
+      try_allocate();
     }
   }
 

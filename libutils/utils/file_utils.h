@@ -47,6 +47,7 @@ class file_utils {
 
   static void clear_dir(const std::string& path) {
     boost::filesystem::remove_all(path);
+    file_utils::create_dir(path);
   }
 
   static bool exists_file(const std::string& path) {

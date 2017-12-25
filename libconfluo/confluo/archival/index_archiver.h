@@ -3,11 +3,11 @@
 
 #include "storage/encoder.h"
 #include "aggregated_reflog.h"
-#include "archival_utils.h"
 #include "schema/column.h"
 #include "conf/configuration_params.h"
 #include "index_log.h"
 #include "io/incr_file_writer.h"
+#include "radix_tree_archival_utils.h"
 #include "read_tail.h"
 #include "schema/schema.h"
 
@@ -27,7 +27,7 @@ class index_archiver {
   index_archiver(const std::string& path, index::radix_index* index, const column_t column)
       : index_(index),
         column_(column),
-        writer_(path, "index_data", ".dat", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
+        writer_(path, "index_data", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
     writer_.init();
     writer_.close();
   }
@@ -78,7 +78,6 @@ class index_log_archiver {
     if (clear) {
       file_utils::clear_dir(path);
     }
-    file_utils::create_dir(path);
  }
 
   ~index_log_archiver() {

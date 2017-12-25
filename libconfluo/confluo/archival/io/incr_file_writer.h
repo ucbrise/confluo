@@ -10,12 +10,10 @@ namespace archival {
 
 class incremental_file_writer {
  public:
-  incremental_file_writer(const std::string& path, const std::string& file_prefix,
-                          const std::string& file_suffix, size_t max_file_size)
+  incremental_file_writer(const std::string& path, const std::string& file_prefix, size_t max_file_size)
       : file_num_(0),
         dir_path_(path),
         file_prefix_(file_prefix),
-        file_suffix_(file_suffix),
         max_file_size_(max_file_size) {
   }
 
@@ -23,7 +21,6 @@ class incremental_file_writer {
       : file_num_(0),
         dir_path_(other.dir_path_),
         file_prefix_(other.file_prefix_),
-        file_suffix_(other.file_suffix_),
         max_file_size_(other.max_file_size_) {
   }
 
@@ -36,7 +33,6 @@ class incremental_file_writer {
     file_num_ = other.file_num_;
     dir_path_ = other.dir_path_;
     file_prefix_ = other.file_prefix_;
-    file_suffix_ = other.file_suffix_;
     max_file_size_ = other.max_file_size_;
     open();
     return *this;
@@ -99,11 +95,11 @@ class incremental_file_writer {
   }
 
   std::string cur_path() const {
-    return dir_path_ + "/" + file_prefix_ + "_" + std::to_string(file_num_) + file_suffix_;
+    return dir_path_ + "/" + file_prefix_ + "_" + std::to_string(file_num_) + ".dat";
   }
 
   std::string metadata_path() const {
-    return dir_path_ + "/" + file_prefix_ + "_metadata" + file_suffix_;
+    return dir_path_ + "/" + file_prefix_ + "_metadata.dat";
   }
 
   incremental_file_offset tell() {
@@ -153,7 +149,6 @@ class incremental_file_writer {
   size_t file_num_;
   std::string dir_path_;
   std::string file_prefix_;
-  std::string file_suffix_;
   size_t max_file_size_;
 
   static const size_t METADATA_OFFSET = sizeof(size_t);
