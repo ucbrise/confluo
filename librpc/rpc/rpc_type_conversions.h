@@ -1,13 +1,13 @@
 #ifndef RPC_RPC_TYPE_CONVERSIONS_H_
 #define RPC_RPC_TYPE_CONVERSIONS_H_
 
-#include "dialog_types.h"
+#include "schema/record_batch.h"
+#include "schema/schema.h"
+#include "storage/storage.h"
+#include "rpc_types.h"
 
-#include "record_batch.h"
-#include "schema.h"
-#include "storage.h"
 
-namespace dialog {
+namespace confluo {
 namespace rpc {
 class rpc_type_conversions {
  public:
@@ -28,7 +28,7 @@ class rpc_type_conversions {
   static std::vector<column_t> convert_schema(const rpc_schema& s) {
     schema_builder builder;
     for (const rpc_column& col : s) {
-      data_type type(static_cast<type_id>(col.type_id), col.type_size);
+      data_type type(static_cast<size_t>(col.type_id), col.type_size);
       builder.add_column(type, col.name);
     }
     return builder.get_columns();
@@ -46,11 +46,11 @@ class rpc_type_conversions {
     return schema;
   }
 
-  static storage::storage_id convert_mode(const rpc_storage_mode& mode) {
-    return static_cast<storage::storage_id>(mode);
+  static storage::storage_mode convert_mode(const rpc_storage_mode& mode) {
+    return static_cast<storage::storage_mode>(mode);
   }
 
-  static rpc_storage_mode convert_mode(const storage::storage_id& mode) {
+  static rpc_storage_mode convert_mode(const storage::storage_mode& mode) {
     return static_cast<rpc_storage_mode>(mode);
   }
 };

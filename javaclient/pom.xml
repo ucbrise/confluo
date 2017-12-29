@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>riselab</groupId>
-  <artifactId>dialog-client</artifactId>
+  <artifactId>confluo-client</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
-  <name>DiaLog Client</name>
+  <name>Confluo Client</name>
 
   <developers>
     <developer>

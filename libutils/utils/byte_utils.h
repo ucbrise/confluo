@@ -1,9 +1,9 @@
 #ifndef UTILS_BYTE_UTILS_H_
 #define UTILS_BYTE_UTILS_H_
 
-#define DIALOG_UNKNOWN_ENDIAN 0
-#define DIALOG_BIG_ENDIAN     1
-#define DIALONG_LITTLE_ENDIAN 2
+#define CONFLUO_UNKNOWN_ENDIAN 0
+#define CONFLUO_BIG_ENDIAN     1
+#define CONFLUO_LITTLE_ENDIAN 2
 
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
     defined(__BIG_ENDIAN__) || \
@@ -11,16 +11,16 @@
     defined(__THUMBEB__) || \
     defined(__AARCH64EB__) || \
     defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
-#define DIALOG_ENDIANNESS DIALOG_BIG_ENDIAN
+#define CONFLUO_ENDIANNESS CONFLUO_BIG_ENDIAN
 #elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
     defined(__LITTLE_ENDIAN__) || \
     defined(__ARMEL__) || \
     defined(__THUMBEL__) || \
     defined(__AARCH64EL__) || \
     defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
-#define DIALOG_ENDIANNESS DIALOG_LITTLE_ENDIAN
+#define CONFLUO_ENDIANNESS CONFLUO_LITTLE_ENDIAN
 #else
-#define DIALOG_ENDIANNESS DIALOG_UNKNOWN_ENDIAN
+#define CONFLUO_ENDIANNESS CONFLUO_UNKNOWN_ENDIAN
 #endif
 
 namespace utils {

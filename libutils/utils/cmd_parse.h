@@ -196,14 +196,17 @@ class cmd_parser {
 
   std::string parsed_values() {
     std::string parsed = "";
-    for (auto kv : values_)
-      parsed += kv.first + " -> \"" + kv.second + "\"; ";
+    for (auto kv : values_) {
+      if (kv.first != "help") {
+        parsed += kv.first + " -> \"" + kv.second + "\"; ";
+      }
+    }
     return parsed;
   }
 
  private:
   void parse() {
-    int c, opt_idx = -1;
+    int c;
     option* lopts = &(opts_.lopts_[0]);
     const char* sopts = opts_.sopts_.c_str();
     std::vector<cmd_option> copts = opts_.copts_;
@@ -216,18 +219,16 @@ class cmd_parser {
         values_[opt.lopt_] = opt.default_;
     }
 
-    while ((c = getopt_long(argc_, argv_, sopts, lopts, &opt_idx)) != -1) {
-      if (opt_idx == -1) {
-        // Try to parse short argument
-        if (c == '?')
-          throw cmd_parse_exception("unexpected argument");
+    while ((c = getopt_long(argc_, argv_, sopts, lopts, nullptr)) != -1) {
+      if (c == '?')
+        throw cmd_parse_exception("unknown or ambiguous option");
 
-        opt_idx = opts_.sopt_to_idx_.at((char) c);
-      }
+      if (c == ':')
+        throw cmd_parse_exception("missing option argument");
 
+      int opt_idx = opts_.sopt_to_idx_.at(static_cast<char>(c));
       parsed[opt_idx] = true;
       std::string key = std::string(copts[opt_idx].lopt_);
-
       if (copts[opt_idx].has_arg_ == required_argument) {
         values_[key] = std::string(optarg);
       } else {

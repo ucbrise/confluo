@@ -1,29 +1,34 @@
-#ifndef TEST_SERVER_CLIENT_TEST_H_
-#define TEST_SERVER_CLIENT_TEST_H_
+#ifndef RPC_TEST_SERVER_CLIENT_TEST_H_
+#define RPC_TEST_SERVER_CLIENT_TEST_H_
 
-#include "dialog_server.h"
 #include "gtest/gtest.h"
-#include "configuration_params.h"
-#include "rpc_dialog_client.h"
 
-using namespace ::dialog::rpc;
-using namespace ::dialog;
+#include "conf/configuration_params.h"
+#include "rpc_client.h"
+#include "rpc_server.h"
+#include "rpc_test_utils.h"
+
+using namespace ::confluo::rpc;
+using namespace ::confluo;
 
 class ClientConnectionTest : public testing::Test {
+ public:
+  const std::string SERVER_ADDRESS = "127.0.0.1";
+  const int SERVER_PORT = 9090;
 };
 
 TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
-  auto store = new dialog_store("/tmp");
-  auto server = dialog_server::create(store, "127.0.0.1", 9090);
+  auto store = new confluo_store("/tmp");
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
     server->serve();
   });
 
-  sleep(1);
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
 
-  std::vector<rpc_dialog_client> clients(configuration_params::MAX_CONCURRENCY);
+  std::vector<rpc_client> clients(configuration_params::MAX_CONCURRENCY);
   for (auto& client : clients) {
-    client.connect("127.0.0.1", 9090);
+    client.connect(SERVER_ADDRESS, SERVER_PORT);
   }
 
   for (auto& client : clients) {
@@ -37,4 +42,4 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
   }
 }
 
-#endif /* TEST_SERVER_CLIENT_TEST_H_ */
+#endif /* RPC_TEST_SERVER_CLIENT_TEST_H_ */

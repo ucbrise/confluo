@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(dialog CXX C)
+project(confluo CXX C)
 
-set(DIALOG_VERSION_MAJOR "0")
-set(DIALOG_VERSION_MINOR "1")
-set(DIALOG_VERSION_PATCH "0")
-set(DIALOG_VERSION "${DIALOG_VERSION_MAJOR}.${DIALOG_VERSION_MINOR}.${DIALOG_VERSION_PATCH}")
+set(CONFLUO_VERSION_MAJOR "0")
+set(CONFLUO_VERSION_MINOR "1")
+set(CONFLUO_VERSION_PATCH "0")
+set(CONFLUO_VERSION "${CONFLUO_VERSION_MAJOR}.${CONFLUO_VERSION_MINOR}.${CONFLUO_VERSION_PATCH}")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   message(FATAL_ERROR "Windows build not supported")
@@ -34,6 +34,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -pedantic -Wextra 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_DEBUG} -Wall -pedantic -Wextra ${SUPPRESS_WARN_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wall -pedantic -Wextra ${SUPPRESS_WARN_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl")
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
@@ -55,6 +56,9 @@ endif()
 # Options
 include(BuildOptions)
 
+# Functions
+include(Functions)
+
 # Dependencies
 include(Dependencies)
 
@@ -64,11 +68,11 @@ if (BUILD_TESTS)
   set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-# DiaLog utils
+# Utilities
 add_subdirectory(libutils)
 
-# DiaLog core
-add_subdirectory(libdialog)
+# Core library
+add_subdirectory(libconfluo)
 
 if (BUILD_RPC)
   # RPC Framework
@@ -85,22 +89,28 @@ if (BUILD_RPC)
   endif()
 endif()
 
+# Confluo examples
+if (BUILD_EXAMPLES)
+  add_subdirectory(examples/libtimeseries)
+  add_subdirectory(examples/libstreaming)
+endif()
+
 if (BUILD_DOC)
   add_subdirectory(docs)
 endif()
 
 # CPack
-set(CPACK_PACKAGE_NAME "libdialog")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DiaLog")
+set(CPACK_PACKAGE_NAME "libconfluo")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Confluo")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VENDOR "RISELab")
 set(CPACK_PACKAGE_CONTACT "anuragk@berkeley.edu")
 
-set(CPACK_PACKAGE_VERSION ${DIALOG_VERSION})
-set(CPACK_PACKAGE_VERSION_MAJOR ${DIALOG_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${DIALOG_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${DIALOG_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${CONFLUO_VERSION})
+set(CPACK_PACKAGE_VERSION_MAJOR ${CONFLUO_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${CONFLUO_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${CONFLUO_VERSION_PATCH})
 
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "~$;[.]swp$;/[.]svn/;/[.]git/;.gitignore;/build/;tags;cscope.*")
