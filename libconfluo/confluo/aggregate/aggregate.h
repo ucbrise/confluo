@@ -12,20 +12,36 @@ namespace confluo {
 class aggregate;
 
 struct aggregate_node {
+
+  /**
+   * Constructor for an aggregate_node
+   * @param agg The numeric containing the aggregate
+   * @param version The version of the aggregate
+   * @param next A pointer to the next aggregate
+   */
   aggregate_node(numeric agg, uint64_t version, aggregate_node *next)
       : value_(agg),
         version_(version),
         next_(next) {
   }
 
+  /** 
+   * @return The value of the aggregate
+   */
   inline numeric value() const {
     return value_;
   }
 
+  /**
+   * @return The current version of the aggregate
+   */
   inline uint64_t version() const {
     return version_;
   }
 
+  /**
+   * @return A pointer to the next aggregate
+   */
   inline aggregate_node* next() {
     return next_;
   }
@@ -39,7 +55,7 @@ struct aggregate_node {
 class aggregate_list {
  public:
   /**
-   * Default constructor
+   * Default constructor that initializes an empty list of aggregates
    */
   aggregate_list()
       : head_(nullptr),
@@ -49,10 +65,10 @@ class aggregate_list {
   }
 
   /**
-   * Constructor for aggregate
+   * Constructor that initializes an aggregate list with one aggregator
    *
-   * @param type The type of Aggregate
-   * @param agg Aggregate function pointer.
+   * @param type The type of the aggregate
+   * @param agg The aggregator that is added to the list
    * 
    */
   aggregate_list(data_type type, const aggregator& agg)
@@ -68,8 +84,8 @@ class aggregate_list {
 
   /**
    * Initializes the type and aggregate of the list
-   * @param type The type of the aggregate
-   * @param agg Aggregate function pointer
+   * @param type The data type of the aggregate
+   * @param agg The aggregator
    */
   void init(data_type type, const aggregator& agg) {
     type_ = type;
@@ -163,6 +179,9 @@ class aggregate_list {
 
 class aggregate {
  public:
+  /**
+   * 
+   */
   aggregate()
       : type_(NONE_TYPE),
         agg_(invalid_aggregator),

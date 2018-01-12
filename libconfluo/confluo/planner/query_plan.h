@@ -11,6 +11,9 @@
 namespace confluo {
 namespace planner {
 
+/**
+ * Container for a list of query_ops
+ */
 class query_plan : public std::vector<std::shared_ptr<query_op>> {
  public:
   query_plan(const data_log* dlog, const schema_t* schema,
@@ -34,6 +37,10 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
     return ret;
   }
 
+  /**
+   * Determines whether the execution will be optimized
+   * @return True if a full scan is not required, false otherwise
+   */
   bool is_optimized() {
     return !(size() == 1 && at(0)->op_type() == query_op_type::D_SCAN_OP);
   }

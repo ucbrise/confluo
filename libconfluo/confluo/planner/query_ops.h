@@ -11,6 +11,9 @@
 namespace confluo {
 namespace planner {
 
+/**
+ * Type of operation that is executed
+ */
 enum query_op_type {
   D_NO_OP = 0,
   D_SCAN_OP = 1,
@@ -18,6 +21,9 @@ enum query_op_type {
   D_INDEX_OP = 3
 };
 
+/**
+ * 
+ */
 class query_op {
  public:
   query_op(const query_op_type& op)
