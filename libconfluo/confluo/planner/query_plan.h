@@ -9,8 +9,15 @@
 namespace confluo {
 namespace planner {
 
+/**
+ * Container for a list of query_ops
+ */
 class query_plan : public std::vector<std::shared_ptr<query_op>> {
  public:
+  /**
+   * Combines all query_op representations
+   * @return a string containing the union of all the representations
+   */
   std::string to_string() {
     std::string ret = "union(\n";
     for (auto& op : *this) {
@@ -20,10 +27,19 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
     return ret;
   }
 
+  /**
+   * Determines whether the execution will be optimized
+   * @return True if a full scan is not required, false otherwise
+   */
   bool is_optimized() {
     return !(size() == 1 && at(0)->op_type() == query_op_type::D_SCAN_OP);
   }
 
+  /**
+   * Executes each of the query operations
+   * @param version marker where the execution starts
+   * @return a stream of records as a result of execution
+   */
   lazy::stream<record_t> execute(uint64_t version) {
     return is_optimized() ? using_indexes(version) : using_full_scan(version);
   }

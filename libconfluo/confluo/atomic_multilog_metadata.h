@@ -16,6 +16,9 @@ using namespace utils;
 
 namespace confluo {
 
+/**
+ * Different types of metadata
+ */
 enum metadata_type
   : uint32_t {
     D_SCHEMA_METADATA = 0,
@@ -25,8 +28,14 @@ enum metadata_type
   D_TRIGGER_METADATA = 4
 };
 
+/**
+ * Efficient lookup for metadata
+ */
 struct index_metadata {
  public:
+  /**
+   * @param
+   */
   index_metadata(const std::string& field_name, double bucket_size)
       : field_name_(field_name),
         bucket_size_(bucket_size) {
