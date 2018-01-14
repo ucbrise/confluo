@@ -13,11 +13,19 @@
 
 namespace confluo {
 
+/**
+ * A type of data that operations can be performed on
+ */
 struct data_type {
  public:
+  /** Identifier of the data_type */
   size_t id;
+  /** Size items of the type take up in bytes */
   size_t size;
 
+  /**
+   * 
+   */
   data_type()
       : id(0),
         size(0) {

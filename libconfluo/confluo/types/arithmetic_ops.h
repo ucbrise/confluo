@@ -36,14 +36,21 @@ enum binary_op_id
   BW_RSHIFT = 9  //!< BW_RSHIFT (>>)
 };
 
+/** Function pointer for a unary operator */
 typedef void (*unary_op_t)(void* res, const immutable_raw_data& v);
 
+/** Function pointer for a binary operator */
 typedef void (*binary_op_t)(void* res, const immutable_raw_data& v1, const immutable_raw_data& v2);
 
+/** List of unary operators */
 typedef std::vector<unary_op_t> unary_ops_t;
+/** List of binary operators */
 typedef std::vector<binary_op_t> binary_ops_t;
 
 // Unary arithmetic operators
+/**
+ * Assigns a value 
+ */
 template<typename T>
 inline void assign(void* res, const immutable_raw_data& v) {
   *(reinterpret_cast<T*>(res)) = v.as<T>();
