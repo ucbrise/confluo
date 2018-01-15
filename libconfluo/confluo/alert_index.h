@@ -23,6 +23,9 @@ class alert_index {
   /** list of alerts returned from range lookup */
   typedef idx_t::rt_result alert_list;
 
+  /**
+   * Initializing an alert_index
+   */
   alert_index()
       : idx_(8, 256) {
   }

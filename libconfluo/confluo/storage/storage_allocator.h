@@ -95,6 +95,11 @@ class storage_allocator {
     }
   }
 
+  /**
+   * memory_utilization
+   *
+   * @return size_t
+   */
   size_t memory_utilization() {
     return mem_stat_.get();
   }

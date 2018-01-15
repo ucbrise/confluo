@@ -14,7 +14,7 @@ namespace confluo {
 namespace planner {
 
 /**
- *
+ * Query planner
  */
 class query_planner {
  public:

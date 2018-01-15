@@ -33,18 +33,31 @@ enum metadata_type
  */
 struct index_metadata {
  public:
-  /**
-   * @param
-   */
+     /**
+      * index_metadata
+      *
+      * @param field_name The field_name
+      * @param bucket_size The bucket_size
+      */
   index_metadata(const std::string& field_name, double bucket_size)
       : field_name_(field_name),
         bucket_size_(bucket_size) {
   }
 
+  /**
+   * field_name
+   *
+   * @return field name
+   */
   std::string field_name() const {
     return field_name_;
   }
 
+  /**
+   * bucket_size
+   *
+   * @return bucket size
+   */
   double bucket_size() const {
     return bucket_size_;
   }
@@ -54,17 +67,36 @@ struct index_metadata {
   double bucket_size_;
 };
 
+/**
+ * Metadata for the filter
+ */
 struct filter_metadata {
  public:
+  /**
+   * filter_metadata
+   *
+   * @param filter_name The filter_name
+   * @param expr The expr
+   */
   filter_metadata(const std::string& filter_name, const std::string& expr)
       : filter_name_(filter_name),
         expr_(expr) {
   }
 
+  /**
+   * filter_name
+   *
+   * @return std::string&
+   */
   const std::string& filter_name() const {
     return filter_name_;
   }
 
+  /**
+   * expr
+   *
+   * @return std::string&
+   */
   const std::string& expr() const {
     return expr_;
   }
@@ -74,8 +106,18 @@ struct filter_metadata {
   std::string expr_;
 };
 
+/**
+ * Metadata for the aggregate
+ */
 struct aggregate_metadata {
  public:
+  /**
+   * aggregate_metadata
+   *
+   * @param name The name
+   * @param filter_name The filter_name
+   * @param expr The expr
+   */
   aggregate_metadata(const std::string& name, const std::string& filter_name,
                      const std::string& expr)
       : name_(name),
@@ -83,14 +125,29 @@ struct aggregate_metadata {
         expr_(expr) {
   }
 
+  /**
+   * aggregate_name
+   *
+   * @return std::string& name
+   */
   const std::string& aggregate_name() const {
     return name_;
   }
 
+  /**
+   * filter_name
+   *
+   * @return std::string& filter name
+   */
   const std::string& filter_name() const {
     return filter_name_;
   }
 
+  /**
+   * aggregate_expression
+   *
+   * @return std::string& expr
+   */
   const std::string& aggregate_expression() const {
     return expr_;
   }
@@ -101,8 +158,18 @@ struct aggregate_metadata {
   std::string expr_;
 };
 
+/**
+ * Metadata for triggers
+ */
 struct trigger_metadata {
  public:
+     /**
+      * trigger_metadata
+      *
+      * @param name The name
+      * @param expr The expr
+      * @param periodicity_ms The periodicity_ms
+      */
   trigger_metadata(const std::string& name, const std::string& expr,
                    uint64_t periodicity_ms)
       : name_(name),
@@ -110,14 +177,29 @@ struct trigger_metadata {
         periodicity_ms_(periodicity_ms) {
   }
 
+  /**
+   * trigger_name
+   *
+   * @return std::string&
+   */
   const std::string& trigger_name() const {
     return name_;
   }
 
+  /**
+   * trigger_expression
+   *
+   * @return std::string&
+   */
   const std::string& trigger_expression() const {
     return expr_;
   }
 
+  /**
+   * periodicity_ms
+   *
+   * @return uint64_t
+   */
   uint64_t periodicity_ms() const {
     return periodicity_ms_;
   }
@@ -128,6 +210,9 @@ struct trigger_metadata {
   uint64_t periodicity_ms_;
 };
 
+/**
+ * Writer for metadata
+ */
 class metadata_writer {
  public:
   /**
@@ -143,6 +228,11 @@ class metadata_writer {
     }
   }
 
+  /**
+   * write_schema
+   *
+   * @param schema The schema
+   */
   void write_schema(const schema_t& schema) {
     if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_SCHEMA_METADATA;
@@ -156,6 +246,12 @@ class metadata_writer {
     }
   }
 
+  /**
+   * write_index_metadata
+   *
+   * @param name The name
+   * @param bucket_size The bucket_size
+   */
   void write_index_metadata(const std::string& name, double bucket_size) {
     if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_INDEX_METADATA;
@@ -166,6 +262,12 @@ class metadata_writer {
     }
   }
 
+  /**
+   * write_filter_metadata
+   *
+   * @param name The name
+   * @param expr The expr
+   */
   void write_filter_metadata(const std::string& name, const std::string& expr) {
     if (id_ != storage::storage_mode::IN_MEMORY) {
       metadata_type type = metadata_type::D_FILTER_METADATA;
@@ -176,6 +278,13 @@ class metadata_writer {
     }
   }
 
+  /**
+   * write_aggregate_metadata
+   *
+   * @param name The name
+   * @param filter_name The filter_name
+   * @param expr The expr
+   */
   void write_aggregate_metadata(const std::string& name,
                                 const std::string& filter_name,
                                 const std::string& expr) {
@@ -189,6 +298,13 @@ class metadata_writer {
     }
   }
 
+  /**
+   * write_trigger_metadata
+   *
+   * @param trigger_name The trigger_name
+   * @param trigger_expr The trigger_expr
+   * @param periodicity_ms The periodicity_ms
+   */
   void write_trigger_metadata(const std::string& trigger_name,
                               const std::string& trigger_expr,
                               const uint64_t periodicity_ms) {
@@ -208,17 +324,35 @@ class metadata_writer {
   storage::storage_mode id_;
 };
 
+/**
+ * Reader metadata
+ */
 class metadata_reader {
  public:
+     /**
+      * metadata_reader
+      *
+      * @param path The path
+      */
   metadata_reader(const std::string& path)
       : filename_(path + "/metadata"),
         in_(filename_) {
   }
 
+  /**
+   * next_type
+   *
+   * @return metadata_type
+   */
   metadata_type next_type() {
     return io_utils::read<metadata_type>(in_);
   }
 
+  /**
+   * next_schema
+   *
+   * @return schema_t
+   */
   schema_t next_schema() {
     size_t ncolumns = io_utils::read<size_t>(in_);
     schema_builder builder;
@@ -230,18 +364,33 @@ class metadata_reader {
     return schema_t(builder.get_columns());
   }
 
+  /**
+   * next_index_metadata
+   *
+   * @return index_metadata
+   */
   index_metadata next_index_metadata() {
     std::string field_name = io_utils::read<std::string>(in_);
     double bucket_size = io_utils::read<double>(in_);
     return index_metadata(field_name, bucket_size);
   }
 
+  /**
+   * next_filter_metadata
+   *
+   * @return filter_metadata
+   */
   filter_metadata next_filter_metadata() {
     std::string filter_name = io_utils::read<std::string>(in_);
     std::string expr = io_utils::read<std::string>(in_);
     return filter_metadata(filter_name, expr);
   }
 
+  /**
+   * next_aggregate_metadata
+   *
+   * @return aggregate_metadata
+   */
   aggregate_metadata next_aggregate_metadata() {
     std::string name = io_utils::read<std::string>(in_);
     std::string filter_name = io_utils::read<std::string>(in_);
@@ -249,6 +398,11 @@ class metadata_reader {
     return aggregate_metadata(name, filter_name, expr);
   }
 
+  /**
+   * next_trigger_metadata
+   *
+   * @return trigger_metadata
+   */
   trigger_metadata next_trigger_metadata() {
     std::string trigger_name = io_utils::read<std::string>(in_);
     std::string trigger_expr = io_utils::read<std::string>(in_);

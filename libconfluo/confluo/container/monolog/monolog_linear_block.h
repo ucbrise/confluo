@@ -11,6 +11,12 @@ namespace monolog {
 
 using namespace ::utils;
 
+/**
+ * Block in a monolog
+ *
+ * @tparam T
+ * @tparam BUFFER_SIZE
+ */
 template<typename T, size_t BUFFER_SIZE = 1048576>
 class monolog_block {
  public:
@@ -21,6 +27,9 @@ class monolog_block {
   static const block_state UNINIT = false;
   static const block_state INIT = true;
 
+  /**
+   * monolog_block
+   */
   monolog_block()
       : path_(""),
         state_(UNINIT),
@@ -29,6 +38,13 @@ class monolog_block {
         mode_(storage::IN_MEMORY) {
   }
 
+  /**
+   * monolog_block
+   *
+   * @param path The path
+   * @param size The size
+   * @param storage The storage
+   */
   monolog_block(const std::string& path, size_t size,
                 const storage::storage_mode& storage)
       : path_(path),
@@ -38,6 +54,11 @@ class monolog_block {
         mode_(storage) {
   }
 
+  /**
+   * monolog_block
+   *
+   * @param other The other
+   */
   monolog_block(const monolog_block<T, BUFFER_SIZE>& other)
       : path_(other.path_),
         state_(other.state_),
@@ -48,6 +69,13 @@ class monolog_block {
     data_.atomic_init(copy.ptr_);
   }
 
+  /**
+   * init
+   *
+   * @param path The path
+   * @param size The size
+   * @param mode The mode
+   */
   void init(const std::string& path, const size_t size,
             const storage::storage_mode& mode) {
     path_ = path;
@@ -55,6 +83,11 @@ class monolog_block {
     mode_ = mode;
   }
 
+  /**
+   * storage_size
+   *
+   * @return size_t
+   */
   size_t storage_size() const {
     if (data_.atomic_load() != nullptr)
       return (size_ + BUFFER_SIZE) * sizeof(T);
@@ -117,14 +150,35 @@ class monolog_block {
     memcpy(data_.atomic_load() + offset, data, len * sizeof(T));
   }
 
+  /**
+   * at
+   *
+   * @param i The i
+   *
+   * @return T
+   */
   const T at(size_t i) const {
     return data_.atomic_get(i);
   }
 
+  /**
+   * read
+   *
+   * @param offset The offset
+   * @param data The data
+   * @param len The len
+   */
   void read(size_t offset, T* data, size_t len) const {
     memcpy(data, data_.atomic_copy()->get() + offset, len * sizeof(T));
   }
 
+  /**
+   * operator[]
+   *
+   * @param i The i
+   *
+   * @return T&
+   */
   T& operator[](size_t i) {
     __atomic_block_copy_ref copy;
     data_.atomic_copy(copy);
@@ -133,6 +187,12 @@ class monolog_block {
     return copy.get()[i];
   }
 
+  /**
+   * ptr
+   *
+   * @param offset The offset
+   * @param data_ptr The data_ptr
+   */
   void ptr(size_t offset, __atomic_block_copy_ref& data_ptr) {
     data_.atomic_copy(data_ptr, offset);
     if (data_ptr.get() == nullptr) {
@@ -141,10 +201,23 @@ class monolog_block {
     }
   }
 
+  /**
+   * cptr
+   *
+   * @param offset The offset
+   * @param data_ptr The data_ptr
+   */
   void cptr(size_t offset, __atomic_block_copy_ref& data_ptr) const {
     data_.atomic_copy(data_ptr, offset);
   }
 
+  /**
+   * operator=
+   *
+   * @param other The other
+   *
+   * @return monolog_block&
+   */
   monolog_block& operator=(const monolog_block<T, BUFFER_SIZE>& other) {
     path_ = other.path_;
     atomic::init(&state_, atomic::load(&other.state_));
@@ -154,6 +227,9 @@ class monolog_block {
     return *this;
   }
 
+  /**
+   * ensure_alloc
+   */
   void ensure_alloc() {
     if (data_.atomic_load() == nullptr) {
       __atomic_block_copy_ref copy;

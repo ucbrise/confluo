@@ -9,17 +9,35 @@
 
 namespace confluo {
 
+    /**
+     * @brief Read Tail marker
+     */
 class read_tail {
  public:
+     /**
+      * read_tail
+      */
   read_tail() {
     read_tail_ = nullptr;
     mode_ = storage::IN_MEMORY;
   }
 
+  /**
+   * read_tail
+   *
+   * @param data_path The data_path
+   * @param mode The mode
+   */
   read_tail(const std::string& data_path, const storage::storage_mode& mode) {
     init(data_path, mode);
   }
 
+  /**
+   * init
+   *
+   * @param data_path The data_path
+   * @param mode The mode
+   */
   void init(const std::string& data_path, const storage::storage_mode& mode) {
     mode_ = mode;
     read_tail_ = (atomic::type<uint64_t>*) storage::STORAGE_FNS[mode_].allocate(
@@ -27,10 +45,21 @@ class read_tail {
     atomic::store(read_tail_, UINT64_C(0));
   }
 
+  /**
+   * get
+   *
+   * @return uint64_t
+   */
   uint64_t get() const {
     return atomic::load(read_tail_);
   }
 
+  /**
+   * advance
+   *
+   * @param old_tail The old_tail
+   * @param bytes The bytes
+   */
   void advance(uint64_t old_tail, uint32_t bytes) {
     uint64_t expected = old_tail;
     while (!atomic::weak::cas(read_tail_, &expected, old_tail + bytes)) {

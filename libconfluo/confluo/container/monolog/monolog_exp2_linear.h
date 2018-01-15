@@ -29,6 +29,9 @@ class monolog_exp2_linear_base {
   typedef storage::read_only_ptr<T> __atomic_bucket_copy_ref;
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
+  /**
+   * monolog_exp2_linear_base
+   */
   monolog_exp2_linear_base()
       : fcs_hibit_(bit_utils::highest_bit(FCS)) {
     __atomic_bucket_ref* null_ptr = nullptr;
@@ -44,6 +47,9 @@ class monolog_exp2_linear_base {
     atomic::init(&bucket_containers_[0], first_container);
   }
 
+  /**
+   * ~monolog_exp2_linear_base
+   */
   ~monolog_exp2_linear_base() {
     size_t num_buckets = FCB;
     for (auto& x : bucket_containers_) {
@@ -403,20 +409,45 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> iterator;
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
 
+  /**
+   * monolog_exp2_linear
+   */
   monolog_exp2_linear()
       : tail_(0) {
   }
 
+  /**
+   * reserve
+   *
+   * @param count The count
+   *
+   * @return size_t
+   */
   size_t reserve(size_t count) {
     return atomic::faa(&tail_, count);
   }
 
+  /**
+   * push_back
+   *
+   * @param val The val
+   *
+   * @return size_t
+   */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
+  /**
+   * push_back_range
+   *
+   * @param start The start
+   * @param end The end
+   *
+   * @return size_t
+   */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
@@ -425,18 +456,40 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
     return idx;
   }
 
+  /**
+   * at
+   *
+   * @param idx The idx
+   *
+   * @return T
+   */
   const T at(size_t idx) const {
     return this->get(idx);
   }
 
+  /**
+   * size
+   *
+   * @return size_t
+   */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
+  /**
+   * begin
+   *
+   * @return iterator
+   */
   iterator begin() const {
     return iterator(this, 0);
   }
 
+  /**
+   * end
+   *
+   * @return iterator
+   */
   iterator end() const {
     return iterator(this, size());
   }

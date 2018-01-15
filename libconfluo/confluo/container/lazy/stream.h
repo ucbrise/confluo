@@ -22,6 +22,9 @@ class stream {
 
   static stream<T> nil;
 
+  /**
+   * stream
+   */
   stream()
       : head_ptr_(nullptr),
         tail_ptr_(nullptr),
@@ -29,6 +32,11 @@ class stream {
         empty_(true) {
   }
 
+  /**
+   * stream
+   *
+   * @param other The other
+   */
   stream(const stream& other)
       : head_ptr_(other.head_ptr_),
         tail_ptr_(other.tail_ptr_),
@@ -36,6 +44,11 @@ class stream {
         empty_(other.empty_) {
   }
 
+  /**
+   * stream
+   *
+   * @param other The other
+   */
   stream(stream&& other)
       : head_ptr_(std::move(other.head_ptr_)),
         tail_ptr_(std::move(other.tail_ptr_)),
@@ -46,10 +59,11 @@ class stream {
   template<typename U>
   using base_type = typename std::remove_const<typename std::remove_reference<U>::type>;
 
-  // stream<T>(head_t&& head, tail_t&& tail),
+  /** stream<T>(head_t&& head, tail_t&& tail),
   // stream<T>(head_t&& head, const tail_t& tail),
   // stream<T>(const head_t& head, tail_t&& tail),
   // stream<T>(const head_t& head, const tail_t& tail)
+  */
   template<typename H, typename U, typename std::enable_if<
       std::is_same<tail_t, typename base_type<U>::type>::value, int>::type = 0>
   stream(H&& head, U&& tail)
@@ -59,10 +73,11 @@ class stream {
         empty_(false) {
   }
 
-  // stream<T>(head_t&& head, generator_t&& tail_gen),
+  /** stream<T>(head_t&& head, generator_t&& tail_gen),
   // stream<T>(head_t&& head, const generator_t& tail_gen),
   // stream<T>(const head_t& head, generator_t&& tail_gen),
   // stream<T>(const head_t& head, const generator_t& tail_gen)
+  */
   template<typename H, typename U,
       typename std::enable_if<
           std::is_convertible<typename base_type<U>::type, generator_t>::value,
@@ -74,10 +89,20 @@ class stream {
         empty_(false) {
   }
 
+  /**
+   * empty
+   *
+   * @return bool
+   */
   bool empty() const {
     return empty_;
   }
 
+  /**
+   * head
+   *
+   * @return head_t&
+   */
   const head_t& head() const {
     if (empty_) {
       throw std::range_error("head() called on empty stream");
@@ -85,6 +110,11 @@ class stream {
     return *head_ptr_;
   }
 
+  /**
+   * tail
+   *
+   * @return stream
+   */
   stream tail() const {
     if (empty_) {
       throw std::range_error("tail() called on empty stream");
@@ -106,6 +136,12 @@ class stream {
     return count;
   }
 
+  /**
+   * for_each
+   *
+   * @tparam F
+   * @param f The f
+   */
   template<typename F>
   void for_each(F&& f) const {
     stream t = *this;
@@ -115,6 +151,13 @@ class stream {
     }
   }
 
+  /**
+   * take
+   *
+   * @param n The n
+   *
+   * @return stream
+   */
   stream take(size_t n) const {
     if (empty_ || n < 1) {
       return nil;
@@ -127,6 +170,14 @@ class stream {
     });
   }
 
+  /**
+   * map
+   *
+   * @tparam F
+   * @param ) The )
+   *
+   * @return auto
+   */
   template<typename F>
   auto map(F&& f) const -> stream<decltype(f(this->head()))> {
     using U = decltype(f(this->head()));
@@ -153,6 +204,13 @@ class stream {
     return accum;
   }
 
+  /**
+   * concat
+   *
+   * @param other The other
+   *
+   * @return stream
+   */
   stream concat(stream other) const {
     if (empty_) {
       return other;
@@ -165,6 +223,14 @@ class stream {
     });
   }
 
+  /**
+   * filter
+   *
+   * @tparam F
+   * @param f The f
+   *
+   * @return stream
+   */
   template<typename F>
   stream filter(F&& f) const {
     if (empty_) {
@@ -181,15 +247,33 @@ class stream {
     return t.filter(std::forward<F>(f));
   }
 
+  /**
+   * flat_map
+   *
+   * @tparam F
+   * @param f(this->head( The f(this->head(
+   *
+   * @return auto
+   */
   template<typename F>
   auto flat_map(F&& f) const -> decltype(f(this->head())) {
     return flatten(map(std::forward<F>(f)));
   }
 
+  /**
+   * distinct
+   *
+   * @return stream
+   */
   stream distinct() const {
     return distinct(std::make_shared<std::unordered_set<T>>());
   }
 
+  /**
+   * to_vector
+   *
+   * @return std::vector
+   */
   std::vector<T> to_vector() const {
     std::vector<T> v;
     stream t = *this;
@@ -200,6 +284,13 @@ class stream {
     return v;
   }
 
+  /**
+   * operator=
+   *
+   * @param other The other
+   *
+   * @return stream&
+   */
   stream& operator=(const stream& other) {
     head_ptr_ = other.head_ptr_;
     tail_ptr_ = other.tail_ptr_;
@@ -208,6 +299,13 @@ class stream {
     return *this;
   }
 
+  /**
+   * operator=
+   *
+   * @param other The other
+   *
+   * @return stream&
+   */
   stream& operator=(stream&& other) {
     head_ptr_ = std::move(other.head_ptr_);
     tail_ptr_ = std::move(other.tail_ptr_);
@@ -242,6 +340,14 @@ class stream {
 template<typename T>
 stream<T> stream<T>::nil;
 
+/**
+ * flatten
+ *
+ * @tparam U
+ * @param s The s
+ *
+ * @return stream
+ */
 template<typename U>
 static stream<U> flatten(stream<stream<U>> s) {
   while (!s.empty() && s.head().empty()) {
@@ -258,6 +364,15 @@ static stream<U> flatten(stream<stream<U>> s) {
   });
 }
 
+/**
+ * iterator_to_stream
+ *
+ * @tparam I
+ * @param it The it
+ * @param e The e
+ *
+ * @return stream
+ */
 template<typename I>
 static stream<typename I::value_type> iterator_to_stream(I it, I e) {
   if (it == e) {
@@ -268,6 +383,14 @@ static stream<typename I::value_type> iterator_to_stream(I it, I e) {
   });
 }
 
+/**
+ * container_to_stream
+ *
+ * @tparam C
+ * @param c The c
+ *
+ * @return stream
+ */
 template<typename C>
 static stream<typename C::value_type> container_to_stream(C const& c) {
   return iterator_to_stream(c.begin(), c.end());

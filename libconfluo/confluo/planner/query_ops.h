@@ -21,61 +21,126 @@ enum query_op_type {
 };
 
 /**
- * 
+ * @brief Query operation
  */
 class query_op {
  public:
+     /**
+      * query_op
+      *
+      * @param op The op
+      */
   query_op(const query_op_type& op)
       : op_(op) {
   }
 
+  /**
+   * ~query_op
+   */
   virtual ~query_op() {
   }
 
+  /**
+   * op_type
+   *
+   * @return query_op_type
+   */
   query_op_type op_type() {
     return op_;
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const = 0;
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const = 0;
 
  private:
   query_op_type op_;
 };
 
+/**
+ * no operation
+ */
 class no_op : public query_op {
  public:
+     /**
+      * no_op
+      */
   no_op()
       : query_op(query_op_type::D_NO_OP) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "no_op";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return UINT64_C(0);
   }
 };
 
+/**
+ * No valid index operation
+ */
 class no_valid_index_op : public query_op {
  public:
+     /**
+      * no_valid_index_op
+      */
   no_valid_index_op()
       : query_op(query_op_type::D_NO_VALID_INDEX_OP) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "no_valid_index_op";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return UINT64_MAX;
   }
 };
 
+/**
+ * Full scan operation
+ */
 class full_scan_op : public query_op {
  public:
+     /**
+      * full_scan_op
+      *
+      * @param dlog The dlog
+      * @param schema The schema
+      * @param expr The expr
+      */
   full_scan_op(const data_log* dlog, const schema_t* schema,
                const compiled_expression& expr)
       : query_op(query_op_type::D_SCAN_OP),
@@ -84,14 +149,31 @@ class full_scan_op : public query_op {
         expr_(expr) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "full_scan(" + expr_.to_string() + ")";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return UINT64_MAX;
   }
 
+  /**
+   * execute
+   *
+   * @param version The version
+   *
+   * @return lazy::stream
+   */
   lazy::stream<record_t> execute(uint64_t version) const {
     const data_log* d = dlog_;
     const schema_t* s = schema_;
@@ -182,10 +264,22 @@ class full_scan_op : public query_op {
   const compiled_expression& expr_;
 };
 
+/**
+ * Index operation
+ */
 class index_op : public query_op {
  public:
   typedef std::pair<byte_string, byte_string> key_range;
 
+  /**
+   * index_op
+   *
+   * @param dlog The dlog
+   * @param index The index
+   * @param schema The schema
+   * @param range The range
+   * @param m The m
+   */
   index_op(const data_log* dlog, const index::radix_index* index,
            const schema_t* schema, const key_range& range,
            const compiled_minterm& m)
@@ -197,16 +291,33 @@ class index_op : public query_op {
     expr_.insert(m);
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "range(" + range_.first.to_string() + "," + range_.second.to_string()
         + ")" + " on index=" + index_->to_string() + " + filter("
         + expr_.to_string() + ")";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return index_->approx_count(range_.first, range_.second);
   }
 
+  /**
+   * execute
+   *
+   * @param version The version
+   *
+   * @return lazy::stream
+   */
   lazy::stream<record_t> execute(uint64_t version) const {
     const data_log* d = dlog_;
     const schema_t* s = schema_;

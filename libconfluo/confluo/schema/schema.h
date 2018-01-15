@@ -26,12 +26,23 @@ using namespace utils;
 
 namespace confluo {
 
+    /**
+     * schema
+     */
 class schema_t {
  public:
+     /**
+      * schema_t
+      */
   schema_t()
       : record_size_(0) {
   }
 
+  /**
+   * schema_t
+   *
+   * @param columns The columns
+   */
   schema_t(const std::vector<column_t>& columns)
       : columns_(columns) {
     record_size_ = 0;
@@ -41,20 +52,51 @@ class schema_t {
     }
   }
 
+  /**
+   * ~schema_t
+   */
   ~schema_t() = default;
 
+  /**
+   * get_field_index
+   *
+   * @param name The name
+   *
+   * @return size_t
+   */
   size_t get_field_index(const std::string& name) const {
     return name_map_.at(string_utils::to_upper(name));
   }
 
+  /**
+   * operator[]
+   *
+   * @param idx The idx
+   *
+   * @return column_t&
+   */
   column_t& operator[](size_t idx) {
     return columns_[idx];
   }
 
+  /**
+   * operator[]
+   *
+   * @param idx The idx
+   *
+   * @return column_t
+   */
   column_t const& operator[](size_t idx) const {
     return columns_[idx];
   }
 
+  /**
+   * operator[]
+   *
+   * @param name The name
+   *
+   * @return column_t&
+   */
   column_t& operator[](const std::string& name) {
     try {
       return columns_[name_map_.at(string_utils::to_upper(name))];
@@ -64,6 +106,13 @@ class schema_t {
     }
   }
 
+  /**
+   * operator[]
+   *
+   * @param name The name
+   *
+   * @return column_t
+   */
   column_t const& operator[](const std::string& name) const {
     try {
       return columns_[name_map_.at(string_utils::to_upper(name))];
@@ -73,14 +122,32 @@ class schema_t {
     }
   }
 
+  /**
+   * record_size
+   *
+   * @return size_t
+   */
   size_t record_size() const {
     return record_size_;
   }
 
+  /**
+   * size
+   *
+   * @return size_t
+   */
   size_t size() const {
     return columns_.size();
   }
 
+  /**
+   * apply
+   *
+   * @param offset The offset
+   * @param data The data
+   *
+   * @return record_t
+   */
   record_t apply(size_t offset, storage::read_only_ptr<uint8_t>& data) const {
     record_t r(offset, data, record_size_);
     r.reserve(columns_.size());
@@ -89,6 +156,14 @@ class schema_t {
     return r;
   }
 
+  /**
+   * apply_unsafe
+   *
+   * @param offset The offset
+   * @param data The data
+   *
+   * @return record_t
+   */
   record_t apply_unsafe(size_t offset, void* data) const {
     record_t r(offset, reinterpret_cast<uint8_t*>(data), record_size_);
     r.reserve(columns_.size());
@@ -97,6 +172,11 @@ class schema_t {
     return r;
   }
 
+  /**
+   * snapshot
+   *
+   * @return schema_snapshot
+   */
   schema_snapshot snapshot() const {
     schema_snapshot snap;
     for (const column_t& col : columns_) {
@@ -105,14 +185,29 @@ class schema_t {
     return snap;
   }
 
+  /**
+   * columns
+   *
+   * @return std::vector&
+   */
   std::vector<column_t>& columns() {
     return columns_;
   }
 
+  /**
+   * columns
+   *
+   * @return std::vector
+   */
   std::vector<column_t> const& columns() const {
     return columns_;
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   std::string to_string() const {
     std::string str = "{\n";
     for (auto col : columns_) {
@@ -122,6 +217,13 @@ class schema_t {
     return str;
   }
 
+  /**
+   * record_vector_to_data
+   *
+   * @param record The record
+   *
+   * @return void
+   */
   void* record_vector_to_data(const std::vector<std::string>& record) const {
     if (record.size() == columns_.size()) {
       // Timestamp is provided
@@ -146,6 +248,12 @@ class schema_t {
     }
   }
 
+  /**
+   * record_vector_to_data
+   *
+   * @param out The out
+   * @param record The record
+   */
   void record_vector_to_data(std::string& out,
                              const std::vector<std::string>& record) const {
     if (record.size() == columns_.size()) {
@@ -169,6 +277,12 @@ class schema_t {
     }
   }
 
+  /**
+   * data_to_record_vector
+   *
+   * @param ret The ret
+   * @param data The data
+   */
   void data_to_record_vector(std::vector<std::string>& ret,
                              const void* data) const {
     for (size_t i = 0; i < size(); i++) {
@@ -192,8 +306,14 @@ class schema_t {
 }
 ;
 
+/**
+ * Schema builder
+ */
 class schema_builder {
  public:
+     /**
+      * schema_builder
+      */
   schema_builder()
       : user_provided_ts_(false),
         offset_(0) {
@@ -205,6 +325,16 @@ class schema_builder {
     offset_ += ULONG_TYPE.size;
   }
 
+  /**
+   * add_column
+   *
+   * @param type The type
+   * @param name The name
+   * @param min The min
+   * @param max The max
+   *
+   * @return schema_builder&
+   */
   schema_builder& add_column(const data_type& type, const std::string& name,
                              const mutable_value& min,
                              const mutable_value& max) {
@@ -222,16 +352,34 @@ class schema_builder {
     return *this;
   }
 
+  /**
+   * add_column
+   *
+   * @param type The type
+   * @param name The name
+   *
+   * @return schema_builder&
+   */
   inline schema_builder& add_column(const data_type& type,
                                     const std::string& name) {
     return add_column(type, name, mutable_value(type, type.min()),
                       mutable_value(type, type.max()));
   }
 
+  /**
+   * get_columns
+   *
+   * @return std::vector
+   */
   std::vector<column_t> get_columns() const {
     return columns_;
   }
 
+  /**
+   * user_provided_ts
+   *
+   * @return bool
+   */
   bool user_provided_ts() const {
     return user_provided_ts_;
   }

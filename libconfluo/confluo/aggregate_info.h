@@ -10,6 +10,9 @@ using namespace confluo::monitor;
 
 namespace confluo {
 
+/**
+* @brief Information about the aggregate
+*/
 class aggregate_info {
  public:
   /**
@@ -189,6 +192,9 @@ class aggregate_info {
   atomic::type<bool> is_valid_;
 };
 
+/**
+ * @brief Log of aggregate_info pointers
+ */
 typedef monolog::monolog_exp2<aggregate_info*> aggregate_log;
 
 }

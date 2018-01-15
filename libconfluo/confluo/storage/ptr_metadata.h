@@ -4,6 +4,9 @@
 namespace confluo {
 namespace storage {
 
+    /**
+     * allocator type
+     */
 struct alloc_type {
   static const uint8_t D_DEFAULT = 0;
   static const uint8_t D_MMAP = 1;
@@ -12,6 +15,9 @@ struct alloc_type {
 const uint8_t alloc_type::D_DEFAULT;
 const uint8_t alloc_type::D_MMAP;
 
+/**
+ * Type of state
+ */
 struct state_type {
   static const uint8_t D_IN_MEMORY = 0;
   static const uint8_t D_ARCHIVED = 1;
@@ -20,6 +26,9 @@ struct state_type {
 const uint8_t state_type::D_IN_MEMORY;
 const uint8_t state_type::D_ARCHIVED;
 
+/**
+ * Metadata from the pointer
+ */
 typedef struct ptr_metadata {
   size_t size_ : 32;
   uint8_t thread_id_ : 8;

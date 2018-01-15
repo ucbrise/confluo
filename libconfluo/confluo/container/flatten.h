@@ -17,11 +17,22 @@ class flattened_iterator {
   typedef typename inner_iterator::pointer pointer;
   typedef typename inner_iterator::reference reference;
 
+  /**
+   * flattened_iterator
+   *
+   * @param it The it
+   */
   flattened_iterator(const outer_iterator& it)
       : outer_(it),
         outer_end_(it) {
   }
 
+  /**
+   * flattened_iterator
+   *
+   * @param it The it
+   * @param end The end
+   */
   flattened_iterator(const outer_iterator& it, const outer_iterator& end)
       : outer_(it),
         outer_end_(end) {
@@ -32,14 +43,29 @@ class flattened_iterator {
     skip_invalid();
   }
 
+  /**
+   * operator
+   *
+   * @return reference
+   */
   reference operator*() const {
     return *inner_;
   }
 
+  /**
+   * operator->
+   *
+   * @return pointer
+   */
   pointer operator->() const {
     return &*inner_;
   }
 
+  /**
+   * operator++
+   *
+   * @return flattened_iterator&
+   */
   flattened_iterator& operator++() {
     ++inner_;
     if (inner_ == outer_->end())
@@ -47,12 +73,27 @@ class flattened_iterator {
     return *this;
   }
 
+  /**
+   * operator++
+   *
+   * @param int The int
+   *
+   * @return flattened_iterator
+   */
   flattened_iterator operator++(int) {
     flattened_iterator it(*this);
     ++*this;
     return it;
   }
 
+  /**
+   * operator==
+   *
+   * @param a The a
+   * @param b The b
+   *
+   * @return friend
+   */
   friend bool operator==(const flattened_iterator& a,
                          const flattened_iterator& b) {
     if (a.outer_ != b.outer_)
@@ -65,6 +106,14 @@ class flattened_iterator {
     return true;
   }
 
+  /**
+   * operator!=
+   *
+   * @param a The a
+   * @param b The b
+   *
+   * @return friend
+   */
   friend bool operator!=(const flattened_iterator& a,
                          const flattened_iterator& b) {
     return !(a == b);
@@ -91,19 +140,39 @@ class flattened_container {
   typedef typename container_t::const_iterator container_iterator;
   typedef flattened_iterator<container_iterator> iterator;
 
+  /**
+   * flattened_container
+   *
+   * @param container The container
+   */
   flattened_container(const container_t& container)
       : begin_(container.begin()),
         end_(container.end()) {
   }
 
+  /**
+   * begin
+   *
+   * @return iterator
+   */
   iterator begin() const {
     return iterator(begin_, end_);
   }
 
+  /**
+   * end
+   *
+   * @return iterator
+   */
   iterator end() const {
     return iterator(end_);
   }
 
+  /**
+   * count
+   *
+   * @return size_t
+   */
   size_t count() const {
     return std::accumulate(
         begin(), end(), static_cast<size_t>(0),
