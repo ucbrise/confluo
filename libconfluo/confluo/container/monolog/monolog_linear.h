@@ -20,11 +20,25 @@ class monolog_linear_base {
  public:
   monolog_linear_base() = default;
 
+  /**
+   * monolog_linear_base
+   *
+   * @param name The name
+   * @param data_path The data_path
+   * @param storage The storage
+   */
   monolog_linear_base(const std::string& name, const std::string& data_path,
                       const storage::storage_mode& storage) {
     init(name, data_path, storage);
   }
 
+  /**
+   * init
+   *
+   * @param name The name
+   * @param data_path The data_path
+   * @param storage The storage
+   */
   void init(const std::string& name, const std::string& data_path,
             const storage::storage_mode& storage) {
     name_ = name;
@@ -37,10 +51,20 @@ class monolog_linear_base {
     blocks_[0].ensure_alloc();
   }
 
+  /**
+   * name
+   *
+   * @return std::string
+   */
   std::string name() const {
     return name_;
   }
 
+  /**
+   * data_path
+   *
+   * @return std::string
+   */
   std::string data_path() const {
     return data_path_;
   }
@@ -210,11 +234,21 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   typedef monolog_iterator<
       monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>> const_iterator;
 
+  /**
+   * monolog_linear
+   */
   monolog_linear()
       : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(),
         tail_(0UL) {
   }
 
+  /**
+   * monolog_linear
+   *
+   * @param name The name
+   * @param data_path The data_path
+   * @param storage The storage
+   */
   monolog_linear(const std::string& name, const std::string& data_path,
                  const storage::storage_mode& storage = storage::IN_MEMORY)
       : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(name,
@@ -223,12 +257,27 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
         tail_(0UL) {
   }
 
+  /**
+   * push_back
+   *
+   * @param val The val
+   *
+   * @return size_t
+   */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
+  /**
+   * push_back_range
+   *
+   * @param start The start
+   * @param end The end
+   *
+   * @return size_t
+   */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
@@ -237,28 +286,65 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
     return idx;
   }
 
+  /**
+   * append
+   *
+   * @param data The data
+   * @param len The len
+   *
+   * @return size_t
+   */
   size_t append(const T* data, size_t len) {
     size_t offset = atomic::faa(&tail_, len);
     this->write(offset, data, len);
     return offset;
   }
 
+  /**
+   * reserve
+   *
+   * @param len The len
+   *
+   * @return size_t
+   */
   size_t reserve(size_t len) {
     return atomic::faa(&tail_, len);
   }
 
+  /**
+   * at
+   *
+   * @param idx The idx
+   *
+   * @return T
+   */
   const T at(size_t idx) const {
     return this->get(idx);
   }
 
+  /**
+   * size
+   *
+   * @return size_t
+   */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
+  /**
+   * begin
+   *
+   * @return iterator
+   */
   iterator begin() const {
     return iterator(this, 0);
   }
 
+  /**
+   * end
+   *
+   * @return iterator
+   */
   iterator end() const {
     return iterator(this, size());
   }

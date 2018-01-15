@@ -10,6 +10,9 @@
 
 // TODO: Can potentially make this more efficient with lock-free concurrency
 // Although seems unnecessary for now
+/**
+ * @brief The type of task
+ */
 struct task_type {
   std::function<void()> func;
   task_type* next;
@@ -21,6 +24,9 @@ struct task_type {
   }
 };
 
+/**
+ * @brief A queue of tasks
+ */
 class task_queue {
  public:
   typedef std::function<void()> function_t;
@@ -132,6 +138,9 @@ class task_queue {
   std::condition_variable condition_;
 };
 
+/**
+ * @brief Executor of tasks
+ */
 class task_worker {
  public:
   /**
@@ -183,6 +192,9 @@ class task_worker {
   std::thread worker_;
 };
 
+/**
+ * @brief Pool of tasks
+ */
 class task_pool {
  public:
   

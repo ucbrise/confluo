@@ -48,25 +48,56 @@ using namespace ::utils;
 
 namespace confluo {
 
+/**
+* The main data structure
+*/
 class atomic_multilog {
  public:
+  /**
+   * @brief Type of data log
+   */
   typedef data_log data_log_type;
+
+  /**
+   * @brief Type of schema
+   */
   typedef schema_t schema_type;
+
+  /**
+   * @brief Type of read tail
+   */
   typedef read_tail read_tail_type;
+
+
+  /**
+   * @brief Type of metadata_writer
+   */
   typedef metadata_writer metadata_writer_type;
 
+  /**
+   * @brief Identifier for filter
+   */
   typedef size_t filter_id_t;
 
+  /**
+   * @brief Identifier for aggregate
+   */
   struct aggregate_id_t {
     filter_id_t filter_idx;
     size_t aggregate_idx;
   };
 
+  /**
+   * @brief Identifier for trigger
+   */
   struct trigger_id_t {
     aggregate_id_t aggregate_id;
     size_t trigger_idx;
   };
 
+  /**
+   * @brief List of alerts
+   */
   typedef alert_index::alert_list alert_list;
 
   /**
@@ -601,6 +632,13 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * add_index_task
+   *
+   * @param field_name The field_name
+   * @param bucket_size The bucket_size
+   * @param ex The ex
+   */
   void add_index_task(const std::string& field_name, double bucket_size,
                       optional<management_exception>& ex) {
     uint16_t idx;
@@ -630,6 +668,12 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * remove_index_task
+   *
+   * @param field_name The field_name
+   * @param ex The ex
+   */
   void remove_index_task(const std::string& field_name,
                          optional<management_exception>& ex) {
     uint16_t idx;
@@ -648,6 +692,13 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * add_filter_task
+   *
+   * @param name The name
+   * @param expr The expr
+   * @param ex The ex
+   */
   void add_filter_task(const std::string& name, const std::string& expr,
                        optional<management_exception>& ex) {
     filter_id_t filter_id;
@@ -666,6 +717,12 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * remove_filter_task
+   *
+   * @param name The name
+   * @param ex The ex
+   */
   void remove_filter_task(const std::string& name,
                           optional<management_exception>& ex) {
     filter_id_t filter_id;
@@ -681,6 +738,14 @@ class atomic_multilog {
     filter_map_.remove(name, filter_id);
   }
 
+  /**
+   * add_aggregate_task
+   *
+   * @param name The name
+   * @param filter_name The filter_name
+   * @param expr The expr
+   * @param ex The ex
+   */
   void add_aggregate_task(const std::string& name,
                           const std::string& filter_name,
                           const std::string& expr,
@@ -709,6 +774,12 @@ class atomic_multilog {
     metadata_.write_aggregate_metadata(name, filter_name, expr);
   }
 
+  /**
+   * remove_aggregate_task
+   *
+   * @param name The name
+   * @param ex The ex
+   */
   void remove_aggregate_task(const std::string& name,
                              optional<management_exception>& ex) {
     aggregate_id_t aggregate_id;
@@ -725,6 +796,14 @@ class atomic_multilog {
     aggregate_map_.remove(name, aggregate_id);
   }
 
+  /**
+   * add_trigger_task
+   *
+   * @param name The name
+   * @param expr The expr
+   * @param periodicity_ms The periodicity_ms
+   * @param ex The ex
+   */
   void add_trigger_task(const std::string& name, const std::string& expr,
                         uint64_t periodicity_ms,
                         optional<management_exception>& ex) {
@@ -757,6 +836,12 @@ class atomic_multilog {
     metadata_.write_trigger_metadata(name, expr, periodicity_ms);
   }
 
+  /**
+   * remove_trigger_task
+   *
+   * @param name The name
+   * @param ex The ex
+   */
   void remove_trigger_task(const std::string& name,
                            optional<management_exception>& ex) {
     trigger_id_t trigger_id;
@@ -809,6 +894,15 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * check_time_bucket
+   *
+   * @param f The filter
+   * @param t The trigger
+   * @param tid The tid
+   * @param time_bucket The time_bucket
+   * @param version The version
+   */
   void check_time_bucket(filter* f, trigger* t, size_t tid,
                          uint64_t time_bucket, uint64_t version) {
     size_t window_size = t->periodicity_ms();

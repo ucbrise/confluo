@@ -14,6 +14,9 @@ using namespace ::utils;
 
 namespace confluo {
 
+    /**
+     * @brief Managment of an atomic multilog
+     */
 class confluo_store {
  public:
   /**

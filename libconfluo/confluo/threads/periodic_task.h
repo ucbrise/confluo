@@ -9,6 +9,9 @@
 #include "../../libutils/utils/atomic.h"
 #include "logger.h"
 
+/**
+ * @brief Task that's executed periodically
+ */
 class periodic_task {
  public:
   /**

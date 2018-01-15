@@ -52,6 +52,9 @@ struct aggregate_node {
   aggregate_node* next_;
 };
 
+/**
+ * List of aggregates
+ */
 class aggregate_list {
  public:
   /**

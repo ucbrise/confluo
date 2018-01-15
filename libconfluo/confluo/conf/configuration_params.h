@@ -8,19 +8,19 @@ namespace confluo {
 
 class configuration_params {
  public:
-  // Memory configuration parameters
+  /** Memory configuration parameters */
   static size_t MAX_MEMORY;
 
-  // Thread configuration parameters
+  /** Thread configuration parameters */
   static int MAX_CONCURRENCY;
 
-  // Index configuration parameters
+  /** Index configuration parameters */
   static double INDEX_BUCKET_SIZE;
 
-  // Time resolution
+  /** Time resolution */
   static uint64_t TIME_RESOLUTION_NS;
 
-  // Monitor configuration parameters
+  /** Monitor configuration parameters */
   static uint64_t MONITOR_WINDOW_MS;
   static uint64_t MONITOR_PERIODICITY_MS;
 

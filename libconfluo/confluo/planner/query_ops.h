@@ -22,74 +22,145 @@ enum query_op_type {
 };
 
 /**
- * 
+ * @brief Query operation
  */
 class query_op {
  public:
+     /**
+      * query_op
+      *
+      * @param op The op
+      */
   query_op(const query_op_type& op)
       : op_(op) {
   }
 
+  /**
+   * ~query_op
+   */
   virtual ~query_op() {
   }
 
+  /**
+   * op_type
+   *
+   * @return query_op_type
+   */
   query_op_type op_type() {
     return op_;
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const = 0;
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const = 0;
 
  private:
   query_op_type op_;
 };
 
+/**
+ * no operation
+ */
 class no_op : public query_op {
  public:
+     /**
+      * no_op
+      */
   no_op()
       : query_op(query_op_type::D_NO_OP) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "no_op";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return UINT64_C(0);
   }
 };
 
+/**
+ * No valid index operation
+ */
 class no_valid_index_op : public query_op {
  public:
+     /**
+      * no_valid_index_op
+      */
   no_valid_index_op()
       : query_op(query_op_type::D_NO_VALID_INDEX_OP) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "no_valid_index_op";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return UINT64_MAX;
   }
 };
 
+/**
+ * Full scan operation
+ */
 class full_scan_op : public query_op {
  public:
   full_scan_op()
       : query_op(query_op_type::D_SCAN_OP) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "full_scan";
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return UINT64_MAX;
   }
 };
 
+/**
+ * Index operation
+ */
 class index_op : public query_op {
  public:
   typedef std::pair<byte_string, byte_string> key_range;
@@ -100,11 +171,21 @@ class index_op : public query_op {
         range_(range) {
   }
 
+  /**
+   * to_string
+   *
+   * @return std::string
+   */
   virtual std::string to_string() const override {
     return "range(" + range_.first.to_string() + "," + range_.second.to_string()
         + ")" + " on index=" + index_->to_string();
   }
 
+  /**
+   * cost
+   *
+   * @return uint64_t
+   */
   virtual uint64_t cost() const override {
     return index_->approx_count(range_.first, range_.second);
   }

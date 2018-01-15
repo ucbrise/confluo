@@ -7,6 +7,9 @@
 
 namespace confluo {
 
+    /**
+     * @brief Data for snapshot of column
+     */
 struct column_snapshot {
   data_type type;
   size_t offset;

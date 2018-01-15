@@ -35,18 +35,33 @@ const uint32_t ptr_constants::SECOND_SHIFT;
 template<typename T>
 class read_only_ptr {
  public:
+     /**
+      * read_only_ptr
+      */
   read_only_ptr() :
     ptr_(nullptr),
     offset_(0),
     ref_counts_(nullptr) {
   }
 
+  /**
+   * read_only_ptr
+   *
+   * @param ptr The ptr
+   * @param ref_counts The ref_counts
+   * @param offset The offset
+   */
   read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_counts, size_t offset = 0) :
     ptr_(ptr),
     offset_(offset),
     ref_counts_(ref_counts) {
   }
 
+  /**
+   * read_only_ptr
+   *
+   * @param other The other
+   */
   read_only_ptr(const read_only_ptr<T>& other) :
     ptr_(other.ptr_),
     offset_(other.offset_),
@@ -58,10 +73,20 @@ class read_only_ptr {
     }
   }
 
+  /**
+   * ~read_only_ptr
+   */
   ~read_only_ptr() {
     decrement_compare_dealloc();
   }
 
+  /**
+   * operator=
+   *
+   * @param other The other
+   *
+   * @return read_only_ptr&
+   */
   read_only_ptr& operator=(const read_only_ptr<T>& other) {
     // TODO potential infinite loop bug here
     init(other.ptr_, other.offset_, other.ref_counts_);
@@ -88,10 +113,20 @@ class read_only_ptr {
     ref_counts_ = ref_count;
   }
 
+  /**
+   * get
+   *
+   * @return T
+   */
   T* get() const {
     return ptr_ ? ptr_ + offset_ : ptr_;
   }
 
+  /**
+   * set_offset
+   *
+   * @param offset The offset
+   */
   void set_offset(size_t offset) {
     offset_ = offset;
   }
@@ -141,6 +176,9 @@ class swappable_ptr {
 
  public:
 
+     /**
+      * swappable_ptr
+      */
   swappable_ptr() :
     swappable_ptr(nullptr) {
   }
@@ -155,6 +193,9 @@ class swappable_ptr {
     ptr_(ptr) {
   }
 
+  /**
+   * ~swappable_ptr
+   */
   ~swappable_ptr() {
     T* ptr = atomic::load(&ptr_);
     if (ptr != nullptr) {

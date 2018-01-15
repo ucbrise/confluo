@@ -7,12 +7,27 @@
 
 namespace confluo {
 
+/**
+* String map
+*
+* @tparam V
+*/
 template<typename V>
 class string_map {
  public:
   static const uint32_t MAX_BUCKETS;
 
+  /**
+   * string hash
+   */
   struct string_hash {
+      /**
+       * hash
+       *
+       * @param str The str
+       *
+       * @return uint32_t
+       */
     static uint32_t hash(const std::string& str) {
       uint32_t h = FIRSTH;
       const char* s = str.c_str();
@@ -30,6 +45,9 @@ class string_map {
     static const uint32_t FIRSTH = 37; /* also prime */
   };
 
+  /**
+   * map entry
+   */
   struct map_entry {
     std::string key;
     V value;
@@ -46,10 +64,16 @@ class string_map {
     }
   };
 
+  /**
+   * string_map
+   */
   string_map()
       : buckets_(new reflog*[MAX_BUCKETS]()) {
   }
 
+  /**
+   * ~string_map
+   */
   ~string_map() {
     for (size_t i = 0; i < MAX_BUCKETS; i++) {
       if (buckets_[i] == nullptr)
@@ -59,6 +83,14 @@ class string_map {
   }
 
   // Only one writer thread permitted, otherwise duplicates may occur
+  /**
+   * put
+   *
+   * @param key The key
+   * @param value The value
+   *
+   * @return int64_t
+   */
   int64_t put(const std::string& key, const V& value) {
     uint32_t hash_key = string_hash::hash(key);
     map_entry entry(key, value);
@@ -88,6 +120,14 @@ class string_map {
   }
 
   // Multiple threads permitted
+  /**
+   * get
+   *
+   * @param key The key
+   * @param value The value
+   *
+   * @return int64_t
+   */
   int64_t get(const std::string& key, V& value) const {
     uint32_t hash_key = string_hash::hash(key);
     reflog* refs;
@@ -108,6 +148,14 @@ class string_map {
     return -1;
   }
 
+  /**
+   * get
+   *
+   * @param idx The idx
+   * @param value The value
+   *
+   * @return int64_t
+   */
   int64_t get(int64_t idx, V& value) const {
     if (idx < entries_.size()) {
       const map_entry& entry = entries_.at(idx);
@@ -120,6 +168,14 @@ class string_map {
   }
 
   // Only one writer thread permitted, otherwise inconsistencies may occur
+  /**
+   * remove
+   *
+   * @param key The key
+   * @param value The value
+   *
+   * @return int64_t
+   */
   int64_t remove(const std::string& key, V& value) {
     uint32_t hash_key = string_hash::hash(key);
     reflog* refs;

@@ -12,6 +12,9 @@
 
 namespace confluo {
 
+    /**
+     * @brief Column in schema
+     */
 class column_t {
  public:
   /**

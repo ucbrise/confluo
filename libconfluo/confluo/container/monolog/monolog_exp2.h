@@ -27,43 +27,95 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   typedef typename monolog_impl::pointer pointer;
   typedef typename monolog_impl::reference reference;
 
+  /**
+   * monolog_iterator
+   */
   monolog_iterator()
       : impl_(nullptr),
         pos_(0) {
   }
 
+  /**
+   * monolog_iterator
+   *
+   * @param impl The impl
+   * @param pos The pos
+   */
   monolog_iterator(const monolog_impl* impl, size_t pos)
       : impl_(impl),
         pos_(pos) {
   }
 
+  /**
+   * operator
+   *
+   * @return reference
+   */
   reference operator*() const {
     return impl_->get(pos_);
   }
 
+  /**
+   * operator->
+   *
+   * @return pointer
+   */
   pointer operator->() const {
     return impl_->ptr(pos_);
   }
 
+  /**
+   * operator++
+   *
+   * @return monolog_iterator&
+   */
   monolog_iterator& operator++() {
     pos_++;
     return *this;
   }
 
+  /**
+   * operator++
+   *
+   * @param int The int
+   *
+   * @return monolog_iterator
+   */
   monolog_iterator operator++(int) {
     monolog_iterator it = *this;
     ++(*this);
     return it;
   }
 
+  /**
+   * operator==
+   *
+   * @param other The other
+   *
+   * @return bool
+   */
   bool operator==(monolog_iterator other) const {
     return (impl_ == other.impl_) && (pos_ == other.pos_);
   }
 
+  /**
+   * operator!=
+   *
+   * @param other The other
+   *
+   * @return bool
+   */
   bool operator!=(monolog_iterator other) const {
     return !(*this == other);
   }
 
+  /**
+   * operator=
+   *
+   * @param other The other
+   *
+   * @return monolog_iterator&
+   */
   monolog_iterator& operator=(const monolog_iterator& other) {
     impl_ = other.impl_;
     pos_ = other.pos_;
@@ -348,20 +400,45 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> iterator;
   typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> const_iterator;
 
+  /**
+   * monolog_exp2
+   */
   monolog_exp2()
       : tail_(0) {
   }
 
+  /**
+   * reserve
+   *
+   * @param count The count
+   *
+   * @return size_t
+   */
   size_t reserve(size_t count) {
     return atomic::faa(&tail_, count);
   }
 
+  /**
+   * push_back
+   *
+   * @param val The val
+   *
+   * @return size_t
+   */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
+  /**
+   * push_back_range
+   *
+   * @param start The start
+   * @param end The end
+   *
+   * @return size_t
+   */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
@@ -370,18 +447,40 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
     return idx;
   }
 
+  /**
+   * at
+   *
+   * @param idx The idx
+   *
+   * @return T&
+   */
   const T& at(size_t idx) const {
     return this->get(idx);
   }
 
+  /**
+   * size
+   *
+   * @return size_t
+   */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
+  /**
+   * begin
+   *
+   * @return iterator
+   */
   iterator begin() const {
     return iterator(this, 0);
   }
 
+  /**
+   * end
+   *
+   * @return iterator
+   */
   iterator end() const {
     return iterator(this, size());
   }
