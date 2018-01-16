@@ -50,6 +50,7 @@ nbproject
 
 # Idea files
 .idea
+*.iml
 
 # generic ignores
 *.deps
