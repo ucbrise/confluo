@@ -8,12 +8,12 @@
 #include <cstdlib>
 #include <string>
 #include <errno.h>
+#include <ftw.h>
 #include <climits>
 #include <fcntl.h>
 #include <sys/stat.h>
 
 #include "assertions.h"
-#include "boost/filesystem.hpp"
 
 namespace utils {
 
@@ -46,8 +46,12 @@ class file_utils {
   }
 
   static void clear_dir(const std::string& path) {
-    boost::filesystem::remove_all(path);
-    file_utils::create_dir(path);
+    delete_dir(path);
+    create_dir(path);
+  }
+
+  static void delete_dir(const std::string& path) {
+    nftw(path.c_str(), unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
   }
 
   static bool exists_file(const std::string& path) {
@@ -87,6 +91,14 @@ class file_utils {
     realpath(path.c_str(), full_path);
     return std::string(full_path);
   }
+
+ private:
+  static int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+      int ret = remove(fpath);
+      assert_throw(ret != -1, "unlink_cb(" << fpath << "):" << strerror(errno));
+      return ret;
+  }
+
 };
 
 }
