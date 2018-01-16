@@ -4,9 +4,11 @@
 #include "storage/allocator.h"
 #include "storage/encoder.h"
 #include "file_utils.h"
+#include "archival_metadata.h"
+#include "archival_headers.h"
 #include "io/incr_file_utils.h"
+#include "io/incr_file_reader.h"
 #include "io/incr_file_writer.h"
-#include "monolog_archival_utils.h"
 #include "read_tail.h"
 
 namespace confluo {
@@ -44,8 +46,22 @@ class monolog_linear_archiver {
    */
   void archive(size_t offset) {
     writer_.open();
-    monolog_linear_archival_utils::archive<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE, ENCODING>(
-                                              log_, writer_, archival_tail_, offset);
+    // TODO replace with bucket iterator later
+    storage::read_only_encoded_ptr<T> bucket_ptr;
+    while (archival_tail_ < offset) {
+      log_->ptr(archival_tail_, bucket_ptr);
+      T* data = bucket_ptr.get().template ptr_as<T>();
+      auto* metadata = storage::ptr_metadata::get(data);
+      if (metadata->state_ != state_type::D_IN_MEMORY) {
+        archival_tail_ += BUCKET_SIZE;
+        continue;
+      }
+      if (log_->size() - archival_tail_ < BUCKET_SIZE) {
+        break;
+      }
+      archive_bucket(data);
+      archival_tail_ += BUCKET_SIZE;
+    }
     writer_.close();
   }
 
@@ -54,10 +70,60 @@ class monolog_linear_archiver {
   }
 
  private:
+  /**
+   * Archive bucket and swap the pointer to the in-memory
+   * bucket in the monolog with the archived version.
+   * @param bucket bucket to archive
+   */
+  void archive_bucket(T* bucket) {
+    auto metadata = ptr_metadata::get(bucket);
+    auto encoded_bucket = encoder::encode<T, ENCODING>(bucket);
+    size_t enc_size = encoded_bucket.size();
+    auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
+
+    auto header = monolog_linear_archival_header(archival_tail_ + BUCKET_SIZE);
+    writer_.update_metadata<monolog_linear_archival_header>(header);
+
+    void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, state_type::D_ARCHIVED);
+    log_->swap_bucket_ptr(archival_tail_ / BUCKET_SIZE, encoded_ptr<T>(archived_bucket));
+  }
+
   incremental_file_writer writer_;
   size_t archival_tail_;
   monolog* log_;
 
+};
+
+class monolog_linear_load_utils {
+public:
+
+  /**
+   * Load a monolog_linear archived on disk.
+   * @param path path to data
+   * @param log log to load into
+   */
+  template<typename T, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUF_SIZE>
+  static void load(const std::string& path, monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE>& log) {
+    incremental_file_reader reader(path, "monolog_linear");
+    auto header = reader.read_metadata<monolog_linear_archival_header>();
+    size_t load_offset = 0;
+    while (reader.has_more() && load_offset < header.archival_tail()) {
+      incremental_file_offset off = reader.tell();
+      size_t size = reader.read<ptr_metadata>().data_size_;
+
+      void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), size, state_type::D_ARCHIVED);
+      log.init_bucket_ptr(load_offset / BUCKET_SIZE, encoded_ptr<T>(encoded_bucket));
+
+      log.reserve(BUCKET_SIZE);
+      reader.advance<uint8_t>(size);
+      load_offset += BUCKET_SIZE;
+    }
+
+    if (load_offset != header.archival_tail()) {
+      THROW(illegal_state_exception, "Archived data could not be loaded!");
+    }
+    incr_file_utils::truncate_rest(reader.tell());
+  }
 };
 
 }

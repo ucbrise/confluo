@@ -5,7 +5,6 @@
 #include "container/data_log.h"
 #include "filter.h"
 #include "filter_log.h"
-#include "monolog_archival_utils.h"
 #include "io/incr_file_reader.h"
 #include "io/incr_file_utils.h"
 #include "io/incr_file_writer.h"
@@ -26,11 +25,29 @@ class load_utils {
    * @param path path to archived data log
    * @param log log to load into
    */
-  static void load_data_log(const std::string& path, data_log& log) {
-    monolog_linear_archival_utils::load<uint8_t,
-                                        data_log_constants::MAX_BUCKETS,
-                                        data_log_constants::BUCKET_SIZE,
-                                        data_log_constants::BUFFER_SIZE>(path, log);
+  static void load_data_log(const std::string& path, const storage::storage_mode mode, data_log& log) {
+    monolog_linear_load_utils::load<uint8_t,
+                                    data_log_constants::MAX_BUCKETS,
+                                    data_log_constants::BUCKET_SIZE,
+                                    data_log_constants::BUFFER_SIZE>(path, log);
+    if (mode != storage::storage_mode::IN_MEMORY) {
+      size_t start = (log.size() + data_log_constants::BUCKET_SIZE - 1) / data_log_constants::BUCKET_SIZE;
+      load_data_log_storage(log, start);
+    }
+  }
+
+  static void load_data_log_storage(data_log& log, size_t start_bucket_idx) {
+//    size_t size = (data_log_constants::BUCKET_SIZE + data_log_constants::BUFFER_SIZE) * sizeof(uint8_t);
+//    std::ifstream dlog_file(log.data_path());
+//    dlog_file.seekg(0, dlog_file.end);
+//    size_t file_size = dlog_file.tellg();
+//    size_t off = 0;
+//    for (size_t i = 0; i < data_log_constants::MAX_BUCKETS; i++) {
+//      void* bucket = ALLOCATOR.mmap(log.data_path(), off, size, storage::state_type::D_IN_MEMORY);
+//      auto metadata = ptr_metadata::get(bucket);
+//      log.init_bucket_ptr(i, encoded_ptr<uint8_t>(bucket));
+//      off += metadata->data_size_;
+//    }
   }
 
   /**
@@ -47,7 +64,7 @@ class load_utils {
       monitor::filter* filter = filters[i];
       if (filter->is_valid()) {
         size_t data_log_archival_tail = load_filter(path + "/filter_" + std::to_string(i) + "/", filter);
-        replay_filter(filter, log, schema, data_log_archival_tail + schema.record_size());
+        replay_filter(filter, log, schema, data_log_archival_tail); //+ schema.record_size());
       }
     }
   }
@@ -81,13 +98,11 @@ class load_utils {
   static size_t load_filter(const std::string& path, monitor::filter* filter) {
     incremental_file_reader reflog_reader(path, "filter_data");
     incremental_file_reader aggs_reader(path, "filter_aggs");
-    reflog_reader.open();
-    aggs_reader.open();
     filter::idx_t* tree = filter->data();
-    size_t archival_tail = radix_tree_archival_utils::load<filter::idx_t>(reflog_reader, tree);
-    size_t archival_tail2 = radix_tree_archival_utils::load_aggregates<filter::idx_t>(aggs_reader, tree);
-    if (archival_tail != archival_tail2) {
-      THROW(illegal_state_exception, "Archived data could not be loaded!");
+    size_t archival_tail = filter_load_utils::load_reflogs(reflog_reader, tree);
+    size_t archival_tail2 = filter_load_utils::load_reflog_aggregates(aggs_reader, tree);
+    if (archival_tail > archival_tail2) {
+      // TODO recovery for failure during aggregate writes edge case
     }
     return archival_tail;
   }
@@ -100,8 +115,7 @@ class load_utils {
    */
   static size_t load_index(const std::string& path, index::radix_index* index) {
     incremental_file_reader reader(path, "index_data");
-    reader.open();
-    return radix_tree_archival_utils::load<index::radix_index>(reader, index);
+    return index_load_utils::load(reader, index);
   }
 
   /**

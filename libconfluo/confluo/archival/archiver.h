@@ -3,8 +3,10 @@
 
 #include "container/data_log.h"
 #include "monolog_linear_archiver.h"
-#include "filter_archiver.h"
-#include "index_archiver.h"
+#include "filter_log.h"
+#include "filter_log_archiver.h"
+#include "index_log.h"
+#include "index_log_archiver.h"
 
 namespace confluo {
 namespace archival {
