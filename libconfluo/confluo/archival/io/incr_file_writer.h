@@ -17,11 +17,13 @@ class incremental_file_writer {
         max_file_size_(max_file_size) {
   }
 
-  incremental_file_writer(const incremental_file_writer& other)
-      : file_num_(0),
-        dir_path_(other.dir_path_),
-        file_prefix_(other.file_prefix_),
-        max_file_size_(other.max_file_size_) {
+  incremental_file_writer(const incremental_file_writer& other) {
+    close();
+    file_num_ = other.file_num_;
+    dir_path_ = other.dir_path_;
+    file_prefix_ = other.file_prefix_;
+    max_file_size_ = other.max_file_size_;
+    open();
   }
 
   ~incremental_file_writer() {

@@ -18,6 +18,7 @@ class incremental_file_reader {
        file_prefix_(file_prefix) {
     std::ifstream metadata_ifs(metadata_path());
     last_file_num_ = io_utils::read<size_t>(metadata_ifs);
+    open();
   }
 
   ~incremental_file_reader() {
