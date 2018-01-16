@@ -15,14 +15,18 @@ public enum rpc_data_type implements org.apache.thrift.TEnum {
   RPC_NONE(0),
   RPC_BOOL(1),
   RPC_CHAR(2),
-  RPC_SHORT(3),
-  RPC_INT(4),
-  RPC_LONG(5),
-  RPC_FLOAT(6),
-  RPC_DOUBLE(7),
-  RPC_STRING(8),
-  RPC_RECORD(9),
-  RPC_ALERT(10);
+  RPC_UCHAR(3),
+  RPC_SHORT(4),
+  RPC_USHORT(5),
+  RPC_INT(6),
+  RPC_UINT(7),
+  RPC_LONG(8),
+  RPC_ULONG(9),
+  RPC_FLOAT(10),
+  RPC_DOUBLE(11),
+  RPC_STRING(12),
+  RPC_RECORD(10001),
+  RPC_ALERT(10002);
 
   private final int value;
 
@@ -50,20 +54,28 @@ public enum rpc_data_type implements org.apache.thrift.TEnum {
       case 2:
         return RPC_CHAR;
       case 3:
-        return RPC_SHORT;
+        return RPC_UCHAR;
       case 4:
-        return RPC_INT;
+        return RPC_SHORT;
       case 5:
-        return RPC_LONG;
+        return RPC_USHORT;
       case 6:
-        return RPC_FLOAT;
+        return RPC_INT;
       case 7:
-        return RPC_DOUBLE;
+        return RPC_UINT;
       case 8:
-        return RPC_STRING;
+        return RPC_LONG;
       case 9:
-        return RPC_RECORD;
+        return RPC_ULONG;
       case 10:
+        return RPC_FLOAT;
+      case 11:
+        return RPC_DOUBLE;
+      case 12:
+        return RPC_STRING;
+      case 10001:
+        return RPC_RECORD;
+      case 10002:
         return RPC_ALERT;
       default:
         return null;

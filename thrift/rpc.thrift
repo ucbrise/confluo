@@ -12,14 +12,18 @@ enum rpc_data_type {
   RPC_NONE = 0,
   RPC_BOOL = 1,
   RPC_CHAR = 2,
-  RPC_SHORT = 3,
-  RPC_INT = 4,
-  RPC_LONG = 5,
-  RPC_FLOAT = 6,
-  RPC_DOUBLE = 7,
-  RPC_STRING = 8,
-  RPC_RECORD = 9,
-  RPC_ALERT = 10
+  RPC_UCHAR = 3,
+  RPC_SHORT = 4,
+  RPC_USHORT = 5,
+  RPC_INT = 6,
+  RPC_UINT = 7,
+  RPC_LONG = 8,
+  RPC_ULONG = 9,
+  RPC_FLOAT = 10,
+  RPC_DOUBLE = 11,
+  RPC_STRING = 12,
+  RPC_RECORD = 10001,
+  RPC_ALERT = 10002
 }
 
 enum rpc_iterator_type {

@@ -47,14 +47,14 @@ class record:
 class field:
 
     FORMAT_CODES = { 
-        type_id.D_BOOL: '?',
-        type_id.D_CHAR: 'c',
-        type_id.D_SHORT: 'h',
-        type_id.D_INT: 'i',
-        type_id.D_LONG: 'l',
-        type_id.D_FLOAT: 'f',
-        type_id.D_DOUBLE: 'd',
-        type_id.D_STRING: 's'
+        type_id.BOOL: '?',
+        type_id.CHAR: 'c',
+        type_id.SHORT: 'h',
+        type_id.INT: 'i',
+        type_id.LONG: 'l',
+        type_id.FLOAT: 'f',
+        type_id.DOUBLE: 'd',
+        type_id.STRING: 's'
     }
 
     def __init__(self, idx, dtype, data):
@@ -64,7 +64,7 @@ class field:
 
     def unpack(self):
         tid = self.data_type_.type_id_
-        if tid == type_id.D_STRING:
+        if tid == type_id.STRING:
             format_code = str(self.data_type_.size_) + self.FORMAT_CODES[tid]
         else:
             format_code = self.FORMAT_CODES[tid]
