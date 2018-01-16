@@ -160,19 +160,23 @@ class atomic_multilog {
         rt_(path, mode),
         metadata_(),
         planner_(&data_log_, &indexes_, &schema_),
+        archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
         archival_task_("archival"),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
-    load(path);
+    load(path, mode);
     metadata_ = metadata_writer(path, mode); // metadata shouldn't be written until after load
-    archiver_ = archiver(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
                          configuration_params::ARCHIVAL_PERIODICITY_MS);
   }
 
-  void load(const std::string& path) {
+  /**
+   * Load multilog from archives.
+   * @param path The path of the atomic multilog
+   */
+  void load(const std::string& path, const storage::storage_mode& mode) {
     metadata_reader reader(path);
     while (reader.has_next()) {
       switch (reader.next_type()) {
@@ -205,9 +209,10 @@ class atomic_multilog {
         }
       }
     }
-    load_utils::load_data_log(archiver_.data_log_path(), data_log_);
+    load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
     load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
     load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
+    rt_.advance(0, data_log_.size());
   }
 
   // Management ops

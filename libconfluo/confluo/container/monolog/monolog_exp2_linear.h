@@ -316,7 +316,8 @@ class monolog_exp2_linear_base {
     if (container == nullptr) {
       container = try_allocate_container(container_idx);
     }
-    container[bucket_idx].atomic_init(data);
+    storage::encoded_ptr<T> old_data = container[bucket_idx].atomic_load();
+    container[bucket_idx].atomic_init(data, old_data);
   }
 
 protected:
@@ -467,6 +468,11 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
     for (size_t i = 0; i < cnt; i++)
       this->set(idx + i, start + i);
     return idx;
+  }
+
+  bool set_tail(size_t count) {
+    size_t old_tail = atomic::load(&tail_);
+    return atomic::strong::cas(&tail_, &old_tail, count);
   }
 
   /**
