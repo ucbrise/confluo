@@ -175,12 +175,20 @@ class swappable_encoded_ptr {
 
   /**
    * Initialize pointer with a CAS operation.
-   * Any load after initialization returns a non-null pointer
-   * @param ptr The pointer to initialize
-   * @return True if initialization successful, false otherwise
+   * @param ptr pointer to initialize as
+   * @return true if initialization successful, otherwise false
    */
   bool atomic_init(encoded_ptr<T> ptr) {
     encoded_ptr<T> expected;
+    return atomic::strong::cas(&enc_ptr_, &expected, ptr);
+  }
+
+  /**
+   * Initialize pointer with a CAS operation.
+   * @param ptr pointer
+   * @return true if initialization successful, otherwise false
+   */
+  bool atomic_init(encoded_ptr<T> ptr, encoded_ptr<T> expected) {
     return atomic::strong::cas(&enc_ptr_, &expected, ptr);
   }
 

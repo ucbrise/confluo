@@ -29,7 +29,7 @@ class encoded_ptr {
    * @return encoded pointer
    */
   template<typename U>
-  void* ptr_as() const {
+  U* ptr_as() const {
     return static_cast<U*>(ptr_);
   }
 

@@ -10,20 +10,42 @@ enum encoding_type {
   IDENTITY
 };
 
+class data_ptr {
+
+ public:
+  typedef std::unique_ptr<uint8_t, void (*)(uint8_t*)> simple_ptr;
+
+  data_ptr(simple_ptr ptr, size_t size)
+      : ptr_(std::move(ptr)),
+        size_(size) {
+  }
+
+  uint8_t* get() {
+    return ptr_.get();
+  }
+
+  size_t size() {
+    return size_;
+  }
+
+ private:
+  simple_ptr ptr_;
+  size_t size_;
+
+};
+
 class encoder {
  public:
-  typedef std::unique_ptr<uint8_t, void (*)(uint8_t*)> raw_encoded_ptr;
 
   /**
-   * Encode pointer.
+   * Encode pointer. Currently an identity operation.
    * @param ptr unencoded data pointer, allocated by the storage allocator.
-   * @param encoded_size size of encoded data in bytes
-   * @return raw encoded pointer (no metadata)
+   * @return pointer to raw encoded data (no metadata)
    */
   template<typename T, encoding_type ENCODING>
-  static raw_encoded_ptr encode(T* ptr, size_t& encoded_size) {
-    encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
-    return raw_encoded_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete);
+  static data_ptr encode(T* ptr) {
+    size_t encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
+    return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), encoded_size);
   }
 
  private:
