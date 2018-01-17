@@ -289,7 +289,7 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(0, schema_vec[0].idx());
   ASSERT_EQ(0, schema_vec[0].offset());
   ASSERT_EQ("TIMESTAMP", schema_vec[0].name());
-  ASSERT_TRUE(LONG_TYPE == schema_vec[0].type());
+  ASSERT_TRUE(ULONG_TYPE == schema_vec[0].type());
   ASSERT_FALSE(schema_vec[0].is_indexed());
 
   ASSERT_EQ(1, schema_vec[1].idx());
@@ -321,7 +321,7 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(0, s[0].idx());
   ASSERT_EQ(0, s[0].offset());
   ASSERT_EQ("TIMESTAMP", s[0].name());
-  ASSERT_TRUE(LONG_TYPE == s[0].type());
+  ASSERT_TRUE(ULONG_TYPE == s[0].type());
   ASSERT_FALSE(s[0].is_indexed());
 
   ASSERT_EQ(1, s[1].idx());

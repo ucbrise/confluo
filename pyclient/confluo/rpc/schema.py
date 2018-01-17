@@ -76,15 +76,15 @@ class schema_builder:
         self.user_provided_ts_ = False
         self.offset_ = 0
         self.columns_ = []
-        timestamp_col = column(0, 0, data_types.LONG_TYPE, "TIMESTAMP", None, None)
+        timestamp_col = column(0, 0, data_types.ULONG_TYPE, "TIMESTAMP", None, None)
         self.columns_.append(timestamp_col)
-        self.offset_ += data_types.LONG_TYPE.size_
+        self.offset_ += data_types.ULONG_TYPE.size_
 
     def add_column(self, dtype, name, min_value=None, max_value=None):
         if name.upper() == "TIMESTAMP":
             self.user_provided_ts_ = True
-            if dtype != data_types.LONG_TYPE:
-                raise ValueError("TIMESTAMP must be of LONG_TYPE")
+            if dtype != data_types.ULONG_TYPE:
+                raise ValueError("TIMESTAMP must be of ULONG_TYPE")
             return self
         col = column(len(self.columns_), self.offset_, dtype, name, min_value, max_value)
         self.columns_.append(col)

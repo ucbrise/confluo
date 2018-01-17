@@ -19,7 +19,7 @@ TEST_F(SchemaParserTest, BasicTest) {
     ASSERT_EQ(0, schema_vec[0].idx());
     ASSERT_EQ(0, schema_vec[0].offset());
     ASSERT_EQ("TIMESTAMP", schema_vec[0].name());
-    ASSERT_TRUE(LONG_TYPE == schema_vec[0].type());
+    ASSERT_TRUE(ULONG_TYPE == schema_vec[0].type());
     ASSERT_FALSE(schema_vec[0].is_indexed());
 
     ASSERT_EQ(1, schema_vec[1].idx());
