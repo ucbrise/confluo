@@ -68,15 +68,19 @@ class type_manager {
 };
 
 static data_type NONE_TYPE = data_type(0, 0);
-static data_type BOOL_TYPE = data_type(1, sizeof(bool));
-static data_type CHAR_TYPE = data_type(2, sizeof(int8_t));
-static data_type SHORT_TYPE = data_type(3, sizeof(int16_t));
-static data_type INT_TYPE = data_type(4, sizeof(int32_t));
-static data_type LONG_TYPE = data_type(5, sizeof(int64_t));
-static data_type FLOAT_TYPE = data_type(6, sizeof(float));
-static data_type DOUBLE_TYPE = data_type(7, sizeof(double));
+static data_type BOOL_TYPE = type_manager::get_type("bool");
+static data_type CHAR_TYPE = type_manager::get_type("char");
+static data_type UCHAR_TYPE = type_manager::get_type("uchar");
+static data_type SHORT_TYPE = type_manager::get_type("short");
+static data_type USHORT_TYPE = type_manager::get_type("ushort");
+static data_type INT_TYPE = type_manager::get_type("int");
+static data_type UINT_TYPE = type_manager::get_type("uint");
+static data_type LONG_TYPE = type_manager::get_type("long");
+static data_type ULONG_TYPE = type_manager::get_type("ulong");
+static data_type FLOAT_TYPE = type_manager::get_type("float");
+static data_type DOUBLE_TYPE = type_manager::get_type("double");
 static data_type STRING_TYPE(size_t size) {
-  return data_type(8, size);
+  return type_manager::get_type("string", size);
 }
 
 }

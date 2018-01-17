@@ -117,11 +117,11 @@ TEST_F(TypeManagerTest, RegisterTest) {
   ASSERT_EQ(limits::int_max, *reinterpret_cast<int*>(addr_type.max()));
   ASSERT_EQ(limits::int_zero, *reinterpret_cast<int*>(addr_type.zero()));
   ASSERT_STREQ("ip_address", addr_type.name().c_str());
-  ASSERT_EQ(9, confluo::type_manager::get_type("ip_address").id);
+  ASSERT_EQ(13, confluo::type_manager::get_type("ip_address").id);
   ASSERT_STREQ("ip_address", s[1].type().name().c_str());
 
   ASSERT_STREQ("size_type", sz_type.name().c_str());
-  ASSERT_EQ(10, confluo::type_manager::get_type("size_type").id);
+  ASSERT_EQ(14, confluo::type_manager::get_type("size_type").id);
   ASSERT_STREQ("size_type", s[3].type().name().c_str());
 
 }
@@ -289,7 +289,7 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(0, schema_vec[0].idx());
   ASSERT_EQ(0, schema_vec[0].offset());
   ASSERT_EQ("TIMESTAMP", schema_vec[0].name());
-  ASSERT_TRUE(LONG_TYPE == schema_vec[0].type());
+  ASSERT_TRUE(ULONG_TYPE == schema_vec[0].type());
   ASSERT_FALSE(schema_vec[0].is_indexed());
 
   ASSERT_EQ(1, schema_vec[1].idx());
@@ -321,7 +321,7 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(0, s[0].idx());
   ASSERT_EQ(0, s[0].offset());
   ASSERT_EQ("TIMESTAMP", s[0].name());
-  ASSERT_TRUE(LONG_TYPE == s[0].type());
+  ASSERT_TRUE(ULONG_TYPE == s[0].type());
   ASSERT_FALSE(s[0].is_indexed());
 
   ASSERT_EQ(1, s[1].idx());

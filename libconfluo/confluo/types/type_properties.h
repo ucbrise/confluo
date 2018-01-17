@@ -85,9 +85,13 @@ std::vector<type_properties> init_primitives() {
   props.push_back(build_properties<void>("none", 0, false));
   props.push_back(DEFINE_PRIMITIVE(bool, bool));
   props.push_back(DEFINE_PRIMITIVE(char, int8_t));
+  props.push_back(DEFINE_PRIMITIVE(uchar, uint8_t));
   props.push_back(DEFINE_PRIMITIVE(short, int16_t));
+  props.push_back(DEFINE_PRIMITIVE(ushort, uint16_t));
   props.push_back(DEFINE_PRIMITIVE(int, int32_t));
+  props.push_back(DEFINE_PRIMITIVE(uint, uint32_t));
   props.push_back(DEFINE_PRIMITIVE(long, int64_t));
+  props.push_back(DEFINE_PRIMITIVE(ulong, uint64_t));
   props.push_back(DEFINE_PRIMITIVE(float, float));
   props.push_back(DEFINE_PRIMITIVE(double, double));
   props.push_back(build_properties<std::string>("string", 0, false));

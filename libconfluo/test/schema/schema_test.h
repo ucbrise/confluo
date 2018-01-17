@@ -50,7 +50,7 @@ TEST_F(SchemaTest, SchemaBuilderTest) {
   ASSERT_EQ(0, schema_vec[0].idx());
   ASSERT_EQ(0, schema_vec[0].offset());
   ASSERT_EQ("TIMESTAMP", schema_vec[0].name());
-  ASSERT_TRUE(LONG_TYPE == schema_vec[0].type());
+  ASSERT_TRUE(ULONG_TYPE == schema_vec[0].type());
   ASSERT_FALSE(schema_vec[0].is_indexed());
 
   ASSERT_EQ(1, schema_vec[1].idx());
@@ -120,7 +120,7 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   ASSERT_EQ(0, s[0].idx());
   ASSERT_EQ(0, s[0].offset());
   ASSERT_EQ("TIMESTAMP", s[0].name());
-  ASSERT_TRUE(LONG_TYPE == s[0].type());
+  ASSERT_TRUE(ULONG_TYPE == s[0].type());
   ASSERT_FALSE(s[0].is_indexed());
 
   ASSERT_EQ(1, s[1].idx());
@@ -174,7 +174,7 @@ TEST_F(SchemaTest, SchemaOpsTest) {
   ASSERT_EQ(0, s["TIMESTAMP"].idx());
   ASSERT_EQ(0, s["TIMESTAMP"].offset());
   ASSERT_EQ("TIMESTAMP", s["TIMESTAMP"].name());
-  ASSERT_TRUE(LONG_TYPE == s["TIMESTAMP"].type());
+  ASSERT_TRUE(ULONG_TYPE == s["TIMESTAMP"].type());
   ASSERT_FALSE(s["TIMESTAMP"].is_indexed());
 
   ASSERT_EQ(1, s["A"].idx());
@@ -244,7 +244,7 @@ TEST_F(SchemaTest, SchemaApplyTest) {
 
   ASSERT_EQ(0, r[0].idx());
   ASSERT_EQ(tmp.ts, r[0].as<int64_t>());
-  ASSERT_TRUE(LONG_TYPE == r[0].type());
+  ASSERT_TRUE(ULONG_TYPE == r[0].type());
   ASSERT_FALSE(r[0].is_indexed());
 
   ASSERT_EQ(1, r[1].idx());

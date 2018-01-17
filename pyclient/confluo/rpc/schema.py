@@ -47,14 +47,14 @@ class record:
 class field:
 
     FORMAT_CODES = { 
-        type_id.D_BOOL: '?',
-        type_id.D_CHAR: 'c',
-        type_id.D_SHORT: 'h',
-        type_id.D_INT: 'i',
-        type_id.D_LONG: 'l',
-        type_id.D_FLOAT: 'f',
-        type_id.D_DOUBLE: 'd',
-        type_id.D_STRING: 's'
+        type_id.BOOL: '?',
+        type_id.CHAR: 'c',
+        type_id.SHORT: 'h',
+        type_id.INT: 'i',
+        type_id.LONG: 'l',
+        type_id.FLOAT: 'f',
+        type_id.DOUBLE: 'd',
+        type_id.STRING: 's'
     }
 
     def __init__(self, idx, dtype, data):
@@ -64,7 +64,7 @@ class field:
 
     def unpack(self):
         tid = self.data_type_.type_id_
-        if tid == type_id.D_STRING:
+        if tid == type_id.STRING:
             format_code = str(self.data_type_.size_) + self.FORMAT_CODES[tid]
         else:
             format_code = self.FORMAT_CODES[tid]
@@ -76,15 +76,15 @@ class schema_builder:
         self.user_provided_ts_ = False
         self.offset_ = 0
         self.columns_ = []
-        timestamp_col = column(0, 0, data_types.LONG_TYPE, "TIMESTAMP", None, None)
+        timestamp_col = column(0, 0, data_types.ULONG_TYPE, "TIMESTAMP", None, None)
         self.columns_.append(timestamp_col)
-        self.offset_ += data_types.LONG_TYPE.size_
+        self.offset_ += data_types.ULONG_TYPE.size_
 
     def add_column(self, dtype, name, min_value=None, max_value=None):
         if name.upper() == "TIMESTAMP":
             self.user_provided_ts_ = True
-            if dtype != data_types.LONG_TYPE:
-                raise ValueError("TIMESTAMP must be of LONG_TYPE")
+            if dtype != data_types.ULONG_TYPE:
+                raise ValueError("TIMESTAMP must be of ULONG_TYPE")
             return self
         col = column(len(self.columns_), self.offset_, dtype, name, min_value, max_value)
         self.columns_.append(col)

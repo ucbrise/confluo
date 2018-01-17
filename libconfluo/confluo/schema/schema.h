@@ -199,10 +199,10 @@ class schema_builder {
         offset_(0) {
     // Every schema must have timestamp
     // TODO: Replace this with a new timestamp type
-    mutable_value min(LONG_TYPE, LONG_TYPE.min());
-    mutable_value max(LONG_TYPE, LONG_TYPE.max());
-    columns_.push_back(column_t(0, 0, LONG_TYPE, "TIMESTAMP", min, max));
-    offset_ += LONG_TYPE.size;
+    mutable_value min(ULONG_TYPE, ULONG_TYPE.min());
+    mutable_value max(ULONG_TYPE, ULONG_TYPE.max());
+    columns_.push_back(column_t(0, 0, ULONG_TYPE, "TIMESTAMP", min, max));
+    offset_ += ULONG_TYPE.size;
   }
 
   schema_builder& add_column(const data_type& type, const std::string& name,
@@ -210,8 +210,8 @@ class schema_builder {
                              const mutable_value& max) {
     if (utils::string_utils::to_upper(name) == "TIMESTAMP") {
       user_provided_ts_ = true;
-      if (type != LONG_TYPE) {
-        THROW(invalid_operation_exception, "TIMESTAMP must be of LONG_TYPE");
+      if (type != ULONG_TYPE) {
+        THROW(invalid_operation_exception, "TIMESTAMP must be of ULONG_TYPE");
       }
       return *this;
     }

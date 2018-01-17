@@ -29,9 +29,13 @@ int _krpc_data_typeValues[] = {
   RPC_NONE,
   RPC_BOOL,
   RPC_CHAR,
+  RPC_UCHAR,
   RPC_SHORT,
+  RPC_USHORT,
   RPC_INT,
+  RPC_UINT,
   RPC_LONG,
+  RPC_ULONG,
   RPC_FLOAT,
   RPC_DOUBLE,
   RPC_STRING,
@@ -42,16 +46,20 @@ const char* _krpc_data_typeNames[] = {
   "RPC_NONE",
   "RPC_BOOL",
   "RPC_CHAR",
+  "RPC_UCHAR",
   "RPC_SHORT",
+  "RPC_USHORT",
   "RPC_INT",
+  "RPC_UINT",
   "RPC_LONG",
+  "RPC_ULONG",
   "RPC_FLOAT",
   "RPC_DOUBLE",
   "RPC_STRING",
   "RPC_RECORD",
   "RPC_ALERT"
 };
-const std::map<int, const char*> _rpc_data_type_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(11, _krpc_data_typeValues, _krpc_data_typeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+const std::map<int, const char*> _rpc_data_type_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(15, _krpc_data_typeValues, _krpc_data_typeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
 
 int _krpc_iterator_typeValues[] = {
   RPC_ADHOC,
