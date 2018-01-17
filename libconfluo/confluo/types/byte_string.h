@@ -249,7 +249,9 @@ class byte_string {
   }
 
   ~byte_string() {
-    delete[] data_;
+    if (data_ != nullptr) {
+      delete[] data_;
+    }
   }
 
   inline uint8_t& operator[](size_t idx) {
