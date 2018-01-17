@@ -472,7 +472,10 @@ class atomic_multilog {
     numeric agg;
     aggregate_info* a = filters_.at(fid)->get_aggregate_info(aid);
     for (uint64_t t = begin_ms; t <= end_ms; t++) {
-      numeric t_agg = filters_.at(fid)->lookup(t)->get_aggregate(aid, version);
+      aggregated_reflog* refs;
+      if ((refs = filters_.at(fid)->lookup(t)) == nullptr)
+        continue;
+      numeric t_agg = refs->get_aggregate(aid, version);
       agg = a->agg(agg, t_agg);
     }
     return agg;

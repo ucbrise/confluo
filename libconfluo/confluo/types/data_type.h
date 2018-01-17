@@ -138,6 +138,9 @@ struct data_type {
         size = std::stoull(type_parts[2].str());
       }
       size_t id = find_type_properties(name);
+      if (id == 0) {
+        THROW(parse_exception, "Unknown type name " + str);
+      }
       return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
     }
     THROW(parse_exception, "Malformed type name " + str);
