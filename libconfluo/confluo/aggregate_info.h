@@ -105,6 +105,14 @@ class aggregate_info {
   }
 
   /**
+   * Returns the zero value for the aggregate
+   * @return Zero value for the aggregate
+   */
+  numeric zero() {
+    return aggregators[agg_type_].zero(field_type_);
+  }
+
+  /**
    * Creates an aggregate using the parsed aggregate information
    *
    * @return The aggregate
