@@ -6,6 +6,8 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TBufferTransports.h>
 
+#include "parser/schema_parser.h"
+
 #include "rpc_service.h"
 #include "rpc_configuration_params.h"
 #include "rpc_types.h"
@@ -68,6 +70,15 @@ class rpc_client {
     cur_schema_ = schema;
     cur_multilog_id_ = client_->create_atomic_multilog(name,
         rpc_type_conversions::convert_schema(schema.columns()),
+        rpc_type_conversions::convert_mode(mode));
+  }
+
+  void create_atomic_multilog(const std::string& name,
+      const std::string& schema,
+      const storage::storage_mode mode) {
+    cur_schema_ = parser::parse_schema(schema);
+    cur_multilog_id_ = client_->create_atomic_multilog(name,
+        rpc_type_conversions::convert_schema(cur_schema_.columns()),
         rpc_type_conversions::convert_mode(mode));
   }
 
