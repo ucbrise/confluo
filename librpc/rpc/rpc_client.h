@@ -89,6 +89,10 @@ class rpc_client {
     cur_multilog_id_ = info.id;
   }
 
+  schema_t const& current_schema() const {
+    return cur_schema_;
+  }
+
   void remove_atomic_multilog() {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
