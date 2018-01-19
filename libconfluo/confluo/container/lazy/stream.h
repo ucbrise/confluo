@@ -95,6 +95,17 @@ class stream {
     return (*gen_ptr_)();
   }
 
+  // TODO: Add tests
+  size_t size() const {
+    size_t count = 0;
+    stream t = *this;
+    while (!t.empty()) {
+      ++count;
+      t = t.tail();
+    }
+    return count;
+  }
+
   template<typename F>
   void for_each(F&& f) const {
     stream t = *this;
@@ -128,6 +139,18 @@ class stream {
     return stream<U>(f(*head_ptr_), [t, f]() -> stream<U> {
       return t.map(f);
     });
+  }
+
+  // TODO: Add tests
+  template<typename U, typename F>
+  U fold_left(const U& start, F&& f) const {
+    U accum = start;
+    stream t = *this;
+    while (!t.empty()) {
+      accum = f(accum, t.head());
+      t = t.tail();
+    }
+    return accum;
   }
 
   stream concat(stream other) const {

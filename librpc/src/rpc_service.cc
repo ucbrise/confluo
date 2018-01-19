@@ -282,6 +282,22 @@ rpc_service_query_aggregate_presult::~rpc_service_query_aggregate_presult() thro
 }
 
 
+rpc_service_adhoc_aggregate_args::~rpc_service_adhoc_aggregate_args() throw() {
+}
+
+
+rpc_service_adhoc_aggregate_pargs::~rpc_service_adhoc_aggregate_pargs() throw() {
+}
+
+
+rpc_service_adhoc_aggregate_result::~rpc_service_adhoc_aggregate_result() throw() {
+}
+
+
+rpc_service_adhoc_aggregate_presult::~rpc_service_adhoc_aggregate_presult() throw() {
+}
+
+
 rpc_service_adhoc_filter_args::~rpc_service_adhoc_filter_args() throw() {
 }
 

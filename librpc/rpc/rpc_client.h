@@ -228,7 +228,8 @@ class rpc_client {
     std::vector<std::vector<std::string>> _return;
     size_t nread = rdata.size() / cur_schema_.record_size();
     for (size_t i = 0; i < nread; i++) {
-      _return.push_back(cur_schema_.data_to_record_vector(rdata.data() + i * cur_schema_.record_size()));
+      _return.push_back(cur_schema_.data_to_record_vector(rdata.data() +
+              i * cur_schema_.record_size()));
     }
     return _return;
   }
@@ -241,6 +242,18 @@ class rpc_client {
     std::string _return;
     client_->query_aggregate(_return, cur_multilog_id_, aggregate_name,
         begin_ms, end_ms);
+    return _return;
+  }
+
+  // TODO: Add tests
+  std::string execute_aggregate(const std::string& aggregate_expr,
+      const std::string& filter_expr) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    std::string _return;
+    client_->adhoc_aggregate(_return, cur_multilog_id_, aggregate_expr,
+        filter_expr);
     return _return;
   }
 

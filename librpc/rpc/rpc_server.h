@@ -227,6 +227,14 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     _return = m->get_aggregate(aggregate_name, begin_ms, end_ms).to_string();
   }
 
+  // TODO: Add tests
+  void adhoc_aggregate(std::string& _return, int64_t id,
+      const std::string& aggregate_expr,
+      const std::string& filter_expr) {
+    atomic_multilog* m = store_->get_atomic_multilog(id);
+    _return = m->execute_aggregate(aggregate_expr, filter_expr).to_string();
+  }
+
   void adhoc_filter(rpc_iterator_handle& _return,int64_t id,
       const std::string& filter_expr) {
     bool success = false;
