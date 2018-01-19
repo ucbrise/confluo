@@ -314,6 +314,200 @@ class rpc_client {
     return client_->num_records(cur_multilog_id_);
   }
 
+  /** Asynchronous calls for query ops **/
+  // TODO: Add tests
+  void send_append_batch(rpc_record_batch& batch) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->send_append_batch(cur_multilog_id_, batch);
+  }
+
+  int64_t recv_append_batch() {
+    return client_->recv_append_batch();
+  }
+
+  void send_append(const record_data& record) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    if (record.length() != cur_schema_.record_size()) {
+      throw illegal_state_exception("Record size incorrect; expected="
+          + std::to_string(cur_schema_.record_size())
+          + ", got=" + std::to_string(record.length()));
+    }
+    client_->send_append(cur_multilog_id_, record);
+  }
+
+  void send_append(const std::vector<std::string>& record) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    record_data rdata;
+    cur_schema_.record_vector_to_data(rdata, record);
+    if (rdata.length() != cur_schema_.record_size()) {
+      throw illegal_state_exception("Record size incorrect; expected="
+          + std::to_string(cur_schema_.record_size())
+          + ", got=" + std::to_string(rdata.length()));
+    }
+    client_->send_append(cur_multilog_id_, rdata);
+  }
+
+  int64_t recv_append() {
+    return client_->recv_append();
+  }
+
+  void send_read_batch(int64_t offset, size_t nrecords) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->send_read(cur_multilog_id_, offset, nrecords);
+  }
+
+  void send_read(record_data& _return, int64_t offset) {
+    send_read_batch(offset, 1);
+  }
+
+  void send_read(int64_t offset) {
+    send_read_batch(offset, 1);
+  }
+
+  void recv_read_batch(record_data& data) {
+    client_->recv_read(data);
+  }
+
+  void recv_read(record_data& data) {
+    recv_read_batch(data);
+  }
+
+  std::vector<std::string> recv_read() {
+    record_data data;
+    recv_read(data);
+    return cur_schema_.data_to_record_vector(data.data());
+  }
+
+  std::vector<std::vector<std::string>> recv_read_batch() {
+    record_data data;
+    recv_read_batch(data);
+    std::vector<std::vector<std::string>> _return;
+    size_t nread = data.size() / cur_schema_.record_size();
+    for (size_t i = 0; i < nread; i++) {
+      _return.push_back(cur_schema_.data_to_record_vector(data.data() +
+              i * cur_schema_.record_size()));
+    }
+    return _return;
+  }
+
+  void send_get_aggregate(const std::string& aggregate_name, int64_t begin_ms,
+      int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+
+    client_->send_query_aggregate(cur_multilog_id_, aggregate_name,
+        begin_ms, end_ms);
+  }
+
+  std::string recv_get_aggregate() {
+    std::string _return;
+    client_->recv_query_aggregate(_return);
+    return _return;
+  }
+
+  void send_execute_aggregate(const std::string& aggregate_expr,
+      const std::string& filter_expr) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+
+    client_->send_adhoc_aggregate(cur_multilog_id_, aggregate_expr,
+        filter_expr);
+  }
+
+  std::string recv_execute_aggregate() {
+    std::string _return;
+    client_->recv_adhoc_aggregate(_return);
+    return _return;
+  }
+
+  void send_execute_filter(const std::string& filter_expr) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+
+    client_->send_adhoc_filter(cur_multilog_id_, filter_expr);
+  }
+
+  rpc_record_stream recv_execute_filter() {
+    rpc_iterator_handle handle;
+    client_->recv_adhoc_filter(handle);
+    return rpc_record_stream(cur_multilog_id_, cur_schema_, client_,
+        std::move(handle));
+  }
+
+  void send_query_filter(const std::string& filter_name,
+      const int64_t begin_ms,
+      const int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->send_predef_filter(cur_multilog_id_, filter_name, begin_ms,
+        end_ms);
+  }
+
+  rpc_record_stream recv_query_filter() {
+    rpc_iterator_handle handle;
+    client_->recv_predef_filter(handle);
+    return rpc_record_stream(cur_multilog_id_, cur_schema_, client_,
+        std::move(handle));
+  }
+
+  void send_query_filter_additional_filter(const std::string& filter_name,
+      const int64_t begin_ms, const int64_t end_ms,
+      const std::string& additional_filter_expr) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+
+    client_->send_combined_filter(cur_multilog_id_, filter_name,
+        additional_filter_expr, begin_ms, end_ms);
+  }
+
+  rpc_record_stream recv_query_filter_additional_filter() {
+    rpc_iterator_handle handle;
+    client_->recv_combined_filter(handle);
+    return rpc_record_stream(cur_multilog_id_, cur_schema_, client_,
+        std::move(handle));
+  }
+
+  void send_get_alerts(const int64_t begin_ms, const int64_t end_ms) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->send_alerts_by_time(cur_multilog_id_, begin_ms, end_ms);
+  }
+
+  rpc_alert_stream recv_get_alerts() {
+    rpc_iterator_handle handle;
+    client_->recv_alerts_by_time(handle);
+    return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
+  }
+
+  void send_get_alerts_by_trigger(const int64_t begin_ms, const int64_t end_ms,
+      const std::string& trigger_name) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->send_alerts_by_trigger_and_time(cur_multilog_id_, trigger_name,
+        begin_ms, end_ms);
+  }
+
+  rpc_alert_stream recv_get_alerts_by_trigger() {
+    rpc_iterator_handle handle;
+    client_->recv_alerts_by_trigger_and_time(handle);
+    return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
+  }
+
 protected:
   int64_t cur_multilog_id_;
   schema_t cur_schema_;
