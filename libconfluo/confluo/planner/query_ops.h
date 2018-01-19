@@ -101,6 +101,75 @@ class full_scan_op : public query_op {
     return lazy::container_to_stream(r).map(to_record).filter(expr_check);
   }
 
+  // TODO: Add tests
+  // TODO: Clean up
+  numeric aggregate(uint64_t version, uint16_t field_idx,
+                    aggregate_type agg) const {
+    auto r = record_offset_range(version, schema_->record_size());
+    switch (agg) {
+      case aggregate_type::D_CNT: {
+        int64_t count = 0;
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            if (expr_.test(schema_->apply(o, ptr))) {
+              count++;
+            }
+          }
+        }
+        return numeric(count);
+      }
+      case aggregate_type::D_MIN: {
+        numeric min((*schema_)[field_idx].max());
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            auto rec = schema_->apply(o, ptr);
+            if (expr_.test(rec)) {
+              numeric val(rec[field_idx].value());
+              min = (val < min) ? val : min;
+            }
+          }
+        }
+        return min;
+      }
+      case aggregate_type::D_MAX: {
+        numeric max((*schema_)[field_idx].min());
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            auto rec = schema_->apply(o, ptr);
+            if (expr_.test(rec)) {
+              numeric val(rec[field_idx].value());
+              max = (val > max) ? val : max;
+            }
+          }
+        }
+        return max;
+      }
+      case aggregate_type::D_SUM: {
+        numeric sum((*schema_)[field_idx].type());
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            auto rec = schema_->apply(o, ptr);
+            if (expr_.test(rec)) {
+              sum = sum + numeric(rec[field_idx].value());
+            }
+          }
+        }
+        return sum;
+      }
+      default: {
+        THROW(invalid_operation_exception, "Unknown aggregate type");
+      }
+    }
+  }
+
  private:
   const data_log* dlog_;
   const schema_t* schema_;
@@ -154,6 +223,75 @@ class index_op : public query_op {
     auto r = index_->range_lookup(range_.first, range_.second);
     return lazy::container_to_stream(r).filter(version_check).map(to_record)
         .filter(expr_check);
+  }
+
+  // TODO: Add tests
+  // TODO: Clean up
+  numeric aggregate(uint64_t version, uint16_t field_idx,
+                    aggregate_type agg) const {
+    auto r = index_->range_lookup(range_.first, range_.second);
+    switch (agg) {
+      case aggregate_type::D_CNT: {
+        int64_t count = 0;
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            if (expr_.test(schema_->apply(o, ptr))) {
+              count++;
+            }
+          }
+        }
+        return numeric(count);
+      }
+      case aggregate_type::D_MIN: {
+        numeric min((*schema_)[field_idx].max());
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            auto rec = schema_->apply(o, ptr);
+            if (expr_.test(rec)) {
+              numeric val(rec[field_idx].value());
+              min = (val < min) ? val : min;
+            }
+          }
+        }
+        return min;
+      }
+      case aggregate_type::D_MAX: {
+        numeric max((*schema_)[field_idx].min());
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            auto rec = schema_->apply(o, ptr);
+            if (expr_.test(rec)) {
+              numeric val(rec[field_idx].value());
+              max = (val > max) ? val : max;
+            }
+          }
+        }
+        return max;
+      }
+      case aggregate_type::D_SUM: {
+        numeric sum((*schema_)[field_idx].type());
+        for (auto o : r) {
+          if (o < version) {
+            ro_data_ptr ptr;
+            dlog_->cptr(o, ptr);
+            auto rec = schema_->apply(o, ptr);
+            if (expr_.test(rec)) {
+              sum = sum + numeric(rec[field_idx].value());
+            }
+          }
+        }
+        return sum;
+      }
+      default: {
+        THROW(invalid_operation_exception, "Unknown aggregate type");
+      }
+    }
   }
 
  private:

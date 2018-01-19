@@ -404,41 +404,13 @@ class atomic_multilog {
   numeric execute_aggregate(const std::string& aggregate_expr,
                             const std::string& filter_expr) {
     auto pa = parser::parse_aggregate(aggregate_expr);
-    auto agg_type = aggregate_type_utils::string_to_agg(pa.agg);
+    auto agg = aggregate_type_utils::string_to_agg(pa.agg);
     uint16_t field_idx = schema_[pa.field_name].idx();
-    switch (agg_type) {
-      case aggregate_type::D_CNT: {
-        int64_t count = execute_filter(filter_expr).size();
-        return numeric(count);
-      }
-      case aggregate_type::D_MAX: {
-        numeric min = numeric(schema_[field_idx].min());
-        return execute_filter(filter_expr).map([field_idx](const record_t& r) {
-          return numeric(r[field_idx].value());
-        }).fold_left(min, [](const numeric& max, const numeric& val) {
-          return max > val ? max : val;
-        });
-      }
-      case aggregate_type::D_MIN: {
-        numeric max = numeric(schema_[field_idx].max());
-        return execute_filter(filter_expr).map([field_idx](const record_t& r) {
-          return numeric(r[field_idx].value());
-        }).fold_left(max, [](const numeric& min, const numeric& val) {
-          return min < val ? min : val;
-        });
-      }
-      case aggregate_type::D_SUM: {
-        numeric zero(schema_[field_idx].type());
-        return execute_filter(filter_expr).map([field_idx](const record_t& r) {
-          return numeric(r[field_idx].value());
-        }).fold_left(zero, [](const numeric& sum, const numeric& val) {
-          return sum + val;
-        });
-      }
-      default: {
-        THROW(invalid_operation_exception, "Unknown aggregate function");
-      }
-    }
+    uint64_t version = rt_.get();
+    auto t = parser::parse_expression(filter_expr);
+    auto cexpr = parser::compile_expression(t, schema_);
+    query_plan plan = planner_.plan(cexpr);
+    return plan.aggregate(version, field_idx, agg);
   }
 
   /**

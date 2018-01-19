@@ -4,6 +4,7 @@
 #include "container/lazy/stream.h"
 #include "parser/expression_compiler.h"
 #include "query_ops.h"
+#include "exceptions.h"
 
 namespace confluo {
 namespace planner {
@@ -27,6 +28,13 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
     return is_optimized() ? using_indexes(version) : using_full_scan(version);
   }
 
+  numeric aggregate(uint64_t version, uint16_t field_idx, aggregate_type type) {
+    return
+        is_optimized() ?
+            aggregate_using_indexes(version, field_idx, type) :
+            aggregate_using_full_scan(version, field_idx, type);
+  }
+
  private:
   lazy::stream<record_t> using_full_scan(uint64_t version) {
     return std::dynamic_pointer_cast<full_scan_op>(at(0))->execute(version);
@@ -40,6 +48,28 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
       return std::dynamic_pointer_cast<index_op>(op)->execute(version);
     };
     return lazy::container_to_stream(*this).flat_map(executor).distinct();
+  }
+
+  // TODO: Fix
+  // TODO: Add tests
+  numeric aggregate_using_indexes(uint64_t version, uint16_t field_idx,
+                                  aggregate_type agg) {
+    if (size() == 1) {
+      return std::dynamic_pointer_cast<index_op>(at(0))->aggregate(version,
+                                                                   field_idx,
+                                                                   agg);
+    }
+
+    THROW(unsupported_exception,
+          "Aggregating multiple minterms not supported yet");
+  }
+
+  // TODO: Add tests
+  numeric aggregate_using_full_scan(uint64_t version, uint16_t field_idx,
+                                    aggregate_type agg) {
+    return std::dynamic_pointer_cast<full_scan_op>(at(0))->aggregate(version,
+                                                                     field_idx,
+                                                                     agg);
   }
 };
 
