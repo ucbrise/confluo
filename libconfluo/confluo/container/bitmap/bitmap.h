@@ -12,9 +12,9 @@
 
 namespace confluo {
 
-    /**
-     * @brief Map of bits
-     */
+/**
+ * Components of a bitmap
+ */
 class bitmap {
  public:
   // Type definitions

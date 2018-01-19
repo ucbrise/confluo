@@ -5,6 +5,9 @@
 
 namespace confluo {
 
+/**
+ * Default parameters for confluo
+ */
 class defaults {
  public:
   static const int HARDWARE_CONCURRENCY;

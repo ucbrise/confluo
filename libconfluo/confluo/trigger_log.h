@@ -6,6 +6,7 @@
 
 namespace confluo {
 
+/** A log for triggers */
 typedef monolog::monolog_exp2<monitor::trigger*> trigger_log;
 
 }

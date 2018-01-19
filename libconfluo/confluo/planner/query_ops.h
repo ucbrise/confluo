@@ -21,45 +21,45 @@ enum query_op_type {
 };
 
 /**
- * @brief Query operation
+ * A query operation
  */
 class query_op {
  public:
-     /**
-      * query_op
-      *
-      * @param op The op
-      */
+  /**
+   * Constructs a query operation from a type of query op
+   *
+   * @param op The type of query operation
+   */
   query_op(const query_op_type& op)
       : op_(op) {
   }
 
   /**
-   * ~query_op
+   * Destructs the query operation
    */
   virtual ~query_op() {
   }
 
   /**
-   * op_type
+   * Gets the operation type
    *
-   * @return query_op_type
+   * @return The query operation type
    */
   query_op_type op_type() {
     return op_;
   }
 
   /**
-   * cost
+   * Gets the cost of the query operation
    *
-   * @return uint64_t
+   * @return The query operation cost
    */
   virtual uint64_t cost() const = 0;
 
   /**
-   * to_string
+   * Gets a string representation of the query operation
    *
-   * @return std::string
+   * @return The string representation of the query operation
    */
   virtual std::string to_string() const = 0;
 
@@ -72,26 +72,26 @@ class query_op {
  */
 class no_op : public query_op {
  public:
-     /**
-      * no_op
-      */
+  /**
+   * Constructs a no op query operation
+   */
   no_op()
       : query_op(query_op_type::D_NO_OP) {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the no op
    *
-   * @return std::string
+   * @return A string containing the representation of no op
    */
   virtual std::string to_string() const override {
     return "no_op";
   }
 
   /**
-   * cost
+   * Gets the cost of a no op
    *
-   * @return uint64_t
+   * @return The cost of a no op
    */
   virtual uint64_t cost() const override {
     return UINT64_C(0);
@@ -103,26 +103,27 @@ class no_op : public query_op {
  */
 class no_valid_index_op : public query_op {
  public:
-     /**
-      * no_valid_index_op
-      */
+  /**
+   * Constructs a no valid index query operation
+   */
   no_valid_index_op()
       : query_op(query_op_type::D_NO_VALID_INDEX_OP) {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the no valid index operation
    *
-   * @return std::string
+   * @return A string containing the representation of a no valid index
+   * operation
    */
   virtual std::string to_string() const override {
     return "no_valid_index_op";
   }
 
   /**
-   * cost
+   * Gets the cost of the no valid index operation
    *
-   * @return uint64_t
+   * @return The cost of the no valid index operation
    */
   virtual uint64_t cost() const override {
     return UINT64_MAX;
@@ -134,13 +135,13 @@ class no_valid_index_op : public query_op {
  */
 class full_scan_op : public query_op {
  public:
-     /**
-      * full_scan_op
-      *
-      * @param dlog The dlog
-      * @param schema The schema
-      * @param expr The expr
-      */
+  /**
+   * Constructs a full scan query operation
+   *
+   * @param dlog The data log to perform the operation on
+   * @param schema The schema of the data log
+   * @param expr The expression of the operation
+   */
   full_scan_op(const data_log* dlog, const schema_t* schema,
                const compiled_expression& expr)
       : query_op(query_op_type::D_SCAN_OP),
@@ -150,29 +151,30 @@ class full_scan_op : public query_op {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the full scan operation
    *
-   * @return std::string
+   * @return A formatted string containing the name and expression
+   * of the operation
    */
   virtual std::string to_string() const override {
     return "full_scan(" + expr_.to_string() + ")";
   }
 
   /**
-   * cost
+   * Gets the cost of the full scan operation
    *
-   * @return uint64_t
+   * @return The cost of the full scan operation
    */
   virtual uint64_t cost() const override {
     return UINT64_MAX;
   }
 
   /**
-   * execute
+   * Executes the full scan operation on the data log
    *
-   * @param version The version
+   * @param version The version to perform the operation on
    *
-   * @return lazy::stream
+   * @return A stream containing the result of the operation
    */
   lazy::stream<record_t> execute(uint64_t version) const {
     const data_log* d = dlog_;
@@ -272,13 +274,13 @@ class index_op : public query_op {
   typedef std::pair<byte_string, byte_string> key_range;
 
   /**
-   * index_op
+   * Constructs an index query operation
    *
-   * @param dlog The dlog
-   * @param index The index
-   * @param schema The schema
-   * @param range The range
-   * @param m The m
+   * @param dlog The data log to perform the operation on
+   * @param index The index used
+   * @param schema The schema of the data log
+   * @param range The range of keys to work over
+   * @param m The compiled minterm
    */
   index_op(const data_log* dlog, const index::radix_index* index,
            const schema_t* schema, const key_range& range,
@@ -292,9 +294,9 @@ class index_op : public query_op {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the index operation
    *
-   * @return std::string
+   * @return Information about the index operation in a string
    */
   virtual std::string to_string() const override {
     return "range(" + range_.first.to_string() + "," + range_.second.to_string()
@@ -303,20 +305,20 @@ class index_op : public query_op {
   }
 
   /**
-   * cost
+   * Gets the cost of the index operation
    *
-   * @return uint64_t
+   * @return The cost of the index operation
    */
   virtual uint64_t cost() const override {
     return index_->approx_count(range_.first, range_.second);
   }
 
   /**
-   * execute
+   * Executes the index operation
    *
-   * @param version The version
+   * @param version The version to perform the operation on
    *
-   * @return lazy::stream
+   * @return A straem of records containing the result of the operation
    */
   lazy::stream<record_t> execute(uint64_t version) const {
     const data_log* d = dlog_;

@@ -194,10 +194,13 @@ class aggregate_list {
   data_type type_;
 };
 
+/**
+ * A summary of the data
+ */
 class aggregate {
  public:
   /**
-   * 
+   * Initializes an empty aggregate for a none type
    */
   aggregate()
       : type_(NONE_TYPE),
@@ -205,6 +208,12 @@ class aggregate {
         aggs_(nullptr) {
   }
 
+  /**
+   * Creates an aggregate from the given data type and aggregate type
+   *
+   * @param type The data type to compute the aggregate from
+   * @param atype The type of aggregate
+   */
   aggregate(const data_type& type, aggregate_type atype)
       : type_(type),
         agg_(aggregators[atype]),
@@ -213,10 +222,25 @@ class aggregate {
       aggs_[i].init(type, atype);
   }
 
+  /**
+   * Updates the local thread aggregate to the specified value for the
+   * given version
+   *
+   * @param thread_id The thread identifier
+   * @param value The value to update the aggregate to
+   * @param version The version to update
+   */
   void update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].update(value, version);
   }
 
+  /**
+   * Gets the aggregate at the specified version
+   *
+   * @param version The version to get the aggregate at
+   *
+   * @return Numeric representing the aggregated value
+   */
   numeric get(uint64_t version) const {
     numeric val = agg_.zero(type_);
     for (int i = 0; i < thread_manager::get_max_concurrency(); i++)

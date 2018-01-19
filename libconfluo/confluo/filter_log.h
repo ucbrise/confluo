@@ -6,6 +6,9 @@
 
 namespace confluo {
 
+/**
+ * A filter log is a type of monolog
+ */
 typedef monolog::monolog_exp2<monitor::filter*> filter_log;
 
 }

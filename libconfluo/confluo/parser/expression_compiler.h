@@ -11,16 +11,16 @@ namespace parser {
 namespace spirit = boost::spirit;
 
 /**
- * parse_aggregate
+ * A predicate
  */
 struct compiled_predicate {
     /**
-     * compiled_predicate
+     * Constructs a predicate from the specified fields
      *
-     * @param attr The attr
-     * @param op The op
-     * @param value The value
-     * @param s The s
+     * @param attr The field of the predicate
+     * @param op The operator of the predicate
+     * @param value The value of the predicate
+     * @param s The schema which contains the attribute
      */
   compiled_predicate(const std::string& attr, int op, const std::string& value,
                      const schema_t& s)
@@ -31,79 +31,83 @@ struct compiled_predicate {
   }
 
   /**
-   * field_name
+   * Gets the field name
    *
-   * @return std::string
+   * @return A string containing the field name
    */
   inline std::string const& field_name() const {
     return field_name_;
   }
 
   /**
-   * field_idx
+   * Gets the index of the field
    *
-   * @return uint32_t
+   * @return The index of the field
    */
   inline uint32_t field_idx() const {
     return field_idx_;
   }
 
   /**
-   * op
+   * Gets the relational operator
    *
-   * @return reational_op_id
+   * @return The identifier for the relational operator
    */
   inline reational_op_id op() const {
     return op_;
   }
 
   /**
-   * value
+   * Gets the immutable value for the predicate
    *
-   * @return immutable_value
+   * @return The immutable value in the compiled predicate
    */
   inline immutable_value const& value() const {
     return val_;
   }
 
   /**
-   * test
+   * Performs the relational operation on the value and the specified
+   * record
    *
-   * @param r The r
+   * @param r The record used in the relational operator
    *
-   * @return bool
+   * @return True if the relational operation is true, false otherwise
    */
   inline bool test(const record_t& r) const {
     return immutable_value::relop(op_, r[field_idx_].value(), val_);
   }
 
   /**
-   * test
+   * Performs the relational operation on the value and the specified
+   * schema snapshot and data
    *
-   * @param snap The snap
-   * @param data The data
+   * @param snap The schema snapshot to get the data from
+   * @param data The data used for the comparison
    *
-   * @return bool
+   * @return True if the relational operation is true, false otherwise
    */
   inline bool test(const schema_snapshot& snap, void* data) const {
     return immutable_value::relop(op_, snap.get(data, field_idx_), val_);
   }
 
   /**
-   * to_string
+   * Gets a string representation of the compiled predicate
    *
-   * @return std::string
+   * @return A string containing the contents of the predicate
    */
   inline std::string to_string() const {
     return field_name_ + relop_utils::op_to_str(op_) + val_.to_string();
   }
 
   /**
-   * operator<
+   * The less than operator that compares this compiled predicate to
+   * another compiled predicate
    *
-   * @param other The other
+   * @param other The other compiled predicate used for comparison
    *
-   * @return bool
+   * @return True if this compiled predicate is less than the other
+   * compiled predicate, false otherwise
    */
   inline bool operator<(const compiled_predicate& other) const {
     return to_string() < other.to_string();
@@ -117,33 +121,33 @@ struct compiled_predicate {
 };
 
 /**
- * Compiled minterm
+ * A set of compiled predicates
  */
 struct compiled_minterm : public std::set<compiled_predicate> {
-    /**
-     * add
-     *
-     * @param p The p
-     */
+  /**
+   * Adds a compiled predicate to this compiled minterm
+   *
+   * @param p The predicate to add
+   */
   inline void add(const compiled_predicate& p) {
     insert(p);
   }
 
   /**
-   * add
+   * Adds a r value compiled predicate to the compiled minterm
    *
-   * @param p The p
+   * @param p The r value predicate to add to the minterm
    */
   inline void add(compiled_predicate&& p) {
     insert(std::move(p));
   }
 
   /**
-   * test
+   * Tests every predicate in the set against the record
    *
-   * @param r The r
+   * @param r The record to test the predicate on
    *
-   * @return bool
+   * @return True if all of the predicates tests are true, false otherwise
    */
   inline bool test(const record_t& r) const {
     for (auto& p : *this)
@@ -153,12 +157,12 @@ struct compiled_minterm : public std::set<compiled_predicate> {
   }
 
   /**
-   * test
+   * Tests every predicate against the data in the schema snapshot
    *
-   * @param snap The snap
-   * @param data The data
+   * @param snap The schema snapshot to look at
+   * @param data The data the predicates are tested against
    *
-   * @return bool
+   * @return True if all of the predicates tests are true, false otherwise
    */
   inline bool test(const schema_snapshot& snap, void* data) const {
     for (auto& p : *this)
@@ -168,9 +172,9 @@ struct compiled_minterm : public std::set<compiled_predicate> {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the compiled minterm
    *
-   * @return std::string
+   * @return A string with the contents of the compiled minterm
    */
   std::string to_string() const {
     std::string s = "";
@@ -184,11 +188,12 @@ struct compiled_minterm : public std::set<compiled_predicate> {
   }
 
   /**
-   * operator<
+   * Performs a less than comparison with another compiled minterm
    *
-   * @param other The other
+   * @param other The other compiled minterm to perform a comparison with
    *
-   * @return bool
+   * @return True if this compiled minterm is less than the other compiled
+   * minterm, false otherwise
    */
   inline bool operator<(const compiled_minterm& other) const {
     return to_string() < other.to_string();
@@ -196,15 +201,15 @@ struct compiled_minterm : public std::set<compiled_predicate> {
 };
 
 /**
- * compiled expression
+ * A set of compiled minterms
  */
 struct compiled_expression : public std::set<compiled_minterm> {
     /**
-     * test
+     * Tests every compiled minterm in the set against a record
      *
-     * @param r The r
+     * @param r The record to test against
      *
-     * @return bool
+     * @return True if every compiled minterm test is true, false otherwise
      */
   inline bool test(const record_t& r) const {
     if (empty())
@@ -218,12 +223,13 @@ struct compiled_expression : public std::set<compiled_minterm> {
   }
 
   /**
-   * test
+   * Tests every compiled minterm against the data from the schema snapshot
    *
-   * @param snap The snap
-   * @param data The data
+   * @param snap The snapshot of the schema
+   * @param data The data that is tested
    *
-   * @return bool
+   * @return True if the all of the compiled minterm tests are true, false
+   * otherwise
    */
   inline bool test(const schema_snapshot& snap, void* data) const {
     if (empty())
@@ -237,9 +243,9 @@ struct compiled_expression : public std::set<compiled_minterm> {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the compiled expression
    *
-   * @return std::string
+   * @return The contents of the compiled expression in string form
    */
   std::string to_string() const {
     std::string ret = "";

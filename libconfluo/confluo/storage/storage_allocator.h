@@ -18,6 +18,9 @@ using namespace ::utils;
 class storage_allocator {
 
  public:
+  /**
+   * Initializes a storage allocator
+   */
   storage_allocator() :
     mem_stat_(),
     mmap_stat_() {
@@ -96,9 +99,9 @@ class storage_allocator {
   }
 
   /**
-   * memory_utilization
+   * Gets the memory utilization stats
    *
-   * @return size_t
+   * @return The utilization of memory
    */
   size_t memory_utilization() {
     return mem_stat_.get();

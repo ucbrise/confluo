@@ -9,20 +9,20 @@
 
 namespace confluo {
 
-    /**
-     * @brief Field definition
-     */
+/**
+ * Field definition
+ */
 struct field_t {
-    /**
-     * field_t
-     *
-     * @param idx The idx
-     * @param type The type
-     * @param data The data
-     * @param indexed The indexed
-     * @param index_id The index_id
-     * @param index_bucket_size The index_bucket_size
-     */
+  /**
+   * Constructs a field from the specified components
+   *
+   * @param idx The index of the field
+   * @param type The data type of the field
+   * @param data The data the field contains
+   * @param indexed Whether the field is indexed
+   * @param index_id The id of the index
+   * @param index_bucket_size The index bucket size
+   */
   field_t(uint16_t idx, const data_type& type, void* data, bool indexed,
           uint16_t index_id, double index_bucket_size)
       : idx_(idx),
@@ -33,65 +33,65 @@ struct field_t {
   }
 
   /**
-   * idx
+   * Returns the index of the field
    *
-   * @return uint16_t
+   * @return The index of the field
    */
   inline uint16_t idx() const {
     return idx_;
   }
 
   /**
-   * type
+   * Returns the data type of the field
    *
-   * @return data_type&
+   * @return The data type of the fiedl
    */
   inline const data_type& type() const {
     return value_.type();
   }
 
   /**
-   * value
+   * Gets the value of the field
    *
-   * @return immutable_value&
+   * @return The immutable value of the field
    */
   inline const immutable_value& value() const {
     return value_;
   }
 
   /**
-   * is_indexed
+   * Returns whether the field is indexed
    *
-   * @return bool
+   * @return True if the field is indexed, false otherwise
    */
   inline bool is_indexed() const {
     return indexed_;
   }
 
   /**
-   * index_id
+   * The identifier of the index
    *
-   * @return uint16_t
+   * @return The index id
    */
   inline uint16_t index_id() const {
     return index_id_;
   }
 
   /**
-   * get_key
+   * Gets the key of the field
    *
-   * @return byte_string
+   * @return A byte string that is the key
    */
   inline byte_string get_key() const {
     return value_.to_key(index_bucket_size_);
   }
 
   /**
-   * as
+   * Casts the field to the specified type
    *
-   * @tparam T
+   * @tparam T The type to cast to
    *
-   * @return T
+   * @return The value casted as type T
    */
   template<typename T>
   inline T as() const {
@@ -99,9 +99,9 @@ struct field_t {
   }
 
   /**
-   * to_string
+   * Gets a string representation of the field
    *
-   * @return std::string
+   * @return A string containing the field data
    */
   std::string to_string() const {
     return value_.to_string();
