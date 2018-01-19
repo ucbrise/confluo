@@ -152,8 +152,8 @@ class atomic_multilog {
    * @param mode The storage mode of the atomic multilog
    * @param pool The pool of tasks
    */
-  atomic_multilog(const std::string& name, const std::string& path,
-                  const storage::storage_mode& mode, task_pool& pool)
+  atomic_multilog(const std::string& name, const std::string& path, const storage::storage_mode& mode,
+                  const archival_mode& a_mode, task_pool& pool)
       : name_(name),
         schema_(),
         data_log_("data_log", path, mode),
@@ -170,6 +170,22 @@ class atomic_multilog {
                         configuration_params::MONITOR_PERIODICITY_MS);
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
                          configuration_params::ARCHIVAL_PERIODICITY_MS);
+  }
+
+  /**
+   * Force archival of multilog up to the read tail
+   */
+  void archive() {
+    archive(rt_.get());
+  }
+
+  /**
+   * Force archival of multilog up to an offset
+   * @param offset The offset of the data into the data log
+   */
+  void archive(size_t offset) {
+    // TODO this is incorrect since it contends with archival task.
+    archiver_.archive(offset);
   }
 
   /**
@@ -944,7 +960,7 @@ class atomic_multilog {
   }
 
   void archival_task() {
-    archiver_.archive_by(configuration_params::DATA_LOG_ARCHIVAL_WINDOW);
+    archiver_.archive_by(configuration_params::ARCHIVAL_WINDOW);
   }
 
   /**

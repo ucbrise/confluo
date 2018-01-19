@@ -13,8 +13,9 @@ class configuration_params {
  public:
   /** Archival configuration parameters */
   static size_t MAX_ARCHIVAL_FILE_SIZE;
-  static size_t DATA_LOG_ARCHIVAL_WINDOW;
+  static size_t ARCHIVAL_WINDOW;
   static uint64_t ARCHIVAL_PERIODICITY_MS;
+  static uint64_t FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS;
 
   /** Memory configuration parameters */
   static size_t MAX_MEMORY;
@@ -40,10 +41,12 @@ static utils::configuration_map confluo_conf(
 
 size_t configuration_params::MAX_ARCHIVAL_FILE_SIZE = confluo_conf.get<size_t>(
     "max_archival_file_size", defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE);
-size_t configuration_params::DATA_LOG_ARCHIVAL_WINDOW = confluo_conf.get<size_t>(
-    "data_log_archival_window", defaults::DEFAULT_DATA_LOG_ARCHIVAL_WINDOW);
+size_t configuration_params::ARCHIVAL_WINDOW = confluo_conf.get<size_t>(
+    "data_log_archival_window", defaults::DEFAULT_ARCHIVAL_WINDOW);
 uint64_t configuration_params::ARCHIVAL_PERIODICITY_MS = confluo_conf.get<uint64_t>(
     "data_log_archival_window", defaults::DEFAULT_ARCHIVAL_PERIODICITY_MS);
+uint64_t configuration_params::FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS = confluo_conf.get<uint64_t>(
+    "data_log_archival_window", defaults::DEFAULT_FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS);
 size_t configuration_params::MAX_MEMORY = confluo_conf.get<size_t>(
     "max_memory", defaults::DEFAULT_MAX_MEMORY);
 int configuration_params::MAX_CONCURRENCY = confluo_conf.get<int>(
