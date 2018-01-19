@@ -3,7 +3,7 @@
 
 #include "storage/encoder.h"
 #include "aggregated_reflog.h"
-#include "archival_headers.h"
+#include "archival_actions.h"
 #include "archival_metadata.h"
 #include "schema/column.h"
 #include "conf/configuration_params.h"
@@ -86,11 +86,11 @@ class index_archiver {
     size_t enc_size = raw_encoded_bucket.size();
 
     auto archival_metadata = radix_tree_archival_metadata(key, idx, bucket_size);
-    auto archival_header = index_archival_header(key, idx + bucket_size, offset);
+    auto action = index_archival_action(key, idx + bucket_size, offset);
 
     radix_tree_archival_metadata::append(archival_metadata, writer_);
     auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, raw_encoded_bucket.get(), enc_size);
-    writer_.update_metadata(archival_header.to_string());
+    writer_.commit<std::string>(action.to_string());
 
     if (bucket_size < reflog_constants::BUCKET_SIZE) {
       void* enc_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, state_type::D_ARCHIVED);
@@ -121,19 +121,15 @@ class index_load_utils {
    * @return data log offset until which radix tree has been archived
    */
   static size_t load(incremental_file_reader& reader, index::radix_index* index) {
-    auto archival_header = index_archival_header(reader.read_metadata<std::string>());
-    size_t key_size = archival_header.key_size();
-    byte_string archival_tail_key = archival_header.archival_tail_key();
-    size_t archival_tail = archival_header.reflog_archival_tail();
-    size_t data_log_archival_tail = archival_header.data_log_archival_tail();
+    size_t data_log_archival_tail = 0;
+    while (reader.has_more()) {
+      auto action = index_archival_action(reader.read_action<std::string>());
+      data_log_archival_tail = action.data_log_archival_tail();
+      size_t key_size = action.key_size();
 
-    size_t reflog_idx = 0;
-    byte_string cur_key(std::string(key_size, '0'));
-
-    while (reader.has_more() && (cur_key != archival_tail_key || reflog_idx != archival_tail)) {
       auto archival_metadata = radix_tree_archival_metadata::read(reader, key_size);
-      cur_key = archival_metadata.key();
-      reflog_idx = archival_metadata.reflog_index();
+      byte_string cur_key = archival_metadata.key();
+      size_t reflog_idx = archival_metadata.reflog_index();
 
       incremental_file_offset off = reader.tell();
       ptr_metadata metadata = reader.read<ptr_metadata>();
@@ -145,13 +141,8 @@ class index_load_utils {
       reader.advance<uint8_t>(bucket_size);
       reflog_idx += archival_metadata.bucket_size();
       refs->set_tail(reflog_idx + bucket_size);
-      // TODO minor edge case with duplicate key/idx pairs
     }
-
-    if (cur_key != archival_tail_key || reflog_idx != archival_tail) {
-      THROW(illegal_state_exception, "Archived data could not be loaded!");
-    }
-    incr_file_utils::truncate_rest(reader.tell());
+    reader.truncate(reader.tell(), reader.tell_transaction_log());
     return data_log_archival_tail;
   }
 };

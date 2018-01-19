@@ -1,12 +1,11 @@
 #ifndef CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_
 #define CONFLUO_ARCHIVAL_MONOLOG_LINEAR_ARCHIVER_H_
 
+#include "archival_actions.h"
 #include "storage/allocator.h"
 #include "storage/encoder.h"
 #include "file_utils.h"
 #include "archival_metadata.h"
-#include "archival_headers.h"
-#include "io/incr_file_utils.h"
 #include "io/incr_file_reader.h"
 #include "io/incr_file_writer.h"
 #include "read_tail.h"
@@ -81,8 +80,8 @@ class monolog_linear_archiver {
     size_t enc_size = encoded_bucket.size();
     auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
 
-    auto header = monolog_linear_archival_header(archival_tail_ + BUCKET_SIZE);
-    writer_.update_metadata<monolog_linear_archival_header>(header);
+    auto action = monolog_linear_archival_action(archival_tail_ + BUCKET_SIZE);
+    writer_.commit<monolog_linear_archival_action>(action);
 
     void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, state_type::D_ARCHIVED);
     log_->swap_bucket_ptr(archival_tail_ / BUCKET_SIZE, encoded_ptr<T>(archived_bucket));
@@ -105,9 +104,10 @@ public:
   template<typename T, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUF_SIZE>
   static void load(const std::string& path, monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE>& log) {
     incremental_file_reader reader(path, "monolog_linear");
-    auto header = reader.read_metadata<monolog_linear_archival_header>();
     size_t load_offset = 0;
-    while (reader.has_more() && load_offset < header.archival_tail()) {
+    while (reader.has_more()) {
+      auto action = reader.read_action<monolog_linear_archival_action>();
+      LOG_INFO << action.archival_tail();
       incremental_file_offset off = reader.tell();
       size_t size = reader.read<ptr_metadata>().data_size_;
 
@@ -118,11 +118,7 @@ public:
       reader.advance<uint8_t>(size);
       load_offset += BUCKET_SIZE;
     }
-
-    if (load_offset != header.archival_tail()) {
-      THROW(illegal_state_exception, "Archived data could not be loaded!");
-    }
-    incr_file_utils::truncate_rest(reader.tell());
+    reader.truncate(reader.tell(), reader.tell_transaction_log());
   }
 };
 

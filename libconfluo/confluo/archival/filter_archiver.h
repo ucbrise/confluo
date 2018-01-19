@@ -2,11 +2,13 @@
 #define CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_
 
 #include "aggregated_reflog.h"
-#include "archival_headers.h"
+#include "archival_actions.h"
 #include "archival_metadata.h"
 #include "conf/configuration_params.h"
 #include "storage/encoder.h"
 #include "filter.h"
+#include "io/incr_file_writer.h"
+#include "io/incr_file_reader.h"
 #include "container/reflog.h"
 
 namespace confluo {
@@ -16,8 +18,6 @@ template<encoding_type ENCODING>
 class filter_archiver {
 
  public:
-//  static const uint64_t DELTA_NS = 60 * 1e9;
-
   filter_archiver(const std::string& path, monitor::filter* filter)
       : filter_(filter),
         refs_writer_(path, "filter_data", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
@@ -42,6 +42,8 @@ class filter_archiver {
       auto& refs = *it;
       byte_string key = it.key();
       ts_tail_ = key.template as<uint64_t>();
+//      LOG_INFO << ts_tail_;
+//      LOG_INFO << ((time_utils::cur_ns() - DELTA_NS) / configuration_params::TIME_RESOLUTION_NS);
 //      if (ts_tail_ > (time_utils::cur_ns() - DELTA_NS) / configuration_params::TIME_RESOLUTION_NS) {
 //        break;
 //      }
@@ -91,11 +93,11 @@ class filter_archiver {
     size_t enc_size = encoded_bucket.size();
 
     auto archival_metadata = radix_tree_archival_metadata(key, refs_tail_, bucket_size);
-    auto archival_header = filter_archival_header(key, refs_tail_ + bucket_size, offset);
+    auto action = filter_archival_action(key, refs_tail_ + bucket_size, offset);
 
     radix_tree_archival_metadata::append(archival_metadata, refs_writer_);
     auto off = refs_writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
-    refs_writer_.update_metadata(archival_header.to_string());
+    refs_writer_.commit(action.to_string());
 
     void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, state_type::D_ARCHIVED);
     refs.swap_bucket_ptr(refs_tail_, encoded_reflog_ptr(archived_bucket));
@@ -124,7 +126,7 @@ class filter_archiver {
       }
       reflog.swap_aggregates(archived_aggs);
     }
-    aggs_writer_.update_metadata(filter_aggregates_archival_header(key).to_string());
+    aggs_writer_.commit(filter_aggregates_archival_action(key).to_string());
   }
 
   static uint64_t max_in_reflog_bucket(uint64_t* bucket) {
@@ -153,18 +155,14 @@ public:
   * @return data log offset until which radix tree has been loaded
   */
  static size_t load_reflogs(incremental_file_reader& reader, filter::idx_t* filter) {
-   auto archival_header = filter_archival_header(reader.read_metadata<std::string>());
-   byte_string archival_tail_key = archival_header.radix_tree_key();
-   size_t archival_tail = archival_header.reflog_index();
-   size_t data_log_archival_tail = archival_header.data_log_offset();
+   size_t data_log_archival_tail = 0;
+   while (reader.has_more()) {
+     auto action = filter_archival_action(reader.read_action<std::string>());
+     data_log_archival_tail = action.data_log_offset();
 
-   size_t reflog_idx = 0;
-   byte_string cur_key(std::string(sizeof(uint64_t), '0'));
-
-   while (reader.has_more() && (cur_key != archival_tail_key || reflog_idx != archival_tail)) {
      auto archival_metadata = radix_tree_archival_metadata::read(reader, sizeof(uint64_t));
-     cur_key = archival_metadata.key();
-     reflog_idx = archival_metadata.reflog_index();
+     byte_string cur_key = archival_metadata.key();
+     size_t reflog_idx = archival_metadata.reflog_index();
 
      incremental_file_offset off = reader.tell();
      ptr_metadata metadata = reader.read<ptr_metadata>();
@@ -175,13 +173,8 @@ public:
      refs->init_bucket_ptr(reflog_idx, encoded_reflog_ptr(encoded_bucket));
      refs->reserve(archival_metadata.bucket_size());
      reader.advance<uint8_t>(bucket_size);
-     reflog_idx += archival_metadata.bucket_size();
    }
-
-   if (cur_key != archival_tail_key || reflog_idx != archival_tail) {
-     THROW(illegal_state_exception, "Archived data could not be loaded!");
-   }
-   incr_file_utils::truncate_rest(reader.tell());
+   reader.truncate(reader.tell(), reader.tell_transaction_log());
    return data_log_archival_tail;
  }
 
@@ -193,16 +186,13 @@ public:
   */
  template<typename radix_tree>
  static size_t load_reflog_aggregates(incremental_file_reader& reader, radix_tree* tree) {
-   auto archival_metadata = filter_aggregates_archival_header(reader.read_metadata<std::string>());
-   size_t key_size = archival_metadata.key_size();
-   byte_string archival_tail_key = archival_metadata.archival_tail_key();
-
-   byte_string cur_key(std::string(key_size, '0'));
-   while (reader.has_more() && cur_key != archival_tail_key) {
-     // TODO abstract into metadata
-     cur_key = byte_string(reader.read(key_size));
-     size_t version = reader.read<size_t>();
-     size_t num_aggs = reader.read<size_t>();
+   byte_string cur_key;
+   while (reader.has_more()) {
+     auto action = filter_aggregates_archival_action(reader.read_action<std::string>());
+     size_t key_size = action.key_size();
+     auto archival_metadata = filter_aggregates_archival_metadata::read(reader);
+     cur_key = archival_metadata.ts_block();
+     size_t num_aggs = archival_metadata.num_aggregates();
 
      if (num_aggs > 0) {
        size_t size = sizeof(aggregate) * num_aggs;
@@ -212,17 +202,13 @@ public:
          std::string data = reader.read(type.size);
          numeric agg(type, &data[0]);
          new (archived_aggs + i) aggregate(agg.type(), D_SUM, 1);
-         archived_aggs[i].update(0, agg, version);
+         archived_aggs[i].update(0, agg, archival_metadata.version());
        }
        tree->get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
      }
    }
-
-   if (cur_key != archival_tail_key) {
-     THROW(illegal_state_exception, "Archived data could not be loaded!");
-   }
-   incr_file_utils::truncate_rest(reader.tell());
-   auto last = tree->get(archival_tail_key);
+   reader.truncate(reader.tell(), reader.tell_transaction_log());
+   auto last = tree->get(cur_key);
    return *std::max_element(last->begin(), last->end());
  }
 

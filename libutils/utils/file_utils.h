@@ -67,7 +67,7 @@ class file_utils {
     return ret;
   }
 
-  static void truncate_file(std::string& path, size_t size) {
+  static void truncate_file(const std::string& path, size_t size) {
     int ret = truncate(path.c_str(), size);
     assert_throw(
         ret != -1,

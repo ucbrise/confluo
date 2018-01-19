@@ -23,9 +23,11 @@ class MonologLinearArchivalTest : public testing::Test {
                                             BUCKET_SIZE, 1024> small_monolog_archiver;
 
   void write_to_log(small_monolog_linear& log) {
+    uint8_t buf[ARRAY_SIZE];
     for (size_t i = 0; i < ARRAY_SIZE; i++) {
-      log.set(i, i % 256);
+      buf[i] = i % 256;
     }
+    log.append(buf, ARRAY_SIZE);
   }
 
   void verify(small_monolog_linear& log, size_t start, size_t stop) {

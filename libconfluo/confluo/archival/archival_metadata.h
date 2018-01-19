@@ -27,6 +27,18 @@ class filter_aggregates_archival_metadata {
     writer.append<size_t>(metadata.num_aggs_);
   }
 
+  byte_string ts_block() {
+    return ts_block_;
+  }
+
+  size_t version() {
+    return version_;
+  }
+
+  size_t num_aggregates() {
+    return num_aggs_;
+  }
+
  private:
   byte_string ts_block_;
   size_t version_;
