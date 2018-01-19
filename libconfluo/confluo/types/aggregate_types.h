@@ -39,7 +39,7 @@ class aggregate_type_utils {
       return aggregate_type::D_MIN;
     } else if (test == "MAX") {
       return aggregate_type::D_MAX;
-    } else if (test == "CNT") {
+    } else if (test == "CNT" || test == "COUNT") {
       return aggregate_type::D_CNT;
     } else {
       THROW(parse_exception, "Invalid aggregate function " + str);
