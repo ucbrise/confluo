@@ -32,30 +32,30 @@ enum metadata_type
  */
 struct index_metadata {
  public:
-     /**
-      * index_metadata
-      *
-      * @param field_name The field_name
-      * @param bucket_size The bucket_size
-      */
+  /**
+   * Constructs an index for the specified field name
+   *
+   * @param field_name The field_name to create an index for
+   * @param bucket_size The bucket_size for lookup
+   */
   index_metadata(const std::string& field_name, double bucket_size)
       : field_name_(field_name),
         bucket_size_(bucket_size) {
   }
 
   /**
-   * field_name
+   * Gets the field name
    *
-   * @return field name
+   * @return The field name for the metadata
    */
   std::string field_name() const {
     return field_name_;
   }
 
   /**
-   * bucket_size
+   * Gets the bucket size
    *
-   * @return bucket size
+   * @return The bucket size used for lookup
    */
   double bucket_size() const {
     return bucket_size_;
@@ -72,10 +72,10 @@ struct index_metadata {
 struct filter_metadata {
  public:
   /**
-   * filter_metadata
+   * Constructs metadata for a filter
    *
-   * @param filter_name The filter_name
-   * @param expr The expr
+   * @param filter_name The name of the filter
+   * @param expr The filter expression
    */
   filter_metadata(const std::string& filter_name, const std::string& expr)
       : filter_name_(filter_name),
@@ -83,18 +83,18 @@ struct filter_metadata {
   }
 
   /**
-   * filter_name
+   * Gets the filter name
    *
-   * @return std::string&
+   * @return The name of the filter
    */
   const std::string& filter_name() const {
     return filter_name_;
   }
 
   /**
-   * expr
+   * Gets the filter expression
    *
-   * @return std::string&
+   * @return The filter expression
    */
   const std::string& expr() const {
     return expr_;
@@ -111,11 +111,11 @@ struct filter_metadata {
 struct aggregate_metadata {
  public:
   /**
-   * aggregate_metadata
+   * Constructs metadata for an aggregate
    *
-   * @param name The name
-   * @param filter_name The filter_name
-   * @param expr The expr
+   * @param name The name of the aggregate
+   * @param filter_name The name of the associated filter
+   * @param expr The expression of the associated filter
    */
   aggregate_metadata(const std::string& name, const std::string& filter_name,
                      const std::string& expr)
@@ -125,27 +125,27 @@ struct aggregate_metadata {
   }
 
   /**
-   * aggregate_name
+   * Gets the name of the aggregate
    *
-   * @return std::string& name
+   * @return The string containing the name of the aggregate
    */
   const std::string& aggregate_name() const {
     return name_;
   }
 
   /**
-   * filter_name
+   * Gets the name of the filter
    *
-   * @return std::string& filter name
+   * @return The filter name
    */
   const std::string& filter_name() const {
     return filter_name_;
   }
 
   /**
-   * aggregate_expression
+   * Gets the aggregate expression
    *
-   * @return std::string& expr
+   * @return A string containing the expression for the aggregate
    */
   const std::string& aggregate_expression() const {
     return expr_;
@@ -163,11 +163,12 @@ struct aggregate_metadata {
 struct trigger_metadata {
  public:
      /**
-      * trigger_metadata
+      * Constructs metadata for the trigger
       *
-      * @param name The name
-      * @param expr The expr
-      * @param periodicity_ms The periodicity_ms
+      * @param name The name of the trigger
+      * @param expr The epxression
+      * @param periodicity_ms The periodicity of the trigger measured in
+      * milliseconds
       */
   trigger_metadata(const std::string& name, const std::string& expr,
                    uint64_t periodicity_ms)
@@ -177,27 +178,27 @@ struct trigger_metadata {
   }
 
   /**
-   * trigger_name
+   * Gets the name of the trigger
    *
-   * @return std::string&
+   * @return The trigger name
    */
   const std::string& trigger_name() const {
     return name_;
   }
 
   /**
-   * trigger_expression
+   * Gets the expression for the trigger
    *
-   * @return std::string&
+   * @return The trigger expression
    */
   const std::string& trigger_expression() const {
     return expr_;
   }
 
   /**
-   * periodicity_ms
+   * Gets the periodicity of the trigger
    *
-   * @return uint64_t
+   * @return The trigger periodicity in milliseconds
    */
   uint64_t periodicity_ms() const {
     return periodicity_ms_;
@@ -228,7 +229,7 @@ class metadata_writer {
   }
 
   /**
-   * write_schema
+   * Writes the schema metadata
    *
    * @param schema The schema
    */
@@ -246,10 +247,10 @@ class metadata_writer {
   }
 
   /**
-   * write_index_metadata
+   * Writes metadata about an index
    *
-   * @param name The name
-   * @param bucket_size The bucket_size
+   * @param name The name of the index
+   * @param bucket_size The bucket_size used for lookup
    */
   void write_index_metadata(const std::string& name, double bucket_size) {
     if (id_ != storage::storage_mode::IN_MEMORY) {
@@ -262,10 +263,10 @@ class metadata_writer {
   }
 
   /**
-   * write_filter_metadata
+   * Writes the metadata for a specified filter
    *
-   * @param name The name
-   * @param expr The expr
+   * @param name The name of the filter
+   * @param expr The filter expression
    */
   void write_filter_metadata(const std::string& name, const std::string& expr) {
     if (id_ != storage::storage_mode::IN_MEMORY) {
@@ -278,11 +279,11 @@ class metadata_writer {
   }
 
   /**
-   * write_aggregate_metadata
+   * Writes the metadata for aggregates
    *
-   * @param name The name
-   * @param filter_name The filter_name
-   * @param expr The expr
+   * @param name The name of the aggregate
+   * @param filter_name The name of the filter
+   * @param expr The filter expression
    */
   void write_aggregate_metadata(const std::string& name,
                                 const std::string& filter_name,
@@ -298,11 +299,12 @@ class metadata_writer {
   }
 
   /**
-   * write_trigger_metadata
+   * Writes metadata for triggers
    *
-   * @param trigger_name The trigger_name
-   * @param trigger_expr The trigger_expr
-   * @param periodicity_ms The periodicity_ms
+   * @param trigger_name The name of the trigger
+   * @param trigger_expr The trigger expression
+   * @param periodicity_ms The periodicity of the trigger measured in
+   * milliseconds
    */
   void write_trigger_metadata(const std::string& trigger_name,
                               const std::string& trigger_expr,
@@ -328,29 +330,29 @@ class metadata_writer {
  */
 class metadata_reader {
  public:
-     /**
-      * metadata_reader
-      *
-      * @param path The path
-      */
+  /**
+   * Constructs an object to read metadata
+   *
+   * @param path The path of the file to read the metadata from
+   */
   metadata_reader(const std::string& path)
       : filename_(path + "/metadata"),
         in_(filename_) {
   }
 
   /**
-   * next_type
+   * Reads the next metadata type
    *
-   * @return metadata_type
+   * @return The metadata type that was read
    */
   metadata_type next_type() {
     return io_utils::read<metadata_type>(in_);
   }
 
   /**
-   * next_schema
+   * Reads the next schema
    *
-   * @return schema_t
+   * @return The schema that was read
    */
   schema_t next_schema() {
     size_t ncolumns = io_utils::read<size_t>(in_);
@@ -364,9 +366,9 @@ class metadata_reader {
   }
 
   /**
-   * next_index_metadata
+   * Reads the next metadata for an index
    *
-   * @return index_metadata
+   * @return The index metadata that was read
    */
   index_metadata next_index_metadata() {
     std::string field_name = io_utils::read<std::string>(in_);
@@ -375,9 +377,9 @@ class metadata_reader {
   }
 
   /**
-   * next_filter_metadata
+   * Reads the next metadata for a filter
    *
-   * @return filter_metadata
+   * @return The filter metadata that was read
    */
   filter_metadata next_filter_metadata() {
     std::string filter_name = io_utils::read<std::string>(in_);
@@ -386,9 +388,9 @@ class metadata_reader {
   }
 
   /**
-   * next_aggregate_metadata
+   * Reads the next metadata for an aggregate
    *
-   * @return aggregate_metadata
+   * @return The aggregate metadata that was read
    */
   aggregate_metadata next_aggregate_metadata() {
     std::string name = io_utils::read<std::string>(in_);
@@ -398,9 +400,9 @@ class metadata_reader {
   }
 
   /**
-   * next_trigger_metadata
+   * Reads the next metadata for a trigger
    *
-   * @return trigger_metadata
+   * @return The trigger metadata that was read
    */
   trigger_metadata next_trigger_metadata() {
     std::string trigger_name = io_utils::read<std::string>(in_);

@@ -8,16 +8,16 @@
 
 namespace confluo {
 
-    /**
-     * Record type
-     */
+/**
+ * The record type
+ */
 struct record_t {
  public:
   typedef std::vector<field_t>::iterator iterator;
   typedef std::vector<field_t>::const_iterator const_iterator;
 
   /**
-   * record_t
+   * Constructs an empty record
    */
   record_t()
       : timestamp_(0),
@@ -59,139 +59,139 @@ struct record_t {
   }
 
   /**
-   * reserve
+   * Reserves n bytes for the record
    *
-   * @param n The n
+   * @param n The number of bytes to reserve
    */
   void reserve(size_t n) {
     fields_.reserve(n);
   }
 
   /**
-   * push_back
+   * Adds a value to the record
    *
-   * @param val The val
+   * @param val The value to add
    */
   void push_back(const field_t& val) {
     fields_.push_back(val);
   }
 
   /**
-   * push_back
+   * Adds an r value reference to the record
    *
-   * @param val The val
+   * @param val The r value reference to add
    */
   void push_back(field_t&& val) {
     fields_.push_back(val);
   }
 
   /**
-   * operator[]
+   * Gets the field at a particular index
    *
-   * @param idx The idx
+   * @param idx The index of the desired field
    *
-   * @return field_t&
+   * @return The field at that index
    */
   const field_t& operator[](uint16_t idx) const {
     return fields_.at(idx);
   }
 
   /**
-   * at
+   * Gets the field at a particular index
    *
-   * @param idx The idx
+   * @param idx The index of the desired field
    *
-   * @return field_t&
+   * @return The field at that index
    */
   const field_t& at(uint16_t idx) const {
     return fields_.at(idx);
   }
 
   /**
-   * timestamp
+   * Gets the timestamp of this record
    *
-   * @return uint64_t
+   * @return The timestamp of this record
    */
   uint64_t timestamp() const {
     return timestamp_;
   }
 
   /**
-   * log_offset
+   * Gets the offset from the log for this record
    *
-   * @return size_t
+   * @return The log offset
    */
   size_t log_offset() const {
     return log_offset_;
   }
 
   /**
-   * data
+   * Gets the data that this record holds
    *
-   * @return uint8_t
+   * @return The data that's held in this record
    */
   uint8_t* data() const {
     return data_;
   }
 
   /**
-   * version
+   * The version of the log the record is in
    *
-   * @return uint64_t
+   * @return The log version
    */
   uint64_t version() const {
     return version_;
   }
 
   /**
-   * begin
+   * Gets an iterator for the record fields
    *
-   * @return iterator
+   * @return The beginning of the iterator
    */
   iterator begin() {
     return fields_.begin();
   }
 
   /**
-   * end
+   * Gets an iterator for the record fields
    *
-   * @return iterator
+   * @return The end of the iterator
    */
   iterator end() {
     return fields_.end();
   }
 
   /**
-   * begin
+   * Gets a constant iterator for the record fields
    *
-   * @return const_iterator
+   * @return The beginning of the constant iterator
    */
   const_iterator begin() const {
     return fields_.begin();
   }
 
   /**
-   * end
+   * Gets the constant iterator for the record fields
    *
-   * @return const_iterator
+   * @return The end of the constant iterator
    */
   const_iterator end() const {
     return fields_.end();
   }
 
   /**
-   * length
+   * Gets the size of the record
    *
-   * @return size_t
+   * @return The size of the record in bytes
    */
   size_t length() const {
     return size_;
   }
 
   /**
-   * to_string
+   * Gets a string representation of the record
    *
-   * @return std::string
+   * @return A string containing the contents of the record
    */
   std::string to_string() const {
     std::string str = "(";
@@ -204,11 +204,12 @@ struct record_t {
   }
 
   /**
-   * operator==
+   * Checks whether this record is equal to the other record
    *
-   * @param other The other
+   * @param other The other record used for equality comparison
    *
-   * @return bool
+   * @return True if this record is equal to the other record, false
+   * otherwise
    */
   bool operator==(const record_t& other) const {
     return log_offset_ == other.log_offset_;
@@ -229,10 +230,16 @@ struct record_t {
 namespace std {
 
 template<>
-    /**
-     * Record hash
-     */
+/**
+ * Record hash
+ */
 struct hash<confluo::record_t> {
+  /**
+   * Computes a hash on the record
+   * @param k The record to hash
+   * @return The hash of the record, which in this case is just the
+   * log offset
+   */
   size_t operator()(const confluo::record_t& k) const {
     return k.log_offset();
   }

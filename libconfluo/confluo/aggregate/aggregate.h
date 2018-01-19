@@ -180,10 +180,13 @@ class aggregate_list {
   data_type type_;
 };
 
+/**
+ * A summary of the data
+ */
 class aggregate {
  public:
   /**
-   * 
+   * Initializes an empty aggregate for a none type
    */
   aggregate()
       : type_(NONE_TYPE),
@@ -207,6 +210,13 @@ class aggregate {
     aggs_[thread_id].comb_update(value, version);
   }
 
+  /**
+   * Gets the aggregate at the specified version
+   *
+   * @param version The version to get the aggregate at
+   *
+   * @return Numeric representing the aggregated value
+   */
   numeric get(uint64_t version) const {
     numeric val = agg_.zero;
     for (int i = 0; i < thread_manager::get_max_concurrency(); i++)

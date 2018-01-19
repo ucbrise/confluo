@@ -7,41 +7,41 @@
 namespace confluo {
 namespace storage {
 
-    /**
-     * @brief Memory statistics
-     */
+/**
+ * Memory statistics
+ */
 class memory_stat {
 
  public:
-     /**
-      * memory_stat
-      */
+  /**
+   * Initializes the memory statistics
+   */
   memory_stat() :
     memory_used_(0) {
   }
 
   /**
-   * increment
+   * Increments the memory used by the specified size
    *
-   * @param size The size
+   * @param size The size to increment by in bytes
    */
   void increment(size_t size) {
     atomic::faa(&memory_used_, size);
   }
 
   /**
-   * decrement
+   * Decrements the memory used by the specified size
    *
-   * @param size The size
+   * @param size The size to increment by in bytes
    */
   void decrement(size_t size) {
     atomic::fas(&memory_used_, size);
   }
 
   /**
-   * get
+   * Loads the amount of memory used
    *
-   * @return size_t
+   * @return The amount of memory used
    */
   size_t get() {
     return atomic::load(&memory_used_);

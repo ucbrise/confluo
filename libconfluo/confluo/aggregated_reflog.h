@@ -7,6 +7,9 @@
 
 namespace confluo {
 
+/**
+ * Stores all of the aggregates
+ */
 class aggregated_reflog : public reflog {
  public:
   typedef reflog::size_type size_type;
@@ -18,6 +21,11 @@ class aggregated_reflog : public reflog {
   typedef reflog::iterator iterator;
   typedef reflog::const_iterator const_iterator;
 
+  /**
+   * Constructs a reflog of aggregates from a log of aggregates
+   *
+   * @param aggregates The specified aggregates
+   */
   aggregated_reflog(const aggregate_log& aggregates)
       : reflog(),
         num_aggregates_(aggregates.size()),
@@ -37,10 +45,23 @@ class aggregated_reflog : public reflog {
     aggregates_[aid].comb_update(thread_id, value, version);
   }
 
+  /**
+   * Gets the specified aggregate
+   *
+   * @param aid The identifier for the desired aggregate
+   * @param version The version of the aggregate to get
+   *
+   * @return A numeric that contains the aggregate value
+   */
   inline numeric get_aggregate(size_t aid, uint64_t version) const {
     return aggregates_[aid].get(version);
   }
 
+  /**
+   * Gets the number of aggregates
+   *
+   * @return The number of aggregates
+   */
   inline size_t num_aggregates() const {
     return num_aggregates_;
   }

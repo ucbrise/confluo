@@ -9,12 +9,15 @@
 
 namespace confluo {
 
-    /**
-     * Record block
-     */
+/**
+ * A block of records
+ */
 struct record_block {
+  /** The time associated with the block */
   int64_t time_block;
+  /** The data in the block */
   std::string data;
+  /** The number of records in the block */
   size_t nrecords;
 };
 
@@ -22,22 +25,24 @@ struct record_block {
  * Batch of records
  */
 struct record_batch {
+  /** Vector of record blocks */
   std::vector<record_block> blocks;
+  /** The number of records */
   size_t nrecords;
 
   /**
-   * start_time_block
+   * Gets the start time of the record block
    *
-   * @return int64_t
+   * @return The start time of the record block
    */
   int64_t start_time_block() const {
     return blocks.front().time_block;
   }
 
   /**
-   * end_time_block
+   * Gets the end time of the record block
    *
-   * @return int64_t
+   * @return The end time of the record block
    */
   int64_t end_time_block() const {
     return blocks.back().time_block;
@@ -49,6 +54,7 @@ struct record_batch {
  */
 class record_batch_builder {
  public:
+  /** The time block */
   static const int64_t TIME_BLOCK = 1e6;
 
   /**

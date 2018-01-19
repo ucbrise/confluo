@@ -10,7 +10,7 @@ using namespace confluo::monitor;
 namespace confluo {
 
 /**
-* @brief Information about the aggregate
+* Information about the aggregate
 */
 class aggregate_info {
  public:

@@ -194,9 +194,9 @@ class filter {
   }
 
   /**
-   * invalidate
+   * Invalidates the filter expression
    *
-   * @return bool
+   * @return True if the filter was succesfully validated, false otherwise
    */
   bool invalidate() {
     bool expected = true;
@@ -207,9 +207,9 @@ class filter {
   }
 
   /**
-   * is_valid
+   * Gets whether the filter is valid
    *
-   * @return bool
+   * @return True if the filter is valid, false otherwise
    */
   bool is_valid() {
     return atomic::load(&is_valid_);

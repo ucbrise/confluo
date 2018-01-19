@@ -21,11 +21,11 @@ class record_offset_range {
     typedef uint64_t value_type;
 
     /**
-     * iterator
+     * Iterator for this range
      *
-     * @param offset The offset
-     * @param version The version
-     * @param record_size The record_size
+     * @param offset The offset for this range
+     * @param version The version of the log
+     * @param record_size The size of each record
      */
     explicit iterator(uint64_t offset, uint64_t version, uint64_t record_size)
         : offset_(offset),
@@ -34,9 +34,9 @@ class record_offset_range {
     }
 
     /**
-     * operator++
+     * Increments iterator to the next record
      *
-     * @return iterator&
+     * @return This iterator advanced
      */
     iterator& operator++() {
       offset_ += record_size_;
@@ -44,11 +44,11 @@ class record_offset_range {
     }
 
     /**
-     * operator++
+     * Increments this iterator by a specified amount
      *
-     * @param int The int
+     * @param int The amount to advance the iterator by
      *
-     * @return iterator
+     * @return A pointer to this iterator advanced
      */
     iterator operator++(int) {
       iterator retval = *this;
@@ -57,11 +57,13 @@ class record_offset_range {
     }
 
     /**
-     * operator==
+     * Performs an equality comparison between this iterator and the other
+     * iterator
      *
-     * @param other The other
+     * @param other The other iterator to perform the equality comparison
+     * against
      *
-     * @return bool
+     * @return True if the iterators are equal, false otherwise
      */
     bool operator==(iterator other) const {
       return offset_ == other.offset_ && version_ == other.version_
@@ -69,20 +71,22 @@ class record_offset_range {
     }
 
     /**
-     * operator!=
+     * Performs a not equal comparison between this iterator and the
+     * iterator passed in
      *
-     * @param other The other
+     * @param other The other iterator used for comparison
      *
-     * @return bool
+     * @return True if this iterator is less than the other iterator, false
+     * otherwise
      */
     bool operator!=(iterator other) const {
       return !(*this == other);
     }
 
     /**
-     * operator
+     * Dereference this offset range
      *
-     * @return reference
+     * @return The offset
      */
     reference operator*() const {
       return offset_;
@@ -95,10 +99,11 @@ class record_offset_range {
   };
 
   /**
-   * record_offset_range
+   * Constructs a offset range from the specified version and record
+   * size
    *
-   * @param version The version
-   * @param record_size The record_size
+   * @param version The version of the log
+   * @param record_size The size of each record
    */
   record_offset_range(uint64_t version, uint64_t record_size)
       : version_(version),
@@ -106,18 +111,18 @@ class record_offset_range {
   }
 
   /**
-   * begin
+   * Gets the beginning of the iterator
    *
-   * @return iterator
+   * @return The beginning of the iterator
    */
   const iterator begin() const {
     return iterator(0, version_, record_size_);
   }
 
   /**
-   * end
+   * Gets the end of the iterator
    *
-   * @return iterator
+   * @return The end of the iterator
    */
   const iterator end() const {
     return iterator(version_, version_, record_size_);

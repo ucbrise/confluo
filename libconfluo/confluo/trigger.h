@@ -8,6 +8,9 @@
 namespace confluo {
 namespace monitor {
 
+/**
+ * A trigger for Confluo
+ */
 struct trigger {
  public:
   /**

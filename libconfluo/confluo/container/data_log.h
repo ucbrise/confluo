@@ -5,10 +5,16 @@
 
 namespace confluo {
 
+/**
+ * Constants for the data log
+ */
 class data_log_constants {
  public:
+  /** Maximum number of blocks */
   static constexpr size_t MAX_BLOCKS = 65536;
+  /** The size of each block */
   static constexpr size_t BLOCK_SIZE = 67108864;
+  /** The size of the buffer */
   static constexpr size_t BUFFER_SIZE = 1048576;
 };
 

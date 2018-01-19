@@ -8,41 +8,41 @@
 
 namespace confluo {
 
-    /**
-     * Snapshot of the schema
-     */
+/**
+ * Snapshot of the schema
+ */
 class schema_snapshot {
  public:
-     /**
-      * schema_snapshot
-      */
+  /**
+   * Constructs an empty snapshot of the schema
+   */
   schema_snapshot() = default;
 
   /**
-   * add_column
+   * Adds a column to the snapshot of the schema
    *
-   * @param snap The snap
+   * @param snap The snapshot of the column to add
    */
   void add_column(const column_snapshot& snap) {
     snapshot_.push_back(snap);
   }
 
   /**
-   * add_column
+   * Adds an r value reference column snapshot to the schema snapshot
    *
-   * @param snap The snap
+   * @param snap The r value reference to a column snapshot
    */
   void add_column(column_snapshot&& snap) {
     snapshot_.push_back(std::move(snap));
   }
 
   /**
-   * get
+   * Gets the data for a specific column in the schema snapshot
    *
-   * @param data The data
-   * @param i The i
+   * @param data The data in the column
+   * @param i The index for finding the column
    *
-   * @return immutable_value
+   * @return An immutable value representing the data at the column
    */
   immutable_value get(void* data, uint32_t i) const {
     return immutable_value(
@@ -51,11 +51,11 @@ class schema_snapshot {
   }
 
   /**
-   * time_key
+   * Gets the time key of the schema snapshot
    *
-   * @param time_block The time_block
+   * @param time_block The time_block of the schema snapshot
    *
-   * @return byte_string
+   * @return The byte string containing the time
    */
   byte_string time_key(int64_t time_block) const {
     return LONG_TYPE.key_transform()(
@@ -63,12 +63,12 @@ class schema_snapshot {
   }
 
   /**
-   * get_key
+   * Gets the key of the schema snapshot
    *
-   * @param ptr The ptr
-   * @param i The i
+   * @param ptr The pointer to wherere the key is
+   * @param i The index of the column snapshot to find the key
    *
-   * @return byte_string
+   * @return Byte string containing the key of the snapshot
    */
   byte_string get_key(void* ptr, uint32_t i) const {
     return snapshot_[i].type.key_transform()(
@@ -78,53 +78,54 @@ class schema_snapshot {
   }
 
   /**
-   * get_timestamp
+   * Gets the timestamp of the schema snapshot
    *
-   * @param ptr The ptr
+   * @param ptr The pointer to where the timestamp is in the schema
+   * snapshot
    *
-   * @return int64_t
+   * @return The timestamp of the schema snapshot
    */
   int64_t get_timestamp(void* ptr) const {
     return *reinterpret_cast<int64_t*>(ptr);
   }
 
   /**
-   * is_indexed
+   * Whether the specified column snapshot is indexed
    *
-   * @param i The i
+   * @param i The index of the column snapshot
    *
-   * @return bool
+   * @return True if the column snapshot is indexed, false otherwise
    */
   bool is_indexed(size_t i) const {
     return snapshot_[i].indexed;
   }
 
   /**
-   * index_id
+   * Gets the id of the index of a column snapshot
    *
-   * @param i The i
+   * @param i The index of the column snapshot
    *
-   * @return uint32_t
+   * @return The identifier for the index
    */
   uint32_t index_id(size_t i) const {
     return snapshot_[i].index_id;
   }
 
   /**
-   * index_bucket_size
+   * Gets the bucket size of a column snapshot
    *
-   * @param i The i
+   * @param i The index of the column snapshot
    *
-   * @return double
+   * @return The bucket size of the specified column snapshot
    */
   double index_bucket_size(size_t i) const {
     return snapshot_[i].index_bucket_size;
   }
 
   /**
-   * num_columns
+   * Gets the number of columns in the schema snapshot
    *
-   * @return size_t
+   * @return The number of columns in the schema snapshot
    */
   size_t num_columns() const {
     return snapshot_.size();

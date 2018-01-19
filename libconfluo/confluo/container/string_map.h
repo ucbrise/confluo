@@ -10,24 +10,23 @@ namespace confluo {
 /**
 * String map
 *
-* @tparam V
+* @tparam V The type of map
 */
 template<typename V>
 class string_map {
  public:
+  /** The maximum number of buckets the string map can have */
   static const uint32_t MAX_BUCKETS;
 
   /**
-   * string hash
+   * The hash computed on a string
    */
   struct string_hash {
-      /**
-       * hash
-       *
-       * @param str The str
-       *
-       * @return uint32_t
-       */
+    /**
+     * Computes the hash for the given string
+     * @param str The string to compute the hash on
+     * @return The hashed value
+     */
     static uint32_t hash(const std::string& str) {
       uint32_t h = FIRSTH;
       const char* s = str.c_str();
@@ -46,33 +45,45 @@ class string_map {
   };
 
   /**
-   * map entry
+   * Map entry for the string map
    */
   struct map_entry {
+    /** The map key */
     std::string key;
+    /** The map value */
     V value;
+    /** Whether the entry is valid */
     bool valid;
 
+    /**
+     * Constructs a map entry from the given key and value passed in
+     *
+     * @param k The key of the entry
+     * @param v The value of the entry
+     */
     map_entry(const std::string& k, const V& v)
         : key(k),
           value(v),
           valid(true) {
     }
 
+    /**
+     * Initializes the map entry to be invalid
+     */
     map_entry()
         : valid(false) {
     }
   };
 
   /**
-   * string_map
+   * Constructs a default string map to have the maximum number of buckets
    */
   string_map()
       : buckets_(new reflog*[MAX_BUCKETS]()) {
   }
 
   /**
-   * ~string_map
+   * Deallocates the string map
    */
   ~string_map() {
     for (size_t i = 0; i < MAX_BUCKETS; i++) {
@@ -84,12 +95,13 @@ class string_map {
 
   // Only one writer thread permitted, otherwise duplicates may occur
   /**
-   * put
+   * Puts a key value pair in the map, only one writer thread permitted,
+   * otherwise duplicates may occur
    *
    * @param key The key
    * @param value The value
    *
-   * @return int64_t
+   * @return The index of the key value pair
    */
   int64_t put(const std::string& key, const V& value) {
     uint32_t hash_key = string_hash::hash(key);
@@ -121,12 +133,12 @@ class string_map {
 
   // Multiple threads permitted
   /**
-   * get
+   * Gets the value at a given key, multiple threads permitted
    *
    * @param key The key
    * @param value The value
    *
-   * @return int64_t
+   * @return The index of the key value pair
    */
   int64_t get(const std::string& key, V& value) const {
     uint32_t hash_key = string_hash::hash(key);
@@ -149,12 +161,12 @@ class string_map {
   }
 
   /**
-   * get
+   * Gets the value at a particular index
    *
-   * @param idx The idx
-   * @param value The value
+   * @param idx The index to get the value at
+   * @param value The value at the index
    *
-   * @return int64_t
+   * @return The index, or -1 if it doesn't exist
    */
   int64_t get(int64_t idx, V& value) const {
     if (idx < entries_.size()) {
@@ -169,12 +181,14 @@ class string_map {
 
   // Only one writer thread permitted, otherwise inconsistencies may occur
   /**
-   * remove
+   * Removes a key value pair from the string map, only one writer thread
+   * permitted, otherwise inconsistencies may occur
    *
    * @param key The key
    * @param value The value
    *
-   * @return int64_t
+   * @return The index of the removed key value pair or -1 if it doesn't
+   * exist
    */
   int64_t remove(const std::string& key, V& value) {
     uint32_t hash_key = string_hash::hash(key);

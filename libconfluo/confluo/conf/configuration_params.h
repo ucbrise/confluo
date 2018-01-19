@@ -6,6 +6,9 @@
 
 namespace confluo {
 
+/**
+ * Parameters used for the configuration of Confluo
+ */
 class configuration_params {
  public:
   /** Memory configuration parameters */

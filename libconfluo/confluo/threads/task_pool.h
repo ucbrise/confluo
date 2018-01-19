@@ -11,7 +11,7 @@
 // TODO: Can potentially make this more efficient with lock-free concurrency
 // Although seems unnecessary for now
 /**
- * @brief The type of task
+ * The type of task
  */
 struct task_type {
   std::function<void()> func;
@@ -25,7 +25,7 @@ struct task_type {
 };
 
 /**
- * @brief A queue of tasks
+ * A queue of tasks
  */
 class task_queue {
  public:
@@ -139,7 +139,7 @@ class task_queue {
 };
 
 /**
- * @brief Executor of tasks
+ * Executor of tasks
  */
 class task_worker {
  public:
@@ -193,7 +193,7 @@ class task_worker {
 };
 
 /**
- * @brief Pool of tasks
+ * Pool of tasks
  */
 class task_pool {
  public:

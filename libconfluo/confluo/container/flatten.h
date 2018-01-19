@@ -7,6 +7,10 @@
 // Based on answer from:
 // https://stackoverflow.com/questions/3623082/flattening-iterator
 
+/**
+ * A flattened iterator
+ *
+ */
 template<typename outer_iterator>
 class flattened_iterator {
  public:
@@ -26,10 +30,11 @@ class flattened_iterator {
   }
 
   /**
-   * flattened_iterator
+   * Constructs a flattened iterator from the beginning and end of the
+   * iterator
    *
-   * @param it The it
-   * @param end The end
+   * @param it The outer iterator
+   * @param end The end of the outer iterator
    */
   flattened_iterator(const outer_iterator& it, const outer_iterator& end)
       : outer_(it),
@@ -42,27 +47,27 @@ class flattened_iterator {
   }
 
   /**
-   * operator
+   * Dereferences the flattened iterator
    *
-   * @return reference
+   * @return The inner iterator
    */
   reference operator*() const {
     return *inner_;
   }
 
   /**
-   * operator->
+   * Gets the value at the inner iterator
    *
-   * @return pointer
+   * @return A pointer to the value at the inner iterator
    */
   pointer operator->() const {
     return &*inner_;
   }
 
   /**
-   * operator++
+   * Advanced the flattened iterator
    *
-   * @return flattened_iterator&
+   * @return The new flattened iterator at the advanced position
    */
   flattened_iterator& operator++() {
     ++inner_;
@@ -72,11 +77,11 @@ class flattened_iterator {
   }
 
   /**
-   * operator++
+   * Advances the flattened iterator by a specified amount
    *
-   * @param int The int
+   * @param int The amount to advance the flattened iterator
    *
-   * @return flattened_iterator
+   * @return The advanced flattened iterator
    */
   flattened_iterator operator++(int) {
     flattened_iterator it(*this);
@@ -85,12 +90,13 @@ class flattened_iterator {
   }
 
   /**
-   * operator==
+   * Performs an equality comparison between two flattened iterators
    *
-   * @param a The a
-   * @param b The b
+   * @param a The first flattened iterator
+   * @param b The other flattened iterator
    *
-   * @return friend
+   * @return True if the first flattened iterator is equal to the other
+   * flattened iterator, false otherwise
    */
   friend bool operator==(const flattened_iterator& a,
                          const flattened_iterator& b) {
@@ -105,12 +111,13 @@ class flattened_iterator {
   }
 
   /**
-   * operator!=
+   * Performs a not equal comparison between two flattened iterators
    *
-   * @param a The a
-   * @param b The b
+   * @param a The first flattened iterator
+   * @param b The second flattened iterator
    *
-   * @return friend
+   * @return True if the first flattened iterator is not equal to the 
+   * second, false otherwise
    */
   friend bool operator!=(const flattened_iterator& a,
                          const flattened_iterator& b) {
@@ -131,6 +138,9 @@ class flattened_iterator {
   inner_iterator inner_;
 };
 
+/**
+ * A flattened container
+ */
 template<typename container_t>
 class flattened_container {
  public:
@@ -140,9 +150,10 @@ class flattened_container {
   typedef flattened_iterator<container_iterator> const_iterator;
 
   /**
-   * flattened_container
+   * Constructs a flattened container from another flattend container
    *
-   * @param container The container
+   * @param container The container used to intialize this flattend
+   * container
    */
   flattened_container(const container_t& container)
       : begin_(container.begin()),
@@ -150,27 +161,27 @@ class flattened_container {
   }
 
   /**
-   * begin
+   * Gets the beginning of the iterator
    *
-   * @return iterator
+   * @return The iterator at the beginning
    */
   iterator begin() const {
     return iterator(begin_, end_);
   }
 
   /**
-   * end
+   * Gets the end of the ierator
    *
-   * @return iterator
+   * @return The iterator at the end
    */
   iterator end() const {
     return iterator(end_);
   }
 
   /**
-   * count
+   * Gets the number of elements in the flattened container
    *
-   * @return size_t
+   * @return The number of elements in the flattened container
    */
   size_t count() const {
     return std::accumulate(
