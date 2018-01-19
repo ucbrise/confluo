@@ -6,7 +6,6 @@
 #include "filter.h"
 #include "filter_log.h"
 #include "io/incr_file_reader.h"
-#include "io/incr_file_utils.h"
 #include "io/incr_file_writer.h"
 #include "index_log.h"
 #include "container/reflog.h"
@@ -37,17 +36,13 @@ class load_utils {
   }
 
   static void load_data_log_storage(data_log& log, size_t start_bucket_idx) {
-//    size_t size = (data_log_constants::BUCKET_SIZE + data_log_constants::BUFFER_SIZE) * sizeof(uint8_t);
-//    std::ifstream dlog_file(log.data_path());
-//    dlog_file.seekg(0, dlog_file.end);
-//    size_t file_size = dlog_file.tellg();
-//    size_t off = 0;
-//    for (size_t i = 0; i < data_log_constants::MAX_BUCKETS; i++) {
-//      void* bucket = ALLOCATOR.mmap(log.data_path(), off, size, storage::state_type::D_IN_MEMORY);
-//      auto metadata = ptr_metadata::get(bucket);
+    size_t size = (data_log_constants::BUCKET_SIZE + data_log_constants::BUFFER_SIZE) * sizeof(uint8_t);
+    for (size_t i = start_bucket_idx; i < data_log_constants::MAX_BUCKETS; i++) {
+//      TODO move to inside monolog/storage_mode?
+//      std::string bucket_path = log.data_path();
+//      void* bucket = ALLOCATOR.mmap(bucket_path, 0, size, storage::state_type::D_IN_MEMORY);
 //      log.init_bucket_ptr(i, encoded_ptr<uint8_t>(bucket));
-//      off += metadata->data_size_;
-//    }
+    }
   }
 
   /**
