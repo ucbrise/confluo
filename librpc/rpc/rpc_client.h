@@ -508,6 +508,17 @@ class rpc_client {
     return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
   }
 
+  void send_num_records() {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->send_num_records(cur_multilog_id_);
+  }
+
+  int64_t recv_num_records() {
+    return client_->recv_num_records();
+  }
+
 protected:
   int64_t cur_multilog_id_;
   schema_t cur_schema_;
