@@ -410,29 +410,29 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
 
   /**
-   * monolog_exp2_linear
+   * Constructs a relaxed monolog implementation
    */
   monolog_exp2_linear()
       : tail_(0) {
   }
 
   /**
-   * reserve
+   * Reserves space for data in the monolog
    *
-   * @param count The count
+   * @param count The amount of space to reserve
    *
-   * @return size_t
+   * @return The resultant tail
    */
   size_t reserve(size_t count) {
     return atomic::faa(&tail_, count);
   }
 
   /**
-   * push_back
+   * Adds a value to the monolog
    *
-   * @param val The val
+   * @param val The value to add
    *
-   * @return size_t
+   * @return The index of the new value
    */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
@@ -441,12 +441,12 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   }
 
   /**
-   * push_back_range
+   * Adds a range of values to the monolog
    *
-   * @param start The start
-   * @param end The end
+   * @param start The start of the range
+   * @param end The end of the range
    *
-   * @return size_t
+   * @return The index of the range
    */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
@@ -457,38 +457,38 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   }
 
   /**
-   * at
+   * Gets the element at an index
    *
-   * @param idx The idx
+   * @param idx The index of the desired element
    *
-   * @return T
+   * @return The element
    */
   const T at(size_t idx) const {
     return this->get(idx);
   }
 
   /**
-   * size
+   * Gets the size of the monolog
    *
-   * @return size_t
+   * @return The size of the monolog
    */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
   /**
-   * begin
+   * Gets the beginning of the monolog iterator
    *
-   * @return iterator
+   * @return Iterator of the beginning of the monolog
    */
   iterator begin() const {
     return iterator(this, 0);
   }
 
   /**
-   * end
+   * Gets the end of the monolog iterator
    *
-   * @return iterator
+   * @return Iterator of the end of the monolog
    */
   iterator end() const {
     return iterator(this, size());

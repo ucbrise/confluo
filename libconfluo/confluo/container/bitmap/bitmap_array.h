@@ -16,10 +16,10 @@ class value_reference {
   typedef typename bitmap_array_impl::reference reference;
 
   /**
-   * value_reference
+   * Constructs a value reference from a bitmap array
    *
-   * @param array The array
-   * @param pos The pos
+   * @param array The array reference to construct this value reference
+   * @param pos The position type
    */
   value_reference(bitmap_array_impl* array, pos_type pos)
       : array_(array),
@@ -27,11 +27,11 @@ class value_reference {
   }
 
   /**
-   * operator=
+   * Assigns another value type to this value reference
    *
-   * @param val The val
+   * @param val The val to set this value type to
    *
-   * @return reference&
+   * @return A pointer to this value reference
    */
   reference& operator=(value_type val) {
     array_->set(pos_, val);
@@ -39,24 +39,29 @@ class value_reference {
   }
 
   /**
-   * operator=
+   * Assigns another value reference to this value reference
    *
-   * @param ref The ref
+   * @param ref The other reference
    *
-   * @return reference&
+   * @return This value reference
    */
   reference& operator=(const value_reference& ref) {
     return (*this) = value_type(ref);
   }
 
+  /**
+   * Gets the value type of this valuer reference
+   *
+   * @return The value type
+   */
   operator value_type() const {
     return array_->get(pos_);
   }
 
   /**
-   * operator++
+   * Increments the value at the position by one
    *
-   * @return reference&
+   * @return This value reference with the incremented value
    */
   reference& operator++() {
     value_type val = array_->get(pos_);

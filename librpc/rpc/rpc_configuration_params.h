@@ -10,7 +10,7 @@ namespace rpc {
 
 class rpc_configuration_params {
  public:
-  // Iterator
+  /** Iterator for the batches */
   static size_t ITERATOR_BATCH_SIZE;
 };
 

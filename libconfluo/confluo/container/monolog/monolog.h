@@ -1,7 +1,7 @@
 #ifndef CONFLUO_CONTAINER_MONOLOG_MONOLOG_H_
 #define CONFLUO_CONTAINER_MONOLOG_MONOLOG_H_
 
-/*
+/**
  * Adds includes for all monolog types.
  */
 
