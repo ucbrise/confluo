@@ -88,7 +88,7 @@ class atomic_multilog {
   };
 
   /**
-   * @brief Identifier for trigger
+   * Identifier for trigger
    */
   struct trigger_id_t {
     /** Identifier for the aggregate */

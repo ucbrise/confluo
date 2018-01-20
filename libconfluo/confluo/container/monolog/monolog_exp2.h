@@ -28,7 +28,7 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   typedef typename monolog_impl::reference reference;
 
   /**
-   * monolog_iterator
+   * Initializes an empty monolog iterator
    */
   monolog_iterator()
       : impl_(nullptr),
@@ -36,10 +36,10 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   }
 
   /**
-   * monolog_iterator
+   * Constructs a monolog iterator from a monolog implementation
    *
-   * @param impl The impl
-   * @param pos The pos
+   * @param impl The monolog implementation
+   * @param pos The position of the iterator in the monolog
    */
   monolog_iterator(const monolog_impl* impl, size_t pos)
       : impl_(impl),
@@ -47,27 +47,27 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   }
 
   /**
-   * operator
+   * Dereferences the pointer at a given position
    *
-   * @return reference
+   * @return The reference at the position
    */
   reference operator*() const {
     return impl_->get(pos_);
   }
 
   /**
-   * operator->
+   * Gets the pointer at a given position
    *
-   * @return pointer
+   * @return The pointer at the given position
    */
   pointer operator->() const {
     return impl_->ptr(pos_);
   }
 
   /**
-   * operator++
+   * Advances the monolog iterator
    *
-   * @return monolog_iterator&
+   * @return This advanced monolog iterator
    */
   monolog_iterator& operator++() {
     pos_++;
@@ -75,11 +75,11 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   }
 
   /**
-   * operator++
+   * Advances the monolog iterator by a specified amount
    *
-   * @param int The int
+   * @param int The amount to advance the monolog iterator by
    *
-   * @return monolog_iterator
+   * @return This advanced monolog iterator
    */
   monolog_iterator operator++(int) {
     monolog_iterator it = *this;
@@ -88,33 +88,37 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   }
 
   /**
-   * operator==
+   * Checks whether the other monolog iterator is equal to this monolog
+   * iterator
    *
-   * @param other The other
+   * @param other The other monolog iterator
    *
-   * @return bool
+   * @return True if this monolog iterator is equal to the other monolog
+   * iterator, false otherwise
    */
   bool operator==(monolog_iterator other) const {
     return (impl_ == other.impl_) && (pos_ == other.pos_);
   }
 
   /**
-   * operator!=
+   * Checks whether the other monolog iterator is not equal to this
+   * monolog iterator
    *
-   * @param other The other
+   * @param other The other monolog iterator
    *
-   * @return bool
+   * @return True if this monolog iterator is not equal to the other
+   * monolog iterator
    */
   bool operator!=(monolog_iterator other) const {
     return !(*this == other);
   }
 
   /**
-   * operator=
+   * Assigns another monolog iterator to this monolog iterator
    *
-   * @param other The other
+   * @param other The other monolog iterator
    *
-   * @return monolog_iterator&
+   * @return This updated monolog iterator
    */
   monolog_iterator& operator=(const monolog_iterator& other) {
     impl_ = other.impl_;
@@ -401,29 +405,29 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> const_iterator;
 
   /**
-   * monolog_exp2
+   * Constructs a default monolog iterator
    */
   monolog_exp2()
       : tail_(0) {
   }
 
   /**
-   * reserve
+   * Reserves a certain amount of space
    *
-   * @param count The count
+   * @param count The amount of space to reserve
    *
-   * @return size_t
+   * @return The resultant tail
    */
   size_t reserve(size_t count) {
     return atomic::faa(&tail_, count);
   }
 
   /**
-   * push_back
+   * Adds a value to the monolog
    *
-   * @param val The val
+   * @param val The value to add
    *
-   * @return size_t
+   * @return The index of the value
    */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
@@ -432,12 +436,12 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   }
 
   /**
-   * push_back_range
+   * Adds a range of values to the monolog
    *
-   * @param start The start
-   * @param end The end
+   * @param start The start of the range
+   * @param end The end of the range
    *
-   * @return size_t
+   * @return The index of the range of data
    */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
@@ -448,38 +452,38 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   }
 
   /**
-   * at
+   * Gets the data at the specified index
    *
-   * @param idx The idx
+   * @param idx The index where the data is located
    *
-   * @return T&
+   * @return The value at the index
    */
   const T& at(size_t idx) const {
     return this->get(idx);
   }
 
   /**
-   * size
+   * Gets the size of the monolog
    *
-   * @return size_t
+   * @return The monolog size
    */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
   /**
-   * begin
+   * Gets the beginning of the iterator for the monolog
    *
-   * @return iterator
+   * @return The beginning of the iterator
    */
   iterator begin() const {
     return iterator(this, 0);
   }
 
   /**
-   * end
+   * Gets the end of the iterator for the monolog
    *
-   * @return iterator
+   * @return The end of the iterator
    */
   iterator end() const {
     return iterator(this, size());
