@@ -2,6 +2,7 @@
 #define CONFLUO_CONF_DEFAULTS_H_
 
 #include <thread>
+#include "storage/ptr_metadata.h"
 
 namespace confluo {
 
@@ -13,6 +14,8 @@ class defaults {
   static const size_t DEFAULT_MAX_ARCHIVAL_FILE_SIZE = 1024 * 1024 * 64;
   static const size_t DEFAULT_ARCHIVAL_WINDOW = 1024 * 1024;
   static const uint64_t DEFAULT_ARCHIVAL_PERIODICITY_MS = 5 * 60 * 1e3;
+  static const uint8_t DEFAULT_ARCHIVED_DATA_LOG_ENCODING_TYPE = storage::encoding_type::D_UNENCODED;
+  static const uint8_t DEFAULT_ARCHIVED_REFLOG_ENCODING_TYPE = storage::encoding_type::D_UNENCODED;
   static const uint64_t DEFAULT_FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS = 1e6;
   /** The thread hardware concurrency */
   static const int HARDWARE_CONCURRENCY;
@@ -31,7 +34,10 @@ class defaults {
 const size_t defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE;
 const size_t defaults::DEFAULT_ARCHIVAL_WINDOW;
 const uint64_t defaults::DEFAULT_ARCHIVAL_PERIODICITY_MS;
+const uint8_t defaults::DEFAULT_ARCHIVED_DATA_LOG_ENCODING_TYPE;
+const uint8_t defaults::DEFAULT_ARCHIVED_REFLOG_ENCODING_TYPE;
 const uint64_t defaults::DEFAULT_FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS;
+
 const int defaults::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
 constexpr double defaults::DEFAULT_INDEX_BUCKET_SIZE;
 constexpr size_t defaults::DEFAULT_MAX_MEMORY;

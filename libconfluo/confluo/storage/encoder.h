@@ -1,14 +1,11 @@
 #ifndef CONFLUO_STORAGE_ENCODER_H_
 #define CONFLUO_STORAGE_ENCODER_H_
 
+#include "exceptions.h"
 #include "ptr_metadata.h"
 
 namespace confluo {
 namespace storage {
-
-enum encoding_type {
-  IDENTITY
-};
 
 class data_ptr {
 
@@ -40,12 +37,18 @@ class encoder {
   /**
    * Encode pointer. Currently an identity operation.
    * @param ptr unencoded data pointer, allocated by the storage allocator.
-   * @return pointer to raw encoded data (no metadata)
+   * @return pointer to raw encoded data
    */
-  template<typename T, encoding_type ENCODING>
-  static data_ptr encode(T* ptr) {
-    size_t encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
-    return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), encoded_size);
+  static data_ptr encode(void* ptr, uint8_t encoding) {
+    switch (encoding) {
+      case encoding_type::D_UNENCODED: {
+        size_t encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
+        return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), encoded_size);
+      }
+      default : {
+        THROW(illegal_state_exception, "Illegal encoding type.");
+      }
+    }
   }
 
  private:

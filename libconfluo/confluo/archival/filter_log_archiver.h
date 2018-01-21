@@ -8,7 +8,6 @@
 namespace confluo {
 namespace archival {
 
-template<encoding_type ENCODING>
 class filter_log_archiver {
 
  public:
@@ -51,12 +50,12 @@ class filter_log_archiver {
     for (size_t i = filter_archivers_.size(); i < filters_->size(); i++) {
       std::string filter_path = path_ + "/filter_" + std::to_string(i) + "/";
       file_utils::create_dir(filter_path);
-      filter_archivers_.push_back(new filter_archiver<ENCODING>(filter_path, filters_->at(i)));
+      filter_archivers_.push_back(new filter_archiver(filter_path, filters_->at(i)));
     }
   }
 
   std::string path_;
-  std::vector<filter_archiver<ENCODING>*> filter_archivers_;
+  std::vector<filter_archiver*> filter_archivers_;
   filter_log* filters_;
 
 };

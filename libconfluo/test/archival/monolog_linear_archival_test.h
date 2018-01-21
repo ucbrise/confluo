@@ -19,8 +19,7 @@ class MonologLinearArchivalTest : public testing::Test {
   typedef storage::encoded_ptr<uint8_t> encoded_ptr_t;
   typedef storage::read_only_encoded_ptr<uint8_t> read_only_ptr_t;
   typedef monolog_linear<uint8_t, MAX_BUCKETS, BUCKET_SIZE, 1024> small_monolog_linear;
-  typedef archival::monolog_linear_archiver<uint8_t, archival::encoding_type::IDENTITY, MAX_BUCKETS,
-                                            BUCKET_SIZE, 1024> small_monolog_archiver;
+  typedef archival::monolog_linear_archiver<uint8_t, MAX_BUCKETS, BUCKET_SIZE, 1024> small_monolog_archiver;
 
   void write_to_log(small_monolog_linear& log) {
     uint8_t buf[ARRAY_SIZE];

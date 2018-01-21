@@ -59,8 +59,8 @@ class archiver {
   std::string path_;
   read_tail rt_;
   data_log_archiver data_log_archiver_;
-  filter_log_archiver<IDENTITY> filter_log_archiver_;
-  index_log_archiver<IDENTITY> index_log_archiver_;
+  filter_log_archiver filter_log_archiver_;
+  index_log_archiver index_log_archiver_;
 
 };
 

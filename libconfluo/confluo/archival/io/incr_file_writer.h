@@ -46,7 +46,10 @@ class incremental_file_writer : public incremental_file_stream {
   void init() {
     if (file_utils::exists_file(transaction_log_path())) {
       std::ifstream transaction_log_ifs(transaction_log_path());
-      file_num_ = io_utils::read<size_t>(transaction_log_ifs);
+      while (file_utils::exists_file(cur_path())) {
+        file_num_++;
+      }
+      file_num_--;
       open();
     } else {
       cur_ofs_.open(cur_path());

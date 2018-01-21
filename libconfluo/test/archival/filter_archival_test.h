@@ -5,14 +5,14 @@
 
 #include "storage/encoder.h"
 #include "filter.h"
-#include "archival/filter_archiver.h"
+#include "archival/filter_log_archiver.h"
 #include "gtest/gtest.h"
 
 using namespace ::confluo;
 
 class FilterArchivalTest : public testing::Test {
  public:
-  typedef archival::filter_log_archiver<archival::encoding_type::IDENTITY> filter_log_archiver_t;
+  typedef archival::filter_log_archiver filter_log_archiver_t;
 
   static const uint64_t kMaxEntries = 1e6;
   static const uint64_t kTimeBlock = 1e3;
@@ -93,8 +93,6 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
   verify(f);
   archiver.archive(32768);
   verify(f);
-
-//  verify_reflog_archived(first_reflog, 0);
 }
 
 TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
@@ -153,8 +151,6 @@ TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
 }
 
 TEST_F(FilterArchivalTest, MultipleReflogsArchivedTest) {
-  read_tail rt("/tmp", storage::IN_MEMORY);
-
   filter f(filter_none);
   fill(f);
 

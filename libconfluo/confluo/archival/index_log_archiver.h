@@ -9,7 +9,6 @@
 namespace confluo {
 namespace archival {
 
-template<encoding_type ENCODING>
 class index_log_archiver {
 
  public:
@@ -64,13 +63,13 @@ class index_log_archiver {
       if (col.is_indexed() && index_archivers_[id] == nullptr) {
         std::string index_path = path_ + "/index_" + std::to_string(i) + "/";
         file_utils::create_dir(index_path);
-        index_archivers_[id] = new index_archiver<ENCODING>(index_path, indexes_->at(i), col);
+        index_archivers_[id] = new index_archiver(index_path, indexes_->at(i), col);
       }
     }
   }
 
   std::string path_;
-  std::vector<index_archiver<ENCODING>*> index_archivers_;
+  std::vector<index_archiver*> index_archivers_;
   index_log* indexes_;
   schema_t* schema_;
 

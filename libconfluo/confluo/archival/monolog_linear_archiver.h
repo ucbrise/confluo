@@ -17,7 +17,7 @@ using namespace ::utils;
 using namespace storage;
 using namespace monolog;
 
-template<typename T, encoding_type ENCODING, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUF_SIZE>
+template<typename T, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUF_SIZE>
 class monolog_linear_archiver {
 
  public:
@@ -76,7 +76,7 @@ class monolog_linear_archiver {
    */
   void archive_bucket(T* bucket) {
     auto metadata = ptr_metadata::get(bucket);
-    auto encoded_bucket = encoder::encode<T, ENCODING>(bucket);
+    auto encoded_bucket = encoder::encode(bucket, configuration_params::ARCHIVED_DATA_LOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
     auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
 
@@ -107,7 +107,6 @@ public:
     size_t load_offset = 0;
     while (reader.has_more()) {
       auto action = reader.read_action<monolog_linear_archival_action>();
-      LOG_INFO << action.archival_tail();
       incremental_file_offset off = reader.tell();
       size_t size = reader.read<ptr_metadata>().data_size_;
 

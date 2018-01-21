@@ -3,6 +3,7 @@
 
 #include "conf/defaults.h"
 #include "config_utils.h"
+#include "storage/encoder.h"
 
 namespace confluo {
 
@@ -15,7 +16,10 @@ class configuration_params {
   static size_t MAX_ARCHIVAL_FILE_SIZE;
   static size_t ARCHIVAL_WINDOW;
   static uint64_t ARCHIVAL_PERIODICITY_MS;
+  static uint8_t ARCHIVED_DATA_LOG_ENCODING_TYPE;
+  static uint8_t ARCHIVED_REFLOG_ENCODING_TYPE;
   static uint64_t FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS;
+  static size_t MAX_ARCHIVAL_FILE_SIZE;
 
   /** Memory configuration parameters */
   static size_t MAX_MEMORY;
@@ -39,14 +43,19 @@ static utils::configuration_map confluo_conf(
     utils::config_utils::read_from_env(
         "CONFLUO_CONF", "/etc/conf/confluo.conf:./conf/confluo.conf"));
 
-size_t configuration_params::MAX_ARCHIVAL_FILE_SIZE = confluo_conf.get<size_t>(
-    "max_archival_file_size", defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE);
 size_t configuration_params::ARCHIVAL_WINDOW = confluo_conf.get<size_t>(
     "data_log_archival_window", defaults::DEFAULT_ARCHIVAL_WINDOW);
 uint64_t configuration_params::ARCHIVAL_PERIODICITY_MS = confluo_conf.get<uint64_t>(
     "data_log_archival_window", defaults::DEFAULT_ARCHIVAL_PERIODICITY_MS);
+uint8_t configuration_params::ARCHIVED_DATA_LOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
+    "data_log_archival_window", defaults::DEFAULT_ARCHIVED_DATA_LOG_ENCODING_TYPE);
+uint8_t configuration_params::ARCHIVED_REFLOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
+    "data_log_archival_window", defaults::DEFAULT_ARCHIVED_REFLOG_ENCODING_TYPE);
+size_t configuration_params::MAX_ARCHIVAL_FILE_SIZE = confluo_conf.get<size_t>(
+    "max_archival_file_size", defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE);
 uint64_t configuration_params::FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS = confluo_conf.get<uint64_t>(
     "data_log_archival_window", defaults::DEFAULT_FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS);
+
 size_t configuration_params::MAX_MEMORY = confluo_conf.get<size_t>(
     "max_memory", defaults::DEFAULT_MAX_MEMORY);
 int configuration_params::MAX_CONCURRENCY = confluo_conf.get<int>(

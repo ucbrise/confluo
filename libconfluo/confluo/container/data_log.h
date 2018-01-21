@@ -32,7 +32,6 @@ typedef monolog_linear<uint8_t,
                        data_log_constants::BUFFER_SIZE> data_log;
 
 typedef archival::monolog_linear_archiver<uint8_t,
-                                          storage::encoding_type::IDENTITY,
                                           data_log_constants::MAX_BUCKETS,
                                           data_log_constants::BUCKET_SIZE,
                                           data_log_constants::BUFFER_SIZE> data_log_archiver;

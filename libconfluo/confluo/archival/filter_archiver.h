@@ -14,7 +14,6 @@
 namespace confluo {
 namespace archival {
 
-template<encoding_type ENCODING>
 class filter_archiver {
 
  public:
@@ -42,11 +41,11 @@ class filter_archiver {
       auto& refs = *it;
       byte_string key = it.key();
       ts_tail_ = key.template as<uint64_t>();
-//      LOG_INFO << ts_tail_;
-//      LOG_INFO << ((time_utils::cur_ns() - DELTA_NS) / configuration_params::TIME_RESOLUTION_NS);
-//      if (ts_tail_ > (time_utils::cur_ns() - DELTA_NS) / configuration_params::TIME_RESOLUTION_NS) {
-//        break;
-//      }
+      uint64_t limit = (time_utils::cur_ns() - configuration_params::FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS)
+                        / configuration_params::TIME_RESOLUTION_NS;
+      if (ts_tail_ > limit) {
+        break;
+      }
       size_t data_log_archival_tail = archive_reflog(key, refs, offset);
       if (refs_tail_ < refs.size()) {
         break;
@@ -88,7 +87,7 @@ class filter_archiver {
    */
   void archive_bucket(byte_string key, reflog& refs, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
-    auto encoded_bucket = encoder::encode<uint64_t, ENCODING>(bucket);
+    auto encoded_bucket = encoder::encode(bucket, configuration_params::ARCHIVED_REFLOG_ENCODING_TYPE);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
     size_t enc_size = encoded_bucket.size();
 

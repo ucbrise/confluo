@@ -14,7 +14,6 @@
 namespace confluo {
 namespace archival {
 
-template<encoding_type ENCODING>
 class index_archiver {
 
  public:
@@ -81,7 +80,7 @@ class index_archiver {
    */
   void archive_bucket(byte_string key, reflog& refs, size_t idx, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
-    auto raw_encoded_bucket = encoder::encode<uint64_t, ENCODING>(bucket);
+    auto raw_encoded_bucket = encoder::encode(bucket, configuration_params::ARCHIVED_REFLOG_ENCODING_TYPE);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - idx);
     size_t enc_size = raw_encoded_bucket.size();
 
