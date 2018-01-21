@@ -127,6 +127,7 @@ class atomic_multilog {
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
         archival_task_("archival"),
+        archival_pool_(),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     data_log_.pre_alloc();
@@ -162,6 +163,7 @@ class atomic_multilog {
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
         archival_task_("archival"),
+        archival_pool_(),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     load(path, mode);
@@ -184,8 +186,13 @@ class atomic_multilog {
    * @param offset The offset of the data into the data log
    */
   void archive(size_t offset) {
-    // TODO this is incorrect since it contends with archival task.
-    archiver_.archive(offset);
+    optional<management_exception> ex;
+    std::future<void> ret = archival_pool_.submit([this, offset] {
+      archiver_.archive(offset);
+    });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
   }
 
   /**
@@ -960,7 +967,13 @@ class atomic_multilog {
   }
 
   void archival_task() {
-    archiver_.archive_by(configuration_params::ARCHIVAL_WINDOW);
+    optional<management_exception> ex;
+    std::future<void> ret = archival_pool_.submit([this] {
+      archiver_.archive_by(configuration_params::ARCHIVAL_WINDOW);
+    });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
   }
 
   /**
@@ -1039,6 +1052,7 @@ class atomic_multilog {
   // Archival
   archiver archiver_;
   periodic_task archival_task_;
+  task_pool archival_pool_;
 
   // Manangement
   task_pool& mgmt_pool_;
