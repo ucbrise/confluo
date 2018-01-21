@@ -7,7 +7,9 @@
 
 namespace confluo {
 
-// Reference to a value
+/** 
+ * Reference to a value
+ */
 template<typename bitmap_array_impl>
 class value_reference {
  public:
@@ -70,11 +72,11 @@ class value_reference {
   }
 
   /**
-   * operator++
+   * Gets the current value and increments it after
    *
-   * @param int The int
+   * @param int The next reference to get
    *
-   * @return value_type
+   * @return The non incremented value
    */
   value_type operator++(int) {
     value_type val = (value_type) *this;
@@ -83,9 +85,9 @@ class value_reference {
   }
 
   /**
-   * operator--
+   * Decrements the value at the given position by one
    *
-   * @return value_reference&
+   * @return The current value reference
    */
   value_reference& operator--() {
     value_type val = array_->get(pos_);
@@ -94,24 +96,24 @@ class value_reference {
   }
 
   /**
-   * operator--
+   * Gets the decremented value
    *
-   * @param int The int
+   * @param int Where to decrement the reference
    *
-   * @return value_type
+   * @return The decremented value type
    */
   value_type operator--(int) {
     value_type val = (value_type) *this;
     --(*this);
     return val;
-  }
+  } 
 
   /**
-   * operator+=
+   * Increments the value type
    *
-   * @param x The x
+   * @param x The other value type
    *
-   * @return reference&
+   * @return A reference to the value type
    */
   reference& operator+=(const value_type x) {
     value_type val = array_->get(pos_);
@@ -120,11 +122,11 @@ class value_reference {
   }
 
   /**
-   * operator-=
+   * Decrements the value at a given position
    *
-   * @param x The x
+   * @param x The other value type
    *
-   * @return reference&
+   * @return This value reference that was decremented
    */
   reference& operator-=(const value_type x) {
     value_type val = array_->get(pos_);
@@ -133,34 +135,33 @@ class value_reference {
   }
 
   /**
-   * operator==
+   * Performs an equality comparison with the passed in value reference
    *
-   * @param x The x
+   * @param x The other value reference
    *
-   * @return bool
+   * @return True if the value references are equal, false otherwise
    */
   bool operator==(const value_reference& x) const {
     return value_type(*this) == value_type(x);
   }
 
   /**
-   * operator<
+   * Performs a less than comparison with the passed in value reference
    *
-   * @param x The x
+   * @param x The other value reference
    *
-   * @return bool
+   * @return True if this value reference is less than the other value
+   * reference, false otherwise
    */
   bool operator<(const value_reference& x) const {
     return value_type(*this) < value_type(x);
   }
 
   /**
-   * swap
+   * Swaps two references
    *
-   * @param lhs The lhs
-   * @param rhs The rhs
-   *
-   * @return friend
+   * @param lhs The first reference
+   * @param rhs The second reference
    */
   friend void swap(reference& lhs, reference& rhs) {
     value_type temp = value_type(lhs);
@@ -169,12 +170,10 @@ class value_reference {
   }
 
   /**
-   * swap
+   * Swaps two references
    *
-   * @param lhs The lhs
-   * @param rhs The rhs
-   *
-   * @return friend
+   * @param lhs The first reference
+   * @param rhs The second reference
    */
   friend void swap(reference lhs, reference rhs) {
     value_type temp = value_type(lhs);
@@ -183,12 +182,10 @@ class value_reference {
   }
 
   /**
-   * swap
+   * Swaps two references
    *
-   * @param lhs The lhs
-   * @param rhs The rhs
-   *
-   * @return friend
+   * @param lhs The first reference
+   * @param rhs The second reference
    */
   friend void swap(reference lhs, value_type rhs) {
     value_type temp = value_type(lhs);
@@ -197,12 +194,10 @@ class value_reference {
   }
 
   /**
-   * swap
+   * Swaps a value type and reference
    *
-   * @param lhs The lhs
-   * @param rhs The rhs
-   *
-   * @return friend
+   * @param lhs The value type to swap
+   * @param rhs The reference to swap
    */
   friend void swap(value_type lhs, reference rhs) {
     value_type temp = value_type(rhs);
@@ -216,6 +211,9 @@ class value_reference {
 };
 
 // Iterators
+/**
+ * Iterator through a bitmap array
+ */
 template<typename bitmap_array_impl>
 class bitmap_array_iterator {
  public:
@@ -228,7 +226,7 @@ class bitmap_array_iterator {
   typedef typename bitmap_array_impl::iterator_category iterator_category;
 
   /**
-   * bitmap_array_iterator
+   * Constructs an empty bitmap array iterator
    */
   bitmap_array_iterator() {
     array_ = NULL;
@@ -236,10 +234,10 @@ class bitmap_array_iterator {
   }
 
   /**
-   * bitmap_array_iterator
+   * Constructs a bitmap array iterator
    *
-   * @param array The array
-   * @param pos The pos
+   * @param array The bitmap array implementation
+   * @param pos The current position of the iterator
    */
   bitmap_array_iterator(bitmap_array_impl* array, pos_type pos) {
     array_ = array;
@@ -247,18 +245,18 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator
+   * Dereferences the array at the position
    *
-   * @return reference
+   * @return Reference at the given position
    */
   reference operator*() const {
     return reference(array_, pos_);
   }
 
   /**
-   * operator++
+   * Advances the iterator by one
    *
-   * @return bitmap_array_iterator&
+   * @return This advanced iterator
    */
   bitmap_array_iterator& operator++() {
     pos_++;
@@ -266,11 +264,11 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator++
+   * Increments the value at this position
    *
-   * @param int The int
+   * @param int The specified integer
    *
-   * @return bitmap_array_iterator
+   * @return The incremented iterator
    */
   bitmap_array_iterator operator++(int) {
     bitmap_array_iterator it = *this;
@@ -279,9 +277,9 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator--
+   * Decrements the position of the iterator
    *
-   * @return bitmap_array_iterator&
+   * @return This iterator
    */
   bitmap_array_iterator& operator--() {
     pos_--;
@@ -289,11 +287,11 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator--
+   * Decrements the value at the position
    *
-   * @param int The int
+   * @param int The specified integer
    *
-   * @return bitmap_array_iterator
+   * @return This iterator with the decremented value
    */
   bitmap_array_iterator operator--(int) {
     bitmap_array_iterator it = *this;
@@ -302,11 +300,11 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator+=
+   * Increments the position of the iterator by a specified amount
    *
-   * @param i The i
+   * @param i The amount to increment the position by
    *
-   * @return bitmap_array_iterator&
+   * @return This iterator advanced by the specified amount
    */
   bitmap_array_iterator& operator+=(difference_type i) {
     pos_ += i;
@@ -314,11 +312,11 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator-=
+   * Decrements the iterator position by the specified amount
    *
-   * @param i The i
+   * @param i The difference
    *
-   * @return bitmap_array_iterator&
+   * @return Returns this iterator with the modified position
    */
   bitmap_array_iterator& operator-=(difference_type i) {
     pos_ -= i;
@@ -326,11 +324,12 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator=
+   * Assigns another bitmap iterator to this bitmap iterator
    *
-   * @param it The it
+   * @param it The other iterator to assign to this iterator
    *
-   * @return bitmap_array_iterator&
+   * @return This bitmap iterator having the contents of the other
+   * bitmap iterator
    */
   bitmap_array_iterator& operator=(const bitmap_array_iterator& it) {
     if (this != &it) {
@@ -341,11 +340,11 @@ class bitmap_array_iterator {
   }
 
   /**
-   * operator+
+   * Advances the position of the iterator by a specified amount
    *
-   * @param i The i
+   * @param i The difference
    *
-   * @return bitmap_array_iterator
+   * @return The advanced iterator
    */
   bitmap_array_iterator operator+(difference_type i) const {
     bitmap_array_iterator it = *this;

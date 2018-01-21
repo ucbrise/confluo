@@ -13,6 +13,9 @@
 namespace confluo {
 namespace index {
 
+/**
+ * A node in the radix tree
+ */
 template<typename reflog>
 struct radix_tree_node {
   typedef radix_tree_node<reflog> node_t;
@@ -20,15 +23,14 @@ struct radix_tree_node {
   typedef byte_string key_t;
 
   /**
-   * radix_tree_node
+   * Constructs a new node from the specified arguments
    *
-   * @tparam ARGS
-   * @param node_key The node_key
-   * @param node_width The node_width
-   * @param node_depth The node_depth
-   * @param node_parent The node_parent
-   * @param bool The bool
-   * @param args The args
+   * @tparam ARGS Arguments for the reflog
+   * @param node_key The node key
+   * @param node_width The node width
+   * @param node_depth The node depth
+   * @param node_parent The node parent
+   * @param args The arguments for the reflog
    */
   template<typename ... ARGS>
   radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
@@ -41,12 +43,12 @@ struct radix_tree_node {
   }
 
   /**
-   * radix_tree_node
+   * Constructs a new radix tree node from the specified parameters
    *
-   * @param node_key The node_key
-   * @param node_width The node_width
-   * @param node_depth The node_depth
-   * @param node_parent The node_parent
+   * @param node_key The node key
+   * @param node_width The node width
+   * @param node_depth The node depth
+   * @param node_parent The node parent
    */
   radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
                   node_t* node_parent)
@@ -60,7 +62,7 @@ struct radix_tree_node {
   }
 
   /**
-   * ~radix_tree_node
+   * Deletes the radix tree node
    */
   ~radix_tree_node() {
     if (is_leaf)
@@ -70,47 +72,47 @@ struct radix_tree_node {
   }
 
   /**
-   * refs
+   * Gets a reference to the reflog of the data
    *
-   * @return reflog
+   * @return The reflog reference containing the data
    */
   inline reflog*& refs() {
     return reinterpret_cast<reflog*&>(data);
   }
 
   /**
-   * refs
+   * Gets a constant reference to the reflog containing the data
    *
-   * @return reflog
+   * @return A constant reference to the reflog containing the data
    */
   inline reflog* const & refs() const {
     return reinterpret_cast<reflog* const &>(data);
   }
 
   /**
-   * children
+   * Gets the children of the node
    *
-   * @return child_t
+   * @return Reference to the children
    */
   inline child_t*& children() {
     return reinterpret_cast<child_t*&>(data);
   }
 
   /**
-   * children
+   * Gets a constant reference to the children
    *
-   * @return child_t
+   * @return A constant pointer to the children
    */
   inline child_t* const & children() const {
     return reinterpret_cast<child_t* const &>(data);
   }
 
   /**
-   * first_child
+   * Gets the first child of the node
    *
-   * @param width The width
+   * @param width The width of a child node
    *
-   * @return node_t
+   * @return A pointer to the first child
    */
   const node_t* first_child(size_t width) const {
     size_t cur_key = 0;
@@ -123,11 +125,11 @@ struct radix_tree_node {
   }
 
   /**
-   * last_child
+   * Gets the last child of the node
    *
-   * @param width The width
+   * @param width The width of the child node
    *
-   * @return node_t
+   * @return A pointer to the child
    */
   const node_t* last_child(size_t width) const {
     int16_t cur_key = width - 1;
@@ -140,7 +142,7 @@ struct radix_tree_node {
   }
 
   /**
-   * next_child
+   * Gets the next child of the node
    *
    * @param key The key
    * @param width The width

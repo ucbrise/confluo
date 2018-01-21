@@ -261,39 +261,51 @@ struct compiled_expression : public std::set<compiled_minterm> {
 };
 
 /**
- * Conjunction
+ * Conjunction operation
  */
 class utree_expand_conjunction {
  public:
   typedef compiled_expression result_type;
 
   /**
-   * utree_expand_conjunction
+   * Expands the conjunction
    *
-   * @param m The m
-   * @param schema The schema
+   * @param m The compiled minterm
+   * @param schema The schema for the monolog
    */
   utree_expand_conjunction(const compiled_minterm& m, const schema_t& schema)
       : m_(m),
         schema_(schema) {
   }
 
+  /**
+   * Operation for all types exception functions
+   * @tparam T The type
+   * @throw parse_exception Unrecognized type
+   * @return The result
+   */
   template<typename T>
   result_type operator()(T) const {
     throw parse_exception(std::string("Unrecognized type ") + typeid(T).name());
   }
 
+  /**
+   * Operation for function type
+   * @param spirit::function_base 
+   * @throw parse_exception Functions are not supported
+   * @return The result
+   */
   result_type operator()(spirit::function_base const&) const {
     throw parse_exception("Functions not supported");
   }
 
   /**
-   * operator()
+   * Operation for an iterator range
    *
-   * @tparam Iterator
-   * @param range The range
+   * @tparam Iterator type
+   * @param range The iterator range
    *
-   * @return result_type
+   * @return The result
    */
   template<typename Iterator>
   result_type operator()(boost::iterator_range<Iterator> const& range) const {
