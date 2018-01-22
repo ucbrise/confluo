@@ -123,7 +123,7 @@ class index_load_utils {
     size_t data_log_archival_tail = 0;
     while (reader.has_more()) {
       auto action = index_archival_action(reader.read_action<std::string>());
-      data_log_archival_tail = action.data_log_archival_tail();
+      data_log_archival_tail = std::max(data_log_archival_tail, action.data_log_archival_tail());
       size_t key_size = action.key_size();
 
       auto archival_metadata = radix_tree_archival_metadata::read(reader, key_size);

@@ -32,10 +32,6 @@ class archiver {
     index_log_archiver_ = index_log_archiver(index_log_path(), indexes, schema);
   }
 
-  void archive_by(size_t data_log_window) {
-    archive(data_log_archiver_.tail() + data_log_window);
-  }
-
   /**
    * Attempt to archive data log, filters and indexes
    * up to a particular data log offset. Best effort.

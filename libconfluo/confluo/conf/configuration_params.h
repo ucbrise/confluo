@@ -43,9 +43,9 @@ class configuration_params {
   static uint64_t TIME_RESOLUTION_NS;
 
   /** Monitor configuration parameters */
+  static uint64_t MEMORY_MONITOR_PERIODICITY_MS;
   static uint64_t MONITOR_WINDOW_MS;
   static uint64_t MONITOR_PERIODICITY_MS;
-
 };
 
 static utils::configuration_map confluo_conf(
@@ -75,11 +75,12 @@ double configuration_params::INDEX_BUCKET_SIZE = confluo_conf.get<double>(
     "index_block_size", defaults::DEFAULT_INDEX_BUCKET_SIZE);
 uint64_t configuration_params::TIME_RESOLUTION_NS = confluo_conf.get<uint64_t>(
     "time_resolution_ns", defaults::DEFAULT_TIME_RESOLUTION_NS);
+uint64_t configuration_params::MEMORY_MONITOR_PERIODICITY_MS = confluo_conf.get<uint64_t>(
+    "memory_monitor_periodicity_ms", defaults::DEFAULT_MEMORY_MONITOR_PERIODICITY_MS);
 uint64_t configuration_params::MONITOR_WINDOW_MS = confluo_conf.get<uint64_t>(
     "monitor_window_ms", defaults::DEFAULT_MONITOR_WINDOW_MS);
-uint64_t configuration_params::MONITOR_PERIODICITY_MS = confluo_conf
-    .get<uint64_t>("monitor_periodicity_ms",
-                   defaults::DEFAULT_MONITOR_PERIODICITY_MS);
+uint64_t configuration_params::MONITOR_PERIODICITY_MS = confluo_conf.get<uint64_t>(
+    "monitor_periodicity_ms", defaults::DEFAULT_MONITOR_PERIODICITY_MS);
 
 }
 

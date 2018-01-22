@@ -17,6 +17,11 @@ namespace archival {
 class filter_archiver {
 
  public:
+  /**
+   * Constructor.
+   * @param path directory to archive in
+   * @param filter filter to archive
+   */
   filter_archiver(const std::string& path, monitor::filter* filter)
       : filter_(filter),
         refs_writer_(path, "filter_data", archival_configuration_params::MAX_FILE_SIZE),
@@ -186,9 +191,9 @@ public:
 
  /**
   * Load aggregates of reflogs in radix tree archived on disk.
-  * @param path path to load aggregates from
+  * @param path path to archived filter
   * @param tree radix tree
-  * @return
+  * @return data log offset until which radix tree aggregates have been loaded
   */
  template<typename radix_tree>
  static size_t load_reflog_aggregates(const std::string& path, radix_tree* tree) {

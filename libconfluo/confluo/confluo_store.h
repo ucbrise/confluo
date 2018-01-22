@@ -24,8 +24,11 @@ class confluo_store {
    * @param data_path The data path for the store
    */
   confluo_store(const std::string& data_path)
-      : data_path_(utils::file_utils::full_path(data_path)) {
+      : data_path_(utils::file_utils::full_path(data_path)),
+        memory_mgmt_task_("memory_management") {
     utils::file_utils::create_dir(data_path_);
+    memory_mgmt_task_.start(std::bind(&confluo_store::memory_management_task, this),
+                            configuration_params::MEMORY_MONITOR_PERIODICITY_MS);
   }
 
   /**
@@ -154,6 +157,7 @@ class confluo_store {
   }
 
  private:
+<<<<<<< 82935d6b6511cb0ca41d37d350fb29826b2cdd1a
   /**
    * Task to create a new atomic multilog
    *
@@ -164,6 +168,17 @@ class confluo_store {
    *
    * @return Identifier for the created atomic multilog
    */
+=======
+  void memory_management_task() {
+    if (ALLOCATOR.memory_utilization() >= configuration_params::MAX_MEMORY) {
+      for (size_t id = 0; id < atomic_multilogs_.size(); id++) {
+        // TODO how aggressively to archive and should multilogs with archival OFF be archived?
+        atomic_multilogs_.get(id)->archive();
+      }
+    }
+  }
+
+>>>>>>> Memory monitoring for confluo store, more documentation.
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::vector<column_t>& schema,
                                       const storage::storage_mode mode,
@@ -244,6 +259,7 @@ class confluo_store {
 
   // Manangement
   task_pool mgmt_pool_;
+  periodic_task memory_mgmt_task_;
 
   // Tables
   monolog::monolog_exp2<atomic_multilog*> atomic_multilogs_;

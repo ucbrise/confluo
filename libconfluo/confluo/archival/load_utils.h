@@ -21,7 +21,8 @@ class load_utils {
 
  public:
   /**
-   * Load data log.
+   * Load data log. Archived buckets are loaded first,
+   * followed by durably written buckets if available.
    * @param path path to archived data log
    * @param log log to load into
    */
