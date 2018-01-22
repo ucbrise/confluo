@@ -6,6 +6,7 @@
 #include "storage/encoder.h"
 #include "container/monolog/monolog_linear.h"
 #include "archival/monolog_linear_archiver.h"
+#include "storage/ptr_aux_block.h"
 
 using namespace ::confluo;
 
@@ -39,7 +40,8 @@ class MonologLinearArchivalTest : public testing::Test {
     read_only_ptr_t bucket_ptr;
     for (size_t i = 0; i < stop; i += BUCKET_SIZE) {
       log.ptr(i, bucket_ptr);
-      ASSERT_EQ(storage::ptr_metadata::get(bucket_ptr.get().ptr())->state_, storage::state_type::D_ARCHIVED);
+      auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
+      ASSERT_EQ(aux.state_, storage::state_type::D_ARCHIVED);
     }
   }
 
@@ -50,6 +52,7 @@ class MonologLinearArchivalTest : public testing::Test {
  */
 TEST_F(MonologLinearArchivalTest, ArchivalTest) {
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
+  file_utils::clear_dir("/tmp/data_log/");
   small_monolog_archiver archiver("/tmp/data_log/", &log);
 
   write_to_log(log);
@@ -69,6 +72,7 @@ TEST_F(MonologLinearArchivalTest, ArchivalTest) {
  */
 TEST_F(MonologLinearArchivalTest, PtrSwapTest) {
   small_monolog_linear log("log", "/tmp", storage::IN_MEMORY);
+  file_utils::clear_dir("/tmp/data_log/");
   small_monolog_archiver archiver("/tmp/data_log/", &log);
 
   write_to_log(log);

@@ -35,7 +35,8 @@ class read_only_encoded_ptr {
         offset_(other.offset_),
         ref_counts_(other.ref_counts_) {
     if (ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(enc_ptr_.ptr())->state_ == state_type::D_IN_MEMORY;
+      auto* metadata = ptr_metadata::get(enc_ptr_.ptr());
+      bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       uses_first_count ? ref_counts_->increment_first() : ref_counts_->increment_second();
     }
   }
@@ -56,7 +57,8 @@ class read_only_encoded_ptr {
     // TODO potential infinite loop bug here
     init(other.enc_ptr_, other.offset_, other.ref_counts_);
     if (ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(enc_ptr_.ptr())->state_ == state_type::D_IN_MEMORY;
+      auto* metadata = ptr_metadata::get(enc_ptr_.ptr());
+      bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       uses_first_count ? ref_counts_->increment_first() : ref_counts_->increment_second();
     }
     return *this;
@@ -116,7 +118,8 @@ class read_only_encoded_ptr {
   void decrement_compare_dealloc() {
     void* internal_ptr = enc_ptr_.ptr();
     if (internal_ptr != nullptr && ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(internal_ptr)->state_ == state_type::D_IN_MEMORY;
+      auto* metadata = ptr_metadata::get(internal_ptr);
+      bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       if (uses_first_count && ref_counts_->decrement_first_and_compare()) {
         lifecycle_util<T>::destroy(internal_ptr);
         ALLOCATOR.dealloc(internal_ptr);
@@ -164,10 +167,10 @@ class swappable_encoded_ptr {
   ~swappable_encoded_ptr() {
     encoded_ptr<T> enc_ptr = atomic::load(&enc_ptr_);
     if (enc_ptr.ptr() != nullptr) {
-      ptr_metadata* metadata = ptr_metadata::get(enc_ptr.ptr());
-      if (metadata->state_ == state_type::D_IN_MEMORY && ref_counts_.decrement_first_and_compare()) {
+      auto aux = ptr_aux_block::get(ptr_metadata::get(enc_ptr.ptr()));
+      if (aux.state_ == state_type::D_IN_MEMORY && ref_counts_.decrement_first_and_compare()) {
         destroy_dealloc(enc_ptr.ptr());
-      } else if (metadata->state_ == state_type::D_ARCHIVED && ref_counts_.decrement_second_and_compare()) {
+      } else if (aux.state_ == state_type::D_ARCHIVED && ref_counts_.decrement_second_and_compare()) {
         destroy_dealloc(enc_ptr.ptr());
       }
     }
@@ -256,13 +259,13 @@ class swappable_encoded_ptr {
     }
 
     // Correct the other counter and create the copy.
-    ptr_metadata* metadata = ptr_metadata::get(ptr.ptr());
-    if (metadata->state_ == state_type::D_IN_MEMORY) {
+    auto aux = ptr_aux_block::get(ptr_metadata::get(ptr.ptr()));
+    if (aux.state_ == state_type::D_IN_MEMORY) {
       // decrement other ref count (no possibility of it reaching 0 here)
       ref_counts_.decrement_second();
       copy.init(ptr, offset, &ref_counts_);
       return;
-    } else if (metadata->state_ == state_type::D_ARCHIVED) {
+    } else if (aux.state_ == state_type::D_ARCHIVED) {
       // decrement other ref count (no possibility of it reaching 0 here)
       ref_counts_.decrement_first();
       copy.init(ptr, offset, &ref_counts_);

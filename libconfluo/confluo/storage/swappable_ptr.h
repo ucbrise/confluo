@@ -83,7 +83,8 @@ class read_only_ptr {
    */
   void decrement_compare_dealloc() {
     if (ptr_ != nullptr && ref_counts_ != nullptr) {
-      bool uses_first_count = ptr_metadata::get(ptr_)->state_ == state_type::D_IN_MEMORY;
+      auto aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+      bool uses_first_count = aux.state_ == state_type::D_IN_MEMORY;
       if (uses_first_count && ref_counts_->decrement_first_and_compare()) {
         lifecycle_util<T>::destroy(ptr_);
         ALLOCATOR.dealloc(ptr_);
@@ -131,10 +132,10 @@ class swappable_ptr {
   ~swappable_ptr() {
     T* ptr = atomic::load(&ptr_);
     if (ptr != nullptr) {
-      ptr_metadata* metadata = ptr_metadata::get(ptr);
-      if (metadata->state_ == state_type::D_IN_MEMORY && ref_counts_.decrement_first_and_compare()) {
+      auto aux = ptr_aux_block::get(ptr_metadata::get(ptr));
+      if (aux.state_ == state_type::D_IN_MEMORY && ref_counts_.decrement_first_and_compare()) {
         destroy_dealloc(ptr);
-      } else if (metadata->state_ == state_type::D_ARCHIVED && ref_counts_.decrement_second_and_compare()) {
+      } else if (aux.state_ == state_type::D_ARCHIVED && ref_counts_.decrement_second_and_compare()) {
         destroy_dealloc(ptr);
       }
     }
@@ -215,13 +216,13 @@ class swappable_ptr {
     }
 
     // Correct the other counter and create the copy.
-    ptr_metadata* metadata = ptr_metadata::get(ptr);
-    if (metadata->state_ == state_type::D_IN_MEMORY) {
+    auto aux = ptr_aux_block::get(ptr_metadata::get(ptr));
+    if (aux.state_ == state_type::D_IN_MEMORY) {
       // decrement other ref count (no possibility of it reaching 0 here)
       ref_counts_.decrement_second();
       copy.init(ptr, offset, &ref_counts_);
       return;
-    } else if (metadata->state_ == state_type::D_ARCHIVED) {
+    } else if (aux.state_ == state_type::D_ARCHIVED) {
       // decrement other ref count (no possibility of it reaching 0 here)
       ref_counts_.decrement_first();
       copy.init(ptr, offset, &ref_counts_);

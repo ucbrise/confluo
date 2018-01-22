@@ -2,7 +2,7 @@
 #define CONFLUO_CONF_DEFAULTS_H_
 
 #include <thread>
-#include "storage/ptr_metadata.h"
+#include "storage/ptr_aux_block.h"
 
 namespace confluo {
 

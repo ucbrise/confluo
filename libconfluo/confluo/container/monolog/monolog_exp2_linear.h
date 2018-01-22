@@ -351,7 +351,8 @@ protected:
    */
   void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx,
                            __atomic_bucket_copy_ref& copy) {
-    void* new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T));
+    storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
+    void* new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T), aux);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(storage::encoded_ptr<T>(new_bucket_data))) {
       ALLOCATOR.dealloc(new_bucket_data);
@@ -367,7 +368,8 @@ protected:
    * @return pointer to allocated bucket
    */
   storage::encoded_ptr<T> try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
-    void* new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T));
+    storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
+    void* new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T), aux);
     storage::encoded_ptr<T> enc_ptr(new_bucket_data);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(enc_ptr)) {

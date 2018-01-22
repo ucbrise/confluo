@@ -8,7 +8,10 @@
 #include "schema/column.h"
 #include "conf/configuration_params.h"
 #include "index_log.h"
+#include "io/incr_file_reader.h"
 #include "io/incr_file_writer.h"
+#include "storage/ptr_aux_block.h"
+#include "storage/ptr_metadata.h"
 #include "schema/schema.h"
 
 namespace confluo {
@@ -55,8 +58,8 @@ class index_archiver {
       read_only_reflog_ptr bucket_ptr;
       refs.ptr(reflog_idx, bucket_ptr);
       uint64_t* data = bucket_ptr.get().ptr_as<uint64_t>();
-      auto* metadata = ptr_metadata::get(data);
-      if (metadata->state_ != state_type::D_IN_MEMORY) {
+      auto aux = ptr_aux_block::get(ptr_metadata::get(data));
+      if (aux.state_ != state_type::D_IN_MEMORY) {
         reflog_idx += reflog_constants::BUCKET_SIZE;
         continue;
       }
@@ -91,7 +94,8 @@ class index_archiver {
     writer_.commit<std::string>(action.to_string());
 
     if (bucket_size < reflog_constants::BUCKET_SIZE) {
-      void* enc_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, state_type::D_ARCHIVED);
+      ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
+      void* enc_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
       refs.swap_bucket_ptr(idx, encoded_reflog_ptr(enc_bucket));
     }
   }
@@ -135,7 +139,8 @@ class index_load_utils {
       size_t bucket_size = metadata.data_size_;
 
       auto*& refs = index->get_or_create(cur_key);
-      void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, state_type::D_ARCHIVED);
+      ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
+      void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, aux);
       refs->init_bucket_ptr(reflog_idx, encoded_reflog_ptr(encoded_bucket));
       reader.advance<uint8_t>(bucket_size);
       reflog_idx += archival_metadata.bucket_size();

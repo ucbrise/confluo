@@ -11,7 +11,7 @@ class archival_utils {
   }
 
   static std::string index_archival_path(const std::string& index_log_path, size_t index_log_idx) {
-    return index_log_path + "/filter_" + std::to_string(index_log_idx) + "/";
+    return index_log_path + "/index_" + std::to_string(index_log_idx) + "/";
   }
 
 };

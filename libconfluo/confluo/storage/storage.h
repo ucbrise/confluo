@@ -17,6 +17,7 @@
 #include "assertions.h"
 #include "file_utils.h"
 #include "mmap_utils.h"
+#include "storage/ptr_aux_block.h"
 #include "storage/ptr_metadata.h"
 #include "storage_allocator.h"
 #include "swappable_encoded_ptr.h"
@@ -91,7 +92,8 @@ struct in_memory {
    * @return Allocated block.
    */
   inline static void* allocate_bucket(const std::string& path, size_t size) {
-    return ALLOCATOR.alloc(size);
+    ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+    return ALLOCATOR.alloc(size, aux);
   }
 
   /**
@@ -144,7 +146,8 @@ struct durable_relaxed {
    * @return Allocated block.
    */
   inline static void* allocate_bucket(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap(path, size);
+    ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+    return ALLOCATOR.mmap(path, size, aux);
   }
 
   /**
@@ -197,7 +200,8 @@ struct durable {
    * @return Allocated block.
    */
   inline static void* allocate_bucket(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap(path, size);
+    ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+    return ALLOCATOR.mmap(path, size, aux);
   }
 
   /**

@@ -36,24 +36,72 @@ class encoded_ptr {
   // Encode/decode member functions
 
   void encode(size_t idx, T val) {
-    static_cast<T*>(ptr_)[idx] = val;
+    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    switch (aux.encoding_) {
+      case encoding_type::D_UNENCODED: {
+        static_cast<T*>(ptr_)[idx] = val;
+        break;
+      }
+      default: {
+        THROW(illegal_state_exception, "Invalid encoding type!");
+      }
+    }
   }
 
   void encode(size_t idx, const T* data, size_t len) {
-    memcpy(&static_cast<T*>(ptr_)[idx], data, sizeof(T) * len);
+    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    switch (aux.encoding_) {
+      case encoding_type::D_UNENCODED: {
+        memcpy(&static_cast<T*>(ptr_)[idx], data, sizeof(T) * len);
+        break;
+      }
+      default: {
+        THROW(illegal_state_exception, "Invalid encoding type!");
+      }
+    }
   }
 
   T decode(size_t idx) const {
-    return static_cast<T*>(ptr_)[idx];
+    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    switch (aux.encoding_) {
+      case encoding_type::D_UNENCODED: {
+        return static_cast<T*>(ptr_)[idx];
+      }
+      default: {
+        THROW(illegal_state_exception, "Invalid encoding type!");
+      }
+    }
   }
 
   void decode(T* buffer, size_t idx, size_t len) const {
-    memcpy(buffer, &static_cast<T*>(ptr_)[idx], sizeof(T) * len);
+    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    switch (aux.encoding_) {
+      case encoding_type::D_UNENCODED: {
+        memcpy(buffer, &static_cast<T*>(ptr_)[idx], sizeof(T) * len);
+        break;
+      }
+      default: {
+        THROW(illegal_state_exception, "Invalid encoding type!");
+      }
+    }
   }
 
+  /**
+   * Decode entire pointer, starting at index idx.
+   * @param idx index
+   * @return decoded pointer
+   */
   decoded_ptr<T> decode_ptr(size_t idx = 0) const {
-    T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + idx;
-    return decoded_ptr<T>(ptr, no_op_delete);
+    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    switch (aux.encoding_) {
+      case encoding_type::D_UNENCODED: {
+        T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + idx;
+        return decoded_ptr<T>(ptr, no_op_delete);
+      }
+      default: {
+        THROW(illegal_state_exception, "Invalid encoding type!");
+      }
+    }
   }
 
  private:

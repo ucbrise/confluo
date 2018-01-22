@@ -20,7 +20,7 @@ class incremental_file_stream {
   }
 
   std::string cur_path() {
-    return dir_path_ + "/" + file_prefix_ + std::to_string(file_num_) + ".dat";
+    return dir_path_ + "/" + file_prefix_ + "_" + std::to_string(file_num_) + ".dat";
   }
 
   std::string transaction_log_path() {

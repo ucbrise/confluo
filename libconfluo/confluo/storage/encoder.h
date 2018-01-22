@@ -2,6 +2,7 @@
 #define CONFLUO_STORAGE_ENCODER_H_
 
 #include "exceptions.h"
+#include "ptr_aux_block.h"
 #include "ptr_metadata.h"
 
 namespace confluo {
@@ -35,7 +36,7 @@ class encoder {
  public:
 
   /**
-   * Encode pointer. Currently an identity operation.
+   * Encode pointer.
    * @param ptr unencoded data pointer, allocated by the storage allocator.
    * @return pointer to raw encoded data
    */
@@ -46,7 +47,7 @@ class encoder {
         return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), encoded_size);
       }
       default : {
-        THROW(illegal_state_exception, "Illegal encoding type.");
+        THROW(illegal_state_exception, "Invalid encoding type!");
       }
     }
   }

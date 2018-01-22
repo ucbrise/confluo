@@ -7,6 +7,7 @@
 #include "filter_log_archiver.h"
 #include "index_log.h"
 #include "index_log_archiver.h"
+#include "read_tail.h"
 
 namespace confluo {
 namespace archival {
@@ -21,7 +22,8 @@ class archiver {
            filter_log* filters, index_log* indexes, schema_t* schema,
            bool clear = true)
       : path_(path),
-        rt_(rt) {
+        rt_(rt),
+        record_size_(schema->record_size()) {
     if (clear) {
       file_utils::clear_dir(data_log_path());
       file_utils::clear_dir(filter_log_path());
@@ -39,7 +41,7 @@ class archiver {
    * @param offset data log offset
    */
   void archive(size_t offset) {
-    offset = std::min(offset, (size_t) rt_.get());
+    offset = std::min(offset - offset % record_size_, (size_t) rt_.get());
     if (offset > data_log_archiver_.tail()) {
       data_log_archiver_.archive(offset);
       filter_log_archiver_.archive(offset);
@@ -66,6 +68,7 @@ class archiver {
  private:
   std::string path_;
   read_tail rt_;
+  size_t record_size_;
   data_log_archiver data_log_archiver_;
   filter_log_archiver filter_log_archiver_;
   index_log_archiver index_log_archiver_;

@@ -9,6 +9,8 @@
 #include "filter.h"
 #include "io/incr_file_writer.h"
 #include "io/incr_file_reader.h"
+#include "storage/ptr_aux_block.h"
+#include "storage/ptr_metadata.h"
 #include "container/reflog.h"
 
 namespace confluo {
@@ -77,7 +79,8 @@ class filter_archiver {
       refs.ptr(refs_tail_, bucket_ptr);
       uint64_t* data = bucket_ptr.get().ptr_as<uint64_t>();
       auto* metadata = ptr_metadata::get(bucket_ptr.get().ptr());
-      if (metadata->state_ != state_type::D_IN_MEMORY) {
+      auto aux = ptr_aux_block::get(metadata);
+      if (aux.state_ != state_type::D_IN_MEMORY) {
         refs_tail_ += reflog_constants::BUCKET_SIZE;
         continue;
       }
@@ -109,7 +112,8 @@ class filter_archiver {
     auto off = refs_writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
     refs_writer_.commit(action.to_string());
 
-    void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, state_type::D_ARCHIVED);
+    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
+    void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
     refs.swap_bucket_ptr(refs_tail_, encoded_reflog_ptr(archived_bucket));
   }
 
@@ -126,7 +130,8 @@ class filter_archiver {
 
     if (num_aggs > 0) {
       size_t alloc_size = sizeof(aggregate) * num_aggs;
-      aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, state_type::D_ARCHIVED));
+      ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
+      aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, aux));
       for (size_t i = 0; i < num_aggs; i++) {
         numeric collapsed_aggregate = reflog.get_aggregate(i, version);
         aggs_writer_.append<data_type>(collapsed_aggregate.type());
@@ -180,7 +185,8 @@ public:
      size_t bucket_size = metadata.data_size_;
 
      auto*& refs = filter->get_or_create(cur_key);
-     void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, state_type::D_ARCHIVED);
+     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
+     void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, aux);
      refs->init_bucket_ptr(reflog_idx, encoded_reflog_ptr(encoded_bucket));
      refs->reserve(archival_metadata.bucket_size());
      reader.advance<uint8_t>(bucket_size);
@@ -208,7 +214,8 @@ public:
 
      if (num_aggs > 0) {
        size_t size = sizeof(aggregate) * num_aggs;
-       aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(size, state_type::D_ARCHIVED));
+       ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
+       aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(size, aux));
        for (size_t i = 0; i < num_aggs; i++) {
          data_type type = reader.read<data_type>();
          std::string data = reader.read(type.size);

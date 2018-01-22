@@ -7,6 +7,7 @@
 #include "filter.h"
 #include "archival/filter_log_archiver.h"
 #include "gtest/gtest.h"
+#include "storage/ptr_aux_block.h"
 
 using namespace ::confluo;
 
@@ -64,13 +65,15 @@ class FilterArchivalTest : public testing::Test {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
       void* ptr = bucket_ptr.get().ptr();
-      ASSERT_EQ(storage::ptr_metadata::get(ptr)->state_, storage::state_type::D_ARCHIVED);
+      auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
+      ASSERT_EQ(aux.state_, storage::state_type::D_ARCHIVED);
     }
     for (uint32_t i = reflog_archival_tail; i < reflog->size(); i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
       void* ptr = bucket_ptr.get().ptr();
-      ASSERT_EQ(storage::ptr_metadata::get(ptr)->state_, storage::state_type::D_IN_MEMORY);
+      auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
+      ASSERT_EQ(aux.state_, storage::state_type::D_IN_MEMORY);
     }
   }
 
@@ -81,6 +84,7 @@ class FilterArchivalTest : public testing::Test {
 };
 
 TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
+  file_utils::clear_dir("/tmp/filter_archives/");
   filter f(filter_none);
   fill(f);
 
@@ -96,6 +100,7 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
 }
 
 TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
+  file_utils::clear_dir("/tmp/filter_archives/");
   filter f(filter_none);
   fill(f);
 
@@ -116,6 +121,7 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
 }
 
 TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
+  file_utils::clear_dir("/tmp/filter_archives/");
   filter f(filter_none);
   fill(f);
 
@@ -151,6 +157,7 @@ TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
 }
 
 TEST_F(FilterArchivalTest, MultipleReflogsArchivedTest) {
+  file_utils::clear_dir("/tmp/filter_archives/");
   filter f(filter_none);
   fill(f);
 

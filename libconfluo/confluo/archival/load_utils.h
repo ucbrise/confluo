@@ -10,6 +10,7 @@
 #include "io/incr_file_writer.h"
 #include "index_log.h"
 #include "container/reflog.h"
+#include "storage/ptr_aux_block.h"
 
 namespace confluo {
 namespace archival {
@@ -41,7 +42,8 @@ class load_utils {
     std::string bucket_path = log.bucket_data_path(start_bucket_idx);
     size_t bucket_idx = start_bucket_idx;
     while (file_utils::exists_file(bucket_path)) {
-      void* bucket = ALLOCATOR.mmap(bucket_path, 0, log.bucket_size(), storage::state_type::D_IN_MEMORY);
+      ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+      void* bucket = ALLOCATOR.mmap(bucket_path, 0, log.bucket_size(), aux);
       log.init_bucket_ptr(bucket_idx, encoded_ptr<uint8_t>(bucket));
       bucket_idx++;
       bucket_path = log.bucket_data_path(bucket_idx);

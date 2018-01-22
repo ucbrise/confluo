@@ -7,6 +7,7 @@
 #include "exceptions.h"
 #include "memory_stat.h"
 #include "mmap_utils.h"
+#include "ptr_aux_block.h"
 #include "ptr_metadata.h"
 
 namespace confluo {
@@ -34,7 +35,7 @@ class storage_allocator {
    * @param size size in bytes to allocate
    * @return pointer to allocated memory
    */
-  void* alloc(size_t size, uint8_t state = state_type::D_IN_MEMORY) {
+  void* alloc(size_t size, ptr_aux_block aux) {
     if (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
       THROW(memory_exception, "Max memory reached!");
     }
@@ -47,9 +48,9 @@ class storage_allocator {
     void* data_ptr = reinterpret_cast<void*>(md + 1);
 
     md->alloc_type_ = alloc_type::D_DEFAULT;
-    md->state_ = state_type::D_IN_MEMORY;
     md->data_size_ = size;
     md->offset_ = 0;
+    md->aux_ = *reinterpret_cast<uint8_t*>(&aux);
 
     return data_ptr;
   }
@@ -63,7 +64,7 @@ class storage_allocator {
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
-  void* mmap(std::string path, size_t size, uint8_t state = state_type::D_IN_MEMORY) {
+  void* mmap(std::string path, size_t size, ptr_aux_block aux) {
     size_t alloc_size = sizeof(ptr_metadata) + size;
     mmap_stat_.increment(alloc_size);
 
@@ -74,9 +75,9 @@ class storage_allocator {
 
     storage::ptr_metadata* metadata = static_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;
-    metadata->state_ = state;
     metadata->data_size_ = size;
     metadata->offset_ = 0;
+    metadata->aux_ = *reinterpret_cast<uint8_t*>(&aux);
 
     return reinterpret_cast<void*>(metadata + 1);
   }
@@ -90,7 +91,7 @@ class storage_allocator {
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
-  void* mmap(std::string path, off_t offset, size_t size, uint8_t state) {
+  void* mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux) {
     int mmap_delta = offset % getpagesize();
     off_t page_aligned_offset = offset - mmap_delta;
 
@@ -105,9 +106,9 @@ class storage_allocator {
 
     storage::ptr_metadata* metadata = reinterpret_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;
-    metadata->state_ = state;
     metadata->data_size_ = size;
     metadata->offset_ = mmap_delta;
+    metadata->aux_ = *reinterpret_cast<uint8_t*>(&aux);
 
     return reinterpret_cast<void*>(metadata + 1);
   }
