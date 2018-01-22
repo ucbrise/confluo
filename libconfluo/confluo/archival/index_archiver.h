@@ -27,8 +27,7 @@ class index_archiver {
       : index_(index),
         tail_(0),
         column_(column),
-        writer_(path, "index_data", configuration_params::MAX_ARCHIVAL_FILE_SIZE) {
-    writer_.init();
+        writer_(path, "index_data", archival_configuration_params::MAX_FILE_SIZE) {
     writer_.close();
   }
 
@@ -80,7 +79,7 @@ class index_archiver {
    */
   void archive_bucket(byte_string key, reflog& refs, size_t idx, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
-    auto raw_encoded_bucket = encoder::encode(bucket, configuration_params::ARCHIVED_REFLOG_ENCODING_TYPE);
+    auto raw_encoded_bucket = encoder::encode(bucket, archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - idx);
     size_t enc_size = raw_encoded_bucket.size();
 
@@ -119,7 +118,8 @@ class index_load_utils {
    * @param index index to load into
    * @return data log offset until which radix tree has been archived
    */
-  static size_t load(incremental_file_reader& reader, index::radix_index* index) {
+  static size_t load(const std::string& path, index::radix_index* index) {
+    incremental_file_reader reader(path, "index_data");
     size_t data_log_archival_tail = 0;
     while (reader.has_more()) {
       auto action = index_archival_action(reader.read_action<std::string>());

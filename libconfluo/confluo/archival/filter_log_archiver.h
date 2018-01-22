@@ -1,6 +1,7 @@
 #ifndef CONFLUO_ARCHIVAL_FILTER_LOG_ARCHIVER_H_
 #define CONFLUO_ARCHIVAL_FILTER_LOG_ARCHIVER_H_
 
+#include "archival_utils.h"
 #include "storage/encoder.h"
 #include "filter_archiver.h"
 #include "filter_log.h"
@@ -48,7 +49,7 @@ class filter_log_archiver {
    */
   void init_new_archivers() {
     for (size_t i = filter_archivers_.size(); i < filters_->size(); i++) {
-      std::string filter_path = path_ + "/filter_" + std::to_string(i) + "/";
+      std::string filter_path = archival_utils::filter_archival_path(path_, i);
       file_utils::create_dir(filter_path);
       filter_archivers_.push_back(new filter_archiver(filter_path, filters_->at(i)));
     }

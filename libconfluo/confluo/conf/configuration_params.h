@@ -8,19 +8,28 @@
 namespace confluo {
 
 /**
+ * Confluo archival configuration parameters
+ */
+class archival_configuration_params {
+ public:
+  static uint64_t PERIODICITY_MS;
+  static size_t PERIODIC_WINDOW;
+  static uint64_t RECENCY_RESTRICTION_WINDOW;
+  static uint64_t RECENCY_FILTER_RESTRICTION_WINDOW_NS;
+
+  // Maximum archival file size in bytes. Cannot be smaller than a bucket.
+  static size_t MAX_FILE_SIZE;
+
+  // Archival compression parameters; TODO parse types
+  static uint8_t DATA_LOG_ENCODING_TYPE;
+  static uint8_t REFLOG_ENCODING_TYPE;
+};
+
+/**
  * Confluo Configuration parameters
  */
 class configuration_params {
  public:
-  /** Archival configuration parameters */
-  static size_t MAX_ARCHIVAL_FILE_SIZE;
-  static size_t ARCHIVAL_WINDOW;
-  static uint64_t ARCHIVAL_PERIODICITY_MS;
-  static uint8_t ARCHIVED_DATA_LOG_ENCODING_TYPE;
-  static uint8_t ARCHIVED_REFLOG_ENCODING_TYPE;
-  static uint64_t FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS;
-  static size_t MAX_ARCHIVAL_FILE_SIZE;
-
   /** Memory configuration parameters */
   static size_t MAX_MEMORY;
 
@@ -43,18 +52,20 @@ static utils::configuration_map confluo_conf(
     utils::config_utils::read_from_env(
         "CONFLUO_CONF", "/etc/conf/confluo.conf:./conf/confluo.conf"));
 
-size_t configuration_params::ARCHIVAL_WINDOW = confluo_conf.get<size_t>(
-    "data_log_archival_window", defaults::DEFAULT_ARCHIVAL_WINDOW);
-uint64_t configuration_params::ARCHIVAL_PERIODICITY_MS = confluo_conf.get<uint64_t>(
-    "data_log_archival_window", defaults::DEFAULT_ARCHIVAL_PERIODICITY_MS);
-uint8_t configuration_params::ARCHIVED_DATA_LOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
-    "data_log_archival_window", defaults::DEFAULT_ARCHIVED_DATA_LOG_ENCODING_TYPE);
-uint8_t configuration_params::ARCHIVED_REFLOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
-    "data_log_archival_window", defaults::DEFAULT_ARCHIVED_REFLOG_ENCODING_TYPE);
-size_t configuration_params::MAX_ARCHIVAL_FILE_SIZE = confluo_conf.get<size_t>(
-    "max_archival_file_size", defaults::DEFAULT_MAX_ARCHIVAL_FILE_SIZE);
-uint64_t configuration_params::FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS = confluo_conf.get<uint64_t>(
-    "data_log_archival_window", defaults::DEFAULT_FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS);
+uint64_t archival_configuration_params::PERIODICITY_MS = confluo_conf.get<uint64_t>(
+    "archival_periodicity_ms", archival_defaults::DEFAULT_PERIODICITY_MS);
+size_t archival_configuration_params::PERIODIC_WINDOW = confluo_conf.get<size_t>(
+    "archival_periodic_window", archival_defaults::DEFAULT_PERIODIC_ARCHIVAL_WINDOW);
+uint64_t archival_configuration_params::RECENCY_RESTRICTION_WINDOW = confluo_conf.get<uint64_t>(
+    "archival_recency_restriction_window", archival_defaults::DEFAULT_RECENCY_RESTRICTION_WINDOW);
+uint64_t archival_configuration_params::RECENCY_FILTER_RESTRICTION_WINDOW_NS = confluo_conf.get<uint64_t>(
+    "filter_archival_recency_restriction_window", archival_defaults::DEFAULT_RECENCY_FILTER_RESTRICTION_WINDOW_NS);
+size_t archival_configuration_params::MAX_FILE_SIZE = confluo_conf.get<size_t>(
+    "max_archival_file_size", archival_defaults::DEFAULT_MAX_FILE_SIZE);
+uint8_t archival_configuration_params::DATA_LOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
+    "data_log_archival_encoding", archival_defaults::DEFAULT_DATA_LOG_ENCODING_TYPE);
+uint8_t archival_configuration_params::REFLOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
+    "reflog_archival_encoding", archival_defaults::DEFAULT_REFLOG_ENCODING_TYPE);
 
 size_t configuration_params::MAX_MEMORY = confluo_conf.get<size_t>(
     "max_memory", defaults::DEFAULT_MAX_MEMORY);

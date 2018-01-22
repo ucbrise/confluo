@@ -75,11 +75,12 @@ class confluo_store {
   }
 
   /**
+   * Loads an existing atomic multilog from disk
    *
-   * @param name
-   * @param mode
-   * @param a_mode
-   * @return
+   * @param name The name of the atomic multilog
+   * @param mode Storage mode
+   * @param a_mode Archival mode
+   * @return The id of the atomic multilog
    */
   int64_t load_atomic_multilog(const std::string& name,
                                const storage::storage_mode mode = storage::IN_MEMORY,

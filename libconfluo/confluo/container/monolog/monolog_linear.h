@@ -46,8 +46,7 @@ class monolog_linear_base {
     name_ = name;
     data_path_ = data_path;
     for (size_t i = 0; i < MAX_BUCKETS; i++) {
-      std::string bucket_path = data_path + "/" + name + "_" + std::to_string(i) + ".dat";
-      buckets_[i].init(bucket_path, BUCKET_SIZE, storage);
+      buckets_[i].init(bucket_data_path(i), BUCKET_SIZE, storage);
     }
   }
 
@@ -63,6 +62,14 @@ class monolog_linear_base {
    */
   std::string name() const {
     return name_;
+  }
+
+  size_t bucket_size() {
+    return BUCKET_SIZE + BUFFER_SIZE;
+  }
+
+  std::string bucket_data_path(size_t bucket_idx) const {
+    return data_path() + "/" + name() + "_" + std::to_string(bucket_idx) + ".dat";
   }
 
   /**

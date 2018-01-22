@@ -19,12 +19,10 @@ class filter_archiver {
  public:
   filter_archiver(const std::string& path, monitor::filter* filter)
       : filter_(filter),
-        refs_writer_(path, "filter_data", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
-        aggs_writer_(path, "filter_aggs", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+        refs_writer_(path, "filter_data", archival_configuration_params::MAX_FILE_SIZE),
+        aggs_writer_(path, "filter_aggs", archival_configuration_params::MAX_FILE_SIZE),
         refs_tail_(0),
         ts_tail_(0) {
-    refs_writer_.init();
-    aggs_writer_.init();
     refs_writer_.close();
     aggs_writer_.close();
   }
@@ -41,9 +39,9 @@ class filter_archiver {
       auto& refs = *it;
       byte_string key = it.key();
       ts_tail_ = key.template as<uint64_t>();
-      uint64_t limit = (time_utils::cur_ns() - configuration_params::FILTER_ARCHIVAL_RESTRICTION_WINDOW_NS)
-                        / configuration_params::TIME_RESOLUTION_NS;
-      if (ts_tail_ > limit) {
+      auto ts_tail_ns = ts_tail_ * configuration_params::TIME_RESOLUTION_NS;
+      if (time_utils::cur_ns() - ts_tail_ns <
+          archival_configuration_params::RECENCY_FILTER_RESTRICTION_WINDOW_NS) {
         break;
       }
       size_t data_log_archival_tail = archive_reflog(key, refs, offset);
@@ -58,6 +56,14 @@ class filter_archiver {
   }
 
  private:
+
+  /**
+   * Archive reflog corresponding to a key, up to an offset.
+   * @param key radix tree key to which reflog belongs
+   * @param refs reflog to archive
+   * @param offset data log offset
+   * @return data log archival tail
+   */
   size_t archive_reflog(byte_string key, reflog& refs, size_t offset) {
     size_t data_log_archival_tail = 0;
     // TODO replace w/ bucket iterator
@@ -79,7 +85,7 @@ class filter_archiver {
   }
 
   /**
-   *
+   * Archive bucket.
    * @param key
    * @param refs
    * @param bucket
@@ -87,7 +93,7 @@ class filter_archiver {
    */
   void archive_bucket(byte_string key, reflog& refs, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
-    auto encoded_bucket = encoder::encode(bucket, configuration_params::ARCHIVED_REFLOG_ENCODING_TYPE);
+    auto encoded_bucket = encoder::encode(bucket, archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
     size_t enc_size = encoded_bucket.size();
 
@@ -149,11 +155,12 @@ class filter_load_utils {
 public:
  /**
   * Load filter's reflogs archived on disk.
-  * @param reader stream to load from
+  * @param path path to load reflogs from
   * @param filter filter to load into
   * @return data log offset until which radix tree has been loaded
   */
- static size_t load_reflogs(incremental_file_reader& reader, filter::idx_t* filter) {
+ static size_t load_reflogs(const std::string& path, filter::idx_t* filter) {
+   incremental_file_reader reader(path, "filter_data");
    size_t data_log_archival_tail = 0;
    while (reader.has_more()) {
      auto action = filter_archival_action(reader.read_action<std::string>());
@@ -179,12 +186,13 @@ public:
 
  /**
   * Load aggregates of reflogs in radix tree archived on disk.
-  * @param reader aggregates reader
+  * @param path path to load aggregates from
   * @param tree radix tree
   * @return
   */
  template<typename radix_tree>
- static size_t load_reflog_aggregates(incremental_file_reader& reader, radix_tree* tree) {
+ static size_t load_reflog_aggregates(const std::string& path, radix_tree* tree) {
+   incremental_file_reader reader(path, "filter_aggs");
    byte_string cur_key;
    while (reader.has_more()) {
      auto action = filter_aggregates_archival_action(reader.read_action<std::string>());

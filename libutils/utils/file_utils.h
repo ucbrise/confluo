@@ -59,6 +59,12 @@ class file_utils {
     return stat(path.c_str(), &buf) == 0;
   }
 
+  static int delete_file(const std::string& path) {
+    int ret = remove(path.c_str());
+    assert_throw(ret != -1, "remove(" << path << "):" << strerror(errno));
+    return ret;
+  }
+
   static int open_file(const std::string& path, int flags) {
     int ret = open(path.c_str(), flags, PERMISSIONS);
     assert_throw(
@@ -95,7 +101,7 @@ class file_utils {
  private:
   static int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
       int ret = remove(fpath);
-      assert_throw(ret != -1, "unlink_cb(" << fpath << "):" << strerror(errno));
+      assert_throw(ret != -1, "remove(" << fpath << "):" << strerror(errno));
       return ret;
   }
 

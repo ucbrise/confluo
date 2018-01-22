@@ -136,7 +136,7 @@ class atomic_multilog {
                         configuration_params::MONITOR_PERIODICITY_MS);
     if (a_mode == archival_mode::ON) {
       archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
-                           configuration_params::ARCHIVAL_PERIODICITY_MS);
+                           archival_configuration_params::PERIODICITY_MS);
     }
   }
 
@@ -159,7 +159,7 @@ class atomic_multilog {
         schema_(),
         data_log_("data_log", path, mode),
         rt_(path, mode),
-        metadata_(),
+        metadata_(path, mode),
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
         archival_task_("archival"),
@@ -167,22 +167,23 @@ class atomic_multilog {
         mgmt_pool_(pool),
         monitor_task_("monitor") {
     load(path, mode);
-    metadata_ = metadata_writer(path, mode); // metadata shouldn't be written until after load
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
-    archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
-                         configuration_params::ARCHIVAL_PERIODICITY_MS);
+    if (a_mode == archival_mode::ON) {
+      archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
+                           archival_configuration_params::PERIODICITY_MS);
+    }
   }
 
   /**
-   * Force archival of multilog up to the read tail
+   * Force archival of multilog up to the read tail.
    */
   void archive() {
     archive(rt_.get());
   }
 
   /**
-   * Force archival of multilog up to an offset
+   * Force archival of multilog up to an offset.
    * @param offset The offset of the data into the data log
    */
   void archive(size_t offset) {
@@ -201,6 +202,8 @@ class atomic_multilog {
    */
   void load(const std::string& path, const storage::storage_mode& mode) {
     metadata_reader reader(path);
+    metadata_writer temp = metadata_;
+    metadata_ = metadata_writer(); // metadata shouldn't be written until after load
     while (reader.has_next()) {
       switch (reader.next_type()) {
         case D_SCHEMA_METADATA: {
@@ -232,6 +235,7 @@ class atomic_multilog {
         }
       }
     }
+    metadata_ = temp;
     load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
     load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
     load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
@@ -966,10 +970,16 @@ class atomic_multilog {
     trigger_map_.remove(name, trigger_id);
   }
 
+  /**
+   * Archives by a window.
+   */
   void archival_task() {
     optional<management_exception> ex;
     std::future<void> ret = archival_pool_.submit([this] {
-      archiver_.archive_by(configuration_params::ARCHIVAL_WINDOW);
+      size_t offset = archiver_.tail() + archival_configuration_params::PERIODIC_WINDOW;
+      if (offset + archival_configuration_params::RECENCY_RESTRICTION_WINDOW < rt_.get()) {
+        archiver_.archive(offset);
+      }
     });
     ret.wait();
     if (ex.has_value())

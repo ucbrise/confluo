@@ -13,7 +13,7 @@ class index_log_archiver {
 
  public:
   index_log_archiver()
-      : index_log_archiver("", nullptr, nullptr, false) {
+      : index_log_archiver("", nullptr, nullptr) {
   }
 
   /**
@@ -21,16 +21,12 @@ class index_log_archiver {
    * @param path directory to archive in
    * @param indexes index log to archive
    * @param schema data schema
-   * @param clear clear current archives if any exist
    */
-  index_log_archiver(const std::string& path, index_log* indexes, schema_t* schema, bool clear = true)
+  index_log_archiver(const std::string& path, index_log* indexes, schema_t* schema)
      : path_(path),
        index_archivers_(),
        indexes_(indexes),
        schema_(schema) {
-    if (clear) {
-      file_utils::clear_dir(path);
-    }
  }
 
   ~index_log_archiver() {

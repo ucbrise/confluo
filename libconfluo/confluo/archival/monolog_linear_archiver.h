@@ -23,19 +23,19 @@ class monolog_linear_archiver {
  public:
   typedef monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE> monolog;
 
+  monolog_linear_archiver()
+      : monolog_linear_archiver("", nullptr) {
+  }
+
   /**
    * Constructor.
    * @param path directory to archive in
    * @param log monolog to archive
    */
-  monolog_linear_archiver(const std::string& path, monolog* log, bool clear = true)
-      : writer_(path, "monolog_linear", configuration_params::MAX_ARCHIVAL_FILE_SIZE),
+  monolog_linear_archiver(const std::string& path, monolog* log)
+      : writer_(path, "monolog_linear", archival_configuration_params::MAX_FILE_SIZE),
         archival_tail_(0),
         log_(log) {
-    if (clear) {
-      file_utils::clear_dir(path);
-    }
-    writer_.init();
     writer_.close();
   }
 
@@ -76,7 +76,7 @@ class monolog_linear_archiver {
    */
   void archive_bucket(T* bucket) {
     auto metadata = ptr_metadata::get(bucket);
-    auto encoded_bucket = encoder::encode(bucket, configuration_params::ARCHIVED_DATA_LOG_ENCODING_TYPE);
+    auto encoded_bucket = encoder::encode(bucket, archival_configuration_params::DATA_LOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
     auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
 

@@ -14,6 +14,7 @@ class incremental_file_writer : public incremental_file_stream {
   incremental_file_writer(const std::string& path, const std::string& file_prefix, size_t max_file_size)
       : incremental_file_stream(path, file_prefix) {
     max_file_size_ = max_file_size;
+    init();
   }
 
   incremental_file_writer(const incremental_file_writer& other)

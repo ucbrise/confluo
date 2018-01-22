@@ -1,6 +1,7 @@
 #ifndef CONFLUO_ARCHIVAL_LOAD_UTILS_H_
 #define CONFLUO_ARCHIVAL_LOAD_UTILS_H_
 
+#include "archival_utils.h"
 #include "storage/allocator.h"
 #include "container/data_log.h"
 #include "filter.h"
@@ -36,19 +37,20 @@ class load_utils {
   }
 
   static void load_data_log_storage(data_log& log, size_t start_bucket_idx) {
-    size_t size = (data_log_constants::BUCKET_SIZE + data_log_constants::BUFFER_SIZE) * sizeof(uint8_t);
-    for (size_t i = start_bucket_idx; i < data_log_constants::MAX_BUCKETS; i++) {
-//      TODO move to inside monolog/storage_mode?
-//      std::string bucket_path = log.data_path();
-//      void* bucket = ALLOCATOR.mmap(bucket_path, 0, size, storage::state_type::D_IN_MEMORY);
-//      log.init_bucket_ptr(i, encoded_ptr<uint8_t>(bucket));
+    std::string bucket_path = log.bucket_data_path(start_bucket_idx);
+    size_t bucket_idx = start_bucket_idx;
+    while (file_utils::exists_file(bucket_path)) {
+      void* bucket = ALLOCATOR.mmap(bucket_path, 0, log.bucket_size(), storage::state_type::D_IN_MEMORY);
+      log.init_bucket_ptr(bucket_idx, encoded_ptr<uint8_t>(bucket));
+      bucket_idx++;
+      bucket_path = log.bucket_data_path(bucket_idx);
     }
   }
 
   /**
    * Load filter log archived on disk and replay
    * remaining data from data log over the filters.
-   * @param path path to data
+   * @param path path to filter log data
    * @param filters filter log to load/replay over
    * @param log data log to replay records from
    * @param schema data log schema
@@ -58,8 +60,8 @@ class load_utils {
     for (size_t i = 0; i < filters.size(); i++) {
       monitor::filter* filter = filters[i];
       if (filter->is_valid()) {
-        size_t data_log_archival_tail = load_filter(path + "/filter_" + std::to_string(i) + "/", filter);
-        replay_filter(filter, log, schema, data_log_archival_tail); //+ schema.record_size());
+        size_t data_log_archival_tail = load_filter(archival_utils::filter_archival_path(path, i), filter);
+        replay_filter(filter, log, schema, data_log_archival_tail);
       }
     }
   }
@@ -67,7 +69,7 @@ class load_utils {
   /**
    * Load index log archived on disk and replay
    * remaining data from data log over the indexes.
-   * @param path path to data
+   * @param path path to index log data
    * @param indexes index log to load/replay over.
    * @param log data log to replay records from
    * @param schema record schema
@@ -78,7 +80,7 @@ class load_utils {
       auto& col = schema[i];
       if (col.is_indexed()) {
         auto* index = indexes[col.index_id()];
-        size_t data_log_archival_tail = load_index(path + "/index_" + std::to_string(i) + "/", index);
+        size_t data_log_archival_tail = load_index(archival_utils::index_archival_path(path, i), index);
         replay_index(index, col.index_id(), log, schema, data_log_archival_tail + schema.record_size());
       }
     }
@@ -91,11 +93,9 @@ class load_utils {
    * @return data log offset to which filter has been archived
    */
   static size_t load_filter(const std::string& path, monitor::filter* filter) {
-    incremental_file_reader reflog_reader(path, "filter_data");
-    incremental_file_reader aggs_reader(path, "filter_aggs");
     filter::idx_t* tree = filter->data();
-    size_t archival_tail = filter_load_utils::load_reflogs(reflog_reader, tree);
-    size_t archival_tail2 = filter_load_utils::load_reflog_aggregates(aggs_reader, tree);
+    size_t archival_tail = filter_load_utils::load_reflogs(path, tree);
+    size_t archival_tail2 = filter_load_utils::load_reflog_aggregates(path, tree);
     if (archival_tail > archival_tail2) {
       // TODO recovery for failure during aggregate writes edge case
     }
@@ -109,8 +109,7 @@ class load_utils {
    * @return data log offset until which index has been archived
    */
   static size_t load_index(const std::string& path, index::radix_index* index) {
-    incremental_file_reader reader(path, "index_data");
-    return index_load_utils::load(reader, index);
+    return index_load_utils::load(path, index);
   }
 
   /**
