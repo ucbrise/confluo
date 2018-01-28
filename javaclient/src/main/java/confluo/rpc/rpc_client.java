@@ -29,8 +29,8 @@ public class rpc_client {
     }
 
     public void connect(String host, int port) {
-        socket = new TSocket(host, port);
-        transport = new TFramedTransport(socket);
+        //socket = new TSocket(host, port);
+        transport = new TSocket(host, port);//TFramedTransport(socket);
         protocol = new TBinaryProtocol(transport);
         client = new rpc_service.Client(protocol);
         try {
