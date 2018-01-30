@@ -6,6 +6,9 @@
 
 namespace confluo {
 
+/**
+ * Manages adding types and utility functions for types
+ */
 class type_manager {
  public:
   /**

@@ -11,16 +11,33 @@ namespace confluo {
 
 class mutable_value : public immutable_value {
  public:
+  /**
+   * Constructs a mutable value of the specified type
+   *
+   * @param type The data type of the specified value
+   */
   mutable_value(data_type type = NONE_TYPE)
       : immutable_value(type,
                         type.is_none() ? nullptr : new uint8_t[type.size]()) {
   }
 
+  /**
+   * Constructs a mutable value from a specified data type and raw data
+   *
+   * @param type The type of data
+   * @param value The data itself for the mutable value
+   */
   mutable_value(const data_type& type, immutable_raw_data value)
       : immutable_value(type, const_cast<void*>(value.ptr)) {
     type_.unaryop(unary_op_id::ASSIGN)(ptr_, value);
   }
 
+  /**
+   * Constructs a mutable 
+   *
+   * @param type The type
+   * @param value The value
+   */
   mutable_value(const data_type& type, const void* value)
       : immutable_value(type,
                         value == nullptr ? nullptr : new uint8_t[type.size]()) {
@@ -30,54 +47,103 @@ class mutable_value : public immutable_value {
     }
   }
 
+  /**
+   * Constructs a boolean mutable value
+   *
+   * @param value The boolan mutable value to create
+   */
   mutable_value(bool value)
       : immutable_value(BOOL_TYPE, new uint8_t[BOOL_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, BOOL_TYPE.size));
   }
 
+  /**
+   * Constructs a character mutable value
+   *
+   * @param value The character value to make a mutable value of
+   */
   mutable_value(int8_t value)
       : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, CHAR_TYPE.size));
   }
 
+  /**
+   * Constructs a short mutable value
+   *
+   * @param value The short value to make a mutable value of
+   */
   mutable_value(int16_t value)
       : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, SHORT_TYPE.size));
   }
 
+  /**
+   * Constructs a mutable value from a integer value
+   *
+   * @param value The integer value to make a mutable value from
+   */
   mutable_value(int32_t value)
       : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, INT_TYPE.size));
   }
 
+  /**
+   * Constructs
+   *
+   * @param value The value
+   */
   mutable_value(int64_t value)
       : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, LONG_TYPE.size));
   }
 
+  /**
+   * Constructs a mutable value from a single precision floating point
+   * number
+   *
+   * @param value The floating point value to construct a mutable value
+   * from
+   */
   mutable_value(float value)
       : immutable_value(FLOAT_TYPE, new uint8_t[FLOAT_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, FLOAT_TYPE.size));
   }
 
+  /**
+   * Constructs a mutable value from a double precision floating point
+   * number
+   *
+   * @param value The double value to construct a mutable value
+   * from
+   */
   mutable_value(double value)
       : immutable_value(DOUBLE_TYPE, new uint8_t[DOUBLE_TYPE.size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(&value, DOUBLE_TYPE.size));
   }
 
+  /**
+   * Constructs a mutable value from a string
+   *
+   * @param str The string to construct a mutable value from
+   */
   mutable_value(const std::string& str)
       : immutable_value(STRING_TYPE(str.length()), new char[str.length()]()) {
     type_.unaryop(unary_op_id::ASSIGN)(
         ptr_, immutable_raw_data(str.c_str(), str.length()));
   }
 
+  /**
+   * mutable_value
+   *
+   * @param other The other
+   */
   mutable_value(const immutable_value& other)
       : immutable_value(other.type(), new uint8_t[other.type().size]()) {
     type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());

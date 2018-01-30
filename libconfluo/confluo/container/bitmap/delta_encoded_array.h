@@ -11,6 +11,12 @@ using namespace utils;
 
 namespace confluo {
 
+/**
+ * Encodes samples
+ *
+ * @tparam T The type
+ * @tparam sampling_rate The sampling rate
+ */
 template<typename T, uint32_t sampling_rate = 128>
 class delta_encoded_array {
  public:
@@ -175,8 +181,12 @@ class delta_encoded_array {
  private:
 };
 
+/**
+ * Prefix sum
+ */
 static struct elias_gamma_prefix_sum {
  public:
+  /** The type of block */
   typedef uint16_t block_type;
 
   /**
@@ -237,6 +247,13 @@ static struct elias_gamma_prefix_sum {
   uint32_t prefixsum_[65536];
 } elias_gamma_prefix_table;
 
+
+/**
+ * Encodes samples
+ *
+ * @tparam T The type
+ * @tparam sampling_rate The sampling rate
+ */
 template<typename T, uint32_t sampling_rate = 128>
 class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
  public:
@@ -264,6 +281,9 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     this->encode(elements, num_elements);
   }
 
+  /**
+   * Default destructor
+   */
   virtual ~elias_gamma_encoded_array() {
   }
 

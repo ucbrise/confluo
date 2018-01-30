@@ -6,13 +6,21 @@
 
 namespace confluo {
 
+/** Function pointer for the aggregation function */
 using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
+/** The zero function pointer */
 using zero_fn = numeric (*)(const data_type& type);
 
+/** Step value for the data_type */
 static numeric count_one(INT64_C(1));
 
+/**
+ * Encapsulation of an aggregate and zero function
+ */
 struct aggregator {
+  /** Function pointer that does the aggregation */
   aggregate_fn agg;
+  /** The function pointer representing zero for the data_type */
   zero_fn zero;
 };
 
@@ -76,12 +84,19 @@ inline numeric sum_zero(const data_type& type) {
 }
 
 /**
- * Generates a numeric with a min zero
+ * Generates a numeric with the maximum value the type has
+ * @param type data_type that is used
+ * @return numeric that contains the type and maximum value
  */
 inline numeric min_zero(const data_type& type) {
   return numeric(type, type.max());
 }
 
+/**
+ * Generates a numeric with the minimum value of a particular type
+ * @param type the desired data_type
+ * @return numeric containing the type and minimum value
+ */
 inline numeric max_zero(const data_type& type) {
   return numeric(type, type.min());
 }
@@ -95,14 +110,24 @@ inline numeric count_zero(const data_type& type) {
   return numeric(type, type.zero());
 }
 
+/**
+ * Throws an exception for an invalid zero function
+ * @param type data_type of the zero function
+ * @throws invalid_operation_exception
+ */
 inline numeric invalid_zero(const data_type& type) {
   throw invalid_operation_exception("Invalid zero op.");
 }
 
+/** An aggregator that performs sum operation */
 static aggregator sum_aggregator = { sum_agg, sum_zero };
+/** An aggregator that performs min operation */
 static aggregator min_aggregator = { min_agg, min_zero };
+/** An aggregator that performs the max oepration */
 static aggregator max_aggregator = { max_agg, max_zero };
+/** An aggregator that performs the count operation */
 static aggregator count_aggregator = { count_agg, count_zero };
+/** An aggregator for invalid operations */
 static aggregator invalid_aggregator = { invalid_agg, invalid_zero };
 
 }

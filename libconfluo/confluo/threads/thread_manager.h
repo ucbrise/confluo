@@ -12,12 +12,20 @@
 
 namespace confluo {
 
+/**
+ * Information about the thread
+ */
 struct thread_info {
+  /** The identifier of the thread */
   std::thread::id tid;
+  /** Whether the thread is valid */
   atomic::type<bool> valid;
 };
 
 // Not thread safe
+/**
+ * Manages threads in the system, not thread safe
+ */
 class thread_manager {
  public:
   /**

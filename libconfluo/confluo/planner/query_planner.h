@@ -13,6 +13,9 @@
 namespace confluo {
 namespace planner {
 
+/**
+ * Query planner
+ */
 class query_planner {
  public:
   typedef std::pair<byte_string, byte_string> key_range;
@@ -21,6 +24,13 @@ class query_planner {
   typedef index_ops::iterator if_iterator;
   typedef index_ops::const_iterator const_if_iterator;
 
+  /**
+   * Initializes query_planner with given references to a data_log,
+   * index_log, and schema
+   * @param dlog A pointer to a data_log
+   * @param idx_list A pointer to an index_log
+   * @param schema A pointer to the schema
+   */
   query_planner(const data_log* dlog, const index_log* idx_list,
                 const schema_t* schema)
       : dlog_(dlog),
@@ -28,6 +38,12 @@ class query_planner {
         schema_(schema) {
   }
 
+  /**
+   * Converts a compiled_expression to a list of query_ops
+   * @param expr the compiled expression
+   * @throws illegal_state_exception
+   * @return the query plan that contains a list of query_ops
+   */
   query_plan plan(const compiled_expression& expr) const {
     query_plan qp;
     for (const compiled_minterm& m : expr) {

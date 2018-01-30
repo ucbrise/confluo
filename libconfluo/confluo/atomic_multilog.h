@@ -46,25 +46,60 @@ using namespace ::utils;
 
 namespace confluo {
 
+/**
+* The main data structure for the data store
+*/
 class atomic_multilog {
  public:
+  /**
+   * Type of data log
+   */
   typedef data_log data_log_type;
+
+  /**
+   * Type of schema
+   */
   typedef schema_t schema_type;
+
+  /**
+   * Type of read tail
+   */
   typedef read_tail read_tail_type;
+
+
+  /**
+   * Type of metadata_writer
+   */
   typedef metadata_writer metadata_writer_type;
 
+  /**
+   * Identifier for filter
+   */
   typedef size_t filter_id_t;
 
+  /**
+   * Identifier for aggregate
+   */
   struct aggregate_id_t {
+    /** The filter index */
     filter_id_t filter_idx;
+    /** The aggregate index */
     size_t aggregate_idx;
   };
 
+  /**
+   * Identifier for trigger
+   */
   struct trigger_id_t {
+    /** Identifier for the aggregate */
     aggregate_id_t aggregate_id;
+    /** Index of the trigger */
     size_t trigger_idx;
   };
 
+  /**
+   * List of alerts
+   */
   typedef alert_index::alert_list alert_list;
 
   /**
@@ -591,6 +626,13 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Adds an index to the schema for a given field
+   *
+   * @param field_name The name of the field to index
+   * @param bucket_size The bucket_size used for indexing
+   * @param ex The exception when the index could not be added
+   */
   void add_index_task(const std::string& field_name, double bucket_size,
                       optional<management_exception>& ex) {
     uint16_t idx;
@@ -620,6 +662,12 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Removes an index for a given field in the schema
+   *
+   * @param field_name The name of the field to index
+   * @param ex The exception when the index could not be removed
+   */
   void remove_index_task(const std::string& field_name,
                          optional<management_exception>& ex) {
     uint16_t idx;
@@ -638,6 +686,13 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Adds a filter to be executed on the data
+   *
+   * @param name The name of the filter
+   * @param expr The filter expression to execute
+   * @param ex The exception when the filter could not be added
+   */
   void add_filter_task(const std::string& name, const std::string& expr,
                        optional<management_exception>& ex) {
     filter_id_t filter_id;
@@ -656,6 +711,12 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Removes a filter that was created
+   *
+   * @param name The name of the filter
+   * @param ex The exception when the filter could not be removed
+   */
   void remove_filter_task(const std::string& name,
                           optional<management_exception>& ex) {
     filter_id_t filter_id;
@@ -671,6 +732,14 @@ class atomic_multilog {
     filter_map_.remove(name, filter_id);
   }
 
+  /**
+   * Adds an aggregate 
+   *
+   * @param name The name of the aggregate
+   * @param filter_name The name of the filter
+   * @param expr The filter expression
+   * @param ex The exception if the aggregate could not be added
+   */
   void add_aggregate_task(const std::string& name,
                           const std::string& filter_name,
                           const std::string& expr,
@@ -700,6 +769,12 @@ class atomic_multilog {
     metadata_.write_aggregate_metadata(name, filter_name, expr);
   }
 
+  /**
+   * Removes an aggregate
+   *
+   * @param name The name of the aggregate to remove
+   * @param ex The exception if the aggregate cannot be removed
+   */
   void remove_aggregate_task(const std::string& name,
                              optional<management_exception>& ex) {
     aggregate_id_t aggregate_id;
@@ -716,6 +791,15 @@ class atomic_multilog {
     aggregate_map_.remove(name, aggregate_id);
   }
 
+  /**
+   * Adds a trigger to the atomic multilog
+   *
+   * @param name The name of the trigger
+   * @param expr The trigger expression
+   * @param periodicity_ms The periodicity of the trigger measured in
+   * milliseconds
+   * @param ex The exception when the trigger cannot be added
+   */
   void add_trigger_task(const std::string& name, const std::string& expr,
                         uint64_t periodicity_ms,
                         optional<management_exception>& ex) {
@@ -748,6 +832,12 @@ class atomic_multilog {
     metadata_.write_trigger_metadata(name, expr, periodicity_ms);
   }
 
+  /**
+   * Removes a trigger from the atomic multilog
+   *
+   * @param name The name of the trigger
+   * @param ex The exception when the trigger could not be removed
+   */
   void remove_trigger_task(const std::string& name,
                            optional<management_exception>& ex) {
     trigger_id_t trigger_id;
@@ -800,6 +890,15 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Checks the time bucket and adds alerts when necessary
+   *
+   * @param f The filter 
+   * @param t The trigger
+   * @param tid The thread identifier
+   * @param time_bucket The time_bucket to check
+   * @param version The version to check
+   */
   void check_time_bucket(filter* f, trigger* t, size_t tid,
                          uint64_t time_bucket, uint64_t version) {
     size_t window_size = t->periodicity_ms();

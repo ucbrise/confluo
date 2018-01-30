@@ -29,6 +29,9 @@ class monolog_exp2_linear_base {
   typedef storage::read_only_ptr<T> __atomic_bucket_copy_ref;
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
+  /**
+   * monolog_exp2_linear_base
+   */
   monolog_exp2_linear_base()
       : fcs_hibit_(bit_utils::highest_bit(FCS)) {
     __atomic_bucket_ref* null_ptr = nullptr;
@@ -44,6 +47,9 @@ class monolog_exp2_linear_base {
     atomic::init(&bucket_containers_[0], first_container);
   }
 
+  /**
+   * ~monolog_exp2_linear_base
+   */
   ~monolog_exp2_linear_base() {
     size_t num_buckets = FCB;
     for (auto& x : bucket_containers_) {
@@ -403,20 +409,45 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> iterator;
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
 
+  /**
+   * Constructs a relaxed monolog implementation
+   */
   monolog_exp2_linear()
       : tail_(0) {
   }
 
+  /**
+   * Reserves space for data in the monolog
+   *
+   * @param count The amount of space to reserve
+   *
+   * @return The resultant tail
+   */
   size_t reserve(size_t count) {
     return atomic::faa(&tail_, count);
   }
 
+  /**
+   * Adds a value to the monolog
+   *
+   * @param val The value to add
+   *
+   * @return The index of the new value
+   */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
+  /**
+   * Adds a range of values to the monolog
+   *
+   * @param start The start of the range
+   * @param end The end of the range
+   *
+   * @return The index of the range
+   */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
@@ -425,18 +456,40 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
     return idx;
   }
 
+  /**
+   * Gets the element at an index
+   *
+   * @param idx The index of the desired element
+   *
+   * @return The element
+   */
   const T at(size_t idx) const {
     return this->get(idx);
   }
 
+  /**
+   * Gets the size of the monolog
+   *
+   * @return The size of the monolog
+   */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
+  /**
+   * Gets the beginning of the monolog iterator
+   *
+   * @return Iterator of the beginning of the monolog
+   */
   iterator begin() const {
     return iterator(this, 0);
   }
 
+  /**
+   * Gets the end of the monolog iterator
+   *
+   * @return Iterator of the end of the monolog
+   */
   iterator end() const {
     return iterator(this, size());
   }

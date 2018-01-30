@@ -20,9 +20,17 @@ namespace spirit = boost::spirit;
 using kv_pair = std::pair<std::string, std::string>;
 using kv_list = std::vector<kv_pair>;
 
+/**
+ * Grammar and rules for parsing a schema
+ *
+ * @tparam I The type of schema parser
+ */
 template<typename I>
 struct schema_parser : public qi::grammar<I, ascii::space_type, kv_list()> {
  public:
+  /**
+   * Constructs a schema parser
+   */
   schema_parser()
       : schema_parser::base_type(sch) {
     using qi::_val;
@@ -49,6 +57,13 @@ struct schema_parser : public qi::grammar<I, ascii::space_type, kv_list()> {
   qi::rule<I, ascii::space_type, std::string()> value;
 };
 
+/**
+ * Parses a schema from a given string
+ *
+ * @param s The string to parse the schema from
+ *
+ * @return A vector of columns that contains data that make up the schema
+ */
 static std::vector<column_t> parse_schema(const std::string& s) {
   using boost::spirit::ascii::space;
   typedef std::string::const_iterator iterator_type;

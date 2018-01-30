@@ -12,6 +12,9 @@
 
 namespace confluo {
 
+/**
+ * Components of a bitmap
+ */
 class bitmap {
  public:
   // Type definitions

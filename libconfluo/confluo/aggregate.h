@@ -10,24 +10,44 @@ namespace confluo {
 
 class aggregate;
 
+/** A vector of the aggregators supported */
 static std::vector<aggregator> aggregators { sum_aggregator, min_aggregator,
     max_aggregator, count_aggregator };
 
+/**
+ * Node that encapsulates the value, version, and the next aggregate
+ */
 struct aggregate_node {
+
+  /**
+   * Constructor for an aggregate_node
+   * @param agg The numeric containing the aggregate
+   * @param version The version of the aggregate
+   * @param next A pointer to the next aggregate
+   */
   aggregate_node(numeric agg, uint64_t version, aggregate_node *next)
       : value_(agg),
         version_(version),
         next_(next) {
   }
 
+  /** 
+   * @return The value of the aggregate
+   */
   inline numeric value() const {
     return value_;
   }
 
+  /**
+   * @return The current version of the aggregate
+   */
   inline uint64_t version() const {
     return version_;
   }
 
+  /**
+   * @return A pointer to the next aggregate
+   */
   inline aggregate_node* next() {
     return next_;
   }
@@ -38,10 +58,13 @@ struct aggregate_node {
   aggregate_node* next_;
 };
 
+/**
+ * List of aggregates
+ */
 class aggregate_list {
  public:
   /**
-   * Default constructor
+   * Default constructor that initializes an empty list of aggregates
    */
   aggregate_list()
       : head_(nullptr),
@@ -51,10 +74,10 @@ class aggregate_list {
   }
 
   /**
-   * Constructor for aggregate
+   * Constructor that initializes an aggregate list with one aggregator
    *
-   * @param type The type of Aggregate
-   * @param agg Aggregate function pointer.
+   * @param type The type of the aggregate
+   * @param agg The aggregator that is added to the list
    * 
    */
   aggregate_list(data_type type, aggregator agg)
@@ -64,10 +87,11 @@ class aggregate_list {
   }
 
   /**
-   * Constructor for aggregate
+   * Constructor that initializes an aggregate list with the type of 
+   * aggregate
    *
-   * @param type The type of Aggregate
-   * @param id Aggregate ID.
+   * @param type The data type of the aggregate
+   * @param atype The aggregate type
    */
   aggregate_list(data_type type, aggregate_type atype)
       : head_(nullptr),
@@ -82,8 +106,8 @@ class aggregate_list {
 
   /**
    * Initializes the type and aggregate of the list
-   * @param type The type of the aggregate
-   * @param agg Aggregate function pointer
+   * @param type The data type of the aggregate
+   * @param agg The aggregator
    */
   void init(data_type type, aggregator agg) {
     type_ = type;
@@ -170,14 +194,26 @@ class aggregate_list {
   data_type type_;
 };
 
+/**
+ * A summary of the data
+ */
 class aggregate {
  public:
+  /**
+   * Initializes an empty aggregate for a none type
+   */
   aggregate()
       : type_(NONE_TYPE),
         agg_(invalid_aggregator),
         aggs_(nullptr) {
   }
 
+  /**
+   * Creates an aggregate from the given data type and aggregate type
+   *
+   * @param type The data type to compute the aggregate from
+   * @param atype The type of aggregate
+   */
   aggregate(const data_type& type, aggregate_type atype)
       : type_(type),
         agg_(aggregators[atype]),
@@ -186,10 +222,25 @@ class aggregate {
       aggs_[i].init(type, atype);
   }
 
+  /**
+   * Updates the local thread aggregate to the specified value for the
+   * given version
+   *
+   * @param thread_id The thread identifier
+   * @param value The value to update the aggregate to
+   * @param version The version to update
+   */
   void update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].update(value, version);
   }
 
+  /**
+   * Gets the aggregate at the specified version
+   *
+   * @param version The version to get the aggregate at
+   *
+   * @return Numeric representing the aggregated value
+   */
   numeric get(uint64_t version) const {
     numeric val = agg_.zero(type_);
     for (int i = 0; i < thread_manager::get_max_concurrency(); i++)

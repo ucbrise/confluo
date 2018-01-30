@@ -8,6 +8,9 @@
 
 namespace confluo {
 
+/**
+ * Defines an exception for a given name
+ */
 #define DEFINE_EXCEPTION(name)\
 class name : public std::exception {\
  public:\
