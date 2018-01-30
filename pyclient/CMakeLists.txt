@@ -5,7 +5,7 @@ configure_file(${SETUP_PY_IN} ${SETUP_PY})
 file(GLOB_RECURSE files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.py *.cfg *.xml)
 create_symlinks(${files})
 
-add_custom_target(pyclient_build ALL
+add_custom_target(pyclient ALL
   COMMAND ${PYTHON_EXECUTABLE} setup.py build --build-base ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Building Python client"

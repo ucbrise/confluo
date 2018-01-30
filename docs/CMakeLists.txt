@@ -1,16 +1,9 @@
 # set input and output files
-set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
-set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+set(DOXYGEN_CPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/DoxyfileCpp.in)
+set(DOXYGEN_CPP_OUT ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileCpp)
 
 # request to configure the file
-configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-
-# generate doxygen API documentation
-add_custom_target(doc_doxygen ALL
-  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMENT "Generating API documentation with Doxygen"
-  VERBATIM)
+configure_file(${DOXYGEN_CPP_IN} ${DOXYGEN_CPP_OUT} @ONLY)
 
 # set input and output files
 set(MKDOCS_IN ${CMAKE_CURRENT_SOURCE_DIR}/mkdocs.yml.in)
@@ -32,3 +25,11 @@ add_custom_target(doc_serve
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Serving Documentation built by MkDocs"
   VERBATIM)
+
+# generate doxygen API documentation
+add_custom_target(doc_doxygen ALL
+  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_CPP_OUT}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  COMMENT "Generating C++ API documentation with Doxygen"
+  VERBATIM)
+
