@@ -2,9 +2,6 @@ package confluo.rpc;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by neil on 1/26/18.
- */
 public class column {
 
     private int idx;

@@ -1,8 +1,5 @@
 package confluo.rpc;
 
-/**
- * Created by neil on 1/26/18.
- */
 public class type_id {
     static rpc_data_type NONE = rpc_data_type.RPC_NONE;
     static rpc_data_type BOOL = rpc_data_type.RPC_BOOL;

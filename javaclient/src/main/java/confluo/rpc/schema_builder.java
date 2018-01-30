@@ -3,9 +3,6 @@ package confluo.rpc;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by neil on 1/26/18.
- */
 public class schema_builder {
 
     private boolean user_provided_ts;

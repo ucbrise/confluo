@@ -3,6 +3,7 @@ package confluo.rpc;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TIOStreamTransport;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TSocket;
 
@@ -29,8 +30,9 @@ public class rpc_client {
     }
 
     public void connect(String host, int port) {
-        //socket = new TSocket(host, port);
-        transport = new TSocket(host, port);//TFramedTransport(socket);
+        socket = new TSocket(host, port);
+        //transport = new TSocket(host, port);//TFramedTransport(socket);
+        transport = socket;
         protocol = new TBinaryProtocol(transport);
         client = new rpc_service.Client(protocol);
         try {
@@ -179,10 +181,10 @@ public class rpc_client {
 
     public void write(ByteBuffer record) {
         if (cur_multilog_id == -1) {
-
+            return;
         }
         if (record.array().length != cur_schema.get_record_size()) {
-
+            return;
         }
         try {
             client.append(cur_multilog_id, record);
@@ -193,7 +195,7 @@ public class rpc_client {
 
     public ByteBuffer read(long offset) {
         if (cur_multilog_id == -1) {
-
+            return null;
         }
         try {
             return client.read(cur_multilog_id, offset, cur_schema.get_record_size());

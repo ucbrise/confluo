@@ -5,7 +5,7 @@ import org.apache.thrift.TException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
-class record_stream implements Iterable<record> {
+public class record_stream implements Iterable<record> {
 
     private long multilog_id;
     private long cur_off;

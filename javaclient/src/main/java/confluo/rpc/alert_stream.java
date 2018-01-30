@@ -1,8 +1,5 @@
 package confluo.rpc;
 
-/**
- * Created by neil on 1/26/18.
- */
 public class alert_stream {
 
     private long multilog_id;

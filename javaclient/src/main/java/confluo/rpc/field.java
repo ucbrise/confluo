@@ -1,17 +1,16 @@
 package confluo.rpc;
 
+import javax.print.DocFlavor;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-/**
- * Created by neil on 1/26/18.
- */
 public class field {
 
     private int idx;
     private data_type data_type;
     private ByteBuffer data;
     private static HashMap<rpc_data_type, String> FORMAT_CODES;
+
     static {
         FORMAT_CODES = new HashMap<>();
         FORMAT_CODES.put(type_id.BOOL, "?");
@@ -30,7 +29,7 @@ public class field {
         this.data = data;
     }
 
-    byte unpack() {
+    public byte unpack() {
         rpc_data_type tid = data_type.type_id;
         String format_code;
         if (tid == type_id.STRING) {
@@ -39,5 +38,9 @@ public class field {
              format_code = FORMAT_CODES.get(tid);
         }
         return data.get(0);
+    }
+
+    public ByteBuffer get_data() {
+        return data;
     }
 }

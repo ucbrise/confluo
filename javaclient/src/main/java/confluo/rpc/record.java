@@ -4,9 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by neil on 1/26/18.
- */
 public class record {
 
     private long log_offset;
