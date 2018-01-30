@@ -168,10 +168,10 @@
   </target>
 
   <!-- ====================================================================== -->
-  <!-- Package target                                                         -->
+  <!-- Jar target                                                             -->
   <!-- ====================================================================== -->
 
-  <target name="package" depends="compile,test" description="Package the application">
+  <target name="jar" depends="compile" description="Builds the jar for the application">
     <jar jarfile="${maven.build.dir}/${maven.build.finalName}.jar" 
          compress="true" 
          index="false" 
@@ -180,10 +180,10 @@
   </target>
 
   <!-- ====================================================================== -->
-  <!-- A dummy target for the package named after the type it creates         -->
+  <!-- Package target                                                         -->
   <!-- ====================================================================== -->
 
-  <target name="jar" depends="package" description="Builds the jar for the application"/>
+  <target name="package" depends="jar,test" description="Package the application"/>
 
   <!-- ====================================================================== -->
   <!-- Download dependencies target                                           -->
