@@ -4,10 +4,14 @@ set(JAVA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DOC_INSTALL_DIR}/java")
 
 set(CONFLUO_CLIENT_ARTIFACTS confluo-client-0.1.0.jar confluo-client-0.1.0.pom)
 
+set(BUILD_XML_IN "${CMAKE_CURRENT_SOURCE_DIR}/build.xml.in")
+set(BUILD_XML "${CMAKE_CURRENT_BINARY_DIR}/build.xml")
+configure_file(${BUILD_XML_IN} ${BUILD_XML} @ONLY)
+
 add_custom_command(
     OUTPUT ${CONFLUO_CLIENT_ARTIFACTS}
-    COMMAND ${Ant_EXECUTABLE} ${ANT_FLAGS} -Dbuild.dir="${CMAKE_CURRENT_BINARY_DIR}" -f build.xml jar
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/build.xml
+    COMMAND ${Ant_EXECUTABLE} ${ANT_FLAGS} -Dbuild.dir="${CMAKE_CURRENT_BINARY_DIR}" -f ${BUILD_XML} jar
+    MAIN_DEPENDENCY ${BUILD_XML}
     DEPENDS ${CONFLUO_CLIENT_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -19,7 +23,7 @@ add_custom_target(javaclient ALL
 
 if (BUILD_TESTS)
   add_test(NAME JavaClientTest
-    COMMAND ${CMAKE_COMMAND} -E env CONFLUO_SERVER_EXEC=${PROJECT_BINARY_DIR}/bin/confluod ${Ant_EXECUTABLE} ${ANT_FLAGS} -Dbuild.dir="${CMAKE_CURRENT_BINARY_DIR}" -f build.xml test
+    COMMAND ${Ant_EXECUTABLE} ${ANT_FLAGS} -Dbuild.dir="${CMAKE_CURRENT_BINARY_DIR}" -f ${BUILD_XML} test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 endif()
