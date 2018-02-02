@@ -199,20 +199,20 @@ public class rpc_service {
       args.set_name(name);
       args.set_schema(schema);
       args.set_mode(mode);
-      sendBase("create_atomic_multilog", args);
+      sendBase("createAtomicMultilog", args);
     }
 
     public long recv_create_atomic_multilog() throws rpc_management_exception, org.apache.thrift.TException
     {
       create_atomic_multilog_result result = new create_atomic_multilog_result();
-      receiveBase(result, "create_atomic_multilog");
+      receiveBase(result, "createAtomicMultilog");
       if (result.is_set_success()) {
         return result.success;
       }
       if (result.ex != null) {
         throw result.ex;
       }
-      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "create_atomic_multilog failed: unknown result");
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "createAtomicMultilog failed: unknown result");
     }
 
     public rpc_atomic_multilog_info get_atomic_multilog_info(java.lang.String name) throws org.apache.thrift.TException
@@ -248,13 +248,13 @@ public class rpc_service {
     {
       remove_atomic_multilog_args args = new remove_atomic_multilog_args();
       args.set_multilog_id(multilog_id);
-      sendBase("remove_atomic_multilog", args);
+      sendBase("removeAtomicMultilog", args);
     }
 
     public void recv_remove_atomic_multilog() throws rpc_management_exception, org.apache.thrift.TException
     {
       remove_atomic_multilog_result result = new remove_atomic_multilog_result();
-      receiveBase(result, "remove_atomic_multilog");
+      receiveBase(result, "removeAtomicMultilog");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -273,13 +273,13 @@ public class rpc_service {
       args.set_multilog_id(multilog_id);
       args.set_field_name(field_name);
       args.set_bucket_size(bucket_size);
-      sendBase("add_index", args);
+      sendBase("addIndex", args);
     }
 
     public void recv_add_index() throws rpc_management_exception, org.apache.thrift.TException
     {
       add_index_result result = new add_index_result();
-      receiveBase(result, "add_index");
+      receiveBase(result, "addIndex");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -297,13 +297,13 @@ public class rpc_service {
       remove_index_args args = new remove_index_args();
       args.set_multilog_id(multilog_id);
       args.set_field_name(field_name);
-      sendBase("remove_index", args);
+      sendBase("removeIndex", args);
     }
 
     public void recv_remove_index() throws rpc_management_exception, org.apache.thrift.TException
     {
       remove_index_result result = new remove_index_result();
-      receiveBase(result, "remove_index");
+      receiveBase(result, "removeIndex");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -322,13 +322,13 @@ public class rpc_service {
       args.set_multilog_id(multilog_id);
       args.set_filter_name(filter_name);
       args.set_filter_expr(filter_expr);
-      sendBase("add_filter", args);
+      sendBase("addFilter", args);
     }
 
     public void recv_add_filter() throws rpc_management_exception, org.apache.thrift.TException
     {
       add_filter_result result = new add_filter_result();
-      receiveBase(result, "add_filter");
+      receiveBase(result, "addFilter");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -346,13 +346,13 @@ public class rpc_service {
       remove_filter_args args = new remove_filter_args();
       args.set_multilog_id(multilog_id);
       args.set_filter_name(filter_name);
-      sendBase("remove_filter", args);
+      sendBase("removeFilter", args);
     }
 
     public void recv_remove_filter() throws rpc_management_exception, org.apache.thrift.TException
     {
       remove_filter_result result = new remove_filter_result();
-      receiveBase(result, "remove_filter");
+      receiveBase(result, "removeFilter");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -372,13 +372,13 @@ public class rpc_service {
       args.set_aggregate_name(aggregate_name);
       args.set_filter_name(filter_name);
       args.set_aggregate_expr(aggregate_expr);
-      sendBase("add_aggregate", args);
+      sendBase("addAggregate", args);
     }
 
     public void recv_add_aggregate() throws rpc_management_exception, org.apache.thrift.TException
     {
       add_aggregate_result result = new add_aggregate_result();
-      receiveBase(result, "add_aggregate");
+      receiveBase(result, "addAggregate");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -396,13 +396,13 @@ public class rpc_service {
       remove_aggregate_args args = new remove_aggregate_args();
       args.set_multilog_id(multilog_id);
       args.set_aggregate_name(aggregate_name);
-      sendBase("remove_aggregate", args);
+      sendBase("removeAggregate", args);
     }
 
     public void recv_remove_aggregate() throws org.apache.thrift.TException
     {
       remove_aggregate_result result = new remove_aggregate_result();
-      receiveBase(result, "remove_aggregate");
+      receiveBase(result, "removeAggregate");
       return;
     }
 
@@ -442,13 +442,13 @@ public class rpc_service {
       remove_trigger_args args = new remove_trigger_args();
       args.set_multilog_id(multilog_id);
       args.set_trigger_name(trigger_name);
-      sendBase("remove_trigger", args);
+      sendBase("removeTrigger", args);
     }
 
     public void recv_remove_trigger() throws rpc_management_exception, org.apache.thrift.TException
     {
       remove_trigger_result result = new remove_trigger_result();
-      receiveBase(result, "remove_trigger");
+      receiveBase(result, "removeTrigger");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -737,17 +737,17 @@ public class rpc_service {
     {
       num_records_args args = new num_records_args();
       args.set_multilog_id(multilog_id);
-      sendBase("num_records", args);
+      sendBase("numRecords", args);
     }
 
     public long recv_num_records() throws org.apache.thrift.TException
     {
       num_records_result result = new num_records_result();
-      receiveBase(result, "num_records");
+      receiveBase(result, "numRecords");
       if (result.is_set_success()) {
         return result.success;
       }
-      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "num_records failed: unknown result");
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "numRecords failed: unknown result");
     }
 
   }
@@ -845,7 +845,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("create_atomic_multilog", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("createAtomicMultilog", org.apache.thrift.protocol.TMessageType.CALL, 0));
         create_atomic_multilog_args args = new create_atomic_multilog_args();
         args.set_name(name);
         args.set_schema(schema);
@@ -911,7 +911,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("remove_atomic_multilog", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("removeAtomicMultilog", org.apache.thrift.protocol.TMessageType.CALL, 0));
         remove_atomic_multilog_args args = new remove_atomic_multilog_args();
         args.set_multilog_id(multilog_id);
         args.write(prot);
@@ -947,7 +947,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_index", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("addIndex", org.apache.thrift.protocol.TMessageType.CALL, 0));
         add_index_args args = new add_index_args();
         args.set_multilog_id(multilog_id);
         args.set_field_name(field_name);
@@ -983,7 +983,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("remove_index", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("removeIndex", org.apache.thrift.protocol.TMessageType.CALL, 0));
         remove_index_args args = new remove_index_args();
         args.set_multilog_id(multilog_id);
         args.set_field_name(field_name);
@@ -1020,7 +1020,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_filter", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("addFilter", org.apache.thrift.protocol.TMessageType.CALL, 0));
         add_filter_args args = new add_filter_args();
         args.set_multilog_id(multilog_id);
         args.set_filter_name(filter_name);
@@ -1056,7 +1056,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("remove_filter", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("removeFilter", org.apache.thrift.protocol.TMessageType.CALL, 0));
         remove_filter_args args = new remove_filter_args();
         args.set_multilog_id(multilog_id);
         args.set_filter_name(filter_name);
@@ -1095,7 +1095,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_aggregate", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("addAggregate", org.apache.thrift.protocol.TMessageType.CALL, 0));
         add_aggregate_args args = new add_aggregate_args();
         args.set_mutlilog_id(mutlilog_id);
         args.set_aggregate_name(aggregate_name);
@@ -1132,7 +1132,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("remove_aggregate", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("removeAggregate", org.apache.thrift.protocol.TMessageType.CALL, 0));
         remove_aggregate_args args = new remove_aggregate_args();
         args.set_multilog_id(multilog_id);
         args.set_aggregate_name(aggregate_name);
@@ -1205,7 +1205,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("remove_trigger", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("removeTrigger", org.apache.thrift.protocol.TMessageType.CALL, 0));
         remove_trigger_args args = new remove_trigger_args();
         args.set_multilog_id(multilog_id);
         args.set_trigger_name(trigger_name);
@@ -1621,7 +1621,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("num_records", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("numRecords", org.apache.thrift.protocol.TMessageType.CALL, 0));
         num_records_args args = new num_records_args();
         args.set_multilog_id(multilog_id);
         args.write(prot);
@@ -1653,17 +1653,17 @@ public class rpc_service {
     private static <I extends Iface> java.util.Map<java.lang.String,  org.apache.thrift.ProcessFunction<I, ? extends org.apache.thrift.TBase>> getProcessMap(java.util.Map<java.lang.String, org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
       processMap.put("register_handler", new register_handler());
       processMap.put("deregister_handler", new deregister_handler());
-      processMap.put("create_atomic_multilog", new create_atomic_multilog());
+      processMap.put("createAtomicMultilog", new create_atomic_multilog());
       processMap.put("get_atomic_multilog_info", new get_atomic_multilog_info());
-      processMap.put("remove_atomic_multilog", new remove_atomic_multilog());
-      processMap.put("add_index", new add_index());
-      processMap.put("remove_index", new remove_index());
-      processMap.put("add_filter", new add_filter());
-      processMap.put("remove_filter", new remove_filter());
-      processMap.put("add_aggregate", new add_aggregate());
-      processMap.put("remove_aggregate", new remove_aggregate());
+      processMap.put("removeAtomicMultilog", new remove_atomic_multilog());
+      processMap.put("addIndex", new add_index());
+      processMap.put("removeIndex", new remove_index());
+      processMap.put("addFilter", new add_filter());
+      processMap.put("removeFilter", new remove_filter());
+      processMap.put("addAggregate", new add_aggregate());
+      processMap.put("removeAggregate", new remove_aggregate());
       processMap.put("add_trigger", new add_trigger());
-      processMap.put("remove_trigger", new remove_trigger());
+      processMap.put("removeTrigger", new remove_trigger());
       processMap.put("append", new append());
       processMap.put("append_batch", new append_batch());
       processMap.put("read", new read());
@@ -1674,7 +1674,7 @@ public class rpc_service {
       processMap.put("alerts_by_time", new alerts_by_time());
       processMap.put("alerts_by_trigger_and_time", new alerts_by_trigger_and_time());
       processMap.put("get_more", new get_more());
-      processMap.put("num_records", new num_records());
+      processMap.put("numRecords", new num_records());
       return processMap;
     }
 
@@ -1728,7 +1728,7 @@ public class rpc_service {
 
     public static class create_atomic_multilog<I extends Iface> extends org.apache.thrift.ProcessFunction<I, create_atomic_multilog_args> {
       public create_atomic_multilog() {
-        super("create_atomic_multilog");
+        super("createAtomicMultilog");
       }
 
       public create_atomic_multilog_args getEmptyArgsInstance() {
@@ -1773,7 +1773,7 @@ public class rpc_service {
 
     public static class remove_atomic_multilog<I extends Iface> extends org.apache.thrift.ProcessFunction<I, remove_atomic_multilog_args> {
       public remove_atomic_multilog() {
-        super("remove_atomic_multilog");
+        super("removeAtomicMultilog");
       }
 
       public remove_atomic_multilog_args getEmptyArgsInstance() {
@@ -1797,7 +1797,7 @@ public class rpc_service {
 
     public static class add_index<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_index_args> {
       public add_index() {
-        super("add_index");
+        super("addIndex");
       }
 
       public add_index_args getEmptyArgsInstance() {
@@ -1821,7 +1821,7 @@ public class rpc_service {
 
     public static class remove_index<I extends Iface> extends org.apache.thrift.ProcessFunction<I, remove_index_args> {
       public remove_index() {
-        super("remove_index");
+        super("removeIndex");
       }
 
       public remove_index_args getEmptyArgsInstance() {
@@ -1845,7 +1845,7 @@ public class rpc_service {
 
     public static class add_filter<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_filter_args> {
       public add_filter() {
-        super("add_filter");
+        super("addFilter");
       }
 
       public add_filter_args getEmptyArgsInstance() {
@@ -1869,7 +1869,7 @@ public class rpc_service {
 
     public static class remove_filter<I extends Iface> extends org.apache.thrift.ProcessFunction<I, remove_filter_args> {
       public remove_filter() {
-        super("remove_filter");
+        super("removeFilter");
       }
 
       public remove_filter_args getEmptyArgsInstance() {
@@ -1893,7 +1893,7 @@ public class rpc_service {
 
     public static class add_aggregate<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_aggregate_args> {
       public add_aggregate() {
-        super("add_aggregate");
+        super("addAggregate");
       }
 
       public add_aggregate_args getEmptyArgsInstance() {
@@ -1917,7 +1917,7 @@ public class rpc_service {
 
     public static class remove_aggregate<I extends Iface> extends org.apache.thrift.ProcessFunction<I, remove_aggregate_args> {
       public remove_aggregate() {
-        super("remove_aggregate");
+        super("removeAggregate");
       }
 
       public remove_aggregate_args getEmptyArgsInstance() {
@@ -1961,7 +1961,7 @@ public class rpc_service {
 
     public static class remove_trigger<I extends Iface> extends org.apache.thrift.ProcessFunction<I, remove_trigger_args> {
       public remove_trigger() {
-        super("remove_trigger");
+        super("removeTrigger");
       }
 
       public remove_trigger_args getEmptyArgsInstance() {
@@ -2215,7 +2215,7 @@ public class rpc_service {
 
     public static class num_records<I extends Iface> extends org.apache.thrift.ProcessFunction<I, num_records_args> {
       public num_records() {
-        super("num_records");
+        super("numRecords");
       }
 
       public num_records_args getEmptyArgsInstance() {
@@ -2249,17 +2249,17 @@ public class rpc_service {
     private static <I extends AsyncIface> java.util.Map<java.lang.String,  org.apache.thrift.AsyncProcessFunction<I, ? extends  org.apache.thrift.TBase,?>> getProcessMap(java.util.Map<java.lang.String,  org.apache.thrift.AsyncProcessFunction<I, ? extends  org.apache.thrift.TBase, ?>> processMap) {
       processMap.put("register_handler", new register_handler());
       processMap.put("deregister_handler", new deregister_handler());
-      processMap.put("create_atomic_multilog", new create_atomic_multilog());
+      processMap.put("createAtomicMultilog", new create_atomic_multilog());
       processMap.put("get_atomic_multilog_info", new get_atomic_multilog_info());
-      processMap.put("remove_atomic_multilog", new remove_atomic_multilog());
-      processMap.put("add_index", new add_index());
-      processMap.put("remove_index", new remove_index());
-      processMap.put("add_filter", new add_filter());
-      processMap.put("remove_filter", new remove_filter());
-      processMap.put("add_aggregate", new add_aggregate());
-      processMap.put("remove_aggregate", new remove_aggregate());
+      processMap.put("removeAtomicMultilog", new remove_atomic_multilog());
+      processMap.put("addIndex", new add_index());
+      processMap.put("removeIndex", new remove_index());
+      processMap.put("addFilter", new add_filter());
+      processMap.put("removeFilter", new remove_filter());
+      processMap.put("addAggregate", new add_aggregate());
+      processMap.put("removeAggregate", new remove_aggregate());
       processMap.put("add_trigger", new add_trigger());
-      processMap.put("remove_trigger", new remove_trigger());
+      processMap.put("removeTrigger", new remove_trigger());
       processMap.put("append", new append());
       processMap.put("append_batch", new append_batch());
       processMap.put("read", new read());
@@ -2270,7 +2270,7 @@ public class rpc_service {
       processMap.put("alerts_by_time", new alerts_by_time());
       processMap.put("alerts_by_trigger_and_time", new alerts_by_trigger_and_time());
       processMap.put("get_more", new get_more());
-      processMap.put("num_records", new num_records());
+      processMap.put("numRecords", new num_records());
       return processMap;
     }
 
@@ -2404,7 +2404,7 @@ public class rpc_service {
 
     public static class create_atomic_multilog<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, create_atomic_multilog_args, java.lang.Long> {
       public create_atomic_multilog() {
-        super("create_atomic_multilog");
+        super("createAtomicMultilog");
       }
 
       public create_atomic_multilog_args getEmptyArgsInstance() {
@@ -2531,7 +2531,7 @@ public class rpc_service {
 
     public static class remove_atomic_multilog<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, remove_atomic_multilog_args, Void> {
       public remove_atomic_multilog() {
-        super("remove_atomic_multilog");
+        super("removeAtomicMultilog");
       }
 
       public remove_atomic_multilog_args getEmptyArgsInstance() {
@@ -2595,7 +2595,7 @@ public class rpc_service {
 
     public static class add_index<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_index_args, Void> {
       public add_index() {
-        super("add_index");
+        super("addIndex");
       }
 
       public add_index_args getEmptyArgsInstance() {
@@ -2659,7 +2659,7 @@ public class rpc_service {
 
     public static class remove_index<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, remove_index_args, Void> {
       public remove_index() {
-        super("remove_index");
+        super("removeIndex");
       }
 
       public remove_index_args getEmptyArgsInstance() {
@@ -2723,7 +2723,7 @@ public class rpc_service {
 
     public static class add_filter<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_filter_args, Void> {
       public add_filter() {
-        super("add_filter");
+        super("addFilter");
       }
 
       public add_filter_args getEmptyArgsInstance() {
@@ -2787,7 +2787,7 @@ public class rpc_service {
 
     public static class remove_filter<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, remove_filter_args, Void> {
       public remove_filter() {
-        super("remove_filter");
+        super("removeFilter");
       }
 
       public remove_filter_args getEmptyArgsInstance() {
@@ -2851,7 +2851,7 @@ public class rpc_service {
 
     public static class add_aggregate<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_aggregate_args, Void> {
       public add_aggregate() {
-        super("add_aggregate");
+        super("addAggregate");
       }
 
       public add_aggregate_args getEmptyArgsInstance() {
@@ -2915,7 +2915,7 @@ public class rpc_service {
 
     public static class remove_aggregate<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, remove_aggregate_args, Void> {
       public remove_aggregate() {
-        super("remove_aggregate");
+        super("removeAggregate");
       }
 
       public remove_aggregate_args getEmptyArgsInstance() {
@@ -3039,7 +3039,7 @@ public class rpc_service {
 
     public static class remove_trigger<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, remove_trigger_args, Void> {
       public remove_trigger() {
-        super("remove_trigger");
+        super("removeTrigger");
       }
 
       public remove_trigger_args getEmptyArgsInstance() {
@@ -3743,7 +3743,7 @@ public class rpc_service {
 
     public static class num_records<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, num_records_args, java.lang.Long> {
       public num_records() {
-        super("num_records");
+        super("numRecords");
       }
 
       public num_records_args getEmptyArgsInstance() {
@@ -3903,7 +3903,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -4174,7 +4174,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -4207,7 +4207,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -4521,7 +4521,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -4792,7 +4792,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -4825,7 +4825,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -5196,7 +5196,7 @@ public class rpc_service {
       this.name = null;
     }
 
-    /** Returns true if field name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field name is set (has been assigned a value) and false otherwise */
     public boolean is_set_name() {
       return this.name != null;
     }
@@ -5235,7 +5235,7 @@ public class rpc_service {
       this.schema = null;
     }
 
-    /** Returns true if field schema is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field Schema is set (has been assigned a value) and false otherwise */
     public boolean is_set_schema() {
       return this.schema != null;
     }
@@ -5267,7 +5267,7 @@ public class rpc_service {
       this.mode = null;
     }
 
-    /** Returns true if field mode is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field mode is set (has been assigned a value) and false otherwise */
     public boolean is_set_mode() {
       return this.mode != null;
     }
@@ -5322,7 +5322,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -5469,7 +5469,7 @@ public class rpc_service {
       }
       first = false;
       if (!first) sb.append(", ");
-      sb.append("schema:");
+      sb.append("Schema:");
       if (this.schema == null) {
         sb.append("null");
       } else {
@@ -5824,7 +5824,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
@@ -5846,7 +5846,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -5890,7 +5890,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -6277,7 +6277,7 @@ public class rpc_service {
       this.name = null;
     }
 
-    /** Returns true if field name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field name is set (has been assigned a value) and false otherwise */
     public boolean is_set_name() {
       return this.name != null;
     }
@@ -6310,7 +6310,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -6641,7 +6641,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -6674,7 +6674,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -7016,7 +7016,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -7047,7 +7047,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -7370,7 +7370,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -7403,7 +7403,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -7769,7 +7769,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -7791,7 +7791,7 @@ public class rpc_service {
       this.field_name = null;
     }
 
-    /** Returns true if field field_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field field_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_field_name() {
       return this.field_name != null;
     }
@@ -7816,7 +7816,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BUCKET_SIZE_ISSET_ID);
     }
 
-    /** Returns true if field bucket_size is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field bucket_size is set (has been assigned a value) and false otherwise */
     public boolean is_set_bucket_size() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BUCKET_SIZE_ISSET_ID);
     }
@@ -7869,7 +7869,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -8296,7 +8296,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -8329,7 +8329,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -8681,7 +8681,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -8703,7 +8703,7 @@ public class rpc_service {
       this.field_name = null;
     }
 
-    /** Returns true if field field_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field field_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_field_name() {
       return this.field_name != null;
     }
@@ -8747,7 +8747,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -9126,7 +9126,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -9159,7 +9159,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -9524,7 +9524,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -9546,7 +9546,7 @@ public class rpc_service {
       this.filter_name = null;
     }
 
-    /** Returns true if field filter_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_name() {
       return this.filter_name != null;
     }
@@ -9570,7 +9570,7 @@ public class rpc_service {
       this.filter_expr = null;
     }
 
-    /** Returns true if field filter_expr is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_expr is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_expr() {
       return this.filter_expr != null;
     }
@@ -9625,7 +9625,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -10060,7 +10060,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -10093,7 +10093,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -10445,7 +10445,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -10467,7 +10467,7 @@ public class rpc_service {
       this.filter_name = null;
     }
 
-    /** Returns true if field filter_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_name() {
       return this.filter_name != null;
     }
@@ -10511,7 +10511,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -10890,7 +10890,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -10923,7 +10923,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -11301,7 +11301,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MUTLILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field mutlilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field mutlilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_mutlilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MUTLILOG_ID_ISSET_ID);
     }
@@ -11323,7 +11323,7 @@ public class rpc_service {
       this.aggregate_name = null;
     }
 
-    /** Returns true if field aggregate_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field aggregate_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_aggregate_name() {
       return this.aggregate_name != null;
     }
@@ -11347,7 +11347,7 @@ public class rpc_service {
       this.filter_name = null;
     }
 
-    /** Returns true if field filter_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_name() {
       return this.filter_name != null;
     }
@@ -11371,7 +11371,7 @@ public class rpc_service {
       this.aggregate_expr = null;
     }
 
-    /** Returns true if field aggregate_expr is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field aggregate_expr is set (has been assigned a value) and false otherwise */
     public boolean is_set_aggregate_expr() {
       return this.aggregate_expr != null;
     }
@@ -11437,7 +11437,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -11928,7 +11928,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -11961,7 +11961,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -12313,7 +12313,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -12335,7 +12335,7 @@ public class rpc_service {
       this.aggregate_name = null;
     }
 
-    /** Returns true if field aggregate_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field aggregate_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_aggregate_name() {
       return this.aggregate_name != null;
     }
@@ -12379,7 +12379,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -12737,7 +12737,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -13038,7 +13038,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -13060,7 +13060,7 @@ public class rpc_service {
       this.trigger_name = null;
     }
 
-    /** Returns true if field trigger_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field trigger_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_trigger_name() {
       return this.trigger_name != null;
     }
@@ -13084,7 +13084,7 @@ public class rpc_service {
       this.trigger_expr = null;
     }
 
-    /** Returns true if field trigger_expr is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field trigger_expr is set (has been assigned a value) and false otherwise */
     public boolean is_set_trigger_expr() {
       return this.trigger_expr != null;
     }
@@ -13139,7 +13139,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -13574,7 +13574,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -13607,7 +13607,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -13959,7 +13959,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -13981,7 +13981,7 @@ public class rpc_service {
       this.trigger_name = null;
     }
 
-    /** Returns true if field trigger_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field trigger_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_trigger_name() {
       return this.trigger_name != null;
     }
@@ -14025,7 +14025,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -14404,7 +14404,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -14437,7 +14437,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -14789,7 +14789,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -14821,7 +14821,7 @@ public class rpc_service {
       this.data = null;
     }
 
-    /** Returns true if field data is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field data is set (has been assigned a value) and false otherwise */
     public boolean is_set_data() {
       return this.data != null;
     }
@@ -14869,7 +14869,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -15252,7 +15252,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
@@ -15283,7 +15283,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -15627,7 +15627,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -15649,7 +15649,7 @@ public class rpc_service {
       this.batch = null;
     }
 
-    /** Returns true if field batch is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field batch is set (has been assigned a value) and false otherwise */
     public boolean is_set_batch() {
       return this.batch != null;
     }
@@ -15693,7 +15693,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -16085,7 +16085,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
@@ -16116,7 +16116,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -16473,7 +16473,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -16496,7 +16496,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __OFFSET_ISSET_ID);
     }
 
-    /** Returns true if field offset is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field offset is set (has been assigned a value) and false otherwise */
     public boolean is_set_offset() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __OFFSET_ISSET_ID);
     }
@@ -16519,7 +16519,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __NRECORDS_ISSET_ID);
     }
 
-    /** Returns true if field nrecords is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field nrecords is set (has been assigned a value) and false otherwise */
     public boolean is_set_nrecords() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __NRECORDS_ISSET_ID);
     }
@@ -16572,7 +16572,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -17001,7 +17001,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -17038,7 +17038,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -17412,7 +17412,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -17434,7 +17434,7 @@ public class rpc_service {
       this.aggregate_name = null;
     }
 
-    /** Returns true if field aggregate_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field aggregate_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_aggregate_name() {
       return this.aggregate_name != null;
     }
@@ -17459,7 +17459,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
 
-    /** Returns true if field begin_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field begin_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_begin_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
@@ -17482,7 +17482,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
 
-    /** Returns true if field end_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field end_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_end_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
@@ -17546,7 +17546,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -18034,7 +18034,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -18058,7 +18058,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -18102,7 +18102,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -18510,7 +18510,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -18532,7 +18532,7 @@ public class rpc_service {
       this.filter_expr = null;
     }
 
-    /** Returns true if field filter_expr is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_expr is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_expr() {
       return this.filter_expr != null;
     }
@@ -18576,7 +18576,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -18970,7 +18970,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -18994,7 +18994,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -19038,7 +19038,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -19483,7 +19483,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -19505,7 +19505,7 @@ public class rpc_service {
       this.filter_name = null;
     }
 
-    /** Returns true if field filter_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_name() {
       return this.filter_name != null;
     }
@@ -19530,7 +19530,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
 
-    /** Returns true if field begin_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field begin_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_begin_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
@@ -19553,7 +19553,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
 
-    /** Returns true if field end_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field end_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_end_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
@@ -19617,7 +19617,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -20107,7 +20107,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -20131,7 +20131,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -20175,7 +20175,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -20633,7 +20633,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -20655,7 +20655,7 @@ public class rpc_service {
       this.filter_name = null;
     }
 
-    /** Returns true if field filter_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_name() {
       return this.filter_name != null;
     }
@@ -20679,7 +20679,7 @@ public class rpc_service {
       this.filter_expr = null;
     }
 
-    /** Returns true if field filter_expr is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field filter_expr is set (has been assigned a value) and false otherwise */
     public boolean is_set_filter_expr() {
       return this.filter_expr != null;
     }
@@ -20704,7 +20704,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
 
-    /** Returns true if field begin_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field begin_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_begin_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
@@ -20727,7 +20727,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
 
-    /** Returns true if field end_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field end_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_end_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
@@ -20802,7 +20802,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -21348,7 +21348,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -21372,7 +21372,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -21416,7 +21416,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -21848,7 +21848,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -21871,7 +21871,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
 
-    /** Returns true if field begin_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field begin_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_begin_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
@@ -21894,7 +21894,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
 
-    /** Returns true if field end_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field end_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_end_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
@@ -21947,7 +21947,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -22381,7 +22381,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -22405,7 +22405,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -22449,7 +22449,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -22894,7 +22894,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -22916,7 +22916,7 @@ public class rpc_service {
       this.trigger_name = null;
     }
 
-    /** Returns true if field trigger_name is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field trigger_name is set (has been assigned a value) and false otherwise */
     public boolean is_set_trigger_name() {
       return this.trigger_name != null;
     }
@@ -22941,7 +22941,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
 
-    /** Returns true if field begin_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field begin_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_begin_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __BEGIN_MS_ISSET_ID);
     }
@@ -22964,7 +22964,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
 
-    /** Returns true if field end_ms is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field end_ms is set (has been assigned a value) and false otherwise */
     public boolean is_set_end_ms() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __END_MS_ISSET_ID);
     }
@@ -23028,7 +23028,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -23518,7 +23518,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -23542,7 +23542,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -23586,7 +23586,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -24005,7 +24005,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -24027,7 +24027,7 @@ public class rpc_service {
       this.desc = null;
     }
 
-    /** Returns true if field desc is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field desc is set (has been assigned a value) and false otherwise */
     public boolean is_set_desc() {
       return this.desc != null;
     }
@@ -24071,7 +24071,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -24474,7 +24474,7 @@ public class rpc_service {
       this.success = null;
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return this.success != null;
     }
@@ -24498,7 +24498,7 @@ public class rpc_service {
       this.ex = null;
     }
 
-    /** Returns true if field ex is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field ex is set (has been assigned a value) and false otherwise */
     public boolean is_set_ex() {
       return this.ex != null;
     }
@@ -24542,7 +24542,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -24946,7 +24946,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
 
-    /** Returns true if field multilog_id is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field multilog_id is set (has been assigned a value) and false otherwise */
     public boolean is_set_multilog_id() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __MULTILOG_ID_ISSET_ID);
     }
@@ -24977,7 +24977,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();
@@ -25304,7 +25304,7 @@ public class rpc_service {
       __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field success is set (has been assigned a value) and false otherwise */
     public boolean is_set_success() {
       return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
@@ -25335,7 +25335,7 @@ public class rpc_service {
       throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
     public boolean isSet(_Fields field) {
       if (field == null) {
         throw new java.lang.IllegalArgumentException();

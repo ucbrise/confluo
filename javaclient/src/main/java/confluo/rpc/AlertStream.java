@@ -1,16 +1,16 @@
 package confluo.rpc;
 
-public class alert_stream {
+public class AlertStream {
 
-    private long multilog_id;
+    private long multilogId;
     private rpc_service.Client client;
     private byte[] stream;
     private rpc_iterator_handle handle;
-    private schema cur_schema;
+    private Schema curSchema;
 
-    public alert_stream(long multilog_id, schema schema, rpc_service.Client client, rpc_iterator_handle handle) {
-        this.multilog_id = multilog_id;
-        this.cur_schema = schema;
+    public AlertStream(long multilogId, Schema schema, rpc_service.Client client, rpc_iterator_handle handle) {
+        this.multilogId = multilogId;
+        this.curSchema = schema;
         this.client = client;
         this.handle = handle;
         this.stream = handle.get_data();

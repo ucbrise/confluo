@@ -4,15 +4,15 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class record {
+public class Record {
 
     private long log_offset;
     private long size;
     private ByteBuffer data;
     private long version;
-    private List<field> fields;
+    private List<Field> fields;
 
-    public record(long log_offset, ByteBuffer data, long size) {
+    public Record(long log_offset, ByteBuffer data, long size) {
         this.log_offset = log_offset;
         this.data = data;
         this.size = size;
@@ -21,11 +21,11 @@ public class record {
 
     }
 
-    public void push_back(field value) {
+    public void push_back(Field value) {
         fields.add(value);
     }
 
-    public field at(int idx) {
+    public Field at(int idx) {
         return fields.get(idx);
     }
 

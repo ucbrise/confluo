@@ -1,46 +1,45 @@
 package confluo.rpc;
 
-import javax.print.DocFlavor;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-public class field {
+public class Field {
 
     private int idx;
-    private data_type data_type;
+    private DataType dataType;
     private ByteBuffer data;
     private static HashMap<rpc_data_type, String> FORMAT_CODES;
 
     static {
         FORMAT_CODES = new HashMap<>();
-        FORMAT_CODES.put(type_id.BOOL, "?");
-        FORMAT_CODES.put(type_id.CHAR, "c");
-        FORMAT_CODES.put(type_id.SHORT, "h");
-        FORMAT_CODES.put(type_id.INT, "i");
-        FORMAT_CODES.put(type_id.LONG, "l");
-        FORMAT_CODES.put(type_id.FLOAT, "f");
-        FORMAT_CODES.put(type_id.DOUBLE, "d");
-        FORMAT_CODES.put(type_id.STRING, "s");
+        FORMAT_CODES.put(TypeId.BOOL, "?");
+        FORMAT_CODES.put(TypeId.CHAR, "c");
+        FORMAT_CODES.put(TypeId.SHORT, "h");
+        FORMAT_CODES.put(TypeId.INT, "i");
+        FORMAT_CODES.put(TypeId.LONG, "l");
+        FORMAT_CODES.put(TypeId.FLOAT, "f");
+        FORMAT_CODES.put(TypeId.DOUBLE, "d");
+        FORMAT_CODES.put(TypeId.STRING, "s");
     }
 
-    public field(int idx, data_type dtype, ByteBuffer data) {
+    public Field(int idx, DataType dtype, ByteBuffer data) {
         this.idx = idx;
-        this.data_type = dtype;
+        this.dataType = dtype;
         this.data = data;
     }
 
     public byte unpack() {
-        rpc_data_type tid = data_type.type_id;
-        String format_code;
-        if (tid == type_id.STRING) {
-            format_code = data_type.size + FORMAT_CODES.get(tid);
+        rpc_data_type tid = dataType.typeId;
+        String formatCode;
+        if (tid == TypeId.STRING) {
+            formatCode = dataType.size + FORMAT_CODES.get(tid);
         } else {
-             format_code = FORMAT_CODES.get(tid);
+             formatCode = FORMAT_CODES.get(tid);
         }
         return data.get(0);
     }
 
-    public ByteBuffer get_data() {
+    public ByteBuffer getData() {
         return data;
     }
 }

@@ -1,6 +1,6 @@
 package confluo.rpc;
 
-public class type_id {
+public class TypeId {
     static rpc_data_type NONE = rpc_data_type.RPC_NONE;
     static rpc_data_type BOOL = rpc_data_type.RPC_BOOL;
     static rpc_data_type CHAR = rpc_data_type.RPC_CHAR;
