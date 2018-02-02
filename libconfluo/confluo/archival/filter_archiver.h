@@ -7,11 +7,11 @@
 #include "conf/configuration_params.h"
 #include "storage/encoder.h"
 #include "filter.h"
-#include "io/incr_file_writer.h"
-#include "io/incr_file_reader.h"
 #include "storage/ptr_aux_block.h"
 #include "storage/ptr_metadata.h"
 #include "container/reflog.h"
+#include "io/incremental_file_reader.h"
+#include "io/incremental_file_writer.h"
 
 namespace confluo {
 namespace archival {

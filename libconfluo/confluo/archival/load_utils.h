@@ -6,8 +6,8 @@
 #include "container/data_log.h"
 #include "filter.h"
 #include "filter_log.h"
-#include "io/incr_file_reader.h"
-#include "io/incr_file_writer.h"
+#include "io/incremental_file_reader.h"
+#include "io/incremental_file_writer.h"
 #include "index_log.h"
 #include "container/reflog.h"
 #include "storage/ptr_aux_block.h"
@@ -38,6 +38,11 @@ class load_utils {
     }
   }
 
+  /**
+   * Load data log buckets from storage, starting at a particular bucket.
+   * @param log data log to load into
+   * @param start_bucket_idx start bucket
+   */
   static void load_data_log_storage(data_log& log, size_t start_bucket_idx) {
     std::string bucket_path = log.bucket_data_path(start_bucket_idx);
     size_t bucket_idx = start_bucket_idx;

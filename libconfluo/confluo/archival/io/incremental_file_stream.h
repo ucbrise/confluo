@@ -1,7 +1,7 @@
 #ifndef CONFLUO_ARCHIVAL_IO_INCR_FILE_STREAM_H_
 #define CONFLUO_ARCHIVAL_IO_INCR_FILE_STREAM_H_
 
-#include "incr_file_offset.h"
+#include "incremental_file_offset.h"
 
 namespace confluo {
 namespace archival {

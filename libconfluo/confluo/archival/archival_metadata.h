@@ -2,8 +2,8 @@
 #define CONFLUO_ARCHIVAL_METADATA_H_
 
 #include "types/byte_string.h"
-#include "io/incr_file_reader.h"
-#include "io/incr_file_writer.h"
+#include "io/incremental_file_reader.h"
+#include "io/incremental_file_writer.h"
 
 namespace confluo {
 namespace archival {

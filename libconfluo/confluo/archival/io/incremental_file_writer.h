@@ -1,9 +1,9 @@
 #ifndef CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_
 #define CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_
 
-#include "incr_file_offset.h"
-#include "incr_file_stream.h"
 #include "file_utils.h"
+#include "incremental_file_offset.h"
+#include "incremental_file_stream.h"
 #include "io_utils.h"
 
 namespace confluo {

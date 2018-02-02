@@ -18,6 +18,16 @@ class archiver {
       : archiver("", read_tail(), nullptr, nullptr, nullptr, nullptr, false) {
   }
 
+  /**
+   * Archiver
+   * @param path directory to store archives in or where archives are stored
+   * @param rt read tail
+   * @param log data log
+   * @param filters atomic multilog filters
+   * @param indexes atomic multilog indexes
+   * @param schema data log schema
+   * @param clear
+   */
   archiver(const std::string& path, read_tail rt, data_log* log,
            filter_log* filters, index_log* indexes, schema_t* schema,
            bool clear = true)

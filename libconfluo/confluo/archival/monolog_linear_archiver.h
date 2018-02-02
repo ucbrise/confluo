@@ -6,8 +6,8 @@
 #include "storage/encoder.h"
 #include "file_utils.h"
 #include "archival_metadata.h"
-#include "io/incr_file_reader.h"
-#include "io/incr_file_writer.h"
+#include "io/incremental_file_reader.h"
+#include "io/incremental_file_writer.h"
 #include "storage/ptr_aux_block.h"
 #include "storage/ptr_metadata.h"
 
