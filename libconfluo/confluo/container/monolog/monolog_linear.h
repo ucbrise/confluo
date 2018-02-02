@@ -9,11 +9,13 @@
 #include "storage/ptr.h"
 #include "storage/storage.h"
 
-// TODO: Add documentation
-
 namespace confluo {
 namespace monolog {
 
+/**
+ * Monolog linear base class. The monolog grow linearly, block-by-block, as
+ * space runs out in previous blocks.
+ */
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
     size_t BUFFER_SIZE = 1048576>
 class monolog_linear_base {
@@ -21,11 +23,12 @@ class monolog_linear_base {
   monolog_linear_base() = default;
 
   /**
-   * monolog_linear_base
+   * Constructor to initialize monolog with specified name, data path and
+   * storage mode.
    *
-   * @param name The name
-   * @param data_path The data_path
-   * @param storage The storage
+   * @param name The name of the monolog.
+   * @param data_path The data path where the monolog is stored.
+   * @param storage The storage mode for the monolog.
    */
   monolog_linear_base(const std::string& name, const std::string& data_path,
                       const storage::storage_mode& storage) {
@@ -33,11 +36,11 @@ class monolog_linear_base {
   }
 
   /**
-   * init
+   * Initialize the monolog with specified name, data path and storage mode.
    *
-   * @param name The name
-   * @param data_path The data_path
-   * @param storage The storage
+   * @param name The name of the monolog.
+   * @param data_path The data path where the monolog is stored.
+   * @param storage The storage mode for the monolog.
    */
   void init(const std::string& name, const std::string& data_path,
             const storage::storage_mode& storage) {
@@ -52,18 +55,18 @@ class monolog_linear_base {
   }
 
   /**
-   * name
+   * Get the name of the monolog.
    *
-   * @return std::string
+   * @return The name of the monolog.
    */
   std::string name() const {
     return name_;
   }
 
   /**
-   * data_path
+   * Get the data path for the monolog.
    *
-   * @return std::string
+   * @return The data path for the monolog.
    */
   std::string data_path() const {
     return data_path_;
@@ -158,7 +161,12 @@ class monolog_linear_base {
     return blocks_[idx / BLOCK_SIZE].at(idx % BLOCK_SIZE);
   }
 
-  // Get len bytes of data at offset.
+  /**
+   * Read a specified number of elements from monolog at a specified offset.
+   * @param offset The offset to read from.
+   * @param data The buffer that the data will be read into.
+   * @param len The number of bytes to read.
+   */
   void read(size_t offset, T* data, size_t len) const {
     size_t remaining = len;
     while (remaining) {
@@ -172,7 +180,7 @@ class monolog_linear_base {
   }
 
   /**
-   * Gets a pointer to the data at idx
+   * Gets a pointer to the data at specified index
    * @param idx monolog index
    * @param data_ptr read-only pointer to store in
    */
@@ -181,7 +189,7 @@ class monolog_linear_base {
   }
 
   /**
-   * Gets a pointer to the data at idx
+   * Gets a pointer to the data at specified index
    * @param idx monolog index
    * @param data_ptr read-only pointer to store in
    */
@@ -189,16 +197,29 @@ class monolog_linear_base {
     blocks_[idx / BLOCK_SIZE].cptr(idx % BLOCK_SIZE, data_ptr);
   }
 
+  /**
+   * operator[] (reference)
+   * @param idx Index of reference to get.
+   * @return Reference to requested data.
+   */
   T& operator[](size_t idx) {
     return blocks_[idx / BLOCK_SIZE][idx % BLOCK_SIZE];
   }
 
+  /**
+   * Swaps the block pointer with given pointer.
+   *
+   * @param idx The index of the data.
+   * @param ptr The pointer to swap the block pointer with.
+   */
   void swap_block_ptr(size_t idx, T* ptr) {
     blocks_[idx / BLOCK_SIZE].swap_ptr(ptr);
   }
 
   /**
-   * @return storage size of the monolog
+   * Get the storage size of the monolog.
+   *
+   * @return storage size of the monolog.
    */
   size_t storage_size() const {
     size_t bucket_size = blocks_.size() * sizeof(monolog_block<T, BLOCK_SIZE> );
@@ -217,6 +238,10 @@ class monolog_linear_base {
 
 };
 
+/**
+ * Monolog linear class. The monolog grow linearly, block-by-block, as
+ * space runs out in previous blocks.
+ */
 template<typename T, size_t MAX_BLOCKS = 4096, size_t BLOCK_SIZE = 268435456,
     size_t BUFFER_SIZE = 1048576>
 class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
@@ -235,7 +260,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
       monolog_linear<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>> const_iterator;
 
   /**
-   * monolog_linear
+   * Default constructor.
    */
   monolog_linear()
       : monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE, BUFFER_SIZE>(),
@@ -243,11 +268,12 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   }
 
   /**
-   * monolog_linear
+   * Constructor to intialize the monolog with specified name, data path and
+   * storage mode.
    *
-   * @param name The name
-   * @param data_path The data_path
-   * @param storage The storage
+   * @param name The name of the monolog.
+   * @param data_path The data path for the monolog.
+   * @param storage The storage mode for the monolog.
    */
   monolog_linear(const std::string& name, const std::string& data_path,
                  const storage::storage_mode& storage = storage::IN_MEMORY)
@@ -258,11 +284,11 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   }
 
   /**
-   * push_back
+   * Add new element to end of monolog, adding more space if necessary.
    *
-   * @param val The val
+   * @param val The value to add at the end of monolog.
    *
-   * @return size_t
+   * @return The offset that the value was added at.
    */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
@@ -271,12 +297,13 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   }
 
   /**
-   * push_back_range
+   * Add a range of values to the end of the monolog, allocating more space
+   * if necessary.
    *
-   * @param start The start
-   * @param end The end
+   * @param start The start of the range.
+   * @param end The end of the range
    *
-   * @return size_t
+   * @return The start offset in the monolog where the range was written.
    */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
@@ -287,12 +314,12 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   }
 
   /**
-   * append
+   * Append elements to end of monolog.
    *
-   * @param data The data
-   * @param len The len
+   * @param data The element array.
+   * @param len The number of elements to append.
    *
-   * @return size_t
+   * @return The start offset in the monolog where the data was written.
    */
   size_t append(const T* data, size_t len) {
     size_t offset = atomic::faa(&tail_, len);
@@ -301,49 +328,49 @@ class monolog_linear : public monolog_linear_base<T, MAX_BLOCKS, BLOCK_SIZE,
   }
 
   /**
-   * reserve
+   * Reserve specified number of elements at the end of the monolog.
    *
-   * @param len The len
+   * @param len The number of elements to reserve
    *
-   * @return size_t
+   * @return Start offset for the reserved space within the monolog.
    */
   size_t reserve(size_t len) {
     return atomic::faa(&tail_, len);
   }
 
   /**
-   * at
+   * Get the element at specified index.
    *
-   * @param idx The idx
+   * @param idx The index into the monolog.
    *
-   * @return T
+   * @return The value at specified index.
    */
   const T at(size_t idx) const {
     return this->get(idx);
   }
 
   /**
-   * size
+   * Get the size of the monolog.
    *
-   * @return size_t
+   * @return The size of the monolog.
    */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
   /**
-   * begin
+   * Get the begin iterator of the monolog.
    *
-   * @return iterator
+   * @return The begin iterator.
    */
   iterator begin() const {
     return iterator(this, 0);
   }
 
   /**
-   * end
+   * Get the end iterator of the monolog.
    *
-   * @return iterator
+   * @return The end iterator.
    */
   iterator end() const {
     return iterator(this, size());

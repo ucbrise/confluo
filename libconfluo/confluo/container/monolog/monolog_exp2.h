@@ -7,15 +7,13 @@
 #include "atomic.h"
 #include "bit_utils.h"
 
-// TODO: Improve documentation
-
 using namespace utils;
 
 namespace confluo {
 namespace monolog {
 
 /**
- * Iterator for monologs.
+ * Iterator over monolog data.
  */
 template<typename monolog_impl>
 class monolog_iterator : public std::iterator<std::input_iterator_tag,
@@ -36,7 +34,7 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
   }
 
   /**
-   * Constructs a monolog iterator from a monolog implementation
+   * Constructs a iterator from a monolog implementation
    *
    * @param impl The monolog implementation
    * @param pos The position of the iterator in the monolog

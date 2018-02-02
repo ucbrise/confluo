@@ -25,12 +25,12 @@ struct radix_tree_node {
   /**
    * Constructs a new node from the specified arguments
    *
-   * @tparam ARGS Arguments for the reflog
+   * @tparam ARGS Template for arguments to the reflog constructor
    * @param node_key The node key
    * @param node_width The node width
    * @param node_depth The node depth
    * @param node_parent The node parent
-   * @param args The arguments for the reflog
+   * @param args The arguments for the reflog constructor
    */
   template<typename ... ARGS>
   radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
@@ -160,12 +160,12 @@ struct radix_tree_node {
   }
 
   /**
-   * prev_child
+   * Gets the previous child for the given node key and width
    *
-   * @param key The key
-   * @param width The width
+   * @param key The node key
+   * @param width The node width
    *
-   * @return node_t
+   * @return A pointer to the child node (nullptr if none were found).
    */
   const node_t* prev_child(uint8_t key, size_t width) const {
     if (key == 0)
@@ -181,13 +181,13 @@ struct radix_tree_node {
   }
 
   /**
-   * advance
+   * Advance the traversal based on the current key, width, and depth.
    *
-   * @param t_key The t_key
-   * @param t_width The t_width
-   * @param t_depth The t_depth
+   * @param t_key The current key.
+   * @param t_width The current width.
+   * @param t_depth The current depth.
    *
-   * @return node_t
+   * @return Pointer to the advanced node.
    */
   const node_t* advance(key_t& t_key, size_t t_width, size_t t_depth) const {
     if (parent == nullptr)
@@ -203,13 +203,15 @@ struct radix_tree_node {
   }
 
   /**
-   * advance_descend
+   * Descend one level into the tree and advance the traversal, based on
+   * current key, width and depth.
    *
-   * @param t_key The t_key
-   * @param t_width The t_width
-   * @param t_depth The t_depth
    *
-   * @return node_t
+   * @param t_key The current key.
+   * @param t_width The current width.
+   * @param t_depth The current depth.
+   *
+   * @return Pointer to the advanced node.
    */
   const node_t* advance_descend(key_t& t_key, size_t t_width,
                                 size_t t_depth) const {
@@ -226,13 +228,13 @@ struct radix_tree_node {
   }
 
   /**
-   * retreat
+   * Retreat the traversal based on current key, width and depth,
    *
-   * @param t_key The t_key
-   * @param t_width The t_width
-   * @param t_depth The t_depth
+   * @param t_key The current key.
+   * @param t_width The current width.
+   * @param t_depth The current depth.
    *
-   * @return node_t
+   * @return Pointer to the retreated node.
    */
   const node_t* retreat(key_t& t_key, size_t t_width, size_t t_depth) const {
     if (parent == nullptr)
@@ -248,13 +250,14 @@ struct radix_tree_node {
   }
 
   /**
-   * retreat_descend
+   * Descend one level into the tree and retreat the traversal, based on current
+   * key, width and depth.
    *
-   * @param t_key The t_key
-   * @param t_width The t_width
-   * @param t_depth The t_depth
+   * @param t_key The current key.
+   * @param t_width The current width.
+   * @param t_depth The current depth.
    *
-   * @return node_t
+   * @return Pointer to the retreated node.
    */
   const node_t* retreat_descend(key_t& t_key, size_t t_width,
                                 size_t t_depth) const {
@@ -278,6 +281,9 @@ struct radix_tree_node {
   node_t* parent;
 };
 
+/**
+ * Iterator over reflogs stored in the radix tree; traverses the tree in order.
+ */
 template<typename reflog>
 class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
  public:
@@ -289,7 +295,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   typedef reflog* pointer;
 
   /**
-   * rt_reflog_it
+   * Default constructor.
    */
   rt_reflog_it()
       : width_(0),
@@ -299,7 +305,8 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   }
 
   /**
-   * rt_reflog_it
+   * Constructor to initialize reflog iterator over the radix tree with given
+   * width, depth key and node.
    *
    * @param width The width
    * @param depth The depth
@@ -314,9 +321,9 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   }
 
   /**
-   * operator
+   * operator*
    *
-   * @return reference
+   * @return Iterator data
    */
   reference operator*() const {
     return *(node_->refs());
@@ -325,7 +332,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   /**
    * operator->
    *
-   * @return pointer
+   * @return Reference to iterator data.
    */
   pointer operator->() const {
     return node_->refs();
@@ -334,9 +341,10 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   /**
    * operator!=
    *
-   * @param other The other
+   * @param other Another iterator.
    *
-   * @return bool
+   * @return Returns true if the iterator does not equal the other iterator,
+   * false otherwise.
    */
   bool operator!=(const self_type& other) const {
     return node_ != other.node_;
@@ -345,18 +353,19 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   /**
    * operator==
    *
-   * @param other The other
+   * @param other Another iterator.
    *
-   * @return bool
+   * @return Returns true if the iterator equals the other iterator,
+   * false otherwise.
    */
   bool operator==(const self_type& other) const {
     return node_ == other.node_;
   }
 
   /**
-   * operator++
+   * operator++ (prefix)
    *
-   * @return self_type&
+   * @return Updated iterator.
    */
   const self_type& operator++() {
     if (node_ != nullptr)
@@ -365,11 +374,11 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   }
 
   /**
-   * operator++
+   * operator++ (postfix)
    *
-   * @param int The int
+   * @param int Postfix argument
    *
-   * @return self_type
+   * @return Updated iterator
    */
   self_type operator++(int) {
     self_type copy(*this);
@@ -378,29 +387,29 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   }
 
   /**
-   * key
+   * Get the iterator key.
    *
-   * @return key_t
+   * @return The iterator key.
    */
   key_t const& key() const {
     return key_;
   }
 
   /**
-   * node
+   * Get the iterator node.
    *
-   * @return node_t
+   * @return The iterator node.
    */
   const node_t* node() const {
     return node_;
   }
 
   /**
-   * set_node
+   * Set the node for the iterator.
    *
-   * @param node The node
+   * @param node Pointer to th node.
    *
-   * @return self_type&
+   * @return Updated iterator.
    */
   self_type& set_node(const node_t* node) {
     node_ = node;
@@ -414,6 +423,10 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   const node_t* node_;
 };
 
+/**
+ * Result of a lookup on radix tree, as a container of reflogs. Only yields
+ * values through iterators.
+ */
 template<typename reflog>
 class rt_reflog_range_result {
  public:
@@ -422,10 +435,11 @@ class rt_reflog_range_result {
   typedef rt_reflog_it<reflog> iterator;
 
   /**
-   * rt_reflog_range_result
+   * Constructor to initialize the result with a lower bound iterator and
+   * an upper bound iterator for the range within the radix tree.
    *
-   * @param lb The lb
-   * @param ub The ub
+   * @param lb The lower bound iterator in the radix tree.
+   * @param ub The upper bound iterator in the radix tree.
    */
   rt_reflog_range_result(const iterator& lb, const iterator& ub)
       : begin_(lb),
@@ -433,9 +447,9 @@ class rt_reflog_range_result {
   }
 
   /**
-   * rt_reflog_range_result
+   * Copy constructor.
    *
-   * @param other The other
+   * @param other Another radix tree lookup result
    */
   rt_reflog_range_result(const rt_reflog_range_result<reflog>& other)
       : begin_(other.begin_),
@@ -443,27 +457,27 @@ class rt_reflog_range_result {
   }
 
   /**
-   * begin
+   * Get the begin iterator
    *
-   * @return iterator
+   * @return iterator The begin iterator.
    */
   const iterator begin() const {
     return begin_;
   }
 
   /**
-   * end
+   * Get the end iterator.
    *
-   * @return iterator
+   * @return iterator The end iterator
    */
   const iterator end() const {
     return end_;
   }
 
   /**
-   * count
+   * Get an estimate of the number of elements in the range.
    *
-   * @return size_t
+   * @return The estimate of the number of elements in the range.
    */
   size_t count() const {
     return std::accumulate(begin_, end_, static_cast<size_t>(0),
@@ -477,9 +491,10 @@ class rt_reflog_range_result {
 };
 
 /**
- * Radix Tree
+ * Radix Tree class. The radix tree uses a fixed-depth, fixed-width (k)-ary
+ * tree to index reflogs based on a byte_array key.
  *
- * @tparam reflog
+ * @tparam reflog The reflog type.
  */
 template<typename reflog>
 class radix_tree {
@@ -494,10 +509,10 @@ class radix_tree {
   typedef typename rt_result::iterator range_iterator;
 
   /**
-   * radix_tree
+   * Constructor to initialize the radix tree with a given depth and width
    *
-   * @param depth The depth
-   * @param width The width
+   * @param depth The radix tree depth
+   * @param width The radix tree node width
    */
   radix_tree(size_t depth, size_t width)
       : width_(width),
@@ -506,31 +521,32 @@ class radix_tree {
   }
 
   /**
-   * width
+   * Get the width of each node.
    *
-   * @return size_t
+   * @return The width of each node.
    */
   inline size_t width() const {
     return width_;
   }
 
   /**
-   * depth
+   * Get the depth of the tree.
    *
-   * @return size_t
+   * @return The depth of the tree.
    */
   inline size_t depth() const {
     return depth_;
   }
 
   /**
-   * get_or_create
+   * Get a leaf node (reflog) for the specified key, and create one if such a
+   * node does not exist
    *
-   * @tparam ARGS
-   * @param key The key
-   * @param args The args
+   * @tparam ARGS Template of arguments to reflog constructor.
+   * @param key The key for the reflog.
+   * @param args The args for the reflog constructor.
    *
-   * @return reflog
+   * @return The reflog corresponding to the given key.
    */
   template<typename ... ARGS>
   reflog*& get_or_create(const key_t& key, ARGS&& ... args) {
@@ -577,14 +593,14 @@ class radix_tree {
   }
 
   /**
-   * insert
+   * Insert a new (key, value) pair into the radix tree.
    *
-   * @tparam ARGS
-   * @param key The key
-   * @param value The value
-   * @param args The args
+   * @tparam ARGS Template for arguments to the reflog constructor.
+   * @param key The key to insert.
+   * @param value The value to insert.
+   * @param args The arguments to the reflog constructor.
    *
-   * @return reflog
+   * @return The reflog to which the value was inserted.
    */
   template<typename ... ARGS>
   reflog*& insert(const key_t& key, const value_t& value, ARGS&& ... args) {
@@ -594,11 +610,12 @@ class radix_tree {
   }
 
   /**
-   * get
+   * Get the reflog corresponding to a given key; returns null if the key has
+   * not been indexed.
    *
-   * @param key The key
+   * @param key The key to lookup.
    *
-   * @return reflog
+   * @return The reflog corresponding to the key.
    */
   reflog const* get(const key_t& key) const {
     node_t* node = root_;
@@ -615,9 +632,9 @@ class radix_tree {
   /**
    * operator[]
    *
-   * @param key The key
+   * @param key The to lookup key.
    *
-   * @return reflog
+   * @return The reflog corresponding to the key.
    */
   reflog* operator[](const key_t& key) {
     node_t* node = root_;
@@ -632,11 +649,13 @@ class radix_tree {
   }
 
   /**
-   * upper_bound
+   * Get the iterator to reflog corresponding to the smallest key larger than or
+   * equal to the given key in the radix tree.
    *
-   * @param key The key
+   * @param key The key.
    *
-   * @return iterator
+   * @return Iterator to reflog corresponding to the smallest key larger than or
+   * equal to the given key in the radix tree.
    */
   iterator upper_bound(const key_t& key) const {
     auto ub = __upper_bound(key);
@@ -644,11 +663,13 @@ class radix_tree {
   }
 
   /**
-   * lower_bound
+   * Get the iterator to reflog corresponding to the largest key smaller than or
+   * equal to the given key in the radix tree.
    *
-   * @param key The key
+   * @param key The key.
    *
-   * @return iterator
+   * @return Iterator to reflog corresponding to the largest key smaller than or
+   * equal to the given key in the radix tree.
    */
   iterator lower_bound(const key_t& key) const {
     auto lb = __lower_bound(key);
@@ -656,12 +677,12 @@ class radix_tree {
   }
 
   /**
-   * range_lookup_reflogs
+   * Lookup all reflogs that lie within a given range in the radix tree.
    *
-   * @param begin The begin
-   * @param end The end
+   * @param begin The begin key for the range.
+   * @param end The end key for the range.
    *
-   * @return rt_reflog_result
+   * @return A container of reflogs corresponding to the range.
    */
   rt_reflog_result range_lookup_reflogs(const key_t& begin,
                                         const key_t& end) const {
@@ -676,24 +697,25 @@ class radix_tree {
   }
 
   /**
-   * range_lookup
+   * Lookup all values that lie within a given range in the radix tree.
    *
-   * @param begin The begin
-   * @param end The end
+   * @param begin The begin key for the range.
+   * @param end The end key for the range.
    *
-   * @return rt_result
+   * @return A container of values corresponding to the range.
    */
   rt_result range_lookup(const key_t& begin, const key_t& end) const {
     return rt_result(range_lookup_reflogs(begin, end));
   }
 
   /**
-   * approx_count
+   * An approximate count (potentially inconsistent) of the values in the
+   * radix tree that lie within a particular range.
    *
-   * @param begin The begin
-   * @param end The end
+   * @param begin The begin key for the range.
+   * @param end The end key for the range.
    *
-   * @return size_t
+   * @return The approximate count.
    */
   size_t approx_count(const key_t& begin, const key_t& end) const {
     return std::accumulate(upper_bound(begin), ++lower_bound(end),
@@ -704,9 +726,9 @@ class radix_tree {
   }
 
   /**
-   * to_string
+   * Get the string corresponding to the radix tree address.
    *
-   * @return std::string
+   * @return The string corresponding to the radix tree address.
    */
   std::string to_string() const {
     const void *addr = static_cast<const void*>(this);
@@ -716,7 +738,11 @@ class radix_tree {
   }
 
  private:
-  // First leaf node <= key
+  /**
+   * Get the first node whose key is smaller than or equal to specified key.
+   * @param key The given key.
+   * @return The node and its corresponding key.
+   */
   std::pair<key_t, const node_t*> __lower_bound(const key_t& key) const {
     std::pair<key_t, const node_t*> ret(key, root_);
     size_t d;
@@ -744,7 +770,11 @@ class radix_tree {
     return ret;
   }
 
-  // First leaf node >= key
+  /**
+   * Get the first node whose key is larger than or equal to specified key.
+   * @param key The given key.
+   * @return The node and its corresponding key.
+   */
   std::pair<key_t, const node_t*> __upper_bound(const key_t& key) const {
     std::pair<key_t, const node_t*> ret(key, root_);
     size_t d;

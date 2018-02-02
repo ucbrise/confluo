@@ -7,7 +7,7 @@
 namespace confluo {
 
 /**
- * Parameters used for the configuration of Confluo
+ * Confluo Configuration parameters
  */
 class configuration_params {
  public:

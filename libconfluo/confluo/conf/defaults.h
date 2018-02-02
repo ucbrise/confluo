@@ -6,7 +6,7 @@
 namespace confluo {
 
 /**
- * Default parameters for confluo
+ * Default configuration parameters
  */
 class defaults {
  public:

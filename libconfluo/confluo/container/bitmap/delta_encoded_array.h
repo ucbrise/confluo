@@ -12,10 +12,11 @@ using namespace utils;
 namespace confluo {
 
 /**
- * Encodes samples
+ * Delta-encoded array class. Stores sorted integer data encoded using
+ * delta-encoding.
  *
- * @tparam T The type
- * @tparam sampling_rate The sampling rate
+ * @tparam T The data type (can only be integers)
+ * @tparam sampling_rate The rate at which data is sampled.
  */
 template<typename T, uint32_t sampling_rate = 128>
 class delta_encoded_array {
@@ -25,7 +26,7 @@ class delta_encoded_array {
   typedef uint8_t width_type;
 
   /**
-   * Default constructor that initializes everything to default values
+   * Default constructor
    */
   delta_encoded_array() {
     samples_ = NULL;
@@ -39,15 +40,15 @@ class delta_encoded_array {
   virtual ~delta_encoded_array() {
     if (samples_) {
       delete samples_;
-      samples_ = NULL;
+      samples_ = nullptr;
     }
     if (delta_offsets_) {
       delete delta_offsets_;
-      delta_offsets_ = NULL;
+      delta_offsets_ = nullptr;
     }
     if (deltas_) {
       delete deltas_;
-      deltas_ = NULL;
+      deltas_ = nullptr;
     }
   }
 
@@ -86,19 +87,22 @@ class delta_encoded_array {
   }
 
  protected:
-  /** Get the encoding size for an delta value
+  /**
+   * Get the encoding size for an delta value
    * @param delta The delta value
    * @return The width type of the delta
    */
   virtual width_type encoding_size(T delta) = 0;
 
-  /** Encode the delta values
+  /**
+   * Encode the delta values
    * @param deltas The delta values
    * @param num_deltas The number of deltas
    */
   virtual void encode_deltas(T* deltas, size_type num_deltas) = 0;
 
-  /** Encode the delta encoded array
+  /**
+   * Encode the delta encoded array
    * @param elements The elements of the array
    * @param num_elements The number of elements
    */
@@ -182,7 +186,7 @@ class delta_encoded_array {
 };
 
 /**
- * Prefix sum
+ * Class that stores pre-computed prefix sum values for Elias-Gamma encoding.
  */
 static struct elias_gamma_prefix_sum {
  public:
@@ -247,12 +251,11 @@ static struct elias_gamma_prefix_sum {
   uint32_t prefixsum_[65536];
 } elias_gamma_prefix_table;
 
-
 /**
- * Encodes samples
+ * Delta-encoded array that uses Elias-Gamma encoding.
  *
- * @tparam T The type
- * @tparam sampling_rate The sampling rate
+ * @tparam T The data type
+ * @tparam sampling_rate The rate at which data is sampled.
  */
 template<typename T, uint32_t sampling_rate = 128>
 class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
@@ -265,7 +268,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   using delta_encoded_array<T>::encode_deltas;
 
   /**
-   * Default constructor that initializes the encoded array
+   * Default constructor
    */
   elias_gamma_encoded_array()
       : delta_encoded_array<T>() {
@@ -316,10 +319,20 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   }
 
  private:
+  /**
+   * Get the encoding size for an delta value
+   * @param delta The delta value
+   * @return The width type of the delta
+   */
   virtual width_type encoding_size(T delta) override {
     return 2 * (bit_utils::bit_width(delta) - 1) + 1;
   }
 
+  /**
+   * Encode the delta values
+   * @param deltas The delta values
+   * @param num_deltas The number of deltas
+   */
   virtual void encode_deltas(T *deltas, size_type num_deltas) override {
     uint64_t pos = 0;
     for (size_t i = 0; i < num_deltas; i++) {
@@ -333,6 +346,12 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     }
   }
 
+  /**
+   * Computes the prefix-sum for data between two specified delta indices.
+   * @param delta_offset Offset into the delta array.
+   * @param until_idx End-index for prefix-sum computation.
+   * @return The computed prefix-sum.
+   */
   T prefix_sum(pos_type delta_offset, pos_type until_idx) {
     T delta_sum = 0;
     pos_type delta_idx = 0;

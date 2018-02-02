@@ -27,10 +27,10 @@ class monolog_exp2_linear_base {
  public:
   typedef storage::swappable_ptr<T> __atomic_bucket_ref;
   typedef storage::read_only_ptr<T> __atomic_bucket_copy_ref;
-  typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
+  typedef atomic::type<__atomic_bucket_ref *> __atomic_bucket_container_ref;
 
   /**
-   * monolog_exp2_linear_base
+   * Default constructor
    */
   monolog_exp2_linear_base()
       : fcs_hibit_(bit_utils::highest_bit(FCS)) {
@@ -48,7 +48,7 @@ class monolog_exp2_linear_base {
   }
 
   /**
-   * ~monolog_exp2_linear_base
+   * Destructor
    */
   ~monolog_exp2_linear_base() {
     size_t num_buckets = FCB;
@@ -213,7 +213,7 @@ class monolog_exp2_linear_base {
    * @param idx monolog index
    * param data_ptr location to store pointer to data at
    */
-   void ptr(size_t idx, __atomic_bucket_copy_ref& data_ptr) const {
+  void ptr(size_t idx, __atomic_bucket_copy_ref& data_ptr) const {
     size_t pos = idx + FCS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
@@ -222,7 +222,7 @@ class monolog_exp2_linear_base {
     size_t container_idx = hibit - fcs_hibit_;
 
     load_bucket_copy(container_idx, bucket_idx, data_ptr);
-   }
+  }
 
   /**
    * Gets the data at index idx.
@@ -341,14 +341,14 @@ protected:
   }
 
   /**
-   * Tries to allocate a bucket. If another thread already succeeded in allocating
-   * the bucket, the current thread deallocates.
+   * Tries to allocate a bucket. If another thread already succeeded in
+   * allocating the bucket, the current thread deallocates.
    * @param container container to put bucket pointer in
    * @param bucket_idx index into the container to allocate bucket at
    * @param copy copy of pointer to allocated bucket
    */
   void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx,
-                           __atomic_bucket_copy_ref& copy) {
+      __atomic_bucket_copy_ref& copy) {
     T* new_bucket_data = ALLOCATOR.alloc<T>(BUCKET_SIZE);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(new_bucket_data)) {
@@ -357,6 +357,13 @@ protected:
     container[bucket_idx].atomic_copy(copy);
   }
 
+  /**
+   * Tries to allocate a bucket. If another thread already succeeded in
+   * allocating the bucket, the current thread deallocates.
+   * @param container container to put bucket pointer in
+   * @param bucket_idx index into the container to allocate bucket at
+   * @return ointer to allocated bucket
+   */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
     T* new_bucket_data = ALLOCATOR.alloc<T>(BUCKET_SIZE);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
@@ -374,9 +381,11 @@ protected:
    * @param copy read-only pointer to store in
    * @param bucket_offset bucket offset to offset the copy's internal pointer
    */
-  void load_bucket_copy(size_t container_idx, size_t bucket_idx, __atomic_bucket_copy_ref& copy,
-                        size_t bucket_offset = 0) const {
-    atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_copy(copy, bucket_offset);
+  void load_bucket_copy(size_t container_idx, size_t bucket_idx,
+      __atomic_bucket_copy_ref& copy,
+      size_t bucket_offset = 0) const {
+    atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_copy(
+        copy, bucket_offset);
   }
 
 private:
