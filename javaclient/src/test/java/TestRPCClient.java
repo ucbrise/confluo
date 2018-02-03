@@ -3,7 +3,9 @@ import confluo.rpc.*;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,8 @@ public class TestRPCClient {
         pb.redirectErrorStream(true);
         try {
             process = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            reader.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,17 +60,18 @@ public class TestRPCClient {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.disconnect();
         stopServer();
     }
 
     @Test
     public void testReadWriteInMemory() {
-        startServer();
+        //startServer();
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
         int size = Long.SIZE / Byte.SIZE + 8;
         ByteBuffer data = ByteBuffer.allocate(size);
         data.putLong(System.nanoTime());
@@ -80,7 +85,7 @@ public class TestRPCClient {
         }
 
         client.disconnect();
-        stopServer();
+        //stopServer();
     }
 
     @Test
@@ -89,7 +94,7 @@ public class TestRPCClient {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.DURABLE_RELAXED);
+        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.DURABLE_RELAXED);
 
         ByteBuffer data = ByteBuffer.allocate(Long.SIZE / Byte.SIZE + 8);
         data.putLong(System.nanoTime());
@@ -112,7 +117,7 @@ public class TestRPCClient {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.DURABLE);
+        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.DURABLE);
 
         ByteBuffer data = ByteBuffer.allocate(Long.SIZE / Byte.SIZE + 8);
         data.putLong(System.nanoTime());
@@ -134,16 +139,16 @@ public class TestRPCClient {
         startServer();
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         Schema multilogSchema = new Schema(buildSchema());
-        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
 
-        client.addIndex("a", 1);
-        client.addIndex("b", 2);
-        client.addIndex("c", 10);
-        client.addIndex("d", 2);
-        client.addIndex("e", 100);
-        client.addIndex("f", 0.1);
-        client.addIndex("g", 0.01);
-        client.addIndex("h", 1);
+        client.add_index("a", 1);
+        client.add_index("b", 2);
+        client.add_index("c", 10);
+        client.add_index("d", 2);
+        client.add_index("e", 100);
+        client.add_index("f", 0.1);
+        client.add_index("g", 0.01);
+        client.add_index("h", 1);
 
         client.write(packRecord(true, "0", (short) 0, 0, 0, 0.01f, 0.01, "abc"));
         client.write(packRecord(true, "1", (short) 10, 2, 1, 0.1f, 0.02, "defg"));
@@ -155,63 +160,63 @@ public class TestRPCClient {
         client.write(packRecord(true, "7", (short) 70, 14, 1000000, 0.7f, 0.08, "zzz"));
 
         int i = 0;
-        for (Record record : client.executeFilter("a == true")) {
+        for (Record record : client.execute_filter("a == true")) {
             Assert.assertTrue(record.at(1).unpack() == 1);
             i += 1;
         }
         Assert.assertTrue(i == 4);
 
         i = 0;
-        for (Record record : client.executeFilter("b > 4")) {
+        for (Record record : client.execute_filter("b > 4")) {
             Assert.assertTrue(record.at(2).unpack() > 4);
             i += 1;
         }
         Assert.assertTrue(i == 3);
 
         i = 0;
-        for (Record record : client.executeFilter("c <= 30")) {
+        for (Record record : client.execute_filter("c <= 30")) {
             Assert.assertTrue(record.at(3).unpack() <= 30);
             i += 1;
         }
         Assert.assertTrue(i == 4);
 
         i = 0;
-        for (Record record : client.executeFilter("d == 0")) {
+        for (Record record : client.execute_filter("d == 0")) {
             Assert.assertTrue(record.at(4).unpack() == 0);
             i += 1;
         }
         Assert.assertTrue(i == 1);
 
         i = 0;
-        for (Record record : client.executeFilter("e <= 100")) {
+        for (Record record : client.execute_filter("e <= 100")) {
             Assert.assertTrue(record.at(5).unpack() <= 100);
             i += 1;
         }
         Assert.assertTrue(i == 4);
 
         i = 0;
-        for (Record record : client.executeFilter("f > 0.1")) {
+        for (Record record : client.execute_filter("f > 0.1")) {
             Assert.assertTrue(record.at(6).unpack() > 0.1);
             i += 1;
         }
         Assert.assertTrue(i == 6);
 
         i = 0;
-        for (Record record : client.executeFilter("g < 0.06")) {
+        for (Record record : client.execute_filter("g < 0.06")) {
             Assert.assertTrue(record.at(7).unpack() < 0.06);
             i += 1;
         }
         Assert.assertTrue(i == 5);
 
         i = 0;
-        for (Record record : client.executeFilter("h == zzz")) {
+        for (Record record : client.execute_filter("h == zzz")) {
             //Assert.assertTrue(Record.at(8).unpack());
             i += 1;
         }
         Assert.assertTrue(i == 2);
 
         i = 0;
-        for (Record record : client.executeFilter("a == true && b > 4")) {
+        for (Record record : client.execute_filter("a == true && b > 4")) {
             Assert.assertTrue(record.at(1).unpack() == 1);
             Assert.assertTrue(record.at(2).unpack() > 4);
             i += 1;
@@ -219,7 +224,7 @@ public class TestRPCClient {
         Assert.assertTrue(i == 2);
 
         i = 0;
-        for (Record record : client.executeFilter("a == true && (b > 4 || c <= 30)")) {
+        for (Record record : client.execute_filter("a == true && (b > 4 || c <= 30)")) {
             Assert.assertTrue(record.at(1).unpack() == 1);
             Assert.assertTrue(record.at(2).unpack() > 4 || record.at(3).unpack() <= 30);
             i += 1;
@@ -227,7 +232,7 @@ public class TestRPCClient {
         Assert.assertTrue(i == 4);
 
         i = 0;
-        for (Record record : client.executeFilter("a == true && (b > 4 || f > 0.1)")) {
+        for (Record record : client.execute_filter("a == true && (b > 4 || f > 0.1)")) {
             Assert.assertTrue(record.at(1).unpack() == 1);
             Assert.assertTrue(record.at(2).unpack() > 4 || record.at(6).unpack() > 0.1);
             i += 1;
@@ -243,32 +248,32 @@ public class TestRPCClient {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         Schema multilogSchema = new Schema(buildSchema());
 
-        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
-        client.addFilter("filter1", "a == true");
-        client.addFilter("filter2", "b > 4");
-        client.addFilter("filter3", "c <= 30");
-        client.addFilter("filter4", "d == 0");
-        client.addFilter("filter5", "e <= 100");
-        client.addFilter("filter6", "f > 0.1");
-        client.addFilter("filter7", "g < 0.06");
-        client.addFilter("filter8", "h == zzz");
+        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.add_filter("filter1", "a == true");
+        client.add_filter("filter2", "b > 4");
+        client.add_filter("filter3", "c <= 30");
+        client.add_filter("filter4", "d == 0");
+        client.add_filter("filter5", "e <= 100");
+        client.add_filter("filter6", "f > 0.1");
+        client.add_filter("filter7", "g < 0.06");
+        client.add_filter("filter8", "h == zzz");
 
-        client.addAggregate("agg1", "filter1", "SUM(d)");
-        client.addAggregate("agg2", "filter2", "SUM(d)");
-        client.addAggregate("agg3", "filter3", "SUM(d)");
-        client.addAggregate("agg4", "filter4", "SUM(d)");
-        client.addAggregate("agg5", "filter5", "SUM(d)");
-        client.addAggregate("agg6", "filter6", "SUM(d)");
-        client.addAggregate("agg7", "filter7", "SUM(d)");
-        client.addAggregate("agg8", "filter8", "SUM(d)");
-        client.installTrigger("trigger1", "agg1 >= 10");
-        client.installTrigger("trigger2", "agg2 >= 10");
-        client.installTrigger("trigger3", "agg3 >= 10");
-        client.installTrigger("trigger4", "agg4 >= 10");
-        client.installTrigger("trigger5", "agg5 >= 10");
-        client.installTrigger("trigger6", "agg6 >= 10");
-        client.installTrigger("trigger7", "agg7 >= 10");
-        client.installTrigger("trigger8", "agg8 >= 10");
+        client.add_aggregate("agg1", "filter1", "SUM(d)");
+        client.add_aggregate("agg2", "filter2", "SUM(d)");
+        client.add_aggregate("agg3", "filter3", "SUM(d)");
+        client.add_aggregate("agg4", "filter4", "SUM(d)");
+        client.add_aggregate("agg5", "filter5", "SUM(d)");
+        client.add_aggregate("agg6", "filter6", "SUM(d)");
+        client.add_aggregate("agg7", "filter7", "SUM(d)");
+        client.add_aggregate("agg8", "filter8", "SUM(d)");
+        client.install_trigger("trigger1", "agg1 >= 10");
+        client.install_trigger("trigger2", "agg2 >= 10");
+        client.install_trigger("trigger3", "agg3 >= 10");
+        client.install_trigger("trigger4", "agg4 >= 10");
+        client.install_trigger("trigger5", "agg5 >= 10");
+        client.install_trigger("trigger6", "agg6 >= 10");
+        client.install_trigger("trigger7", "agg7 >= 10");
+        client.install_trigger("trigger8", "agg8 >= 10");
 
         long now = System.nanoTime();
         long begin_ms = timeBlock(now);
@@ -332,6 +337,7 @@ public class TestRPCClient {
         }
         Assert.assertEquals(5, i);
 
+        client.disconnect();
         stopServer();
     }
 

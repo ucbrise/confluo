@@ -199,20 +199,20 @@ public class rpc_service {
       args.set_name(name);
       args.set_schema(schema);
       args.set_mode(mode);
-      sendBase("createAtomicMultilog", args);
+      sendBase("create_atomic_multilog", args);
     }
 
     public long recv_create_atomic_multilog() throws rpc_management_exception, org.apache.thrift.TException
     {
       create_atomic_multilog_result result = new create_atomic_multilog_result();
-      receiveBase(result, "createAtomicMultilog");
+      receiveBase(result, "create_atomic_multilog");
       if (result.is_set_success()) {
         return result.success;
       }
       if (result.ex != null) {
         throw result.ex;
       }
-      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "createAtomicMultilog failed: unknown result");
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "create_atomic_multilog failed: unknown result");
     }
 
     public rpc_atomic_multilog_info get_atomic_multilog_info(java.lang.String name) throws org.apache.thrift.TException
@@ -273,13 +273,13 @@ public class rpc_service {
       args.set_multilog_id(multilog_id);
       args.set_field_name(field_name);
       args.set_bucket_size(bucket_size);
-      sendBase("addIndex", args);
+      sendBase("add_index", args);
     }
 
     public void recv_add_index() throws rpc_management_exception, org.apache.thrift.TException
     {
       add_index_result result = new add_index_result();
-      receiveBase(result, "addIndex");
+      receiveBase(result, "add_index");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -322,13 +322,13 @@ public class rpc_service {
       args.set_multilog_id(multilog_id);
       args.set_filter_name(filter_name);
       args.set_filter_expr(filter_expr);
-      sendBase("addFilter", args);
+      sendBase("add_filter", args);
     }
 
     public void recv_add_filter() throws rpc_management_exception, org.apache.thrift.TException
     {
       add_filter_result result = new add_filter_result();
-      receiveBase(result, "addFilter");
+      receiveBase(result, "add_filter");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -372,13 +372,13 @@ public class rpc_service {
       args.set_aggregate_name(aggregate_name);
       args.set_filter_name(filter_name);
       args.set_aggregate_expr(aggregate_expr);
-      sendBase("addAggregate", args);
+      sendBase("add_aggregate", args);
     }
 
     public void recv_add_aggregate() throws rpc_management_exception, org.apache.thrift.TException
     {
       add_aggregate_result result = new add_aggregate_result();
-      receiveBase(result, "addAggregate");
+      receiveBase(result, "add_aggregate");
       if (result.ex != null) {
         throw result.ex;
       }
@@ -845,7 +845,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("createAtomicMultilog", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("create_atomic_multilog", org.apache.thrift.protocol.TMessageType.CALL, 0));
         create_atomic_multilog_args args = new create_atomic_multilog_args();
         args.set_name(name);
         args.set_schema(schema);
@@ -947,7 +947,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("addIndex", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_index", org.apache.thrift.protocol.TMessageType.CALL, 0));
         add_index_args args = new add_index_args();
         args.set_multilog_id(multilog_id);
         args.set_field_name(field_name);
@@ -1020,7 +1020,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("addFilter", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_filter", org.apache.thrift.protocol.TMessageType.CALL, 0));
         add_filter_args args = new add_filter_args();
         args.set_multilog_id(multilog_id);
         args.set_filter_name(filter_name);
@@ -1095,7 +1095,7 @@ public class rpc_service {
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("addAggregate", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("add_aggregate", org.apache.thrift.protocol.TMessageType.CALL, 0));
         add_aggregate_args args = new add_aggregate_args();
         args.set_mutlilog_id(mutlilog_id);
         args.set_aggregate_name(aggregate_name);
@@ -1653,14 +1653,14 @@ public class rpc_service {
     private static <I extends Iface> java.util.Map<java.lang.String,  org.apache.thrift.ProcessFunction<I, ? extends org.apache.thrift.TBase>> getProcessMap(java.util.Map<java.lang.String, org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
       processMap.put("register_handler", new register_handler());
       processMap.put("deregister_handler", new deregister_handler());
-      processMap.put("createAtomicMultilog", new create_atomic_multilog());
+      processMap.put("create_atomic_multilog", new create_atomic_multilog());
       processMap.put("get_atomic_multilog_info", new get_atomic_multilog_info());
       processMap.put("removeAtomicMultilog", new remove_atomic_multilog());
-      processMap.put("addIndex", new add_index());
+      processMap.put("add_index", new add_index());
       processMap.put("removeIndex", new remove_index());
-      processMap.put("addFilter", new add_filter());
+      processMap.put("add_filter", new add_filter());
       processMap.put("removeFilter", new remove_filter());
-      processMap.put("addAggregate", new add_aggregate());
+      processMap.put("add_aggregate", new add_aggregate());
       processMap.put("removeAggregate", new remove_aggregate());
       processMap.put("add_trigger", new add_trigger());
       processMap.put("removeTrigger", new remove_trigger());
@@ -1728,7 +1728,7 @@ public class rpc_service {
 
     public static class create_atomic_multilog<I extends Iface> extends org.apache.thrift.ProcessFunction<I, create_atomic_multilog_args> {
       public create_atomic_multilog() {
-        super("createAtomicMultilog");
+        super("create_atomic_multilog");
       }
 
       public create_atomic_multilog_args getEmptyArgsInstance() {
@@ -1797,7 +1797,7 @@ public class rpc_service {
 
     public static class add_index<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_index_args> {
       public add_index() {
-        super("addIndex");
+        super("add_index");
       }
 
       public add_index_args getEmptyArgsInstance() {
@@ -1845,7 +1845,7 @@ public class rpc_service {
 
     public static class add_filter<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_filter_args> {
       public add_filter() {
-        super("addFilter");
+        super("add_filter");
       }
 
       public add_filter_args getEmptyArgsInstance() {
@@ -1893,7 +1893,7 @@ public class rpc_service {
 
     public static class add_aggregate<I extends Iface> extends org.apache.thrift.ProcessFunction<I, add_aggregate_args> {
       public add_aggregate() {
-        super("addAggregate");
+        super("add_aggregate");
       }
 
       public add_aggregate_args getEmptyArgsInstance() {
@@ -2249,14 +2249,14 @@ public class rpc_service {
     private static <I extends AsyncIface> java.util.Map<java.lang.String,  org.apache.thrift.AsyncProcessFunction<I, ? extends  org.apache.thrift.TBase,?>> getProcessMap(java.util.Map<java.lang.String,  org.apache.thrift.AsyncProcessFunction<I, ? extends  org.apache.thrift.TBase, ?>> processMap) {
       processMap.put("register_handler", new register_handler());
       processMap.put("deregister_handler", new deregister_handler());
-      processMap.put("createAtomicMultilog", new create_atomic_multilog());
+      processMap.put("create_atomic_multilog", new create_atomic_multilog());
       processMap.put("get_atomic_multilog_info", new get_atomic_multilog_info());
       processMap.put("removeAtomicMultilog", new remove_atomic_multilog());
-      processMap.put("addIndex", new add_index());
+      processMap.put("add_index", new add_index());
       processMap.put("removeIndex", new remove_index());
-      processMap.put("addFilter", new add_filter());
+      processMap.put("add_filter", new add_filter());
       processMap.put("removeFilter", new remove_filter());
-      processMap.put("addAggregate", new add_aggregate());
+      processMap.put("add_aggregate", new add_aggregate());
       processMap.put("removeAggregate", new remove_aggregate());
       processMap.put("add_trigger", new add_trigger());
       processMap.put("removeTrigger", new remove_trigger());
@@ -2404,7 +2404,7 @@ public class rpc_service {
 
     public static class create_atomic_multilog<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, create_atomic_multilog_args, java.lang.Long> {
       public create_atomic_multilog() {
-        super("createAtomicMultilog");
+        super("create_atomic_multilog");
       }
 
       public create_atomic_multilog_args getEmptyArgsInstance() {
@@ -2595,7 +2595,7 @@ public class rpc_service {
 
     public static class add_index<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_index_args, Void> {
       public add_index() {
-        super("addIndex");
+        super("add_index");
       }
 
       public add_index_args getEmptyArgsInstance() {
@@ -2723,7 +2723,7 @@ public class rpc_service {
 
     public static class add_filter<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_filter_args, Void> {
       public add_filter() {
-        super("addFilter");
+        super("add_filter");
       }
 
       public add_filter_args getEmptyArgsInstance() {
@@ -2851,7 +2851,7 @@ public class rpc_service {
 
     public static class add_aggregate<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, add_aggregate_args, Void> {
       public add_aggregate() {
-        super("addAggregate");
+        super("add_aggregate");
       }
 
       public add_aggregate_args getEmptyArgsInstance() {

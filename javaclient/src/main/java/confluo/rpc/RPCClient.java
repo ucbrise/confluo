@@ -52,19 +52,19 @@ public class RPCClient {
         }
     }
 
-    public void createAtomicMultilog(String atomicMultilogName, Schema schema, rpc_storage_mode storage_mode) {
+    public void create_atomic_multilog(String atomicMultilogName, Schema schema, rpc_storage_mode storageMode) {
         this.curSchema = schema;
         List<rpc_column> rpcSchema = RPCTypeConversions.convertToRPCSchema(schema);
         try {
-            curMultilogId = client.create_atomic_multilog(atomicMultilogName, rpcSchema, storage_mode);
+            curMultilogId = client.create_atomic_multilog(atomicMultilogName, rpcSchema, storageMode);
         } catch (TException e) {
             e.printStackTrace();
         }
     }
 
-    public void setCurrentAtomicMultilog(String atomic_multilog_name) {
+    public void setCurrentAtomicMultilog(String atomicMultilogName) {
         try {
-            info = client.get_atomic_multilog_info(atomic_multilog_name);
+            info = client.get_atomic_multilog_info(atomicMultilogName);
         } catch (TException e) {
             e.printStackTrace();
         }
@@ -84,7 +84,7 @@ public class RPCClient {
         }
     }
 
-    public void addIndex(String fieldName, double bucketSize) {
+    public void add_index(String fieldName, double bucketSize) {
         if (curMultilogId == -1) {
 
         }
@@ -107,7 +107,7 @@ public class RPCClient {
     }
 
 
-    public void addFilter(String filterName, String filterExpr) {
+    public void add_filter(String filterName, String filterExpr) {
         if (curMultilogId == -1) {
 
         }
@@ -129,7 +129,7 @@ public class RPCClient {
         }
     }
 
-    public void addAggregate(String aggregateName, String filterName, String aggregateExpr) {
+    public void add_aggregate(String aggregateName, String filterName, String aggregateExpr) {
         if (curMultilogId == -1) {
 
         }
@@ -151,7 +151,7 @@ public class RPCClient {
         }
     }
 
-    public void installTrigger(String triggerName, String triggerExpr) {
+    public void install_trigger(String triggerName, String triggerExpr) {
         if (curMultilogId == -1) {
 
         }
@@ -215,7 +215,7 @@ public class RPCClient {
         return null;
     }
 
-    public RecordStream executeFilter(String filterExpr) {
+    public RecordStream execute_filter(String filterExpr) {
         if (curMultilogId == -1) {
 
         }
