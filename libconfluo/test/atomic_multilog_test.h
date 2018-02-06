@@ -1024,4 +1024,44 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   ASSERT_TRUE(a8.tail().empty());
 }
 
+TEST_F(AtomicMultilogTest, JsonAppendTest) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+
+  std::string rec1 = "{'a': false, 'b': '0', 'c': '0', 'd': '0', 'e': '0', 'f': '0.000000', 'g': '0.010000', 'h': 'abc' }";
+  std::string rec2 = "{'a': true, 'b': '1', 'c': '10', 'd': '2', 'e': '1', 'f': '0.100000', 'g': '0.020000', 'h': 'defg' }";
+  std::string rec3 = "{'a': false, 'b': '2', 'c': '20', 'd': '4', 'e': '10', 'f': '0.200000', 'g': '0.030000', 'h': 'hijkl' }";
+  std::string rec4 = "{'a': true, 'b': '3', 'c': '30', 'd': '6', 'e': '100', 'f': '0.300000', 'g': '0.040000', 'h': 'mnopqr' }";
+  std::string rec5 = "{'a': false, 'b': '4', 'c': '40', 'd': '8', 'e': '1000', 'f': '0.400000', 'g': '0.050000', 'h': 'stuvwx' }";
+  std::string rec6 = "{'a': true, 'b': '5', 'c': '50', 'd': '10', 'e': '10000', 'f': '0.500000', 'g': '0.060000', 'h': 'yyy' }";
+  std::string rec7 = "{'a': false, 'b': '6', 'c': '60', 'd': '12', 'e': '100000', 'f': '0.600000', 'g': '0.070000', 'h': 'zzz' }";
+  std::string rec8 = "{'a': true, 'b': '7', 'c': '70', 'd': '14', 'e': '1000000', 'f': '0.700000', 'g': '0.080000', 'h': 'zzz' }";
+
+  ASSERT_EQ(mlog.record_size() * 0, mlog.append(rec1));
+  ASSERT_EQ(mlog.record_size() * 1, mlog.append(rec2));
+  ASSERT_EQ(mlog.record_size() * 2, mlog.append(rec3));
+  ASSERT_EQ(mlog.record_size() * 3, mlog.append(rec4));
+  ASSERT_EQ(mlog.record_size() * 4, mlog.append(rec5));
+  ASSERT_EQ(mlog.record_size() * 5, mlog.append(rec6));
+  ASSERT_EQ(mlog.record_size() * 6, mlog.append(rec7));
+  ASSERT_EQ(mlog.record_size() * 7, mlog.append(rec8));
+
+  std::string res1 = mlog.read_json(mlog.record_size() * 0);
+  std::string res2 = mlog.read_json(mlog.record_size() * 1);
+  std::string res3 = mlog.read_json(mlog.record_size() * 2);
+  std::string res4 = mlog.read_json(mlog.record_size() * 3);
+  std::string res5 = mlog.read_json(mlog.record_size() * 4);
+  std::string res6 = mlog.read_json(mlog.record_size() * 5);
+  std::string res7 = mlog.read_json(mlog.record_size() * 6);
+  std::string res8 = mlog.read_json(mlog.record_size() * 7);
+
+  ASSERT_EQ(rec1, res1);
+  ASSERT_EQ(rec2, res2);
+  ASSERT_EQ(rec3, res3);
+  ASSERT_EQ(rec4, res4);
+  ASSERT_EQ(rec5, res5);
+  ASSERT_EQ(rec6, res6);
+  ASSERT_EQ(rec7, res7);
+  ASSERT_EQ(rec8, res8);
+}
+
 #endif /* CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_ */
