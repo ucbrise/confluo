@@ -338,6 +338,13 @@ class atomic_multilog {
     return off;
   }
 
+  size_t append(const std::string& json) {
+    void* buf = schema_.json_to_data(json);
+    size_t off = append(buf);
+    delete[] reinterpret_cast<uint8_t*>(buf);
+    return off;
+  }
+
   /**
    * Reads the data from the atomic multilog
    * @param offset The location of where the data is stored
@@ -385,6 +392,24 @@ class atomic_multilog {
   std::vector<std::string> read(uint64_t offset) const {
     uint64_t version;
     return read(offset, version);
+  }
+
+
+
+  void read_json(uint64_t offset, ro_data_ptr& ptr) const {
+    uint64_t version;
+    read(offset, version, ptr);
+  }
+
+  std::string read_json(uint64_t offset, uint64_t& version) const {
+    ro_data_ptr rptr;
+    read(offset, version, rptr);
+    return schema_.data_to_json(rptr.get());
+  }
+
+  std::string read_json(uint64_t offset) const {
+    uint64_t version;
+    return read_json(offset, version);
   }
 
   /**
