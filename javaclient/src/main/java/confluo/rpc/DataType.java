@@ -11,10 +11,7 @@ public class DataType {
     }
 
     public boolean equals(DataType other) {
-        if (other.typeId.getValue() == this.typeId.getValue() && other.size == this.size) {
-            return true;
-        }
-        return false;
+        return other.typeId.getValue() == this.typeId.getValue() && other.size == this.size;
     }
 
     boolean notEquals(DataType other) {

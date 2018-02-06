@@ -13,7 +13,7 @@ public class RecordStream implements Iterable<Record> {
     private rpc_iterator_handle handle;
     private Schema schema;
 
-    public RecordStream(long multilogId, Schema schema, rpc_service.Client client, rpc_iterator_handle handle)
+    RecordStream(long multilogId, Schema schema, rpc_service.Client client, rpc_iterator_handle handle)
     {
         this.multilogId = multilogId;
         this.schema = schema;
@@ -22,7 +22,7 @@ public class RecordStream implements Iterable<Record> {
         this.curOff = 0;
     }
 
-    public Record next() {
+    private Record next() {
         byte[] data = handle.get_data();
         ByteBuffer handleData = ByteBuffer.allocate((int) (data.length - curOff));
         for (int i = (int) curOff; i < data.length; i++) {
@@ -43,21 +43,21 @@ public class RecordStream implements Iterable<Record> {
         return next;
     }
 
-    public boolean hasMore() {
+    private boolean hasMore() {
        return this.curOff == -1 || curOff != handle.get_num_entries();
     }
 
     @Override
     public Iterator<Record> iterator() {
-        Iterator<Record> iterator = new Iterator<Record>() {
+        return new Iterator<Record>() {
             @Override
             public boolean hasNext() {
-                return hasMore();
+                return RecordStream.this.hasMore();
             }
 
             @Override
             public Record next() {
-                return next();
+                return RecordStream.this.next();
             }
 
             @Override
@@ -65,7 +65,6 @@ public class RecordStream implements Iterable<Record> {
                 throw new UnsupportedOperationException();
             }
         };
-        return null;
     }
 }
 

@@ -1,11 +1,13 @@
 
 import confluo.rpc.*;
+import org.apache.thrift.TException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,33 +16,49 @@ public class TestRPCClient {
 
     private Process process;
 
-    public void startServer() {
+    private void startServer() throws IOException, InterruptedException {
         String SERVER_EXECUTABLE = System.getenv("CONFLUO_SERVER_EXEC");
         if (SERVER_EXECUTABLE == null) {
             SERVER_EXECUTABLE = "confluod";
         }
-        List<String> args = new ArrayList<>();
-        args.add(SERVER_EXECUTABLE);
-        args.add("--data-path");
-        args.add("/tmp");
-        ProcessBuilder pb = new ProcessBuilder(args);
+        ProcessBuilder pb = new ProcessBuilder(SERVER_EXECUTABLE, "--data-path", "/tmp/javaclient");
+        File log = new File("/tmp/java_test.txt");
         pb.redirectErrorStream(true);
-        try {
-            process = pb.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            reader.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
+        pb.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+        process = pb.start();
+        waitTillServerReady();
+    }
+
+    @Before
+    public void setUo() throws IOException, InterruptedException {
+        startServer();
+    }
+
+    @After
+    public void tearDown() throws InterruptedException {
+        stopServer();
+    }
+
+    private void waitTillServerReady() throws InterruptedException {
+        boolean check = true;
+        while (check) {
+            try {
+                RPCClient c = new RPCClient("127.0.0.1", 9090);
+                c.close();
+                check = false;
+            } catch (TException e) {
+                Thread.sleep(100);
+            }
         }
     }
 
-    public void stopServer() {
+    private void stopServer() throws InterruptedException {
         process.destroy();
+        process.waitFor();
     }
 
     @Test
-    public void testConcurrentConnections() {
-        startServer();
+    public void testConcurrentConnections() throws TException, IOException, InterruptedException {
         List<RPCClient> clients = new ArrayList<>();
         clients.add(new RPCClient("127.0.0.1", 9090));
         clients.add(new RPCClient("127.0.0.1", 9090));
@@ -50,96 +68,85 @@ public class TestRPCClient {
         for (RPCClient c : clients) {
             c.disconnect();
         }
-
-        stopServer();
     }
 
     @Test
-    public void testCreateAtomicMultilog() {
-        startServer();
+    public void testCreateAtomicMultilog() throws TException, IOException, InterruptedException {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
         client.disconnect();
-        stopServer();
     }
 
     @Test
-    public void testReadWriteInMemory() {
-        //startServer();
+    public void testReadWriteInMemory() throws TException, IOException, InterruptedException {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
         int size = Long.SIZE / Byte.SIZE + 8;
         ByteBuffer data = ByteBuffer.allocate(size);
         data.putLong(System.nanoTime());
         data.put("abcdefgh".getBytes());
         data.flip();
 
-        client.write(data);
+        client.append(data);
         ByteBuffer buf = client.read(0);
         for (int i = 0; i < 8; i++) {
             Assert.assertEquals((char) ('a' + i), buf.get(i + 8));
         }
 
         client.disconnect();
-        //stopServer();
     }
 
     @Test
-    public void testReadWriteDurableRelaxed() {
-        startServer();
+    public void testReadWriteDurableRelaxed() throws TException, IOException, InterruptedException {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.DURABLE_RELAXED);
+        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.DURABLE_RELAXED);
 
         ByteBuffer data = ByteBuffer.allocate(Long.SIZE / Byte.SIZE + 8);
         data.putLong(System.nanoTime());
         data.put("abcdefgh".getBytes());
         data.flip();
 
-        client.write(data);
+        client.append(data);
         ByteBuffer buf = client.read(0);
         for (int i = 0; i < 8; i++) {
             Assert.assertEquals((char) ('a' + i), buf.get(i + 8));
         }
 
         client.disconnect();
-        stopServer();
     }
 
     @Test
-    public void testReadWriteDurable() {
-        startServer();
+    public void testReadWriteDurable() throws TException, IOException, InterruptedException {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         SchemaBuilder builder = new SchemaBuilder();
         Schema multilogSchema = new Schema(builder.addColumn(DataTypes.STRING_TYPE(8), "msg").build());
-        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.DURABLE);
+        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.DURABLE);
 
         ByteBuffer data = ByteBuffer.allocate(Long.SIZE / Byte.SIZE + 8);
         data.putLong(System.nanoTime());
         data.put("abcdefgh".getBytes());
         data.flip();
 
-        client.write(data);
+        client.append(data);
         ByteBuffer buf = client.read(0);
         for (int i = 0; i < 8; i++) {
             Assert.assertEquals((char) ('a' + i), buf.get(i + 8));
         }
 
         client.disconnect();
-        stopServer();
     }
 
     @Test
-    public void testExecuteFilter() {
-        startServer();
+    public void testExecuteFilter() throws TException, IOException, InterruptedException {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         Schema multilogSchema = new Schema(buildSchema());
-        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
 
         client.add_index("a", 1);
         client.add_index("b", 2);
@@ -150,14 +157,14 @@ public class TestRPCClient {
         client.add_index("g", 0.01);
         client.add_index("h", 1);
 
-        client.write(packRecord(true, "0", (short) 0, 0, 0, 0.01f, 0.01, "abc"));
-        client.write(packRecord(true, "1", (short) 10, 2, 1, 0.1f, 0.02, "defg"));
-        client.write(packRecord(false, "2", (short) 20, 4, 10, 0.2f, 0.03, "hijkl"));
-        client.write(packRecord(true, "3", (short) 30, 6, 100, 0.3f, 0.04, "mnopqr"));
-        client.write(packRecord(false, "4", (short) 40, 8, 1000, 0.4f, 0.05, "stuvwx"));
-        client.write(packRecord(true, "5", (short) 50, 10, 10000, 0.5f, 0.06, "yyy"));
-        client.write(packRecord(false, "6", (short) 60, 12, 100000, 0.6f, 0.07, "zzz"));
-        client.write(packRecord(true, "7", (short) 70, 14, 1000000, 0.7f, 0.08, "zzz"));
+        client.append(packRecord(true, "0", (short) 0, 0, 0, 0.01f, 0.01, "abc"));
+        client.append(packRecord(true, "1", (short) 10, 2, 1, 0.1f, 0.02, "defg"));
+        client.append(packRecord(false, "2", (short) 20, 4, 10, 0.2f, 0.03, "hijkl"));
+        client.append(packRecord(true, "3", (short) 30, 6, 100, 0.3f, 0.04, "mnopqr"));
+        client.append(packRecord(false, "4", (short) 40, 8, 1000, 0.4f, 0.05, "stuvwx"));
+        client.append(packRecord(true, "5", (short) 50, 10, 10000, 0.5f, 0.06, "yyy"));
+        client.append(packRecord(false, "6", (short) 60, 12, 100000, 0.6f, 0.07, "zzz"));
+        client.append(packRecord(true, "7", (short) 70, 14, 1000000, 0.7f, 0.08, "zzz"));
 
         int i = 0;
         for (Record record : client.execute_filter("a == true")) {
@@ -239,16 +246,14 @@ public class TestRPCClient {
         }
 
         client.disconnect();
-        stopServer();
     }
 
     @Test
-    public void testQueryFilter() {
-        startServer();
+    public void testQueryFilter() throws TException, IOException, InterruptedException {
         RPCClient client = new RPCClient("127.0.0.1", 9090);
         Schema multilogSchema = new Schema(buildSchema());
 
-        client.create_atomic_multilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
+        client.createAtomicMultilog("my_multilog", multilogSchema, StorageId.IN_MEMORY);
         client.add_filter("filter1", "a == true");
         client.add_filter("filter2", "b > 4");
         client.add_filter("filter3", "c <= 30");
@@ -279,14 +284,14 @@ public class TestRPCClient {
         long begin_ms = timeBlock(now);
         long end_ms = timeBlock(now);
 
-        client.write(packRecordTime(now, false, '0', (short) 0, 0, 0, 0.0f, 0.01, "abc"));
-        client.write(packRecordTime(now, true, '1', (short) 10, 2, 1, 0.1f, 0.02, "defg"));
-        client.write(packRecordTime(now, false, '2', (short) 20, 4, 10, 0.2f, 0.03, "hijkl"));
-        client.write(packRecordTime(now, true, '3', (short) 30, 6, 100, 0.3f, 0.04, "mnopqr"));
-        client.write(packRecordTime(now, false, '4', (short) 40, 8, 1000, 0.4f, 0.05, "stuvwx"));
-        client.write(packRecordTime(now, true, '5', (short) 50, 10, 10000, 0.5f, 0.06, "yyy"));
-        client.write(packRecordTime(now, false, '6', (short) 60, 12, 100000, 0.6f, 0.07, "zzz"));
-        client.write(packRecordTime(now, true, '7', (short) 70, 14, 1000000, 0.7f, 0.08, "zzz"));
+        client.append(packRecordTime(now, false, '0', (short) 0, 0, 0, 0.0f, 0.01, "abc"));
+        client.append(packRecordTime(now, true, '1', (short) 10, 2, 1, 0.1f, 0.02, "defg"));
+        client.append(packRecordTime(now, false, '2', (short) 20, 4, 10, 0.2f, 0.03, "hijkl"));
+        client.append(packRecordTime(now, true, '3', (short) 30, 6, 100, 0.3f, 0.04, "mnopqr"));
+        client.append(packRecordTime(now, false, '4', (short) 40, 8, 1000, 0.4f, 0.05, "stuvwx"));
+        client.append(packRecordTime(now, true, '5', (short) 50, 10, 10000, 0.5f, 0.06, "yyy"));
+        client.append(packRecordTime(now, false, '6', (short) 60, 12, 100000, 0.6f, 0.07, "zzz"));
+        client.append(packRecordTime(now, true, '7', (short) 70, 14, 1000000, 0.7f, 0.08, "zzz"));
 
         int i = 0;
         for (Record record : client.queryFilter("filter1", begin_ms, end_ms, "")) {
@@ -338,10 +343,9 @@ public class TestRPCClient {
         Assert.assertEquals(5, i);
 
         client.disconnect();
-        stopServer();
     }
 
-    public List<Column> buildSchema() {
+    private List<Column> buildSchema() {
         SchemaBuilder builder = new SchemaBuilder();
         builder.addColumn(DataTypes.BOOL_TYPE, "a");
         builder.addColumn(DataTypes.CHAR_TYPE, "b");
@@ -354,7 +358,7 @@ public class TestRPCClient {
         return builder.build();
     }
 
-    public ByteBuffer packRecord(boolean a, String b, short c, int d, long e, float f, double g, String h) {
+    private ByteBuffer packRecord(boolean a, String b, short c, int d, long e, float f, double g, String h) {
         int size = 8 + 1 + 1 + 2 + 4 + 8 + 4 + 8 + 16;
         ByteBuffer rec = ByteBuffer.allocate(size);
         rec.putLong(System.nanoTime());
@@ -370,8 +374,8 @@ public class TestRPCClient {
         return rec;
     }
 
-    public ByteBuffer packRecordTime(long ts, boolean a, char b, short c, int d, long e, float f, double g, String h) {
-        int size = 8 + 1 + 2 + 2 + 4 + 8 + 4 + 8 + 16;
+    private ByteBuffer packRecordTime(long ts, boolean a, char b, short c, int d, long e, float f, double g, String h) {
+        int size = 8 + 1 + 1 + 2 + 4 + 8 + 4 + 8 + 16;
         ByteBuffer rec = ByteBuffer.allocate(size);
         rec.putLong(ts);
         rec.put((byte) (a ? 1 : 0));
@@ -386,7 +390,7 @@ public class TestRPCClient {
         return rec;
     }
 
-    public long timeBlock(long ts) {
+    private long timeBlock(long ts) {
         return (long) (ts / 1e6);
     }
 

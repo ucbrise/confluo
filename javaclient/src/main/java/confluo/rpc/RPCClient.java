@@ -10,15 +10,13 @@ import java.util.List;
 
 public class RPCClient {
 
-    private TSocket socket;
     private TTransport transport;
-    private TBinaryProtocol protocol;
     private rpc_service.Client client;
     private long curMultilogId;
     private rpc_atomic_multilog_info info;
     private Schema curSchema;
 
-    public RPCClient(String host, int port) {
+    public RPCClient(String host, int port) throws TException {
         connect(host, port);
         curMultilogId = -1;
     }
@@ -27,18 +25,12 @@ public class RPCClient {
         disconnect();
     }
 
-    public void connect(String host, int port) {
-        socket = new TSocket(host, port);
-        //transport = new TSocket(host, port);//TFramedTransport(socket);
-        transport = socket;
-        protocol = new TBinaryProtocol(transport);
+    public void connect(String host, int port) throws TException {
+        transport = new TSocket(host, port);
+        TBinaryProtocol protocol = new TBinaryProtocol(transport);
         client = new rpc_service.Client(protocol);
-        try {
-            transport.open();
-            client.register_handler();
-        } catch (TException e) {
-            e.printStackTrace();
-        }
+        transport.open();
+        client.register_handler();
     }
 
     public void disconnect() {
@@ -52,7 +44,7 @@ public class RPCClient {
         }
     }
 
-    public void create_atomic_multilog(String atomicMultilogName, Schema schema, rpc_storage_mode storageMode) {
+    public void createAtomicMultilog(String atomicMultilogName, Schema schema, rpc_storage_mode storageMode) {
         this.curSchema = schema;
         List<rpc_column> rpcSchema = RPCTypeConversions.convertToRPCSchema(schema);
         try {
@@ -74,7 +66,7 @@ public class RPCClient {
 
     public void removeAtomicMultilog() {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.remove_atomic_multilog(curMultilogId);
@@ -86,7 +78,7 @@ public class RPCClient {
 
     public void add_index(String fieldName, double bucketSize) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.add_index(curMultilogId, fieldName, bucketSize);
@@ -97,7 +89,7 @@ public class RPCClient {
 
     public void removeIndex(String fieldName) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.remove_index(curMultilogId, fieldName);
@@ -109,7 +101,7 @@ public class RPCClient {
 
     public void add_filter(String filterName, String filterExpr) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.add_filter(curMultilogId, filterName, filterExpr);
@@ -120,7 +112,7 @@ public class RPCClient {
 
     public void removeFilter(String filterName) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.remove_filter(curMultilogId, filterName);
@@ -131,7 +123,7 @@ public class RPCClient {
 
     public void add_aggregate(String aggregateName, String filterName, String aggregateExpr) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.add_aggregate(curMultilogId, aggregateName, filterName, aggregateExpr);
@@ -142,7 +134,7 @@ public class RPCClient {
 
     public void removeAggregate(String aggregateName) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.remove_aggregate(curMultilogId, aggregateName);
@@ -153,7 +145,7 @@ public class RPCClient {
 
     public void install_trigger(String triggerName, String triggerExpr) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.add_trigger(curMultilogId, triggerName, triggerExpr);
@@ -164,7 +156,7 @@ public class RPCClient {
 
     public void removeTrigger(String triggerName) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             client.remove_trigger(curMultilogId, triggerName);
@@ -177,12 +169,13 @@ public class RPCClient {
         return new RPCRecordBatchBuilder();
     }
 
-    public void write(ByteBuffer record) {
+    public void append(ByteBuffer record) {
         if (curMultilogId == -1) {
-            return;
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         if (record.array().length != curSchema.getRecordSize()) {
-            return;
+            throw new IllegalStateException("Record size incorrect; expected=" + curSchema.getRecordSize()
+                    + ", got=" + record.array().length);
         }
         try {
             client.append(curMultilogId, record);
@@ -205,7 +198,7 @@ public class RPCClient {
 
     public String getAggregate(String aggregateName, long beginMs, long endMs) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             return client.query_aggregate(curMultilogId, aggregateName, beginMs, endMs);
@@ -217,7 +210,7 @@ public class RPCClient {
 
     public RecordStream execute_filter(String filterExpr) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             rpc_iterator_handle handle = client.adhoc_filter(curMultilogId, filterExpr);
@@ -230,7 +223,7 @@ public class RPCClient {
 
     public RecordStream queryFilter(String filterName, long beginMs, long endMs, String filterExpr) {
         if (curMultilogId == -1)  {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         if (filterExpr.equals("")) {
             try {
@@ -252,7 +245,7 @@ public class RPCClient {
 
     public AlertStream getAlerts(long beginMs, long endMs, String triggerName) {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         if (triggerName.equals("")) {
             try {
@@ -272,10 +265,9 @@ public class RPCClient {
         return null;
     }
 
-
     public long numRecords() {
         if (curMultilogId == -1) {
-
+            throw new IllegalStateException("Must set Atomic Multilog first");
         }
         try {
             return client.num_records(curMultilogId);
