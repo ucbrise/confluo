@@ -6,7 +6,7 @@
 
 namespace confluo {
 
-/** An index_log is a type of monolog */
+/** An index_log is a type of monolog for supporting indexes */
 typedef monolog::monolog_exp2<index::radix_index*> index_log;
 
 }

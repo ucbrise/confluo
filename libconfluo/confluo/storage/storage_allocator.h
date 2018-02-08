@@ -10,10 +10,10 @@ namespace confluo {
 namespace storage {
 
 using namespace ::utils;
+// TODO: delegate requests to memory pools
 
 /**
- * Allocator interface
- * TODO: delegate requests to memory pools
+ * Storage allocator class. Interface for managing memory and storage
  */
 class storage_allocator {
 

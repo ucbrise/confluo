@@ -4,6 +4,9 @@
 namespace confluo {
 namespace rpc {
 
+/**
+ * Holder of default values for parameters
+ */
 class rpc_defaults {
  public:
   // Iterator

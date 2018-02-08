@@ -21,8 +21,10 @@ enum reational_op_id
   NEQ = 5  //!< NEQ
 };
 
+/** A relational comparison between two immutable values */
 typedef bool (*relational_op_t)(const immutable_raw_data& v1, const immutable_raw_data& v2);
 
+/** A vector of relational comparison functions */
 typedef std::vector<relational_op_t> rel_ops_t;
 
 /**

@@ -36,7 +36,8 @@ namespace spirit = boost::spirit;
 namespace phx = boost::phoenix;
 
 /**
- * Aggregate Parser
+ * Aggregate Parser class. Contains operations for parsing aggregates based
+ * on grammar rules.
  *
  * @tparam I The type of aggregate
  */

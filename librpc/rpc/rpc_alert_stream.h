@@ -46,7 +46,7 @@ class rpc_alert_stream {
   /**
    * Advances the alert stream
    *
-   * @return This rpc alert stream advanced
+   * @return This updated rpc alert stream 
    */
   rpc_alert_stream& operator++() {
     if (has_more()) {

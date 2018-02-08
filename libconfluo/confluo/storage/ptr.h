@@ -9,16 +9,22 @@ namespace confluo {
 namespace storage {
 
 /**
- * Values for pointers
+ * Pointer constants class. Contains constants for important values for 
+ * pointers
  */
 class ptr_constants {
  public:
   // Increments/decrements for first and second counters
+  /** Increments or decrements for the first counter */
   static const uint32_t FIRST_DELTA = 1U;
+  /** Increments or decrements for the second counter */
   static const uint32_t SECOND_DELTA = 1U << 16;
+  /** Increments or decrements for both counters */
   static const uint32_t BOTH_DELTA = FIRST_DELTA + SECOND_DELTA;
 
+  /** A mask for the first counter */
   static const uint32_t FIRST_MASK = (1U << 16) - 1;
+  /** Shift amount for the second counter */
   static const uint32_t SECOND_SHIFT = 16;
 };
 
@@ -51,8 +57,8 @@ class read_only_ptr {
    * Constructs a read only pointer from a specified pointer
    *
    * @param ptr The pointer to construct a read only pointer from
-   * @param ref_counts The ref_counts
-   * @param offset The offset
+   * @param ref_counts The ref_counts for the pointer
+   * @param offset The offset for the pointer
    */
   read_only_ptr(T* ptr, atomic::type<uint32_t>* ref_counts, size_t offset = 0) :
     ptr_(ptr),
@@ -214,7 +220,7 @@ class swappable_ptr {
   /**
    * Initialize pointer with a CAS operation.
    * Any load after initialization returns a non-null pointer
-   * @param ptr The pointer
+   * @param ptr The pointer to initialize
    * @return True if initialization successful, false otherwise
    */
   bool atomic_init(T* ptr) {
@@ -310,6 +316,11 @@ class swappable_ptr {
     }
   }
 
+  /**
+   * Decrements the ref count for the second counter
+   * and deallocates the pointer if it reaches 0.
+   * @param ref_count reference count to decrement
+   */
   void decrement_compare_dealloc_second() {
     if ((atomic::fas(&ref_counts_, ptr_constants::SECOND_DELTA) >> ptr_constants::SECOND_SHIFT) == 1) {
       ALLOCATOR.dealloc<T>(ptr_);

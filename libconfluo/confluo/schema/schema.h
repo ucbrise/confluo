@@ -27,7 +27,8 @@ using namespace utils;
 namespace confluo {
 
 /**
- * The schema for the atomic multilog
+ * The schema for the atomic multilog. Contains operations applied to
+ * data that it contains.
  */
 class schema_t {
  public:

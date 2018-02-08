@@ -8,7 +8,8 @@ namespace confluo {
 namespace storage {
 
 /**
- * Memory statistics
+ * The memory stat class. Contains functionality for modifying the amount
+ * of memory used.
  */
 class memory_stat {
 

@@ -12,13 +12,21 @@ namespace confluo {
  */
 class aggregated_reflog : public reflog {
  public:
+  /** The type of size of the reflog */
   typedef reflog::size_type size_type;
+  /** The type of position of the reflog */;
   typedef reflog::pos_type pos_type;
+  /** The type of value contained in the reflog */
   typedef reflog::value_type value_type;
+  /** The type of difference in the reflog */
   typedef reflog::difference_type difference_type;
+  /** The type of pointer in the reflog */
   typedef reflog::pointer pointer;
+  /** The type of reference in the reflog */
   typedef reflog::reference reference;
+  /** The type of iterator for the reflog */
   typedef reflog::iterator iterator;
+  /** The type of constant iterator for the reflog */
   typedef reflog::const_iterator const_iterator;
 
   /**

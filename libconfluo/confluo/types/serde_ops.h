@@ -5,7 +5,9 @@
 
 namespace confluo {
 
+/** Serializes the raw immutable data to the output stream */
 typedef void (*serialize_op_t)(std::ostream&, const immutable_raw_data&);
+/** Initializes the raw mutable data from the input stream */
 typedef void (*deserialize_op_t)(std::istream&, mutable_raw_data&);
 
 /**

@@ -11,12 +11,21 @@
 // TODO: Can potentially make this more efficient with lock-free concurrency
 // Although seems unnecessary for now
 /**
- * The type of task
+ * The task type structure. Contains the task function and a pointer to
+ * the next task type.
  */
 struct task_type {
+  /** The task function */
   std::function<void()> func;
+  /** Pointer to the next task type */
   task_type* next;
 
+  /**
+   * Constructs a task type from the passed in arguments
+   *
+   * @tparam ARGS The type of the arguments
+   * @param args The arguments to pass into the task function
+   */
   template<class ... ARGS>
   task_type(ARGS&&... args)
       : func(std::forward<ARGS>(args)...),
@@ -25,10 +34,12 @@ struct task_type {
 };
 
 /**
- * A queue of tasks
+ * The task queue class. Contains queue operations for adding and removing
+ * tasks.
  */
 class task_queue {
  public:
+  /** Function that takes in no arguments */
   typedef std::function<void()> function_t;
 
   /**
@@ -139,12 +150,14 @@ class task_queue {
 };
 
 /**
- * Executor of tasks
+ * The task worker class. Supports operations for workers to execute
+ * tasks on the queue.
  */
 class task_worker {
  public:
   /**
    * Default constructor that initalizes work to a queue of tasks to do
+   * @param queue The task queue the workers get tasks from
    */
   task_worker(task_queue& queue)
       : stop_(false),
@@ -193,7 +206,8 @@ class task_worker {
 };
 
 /**
- * Pool of tasks
+ * Task pool class. Contains functionality to submit jobs into the task
+ * pool. 
  */
 class task_pool {
  public:

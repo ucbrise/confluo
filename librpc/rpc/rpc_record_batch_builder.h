@@ -10,7 +10,7 @@ namespace confluo {
 namespace rpc {
 
 /**
- * Containsi data from the record
+ * Contains data from the record
  */
 struct record_data : public std::string {
   /**

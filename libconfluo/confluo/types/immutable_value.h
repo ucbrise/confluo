@@ -12,7 +12,8 @@ using namespace utils;
 namespace confluo {
 
 /**
- * Data that cannot be modified
+ * The immutable value class. Contains data that cannot be modified and
+ * associated comparative operations.
  */
 class immutable_value {
  public:

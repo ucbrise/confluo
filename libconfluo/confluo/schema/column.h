@@ -13,7 +13,7 @@
 namespace confluo {
 
 /**
- * Column in the schema
+ * Column class. Contains operations for operating on columns in the schema.
  */
 class column_t {
  public:

@@ -76,6 +76,7 @@ class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()
  * Parses a trigger from a string
  *
  * @param t The string that the trigger is parsed from
+ * @throw parse_exception
  *
  * @return A parsed trigger
  */

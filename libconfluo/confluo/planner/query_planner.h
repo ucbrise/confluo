@@ -14,14 +14,20 @@ namespace confluo {
 namespace planner {
 
 /**
- * Query planner
+ * Query planner class. Contains operations to map operations onto the
+ * data.
  */
 class query_planner {
  public:
+  /** Range of keys */
   typedef std::pair<byte_string, byte_string> key_range;
+  /** Maps an id to a key range */
   typedef std::map<uint32_t, key_range> key_range_map;
+  /** List of index operation that can be performed */
   typedef std::vector<index_op> index_ops;
+  /** Iterator through the index operations */
   typedef index_ops::iterator if_iterator;
+  /** Constant iterator through the list of index operations */
   typedef index_ops::const_iterator const_if_iterator;
 
   /**
@@ -67,11 +73,28 @@ class query_planner {
   }
 
  private:
+  /**
+   * Merges two key ranges together
+   *
+   * @param r1 The first key range
+   * @param r2 The second key range
+   *
+   * @return A key range containing the combination of the given key ranges
+   */
   key_range merge_range(const key_range& r1, const key_range& r2) const {
     return std::make_pair(std::max(r1.first, r2.first),
                           std::min(r1.second, r2.second));
   }
 
+  /**
+   * Adds a key range to the given key range map
+   *
+   * @param ranges The key range map that the range is added to
+   * @param id The identifier of the key range
+   * @param r The key range to add to the key range map
+   *
+   * @return True if the range was successfully added, false otherwise
+   */
   bool add_range(key_range_map& ranges, uint32_t id, const key_range& r) const {
     key_range_map::iterator it;
     key_range r_m;
@@ -88,6 +111,13 @@ class query_planner {
     return false;  // Invalid key-range
   }
 
+  /**
+   * Optimizes the compiled minterm expression using the key ranges
+   *
+   * @param m The minterm to optimize
+   *
+   * @return Pointer to the optimized query operation
+   */
   std::shared_ptr<query_op> optimize_minterm(const compiled_minterm& m) const {
     // Get valid, condensed key-ranges for indexed attributes
     key_range_map m_key_ranges;

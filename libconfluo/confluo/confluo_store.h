@@ -131,6 +131,16 @@ class confluo_store {
   }
 
  private:
+  /**
+   * Task to create a new atomic multilog
+   *
+   * @param name The name of the atomic multilog
+   * @param schema The schema of the atomic multilog
+   * @param mode The storage mode of the atomic multilog
+   * @param ex The exception if creation fails
+   *
+   * @return Identifier for the created atomic multilog
+   */
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::vector<column_t>& schema,
                                       const storage::storage_mode mode,
@@ -154,6 +164,16 @@ class confluo_store {
 
   }
 
+  /**
+   * Task to create a new atomic multilog
+   *
+   * @param name The name of the atomic multilog
+   * @param schema The schema of the atomic multilog
+   * @param mode The storage mode of the atomic multilog
+   * @param ex The exception if creation fails
+   *
+   * @return Identifier for the created atomic multilog
+   */
   int64_t create_atomic_multilog_task(const std::string& name,
                                       const std::string& schema,
                                       const storage::storage_mode mode,

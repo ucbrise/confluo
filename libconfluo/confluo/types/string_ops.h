@@ -9,7 +9,9 @@ using namespace utils;
 
 namespace confluo {
 
+/** Parses the contents from the given string to the data */
 typedef void (*parse_op_t)(const std::string&, void*);
+/** Gets the string representation of the immutable raw data */
 typedef std::string (*to_string_op_t)(const immutable_raw_data&);
 
 /**

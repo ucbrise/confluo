@@ -9,7 +9,7 @@
 namespace confluo {
 
 /**
- * Snapshot of the schema
+ * Snapshot of the schema for backups
  */
 class schema_snapshot {
  public:

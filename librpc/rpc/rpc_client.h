@@ -106,15 +106,6 @@ class rpc_client {
         rpc_type_conversions::convert_mode(mode));
   }
 
-  void create_atomic_multilog(const std::string& name,
-      const std::string& schema,
-      const storage::storage_mode mode) {
-    cur_schema_ = parser::parse_schema(schema);
-    cur_multilog_id_ = client_->create_atomic_multilog(name,
-        rpc_type_conversions::convert_schema(cur_schema_.columns()),
-        rpc_type_conversions::convert_mode(mode));
-  }
-
   /**
    * Sets the current atomic multilog to the name of the desired atomic
    * multilog
@@ -129,12 +120,18 @@ class rpc_client {
     cur_multilog_id_ = info.id;
   }
 
+  /**
+   * Gets the current schema
+   *
+   * @return The current schema for the atomic multilog
+   */
   schema_t const& current_schema() const {
     return cur_schema_;
   }
 
   /**
    * Removes the atomic multilog associated with this client
+   * @throw illegal_state_exception
    */
   void remove_atomic_multilog() {
     if (cur_multilog_id_ == -1) {
@@ -149,6 +146,7 @@ class rpc_client {
    *
    * @param field_name The name of the field to add the index to 
    * @param bucket_size The size of the bucket for lookup
+   * @throw illegal_state_exception
    */
   void add_index(const std::string& field_name, const double bucket_size = 1.0) {
     if (cur_multilog_id_ == -1) {
@@ -161,6 +159,7 @@ class rpc_client {
    * Removes an index associated with a field
    *
    * @param field_name The name of the field
+   * @throw illegal_state_exception
    */
   void remove_index(const std::string& field_name) {
     if (cur_multilog_id_ == -1) {
@@ -174,6 +173,7 @@ class rpc_client {
    *
    * @param filter_name The name of the filter
    * @param filter_expr The filter expression
+   * @throw illegal_state_exception
    */
   void add_filter(const std::string& filter_name,
       const std::string& filter_expr) {
@@ -187,6 +187,7 @@ class rpc_client {
    * Removes a filter from the client
    *
    * @param filter_name The name of the filter to remove
+   * @throw illegal_state_exception
    */
   void remove_filter(const std::string& filter_name) {
     if (cur_multilog_id_ == -1) {
@@ -201,6 +202,7 @@ class rpc_client {
    * @param aggregate_name The name of the aggregate
    * @param filter_name The name of the filter
    * @param aggregate_expr The aggregate expression
+   * @throw illegal_state_exception
    */
   void add_aggregate(const std::string& aggregate_name,
       const std::string& filter_name,
@@ -216,6 +218,7 @@ class rpc_client {
    * Removes an aggregate from the client
    *
    * @param aggregate_name The name of the aggregate to remove
+   * @throw illegal_state_exception
    */
   void remove_aggregate(const std::string& aggregate_name) {
     if (cur_multilog_id_ == -1) {
@@ -229,6 +232,7 @@ class rpc_client {
    *
    * @param trigger_name The name of the trigger
    * @param trigger_expr The trigger expression
+   * @throw illegal_state_exception
    */
   void install_trigger(const std::string& trigger_name,
       const std::string& trigger_expr) {
@@ -509,6 +513,13 @@ class rpc_client {
 
   /** Asynchronous calls for query ops **/
   // TODO: Add tests
+  
+  /**
+   * Asynchronous call the append batch function
+   * @throw illegal_state_exception
+   *
+   * @param batch The batch argument to the method
+   */
   void send_append_batch(rpc_record_batch& batch) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -516,10 +527,21 @@ class rpc_client {
     client_->send_append_batch(cur_multilog_id_, batch);
   }
 
+  /**
+   * Asynchronous receiving of the append batch
+   *
+   * @return The success of receiving the batch
+   */
   int64_t recv_append_batch() {
     return client_->recv_append_batch();
   }
 
+  /**
+   * Asynchronous call the append function
+   * @throw illegal_state_exception
+   *
+   * @param record The record argument to the method
+   */
   void send_append(const record_data& record) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -532,6 +554,12 @@ class rpc_client {
     client_->send_append(cur_multilog_id_, record);
   }
 
+  /**
+   * Asynchronous call the append function
+   * @throw illegal_state_exception
+   *
+   * @param record The record argument to the method
+   */
   void send_append(const std::vector<std::string>& record) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -546,10 +574,22 @@ class rpc_client {
     client_->send_append(cur_multilog_id_, rdata);
   }
 
+  /**
+   * Asynchronous receiving of the append operation
+   *
+   * @return The success of receiving 
+   */
   int64_t recv_append() {
     return client_->recv_append();
   }
 
+  /**
+   * Asynchronous call the read batch function
+   * @throw illegal_state_exception
+   *
+   * @param offset The offset argument to the method
+   * @param nrecords The number of records argument to the method
+   */
   void send_read_batch(int64_t offset, size_t nrecords) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -557,28 +597,59 @@ class rpc_client {
     client_->send_read(cur_multilog_id_, offset, nrecords);
   }
 
+  /**
+   * Asynchronous call the read  function
+   *
+   * @param return The records that are read
+   * @param offset The offset to read from
+   */
   void send_read(record_data& _return, int64_t offset) {
     send_read_batch(offset, 1);
   }
 
+  /**
+   * Sends the read data method
+   *
+   * @param offset The offset to read from
+   */
   void send_read(int64_t offset) {
     send_read_batch(offset, 1);
   }
 
+  /**
+   * Receives the record batch data that is read
+   *
+   * @param data The data to be read
+   */
   void recv_read_batch(record_data& data) {
     client_->recv_read(data);
   }
 
+  /**
+   * Receives the record  data that is read
+   *
+   * @param data The data to be read
+   */
   void recv_read(record_data& data) {
     recv_read_batch(data);
   }
 
+  /**
+   * Receives the data that is read
+   *
+   * @return A vector containing the records that are read
+   */
   std::vector<std::string> recv_read() {
     record_data data;
     recv_read(data);
     return cur_schema_.data_to_record_vector(data.data());
   }
 
+  /**
+   * Receives the batch that is read
+   *
+   * @return A vector containing the batch of records that are read
+   */
   std::vector<std::vector<std::string>> recv_read_batch() {
     record_data data;
     recv_read_batch(data);
@@ -591,6 +662,13 @@ class rpc_client {
     return _return;
   }
 
+  /**
+   * Sends the aggregate from the client
+   *
+   * @param aggregate_name The name of the aggregate
+   * @param begin_ms The beginning time in milliseconds
+   * @param end_ms The end time in milliseconds
+   */
   void send_get_aggregate(const std::string& aggregate_name, int64_t begin_ms,
       int64_t end_ms) {
     if (cur_multilog_id_ == -1) {
@@ -601,12 +679,24 @@ class rpc_client {
         begin_ms, end_ms);
   }
 
+  /**
+   * Receives an aggregate
+   *
+   * @return String containing the aggregate
+   */
   std::string recv_get_aggregate() {
     std::string _return;
     client_->recv_query_aggregate(_return);
     return _return;
   }
 
+  /**
+   * Sends the aggregate from the client
+   *
+   * @param aggregate_expr The aggregate expression
+   * @param filter_expr The filter expression
+   * @throw illegal_state_exception
+   */
   void send_execute_aggregate(const std::string& aggregate_expr,
       const std::string& filter_expr) {
     if (cur_multilog_id_ == -1) {
@@ -617,12 +707,23 @@ class rpc_client {
         filter_expr);
   }
 
+  /**
+   * Receives the aggregate
+   *
+   * @return String containing the aggregate
+   */
   std::string recv_execute_aggregate() {
     std::string _return;
     client_->recv_adhoc_aggregate(_return);
     return _return;
   }
 
+  /**
+   * Sends the filter from the client
+   *
+   * @param filter_expr The filter expression
+   * @throw illegal_state_exception
+   */
   void send_execute_filter(const std::string& filter_expr) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -631,6 +732,11 @@ class rpc_client {
     client_->send_adhoc_filter(cur_multilog_id_, filter_expr);
   }
 
+  /**
+   * Receives the records after executing the filter
+   *
+   * @return Stream containing the records as a result of the filter
+   */
   rpc_record_stream recv_execute_filter() {
     rpc_iterator_handle handle;
     client_->recv_adhoc_filter(handle);
@@ -638,6 +744,14 @@ class rpc_client {
         std::move(handle));
   }
 
+  /**
+   * Sends query filter from the client
+   *
+   * @param filter_name The name of the filter
+   * @param begin_ms The beginning time in milliseconds
+   * @param end_ms The end time in milliseconds
+   * @throw illegal_state_exception
+   */
   void send_query_filter(const std::string& filter_name,
       const int64_t begin_ms,
       const int64_t end_ms) {
@@ -648,6 +762,11 @@ class rpc_client {
         end_ms);
   }
 
+  /**
+   * Receives the query filter
+   *
+   * @return Stream containing the records that filter returns
+   */
   rpc_record_stream recv_query_filter() {
     rpc_iterator_handle handle;
     client_->recv_predef_filter(handle);
@@ -655,6 +774,14 @@ class rpc_client {
         std::move(handle));
   }
 
+  /**
+   * Sends additional filter from the client
+   *
+   * @param filter_name The name of the filter
+   * @param begin_ms The beginning time in milliseconds
+   * @param end_ms The end time in milliseconds
+   * @param additional_filter_expr The additional filter expression
+   */
   void send_query_filter_additional_filter(const std::string& filter_name,
       const int64_t begin_ms, const int64_t end_ms,
       const std::string& additional_filter_expr) {
@@ -666,6 +793,11 @@ class rpc_client {
         additional_filter_expr, begin_ms, end_ms);
   }
 
+  /**
+   * Receives additional filter
+   *
+   * @return Records that filter returns
+   */
   rpc_record_stream recv_query_filter_additional_filter() {
     rpc_iterator_handle handle;
     client_->recv_combined_filter(handle);
@@ -673,6 +805,13 @@ class rpc_client {
         std::move(handle));
   }
 
+  /**
+   * Sends the alerts by the time from the client
+   *
+   * @param begin_ms The beginning time in milliseconds
+   * @param end_ms The end time in milliseconds
+   * @throw illegal_state_exception
+   */
   void send_get_alerts(const int64_t begin_ms, const int64_t end_ms) {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -680,12 +819,25 @@ class rpc_client {
     client_->send_alerts_by_time(cur_multilog_id_, begin_ms, end_ms);
   }
 
+  /**
+   * Receives the alerts
+   *
+   * @return Stream containing the alerts
+   */
   rpc_alert_stream recv_get_alerts() {
     rpc_iterator_handle handle;
     client_->recv_alerts_by_time(handle);
     return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
   }
 
+  /**
+   * Sends the alerts by the trigger from the client
+   *
+   * @param begin_ms The beginning time in milliseconds
+   * @param end_ms The end time in milliseconds
+   * @param trigger_name The name of the trigger
+   * @throw illegal_state_exception
+   */
   void send_get_alerts_by_trigger(const int64_t begin_ms, const int64_t end_ms,
       const std::string& trigger_name) {
     if (cur_multilog_id_ == -1) {
@@ -695,12 +847,20 @@ class rpc_client {
         begin_ms, end_ms);
   }
 
+  /**
+   * Recieves the alerts by the trigger
+   *
+   * @return Stream containing the alerts
+   */
   rpc_alert_stream recv_get_alerts_by_trigger() {
     rpc_iterator_handle handle;
     client_->recv_alerts_by_trigger_and_time(handle);
     return rpc_alert_stream(cur_multilog_id_, client_, std::move(handle));
   }
 
+  /**
+   * Asynchronous call to send the number of records to the client
+   */
   void send_num_records() {
     if (cur_multilog_id_ == -1) {
       throw illegal_state_exception("Must set atomic multilog first");
@@ -708,6 +868,11 @@ class rpc_client {
     client_->send_num_records(cur_multilog_id_);
   }
 
+  /**
+   * Asynchronous call to get the number of records
+   *
+   * @return The number of records in the atomic multilog
+   */
   int64_t recv_num_records() {
     return client_->recv_num_records();
   }

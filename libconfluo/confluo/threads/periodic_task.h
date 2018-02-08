@@ -10,7 +10,8 @@
 #include "logger.h"
 
 /**
- * Task that's executed periodically
+ * The periodic task class. Contains functionality to start and stop
+ * the specified task.
  */
 class periodic_task {
  public:

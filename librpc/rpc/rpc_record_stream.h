@@ -13,6 +13,7 @@ namespace rpc {
  */
 class rpc_record_stream {
  public:
+  /** The thrift client over rpc */
   typedef rpc_serviceClient thrift_client;
 
   /**

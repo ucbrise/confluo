@@ -10,7 +10,8 @@
 namespace confluo {
 
 /**
- * The read tail marker
+ * The read tail marker. Contains operations for modifying and setting
+ * the marker for read requests.
  */
 class read_tail {
  public:

@@ -20,10 +20,15 @@ namespace confluo {
  */
 enum metadata_type
   : uint32_t {
+    /** Metadata for the schema */
     D_SCHEMA_METADATA = 0,
+  /** Metadata for the index */
   D_INDEX_METADATA = 1,
+  /** Metadata for filters */
   D_FILTER_METADATA = 2,
+  /** Metadata for aggregates */
   D_AGGREGATE_METADATA = 3,
+  /** Metadata for triggers */
   D_TRIGGER_METADATA = 4
 };
 

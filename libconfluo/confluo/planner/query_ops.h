@@ -15,14 +15,18 @@ namespace planner {
  * Type of operation that is executed
  */
 enum query_op_type {
+  /** Operation that does nothing */
   D_NO_OP = 0,
+  /** Operation that scans the data store */
   D_SCAN_OP = 1,
+  /** Operation that is invalid */
   D_NO_VALID_INDEX_OP = 2,
+  /** Index operation */
   D_INDEX_OP = 3
 };
 
 /**
- * A query operation
+ * Query operation class. Contains functionality for all queries.
  */
 class query_op {
  public:
@@ -69,7 +73,8 @@ class query_op {
 };
 
 /**
- * no operation
+ * The no operation class. Specific implementation of a query operation
+ * that does nothing
  */
 class no_op : public query_op {
  public:
@@ -132,7 +137,8 @@ class no_valid_index_op : public query_op {
 };
 
 /**
- * Full scan operation
+ * Full scan operation class. Specific implementation of a query operation
+ * that does a full scan.
  */
 class full_scan_op : public query_op {
  public:
@@ -161,7 +167,8 @@ class full_scan_op : public query_op {
 };
 
 /**
- * Index operation
+ * Index operation class. A specific implementation of a query operation
+ * that indexes the data store.
  */
 class index_op : public query_op {
  public:

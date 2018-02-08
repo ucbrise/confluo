@@ -686,15 +686,33 @@ private:
   alerts_map alerts_;
 };
 
+/**
+ * Factory for constructing an rpc service
+ */
 class rpc_clone_factory : public rpc_serviceIfFactory {
  public:
+  /**
+   * Constructs a rpc factory from the given confluo store
+   *
+   * @param store The confluo store for the rpc clone
+   */
   rpc_clone_factory(confluo_store* store)
       : store_(store) {
   }
 
+  /**
+   * Destructs the rpc clone factory
+   */
   virtual ~rpc_clone_factory() {
   }
 
+  /**
+   * Gets the service handler for the rpc connection
+   *
+   * @param conn_info The information that defines the connection
+   *
+   * @return An rpc service handler for the confluo store
+   */
   virtual rpc_serviceIf* getHandler(const TConnectionInfo& conn_info) {
     shared_ptr<TSocket> sock = boost::dynamic_pointer_cast<TSocket>(
         conn_info.transport);
@@ -706,6 +724,11 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
     return new rpc_service_handler(store_);
   }
 
+  /**
+   * Destructs the handler
+   *
+   * @param handler The handler to destruct
+   */
   virtual void releaseHandler(rpc_serviceIf* handler) {
     delete handler;
   }
@@ -714,8 +737,20 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
   confluo_store* store_;
 };
 
+/**
+ * The rpc server the client connects to
+ */
 class rpc_server {
  public:
+  /**
+   * Creates an rpc server from the given parameters
+   *
+   * @param store The confluo store 
+   * @param address The address of the server
+   * @param port The port the server is on
+   *
+   * @return A pointer to the server
+   */
   static shared_ptr<TThreadedServer> create(confluo_store* store,
                                             const std::string& address,
                                             int port) {

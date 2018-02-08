@@ -9,7 +9,8 @@
 namespace confluo {
 
 /**
- * The record type
+ * The record type. Contains functionality to iterate and modify data
+ * stored in the record
  */
 struct record_t {
  public:

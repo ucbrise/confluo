@@ -8,7 +8,8 @@
 namespace confluo {
 
 /**
-* String map
+* String map class. Contains functionality for adding/removing strings
+* to the map
 *
 * @tparam V The type of map
 */

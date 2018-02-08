@@ -8,13 +8,17 @@
 namespace confluo {
 
 /** 
- * Reference to a value
+ * Value reference class. Contains a reference to a bitmap array and 
+ * supports pointer operations
  */
 template<typename bitmap_array_impl>
 class value_reference {
  public:
+  /** Contains the position type for a bitmap array */
   typedef typename bitmap_array_impl::pos_type pos_type;
+  /** Contains the type of value that the bitmap array holds */
   typedef typename bitmap_array_impl::value_type value_type;
+  /** A reference to to the bitmap array */
   typedef typename bitmap_array_impl::reference reference;
 
   /**

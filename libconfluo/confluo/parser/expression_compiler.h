@@ -11,7 +11,8 @@ namespace parser {
 namespace spirit = boost::spirit;
 
 /**
- * A predicate
+ * Compiled predicate class. Contains operations for extracting data
+ * from the expression.
  */
 struct compiled_predicate {
     /**
@@ -121,7 +122,7 @@ struct compiled_predicate {
 };
 
 /**
- * A set of compiled predicates
+ * A set of compiled predicates. Manages a list of predicate expressions.
  */
 struct compiled_minterm : public std::set<compiled_predicate> {
   /**
@@ -201,7 +202,7 @@ struct compiled_minterm : public std::set<compiled_predicate> {
 };
 
 /**
- * A set of compiled minterms
+ * A set of compiled minterms. Manages a grouping of minterms
  */
 struct compiled_expression : public std::set<compiled_minterm> {
     /**
@@ -291,7 +292,7 @@ class utree_expand_conjunction {
 
   /**
    * Operation for function type
-   * @param spirit::function_base 
+   * @param spirit::function_base The function passed in
    * @throw parse_exception Functions are not supported
    * @return The result
    */
@@ -358,37 +359,48 @@ class utree_expand_conjunction {
 };
 
 /**
- * compiled expression
+ * Tree Compiled expression class. 
+ * Manages operations performed on expressions
  */
 class utree_compile_expression {
  public:
+  /** The evaluated compiled expression */
   typedef compiled_expression result_type;
 
   /**
-   * utree_compile_expression
+   * Constructs a compiled expression from the given schema
    *
-   * @param schema The schema
+   * @param schema The schema used to initialize the compiled expression
    */
   utree_compile_expression(const schema_t& schema)
       : schema_(schema) {
   }
 
+  /**
+   * () operator that evaluates the compiled expression
+   * @tparam T The type operator is called on
+   * @throw parse_exception
+   */
   template<typename T>
   result_type operator()(T) const {
     throw parse_exception(std::string("Unrecognized type ") + typeid(T).name());
   }
 
+  /**
+   * () operator that evaluates the compiled expression
+   * @throw parse_exception
+   */
   result_type operator()(spirit::function_base const&) const {
     throw parse_exception("Functions not supported");
   }
 
   /**
-   * operator()
+   * () operator that evaluates the compiled expression
    *
    * @tparam Iterator
-   * @param range The range
+   * @param range The range of tokens to evaluate
    *
-   * @return result_type
+   * @return The result of evaluating the expression
    */
   template<typename Iterator>
   result_type operator()(boost::iterator_range<Iterator> const& range) const {
@@ -440,12 +452,12 @@ class utree_compile_expression {
 };
 
 /**
- * compile_expression
+ * Recursively gets the compiled expression from the tree and schema
  *
- * @param e The e
- * @param schema The schema
+ * @param e The utree containing the contents of the expression
+ * @param schema The schema to create the compiled expression from
  *
- * @return compiled_expression
+ * @return Compiled expression containing the result of evaluation
  */
 static compiled_expression compile_expression(const spirit::utree& e,
                                               const schema_t& schema) {

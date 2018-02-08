@@ -66,8 +66,8 @@ struct type_properties {
    *
    * @param _name The name of the type
    * @param _size The size of the type
-   * @param _min The min of the type
-   * @param _max The max of the type
+   * @param _min The minimum value of the type
+   * @param _max The maximum value of the type
    * @param _one The one value of the type
    * @param _zero The zero value of the type
    * @param _is_numeric Whether the type is numeric
@@ -109,10 +109,10 @@ struct type_properties {
  *
  * @tparam T The type to construct the properties for
  * @param name The name of the type
- * @param size The size of the type
+ * @param size The size of the data type
  * @param is_numeric Whether the type is numeric
- * @param min The min of the type
- * @param max The max of the type
+ * @param min The minimum value of the type
+ * @param max The maximum value of the type
  * @param one The one value of the type
  * @param zero The zero value of the type
  *

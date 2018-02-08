@@ -23,12 +23,14 @@ namespace spirit = boost::spirit;
  */
 enum and_or
   : int {
+    /** And identifier */
     AND = 6,
+  /** Or identifier */
   OR = 7
 };
 
 /**
- * Debug printing
+ * Tree that handles printing debug output
  */
 class utree_dbg_print {
  public:

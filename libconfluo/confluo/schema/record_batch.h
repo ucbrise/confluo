@@ -22,7 +22,7 @@ struct record_block {
 };
 
 /**
- * Batch of records
+ * Batch of records, maintains lookup of records
  */
 struct record_batch {
   /** Vector of record blocks */
@@ -50,7 +50,8 @@ struct record_batch {
 };
 
 /**
- * Builder of record batches
+ * Builder of record batches. Contains functionality to add records
+ * for use in building a schema.
  */
 class record_batch_builder {
  public:

@@ -13,7 +13,7 @@ class record_offset_range {
  public:
   typedef uint64_t value_type;
   /**
-   * Iterator
+   * Iterator for all of the records
    */
   class iterator : public std::iterator<std::input_iterator_tag, uint64_t,
       uint64_t, const uint64_t*, uint64_t> {

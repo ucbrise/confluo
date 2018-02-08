@@ -8,6 +8,9 @@
 
 namespace confluo {
 
+/** A function that maps raw immutable data into a byte string used for
+ * lookup 
+ */
 typedef byte_string (*key_op_t)(const immutable_raw_data& v, double bucket_size);
 
 /**

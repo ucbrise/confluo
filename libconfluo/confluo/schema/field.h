@@ -10,7 +10,8 @@
 namespace confluo {
 
 /**
- * Field definition
+ * Field class. Contains operations for operating on the data in the
+ * schema.
  */
 struct field_t {
   /**
