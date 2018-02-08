@@ -179,9 +179,6 @@ class schema_t {
     try {
       boost::iostreams::stream<boost::iostreams::array_source> stream(json.c_str(), json.size());
       pt::read_json(stream, out);
-      // std::istringstream ss(json);
-      // // ss << json;
-      // pt::read_json(ss, tree);
     } catch (pt::json_parser_error& e) {
       THROW(invalid_operation_exception, e.what());
     } catch (...) {
