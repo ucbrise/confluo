@@ -133,7 +133,7 @@ class thread_manager {
 
   /** The maximum amount of threads Confluo supports */
   static int MAX_CONCURRENCY;
-  ./** The thread info */
+  /** The thread info */
   static thread_info* THREAD_INFO;
 };
 

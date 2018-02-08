@@ -14,7 +14,7 @@ class aggregated_reflog : public reflog {
  public:
   /** The type of size of the reflog */
   typedef reflog::size_type size_type;
-  /** The type of position of the reflog */;
+  /** The type of position of the reflog */
   typedef reflog::pos_type pos_type;
   /** The type of value contained in the reflog */
   typedef reflog::value_type value_type;
