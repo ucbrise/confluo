@@ -123,7 +123,7 @@ class atomic_multilog {
         schema_(schema),
         data_log_("data_log", path, s_mode),
         rt_(path, s_mode),
-        metadata_(path, s_mode),
+        metadata_(path),
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
         archival_task_("archival"),
@@ -132,6 +132,8 @@ class atomic_multilog {
         monitor_task_("monitor") {
     data_log_.pre_alloc();
     metadata_.write_schema(schema_);
+    metadata_.write_storage_mode(s_mode);
+    metadata_.write_archival_mode(a_mode);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
     if (a_mode == archival_mode::ON) {
@@ -150,23 +152,24 @@ class atomic_multilog {
    * Constructor that initializes atomic multilog from existing archives.
    * @param name The atomic multilog name
    * @param path The path of the atomic multilog
-   * @param mode The storage mode of the atomic multilog
    * @param pool The pool of tasks
    */
-  atomic_multilog(const std::string& name, const std::string& path, const storage::storage_mode& mode,
-                  const archival_mode& a_mode, task_pool& pool)
+  atomic_multilog(const std::string& name, const std::string& path, task_pool& pool)
       : name_(name),
         schema_(),
-        data_log_("data_log", path, mode),
-        rt_(path, mode),
-        metadata_(path, mode),
+        metadata_(path),
         planner_(&data_log_, &indexes_, &schema_),
         archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
         archival_task_("archival"),
         archival_pool_(),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
-    load(path, mode);
+    storage_mode s_mode;
+    archival_mode a_mode;
+    load_metadata(path, s_mode, a_mode);
+    data_log_ = data_log_type("data_log", path, s_mode);
+    rt_ = read_tail_type(path, s_mode);
+    load(s_mode);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
     if (a_mode == archival_mode::ON) {
@@ -194,52 +197,6 @@ class atomic_multilog {
     ret.wait();
     if (ex.has_value())
       throw ex.value();
-  }
-
-  /**
-   * Load multilog from archives.
-   * @param path The path of the atomic multilog
-   */
-  void load(const std::string& path, const storage::storage_mode& mode) {
-    metadata_reader reader(path);
-    metadata_writer temp = metadata_;
-    metadata_ = metadata_writer(); // metadata shouldn't be written until after load
-    while (reader.has_next()) {
-      switch (reader.next_type()) {
-        case D_SCHEMA_METADATA: {
-          schema_ = reader.next_schema();
-          break;
-        }
-        case D_FILTER_METADATA: {
-          auto filter_metadata = reader.next_filter_metadata();
-          add_filter(filter_metadata.filter_name(), filter_metadata.expr());
-          break;
-        }
-        case D_INDEX_METADATA: {
-          auto index_metadata = reader.next_index_metadata();
-          add_index(index_metadata.field_name(), index_metadata.bucket_size());
-          break;
-        }
-        case D_AGGREGATE_METADATA: {
-          auto agg_metadata = reader.next_aggregate_metadata();
-          add_aggregate(agg_metadata.aggregate_name(), agg_metadata.filter_name(),
-                        agg_metadata.aggregate_expression());
-          break;
-        }
-        case D_TRIGGER_METADATA: {
-          auto trigger_metadata = reader.next_trigger_metadata();
-          optional<management_exception> ex;
-          add_trigger_task(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
-                           trigger_metadata.periodicity_ms(), ex);
-          break;
-        }
-      }
-    }
-    metadata_ = temp;
-    load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
-    load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
-    load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
-    rt_.advance(0, data_log_.size());
   }
 
   // Management ops
@@ -702,6 +659,65 @@ class atomic_multilog {
   }
 
  protected:
+  /**
+   * Load multilog from archives. Expects metadata to be loaded
+   * and archiver to be initialized.
+   * Note: no reads/writes should occur during this period, since the data log is being initialized.
+   * @param mode The storage mode used in the previous life-cycle of this multilog
+   */
+  void load(const storage::storage_mode& mode) {
+    load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
+    load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
+    load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
+    rt_.advance(0, data_log_.size());
+  }
+
+  void load_metadata(const std::string& path, storage_mode& s_mode, archival_mode& a_mode) {
+    metadata_reader reader(path);
+    metadata_writer temp = metadata_;
+    metadata_ = metadata_writer(); // metadata shouldn't be written while loading
+    while (reader.has_next()) {
+      switch (reader.next_type()) {
+      case D_SCHEMA_METADATA: {
+        schema_ = reader.next_schema();
+        break;
+      }
+      case D_FILTER_METADATA: {
+        auto filter_metadata = reader.next_filter_metadata();
+        add_filter(filter_metadata.filter_name(), filter_metadata.expr());
+        break;
+      }
+      case D_INDEX_METADATA: {
+        auto index_metadata = reader.next_index_metadata();
+        add_index(index_metadata.field_name(), index_metadata.bucket_size());
+        break;
+      }
+      case D_AGGREGATE_METADATA: {
+        auto agg_metadata = reader.next_aggregate_metadata();
+        add_aggregate(agg_metadata.aggregate_name(), agg_metadata.filter_name(),
+            agg_metadata.aggregate_expression());
+        break;
+      }
+      case D_TRIGGER_METADATA: {
+        auto trigger_metadata = reader.next_trigger_metadata();
+        optional<management_exception> ex;
+        add_trigger_task(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
+            trigger_metadata.periodicity_ms(), ex);
+        break;
+      }
+      case D_STORAGE_MODE_METADATA: {
+        s_mode = reader.next_storage_mode();
+        break;
+      }
+      case D_ARCHIVAL_MODE_METADATA: {
+        a_mode = reader.next_archival_mode();
+        break;
+      }
+      }
+    }
+    metadata_ = temp;
+  }
+
   /**
    * Updates the record block
    * @param log_offset The offset of the log

@@ -35,6 +35,26 @@ class monolog_linear_base {
   }
 
   /**
+   * Copy constructor, does not copy data. TODO
+   * @param other other monolog_linear
+   */
+  monolog_linear_base(const monolog_linear_base& other) {
+    init(other.name_, other.data_path_, other.buckets_[0].mode());
+  }
+
+  /**
+   * Copy assignment does not copy data. TODO
+   * @param other
+   * @return this
+   */
+  monolog_linear_base& operator=(const monolog_linear_base& other) {
+    if(&other == this)
+      return *this;
+    init(other.name_, other.data_path_, other.buckets_[0].mode());
+    return *this;
+  }
+
+  /**
    * Initialize the monolog with specified name, data path and storage mode.
    *
    * @param name The name of the monolog.
@@ -227,21 +247,11 @@ class monolog_linear_base {
   }
 
   /**
-   * Swap bucket pointer. Should be used only by archiver.
-   * @param bucket_idx index of monolog bucket
-   * @param ptr new pointer
+   * Note: it's dangerous to modify this data structure.
+   * @return pointer to underlying array
    */
-  void swap_bucket_ptr(size_t bucket_idx, storage::encoded_ptr<T> ptr) {
-    buckets_[bucket_idx].swap_ptr(ptr);
-  }
-
-  /**
-   * Initialize bucket pointer. Should be used only by loader.
-   * @param bucket_idx index of monolog bucket
-   * @param ptr new pointer
-   */
-  void init_bucket_ptr(size_t bucket_idx, storage::encoded_ptr<T> ptr) {
-    buckets_[bucket_idx].init_ptr(ptr);
+  std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS>* data() {
+    return &buckets_;
   }
 
  protected:
@@ -294,12 +304,35 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
   }
 
   /**
-   * Add new element to end of monolog, adding more space if necessary.
-   *
-   * @param val The value to add at the end of monolog.
-   *
-   * @return The offset that the value was added at.
+   * TODO Copy constructor doesn't copy data
+   * @param other another monolog_linear
    */
+  monolog_linear(const monolog_linear& other)
+      : monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>(other) {
+    atomic::init(&tail_, 0UL);
+  }
+
+  /**
+   * TODO Copy assignment doesn't copy data
+   * @param other
+   * @return this
+   */
+  monolog_linear& operator=(const monolog_linear& other) {
+    if(&other == this)
+      return *this;
+    monolog_linear::operator=(other);
+    atomic::init(&tail_, 0UL);
+    return *this;
+  }
+
+ /**
+  * Add a new element to end of monolog, adding more space if necessary.
+  *
+  * @param val The value to add at the end of monolog.
+  *
+  * @return The offset that the value was added at.
+  *
+  */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);

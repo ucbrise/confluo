@@ -226,6 +226,10 @@ class monolog_linear_bucket {
     data_.atomic_init(enc_ptr);
   }
 
+  storage::storage_mode storage_mode() {
+    return mode_;
+  }
+
  private:
   /**
    * Try to allocate space for block.

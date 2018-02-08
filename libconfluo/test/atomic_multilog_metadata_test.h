@@ -10,7 +10,7 @@ class AtomicMultilogMetadataTest : public testing::Test {
 };
 
 TEST_F(AtomicMultilogMetadataTest, ReadWriteTest) {
-  metadata_writer w("/tmp", storage::storage_mode::DURABLE);
+  metadata_writer w("/tmp");
   schema_builder builder;
   builder.add_column(BOOL_TYPE, "a");
   builder.add_column(CHAR_TYPE, "b");

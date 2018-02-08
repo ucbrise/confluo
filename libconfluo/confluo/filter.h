@@ -239,7 +239,10 @@ class filter {
     return atomic::load(&is_valid_);
   }
 
-  // TODO can this be exposed
+  /**
+   * Note: It is dangerous to modify this data structure.
+   * @return underlying radix tree
+   */
   idx_t* data() {
     return &idx_;
   }

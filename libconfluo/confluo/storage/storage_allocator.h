@@ -22,12 +22,19 @@ using namespace ::utils;
 class storage_allocator {
 
  public:
+  typedef std::function<void(void)> callback_fn;
+
   /**
    * Initializes a storage allocator.
    */
   storage_allocator()
       : mem_stat_(),
-        mmap_stat_() {
+        mmap_stat_(),
+        mem_cleanup_callback_(no_op) {
+  }
+
+  void register_cleanup_callback(callback_fn callback) {
+    mem_cleanup_callback_ = callback;
   }
 
   /**
@@ -36,8 +43,12 @@ class storage_allocator {
    * @return pointer to allocated memory
    */
   void* alloc(size_t size, ptr_aux_block aux) {
-    if (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
-      THROW(memory_exception, "Max memory reached!");
+    int retries = 0;
+    while (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
+      mem_cleanup_callback_();
+      if (retries > MAX_CLEANUP_RETRIES)
+        THROW(memory_exception, "Max memory reached!");
+      retries++;
     }
     size_t alloc_size = sizeof(ptr_metadata) + size;
     mem_stat_.increment(alloc_size);
@@ -146,8 +157,14 @@ class storage_allocator {
  private:
   memory_stat mem_stat_;
   memory_stat mmap_stat_;
+  callback_fn mem_cleanup_callback_;
+
+  static const int MAX_CLEANUP_RETRIES = 10;
+  static void no_op() { }
 
 };
+
+const int storage_allocator::MAX_CLEANUP_RETRIES;
 
 }
 }

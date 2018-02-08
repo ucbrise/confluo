@@ -320,6 +320,10 @@ class monolog_exp2_linear_base {
     container[bucket_idx].atomic_init(data, old_data);
   }
 
+  std::array<__atomic_bucket_container_ref, NCONTAINERS>* get_underlying() {
+    return &bucket_containers_;
+  }
+
 protected:
   /**
    * Tries to allocate the specified container. If another thread already succeeded
