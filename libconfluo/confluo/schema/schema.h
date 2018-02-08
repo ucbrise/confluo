@@ -10,6 +10,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
 
 #include "exceptions.h"
 #include "types/immutable_value.h"
@@ -173,11 +175,23 @@ class schema_t {
     }
   }
 
+  void json_to_ptree(pt::ptree& out, const std::string& json) const {
+    try {
+      boost::iostreams::stream<boost::iostreams::array_source> stream(json.c_str(), json.size());
+      pt::read_json(stream, out);
+      // std::istringstream ss(json);
+      // // ss << json;
+      // pt::read_json(ss, tree);
+    } catch (pt::json_parser_error& e) {
+      THROW(invalid_operation_exception, e.what());
+    } catch (...) {
+      THROW(invalid_operation_exception, "JSON format failed to read for some reason");
+    }
+  }
+
   void* json_to_data(const std::string& json) const {
     pt::ptree tree;
-    std::stringstream ss;
-    ss << json;
-    pt::read_json(ss, tree);
+    json_to_ptree(tree, json);
 
     if (tree.size() == columns_.size()) {
       // Timestamp is provided

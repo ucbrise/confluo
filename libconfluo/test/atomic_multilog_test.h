@@ -42,6 +42,21 @@ class AtomicMultilogTest : public testing::Test {
     ASSERT_EQ(MAX_RECORDS, mlog.num_records());
   }
 
+
+  void json_to_ptree(pt::ptree& out, const std::string& json) {
+    try {
+      boost::iostreams::stream<boost::iostreams::array_source> stream(json.c_str(), json.size());
+      pt::read_json(stream, out);
+      // std::istringstream ss(json);
+      // // ss << json;
+      // pt::read_json(ss, tree);
+    } catch (pt::json_parser_error& e) {
+      THROW(invalid_operation_exception, e.what());
+    } catch (...) {
+      THROW(invalid_operation_exception, "JSON format failed to read for some reason");
+    }
+  }
+
   static std::vector<column_t> s;
 
   struct rec {
@@ -1027,14 +1042,23 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
 TEST_F(AtomicMultilogTest, JsonAppendTest) {
   atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
 
-  std::string rec1 = "{'a': false, 'b': '0', 'c': '0', 'd': '0', 'e': '0', 'f': '0.000000', 'g': '0.010000', 'h': 'abc' }";
-  std::string rec2 = "{'a': true, 'b': '1', 'c': '10', 'd': '2', 'e': '1', 'f': '0.100000', 'g': '0.020000', 'h': 'defg' }";
-  std::string rec3 = "{'a': false, 'b': '2', 'c': '20', 'd': '4', 'e': '10', 'f': '0.200000', 'g': '0.030000', 'h': 'hijkl' }";
-  std::string rec4 = "{'a': true, 'b': '3', 'c': '30', 'd': '6', 'e': '100', 'f': '0.300000', 'g': '0.040000', 'h': 'mnopqr' }";
-  std::string rec5 = "{'a': false, 'b': '4', 'c': '40', 'd': '8', 'e': '1000', 'f': '0.400000', 'g': '0.050000', 'h': 'stuvwx' }";
-  std::string rec6 = "{'a': true, 'b': '5', 'c': '50', 'd': '10', 'e': '10000', 'f': '0.500000', 'g': '0.060000', 'h': 'yyy' }";
-  std::string rec7 = "{'a': false, 'b': '6', 'c': '60', 'd': '12', 'e': '100000', 'f': '0.600000', 'g': '0.070000', 'h': 'zzz' }";
-  std::string rec8 = "{'a': true, 'b': '7', 'c': '70', 'd': '14', 'e': '1000000', 'f': '0.700000', 'g': '0.080000', 'h': 'zzz' }";
+  std::string rec1 = "{\"A\": false, \"B\": 0, \"C\": 0, \"D\": 0, \"E\": 0, \"F\": 0.000000, \"G\": 0.010000, \"H\": \"abc\" }";
+  std::string rec2 = "{\"A\": true, \"B\": 1, \"C\": 10, \"D\": 2, \"E\": 1, \"F\": 0.100000, \"G\": 0.020000, \"H\": \"defg\" }";
+  std::string rec3 = "{\"A\": false, \"B\": 2, \"C\": 20, \"D\": 4, \"E\": 10, \"F\": 0.200000, \"G\": 0.030000, \"H\": \"hijkl\" }";
+  std::string rec4 = "{\"A\": true, \"B\": 3, \"C\": 30, \"D\": 6, \"E\": 100, \"F\": 0.300000, \"G\": 0.040000, \"H\": \"mnopqr\" }";
+  std::string rec5 = "{\"A\": false, \"B\": 4, \"C\": 40, \"D\": 8, \"E\": 1000, \"F\": 0.400000, \"G\": 0.050000, \"H\": \"stuvwx\" }";
+  std::string rec6 = "{\"A\": true, \"B\": 5, \"C\": 50, \"D\": 10, \"E\": 10000, \"F\": 0.500000, \"G\": 0.060000, \"H\": \"yyy\" }";
+  std::string rec7 = "{\"A\": false, \"B\": 6, \"C\": 60, \"D\": 12, \"E\": 100000, \"F\": 0.600000, \"G\": 0.070000, \"H\": \"zzz\" }";
+  std::string rec8 = "{\"A\": true, \"B\": 7, \"C\": 70, \"D\": 14, \"E\": 1000000, \"F\": 0.700000, \"G\": 0.080000, \"H\": \"zzz\" }";
+
+  pt::ptree exp1; json_to_ptree(exp1, rec1);
+  pt::ptree exp2; json_to_ptree(exp2, rec2);
+  pt::ptree exp3; json_to_ptree(exp3, rec3);
+  pt::ptree exp4; json_to_ptree(exp4, rec4);
+  pt::ptree exp5; json_to_ptree(exp5, rec5);
+  pt::ptree exp6; json_to_ptree(exp6, rec6);
+  pt::ptree exp7; json_to_ptree(exp7, rec7);
+  pt::ptree exp8; json_to_ptree(exp8, rec8);
 
   ASSERT_EQ(mlog.record_size() * 0, mlog.append(rec1));
   ASSERT_EQ(mlog.record_size() * 1, mlog.append(rec2));
@@ -1054,14 +1078,32 @@ TEST_F(AtomicMultilogTest, JsonAppendTest) {
   std::string res7 = mlog.read_json(mlog.record_size() * 6);
   std::string res8 = mlog.read_json(mlog.record_size() * 7);
 
-  ASSERT_EQ(rec1, res1);
-  ASSERT_EQ(rec2, res2);
-  ASSERT_EQ(rec3, res3);
-  ASSERT_EQ(rec4, res4);
-  ASSERT_EQ(rec5, res5);
-  ASSERT_EQ(rec6, res6);
-  ASSERT_EQ(rec7, res7);
-  ASSERT_EQ(rec8, res8);
+  pt::ptree tree1; json_to_ptree(tree1, res1);
+  pt::ptree tree2; json_to_ptree(tree2, res2);
+  pt::ptree tree3; json_to_ptree(tree3, res3);
+  pt::ptree tree4; json_to_ptree(tree4, res4);
+  pt::ptree tree5; json_to_ptree(tree5, res5);
+  pt::ptree tree6; json_to_ptree(tree6, res6);
+  pt::ptree tree7; json_to_ptree(tree7, res7);
+  pt::ptree tree8; json_to_ptree(tree8, res8);
+
+  std::string keys[8] = {"A", "B", "C", "D", "E", "F", "G", "H"};
+
+  for (const std::string &key: keys) {
+    // std::cout << "HERE IS EXP1: ";
+    // pt::write_json(std::cout, exp1);
+    // std::cout << "HERE IS TREE1: ";
+    // pt::write_json(std::cout, tree1);
+    ASSERT_EQ(exp1.get<std::string>(key), tree1.get<std::string>(key));
+    ASSERT_EQ(exp2.get<std::string>(key), tree2.get<std::string>(key));
+    ASSERT_EQ(exp3.get<std::string>(key), tree3.get<std::string>(key));
+    ASSERT_EQ(exp4.get<std::string>(key), tree4.get<std::string>(key));
+    ASSERT_EQ(exp5.get<std::string>(key), tree5.get<std::string>(key));
+    ASSERT_EQ(exp6.get<std::string>(key), tree6.get<std::string>(key));
+    ASSERT_EQ(exp7.get<std::string>(key), tree7.get<std::string>(key));
+    ASSERT_EQ(exp8.get<std::string>(key), tree8.get<std::string>(key));
+  }
+
 }
 
 #endif /* CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_ */
