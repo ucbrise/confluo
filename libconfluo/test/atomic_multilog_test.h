@@ -47,9 +47,6 @@ class AtomicMultilogTest : public testing::Test {
     try {
       boost::iostreams::stream<boost::iostreams::array_source> stream(json.c_str(), json.size());
       pt::read_json(stream, out);
-      // std::istringstream ss(json);
-      // // ss << json;
-      // pt::read_json(ss, tree);
     } catch (pt::json_parser_error& e) {
       THROW(invalid_operation_exception, e.what());
     } catch (...) {
@@ -1090,10 +1087,6 @@ TEST_F(AtomicMultilogTest, JsonAppendTest) {
   std::string keys[8] = {"A", "B", "C", "D", "E", "F", "G", "H"};
 
   for (const std::string &key: keys) {
-    // std::cout << "HERE IS EXP1: ";
-    // pt::write_json(std::cout, exp1);
-    // std::cout << "HERE IS TREE1: ";
-    // pt::write_json(std::cout, tree1);
     ASSERT_EQ(exp1.get<std::string>(key), tree1.get<std::string>(key));
     ASSERT_EQ(exp2.get<std::string>(key), tree2.get<std::string>(key));
     ASSERT_EQ(exp3.get<std::string>(key), tree3.get<std::string>(key));
