@@ -20,6 +20,7 @@
 #include "schema/record.h"
 #include "schema_snapshot.h"
 #include "string_utils.h"
+#include "json_utils.h"
 #include "types/data_type.h"
 
 using namespace utils;
@@ -175,20 +176,9 @@ class schema_t {
     }
   }
 
-  void json_to_ptree(pt::ptree& out, const std::string& json) const {
-    try {
-      boost::iostreams::stream<boost::iostreams::array_source> stream(json.c_str(), json.size());
-      pt::read_json(stream, out);
-    } catch (pt::json_parser_error& e) {
-      THROW(invalid_operation_exception, e.what());
-    } catch (...) {
-      THROW(invalid_operation_exception, "JSON format failed to read for some reason");
-    }
-  }
-
   void* json_to_data(const std::string& json) const {
     pt::ptree tree;
-    json_to_ptree(tree, json);
+    utils::json_utils::json_to_ptree(tree, json);
 
     if (tree.size() == columns_.size()) {
       // Timestamp is provided

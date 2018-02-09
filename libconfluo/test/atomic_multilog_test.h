@@ -2,6 +2,7 @@
 #define CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 
 #include "atomic_multilog.h"
+#include "json_utils.h"
 
 #include "gtest/gtest.h"
 
@@ -42,17 +43,6 @@ class AtomicMultilogTest : public testing::Test {
     ASSERT_EQ(MAX_RECORDS, mlog.num_records());
   }
 
-
-  void json_to_ptree(pt::ptree& out, const std::string& json) {
-    try {
-      boost::iostreams::stream<boost::iostreams::array_source> stream(json.c_str(), json.size());
-      pt::read_json(stream, out);
-    } catch (pt::json_parser_error& e) {
-      THROW(invalid_operation_exception, e.what());
-    } catch (...) {
-      THROW(invalid_operation_exception, "JSON format failed to read for some reason");
-    }
-  }
 
   static std::vector<column_t> s;
 
@@ -1048,14 +1038,14 @@ TEST_F(AtomicMultilogTest, JsonAppendTest) {
   std::string rec7 = "{\"A\": false, \"B\": 6, \"C\": 60, \"D\": 12, \"E\": 100000, \"F\": 0.600000, \"G\": 0.070000, \"H\": \"zzz\" }";
   std::string rec8 = "{\"A\": true, \"B\": 7, \"C\": 70, \"D\": 14, \"E\": 1000000, \"F\": 0.700000, \"G\": 0.080000, \"H\": \"zzz\" }";
 
-  pt::ptree exp1; json_to_ptree(exp1, rec1);
-  pt::ptree exp2; json_to_ptree(exp2, rec2);
-  pt::ptree exp3; json_to_ptree(exp3, rec3);
-  pt::ptree exp4; json_to_ptree(exp4, rec4);
-  pt::ptree exp5; json_to_ptree(exp5, rec5);
-  pt::ptree exp6; json_to_ptree(exp6, rec6);
-  pt::ptree exp7; json_to_ptree(exp7, rec7);
-  pt::ptree exp8; json_to_ptree(exp8, rec8);
+  pt::ptree exp1; utils::json_utils::json_to_ptree(exp1, rec1);
+  pt::ptree exp2; utils::json_utils::json_to_ptree(exp2, rec2);
+  pt::ptree exp3; utils::json_utils::json_to_ptree(exp3, rec3);
+  pt::ptree exp4; utils::json_utils::json_to_ptree(exp4, rec4);
+  pt::ptree exp5; utils::json_utils::json_to_ptree(exp5, rec5);
+  pt::ptree exp6; utils::json_utils::json_to_ptree(exp6, rec6);
+  pt::ptree exp7; utils::json_utils::json_to_ptree(exp7, rec7);
+  pt::ptree exp8; utils::json_utils::json_to_ptree(exp8, rec8);
 
   ASSERT_EQ(mlog.record_size() * 0, mlog.append(rec1));
   ASSERT_EQ(mlog.record_size() * 1, mlog.append(rec2));
@@ -1075,14 +1065,14 @@ TEST_F(AtomicMultilogTest, JsonAppendTest) {
   std::string res7 = mlog.read_json(mlog.record_size() * 6);
   std::string res8 = mlog.read_json(mlog.record_size() * 7);
 
-  pt::ptree tree1; json_to_ptree(tree1, res1);
-  pt::ptree tree2; json_to_ptree(tree2, res2);
-  pt::ptree tree3; json_to_ptree(tree3, res3);
-  pt::ptree tree4; json_to_ptree(tree4, res4);
-  pt::ptree tree5; json_to_ptree(tree5, res5);
-  pt::ptree tree6; json_to_ptree(tree6, res6);
-  pt::ptree tree7; json_to_ptree(tree7, res7);
-  pt::ptree tree8; json_to_ptree(tree8, res8);
+  pt::ptree tree1; utils::json_utils::json_to_ptree(tree1, res1);
+  pt::ptree tree2; utils::json_utils::json_to_ptree(tree2, res2);
+  pt::ptree tree3; utils::json_utils::json_to_ptree(tree3, res3);
+  pt::ptree tree4; utils::json_utils::json_to_ptree(tree4, res4);
+  pt::ptree tree5; utils::json_utils::json_to_ptree(tree5, res5);
+  pt::ptree tree6; utils::json_utils::json_to_ptree(tree6, res6);
+  pt::ptree tree7; utils::json_utils::json_to_ptree(tree7, res7);
+  pt::ptree tree8; utils::json_utils::json_to_ptree(tree8, res8);
 
   std::string keys[8] = {"A", "B", "C", "D", "E", "F", "G", "H"};
 

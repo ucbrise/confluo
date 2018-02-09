@@ -399,17 +399,6 @@ class atomic_multilog {
     return read(offset, version);
   }
 
-
-  /**
-   * Reads the data as a JSON string based on the offset
-   * @param offset The location of the data
-   * @param ptr The read-only pointer to store in
-   */
-  void read_json(uint64_t offset, ro_data_ptr& ptr) const {
-    uint64_t version;
-    read(offset, version, ptr);
-  }
-
   /**
    * Reads the data as a JSON string based on the offset
    * @param offset The location of the data
