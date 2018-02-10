@@ -127,7 +127,7 @@ public class rpc_management_exception extends org.apache.thrift.TException imple
     this.msg = null;
   }
 
-  /** Returns true if field msg is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field msg is set (has been assigned a value) and false otherwise */
   public boolean is_set_msg() {
     return this.msg != null;
   }
@@ -160,7 +160,7 @@ public class rpc_management_exception extends org.apache.thrift.TException imple
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();

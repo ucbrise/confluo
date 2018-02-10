@@ -150,7 +150,7 @@ public class rpc_atomic_multilog_info implements org.apache.thrift.TBase<rpc_ato
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __ID_ISSET_ID);
   }
 
-  /** Returns true if field id is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field id is set (has been assigned a value) and false otherwise */
   public boolean is_set_id() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __ID_ISSET_ID);
   }
@@ -187,7 +187,7 @@ public class rpc_atomic_multilog_info implements org.apache.thrift.TBase<rpc_ato
     this.schema = null;
   }
 
-  /** Returns true if field schema is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field Schema is set (has been assigned a value) and false otherwise */
   public boolean is_set_schema() {
     return this.schema != null;
   }
@@ -231,7 +231,7 @@ public class rpc_atomic_multilog_info implements org.apache.thrift.TBase<rpc_ato
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();
@@ -347,7 +347,7 @@ public class rpc_atomic_multilog_info implements org.apache.thrift.TBase<rpc_ato
     sb.append(this.id);
     first = false;
     if (!first) sb.append(", ");
-    sb.append("schema:");
+    sb.append("Schema:");
     if (this.schema == null) {
       sb.append("null");
     } else {

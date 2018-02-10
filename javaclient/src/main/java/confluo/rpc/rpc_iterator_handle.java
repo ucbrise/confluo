@@ -14,7 +14,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
   private static final org.apache.thrift.protocol.TField DESC_FIELD_DESC = new org.apache.thrift.protocol.TField("desc", org.apache.thrift.protocol.TType.STRUCT, (short)1);
   private static final org.apache.thrift.protocol.TField DATA_FIELD_DESC = new org.apache.thrift.protocol.TField("data", org.apache.thrift.protocol.TType.STRING, (short)2);
   private static final org.apache.thrift.protocol.TField NUM_ENTRIES_FIELD_DESC = new org.apache.thrift.protocol.TField("num_entries", org.apache.thrift.protocol.TType.I32, (short)3);
-  private static final org.apache.thrift.protocol.TField HAS_MORE_FIELD_DESC = new org.apache.thrift.protocol.TField("has_more", org.apache.thrift.protocol.TType.BOOL, (short)4);
+  private static final org.apache.thrift.protocol.TField HAS_MORE_FIELD_DESC = new org.apache.thrift.protocol.TField("hasMore", org.apache.thrift.protocol.TType.BOOL, (short)4);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_iterator_handleStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new rpc_iterator_handleTupleSchemeFactory();
@@ -29,7 +29,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     DESC((short)1, "desc"),
     DATA((short)2, "data"),
     NUM_ENTRIES((short)3, "num_entries"),
-    HAS_MORE((short)4, "has_more");
+    HAS_MORE((short)4, "hasMore");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -104,7 +104,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING        , true)));
     tmpMap.put(_Fields.NUM_ENTRIES, new org.apache.thrift.meta_data.FieldMetaData("num_entries", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
-    tmpMap.put(_Fields.HAS_MORE, new org.apache.thrift.meta_data.FieldMetaData("has_more", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.HAS_MORE, new org.apache.thrift.meta_data.FieldMetaData("hasMore", org.apache.thrift.TFieldRequirementType.REQUIRED,
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BOOL)));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(rpc_iterator_handle.class, metaDataMap);
@@ -172,7 +172,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     this.desc = null;
   }
 
-  /** Returns true if field desc is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field desc is set (has been assigned a value) and false otherwise */
   public boolean is_set_desc() {
     return this.desc != null;
   }
@@ -206,7 +206,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     this.data = null;
   }
 
-  /** Returns true if field data is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field data is set (has been assigned a value) and false otherwise */
   public boolean is_set_data() {
     return this.data != null;
   }
@@ -231,7 +231,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __NUM_ENTRIES_ISSET_ID);
   }
 
-  /** Returns true if field num_entries is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field num_entries is set (has been assigned a value) and false otherwise */
   public boolean is_set_num_entries() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __NUM_ENTRIES_ISSET_ID);
   }
@@ -254,7 +254,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __HAS_MORE_ISSET_ID);
   }
 
-  /** Returns true if field has_more is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field hasMore is set (has been assigned a value) and false otherwise */
   public boolean is_set_has_more() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __HAS_MORE_ISSET_ID);
   }
@@ -322,7 +322,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();
@@ -502,7 +502,7 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
     sb.append(this.num_entries);
     first = false;
     if (!first) sb.append(", ");
-    sb.append("has_more:");
+    sb.append("hasMore:");
     sb.append(this.has_more);
     first = false;
     sb.append(")");
@@ -512,13 +512,13 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
     if (desc == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'desc' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'desc' was not present! Struct: " + toString());
     }
     if (data == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'data' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'data' was not present! Struct: " + toString());
     }
     // alas, we cannot check 'num_entries' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'has_more' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'hasMore' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
     if (desc != null) {
       desc.validate();
@@ -605,10 +605,10 @@ public class rpc_iterator_handle implements org.apache.thrift.TBase<rpc_iterator
 
       // check for required fields of primitive type, which can't be checked in the validate method
       if (!struct.is_set_num_entries()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'num_entries' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'num_entries' was not found in serialized data! Struct: " + toString());
       }
       if (!struct.is_set_has_more()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'has_more' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'hasMore' was not found in serialized data! Struct: " + toString());
       }
       struct.validate();
     }

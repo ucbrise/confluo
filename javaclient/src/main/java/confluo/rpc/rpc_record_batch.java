@@ -165,7 +165,7 @@ public class rpc_record_batch implements org.apache.thrift.TBase<rpc_record_batc
     this.blocks = null;
   }
 
-  /** Returns true if field blocks is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field blocks is set (has been assigned a value) and false otherwise */
   public boolean is_set_blocks() {
     return this.blocks != null;
   }
@@ -190,7 +190,7 @@ public class rpc_record_batch implements org.apache.thrift.TBase<rpc_record_batc
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __NRECORDS_ISSET_ID);
   }
 
-  /** Returns true if field nrecords is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field nrecords is set (has been assigned a value) and false otherwise */
   public boolean is_set_nrecords() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __NRECORDS_ISSET_ID);
   }
@@ -232,7 +232,7 @@ public class rpc_record_batch implements org.apache.thrift.TBase<rpc_record_batc
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();
@@ -362,7 +362,7 @@ public class rpc_record_batch implements org.apache.thrift.TBase<rpc_record_batc
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
     if (blocks == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'blocks' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'blocks' was not present! Struct: " + toString());
     }
     // alas, we cannot check 'nrecords' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
@@ -445,7 +445,7 @@ public class rpc_record_batch implements org.apache.thrift.TBase<rpc_record_batc
 
       // check for required fields of primitive type, which can't be checked in the validate method
       if (!struct.is_set_nrecords()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'nrecords' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'nrecords' was not found in serialized data! Struct: " + toString());
       }
       struct.validate();
     }

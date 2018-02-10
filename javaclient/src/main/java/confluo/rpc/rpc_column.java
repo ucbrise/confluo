@@ -11,7 +11,7 @@ package confluo.rpc;
 public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_column._Fields>, java.io.Serializable, Cloneable, Comparable<rpc_column> {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("rpc_column");
 
-  private static final org.apache.thrift.protocol.TField TYPE_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("type_id", org.apache.thrift.protocol.TType.I32, (short)1);
+  private static final org.apache.thrift.protocol.TField TYPE_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("typeId", org.apache.thrift.protocol.TType.I32, (short)1);
   private static final org.apache.thrift.protocol.TField TYPE_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("type_size", org.apache.thrift.protocol.TType.I32, (short)2);
   private static final org.apache.thrift.protocol.TField NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("name", org.apache.thrift.protocol.TType.STRING, (short)3);
 
@@ -24,7 +24,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    TYPE_ID((short)1, "type_id"),
+    TYPE_ID((short)1, "typeId"),
     TYPE_SIZE((short)2, "type_size"),
     NAME((short)3, "name");
 
@@ -93,7 +93,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
   public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-    tmpMap.put(_Fields.TYPE_ID, new org.apache.thrift.meta_data.FieldMetaData("type_id", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.TYPE_ID, new org.apache.thrift.meta_data.FieldMetaData("typeId", org.apache.thrift.TFieldRequirementType.REQUIRED,
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
     tmpMap.put(_Fields.TYPE_SIZE, new org.apache.thrift.meta_data.FieldMetaData("type_size", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
@@ -158,7 +158,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __TYPE_ID_ISSET_ID);
   }
 
-  /** Returns true if field type_id is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field typeId is set (has been assigned a value) and false otherwise */
   public boolean is_set_type_id() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __TYPE_ID_ISSET_ID);
   }
@@ -181,7 +181,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __TYPE_SIZE_ISSET_ID);
   }
 
-  /** Returns true if field type_size is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field type_size is set (has been assigned a value) and false otherwise */
   public boolean is_set_type_size() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __TYPE_SIZE_ISSET_ID);
   }
@@ -203,7 +203,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
     this.name = null;
   }
 
-  /** Returns true if field name is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field name is set (has been assigned a value) and false otherwise */
   public boolean is_set_name() {
     return this.name != null;
   }
@@ -258,7 +258,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();
@@ -393,7 +393,7 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
     java.lang.StringBuilder sb = new java.lang.StringBuilder("rpc_column(");
     boolean first = true;
 
-    sb.append("type_id:");
+    sb.append("typeId:");
     sb.append(this.type_id);
     first = false;
     if (!first) sb.append(", ");
@@ -414,10 +414,10 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
 
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
-    // alas, we cannot check 'type_id' because it's a primitive and you chose the non-beans generator.
+    // alas, we cannot check 'typeId' because it's a primitive and you chose the non-beans generator.
     // alas, we cannot check 'type_size' because it's a primitive and you chose the non-beans generator.
     if (name == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'name' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'name' was not present! Struct: " + toString());
     }
     // check for sub-struct validity
   }
@@ -491,10 +491,10 @@ public class rpc_column implements org.apache.thrift.TBase<rpc_column, rpc_colum
 
       // check for required fields of primitive type, which can't be checked in the validate method
       if (!struct.is_set_type_id()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'type_id' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'typeId' was not found in serialized data! Struct: " + toString());
       }
       if (!struct.is_set_type_size()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'type_size' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'type_size' was not found in serialized data! Struct: " + toString());
       }
       struct.validate();
     }

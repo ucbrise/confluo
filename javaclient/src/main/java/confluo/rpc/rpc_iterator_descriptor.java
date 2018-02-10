@@ -13,7 +13,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
 
   private static final org.apache.thrift.protocol.TField ID_FIELD_DESC = new org.apache.thrift.protocol.TField("id", org.apache.thrift.protocol.TType.I64, (short)1);
   private static final org.apache.thrift.protocol.TField TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("type", org.apache.thrift.protocol.TType.I32, (short)2);
-  private static final org.apache.thrift.protocol.TField DATA_TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("data_type", org.apache.thrift.protocol.TType.I32, (short)3);
+  private static final org.apache.thrift.protocol.TField DATA_TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("DataType", org.apache.thrift.protocol.TType.I32, (short)3);
   private static final org.apache.thrift.protocol.TField HANDLER_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("handler_id", org.apache.thrift.protocol.TType.I32, (short)4);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new rpc_iterator_descriptorStandardSchemeFactory();
@@ -36,7 +36,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
      * 
      * @see rpc_data_type
      */
-    DATA_TYPE((short)3, "data_type"),
+    DATA_TYPE((short)3, "DataType"),
     HANDLER_ID((short)4, "handler_id");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
@@ -110,7 +110,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64        , "rpc_iterator_id")));
     tmpMap.put(_Fields.TYPE, new org.apache.thrift.meta_data.FieldMetaData("type", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, rpc_iterator_type.class)));
-    tmpMap.put(_Fields.DATA_TYPE, new org.apache.thrift.meta_data.FieldMetaData("data_type", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.DATA_TYPE, new org.apache.thrift.meta_data.FieldMetaData("DataType", org.apache.thrift.TFieldRequirementType.REQUIRED,
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, rpc_data_type.class)));
     tmpMap.put(_Fields.HANDLER_ID, new org.apache.thrift.meta_data.FieldMetaData("handler_id", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32        , "rpc_handler_id")));
@@ -179,7 +179,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __ID_ISSET_ID);
   }
 
-  /** Returns true if field id is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field id is set (has been assigned a value) and false otherwise */
   public boolean is_set_id() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __ID_ISSET_ID);
   }
@@ -209,7 +209,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     this.type = null;
   }
 
-  /** Returns true if field type is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field type is set (has been assigned a value) and false otherwise */
   public boolean is_set_type() {
     return this.type != null;
   }
@@ -241,7 +241,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     this.data_type = null;
   }
 
-  /** Returns true if field data_type is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field DataType is set (has been assigned a value) and false otherwise */
   public boolean is_set_data_type() {
     return this.data_type != null;
   }
@@ -266,7 +266,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __HANDLER_ID_ISSET_ID);
   }
 
-  /** Returns true if field handler_id is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field handler_id is set (has been assigned a value) and false otherwise */
   public boolean is_set_handler_id() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __HANDLER_ID_ISSET_ID);
   }
@@ -330,7 +330,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();
@@ -502,7 +502,7 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     }
     first = false;
     if (!first) sb.append(", ");
-    sb.append("data_type:");
+    sb.append("DataType:");
     if (this.data_type == null) {
       sb.append("null");
     } else {
@@ -521,10 +521,10 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
     // check for required fields
     // alas, we cannot check 'id' because it's a primitive and you chose the non-beans generator.
     if (type == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'type' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'type' was not present! Struct: " + toString());
     }
     if (data_type == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'data_type' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'DataType' was not present! Struct: " + toString());
     }
     // alas, we cannot check 'handler_id' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
@@ -607,10 +607,10 @@ public class rpc_iterator_descriptor implements org.apache.thrift.TBase<rpc_iter
 
       // check for required fields of primitive type, which can't be checked in the validate method
       if (!struct.is_set_id()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'id' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'id' was not found in serialized data! Struct: " + toString());
       }
       if (!struct.is_set_handler_id()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'handler_id' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'handler_id' was not found in serialized data! Struct: " + toString());
       }
       struct.validate();
     }

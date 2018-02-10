@@ -158,7 +158,7 @@ public class rpc_record_block implements org.apache.thrift.TBase<rpc_record_bloc
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __TIME_BLOCK_ISSET_ID);
   }
 
-  /** Returns true if field time_block is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field time_block is set (has been assigned a value) and false otherwise */
   public boolean is_set_time_block() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __TIME_BLOCK_ISSET_ID);
   }
@@ -190,7 +190,7 @@ public class rpc_record_block implements org.apache.thrift.TBase<rpc_record_bloc
     this.data = null;
   }
 
-  /** Returns true if field data is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field data is set (has been assigned a value) and false otherwise */
   public boolean is_set_data() {
     return this.data != null;
   }
@@ -215,7 +215,7 @@ public class rpc_record_block implements org.apache.thrift.TBase<rpc_record_bloc
     __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __NRECORDS_ISSET_ID);
   }
 
-  /** Returns true if field nrecords is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field nrecords is set (has been assigned a value) and false otherwise */
   public boolean is_set_nrecords() {
     return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __NRECORDS_ISSET_ID);
   }
@@ -272,7 +272,7 @@ public class rpc_record_block implements org.apache.thrift.TBase<rpc_record_bloc
     throw new java.lang.IllegalStateException();
   }
 
-  /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+  /** Returns true if Field corresponding to fieldID is set (has been assigned a value) and false otherwise */
   public boolean isSet(_Fields field) {
     if (field == null) {
       throw new java.lang.IllegalArgumentException();
@@ -430,7 +430,7 @@ public class rpc_record_block implements org.apache.thrift.TBase<rpc_record_bloc
     // check for required fields
     // alas, we cannot check 'time_block' because it's a primitive and you chose the non-beans generator.
     if (data == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'data' was not present! Struct: " + toString());
+      throw new org.apache.thrift.protocol.TProtocolException("Required Field 'data' was not present! Struct: " + toString());
     }
     // alas, we cannot check 'nrecords' because it's a primitive and you chose the non-beans generator.
     // check for sub-struct validity
@@ -505,10 +505,10 @@ public class rpc_record_block implements org.apache.thrift.TBase<rpc_record_bloc
 
       // check for required fields of primitive type, which can't be checked in the validate method
       if (!struct.is_set_time_block()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'time_block' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'time_block' was not found in serialized data! Struct: " + toString());
       }
       if (!struct.is_set_nrecords()) {
-        throw new org.apache.thrift.protocol.TProtocolException("Required field 'nrecords' was not found in serialized data! Struct: " + toString());
+        throw new org.apache.thrift.protocol.TProtocolException("Required Field 'nrecords' was not found in serialized data! Struct: " + toString());
       }
       struct.validate();
     }
