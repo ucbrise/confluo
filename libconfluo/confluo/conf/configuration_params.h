@@ -17,7 +17,7 @@ class archival_configuration_params {
   static uint64_t RECENCY_RESTRICTION_WINDOW;
   static uint64_t RECENCY_FILTER_RESTRICTION_WINDOW_NS;
 
-  // Maximum archival file size in bytes. Cannot be smaller than a bucket.
+  // Maximum archival file size in bytes. Cannot be smaller than a data log bucket.
   static size_t MAX_FILE_SIZE;
 
   // Archival compression parameters; TODO parse types
