@@ -6,6 +6,8 @@
 #include "incremental_file_stream.h"
 #include "io_utils.h"
 
+using namespace ::utils;
+
 namespace confluo {
 namespace archival {
 
@@ -24,7 +26,8 @@ class incremental_file_writer : public incremental_file_stream {
     dir_path_ = other.dir_path_;
     file_prefix_ = other.file_prefix_;
     max_file_size_ = other.max_file_size_;
-    open();
+    cur_ofs_ = open_new(cur_path());
+    transaction_log_ofs_ = open_new(cur_path());
   }
 
   ~incremental_file_writer() {
@@ -37,7 +40,8 @@ class incremental_file_writer : public incremental_file_stream {
     dir_path_ = other.dir_path_;
     file_prefix_ = other.file_prefix_;
     max_file_size_ = other.max_file_size_;
-    open();
+    cur_ofs_ = open_new(cur_path());
+    transaction_log_ofs_ = open_new(cur_path());
     return *this;
   }
 
@@ -53,8 +57,8 @@ class incremental_file_writer : public incremental_file_stream {
       file_num_--;
       open();
     } else {
-      cur_ofs_.open(cur_path());
-      transaction_log_ofs_.open(transaction_log_path());
+      cur_ofs_ = open_new(cur_path());
+      transaction_log_ofs_ = open_new(cur_path());
     }
   }
 
@@ -63,8 +67,8 @@ class incremental_file_writer : public incremental_file_stream {
     if (!fits_in_cur_file(sizeof(T) * len))
       open_new_next();
     incremental_file_offset incr_file_off = tell();
-    io_utils::write<T>(cur_ofs_, data, len);
-    cur_ofs_.flush();
+    io_utils::write<T>(*cur_ofs_, data, len);
+    cur_ofs_->flush();
     return incr_file_off;
   }
 
@@ -73,8 +77,8 @@ class incremental_file_writer : public incremental_file_stream {
     if (!fits_in_cur_file(sizeof(T)))
       open_new_next();
     incremental_file_offset incr_file_off = tell();
-    io_utils::write<T>(cur_ofs_, data);
-    cur_ofs_.flush();
+    io_utils::write<T>(*cur_ofs_, data);
+    cur_ofs_->flush();
     return incr_file_off;
   }
 
@@ -86,56 +90,72 @@ class incremental_file_writer : public incremental_file_stream {
     if (!fits_in_cur_file((sizeof(T) * t_len) + (sizeof(U) * u_len)))
       open_new_next();
     incremental_file_offset incr_file_off = tell();
-    io_utils::write<T>(cur_ofs_, t_data, t_len);
-    io_utils::write<U>(cur_ofs_, u_data, u_len);
-    cur_ofs_.flush();
+    io_utils::write<T>(*cur_ofs_, t_data, t_len);
+    io_utils::write<U>(*cur_ofs_, u_data, u_len);
+    cur_ofs_->flush();
     return incr_file_off;
   }
 
   template<typename ACTION>
   void commit(ACTION action) {
-    io_utils::write<ACTION>(transaction_log_ofs_, action);
-    transaction_log_ofs_.flush();
+    io_utils::write<ACTION>(*transaction_log_ofs_, action);
+    transaction_log_ofs_->flush();
   }
 
   incremental_file_offset tell() {
-    return incremental_file_offset(cur_path(), cur_ofs_.tellp());
+    return incremental_file_offset(cur_path(), cur_ofs_->tellp());
   }
 
   void flush() {
-    cur_ofs_.flush();
-    transaction_log_ofs_.flush();
+    cur_ofs_->flush();
+    transaction_log_ofs_->flush();
   }
 
   void open() {
-    // std::ios::in required to prevent truncation, caused by lack of std::ios::app
-    cur_ofs_.open(cur_path(), std::ios::in | std::ios::out | std::ios::ate);
-    transaction_log_ofs_.open(transaction_log_path(), std::ios::in | std::ios::out | std::ios::ate);
+    cur_ofs_ = open_existing(cur_path());
+    transaction_log_ofs_ = open_existing(transaction_log_path());
   }
 
   void close() {
-    if (cur_ofs_.is_open())
-      cur_ofs_.close();
-    if (transaction_log_ofs_.is_open())
-      transaction_log_ofs_.close();
+    if (cur_ofs_) {
+      close(cur_ofs_);
+    }
+    if (transaction_log_ofs_)
+      close(transaction_log_ofs_);
   }
 
  private:
 
   bool fits_in_cur_file(size_t append_size) {
-    size_t off = cur_ofs_.tellp();
+    size_t off = cur_ofs_->tellp();
     return off + append_size < max_file_size_;
   }
 
   incremental_file_offset open_new_next() {
-    cur_ofs_.close();
+    close(cur_ofs_);
     file_num_++;
-    cur_ofs_.open(cur_path(), std::ios::out | std::ios::trunc);
+    cur_ofs_ = open_new(cur_path());
     return tell();
   }
 
-  std::ofstream cur_ofs_;
-  std::ofstream transaction_log_ofs_;
+  static std::ofstream* open_new(const std::string& path) {
+   return new std::ofstream(path, std::ios::out | std::ios::trunc);
+ }
+
+   static std::ofstream* open_existing(const std::string& path) {
+    // std::ios::in required to prevent truncation, caused by lack of std::ios::app
+    return new std::ofstream(path, std::ios::in | std::ios::out | std::ios::ate);
+  }
+
+   static void close(std::ofstream*& ofs) {
+    if (ofs->is_open())
+      ofs->close();
+    delete ofs;
+    ofs = nullptr;
+  }
+
+  std::ofstream* cur_ofs_;
+  std::ofstream* transaction_log_ofs_;
 
   size_t max_file_size_;
 
