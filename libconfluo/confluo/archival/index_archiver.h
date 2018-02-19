@@ -65,7 +65,7 @@ class index_archiver {
         reflog_idx += reflog_constants::BUCKET_SIZE;
         continue;
       }
-      if ((data_log_off = max_in_reflog_bucket(data)) < offset) {
+      if ((data_log_off = archival_utils::max_in_reflog_bucket(data)) < offset) {
         reflog_idx = archive_bucket(key, refs, reflog_idx, data, data_log_off);
       }
     }
@@ -99,17 +99,9 @@ class index_archiver {
     if (bucket_size < reflog_constants::BUCKET_SIZE) {
       ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
       void* enc_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
-      refs.swap_bucket_ptr(idx, encoded_reflog_ptr(enc_bucket));
+      archival_utils::swap_bucket_ptr(refs, idx, encoded_reflog_ptr(enc_bucket));
     }
     return idx + bucket_size;
-  }
-
-  static uint64_t max_in_reflog_bucket(uint64_t* bucket) {
-    uint64_t max = 0;
-    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && bucket[i] != limits::ulong_max; i++) {
-      max = std::max(max, bucket[i]);
-    }
-    return max;
   }
 
   index::radix_index* index_;
@@ -146,13 +138,34 @@ class index_load_utils {
       auto*& refs = index->get_or_create(cur_key);
       ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, aux);
-      refs->init_bucket_ptr(reflog_idx, encoded_reflog_ptr(encoded_bucket));
+      init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
       reader.advance<uint8_t>(bucket_size);
       reflog_idx += archival_metadata.bucket_size();
-      refs->set_tail(reflog_idx + bucket_size);
+
+      atomic::type<size_t>* tail = refs->write_tail();
+      size_t old_tail = atomic::load(tail);
+      atomic::strong::cas(tail, &old_tail, reflog_idx + bucket_size);
+
     }
     reader.truncate(reader.tell(), reader.tell_transaction_log());
     return data_log_archival_tail;
+  }
+
+ private:
+  /**
+   * Initialize a bucket.
+   * @param refs reflog
+   * @param idx reflog index
+   * @param encoded_bucket bucket to initialize at index
+   */
+  static void init_bucket_ptr(reflog* refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
+    auto* bucket_containers = refs->data();
+    size_t bucket_idx, container_idx;
+    refs->raw_data_location(idx, container_idx, bucket_idx);
+    refs->ensure_alloc(idx, idx);
+    auto* container = atomic::load(&(*bucket_containers)[container_idx]);
+    encoded_reflog_ptr old_data = container[bucket_idx].atomic_load();
+    container[bucket_idx].atomic_init(encoded_bucket, old_data);
   }
 };
 

@@ -14,6 +14,19 @@ class archival_utils {
     return index_log_path + "/index_" + std::to_string(index_log_idx) + "/";
   }
 
+  static void swap_bucket_ptr(reflog& refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
+    size_t bucket_idx, container_idx;
+    refs.raw_data_location(idx, container_idx, bucket_idx);
+    atomic::load(&((*refs.data())[container_idx]))[bucket_idx].swap_ptr(encoded_bucket);
+  }
+
+  static uint64_t max_in_reflog_bucket(uint64_t* bucket) {
+    uint64_t max = 0;
+    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && bucket[i] != limits::ulong_max; i++)
+      max = std::max(max, bucket[i]);
+    return max;
+  }
+
 };
 
 }

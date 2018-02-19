@@ -84,7 +84,7 @@ class filter_archiver {
         refs_tail_ += reflog_constants::BUCKET_SIZE;
         continue;
       }
-      if ((data_log_archival_tail = max_in_reflog_bucket(data)) < offset) {
+      if ((data_log_archival_tail = archival_utils::max_in_reflog_bucket(data)) < offset) {
         archive_bucket(key, refs, data, offset);
         refs_tail_ += reflog_constants::BUCKET_SIZE;
       }
@@ -115,7 +115,7 @@ class filter_archiver {
 
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
     void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
-    refs.swap_bucket_ptr(refs_tail_, encoded_reflog_ptr(archived_bucket));
+    archival_utils::swap_bucket_ptr(refs, refs_tail_, encoded_reflog_ptr(archived_bucket));
   }
 
   /**
@@ -145,13 +145,7 @@ class filter_archiver {
     aggs_writer_.commit(filter_aggregates_archival_action(key).to_string());
   }
 
-  static uint64_t max_in_reflog_bucket(uint64_t* bucket) {
-    uint64_t max = 0;
-    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && bucket[i] != limits::ulong_max; i++)
-      max = std::max(max, bucket[i]);
-    return max;
-  }
-
+ private:
   monitor::filter* filter_;
   incremental_file_writer refs_writer_;
   incremental_file_writer aggs_writer_;
@@ -163,7 +157,7 @@ class filter_archiver {
 
 class filter_load_utils {
 
-public:
+ public:
  /**
   * Load filter's reflogs archived on disk.
   * @param path path to load reflogs from
@@ -188,7 +182,7 @@ public:
      auto*& refs = filter->get_or_create(cur_key);
      ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
      void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, aux);
-     refs->init_bucket_ptr(reflog_idx, encoded_reflog_ptr(encoded_bucket));
+     init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
      refs->reserve(archival_metadata.bucket_size());
      reader.advance<uint8_t>(bucket_size);
    }
@@ -231,6 +225,23 @@ public:
    auto last = tree->get(cur_key);
    return *std::max_element(last->begin(), last->end());
  }
+
+ private:
+  /**
+   * Initialize a bucket.
+   * @param refs reflog
+   * @param idx reflog index
+   * @param encoded_bucket bucket to initialize at index
+   */
+  static void init_bucket_ptr(reflog* refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
+    auto* bucket_containers = refs->data();
+    size_t bucket_idx, container_idx;
+    refs->raw_data_location(idx, container_idx, bucket_idx);
+    refs->ensure_alloc(idx, idx);
+    auto* container = atomic::load(&(*bucket_containers)[container_idx]);
+    encoded_reflog_ptr old_data = container[bucket_idx].atomic_load();
+    container[bucket_idx].atomic_init(encoded_bucket, old_data);
+  }
 
 };
 

@@ -58,25 +58,23 @@ class monolog_exp2_linear_base {
 
   /**
    * Ensures containers are allocated to cover the range of indexes given.
-   * @param start_idx start index
-   * @param end_idx end index
+   * @param start_idx start monolog index
+   * @param end_idx end monolog index
    */
   void ensure_alloc(size_t start_idx, size_t end_idx) {
-    size_t pos1 = start_idx + FCS;
-    size_t pos2 = end_idx + FCS;
-    size_t hibit1 = bit_utils::highest_bit(pos1);
-    size_t hibit2 = bit_utils::highest_bit(pos2);
-    size_t highest_cleared1 = pos1 ^ (1 << hibit1);
-    size_t highest_cleared2 = pos2 ^ (1 << hibit2);
-    size_t bucket_idx1 = highest_cleared1 / BUCKET_SIZE;
-    size_t bucket_idx2 = highest_cleared2 / BUCKET_SIZE;
-    size_t container_idx1 = hibit1 - fcs_hibit_;
-    size_t container_idx2 = hibit2 - fcs_hibit_;
+    size_t start_cont_idx, end_cont_idx, start_bucket_idx, end_bucket_idx;
+    raw_data_location(start_idx, start_cont_idx, start_bucket_idx);
+    raw_data_location(end_idx, end_cont_idx, end_bucket_idx);
     // TODO fix this
-    for (size_t i = container_idx1; i <= container_idx2; i++) {
+    for (size_t i = start_cont_idx; i <= end_cont_idx; i++) {
       __atomic_bucket_ref* container = atomic::load(&bucket_containers_[i]);
+      size_t cur_start_bucket_idx = (i == start_cont_idx) ? start_bucket_idx : 0;
+      size_t cur_end_bucket_idx = (i == end_cont_idx) ? end_cont_idx << (i + fcs_hibit_) : end_bucket_idx;
       if (container == nullptr) {
         try_allocate_container(i);
+        for (size_t j = cur_start_bucket_idx; j <= cur_end_bucket_idx; j++) {
+          try_allocate_bucket(bucket_containers_[i], j);
+        }
       }
     }
   }
@@ -292,35 +290,26 @@ class monolog_exp2_linear_base {
     return container_size + bucket_size + data_size;
   }
 
-  // This method takes in the monolog idx, but monolog_linear used bucket_idx, fix this
-  void swap_bucket_ptr(size_t idx, storage::encoded_ptr<T> data) {
+  /**
+   * Get the container and bucket indexes corresponding to a data index.
+   * @param idx monolog index
+   * @param container_idx corresponding container index
+   * @param bucket_idx corresponding bucket index
+   */
+  inline void raw_data_location(size_t idx, size_t& container_idx, size_t& bucket_idx) {
     size_t pos = idx + FCS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
-    size_t bucket_idx = highest_cleared / BUCKET_SIZE;
+    bucket_idx = highest_cleared / BUCKET_SIZE;
     size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - fcs_hibit_;
-    atomic::load(&bucket_containers_[container_idx])[bucket_idx].swap_ptr(data);
+    container_idx = hibit - fcs_hibit_;
   }
 
-  // This method takes in the monolog idx, but monolog_linear used bucket_idx, fix this
-  void init_bucket_ptr(size_t idx, storage::encoded_ptr<T> data) {
-    size_t pos = idx + FCS;
-    size_t hibit = bit_utils::highest_bit(pos);
-    size_t highest_cleared = pos ^ (1 << hibit);
-    size_t bucket_idx = highest_cleared / BUCKET_SIZE;
-    size_t bucket_off = highest_cleared % BUCKET_SIZE;
-    size_t container_idx = hibit - fcs_hibit_;
-
-    __atomic_bucket_ref* container = atomic::load(&bucket_containers_[container_idx]);
-    if (container == nullptr) {
-      container = try_allocate_container(container_idx);
-    }
-    storage::encoded_ptr<T> old_data = container[bucket_idx].atomic_load();
-    container[bucket_idx].atomic_init(data, old_data);
-  }
-
-  std::array<__atomic_bucket_container_ref, NCONTAINERS>* get_underlying() {
+  /**
+   * Dangerous to modify this data structure externally.
+   * @return pointer to bucket containers that store the data
+   */
+  std::array<__atomic_bucket_container_ref, NCONTAINERS>* data() {
     return &bucket_containers_;
   }
 
@@ -525,6 +514,14 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
 
   iterator end_bucket() const {
     return bucket_iterator(this, size() + BUCKET_SIZE - (size() % BUCKET_SIZE));
+  }
+
+  /**
+   * Dangerous to modify this tail externally.
+   * @return pointer to write tail
+   */
+  atomic::type<size_t>* write_tail() {
+    return &tail_;
   }
 
  private:

@@ -17,7 +17,8 @@ class incremental_file_reader : public incremental_file_stream {
  public:
   incremental_file_reader(const std::string& path, const std::string& file_prefix)
       : incremental_file_stream(path, file_prefix) {
-    open();
+    cur_ifs_ = new std::ifstream(cur_path());
+    transaction_log_ifs_.open(transaction_log_path());
   }
 
   ~incremental_file_reader() {
@@ -73,11 +74,6 @@ class incremental_file_reader : public incremental_file_stream {
     size_t end_off = transaction_log_ifs_.tellg();
     transaction_log_ifs_.seekg(off);
     return off < end_off;
-  }
-
-  void open() {
-    cur_ifs_->open(cur_path());
-    transaction_log_ifs_.open(transaction_log_path());
   }
 
   bool is_open() {

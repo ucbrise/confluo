@@ -43,7 +43,7 @@ class encoded_ptr {
         break;
       }
       default: {
-        THROW(illegal_state_exception, "Invalid encoding type!");
+        THROW(unsupported_exception, "Writing to an encoded pointer is unsupported!");
       }
     }
   }
@@ -56,7 +56,7 @@ class encoded_ptr {
         break;
       }
       default: {
-        THROW(illegal_state_exception, "Invalid encoding type!");
+        THROW(illegal_state_exception, "Writing to an encoded pointer is unsupported!");
       }
     }
   }
@@ -111,7 +111,7 @@ class encoded_ptr {
    */
   static void no_op_delete(T* ptr) { }
 
-  void* ptr_;
+  void* ptr_; // encoded data stored at this pointer
 
 };
 
