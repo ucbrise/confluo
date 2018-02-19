@@ -27,7 +27,7 @@ class incremental_file_writer : public incremental_file_stream {
     file_prefix_ = other.file_prefix_;
     max_file_size_ = other.max_file_size_;
     cur_ofs_ = open_new(cur_path());
-    transaction_log_ofs_ = open_new(cur_path());
+    transaction_log_ofs_ = open_new(transaction_log_path());
   }
 
   ~incremental_file_writer() {
@@ -41,7 +41,7 @@ class incremental_file_writer : public incremental_file_stream {
     file_prefix_ = other.file_prefix_;
     max_file_size_ = other.max_file_size_;
     cur_ofs_ = open_new(cur_path());
-    transaction_log_ofs_ = open_new(cur_path());
+    transaction_log_ofs_ = open_new(transaction_log_path());
     return *this;
   }
 
@@ -58,7 +58,7 @@ class incremental_file_writer : public incremental_file_stream {
       open();
     } else {
       cur_ofs_ = open_new(cur_path());
-      transaction_log_ofs_ = open_new(cur_path());
+      transaction_log_ofs_ = open_new(transaction_log_path());
     }
   }
 

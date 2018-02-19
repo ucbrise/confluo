@@ -539,29 +539,18 @@ class byte_string {
     return *this;
   }
 
-  // TODO clean this up
   template<typename T>
   inline T as() const {
     T val;
 #if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
     val = *reinterpret_cast<T*>(data_);
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
-    uint8_t *buf = new uint8_t[size_];
-    for (size_t i = 0; i < size_; i++) {
-      buf[size_ - i - 1] = data_[i];
-    }
-    val = *reinterpret_cast<T*>(buf);
-    delete[] buf;
+    val = byte_utils::reverse_as<T>(data_, size_);
 #else
     if (byte_utils::is_big_endian()) {
       val = *reinterpret_cast<T*>(data_);
     } else {
-      uint8_t *buf = new uint8_t[size_];
-      for (size_t i = 0; i < size_; i++) {
-        buf[size_ - i - 1] = data_[i];
-      }
-      val = *reinterpret_cast<T*>(buf);
-      delete[] buf;
+      val = byte_utils::reverse(data_, size_);
     }
 #endif
     return val;

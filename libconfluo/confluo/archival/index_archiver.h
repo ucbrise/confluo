@@ -1,6 +1,8 @@
 #ifndef CONFLUO_ARCHIVAL_INDEX_ARCHIVER_H_
 #define CONFLUO_ARCHIVAL_INDEX_ARCHIVER_H_
 
+#include <unordered_map>
+
 #include "storage/encoder.h"
 #include "aggregated_reflog.h"
 #include "archival_actions.h"
@@ -28,7 +30,7 @@ class index_archiver {
    */
   index_archiver(const std::string& path, index::radix_index* index, const column_t column)
       : index_(index),
-        tail_(0),
+        reflog_tails_(),
         column_(column),
         writer_(path, "index_data", archival_configuration_params::MAX_FILE_SIZE) {
     writer_.close();
@@ -52,23 +54,22 @@ class index_archiver {
 
  private:
   void archive_reflog(byte_string key, reflog& refs, size_t offset) {
-    size_t reflog_idx = 0;
-    size_t data_log_off = tail_;
+    size_t reflog_idx = reflog_tails_[key.to_string()];
+    size_t data_log_off = 0;
     while (data_log_off < offset && reflog_idx < refs.size()) {
       read_only_reflog_ptr bucket_ptr;
-      refs.ptr(reflog_idx, bucket_ptr);
+      refs.ptr(reflog_idx - reflog_idx % reflog_constants::BUCKET_SIZE, bucket_ptr);
       uint64_t* data = bucket_ptr.get().ptr_as<uint64_t>();
       auto aux = ptr_aux_block::get(ptr_metadata::get(data));
       if (aux.state_ != state_type::D_IN_MEMORY) {
         reflog_idx += reflog_constants::BUCKET_SIZE;
         continue;
       }
-      if ((data_log_off = max_in_reflog_bucket(data)) < offset && data_log_off >= tail_) {
-        archive_bucket(key, refs, reflog_idx, data, data_log_off);
-        reflog_idx += reflog_constants::BUCKET_SIZE;
+      if ((data_log_off = max_in_reflog_bucket(data)) < offset) {
+        reflog_idx = archive_bucket(key, refs, reflog_idx, data, data_log_off);
       }
     }
-    tail_ = data_log_off;
+    reflog_tails_[key.to_string()] = reflog_idx;
  }
 
   /**
@@ -79,11 +80,13 @@ class index_archiver {
    * @param idx reflog index at which bucket starts
    * @param bucket reflog bucket starting at idx
    * @param offset max data log offset in bucket
+   * @return reflog index to which bucket is archived
    */
-  void archive_bucket(byte_string key, reflog& refs, size_t idx, uint64_t* bucket, size_t offset) {
+  size_t archive_bucket(byte_string key, reflog& refs, size_t idx, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
-    auto raw_encoded_bucket = encoder::encode(bucket, archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - idx);
+    auto raw_encoded_bucket = encoder::encode(bucket, bucket_size,
+                                              archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t enc_size = raw_encoded_bucket.size();
 
     auto archival_metadata = radix_tree_archival_metadata(key, idx, bucket_size);
@@ -98,17 +101,19 @@ class index_archiver {
       void* enc_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
       refs.swap_bucket_ptr(idx, encoded_reflog_ptr(enc_bucket));
     }
+    return idx + bucket_size;
   }
 
   static uint64_t max_in_reflog_bucket(uint64_t* bucket) {
     uint64_t max = 0;
-    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && bucket[i] != limits::ulong_max; i++)
+    for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && bucket[i] != limits::ulong_max; i++) {
       max = std::max(max, bucket[i]);
+    }
     return max;
   }
 
   index::radix_index* index_;
-  size_t tail_;
+  std::unordered_map<std::string, uint64_t> reflog_tails_;
   column_t column_;
   incremental_file_writer writer_;
 

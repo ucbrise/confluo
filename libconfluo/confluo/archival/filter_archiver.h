@@ -101,8 +101,9 @@ class filter_archiver {
    */
   void archive_bucket(byte_string key, reflog& refs, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
-    auto encoded_bucket = encoder::encode(bucket, archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
+    auto encoded_bucket = encoder::encode(bucket, bucket_size,
+                                          archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
 
     auto archival_metadata = radix_tree_archival_metadata(key, refs_tail_, bucket_size);

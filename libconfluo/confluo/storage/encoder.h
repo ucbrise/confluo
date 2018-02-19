@@ -38,9 +38,10 @@ class encoder {
   /**
    * Encode pointer.
    * @param ptr unencoded data pointer, allocated by the storage allocator.
+   * @param size size of unencoded data in bytes
    * @return pointer to raw encoded data
    */
-  static data_ptr encode(void* ptr, uint8_t encoding) {
+  static data_ptr encode(void* ptr, size_t size, uint8_t encoding) {
     switch (encoding) {
       case encoding_type::D_UNENCODED: {
         size_t encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
