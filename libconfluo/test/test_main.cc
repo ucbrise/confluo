@@ -10,6 +10,7 @@
 #include "types/byte_string_test.h"
 #include "schema/column_test.h"
 #include "types/data_types_test.h"
+#include "container/bitmap/lz4_encode_test.h"
 #include "container/bitmap/delta_encoded_array_test.h"
 #include "confluo_store_test.h"
 #include "atomic_multilog_test.h"

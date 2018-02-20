@@ -318,6 +318,110 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     return get(i);
   }
 
+  size_t byte_array_length() {
+    return sizeof(width_type) * 2 + sizeof(size_type) * 3 + 
+        (BITS2BLOCKS(this->samples_->num_bits()) * sizeof(uint64_t)) + 
+        (BITS2BLOCKS(this->deltas_->num_bits()) * sizeof(uint64_t)) + 
+        (BITS2BLOCKS(this->delta_offsets_->num_bits()) * sizeof(uint64_t));
+  }
+
+
+
+  size_t to_byte_array(char* buffer) {
+    size_t array_size = 0;
+    width_type width = this->samples_->bit_width();
+    std::memcpy(buffer, reinterpret_cast<const char *>(&width), 
+            sizeof(width_type));
+    array_size += sizeof(width_type);
+
+    size_type num_bits = this->samples_->num_bits();
+    std::memcpy(buffer + array_size, 
+            reinterpret_cast<const char*>(&num_bits), sizeof(size_type));
+    array_size += sizeof(size_type);
+
+    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+                this->samples_->data()), sizeof(data_type) * 
+            BITS2BLOCKS(num_bits));
+    array_size += (BITS2BLOCKS(num_bits) * sizeof(uint64_t));
+
+    num_bits = this->deltas_->num_bits();
+    std::memcpy(buffer + array_size,
+            reinterpret_cast<const char *>(&num_bits), sizeof(size_type));
+    array_size += sizeof(size_type);
+
+    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+                this->deltas_->data()), sizeof(data_type) *
+            BITS2BLOCKS(num_bits));
+    array_size += (BITS2BLOCKS(num_bits) * sizeof(uint64_t));
+
+    width = this->delta_offsets_->bit_width();
+    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+                &width), sizeof(width_type));
+    array_size += sizeof(width_type);
+
+    num_bits = this->delta_offsets_->num_bits();
+    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+                &num_bits), sizeof(size_type));
+    array_size += sizeof(size_type);
+
+    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+                this->delta_offsets_->data()), sizeof(data_type) *
+            BITS2BLOCKS(num_bits));
+    array_size += (BITS2BLOCKS(num_bits) * sizeof(uint64_t));
+
+    return array_size;
+  }
+
+  size_t from_byte_array(char* buffer) {
+    size_t array_size = 0;
+    width_type bit_width;
+    bit_width = *reinterpret_cast<width_type *>(buffer, 
+            sizeof(width_type));
+    array_size += sizeof(width_type);
+
+    size_type size = *reinterpret_cast<size_type*>((buffer + array_size), 
+            sizeof(size_type));
+    array_size += sizeof(size_type);
+
+    this->samples_->set_size(size);
+    this->samples_->set_bit_width(bit_width);
+
+    for (int i = 0; i < BITS2BLOCKS(size) * sizeof(data_type); i++) {
+      T val = *reinterpret_cast<T *>((buffer + array_size + i), sizeof(T));
+      this->samples_->set(i, val);
+    }
+    array_size += (BITS2BLOCKS(size) * sizeof(data_type));
+
+    size = *reinterpret_cast<size_type *>((buffer + array_size), 
+            sizeof(size_type));
+    array_size += sizeof(size_type);
+    this->deltas_->set_size(size);
+
+    for (int i = 0; i < BITS2BLOCKS(size) * sizeof(uint64_t); i++) {
+      if (*(buffer + array_size + i)) {
+        this->deltas_->set_bit(i);
+      }
+    }
+    array_size += (BITS2BLOCKS(size) * sizeof(size_type));
+
+    bit_width = *reinterpret_cast<width_type *>(buffer, 
+            sizeof(width_type));
+    array_size += sizeof(width_type);
+
+    size = *reinterpret_cast<size_type*>((buffer + array_size), 
+            sizeof(size_type));
+    array_size += sizeof(size_type);
+    this->delta_offsets_->set_size(size);
+    this->delta_offsets_->set_bit_width(bit_width);
+
+    for (int i = 0; i < BITS2BLOCKS(size) * sizeof(data_type); i++) {
+      pos_type val = *reinterpret_cast<pos_type *>((buffer + array_size + i), sizeof(pos_type));
+      this->delta_offsets_->set(i, val);
+    }
+    array_size += (BITS2BLOCKS(size) * sizeof(data_type));
+    return array_size;
+  }
+
  private:
   /**
    * Get the encoding size for an delta value
