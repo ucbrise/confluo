@@ -901,6 +901,14 @@ class unsized_bitmap_array : public bitmap {
     return this->template get_val_pos<T>(i * this->bit_width_, this->bit_width_);
   }
 
+  void set_size(size_type size) {
+    size_ = size;
+  }
+
+  void set_bit_width(width_type bit_width) {
+    bit_width_ = bit_width;
+  }
+
   // Operators, iterators
   /**
    * operator[]
@@ -922,6 +930,10 @@ class unsized_bitmap_array : public bitmap {
    */
   reference operator[](const pos_type& i) {
     return reference(this, i);
+  }
+
+  width_type bit_width() {
+    return bit_width_;
   }
 
   // Serialization and De-serialization

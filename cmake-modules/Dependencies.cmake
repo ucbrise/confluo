@@ -49,6 +49,55 @@ if (BUILD_TESTS)
     ${GTEST_MAIN_STATIC_LIB})
 endif()
 
+#ExternalProject_Add(
+#    lz4
+#    PREFIX "${PROJECT_BINARY_DIR}/lz4"
+#    URL https://github.com/lz4/lz4/archive/v1.8.1.2.tar.gz
+#    PATCH_COMMAND ${CMAKE_COMMAND} ${PROJECT_BINARY_DIR}/lz4/src/lz4/contrib/cmake_unofficial/CMakeLists.txt
+#)
+#ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
+#set(lz4_INCLUDE_DIR "${SOURCE_DIR}/lib")
+#set(lz4_STATIC_LIB ${BINARY_DIR}/cmake_unofficial/liblz4.a)
+
+#ExternalProject_Add(
+#        lz4
+#        PREFIX "${CMAKE_BINARY_DIR}/lz4"
+#        URL "https://github.com/lz4/lz4/archive/r131.tar.gz"
+        # do not update
+        #        UPDATE_COMMAND ""
+        # fix missing CMakeLists.txt in source root dir
+        #        PATCH_COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR}/lz4/src/lz4/cmake_unofficial/CMakeLists.txt <SOURCE_DIR>/CMakeLists.txt
+        # do not install
+        #        INSTALL_COMMAND ""
+        #)
+        #ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
+        #set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+        #set( lz4_STATIC_LIB ${BINARY_DIR}/cmake_unofficial/liblz4.a )
+
+        #include_directories(SYSTEM ${lz4_INCLUDE_DIR})
+        #link_libraries(SYSTEM ${lz4_STATIC_LIB})
+ExternalProject_Add(lz4
+    DEPENDS             ""
+    PREFIX              "${CMAKE_BINARY_DIR}/lz4"
+    GIT_REPOSITORY      "https://github.com/lz4/lz4/archive/r131.tar.gz"
+    UPDATE_COMMAND      ""
+    PATCH_COMMAND       ""
+    CONFIGURE_COMMAND   "" 
+    BUILD_COMMAND       ${BUILDEM_ENV_STRING} $(MAKE)
+    BUILD_IN_SOURCE     1 
+    INSTALL_COMMAND     ${BUILDEM_ENV_STRING} PREFIX=${BUILDEM_DIR} $(MAKE) install
+)
+
+set_target_properties(lz4 PROPERTIES EXCLUDE_FROM_ALL ON)
+ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
+set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+set( lz4_STATIC_LIB ${BINARY_DIR}/liblz4.a )
+
+include_directories(SYSTEM ${lz4_INCLUDE_DIR})
+target_link_libraries(lz4 ${lz4_STATIC_LIB})
+link_libraries(SYSTEM ${lz4_STATIC_LIB})
+
+
 if (BUILD_RPC)
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
   set(THRIFT_C_FLAGS "${EXTERNAL_C_FLAGS}")

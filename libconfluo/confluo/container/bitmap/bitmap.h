@@ -104,6 +104,10 @@ class bitmap {
     return GETBITVAL(data_, i);
   }
 
+  void set_size(size_type size) {
+    size_ = size;
+  }
+
   // Integer operations
   /**
    * Sets the value at a specific position
