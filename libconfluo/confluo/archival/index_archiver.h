@@ -53,6 +53,12 @@ class index_archiver {
   }
 
  private:
+  /**
+   * Archive unarchived buckets of a reflog up to an offset.
+   * @param key key to which reflog belongs to in radix_tree
+   * @param refs reflog
+   * @param offset data log offset to archive reflog up to
+   */
   void archive_reflog(byte_string key, reflog& refs, size_t offset) {
     size_t reflog_idx = reflog_tails_[key.to_string()];
     size_t data_log_off = 0;
@@ -74,7 +80,6 @@ class index_archiver {
 
   /**
    * Archives a reflog bucket of a reflog corresponding to a radix tree key.
-   * Archived bucket format: [key|bucket_index|bucket_size][bucket]
    * @param key key to which reflog belongs to in radix_tree
    * @param reflog reflog to which bucket belongs
    * @param idx reflog index at which bucket starts

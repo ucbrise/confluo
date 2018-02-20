@@ -4,6 +4,9 @@
 namespace confluo {
 namespace archival {
 
+/**
+ * Utilities used by archivers and loaders
+ */
 class archival_utils {
  public:
   static std::string filter_archival_path(const std::string& filter_log_path, size_t filter_log_idx) {

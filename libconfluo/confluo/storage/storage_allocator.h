@@ -111,9 +111,9 @@ class storage_allocator {
 
     int fd = file_utils::open_file(path, O_RDWR);
     uint8_t* ptr = static_cast<uint8_t*>(mmap_utils::map(fd, nullptr, page_aligned_offset, mmap_size));
+    file_utils::close_file(fd);
 
     ptr += mmap_delta;
-    file_utils::close_file(fd);
 
     storage::ptr_metadata* metadata = reinterpret_cast<ptr_metadata*>(ptr);
     metadata->alloc_type_ = alloc_type::D_MMAP;

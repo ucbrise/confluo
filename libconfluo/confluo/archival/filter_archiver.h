@@ -47,8 +47,7 @@ class filter_archiver {
       byte_string key = it.key();
       ts_tail_ = key.template as<uint64_t>();
       auto ts_tail_ns = ts_tail_ * configuration_params::TIME_RESOLUTION_NS;
-      if (time_utils::cur_ns() - ts_tail_ns <
-          archival_configuration_params::RECENCY_FILTER_RESTRICTION_WINDOW_NS) {
+      if (time_utils::cur_ns() - ts_tail_ns < archival_configuration_params::IN_MEMORY_FILTER_WINDOW_NS) {
         break;
       }
       size_t data_log_archival_tail = archive_reflog(key, refs, offset);
@@ -65,7 +64,7 @@ class filter_archiver {
  private:
 
   /**
-   * Archive reflog corresponding to a key, up to an offset.
+   * Archive unarchived buckets of a reflog up to an offset.
    * @param key radix tree key to which reflog belongs
    * @param refs reflog to archive
    * @param offset data log offset
@@ -93,11 +92,12 @@ class filter_archiver {
   }
 
   /**
-   * Archive bucket.
-   * @param key
-   * @param refs
-   * @param bucket
-   * @param offset
+   * Archives a reflog bucket of a reflog corresponding to a radix tree key.
+   * @param key key to which reflog belongs to in radix_tree
+   * @param reflog reflog to which bucket belongs
+   * @param bucket reflog bucket starting at idx
+   * @param offset max data log offset in bucket
+   * @return reflog index to which bucket is archived
    */
   void archive_bucket(byte_string key, reflog& refs, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
@@ -169,7 +169,7 @@ class filter_load_utils {
    size_t data_log_archival_tail = 0;
    while (reader.has_more()) {
      auto action = filter_archival_action(reader.read_action<std::string>());
-     data_log_archival_tail = action.data_log_offset();
+     data_log_archival_tail = action.data_log_archival_tail();
 
      auto archival_metadata = radix_tree_archival_metadata::read(reader, sizeof(uint64_t));
      byte_string cur_key = archival_metadata.key();
@@ -202,7 +202,6 @@ class filter_load_utils {
    byte_string cur_key;
    while (reader.has_more()) {
      auto action = filter_aggregates_archival_action(reader.read_action<std::string>());
-     size_t key_size = action.key_size();
      auto archival_metadata = filter_aggregates_archival_metadata::read(reader);
      cur_key = archival_metadata.ts_block();
      size_t num_aggs = archival_metadata.num_aggregates();

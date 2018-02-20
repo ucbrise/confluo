@@ -8,6 +8,11 @@
 namespace confluo {
 namespace archival {
 
+// TODO distinction between metadata & transaction log actions:
+// most recent commit should describe everything before it,
+// everything else should go here. Need to separate it out better.
+// That way old actions can be garbage collected.
+
 class filter_aggregates_archival_metadata {
  public:
   filter_aggregates_archival_metadata(byte_string ts_block, size_t version, size_t num_aggs)

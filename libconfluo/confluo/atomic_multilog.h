@@ -987,15 +987,14 @@ class atomic_multilog {
   }
 
   /**
-   * Archives by a window.
+   * Archives until only a configured number of bytes
+   * of the data log are resident in memory.
    */
   void archival_task() {
     optional<management_exception> ex;
     std::future<void> ret = archival_pool_.submit([this] {
-      size_t offset = archiver_.tail() + archival_configuration_params::PERIODIC_WINDOW;
-      if (offset + archival_configuration_params::RECENCY_RESTRICTION_WINDOW < rt_.get()) {
-        archiver_.archive(offset);
-      }
+      if (rt_.get() > archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES)
+        archiver_.archive(rt_.get() - archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES);
     });
     ret.wait();
     if (ex.has_value())

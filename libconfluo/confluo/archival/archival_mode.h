@@ -4,6 +4,10 @@
 namespace confluo {
 namespace archival {
 
+/**
+ * Describes whether or not an atomic_multilog
+ * has periodic archival enabled.
+ */
 enum archival_mode {
   OFF = 0,
   ON = 1

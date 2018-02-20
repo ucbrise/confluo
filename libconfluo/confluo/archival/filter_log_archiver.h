@@ -13,16 +13,18 @@ class filter_log_archiver {
 
  public:
   filter_log_archiver()
-      : filter_log_archiver("", nullptr, false) {
+      : filter_log_archiver("", nullptr) {
   }
 
-  filter_log_archiver(const std::string& path, filter_log* filters, bool clear = true)
+  /**
+   * Constructor.
+   * @param path directory to archive in
+   * @param filters filter log to archive
+   */
+  filter_log_archiver(const std::string& path, filter_log* filters)
       : path_(path),
         filter_archivers_(),
         filters_(filters) {
-    if (clear) {
-      file_utils::clear_dir(path);
-    }
   }
 
   ~filter_log_archiver() {
@@ -31,7 +33,8 @@ class filter_log_archiver {
   }
 
   /**
-   * Archive all filters up to offset.
+   * Archive all filters up to a data log offset. Create new
+   * archivers for new filters since the last archive call.
    * @param offset data log offset
    */
   void archive(size_t offset) {

@@ -13,9 +13,8 @@ namespace confluo {
 class archival_configuration_params {
  public:
   static uint64_t PERIODICITY_MS;
-  static size_t PERIODIC_WINDOW;
-  static uint64_t RECENCY_RESTRICTION_WINDOW;
-  static uint64_t RECENCY_FILTER_RESTRICTION_WINDOW_NS;
+  static uint64_t IN_MEMORY_DATALOG_WINDOW_BYTES;
+  static uint64_t IN_MEMORY_FILTER_WINDOW_NS;
 
   // Maximum archival file size in bytes. Cannot be smaller than a data log bucket.
   static size_t MAX_FILE_SIZE;
@@ -54,12 +53,10 @@ static utils::configuration_map confluo_conf(
 
 uint64_t archival_configuration_params::PERIODICITY_MS = confluo_conf.get<uint64_t>(
     "archival_periodicity_ms", archival_defaults::DEFAULT_PERIODICITY_MS);
-size_t archival_configuration_params::PERIODIC_WINDOW = confluo_conf.get<size_t>(
-    "archival_periodic_window", archival_defaults::DEFAULT_PERIODIC_ARCHIVAL_WINDOW);
-uint64_t archival_configuration_params::RECENCY_RESTRICTION_WINDOW = confluo_conf.get<uint64_t>(
-    "archival_recency_restriction_window", archival_defaults::DEFAULT_RECENCY_RESTRICTION_WINDOW);
-uint64_t archival_configuration_params::RECENCY_FILTER_RESTRICTION_WINDOW_NS = confluo_conf.get<uint64_t>(
-    "filter_archival_recency_restriction_window", archival_defaults::DEFAULT_RECENCY_FILTER_RESTRICTION_WINDOW_NS);
+uint64_t archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES = confluo_conf.get<uint64_t>(
+    "archival_in_memory_datalog_window_bytes", archival_defaults::DEFAULT_IN_MEMORY_DATALOG_WINDOW_BYTES);
+uint64_t archival_configuration_params::IN_MEMORY_FILTER_WINDOW_NS = confluo_conf.get<uint64_t>(
+    "archival_in_memory_filter_window_ns", archival_defaults::DEFAULT_IN_MEMORY_FILTER_WINDOW_NS);
 size_t archival_configuration_params::MAX_FILE_SIZE = confluo_conf.get<size_t>(
     "max_archival_file_size", archival_defaults::DEFAULT_MAX_FILE_SIZE);
 uint8_t archival_configuration_params::DATA_LOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(

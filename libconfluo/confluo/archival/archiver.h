@@ -19,9 +19,9 @@ class archiver {
   }
 
   /**
-   * Archiver
-   * @param path directory to store archives in or where archives are stored
-   * @param rt read tail
+   * Constructor.
+   * @param path directory to store archives in or where archives are currently stored
+   * @param rt data log read tail
    * @param log data log
    * @param filters atomic multilog filters
    * @param indexes atomic multilog indexes
@@ -59,18 +59,34 @@ class archiver {
     }
   }
 
+  /**
+   *
+   * @return offset up to which data log has been archived
+   */
   size_t tail() {
     return data_log_archiver_.tail();
   }
 
+  /**
+   *
+   * @return path of directory in which data log archives are stored
+   */
   std::string data_log_path() {
     return path_ + "/archives/data_log/";
   }
 
+  /**
+   *
+   * @return path of directory in which filter log archives are stored
+   */
   std::string filter_log_path() {
     return path_ + "/archives/filters/";
   }
 
+  /**
+   *
+   * @return path of directory in which index log archives are stored
+   */
   std::string index_log_path() {
     return path_ + "/archives/indexes/";
   }

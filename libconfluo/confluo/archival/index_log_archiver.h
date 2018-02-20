@@ -35,7 +35,8 @@ class index_log_archiver {
   }
 
   /**
-   * Archive every index in the index log up to a data log offset.
+   * Archive all indexes up to a data log offset. Create new
+   * archivers for new indexes since the last archive call.
    * @param offset data log offset
    */
   void archive(size_t offset) {

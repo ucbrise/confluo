@@ -4,6 +4,10 @@
 namespace confluo {
 namespace archival {
 
+/**
+ * Offset into an incremental file, uniquely defined by
+ * the path to a file and the offset into the file
+ */
 class incremental_file_offset {
  public:
   incremental_file_offset()
@@ -21,11 +25,6 @@ class incremental_file_offset {
   }
 
   size_t offset() const {
-    return off_;
-  }
-
-  size_t advance(size_t increment) {
-    off_ += increment;
     return off_;
   }
 

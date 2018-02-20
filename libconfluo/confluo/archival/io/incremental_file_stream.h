@@ -1,6 +1,7 @@
 #ifndef CONFLUO_ARCHIVAL_IO_INCR_FILE_STREAM_H_
 #define CONFLUO_ARCHIVAL_IO_INCR_FILE_STREAM_H_
 
+#include "file_utils.h"
 #include "incremental_file_offset.h"
 
 namespace confluo {
@@ -29,8 +30,8 @@ class incremental_file_stream {
 
   void truncate(incremental_file_offset incr_file_off, size_t transaction_log_off) {
     // TODO delete succeeding files as well
-    file_utils::truncate_file(incr_file_off.path(), incr_file_off.offset());
-    file_utils::truncate_file(transaction_log_path(), transaction_log_off);
+    utils::file_utils::truncate_file(incr_file_off.path(), incr_file_off.offset());
+    utils::file_utils::truncate_file(transaction_log_path(), transaction_log_off);
   }
 
  protected:
