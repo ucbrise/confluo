@@ -375,25 +375,22 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   size_t from_byte_array(char* buffer) {
     size_t array_size = 0;
     width_type bit_width;
-    bit_width = *reinterpret_cast<width_type *>(buffer, 
-            sizeof(width_type));
+    bit_width = *reinterpret_cast<width_type *>(buffer);
     array_size += sizeof(width_type);
 
-    size_type size = *reinterpret_cast<size_type*>((buffer + array_size), 
-            sizeof(size_type));
+    size_type size = *reinterpret_cast<size_type*>(buffer + array_size);
     array_size += sizeof(size_type);
 
     this->samples_->set_size(size);
     this->samples_->set_bit_width(bit_width);
 
-    for (int i = 0; i < BITS2BLOCKS(size) * sizeof(data_type); i++) {
-      T val = *reinterpret_cast<T *>((buffer + array_size + i), sizeof(T));
+    for (int i = 0; i < size; i++) {
+      T val = *reinterpret_cast<T *>(buffer + array_size + i);
       this->samples_->set(i, val);
     }
-    array_size += (BITS2BLOCKS(size) * sizeof(data_type));
+    array_size += sizeof(T) * size;
 
-    size = *reinterpret_cast<size_type *>((buffer + array_size), 
-            sizeof(size_type));
+    size = *reinterpret_cast<size_type *>(buffer + array_size);
     array_size += sizeof(size_type);
     this->deltas_->set_size(size);
 
@@ -404,21 +401,19 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     }
     array_size += (BITS2BLOCKS(size) * sizeof(size_type));
 
-    bit_width = *reinterpret_cast<width_type *>(buffer, 
-            sizeof(width_type));
+    bit_width = *reinterpret_cast<width_type *>(buffer);
     array_size += sizeof(width_type);
 
-    size = *reinterpret_cast<size_type*>((buffer + array_size), 
-            sizeof(size_type));
+    size = *reinterpret_cast<size_type*>(buffer + array_size);
     array_size += sizeof(size_type);
     this->delta_offsets_->set_size(size);
     this->delta_offsets_->set_bit_width(bit_width);
 
-    for (int i = 0; i < BITS2BLOCKS(size) * sizeof(data_type); i++) {
-      pos_type val = *reinterpret_cast<pos_type *>((buffer + array_size + i), sizeof(pos_type));
+    for (int i = 0; i < size; i++) {
+      pos_type val = *reinterpret_cast<pos_type *>(buffer + array_size + i);
       this->delta_offsets_->set(i, val);
     }
-    array_size += (BITS2BLOCKS(size) * sizeof(data_type));
+    array_size += sizeof(pos_type) * size;
     return array_size;
   }
 

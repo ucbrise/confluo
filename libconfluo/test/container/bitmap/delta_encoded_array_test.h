@@ -26,21 +26,27 @@ TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayTest) {
 }
 
 TEST_F(DeltaEncodedArrayTest, EliasToStream) {
-  uint64_t *array = new uint64_t[kArraySize];
-  for (uint64_t i = 0; i < kArraySize; i++) {
+  uint64_t k_array_size = 1000;
+
+  uint64_t *array = new uint64_t[k_array_size];
+  for (uint64_t i = 0; i < k_array_size; i++) {
     array[i] = i;
   }
 
-  elias_gamma_encoded_array<uint64_t> enc_array(array, kArraySize);
+  elias_gamma_encoded_array<uint64_t> enc_array(array, k_array_size);
   size_t size = enc_array.byte_array_length();
 
   char buffer[size];
-  size_t byte_array_size = enc_array.to_byte_array(buffer);
+  /*size_t byte_array_size = enc_array.to_byte_array(buffer);
 
-  std::cout << "Size from precompute: " << size << "Size after: " <<
+  std::cout << "Size from precompute: " << size << " Size after: " <<
       byte_array_size << std::endl;
 
   size_t from_size = enc_array.from_byte_array(buffer);
+
+  for (uint64_t i = 0; i < from_size; i++) {
+    std::cout << enc_array[i] << std::endl;
+  }*/
 }
 
 #endif /* CONFLUO_TEST_DELTA_ENCODED_ARRAY_TEST_H_ */
