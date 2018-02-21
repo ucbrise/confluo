@@ -83,9 +83,9 @@ ExternalProject_Add(lz4
     UPDATE_COMMAND      ""
     PATCH_COMMAND       ""
     CONFIGURE_COMMAND   "" 
-    BUILD_COMMAND       ${BUILDEM_ENV_STRING} $(MAKE)
+    BUILD_COMMAND       make
     BUILD_IN_SOURCE     1 
-    INSTALL_COMMAND     ${BUILDEM_ENV_STRING} PREFIX=${BUILDEM_DIR} $(MAKE) install
+    INSTALL_COMMAND     make install
 )
 
 set_target_properties(lz4 PROPERTIES EXCLUDE_FROM_ALL ON)

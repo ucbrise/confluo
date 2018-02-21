@@ -12,24 +12,19 @@ class LZ4EncodeTest : public testing::Test {
 };
 
 TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
-  lz4_encode encoder;
-  lz4_decode decoder;
-
   size_t size = 10000;
+  size_t bytes_per_block = 1000;
   char source[size];
 
   for (size_t i = 0; i < size; i++) {
     source[i] = i;
   }
 
-  size_t buffer_size = encoder.get_buffer_size(size);
-  char buffer[buffer_size];
-
-  size_t compressed_size = encoder.encode(buffer, source, size);
+  lz4_encode encoder(source, size, bytes_per_block);
+  lz4_decode decoder(&encoder);
 
   char destination[size];
-  size_t decompressed_size = decoder.decode_full(destination, buffer, 
-          compressed_size, size);
+  decoder.decode_full(destination, size);
 
   for (size_t i = 0; i < size; i++) {
     ASSERT_EQ(source[i], destination[i]);
@@ -37,61 +32,52 @@ TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
 }
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
-  lz4_encode encoder;
-  lz4_decode decoder;
-
-  size_t size = 10000;
+  size_t size = 1000;
+  size_t bytes_per_block = 100;
   char source[size];
 
   for (size_t i = 0; i < size; i++) {
     source[i] = i;
   }
 
-  size_t buffer_size = encoder.get_buffer_size(size);
-  char buffer[buffer_size];
+  lz4_encode encoder(source, size, bytes_per_block);
+  lz4_decode decoder(&encoder);
 
-  size_t compress_size_one = encoder.encode(buffer, source, size / 2);
-  size_t compress_size_two = encoder.encode(buffer + compress_size_one,
-          source + size / 2, size / 2);
+  size_t dest_size = bytes_per_block + 30;
+  int src_index = 210;
 
+  char destination[dest_size];
+  decoder.decode_partial(destination, bytes_per_block, src_index, dest_size);
 
-  char destination_partial[compress_size_two];
-  int block_size = 16;
-  int position = size / 2;
-  int decomp_size = decoder.decode_partial(destination_partial, buffer,
-          compress_size_two, block_size, position);
-  for (int i = 0; i < block_size; i++) {
-    ASSERT_EQ(source[i], destination_partial[i]);
+  for (size_t i = 0; i < dest_size; i++) {
+    ASSERT_EQ(source[i + src_index], destination[i]);
   }
+
 }
 
 TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
-  lz4_encode encoder;
-  lz4_decode decoder;
 
   size_t size = 10000;
+  size_t bytes_per_block = 1000;
   char source[size];
 
   for (size_t i = 0; i < size; i++) {
     source[i] = i;
   }
 
-  size_t buffer_size = encoder.get_buffer_size(size);
-  char buffer[buffer_size];
+  lz4_encode encoder(source, size, bytes_per_block);
+  lz4_decode decoder(&encoder);
 
-  size_t compress_size_one = encoder.encode(buffer, source, size / 2);
-  size_t compress_size_two = encoder.encode(buffer + compress_size_one,
-          source + size / 2, size / 2);
+  int src_index = 230;
+  size_t dest_size = size - src_index;
 
+  char destination[dest_size];
+  decoder.decode_index(destination, bytes_per_block, src_index);
 
-  char destination_partial[compress_size_two];
-  int block_size = 16;
-  int position = size / 2;
-  int decomp_size = decoder.decode_index(destination_partial, buffer,
-          compress_size_two, position);
-  for (int i = 0; i < block_size; i++) {
-    ASSERT_EQ(source[i], destination_partial[i]);
+  for (size_t i = 0; i < dest_size; i++) {
+    ASSERT_EQ(source[i + src_index], destination[i]);
   }
+
  
 }
 
