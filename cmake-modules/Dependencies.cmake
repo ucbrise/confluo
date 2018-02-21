@@ -51,9 +51,9 @@ endif()
 
 #ExternalProject_Add(
 #    lz4
-#    PREFIX "${PROJECT_BINARY_DIR}/lz4"
-#    URL https://github.com/lz4/lz4/archive/v1.8.1.2.tar.gz
-#    PATCH_COMMAND ${CMAKE_COMMAND} ${PROJECT_BINARY_DIR}/lz4/src/lz4/contrib/cmake_unofficial/CMakeLists.txt
+#PREFIX "${PROJECT_BINARY_DIR}/lz4"
+#URL https://github.com/lz4/lz4/archive/v1.8.1.2.tar.gz
+#PATCH_COMMAND ${CMAKE_COMMAND} ${PROJECT_BINARY_DIR}/lz4/src/lz4/contrib/cmake_unofficial/CMakeLists.txt
 #)
 #ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
 #set(lz4_INCLUDE_DIR "${SOURCE_DIR}/lib")
@@ -63,40 +63,78 @@ endif()
 #        lz4
 #        PREFIX "${CMAKE_BINARY_DIR}/lz4"
 #        URL "https://github.com/lz4/lz4/archive/r131.tar.gz"
-        # do not update
-        #        UPDATE_COMMAND ""
+        #do not update
+        #                UPDATE_COMMAND ""
         # fix missing CMakeLists.txt in source root dir
-        #        PATCH_COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR}/lz4/src/lz4/cmake_unofficial/CMakeLists.txt <SOURCE_DIR>/CMakeLists.txt
-        # do not install
-        #        INSTALL_COMMAND ""
-        #)
+        #       PATCH_COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR}/lz4/src/lz4/cmake_unofficial/CMakeLists.txt <SOURCE_DIR>/CMakeLists.txt
+                # do not install
+                #       INSTALL_COMMAND ""
+                #)
         #ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
         #set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
         #set( lz4_STATIC_LIB ${BINARY_DIR}/cmake_unofficial/liblz4.a )
 
         #include_directories(SYSTEM ${lz4_INCLUDE_DIR})
         #link_libraries(SYSTEM ${lz4_STATIC_LIB})
+        #ExternalProject_Add(lz4
+        #DEPENDS             ""
+        #PREFIX              "${CMAKE_BINARY_DIR}/lz4"
+        #GIT_REPOSITORY      "https://github.com/lz4/lz4/archive/r131.tar.gz"
+        #UPDATE_COMMAND      ""
+        #PATCH_COMMAND       ""
+        #CONFIGURE_COMMAND   "" 
+        #BUILD_COMMAND       make
+        #BUILD_IN_SOURCE     1 
+        #INSTALL_COMMAND     make install
+        #)
+
+        #add_custom_target(SYSTEM COMMAND make
+        #WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/lz4/src/lz4
+        #)
+
+        #ExternalProject_Add(
+        #lz4
+        #PREFIX "${CMAKE_BINARY_DIR}/lz4"
+        #URL "https://github.com/lz4/lz4/archive/r131.tar.gz"
+        # do not update
+        #UPDATE_COMMAND ${CMAKE_COMMAND} <SOURCE_DIR>/cmake_unofficial/CMakeLists.txt
+        # fix missing CMakeLists.txt in source root dir
+        #PATCH_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/cmake_unofficial/CMakeLists.txt <SOURCE_DIR>/CMakeLists.txt
+        # do not install
+        #INSTALL_COMMAND "make"
+        #)
+#ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
+#set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+#set( lz4_STATIC_LIB <SOURCE_DIR>/cmake_unofficial/liblz4.a )
+
+#set_target_properties(lz4 PROPERTIES EXCLUDE_FROM_ALL ON)
+#ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
+#set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+#set( lz4_STATIC_LIB ${BINARY_DIR}/liblz4.a )
+
+#include_directories(SYSTEM ${lz4_INCLUDE_DIR})
+#target_link_libraries(lz4 ${lz4_STATIC_LIB})
+#link_libraries(SYSTEM ${lz4_STATIC_LIB})
 ExternalProject_Add(lz4
-    DEPENDS             ""
-    PREFIX              "${CMAKE_BINARY_DIR}/lz4"
-    GIT_REPOSITORY      "https://github.com/lz4/lz4/archive/r131.tar.gz"
-    UPDATE_COMMAND      ""
-    PATCH_COMMAND       ""
-    CONFIGURE_COMMAND   "" 
-    BUILD_COMMAND       make
-    BUILD_IN_SOURCE     1 
-    INSTALL_COMMAND     make install
+        DOWNLOAD_COMMAND git clone https://github.com/Cyan4973/lz4.git
+        #DOWNLOAD_DIR "${CMAKE_BINARY_DR}/lz4"
+        CONFIGURE_COMMAND ""
+        BUILD_IN_SOURCE 1
+        BUILD_COMMAND make -C lib lib MOREFLAGS=-fPIC
+        INSTALL_COMMAND ""
 )
-
-set_target_properties(lz4 PROPERTIES EXCLUDE_FROM_ALL ON)
-ExternalProject_Get_Property( lz4 SOURCE_DIR BINARY_DIR )
-set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
-set( lz4_STATIC_LIB ${BINARY_DIR}/liblz4.a )
-
-include_directories(SYSTEM ${lz4_INCLUDE_DIR})
-target_link_libraries(lz4 ${lz4_STATIC_LIB})
-link_libraries(SYSTEM ${lz4_STATIC_LIB})
-
+    ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
+    #set_target_properties(lz4 PROPERTIES EXCLUDE_FROM_ALL ON)
+    #include_directories(${SOURCE_DIR}/lib/)
+    #add_library(lz4-git STATIC IMPORTED)
+    set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+    set( lz4_STATIC_LIB ${BINARY_DIR}/lib/liblz4.a )
+    #set_property(TARGET lz4-git PROPERTY IMPORTED_LOCATION ${CMAKE_BINARY_DR}/lib/liblz4.a)
+    #add_dependencies(lz4-git lz4)
+    #add_dependencies(TARGET lz4-git)
+    #TARGET_LINK_LIBRARIES(TARGET lz4)
+    include_directories(SYSTEM ${lz4_INCLUDE_DIR})
+    link_libraries(SYSTEM ${lz4_STATIC_LIB})
 
 if (BUILD_RPC)
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
