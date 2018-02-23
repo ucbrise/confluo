@@ -20,23 +20,20 @@ TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
     source[i] = i;
   }
 
-  lz4_encoder encoder;
-  lz4_decoder decoder;
-
   uint8_t destination[size];
-  std::vector<uint8_t*> compressed_blocks;
+  uint8_t encode_buffer[lz4_encoder::get_buffer_size(size)];
+
   std::vector<size_t> compressed_sizes;
 
-  encoder.encode(source, size, bytes_per_block, &compressed_blocks,
-          &compressed_sizes);
-  decoder.decode_full(&compressed_blocks, &compressed_sizes, 
+  lz4_encoder::encode(source, size, bytes_per_block,
+          &compressed_sizes, encode_buffer);
+  lz4_decoder::decode_full(encode_buffer, &compressed_sizes, 
           bytes_per_block, destination, size);
 
   for (size_t i = 0; i < size; i++) {
     ASSERT_EQ(source[i], destination[i]);
   }
 
-  compressed_blocks.clear();
   compressed_sizes.clear();
 }
 
@@ -49,26 +46,22 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
     source[i] = i;
   }
 
-  lz4_encoder encoder;
-  lz4_decoder decoder;
-
   size_t dest_size = bytes_per_block + 30;
   int src_index = 210;
 
   uint8_t destination[dest_size];
-  
-  std::vector<uint8_t*> compressed_blocks;
+  uint8_t encode_buffer[lz4_encoder::get_buffer_size(size)];
+
   std::vector<size_t> compressed_sizes;
 
-  encoder.encode(source, size, bytes_per_block, &compressed_blocks,
-          &compressed_sizes);
-  decoder.decode_partial(&compressed_blocks, &compressed_sizes, bytes_per_block, destination, bytes_per_block, src_index, dest_size);
+  lz4_encoder::encode(source, size, bytes_per_block,
+          &compressed_sizes, encode_buffer);
+  lz4_decoder::decode_partial(encode_buffer, &compressed_sizes, bytes_per_block, destination, bytes_per_block, src_index, dest_size);
 
   for (size_t i = 0; i < dest_size; i++) {
     ASSERT_EQ(source[i + src_index], destination[i]);
   }
 
-  compressed_blocks.clear();
   compressed_sizes.clear();
 
 }
@@ -83,26 +76,23 @@ TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
     source[i] = i;
   }
 
-  lz4_encoder encoder;
-  lz4_decoder decoder;
-
   int src_index = 230;
   size_t dest_size = size - src_index;
 
   uint8_t destination[dest_size];
-  std::vector<uint8_t*> compressed_blocks;
+  uint8_t encode_buffer[lz4_encoder::get_buffer_size(size)];
+
   std::vector<size_t> compressed_sizes;
 
-  encoder.encode(source, size, bytes_per_block, &compressed_blocks,
-          &compressed_sizes);
+  lz4_encoder::encode(source, size, bytes_per_block,
+          &compressed_sizes, encode_buffer);
 
-  decoder.decode_index(&compressed_blocks, &compressed_sizes, bytes_per_block, destination, bytes_per_block, src_index);
+  lz4_decoder::decode_index(encode_buffer, &compressed_sizes, bytes_per_block, destination, bytes_per_block, src_index);
 
   for (size_t i = 0; i < dest_size; i++) {
     ASSERT_EQ(source[i + src_index], destination[i]);
   }
 
-  compressed_blocks.clear();
   compressed_sizes.clear();
  
 }
