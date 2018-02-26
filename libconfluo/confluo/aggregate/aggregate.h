@@ -3,15 +3,13 @@
 
 #include "atomic.h"
 #include "threads/thread_manager.h"
-#include "types/aggregate_ops.h"
+#include "aggregate_ops.h"
+#include "aggregate_manager.h"
 #include "types/numeric.h"
 
 namespace confluo {
 
 class aggregate;
-
-static std::vector<aggregator> aggregators { sum_aggregator, min_aggregator,
-    max_aggregator, count_aggregator };
 
 struct aggregate_node {
   aggregate_node(numeric agg, uint64_t version, aggregate_node *next)
@@ -57,21 +55,9 @@ class aggregate_list {
    * @param agg Aggregate function pointer.
    * 
    */
-  aggregate_list(data_type type, aggregator agg)
+  aggregate_list(data_type type, const aggregator& agg)
       : head_(nullptr),
         agg_(agg),
-        type_(type) {
-  }
-
-  /**
-   * Constructor for aggregate
-   *
-   * @param type The type of Aggregate
-   * @param id Aggregate ID.
-   */
-  aggregate_list(data_type type, aggregate_type atype)
-      : head_(nullptr),
-        agg_(aggregators[atype]),
         type_(type) {
   }
 
@@ -85,19 +71,9 @@ class aggregate_list {
    * @param type The type of the aggregate
    * @param agg Aggregate function pointer
    */
-  void init(data_type type, aggregator agg) {
+  void init(data_type type, const aggregator& agg) {
     type_ = type;
     agg_ = agg;
-  }
-
-  /**
-   * Initializes the type of Aggregate and the id
-   * @param type The type of the aggregate
-   * @param id The Aggregate id
-   */
-  void init(data_type type, aggregate_type atype) {
-    type_ = type;
-    agg_ = aggregators[atype];
   }
 
   /**
@@ -105,7 +81,7 @@ class aggregate_list {
    * @return The 0th aggregate
    */
   numeric zero() const {
-    return agg_.zero(type_);
+    return agg_.zero;
   }
 
   /** 
@@ -119,21 +95,36 @@ class aggregate_list {
     aggregate_node *req = get_node(cur_head, version);
     if (req != nullptr)
       return req->value();
-    return agg_.zero(type_);
+    return agg_.zero;
   }
 
   /**
-   * Get update the aggregate value with given version.
+   * Update the aggregate value with given version, using the combine operator.
    *
    * @param value The value with which the aggregate is to be updated.
    * @param version The aggregate version.
    */
-  void update(const numeric& value, uint64_t version) {
+  void comb_update(const numeric& value, uint64_t version) {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
-    numeric old_agg = (req == nullptr) ? agg_.zero(type_) : req->value();
-    aggregate_node *node = new aggregate_node(agg_.agg(old_agg, value), version,
-                                              cur_head);
+    numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
+    aggregate_node *node = new aggregate_node(agg_.comb_op(old_agg, value),
+                                              version, cur_head);
+    atomic::store(&head_, node);
+  }
+
+  /**
+   * Update the aggregate value with the given version, using the sequential operator.
+   *
+   * @param value The value with which the aggregate is to be updated.
+   * @param version The aggregate version.
+   */
+  void seq_update(const numeric& value, uint64_t version) {
+    aggregate_node *cur_head = atomic::load(&head_);
+    aggregate_node *req = get_node(cur_head, version);
+    numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
+    aggregate_node *node = new aggregate_node(agg_.seq_op(old_agg, value),
+                                              version, cur_head);
     atomic::store(&head_, node);
   }
 
@@ -178,22 +169,26 @@ class aggregate {
         aggs_(nullptr) {
   }
 
-  aggregate(const data_type& type, aggregate_type atype)
+  aggregate(const data_type& type, const aggregator& agg)
       : type_(type),
-        agg_(aggregators[atype]),
+        agg_(agg),
         aggs_(new aggregate_list[thread_manager::get_max_concurrency()]) {
     for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
-      aggs_[i].init(type, atype);
+      aggs_[i].init(type, agg);
   }
 
-  void update(int thread_id, const numeric& value, uint64_t version) {
-    aggs_[thread_id].update(value, version);
+  void seq_update(int thread_id, const numeric& value, uint64_t version) {
+    aggs_[thread_id].seq_update(value, version);
+  }
+
+  void comb_update(int thread_id, const numeric& value, uint64_t version) {
+    aggs_[thread_id].comb_update(value, version);
   }
 
   numeric get(uint64_t version) const {
-    numeric val = agg_.zero(type_);
+    numeric val = agg_.zero;
     for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
-      val = agg_.agg(val, aggs_[i].get(version));
+      val = agg_.comb_op(val, aggs_[i].get(version));
     return val;
   }
 

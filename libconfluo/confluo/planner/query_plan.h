@@ -28,11 +28,12 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
     return is_optimized() ? using_indexes(version) : using_full_scan(version);
   }
 
-  numeric aggregate(uint64_t version, uint16_t field_idx, aggregate_type type) {
+  numeric aggregate(uint64_t version, uint16_t field_idx,
+                    const aggregator& agg) {
     return
         is_optimized() ?
-            aggregate_using_indexes(version, field_idx, type) :
-            aggregate_using_full_scan(version, field_idx, type);
+            aggregate_using_indexes(version, field_idx, agg) :
+            aggregate_using_full_scan(version, field_idx, agg);
   }
 
  private:
@@ -53,7 +54,7 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
   // TODO: Fix
   // TODO: Add tests
   numeric aggregate_using_indexes(uint64_t version, uint16_t field_idx,
-                                  aggregate_type agg) {
+                                  const aggregator& agg) {
     if (size() == 1) {
       return std::dynamic_pointer_cast<index_op>(at(0))->aggregate(version,
                                                                    field_idx,
@@ -66,7 +67,7 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
 
   // TODO: Add tests
   numeric aggregate_using_full_scan(uint64_t version, uint16_t field_idx,
-                                    aggregate_type agg) {
+                                    const aggregator& agg) {
     return std::dynamic_pointer_cast<full_scan_op>(at(0))->aggregate(version,
                                                                      field_idx,
                                                                      agg);

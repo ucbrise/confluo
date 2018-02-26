@@ -1,7 +1,7 @@
 #ifndef CONFLUO_TEST_AGGREGATE_TEST_H_
 #define CONFLUO_TEST_AGGREGATE_TEST_H_
 
-#include "aggregate.h"
+#include "aggregate/aggregate.h"
 
 #include "gtest/gtest.h"
 
@@ -11,18 +11,18 @@ class AggregateTest : public testing::Test {
 };
 
 TEST_F(AggregateTest, SumTest) {
-  aggregate_list agg(INT_TYPE, aggregate_type::D_SUM);
-  ASSERT_TRUE(numeric(limits::int_zero) == agg.get(0));
+  aggregate_list agg(INT_TYPE, aggregate_manager::get_aggregator("sum"));
+  ASSERT_TRUE(numeric(limits::double_zero) == agg.get(0));
 
-  int32_t sum[11];
-  sum[0] = limits::int_zero;
+  double sum[11];
+  sum[0] = limits::double_zero;
   for (int32_t i = 1; i <= 10; i++) {
     sum[i] = sum[i - 1] + i;
   }
 
   for (int32_t i = 1; i <= 10; i++) {
     numeric value(i);
-    agg.update(value, i * 2);
+    agg.seq_update(value, i * 2);
     for (int32_t j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(sum[j]) == agg.get(j * 2));
   }
@@ -33,18 +33,18 @@ TEST_F(AggregateTest, SumTest) {
 }
 
 TEST_F(AggregateTest, MinTest) {
-  aggregate_list agg(INT_TYPE, aggregate_type::D_MIN);
-  ASSERT_TRUE(numeric(limits::int_max) == agg.get(0));
+  aggregate_list agg(INT_TYPE, aggregate_manager::get_aggregator("min"));
+  ASSERT_TRUE(numeric(limits::double_max) == agg.get(0));
 
-  int32_t min[11];
-  min[0] = limits::int_max;
+  double min[11];
+  min[0] = limits::double_max;
   for (int32_t i = 1; i <= 10; i++) {
-    min[i] = std::min(min[i - 1], 10 - i);
+    min[i] = std::min(min[i - 1], static_cast<double>(10 - i));
   }
 
   for (int32_t i = 1; i <= 10; i++) {
     numeric value(10 - i);
-    agg.update(value, i * 2);
+    agg.seq_update(value, i * 2);
     for (int32_t j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(min[j]) == agg.get(j * 2));
   }
@@ -55,18 +55,18 @@ TEST_F(AggregateTest, MinTest) {
 }
 
 TEST_F(AggregateTest, MaxTest) {
-  aggregate_list agg(INT_TYPE, aggregate_type::D_MAX);
-  ASSERT_EQ(numeric(limits::int_min), agg.get(0));
+  aggregate_list agg(INT_TYPE, aggregate_manager::get_aggregator("max"));
+  ASSERT_TRUE(numeric(limits::double_min) == agg.get(0));
 
-  int32_t max[11];
-  max[0] = limits::int_min;
+  double max[11];
+  max[0] = limits::double_min;
   for (int32_t i = 1; i <= 10; i++) {
-    max[i] = std::max(max[i - 1], i);
+    max[i] = std::max(max[i - 1], static_cast<double>(i));
   }
 
   for (int32_t i = 1; i <= 10; i++) {
     numeric value(i);
-    agg.update(value, i * 2);
+    agg.seq_update(value, i * 2);
     for (int32_t j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(max[j]) == agg.get(j * 2));
   }
@@ -77,8 +77,8 @@ TEST_F(AggregateTest, MaxTest) {
 }
 
 TEST_F(AggregateTest, CountTest) {
-  aggregate_list agg(INT_TYPE, aggregate_type::D_CNT);
-  ASSERT_TRUE(numeric(limits::int_zero) == agg.get(0));
+  aggregate_list agg(INT_TYPE, aggregate_manager::get_aggregator("count"));
+  ASSERT_TRUE(numeric(limits::ulong_zero) == agg.get(0));
 
   int32_t count[11];
   count[0] = limits::int_zero;
@@ -87,7 +87,7 @@ TEST_F(AggregateTest, CountTest) {
   }
 
   for (int32_t i = 1; i <= 10; i++) {
-    agg.update(numeric(1), i * 2);
+    agg.seq_update(numeric(1), i * 2);
     for (int32_t j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(count[j]) == agg.get(j * 2));
   }

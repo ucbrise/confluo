@@ -1,7 +1,7 @@
 #ifndef CONFLUO_TRIGGER_H_
 #define CONFLUO_TRIGGER_H_
 
-#include "aggregate.h"
+#include "aggregate/aggregate.h"
 #include "types/relational_ops.h"
 #include "schema/schema_snapshot.h"
 

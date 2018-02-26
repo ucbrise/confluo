@@ -63,7 +63,7 @@ class type_manager {
    * @return True if id is primitive, false otherwise
    */
   static bool is_primitive(size_t id) {
-    return id >= 1 && id <= 8;
+    return id >= 1 && id <= 12;
   }
 };
 

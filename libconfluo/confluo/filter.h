@@ -129,11 +129,8 @@ class filter {
       for (size_t i = 0; i < refs->num_aggregates(); i++) {
         if (aggregates_.at(i)->is_valid()) {
           size_t field_idx = aggregates_.at(i)->field_idx();
-          aggregate_type agg = aggregates_.at(i)->agg_type();
-          numeric val =
-              agg == aggregate_type::D_CNT ?
-                  numeric(INT64_C(1)) : numeric(r[field_idx].value());
-          refs->update_aggregate(tid, i, val, r.version());
+          numeric val(r[field_idx].value());
+          refs->seq_update_aggregate(tid, i, val, r.version());
         }
       }
     }
@@ -162,15 +159,15 @@ class filter {
         refs->push_back(rec_off);
         for (size_t j = 0; j < local_aggs.size(); j++)
           if (aggregates_.at(j)->is_valid())
-            local_aggs[j] = aggregates_.at(j)->agg(local_aggs[j], snap,
-                                                   cur_rec);
+            local_aggs[j] = aggregates_.at(j)->seq_op(local_aggs[j], snap,
+                                                      cur_rec);
       }
     }
 
     size_t version = log_offset + block.nrecords * record_size;
     for (size_t j = 0; j < local_aggs.size(); j++)
       if (aggregates_.at(j)->is_valid() && !local_aggs[j].type().is_none())
-        refs->update_aggregate(tid, j, local_aggs[j], version);
+        refs->comb_update_aggregate(tid, j, local_aggs[j], version);
   }
 
   /**

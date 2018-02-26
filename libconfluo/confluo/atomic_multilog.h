@@ -404,7 +404,7 @@ class atomic_multilog {
   numeric execute_aggregate(const std::string& aggregate_expr,
                             const std::string& filter_expr) {
     auto pa = parser::parse_aggregate(aggregate_expr);
-    auto agg = aggregate_type_utils::string_to_agg(pa.agg);
+    aggregator agg = aggregate_manager::get_aggregator(pa.agg);
     uint16_t field_idx = schema_[pa.field_name].idx();
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(filter_expr);
@@ -489,7 +489,7 @@ class atomic_multilog {
       if ((refs = filters_.at(fid)->lookup(t)) == nullptr)
         continue;
       numeric t_agg = refs->get_aggregate(aid, version);
-      agg = a->agg(agg, t_agg);
+      agg = a->comb_op(agg, t_agg);
     }
     return agg;
   }
@@ -689,8 +689,7 @@ class atomic_multilog {
     auto pa = parser::parse_aggregate(expr);
     const column_t& col = schema_[pa.field_name];
     aggregate_info *a = new aggregate_info(
-        name, aggregate_type_utils::string_to_agg(pa.agg), col.type(),
-        col.idx());
+        name, aggregate_manager::get_aggregator(pa.agg), col.idx());
     aggregate_id.aggregate_idx = filters_.at(filter_id)->add_aggregate(a);
     if (aggregate_map_.put(name, aggregate_id) == -1) {
       ex = management_exception(

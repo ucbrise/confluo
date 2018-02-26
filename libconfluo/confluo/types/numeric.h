@@ -7,6 +7,15 @@
 
 namespace confluo {
 
+class numeric;
+
+/** Helpers for casting numerics **/
+static numeric cast(const numeric& val, const data_type& type);
+
+static data_type max(const data_type& t1, const data_type& t2) {
+  return type_manager::get_type(std::max(t1.id, t2.id));
+}
+
 class numeric {
  public:
   static const size_t MAX_SIZE = sizeof(uint64_t);
@@ -30,9 +39,19 @@ class numeric {
     as<int8_t>() = val;
   }
 
+  numeric(uint8_t val)
+      : type_(UCHAR_TYPE) {
+    as<uint8_t>() = val;
+  }
+
   numeric(int16_t val)
       : type_(SHORT_TYPE) {
     as<int16_t>() = val;
+  }
+
+  numeric(uint16_t val)
+      : type_(USHORT_TYPE) {
+    as<uint16_t>() = val;
   }
 
   numeric(int32_t val)
@@ -40,9 +59,19 @@ class numeric {
     as<int32_t>() = val;
   }
 
+  numeric(uint32_t val)
+      : type_(UINT_TYPE) {
+    as<uint32_t>() = val;
+  }
+
   numeric(int64_t val)
       : type_(LONG_TYPE) {
     as<int64_t>() = val;
+  }
+
+  numeric(uint64_t val)
+      : type_(ULONG_TYPE) {
+    as<uint64_t>() = val;
   }
 
   numeric(float val)
@@ -69,6 +98,10 @@ class numeric {
     memcpy(data_, val.ptr(), type_.size);
   }
 
+  bool is_valid() const {
+    return !type_.is_none();
+  }
+
   static numeric parse(const std::string& str, const data_type& type) {
     numeric value(type);
     type.parse_op()(str, value.data_);
@@ -86,12 +119,11 @@ class numeric {
   // Relational operators
   static bool relop(reational_op_id id, const numeric& first,
                     const numeric& second) {
-    if (first.type_ != second.type_)
-      THROW(
-          invalid_operation_exception,
-          "Comparing values of different types: (" + first.type().name() + ", "
-              + second.type().name() + ")");
-    return first.type_.relop(id)(first.to_data(), second.to_data());
+    // Promote to the larger type
+    data_type m = max(first.type_, second.type_);
+    numeric v1 = cast(first, m);
+    numeric v2 = cast(second, m);
+    return m.relop(id)(v1.to_data(), v2.to_data());
   }
 
   friend inline bool operator <(const numeric& first, const numeric& second) {
@@ -139,13 +171,12 @@ class numeric {
 
   static numeric binaryop(binary_op_id id, const numeric& first,
                           const numeric& second) {
-    if (first.type() != second.type())
-      THROW(
-          invalid_operation_exception,
-          "Cannot operate on values of different types: (" + first.type().name()
-              + ", " + second.type().name() + ")");
-    numeric result(first.type());
-    result.type_.binaryop(id)(result.data_, first.to_data(), second.to_data());
+    // Promote to the larger type
+    data_type m = max(first.type_, second.type_);
+    numeric v1 = cast(first, m);
+    numeric v2 = cast(second, m);
+    numeric result(m);
+    m.binaryop(id)(result.data_, v1.to_data(), v2.to_data());
     return result;
   }
 
@@ -211,9 +242,21 @@ class numeric {
     return *this;
   }
 
+  numeric& operator=(uint8_t value) {
+    type_ = UCHAR_TYPE;
+    as<uint8_t>() = value;
+    return *this;
+  }
+
   numeric& operator=(int16_t value) {
     type_ = SHORT_TYPE;
     as<int16_t>() = value;
+    return *this;
+  }
+
+  numeric& operator=(uint16_t value) {
+    type_ = USHORT_TYPE;
+    as<uint16_t>() = value;
     return *this;
   }
 
@@ -223,9 +266,21 @@ class numeric {
     return *this;
   }
 
+  numeric& operator=(uint32_t value) {
+    type_ = UINT_TYPE;
+    as<uint32_t>() = value;
+    return *this;
+  }
+
   numeric& operator=(int64_t value) {
     type_ = LONG_TYPE;
     as<int64_t>() = value;
+    return *this;
+  }
+
+  numeric& operator=(uint64_t value) {
+    type_ = ULONG_TYPE;
+    as<uint64_t>() = value;
     return *this;
   }
 
@@ -265,6 +320,73 @@ class numeric {
   data_type type_;
   uint8_t data_[MAX_SIZE];
 };
+
+// Cast functions for primitive types
+using cast_fn = numeric (*)(const numeric& v);
+
+namespace detail {
+
+template<typename IN, typename OUT>
+struct cast_helper {
+  static numeric cast(const numeric& v) {
+    return numeric(static_cast<OUT>(v.as<IN>()));
+  }
+};
+
+template<typename T>
+struct cast_helper<T, T> {
+  static numeric cast(const numeric& v) {
+    return v;
+  }
+};
+
+template<typename OUT>
+struct cast_helper<void, OUT> {
+  static numeric cast(const numeric& v) {
+    throw invalid_cast_exception("Cannot cast none type to any other type");
+  }
+};
+
+template<typename IN>
+struct cast_helper<IN, void> {
+  static numeric cast(const numeric& v) {
+    throw invalid_cast_exception("Cannot cast any type to none type");
+  }
+};
+
+template<>
+struct cast_helper<void, void> {
+  static numeric cast(const numeric& v) {
+    throw invalid_cast_exception("Cannot cast none type to none type");
+  }
+};
+
+}
+
+template<typename IN, typename OUT>
+numeric type_cast(const numeric& v) {
+  return detail::cast_helper<IN, OUT>::cast(v);
+}
+
+template<typename IN>
+static std::vector<cast_fn> init_type_cast_ops() {
+  return {type_cast<IN, void>, type_cast<IN, bool>, type_cast<IN, int8_t>, type_cast<IN, uint8_t>,
+    type_cast<IN, int16_t>, type_cast<IN, uint16_t>, type_cast<IN, int32_t>,
+    type_cast<IN, uint32_t>, type_cast<IN, int64_t>, type_cast<IN, uint64_t>,
+    type_cast<IN, float>, type_cast<IN, double>};
+}
+
+static std::vector<std::vector<cast_fn>> CAST_OPS = {
+    init_type_cast_ops<void>(), init_type_cast_ops<bool>(), init_type_cast_ops<
+        int8_t>(), init_type_cast_ops<uint8_t>(), init_type_cast_ops<int16_t>(),
+    init_type_cast_ops<uint16_t>(), init_type_cast_ops<int32_t>(),
+    init_type_cast_ops<uint32_t>(), init_type_cast_ops<int64_t>(),
+    init_type_cast_ops<uint64_t>(), init_type_cast_ops<float>(),
+    init_type_cast_ops<double>() };
+
+static numeric cast(const numeric& val, const data_type& type) {
+  return CAST_OPS[val.type().id][type.id](val);
+}
 
 }
 
