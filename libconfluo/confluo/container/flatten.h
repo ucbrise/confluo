@@ -2,6 +2,7 @@
 #define CONFLUO_CONTAINER_FLATTEN_H_
 
 #include <iterator>
+#include <numeric>
 
 // Based on answer from:
 // https://stackoverflow.com/questions/3623082/flattening-iterator
