@@ -502,21 +502,22 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   // Test aggregates
   std::string val1 = client.get_aggregate("agg1", beg, end);
-  ASSERT_TRUE("int(32)" == val1);
+  fprintf(stderr, "Aggregate: %s\n", val1.c_str());
+  ASSERT_TRUE("double(32.000000)" == val1);
   std::string val2 = client.get_aggregate("agg2", beg, end);
-  ASSERT_TRUE("int(36)" == val2);
+  ASSERT_TRUE("double(36.000000)" == val2);
   std::string val3 = client.get_aggregate("agg3", beg, end);
-  ASSERT_TRUE("int(12)" == val3);
+  ASSERT_TRUE("double(12.000000)" == val3);
   std::string val4 = client.get_aggregate("agg4", beg, end);
-  ASSERT_TRUE("int(0)" == val4);
+  ASSERT_TRUE("double(0.000000)" == val4);
   std::string val5 = client.get_aggregate("agg5", beg, end);
-  ASSERT_TRUE("int(12)" == val5);
+  ASSERT_TRUE("double(12.000000)" == val5);
   std::string val6 = client.get_aggregate("agg6", beg, end);
-  ASSERT_TRUE("int(54)" == val6);
+  ASSERT_TRUE("double(54.000000)" == val6);
   std::string val7 = client.get_aggregate("agg7", beg, end);
-  ASSERT_TRUE("int(20)" == val7);
+  ASSERT_TRUE("double(20.000000)" == val7);
   std::string val8 = client.get_aggregate("agg8", beg, end);
-  ASSERT_TRUE("int(26)" == val8);
+  ASSERT_TRUE("double(26.000000)" == val8);
 
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated
@@ -825,21 +826,21 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   // Test aggregates
   std::string val1 = client.get_aggregate("agg1", beg, end);
-  ASSERT_TRUE("int(32)" == val1);
+  ASSERT_TRUE("double(32.000000)" == val1);
   std::string val2 = client.get_aggregate("agg2", beg, end);
-  ASSERT_TRUE("int(36)" == val2);
+  ASSERT_TRUE("double(36.000000)" == val2);
   std::string val3 = client.get_aggregate("agg3", beg, end);
-  ASSERT_TRUE("int(12)" == val3);
+  ASSERT_TRUE("double(12.000000)" == val3);
   std::string val4 = client.get_aggregate("agg4", beg, end);
-  ASSERT_TRUE("int(0)" == val4);
+  ASSERT_TRUE("double(0.000000)" == val4);
   std::string val5 = client.get_aggregate("agg5", beg, end);
-  ASSERT_TRUE("int(12)" == val5);
+  ASSERT_TRUE("double(12.000000)" == val5);
   std::string val6 = client.get_aggregate("agg6", beg, end);
-  ASSERT_TRUE("int(54)" == val6);
+  ASSERT_TRUE("double(54.000000)" == val6);
   std::string val7 = client.get_aggregate("agg7", beg, end);
-  ASSERT_TRUE("int(20)" == val7);
+  ASSERT_TRUE("double(20.000000)" == val7);
   std::string val8 = client.get_aggregate("agg8", beg, end);
-  ASSERT_TRUE("int(26)" == val8);
+  ASSERT_TRUE("double(26.000000)" == val8);
 
   // Test triggers
   sleep(1);  // To make sure all triggers have been evaluated

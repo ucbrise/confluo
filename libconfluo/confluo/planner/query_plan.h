@@ -61,8 +61,10 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
                                                                    agg);
     }
 
-    THROW(unsupported_exception,
-          "Aggregating multiple minterms not supported yet");
+    return using_indexes(version).fold_left(agg.zero, [field_idx, agg](const numeric& accum, const record_t& rec) {
+      numeric val(rec[field_idx].value());
+      return agg.seq_op(accum, val);
+    });
   }
 
   // TODO: Add tests
