@@ -292,97 +292,97 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   mlog.append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = mlog.execute_filter("a == true"); !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+  for (auto r = mlog.execute_filter("a == true"); r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("b > 4"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.execute_filter("b > 4"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
+  for (auto r = mlog.execute_filter("c <= 30"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("d == 0"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
+  for (auto r = mlog.execute_filter("d == 0"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
+  for (auto r = mlog.execute_filter("e <= 100"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("e >= 100"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() >= 100);
+  for (auto r = mlog.execute_filter("e >= 100"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() >= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
+  for (auto r = mlog.execute_filter("f > 0.1"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
+  for (auto r = mlog.execute_filter("g < 0.06"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("h == zzz"); r->has_more(); r->advance()) {
     ASSERT_TRUE(
-        r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
+        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("a == true && b > 4"); !r.empty();
-      r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.execute_filter("a == true && b > 4"); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
   for (auto r = mlog.execute_filter("a == true && (b > 4 || c <= 30)");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(3).value().to_data().as<int16_t>() <= 30);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
   for (auto r = mlog.execute_filter("a == true && (b > 4 || f > 0.1)");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(6).value().to_data().as<float>() > 0.1);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -441,8 +441,8 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
   mlog.append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
-      r.tail()) {
+  for (auto r = mlog.query_filter("filter1", beg, end); r->has_more();
+      r->advance()) {
     i++;
   }
 
@@ -532,98 +532,98 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
 
   // Test filters
   size_t i = 0;
-  for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+  for (auto r = mlog.query_filter("filter1", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter2", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.query_filter("filter2", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter3", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
+  for (auto r = mlog.query_filter("filter3", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter4", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
+  for (auto r = mlog.query_filter("filter4", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter5", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
+  for (auto r = mlog.query_filter("filter5", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter6", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
+  for (auto r = mlog.query_filter("filter6", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter7", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
+  for (auto r = mlog.query_filter("filter7", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter8", beg, end); !r.empty(); r =
-      r.tail()) {
+  for (auto r = mlog.query_filter("filter8", beg, end); r->has_more();
+      r->advance()) {
     ASSERT_TRUE(
-        r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
+        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter1", beg, end, "b > 4"); !r.empty(); r =
-      r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.query_filter("filter1", beg, end, "b > 4"); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end, "b > 4 || c <= 30");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(3).value().to_data().as<int16_t>() <= 30);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end, "b > 4 || f > 0.1");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(6).value().to_data().as<float>() > 0.1);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -719,97 +719,97 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
   mlog.append_batch(batch);
 
   size_t i = 0;
-  for (auto r = mlog.execute_filter("a == true"); !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+  for (auto r = mlog.execute_filter("a == true"); r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("b > 4"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.execute_filter("b > 4"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("c <= 30"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
+  for (auto r = mlog.execute_filter("c <= 30"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("d == 0"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
+  for (auto r = mlog.execute_filter("d == 0"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("e <= 100"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
+  for (auto r = mlog.execute_filter("e <= 100"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("e >= 100"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() >= 100);
+  for (auto r = mlog.execute_filter("e >= 100"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() >= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("f > 0.1"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
+  for (auto r = mlog.execute_filter("f > 0.1"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("g < 0.06"); !r.empty(); r = r.tail()) {
-    ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
+  for (auto r = mlog.execute_filter("g < 0.06"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("h == zzz"); !r.empty(); r = r.tail()) {
+  for (auto r = mlog.execute_filter("h == zzz"); r->has_more(); r->advance()) {
     ASSERT_TRUE(
-        r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
+        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("a == true && b > 4"); !r.empty();
-      r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.execute_filter("a == true && b > 4"); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
   for (auto r = mlog.execute_filter("a == true && (b > 4 || c <= 30)");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(3).value().to_data().as<int16_t>() <= 30);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
   for (auto r = mlog.execute_filter("a == true && (b > 4 || f > 0.1)");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(6).value().to_data().as<float>() > 0.1);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -853,98 +853,98 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
 
   // Test filters
   size_t i = 0;
-  for (auto r = mlog.query_filter("filter1", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+  for (auto r = mlog.query_filter("filter1", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter2", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.query_filter("filter2", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter3", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(3).value().to_data().as<int16_t>() <= 30);
+  for (auto r = mlog.query_filter("filter3", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter4", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(4).value().to_data().as<int32_t>() == 0);
+  for (auto r = mlog.query_filter("filter4", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter5", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(5).value().to_data().as<int64_t>() <= 100);
+  for (auto r = mlog.query_filter("filter5", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter6", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(6).value().to_data().as<float>() > 0.1);
+  for (auto r = mlog.query_filter("filter6", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter7", beg, end); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(7).value().to_data().as<double>() < 0.06);
+  for (auto r = mlog.query_filter("filter7", beg, end); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter8", beg, end); !r.empty(); r =
-      r.tail()) {
+  for (auto r = mlog.query_filter("filter8", beg, end); r->has_more();
+      r->advance()) {
     ASSERT_TRUE(
-        r.head().at(8).value().to_data().as<std::string>().substr(0, 3)
+        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
             == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.query_filter("filter1", beg, end, "b > 4"); !r.empty(); r =
-      r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
-    ASSERT_TRUE(r.head().at(2).value().to_data().as<int8_t>() > '4');
+  for (auto r = mlog.query_filter("filter1", beg, end, "b > 4"); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end, "b > 4 || c <= 30");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(3).value().to_data().as<int16_t>() <= 30);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
   for (auto r = mlog.query_filter("filter1", beg, end, "b > 4 || f > 0.1");
-      !r.empty(); r = r.tail()) {
-    ASSERT_EQ(true, r.head().at(1).value().to_data().as<bool>());
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r.head().at(2).value().to_data().as<int8_t>() > '4'
-            || r.head().at(6).value().to_data().as<float>() > 0.1);
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);

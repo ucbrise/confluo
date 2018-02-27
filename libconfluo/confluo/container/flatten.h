@@ -18,6 +18,8 @@ class flattened_iterator {
   typedef typename inner_iterator::pointer pointer;
   typedef typename inner_iterator::reference reference;
 
+  flattened_iterator() = default;
+
   flattened_iterator(const outer_iterator& it)
       : outer_(it),
         outer_end_(it) {
@@ -91,6 +93,7 @@ class flattened_container {
   typedef typename container_t::value_type::value_type value_type;
   typedef typename container_t::const_iterator container_iterator;
   typedef flattened_iterator<container_iterator> iterator;
+  typedef flattened_iterator<container_iterator> const_iterator;
 
   flattened_container(const container_t& container)
       : begin_(container.begin()),

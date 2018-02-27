@@ -6,6 +6,7 @@
 #include "container/radix_tree.h"
 #include "container/record_offset_range.h"
 #include "schema/schema.h"
+#include "container/cursor/offset_cursors.h"
 
 namespace confluo {
 namespace planner {
@@ -70,139 +71,45 @@ class no_valid_index_op : public query_op {
 
 class full_scan_op : public query_op {
  public:
-  full_scan_op(const data_log* dlog, const schema_t* schema,
-               const compiled_expression& expr)
-      : query_op(query_op_type::D_SCAN_OP),
-        dlog_(dlog),
-        schema_(schema),
-        expr_(expr) {
+  full_scan_op()
+      : query_op(query_op_type::D_SCAN_OP) {
   }
 
   virtual std::string to_string() const override {
-    return "full_scan(" + expr_.to_string() + ")";
+    return "full_scan";
   }
 
   virtual uint64_t cost() const override {
     return UINT64_MAX;
   }
-
-  lazy::stream<record_t> execute(uint64_t version) const {
-    const data_log* d = dlog_;
-    const schema_t* s = schema_;
-    static auto to_record = [d, s](uint64_t offset) -> record_t {
-      ro_data_ptr ptr;
-      d->cptr(offset, ptr);
-      return s->apply(offset, ptr);
-    };
-    auto expr_check = [this](const record_t& r) -> bool {
-      return this->expr_.test(r);
-    };
-    auto r = record_offset_range(version, schema_->record_size());
-    return lazy::container_to_stream(r).map(to_record).filter(expr_check);
-  }
-
-  // TODO: Add tests
-  // TODO: Clean up
-  numeric aggregate(uint64_t version, uint16_t field_idx,
-                    const aggregator& agg) const {
-    auto r = record_offset_range(version, schema_->record_size());
-    numeric accum = agg.zero;
-    for (auto o : r) {
-      if (o < version) {
-        ro_data_ptr ptr;
-        dlog_->cptr(o, ptr);
-        auto rec = schema_->apply(o, ptr);
-        if (expr_.test(rec)) {
-          numeric val(rec[field_idx].value());
-          accum = agg.seq_op(accum, val);
-        }
-      }
-    }
-    return accum;
-  }
-
- private:
-  const data_log* dlog_;
-  const schema_t* schema_;
-  const compiled_expression& expr_;
 };
 
 class index_op : public query_op {
  public:
   typedef std::pair<byte_string, byte_string> key_range;
 
-  index_op(const data_log* dlog, const index::radix_index* index,
-           const schema_t* schema, const key_range& range,
-           const compiled_minterm& m)
+  index_op(const index::radix_index* index, const key_range& range)
       : query_op(query_op_type::D_INDEX_OP),
-        dlog_(dlog),
         index_(index),
-        schema_(schema),
         range_(range) {
-    expr_.insert(m);
   }
 
   virtual std::string to_string() const override {
     return "range(" + range_.first.to_string() + "," + range_.second.to_string()
-        + ")" + " on index=" + index_->to_string() + " + filter("
-        + expr_.to_string() + ")";
+        + ")" + " on index=" + index_->to_string();
   }
 
   virtual uint64_t cost() const override {
     return index_->approx_count(range_.first, range_.second);
   }
 
-  lazy::stream<record_t> execute(uint64_t version) const {
-    const data_log* d = dlog_;
-    const schema_t* s = schema_;
-    compiled_expression e = expr_;
-
-    auto version_check = [version](uint64_t offset) -> bool {
-      return offset < version;
-    };
-
-    auto to_record = [d, s](uint64_t offset) -> record_t {
-      ro_data_ptr ptr;
-      d->cptr(offset, ptr);
-      return s->apply(offset, ptr);
-    };
-
-    auto expr_check = [e](const record_t& r) -> bool {
-      return e.test(r);
-    };
-
-    auto r = index_->range_lookup(range_.first, range_.second);
-    return lazy::container_to_stream(r).filter(version_check).map(to_record)
-        .filter(expr_check);
-  }
-
-  // TODO: Add tests
-  // TODO: Clean up
-  numeric aggregate(uint64_t version, uint16_t field_idx,
-                    const aggregator& agg) const {
-    auto r = index_->range_lookup(range_.first, range_.second);
-
-    numeric accum = agg.zero;
-    for (auto o : r) {
-      if (o < version) {
-        ro_data_ptr ptr;
-        dlog_->cptr(o, ptr);
-        auto rec = schema_->apply(o, ptr);
-        if (expr_.test(rec)) {
-          numeric val(rec[field_idx].value());
-          accum = agg.seq_op(accum, val);
-        }
-      }
-    }
-    return accum;
+  index::radix_index::rt_result query_index() {
+    return index_->range_lookup(range_.first, range_.second);
   }
 
  private:
-  const data_log* dlog_;
   const index::radix_index* index_;
-  const schema_t* schema_;
   key_range range_;
-  compiled_expression expr_;
 };
 
 }

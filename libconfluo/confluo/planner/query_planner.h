@@ -29,7 +29,7 @@ class query_planner {
   }
 
   query_plan plan(const compiled_expression& expr) const {
-    query_plan qp;
+    query_plan qp(dlog_, schema_, expr);
     for (const compiled_minterm& m : expr) {
       std::shared_ptr<query_op> op = optimize_minterm(m);
       switch (op->op_type()) {
@@ -37,7 +37,7 @@ class query_planner {
           break;
         case query_op_type::D_NO_VALID_INDEX_OP: {
           qp.clear();
-          qp.push_back(std::make_shared<full_scan_op>(dlog_, schema_, expr));
+          qp.push_back(std::make_shared<full_scan_op>());
           return qp;
         }
         case query_op_type::D_INDEX_OP:
@@ -136,8 +136,8 @@ class query_planner {
       }
     }
 
-    return std::make_shared<index_op>(dlog_, idx_list_->at(min_id), schema_,
-                                      m_key_ranges[min_id], m);
+    return std::make_shared<index_op>(idx_list_->at(min_id),
+                                      m_key_ranges[min_id]);
   }
 
   const data_log* dlog_;

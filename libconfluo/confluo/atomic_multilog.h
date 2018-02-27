@@ -16,6 +16,7 @@
 #include "atomic_multilog_metadata.h"
 #include "conf/configuration_params.h"
 #include "container/data_log.h"
+#include "container/cursor/record_cursors.h"
 #include "container/monolog/monolog.h"
 #include "container/radix_tree.h"
 #include "container/string_map.h"
@@ -392,7 +393,7 @@ class atomic_multilog {
    * @param expr The filter expression
    * @return The result of applying the filter to the atomic multilog
    */
-  lazy::stream<record_t> execute_filter(const std::string& expr) const {
+  std::unique_ptr<record_cursor> execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
@@ -420,30 +421,25 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(const std::string& filter_name,
-                                      uint64_t begin_ms,
-                                      uint64_t end_ms) const {
+  std::unique_ptr<record_cursor> query_filter(const std::string& filter_name,
+                                              uint64_t begin_ms,
+                                              uint64_t end_ms) const {
     filter_id_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
       throw invalid_operation_exception(
           "Filter " + filter_name + " does not exist.");
     }
 
-    auto res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
+    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
+                                                                    end_ms);
     uint64_t version = rt_.get();
-    auto version_check = [version](uint64_t offset) -> bool {
-      return offset < version;
-    };
-
-    data_log const* d = &data_log_;
-    schema_t const* s = &schema_;
-    auto to_record = [d, s](uint64_t offset) -> record_t {
-      ro_data_ptr ptr;
-      d->cptr(offset, ptr);
-      return s->apply(offset, ptr);
-    };
-
-    return lazy::container_to_stream(res).filter(version_check).map(to_record);
+    std::unique_ptr<offset_cursor> o_cursor(
+        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
+                                                                   res.end(),
+                                                                   version));
+    return std::unique_ptr<record_cursor>(
+        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_,
+                                 parser::compiled_expression()));
   }
 
   /**
@@ -454,15 +450,26 @@ class atomic_multilog {
    * @param additional_filter_expr Additional filter expression
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(
+  std::unique_ptr<record_cursor> query_filter(
       const std::string& filter_name, uint64_t begin_ms, uint64_t end_ms,
       const std::string& additional_filter_expr) const {
     auto t = parser::parse_expression(additional_filter_expr);
     auto e = parser::compile_expression(t, schema_);
-    auto expr_check = [e](const record_t& r) -> bool {
-      return e.test(r);
-    };
-    return query_filter(filter_name, begin_ms, end_ms).filter(expr_check);
+    filter_id_t filter_id;
+    if (filter_map_.get(filter_name, filter_id) == -1) {
+      throw invalid_operation_exception(
+          "Filter " + filter_name + " does not exist.");
+    }
+
+    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
+                                                                    end_ms);
+    uint64_t version = rt_.get();
+    std::unique_ptr<offset_cursor> o_cursor(
+        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
+                                                                   res.end(),
+                                                                   version));
+    return std::unique_ptr<record_cursor>(
+        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_, e));
   }
 
   /**
