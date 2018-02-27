@@ -22,16 +22,10 @@ class BatchedCursorTest : public testing::Test {
 
     virtual size_t load_next_batch() override {
       size_t i = 0;
-      for (; i < current_batch_.size() && cur_ != end_; ++i) {
-        fprintf(stderr, "Loading %d at pos %zu\n", *cur_, i);
+      for (; i < current_batch_.size() && cur_ != end_; ++i, ++cur_) {
         current_batch_[i] = *cur_;
-        ++cur_;
       }
       return i;
-    }
-
-    virtual bool has_next_batch() override {
-      return cur_ != end_;
     }
 
    private:

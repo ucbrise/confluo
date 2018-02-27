@@ -66,7 +66,7 @@ class batched_cursor {
    * @return True if the cursor has more elements, false otherwise
    */
   bool has_more() {
-    return current_batch_pos_ < current_batch_size_ || has_next_batch();
+    return current_batch_pos_ < current_batch_size_;
   }
 
  protected:
@@ -76,13 +76,6 @@ class batched_cursor {
    * @return The size of the loaded batch.
    */
   virtual size_t load_next_batch() = 0;
-
-  /**
-   * Checks if the cursor can load another batch of elements.
-   *
-   * @return True if cursor can load another batch of elements, false otherwise
-   */
-  virtual bool has_next_batch() = 0;
 
   /** Current position in batch **/
   size_t current_batch_pos_;
