@@ -44,8 +44,7 @@ class encoder {
   static data_ptr encode(void* ptr, size_t size, uint8_t encoding) {
     switch (encoding) {
       case encoding_type::D_UNENCODED: {
-        size_t encoded_size = storage::ptr_metadata::get(ptr)->data_size_;
-        return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), encoded_size);
+        return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), size);
       }
       default : {
         THROW(illegal_state_exception, "Invalid encoding type!");

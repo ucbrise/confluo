@@ -16,6 +16,8 @@
 namespace confluo {
 namespace archival {
 
+using namespace storage;
+
 class filter_archiver {
 
  public:
@@ -102,7 +104,7 @@ class filter_archiver {
   void archive_bucket(byte_string key, reflog& refs, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
-    auto encoded_bucket = encoder::encode(bucket, bucket_size,
+    auto encoded_bucket = encoder::encode(bucket, bucket_size * sizeof(uint64_t),
                                           archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
 
@@ -126,10 +128,11 @@ class filter_archiver {
    */
   void archive_reflog_aggregates(byte_string key, aggregated_reflog& reflog, size_t version) {
     size_t num_aggs = reflog.num_aggregates();
-    auto metadata = filter_aggregates_archival_metadata(key, version, num_aggs);
-    filter_aggregates_archival_metadata::append(metadata, aggs_writer_);
 
     if (num_aggs > 0) {
+      auto metadata = filter_aggregates_archival_metadata(key, version, num_aggs);
+      filter_aggregates_archival_metadata::append(metadata, aggs_writer_);
+
       size_t alloc_size = sizeof(aggregate) * num_aggs;
       ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
       aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, aux));
@@ -141,8 +144,8 @@ class filter_archiver {
         archived_aggs[i].update(0, collapsed_aggregate, version);
       }
       reflog.swap_aggregates(archived_aggs);
+      aggs_writer_.commit(filter_aggregates_archival_action(key).to_string());
     }
-    aggs_writer_.commit(filter_aggregates_archival_action(key).to_string());
   }
 
  private:
@@ -206,19 +209,17 @@ class filter_load_utils {
      cur_key = archival_metadata.ts_block();
      size_t num_aggs = archival_metadata.num_aggregates();
 
-     if (num_aggs > 0) {
-       size_t size = sizeof(aggregate) * num_aggs;
-       ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
-       aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(size, aux));
-       for (size_t i = 0; i < num_aggs; i++) {
-         data_type type = reader.read<data_type>();
-         std::string data = reader.read(type.size);
-         numeric agg(type, &data[0]);
-         new (archived_aggs + i) aggregate(agg.type(), D_SUM, 1);
-         archived_aggs[i].update(0, agg, archival_metadata.version());
-       }
-       tree->get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
+     size_t size = sizeof(aggregate) * num_aggs;
+     ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
+     aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(size, aux));
+     for (size_t i = 0; i < num_aggs; i++) {
+       data_type type = reader.read<data_type>();
+       std::string data = reader.read(type.size);
+       numeric agg(type, &data[0]);
+       new (archived_aggs + i) aggregate(agg.type(), D_SUM, 1);
+       archived_aggs[i].update(0, agg, archival_metadata.version());
      }
+     tree->get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
    }
    reader.truncate(reader.tell(), reader.tell_transaction_log());
    auto last = tree->get(cur_key);
