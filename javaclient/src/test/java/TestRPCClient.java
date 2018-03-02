@@ -373,28 +373,28 @@ public class TestRPCClient {
     Assert.assertEquals(3, i);
 
     String val1 = client.getAggregate("agg1", beginMs, endMs);
-    Assert.assertTrue(val1.equals("int(32)"));
+    Assert.assertTrue(val1.equals("double(32.000000)"));
 
     String val2 = client.getAggregate("agg2", beginMs, endMs);
-    Assert.assertTrue(val2.equals("int(36)"));
+    Assert.assertTrue(val2.equals("double(36.000000)"));
 
     String val3 = client.getAggregate("agg3", beginMs, endMs);
-    Assert.assertTrue(val3.equals("int(12)"));
+    Assert.assertTrue(val3.equals("double(12.000000)"));
 
     String val4 = client.getAggregate("agg4", beginMs, endMs);
-    Assert.assertTrue(val4.equals("int(0)"));
+    Assert.assertTrue(val4.equals("double(0.000000)"));
 
     String val5 = client.getAggregate("agg5", beginMs, endMs);
-    Assert.assertTrue(val5.equals("int(12)"));
+    Assert.assertTrue(val5.equals("double(12.000000)"));
 
     String val6 = client.getAggregate("agg6", beginMs, endMs);
-    Assert.assertTrue(val6.equals("int(54)"));
+    Assert.assertTrue(val6.equals("double(54.000000)"));
 
     String val7 = client.getAggregate("agg7", beginMs, endMs);
-    Assert.assertTrue(val7.equals("int(20)"));
+    Assert.assertTrue(val7.equals("double(20.000000)"));
 
     String val8 = client.getAggregate("agg8", beginMs, endMs);
-    Assert.assertTrue(val8.equals("int(26)"));
+    Assert.assertTrue(val8.equals("double(26.000000)"));
 
     client.disconnect();
   }
