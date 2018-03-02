@@ -11,8 +11,13 @@
 namespace confluo {
 namespace parser {
 
+/**
+ * Parsed aggregate attributes
+ */
 struct parsed_aggregate {
+  /** The aggregate */
   std::string agg;
+  /** The field for which the aggregate is computed over */
   std::string field_name;
 };
 
@@ -30,10 +35,19 @@ namespace ascii = boost::spirit::ascii;
 namespace spirit = boost::spirit;
 namespace phx = boost::phoenix;
 
+/**
+ * Aggregate Parser class. Contains operations for parsing aggregates based
+ * on grammar rules.
+ *
+ * @tparam I The type of aggregate
+ */
 template<typename I>
 class aggregate_parser : public qi::grammar<I, ascii::space_type,
     parsed_aggregate()> {
  public:
+  /**
+   * Initializes rules and grammar for aggregate parser
+   */
   aggregate_parser()
       : aggregate_parser::base_type(agg) {
     using qi::alpha;
@@ -53,6 +67,13 @@ class aggregate_parser : public qi::grammar<I, ascii::space_type,
   qi::rule<I, ascii::space_type, std::string()> identifier;
 };
 
+/**
+ * Parses the aggregate from a given string
+ *
+ * @param t The string from which the aggregate is generated from
+ *
+ * @return The parsed aggregate from the string
+ */
 parsed_aggregate parse_aggregate(const std::string& t) {
   using boost::spirit::ascii::space;
   typedef std::string::const_iterator iterator_type;

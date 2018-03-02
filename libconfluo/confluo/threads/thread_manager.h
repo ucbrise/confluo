@@ -12,12 +12,20 @@
 
 namespace confluo {
 
+/**
+ * Information about the thread
+ */
 struct thread_info {
+  /** The identifier of the thread */
   std::thread::id tid;
+  /** Whether the thread is valid */
   atomic::type<bool> valid;
 };
 
-// Not thread safe
+/**
+ * Note: Not thread safe
+ * Manages threads in the system, not thread safe
+ */
 class thread_manager {
  public:
   /**
@@ -68,6 +76,11 @@ class thread_manager {
   }
 
  private:
+  /**
+   * Initializes info for each thread
+   *
+   * @return A pointer to the thread info
+   */
   static thread_info* init_thread_info() {
     thread_info* tinfo = new thread_info[MAX_CONCURRENCY];
     for (int i = 0; i < MAX_CONCURRENCY; i++)
@@ -75,6 +88,11 @@ class thread_manager {
     return tinfo;
   }
 
+  /**
+   * Finds the given thread
+   *
+   * @return The identifier for the thread
+   */
   static int find() {
     auto tid = std::this_thread::get_id();
     for (int i = 0; i < MAX_CONCURRENCY; i++) {
@@ -86,6 +104,11 @@ class thread_manager {
     return -1;
   }
 
+  /**
+   * Sets the thread identifier
+   *
+   * @return Integer representing the index of the thread 
+   */
   static int set() {
     auto tid = std::this_thread::get_id();
     bool expected = false;
@@ -99,15 +122,24 @@ class thread_manager {
     return -2;
   }
 
+  /**
+   * Sets the thread to be invalid
+   *
+   * @param i The index of the thread
+   */
   static void unset(int i) {
     atomic::store(&THREAD_INFO[i].valid, false);
   }
 
+  /** The maximum amount of threads Confluo supports */
   static int MAX_CONCURRENCY;
+  /** The thread info */
   static thread_info* THREAD_INFO;
 };
 
+/** The max concurrecy is specified by the configuration parameters */
 int thread_manager::MAX_CONCURRENCY = configuration_params::MAX_CONCURRENCY;
+/** Initializes the thread information */
 thread_info* thread_manager::THREAD_INFO = thread_manager::init_thread_info();
 
 }

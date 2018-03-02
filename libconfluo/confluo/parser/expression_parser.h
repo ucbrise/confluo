@@ -18,23 +18,43 @@ namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 namespace spirit = boost::spirit;
 
+/**
+ * Encapsulates and or operators
+ */
 enum and_or
   : int {
+    /** And identifier */
     AND = 6,
+  /** Or identifier */
   OR = 7
 };
 
+/**
+ * Tree that handles printing debug output
+ */
 class utree_dbg_print {
  public:
   typedef void result_type;
 
   utree_dbg_print() = default;
 
+  /**
+   * Handles unrecognized type case
+   *
+   * @tparam T The data type
+   * @param T The type of argument passed in
+   */
   template<typename T>
   void operator()(T) const {
     fprintf(stderr, " <!!!Unrecognized type %s!!!> ", typeid(T).name());
   }
 
+  /**
+   * Visits nodes in the range
+   *
+   * @tparam Iterator that contains the nodes in the range
+   * @param range The range of nodes to visit
+   */
   template<typename Iterator>
   void operator()(boost::iterator_range<Iterator> const& range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
@@ -45,6 +65,11 @@ class utree_dbg_print {
     fprintf(stderr, ")");
   }
 
+  /**
+   * Prints the characters in the string
+   *
+   * @param str The string to print the characters from
+   */
   void operator()(spirit::utf8_string_range_type const& str) const {
     typedef spirit::utf8_string_range_type::const_iterator iterator;
     iterator i = str.begin();
@@ -54,6 +79,11 @@ class utree_dbg_print {
     fprintf(stderr, "\" ");
   }
 
+  /**
+   * Prints the corresponding relational operator
+   *
+   * @param op The identifier of the relational operator
+   */
   void operator()(int op) const {
     if (op < 6) {
       reational_op_id id = static_cast<reational_op_id>(op);
@@ -63,46 +93,96 @@ class utree_dbg_print {
     }
   }
 
+  /**
+   * Prints the function
+   *
+   * @param spirit::function_base The function to print
+   */
   void operator()(spirit::function_base const&) const {
     return (*this)("<function>\n");
   }
 };
 
+/**
+ * To operator
+ */
 class utree_to_op {
  public:
   typedef int result_type;
 
   utree_to_op() = default;
 
+  /**
+   * Handles the unrecognized type case for the operator
+   * @tparam T The data type
+   * @throw parse_exception This type is not recognized
+   * @return The result
+   */
   template<typename T>
   result_type operator()(T) const {
     throw parse_exception(std::string("Unrecognized type ") + typeid(T).name());
   }
 
+  /**
+   * Handles the unrecognized type case for the operator when called
+   * on functions
+   * @throw parse_exception This type is not recognized
+   * @return The result
+   */
   result_type operator()(spirit::function_base const&) const {
     throw parse_exception("Functions not supported");
   }
 
+  /**
+   * Returns the op id associated
+   *
+   * @param op The operator identifier
+   *
+   * @return The result which is the operator identifier
+   */
   result_type operator()(int op) const {
     return op;
   }
 };
 
+/**
+ * To string operation
+ */
 class utree_to_string {
  public:
   typedef std::string result_type;
 
   utree_to_string() = default;
 
+  /**
+   * Handles the case for unrecognized types
+   * @tparam T The data type
+   * @param T The type of the argument
+   * @throw parse_exception The type is not recognized
+   * @return The result
+   */
   template<typename T>
   result_type operator()(T) const {
     throw parse_exception(std::string("Unrecognized type ") + typeid(T).name());
   }
 
+  /**
+   * Handles the case for functions passed in
+   * @param spirit::function_base The function passed in
+   * @throw parse_exception Functions are not supported for to string
+   * @return The result
+   */
   result_type operator()(spirit::function_base const&) const {
     throw parse_exception("Functions not supported");
   }
 
+  /**
+   * Iterates through the string and returns the result
+   *
+   * @param str The string iterator that is iterated through
+   *
+   * @return The result of combining all of the values in the iterator
+   */
   result_type operator()(spirit::utf8_string_range_type const& str) const {
     typedef spirit::utf8_string_range_type::const_iterator iterator;
     iterator it = str.begin(), end = str.end();
@@ -115,17 +195,35 @@ class utree_to_string {
   }
 };
 
+/**
+ * Negate operator
+ */
 class utree_negate {
  public:
   typedef spirit::utree result_type;
 
   utree_negate() = default;
 
+  /**
+   * Handles the case for unrecognized types
+   * @tparam T The data type
+   * @param T The type of the argument passed in
+   * @throw parse_exception The type is not recognized
+   * @return The tree
+   */
   template<typename T>
   spirit::utree operator()(T) const {
     throw parse_exception(std::string("Unrecognized type ") + typeid(T).name());
   }
 
+  /**
+   * Visits all of the nodes in the iterator range
+   *
+   * @tparam Iterator The type of node
+   * @param range The range of nodes to visit
+   *
+   * @return The tree with all of the visited nodes in the range
+   */
   template<typename Iterator>
   spirit::utree operator()(boost::iterator_range<Iterator> const& range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
@@ -136,10 +234,24 @@ class utree_negate {
     return ut;
   }
 
+  /**
+   * Gets the string contents from a string range
+   *
+   * @param str The string range to get the contents from
+   *
+   * @return The tree containing the contents from the specified range
+   */
   spirit::utree operator()(spirit::utf8_string_range_type const& str) const {
     return str;
   }
 
+  /**
+   * Gets the tree associated with operator id
+   *
+   * @param op The operator identifier
+   *
+   * @return The tree associated with the operator identifier
+   */
   spirit::utree operator()(int op) const {
     switch (op) {
       case reational_op_id::EQ:
@@ -162,21 +274,48 @@ class utree_negate {
     return spirit::utree::invalid_type();
   }
 
+
+  /**
+   * Handles the case when functinos are passed in
+   * @param spirit::function_base The function passed in the argument
+   * @throw parse_exception Functions are not supported for this operator
+   * @return The tree
+   */
   spirit::utree operator()(spirit::function_base const&) const {
     throw parse_exception("Function is not supported yet");
   }
 };
 
+/**
+ * All of the components that make up an expression
+ */
 struct expr {
+  /**
+   * The result of an expression
+   *
+   * @tparam T1 The first type
+   * @tparam T2 The second type
+   */
   template<typename T1, typename T2 = void>
   struct result {
     using type = void;
   };
 
+  /**
+   * Constructs an expression from an operator id
+   *
+   * @param op The operator identifier
+   */
   expr(int op)
       : op(op) {
   }
 
+  /**
+   * Initializes the tree to the components of the expression
+   *
+   * @param t The tree to initialize
+   * @param rhs The right hand side of the expression
+   */
   void operator()(spirit::utree& t, spirit::utree const& rhs) const {
     spirit::utree lhs;
     lhs.swap(t);
@@ -185,19 +324,40 @@ struct expr {
     t.push_back(rhs);
   }
 
+  /** The operator in the expression */
   int const op;
 };
 
+/**
+ * Components that make up a predicate
+ */
 struct pred {
-  template<typename T1, typename T2 = void>
+ /**
+  * The result of a predicate
+  *
+  * @tparam T1 The first type
+  * @tparam T2 The second type
+  */
+ template<typename T1, typename T2 = void>
   struct result {
     using type = void;
   };
 
+  /**
+   * Constructs an empty predicate and initializes the operator
+   *
+   * @param op The operator id
+   */
   pred(const int op)
       : op(op) {
   }
 
+  /**
+   * Initializes the tree to the components of the predicate
+   *
+   * @param t The tree to initialize
+   * @param rhs The right hand side of the predicate
+   */
   void operator()(spirit::utree& t, spirit::utree const& rhs) const {
     spirit::utree lhs;
     lhs.swap(t);
@@ -206,6 +366,7 @@ struct pred {
     t.push_back(rhs);
   }
 
+  /** The operator associated with the predicate */
   int const op;
 };
 
@@ -219,12 +380,21 @@ boost::phoenix::function<pred> const NEQ = pred(reational_op_id::NEQ);
 boost::phoenix::function<expr> const CONJ = expr(and_or::AND);
 boost::phoenix::function<expr> const DISJ = expr(and_or::OR);
 
+/**
+ * Negated expression
+ */
 struct negate_expr {
   template<typename T1, typename T2 = void>
   struct result {
     typedef void type;
   };
 
+  /**
+   * Visits the nodes in the expression tree and negate them
+   *
+   * @param expr The expression to negate
+   * @param rhs The right hand side of the expression
+   */
   void operator()(spirit::utree& expr, spirit::utree const& rhs) const {
     expr.clear();
     expr = spirit::utree::visit(rhs, utree_negate());
@@ -241,8 +411,16 @@ boost::phoenix::function<negate_expr> NEG;
  * <value>::= "alnum*"
  */
 
+/**
+ * Parser of expressions
+ *
+ * @tparam I The type of expression
+ */
 template<typename I>
 struct expression_parser : qi::grammar<I, ascii::space_type, spirit::utree()> {
+  /**
+   * Constructs an expression parser from a grammar
+   */
   expression_parser()
       : expression_parser::base_type(exp) {
     using qi::char_;
@@ -286,6 +464,13 @@ struct expression_parser : qi::grammar<I, ascii::space_type, spirit::utree()> {
   qi::rule<I, ascii::space_type, std::string()> quoted_string;
 };
 
+/**
+ * Parses the expression from a given string
+ *
+ * @param e The string to parse the expression from
+ *
+ * @return The tree representing the contents of the expression
+ */
 static spirit::utree parse_expression(const std::string& e) {
   using boost::spirit::utree;
   using boost::spirit::ascii::space;

@@ -193,6 +193,11 @@ class filter {
                              byte_string(ts_block_end));
   }
 
+  /**
+   * Invalidates the filter expression
+   *
+   * @return True if the filter was succesfully validated, false otherwise
+   */
   bool invalidate() {
     bool expected = true;
     if (atomic::strong::cas(&is_valid_, &expected, false)) {
@@ -201,6 +206,11 @@ class filter {
     return false;
   }
 
+  /**
+   * Gets whether the filter is valid
+   *
+   * @return True if the filter is valid, false otherwise
+   */
   bool is_valid() {
     return atomic::load(&is_valid_);
   }

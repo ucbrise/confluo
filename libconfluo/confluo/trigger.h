@@ -8,6 +8,10 @@
 namespace confluo {
 namespace monitor {
 
+/**
+ * A trigger structure. Contains trigger properties including the
+ * periodicity, name, and aggregate
+ */
 struct trigger {
  public:
   /**
@@ -15,7 +19,7 @@ struct trigger {
    *
    * @param name The name of the trigger
    * @param aggregate_name The name of the aggregate on which the trigger
-   *        is defined
+   * is defined
    * @param op Trigger's relational operator
    * @param threshold Trigger's threshold
    * @param periodicity Trigger's periodicity

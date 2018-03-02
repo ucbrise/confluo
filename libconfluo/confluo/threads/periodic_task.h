@@ -9,6 +9,10 @@
 #include "../../libutils/utils/atomic.h"
 #include "logger.h"
 
+/**
+ * The periodic task class. Contains functionality to start and stop
+ * the specified task.
+ */
 class periodic_task {
  public:
   /**

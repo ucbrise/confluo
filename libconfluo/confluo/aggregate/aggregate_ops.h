@@ -5,8 +5,12 @@
 
 namespace confluo {
 
+/** Function pointer for the aggregation function */
 using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
 
+/**
+ * Encapsulation of an aggregate and zero function
+ */
 struct aggregator {
   std::string name;
   aggregate_fn seq_op;

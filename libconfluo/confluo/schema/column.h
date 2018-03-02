@@ -12,10 +12,13 @@
 
 namespace confluo {
 
+/**
+ * Column class. Contains operations for operating on columns in the schema.
+ */
 class column_t {
  public:
   /**
-   * Default constructor for column_t 
+   * Default constructor for a column
    */
   column_t()
       : idx_(UINT16_MAX),

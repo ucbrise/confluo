@@ -8,9 +8,12 @@
 namespace confluo {
 namespace rpc {
 
+/**
+ * Configuration parameters for the rpc client
+ */
 class rpc_configuration_params {
  public:
-  // Iterator
+  /** Iterator for the batches */
   static size_t ITERATOR_BATCH_SIZE;
 };
 

@@ -18,22 +18,42 @@ static data_type max(const data_type& t1, const data_type& t2) {
 
 class numeric {
  public:
+  /** The maximum size of data a numeric can hold in bytes */
   static const size_t MAX_SIZE = sizeof(uint64_t);
 
+  /**
+   * Constructs a numeric of the none type
+   */
   numeric()
       : type_(NONE_TYPE) {
   }
 
+  /**
+   * Constructs a numeric that contains the given data type and the zero
+   * value of that data type
+   *
+   * @param type The data type of the numeric
+   */
   numeric(data_type type)
       : type_(type) {
     memcpy(data_, type_.zero(), type_.size);
   }
 
+  /**
+   * Constructs a numeric from a boolean value
+   *
+   * @param val The boolean value used to create this numeric
+   */
   numeric(bool val)
       : type_(BOOL_TYPE) {
     as<bool>() = val;
   }
 
+  /**
+   * Constructs a numeric from a character value
+   *
+   * @param val The character value used to create this numeric
+   */
   numeric(int8_t val)
       : type_(CHAR_TYPE) {
     as<int8_t>() = val;
@@ -78,12 +98,24 @@ class numeric {
       : type_(FLOAT_TYPE) {
     as<float>() = val;
   }
-
+ 
+  /**
+   * Constructs a numeric from a double precision floating point value
+   *
+   * @param val The double value used to create this numeric
+   */  
   numeric(double val)
       : type_(DOUBLE_TYPE) {
     as<double>() = val;
   }
 
+  /**
+   * Constructs a numeric from the given data type and data
+   *
+   * @param type The type of data the numeric contains
+   * @param data The data that the numeric contains
+   * @throw invalid_cast_exception
+   */
   numeric(const data_type& type, void* data)
       : type_(type) {
     if (!type_.is_numeric())
@@ -91,6 +123,13 @@ class numeric {
     memcpy(data_, data, type_.size);
   }
 
+  /**
+   * Constructs a numeric from the given immutable value
+   *
+   * @param val The immutable value, which contents are used to intialize
+   * this numeric
+   * @throw invalid_cast_exception
+   */
   numeric(const immutable_value& val)
       : type_(val.type()) {
     if (!type_.is_numeric())
@@ -108,15 +147,34 @@ class numeric {
     return value;
   }
 
+  /**
+   * Converts this numeric to raw immutable data
+   *
+   * @return Immutable raw data containing the data and type of this numeric
+   */
   inline immutable_raw_data to_data() const {
     return immutable_raw_data(data_, type_.size);
   }
 
+  /**
+   * Gets the data type of this numeric
+   *
+   * @return The data type of this numeric
+   */
   data_type const& type() const {
     return type_;
   }
 
   // Relational operators
+  /**
+   * Performs a relational comparison between two numerics
+   *
+   * @param id The unique identifier for the relational operator
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   * @throw invalid_operation_exception
+   * @return True if the relational comparison is true, false otherwise
+   */
   static bool relop(reational_op_id id, const numeric& first,
                     const numeric& second) {
     // Promote to the larger type
@@ -126,49 +184,143 @@ class numeric {
     return m.relop(id)(v1.to_data(), v2.to_data());
   }
 
+  /**
+   * Less than operator
+   *
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   *
+   * @return True if the data in the first numeric is less than the data in
+   * the second numeric, false otherwise
+   */
   friend inline bool operator <(const numeric& first, const numeric& second) {
     return relop(reational_op_id::LT, first, second);
   }
 
+  /**
+   * Less than or equal to operator
+   *
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   *
+   * @return True if the data in the first numeric is less than or equal to
+   * the data in the second numeric
+   */
   friend inline bool operator <=(const numeric& first, const numeric& second) {
     return relop(reational_op_id::LE, first, second);
   }
 
+  /**
+   * Greater than operator
+   *
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   *
+   * @return True if the data in the first numeric is greater than the 
+   * data in the second numeric
+   */
   friend inline bool operator >(const numeric& first, const numeric& second) {
     return relop(reational_op_id::GT, first, second);
   }
 
+  /**
+   * Greater than or equal to operator
+   *
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   *
+   * @return True if the data in the first numeric is greater than or equal
+   * to the data in the second numeric
+   */
   friend inline bool operator >=(const numeric& first, const numeric& second) {
     return relop(reational_op_id::GE, first, second);
   }
 
+  /**
+   * Equality operator
+   *
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   *
+   * @return True if the data in the first numeric is equal
+   * to the data in the second numeric
+   */
   friend inline bool operator ==(const numeric& first, const numeric& second) {
     return relop(reational_op_id::EQ, first, second);
   }
 
+  /**
+   * Not equal operator
+   *
+   * @param first The first numeric in the relational expression
+   * @param second The second numeric in the relational expression
+   *
+   * @return True if the data in the first numeric is not equal
+   * to the data in the second numeric
+   */
   friend inline bool operator !=(const numeric& first, const numeric& second) {
     return relop(reational_op_id::NEQ, first, second);
   }
 
   // Arithmetic operations
+  /**
+   * Performs a unary operation on the given numeric
+   *
+   * @param id The unique identifier for the unary operator
+   * @param n The numeric the unary operator is applied to
+   *
+   * @return The numeric containing the result of the unary operation
+   */
   static inline numeric unaryop(unary_op_id id, const numeric& n) {
     numeric result(n.type());
     result.type_.unaryop(id)(result.data_, n.to_data());
     return result;
   }
 
+  /**
+   * Unary negation operator
+   *
+   * @param n The numeric to be negated
+   *
+   * @return A numeric containing the negated numeric
+   */
   friend inline numeric operator-(const numeric& n) {
     return unaryop(unary_op_id::NEGATIVE, n);
   }
 
+  /**
+   * Unary positive operator
+   *
+   * @param n The numeric the positive unary operator is applied to
+   *
+   * @return A numeric containing the value of the given numeric
+   */
   friend inline numeric operator+(const numeric& n) {
     return unaryop(unary_op_id::POSITIVE, n);
   }
 
+  /**
+   * Bitwise not unary operator
+   *
+   * @param n The numeric the bitwise not unary operator is applied to
+   *
+   * @return A numeric containing the flipped bits of the given numeric
+   * value
+   */
   friend inline numeric operator~(const numeric& n) {
     return unaryop(unary_op_id::BW_NOT, n);
   }
 
+  /**
+   * Performs the binary operation on the expression containing two
+   * numerics
+   *
+   * @param id The unique identifier of the binary operator
+   * @param first The first numeric in the expression
+   * @param second The second numeric in the expression
+   *
+   * @return A numeric containing the result of the binary expression
+   */
   static numeric binaryop(binary_op_id id, const numeric& first,
                           const numeric& second) {
     // Promote to the larger type
@@ -180,48 +332,138 @@ class numeric {
     return result;
   }
 
+  /**
+   * The addition operator
+   *
+   * @param first The first numeric in the expression
+   * @param second The second numeric in the expression
+   *
+   * @return A numeric containing the sum of the values of the numerics
+   */
   friend inline numeric operator+(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::ADD, first, second);
   }
 
+  /**
+   * The subtraction operator
+   *
+   * @param first The first numeric in the expression
+   * @param second The second numeric in the expression
+   *
+   * @return A numeric containing the difference of the values 
+   * of the numerics
+   */
   friend inline numeric operator-(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::SUBTRACT, first, second);
   }
 
+  /**
+   * The multiplication operator
+   *
+   * @param first The first numeric in the expression
+   * @param second The second numeric in the expression
+   *
+   * @return A numeric containing the product of the values 
+   * of the numerics
+   */
   friend inline numeric operator*(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::MULTIPLY, first, second);
   }
 
+  /**
+   * The division operator
+   *
+   * @param first The numeric containing the dividend
+   * @param second The numeric containing the divisor
+   *
+   * @return A numeric containing the quotient of the expression
+   */
   friend inline numeric operator/(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::DIVIDE, first, second);
   }
 
+  /**
+   * The modulo operator
+   *
+   * @param first The numeric containing the dividend
+   * @param second The numeric containing the divisor
+   *
+   * @return A numeric containing the remainder of the expression
+   */
   friend inline numeric operator%(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::MODULO, first, second);
   }
 
+  /**
+   * The bitwise and operator
+   *
+   * @param first The first numeric in the and expression
+   * @param second The second numeric in the and expression
+   *
+   * @return A numeric containing the result of the and expression
+   */
   friend inline numeric operator&(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::BW_AND, first, second);
   }
 
+  /**
+   * The bitwise or operator
+   *
+   * @param first The first numeric in the or expression
+   * @param second The second numeric in the or expression
+   *
+   * @return A numeric containing the result of the or expression
+   */
   friend inline numeric operator|(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::BW_OR, first, second);
   }
 
+  /**
+   * The bitwise xor operator
+   *
+   * @param first The first numeric in the xor expression
+   * @param second The second numeric in the xor expression
+   *
+   * @return A numeric containing the result of the xor expression
+   */
   friend inline numeric operator^(const numeric& first, const numeric& second) {
     return binaryop(binary_op_id::BW_XOR, first, second);
   }
 
+  /**
+   * The bitwise left logical shift operator
+   *
+   * @param first The numeric containing the value that will be shifted
+   * @param second The numeric containing the amount to shift
+   *
+   * @return A numeric containing the result of the left shift expression
+   */
   friend inline numeric operator<<(const numeric& first,
                                    const numeric& second) {
     return binaryop(binary_op_id::BW_LSHIFT, first, second);
   }
 
+  /**
+   * The bitwise right logical shift operator
+   *
+   * @param first The numeric containing the value that will be shifted
+   * @param second The numeric containing the amount to shift
+   *
+   * @return A numeric containing the result of the right shift expression
+   */
   friend inline numeric operator>>(const numeric& first,
                                    const numeric& second) {
     return binaryop(binary_op_id::BW_RSHIFT, first, second);
   }
 
+  /**
+   * Constructs this numeric from the given immutable value
+   *
+   * @param other The immutable value containing the data type and value
+   * that this numeric will contain
+   *
+   * @return This updated numeric
+   */
   numeric& operator=(const immutable_value& other) {
     type_ = other.type();
     if (!type_.is_numeric())
@@ -230,12 +472,26 @@ class numeric {
     return *this;
   }
 
+  /**
+   * Assigns the boolean value to this numeric
+   *
+   * @param value The boolean value that is copied to this numeric's value
+   *
+   * @return This updated numeric
+   */
   numeric& operator=(bool value) {
     type_ = BOOL_TYPE;
     as<bool>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the character value to this numeric
+   *
+   * @param value The character value that is copied to this numeric's value
+   *
+   * @return This updated numeric
+   */
   numeric& operator=(int8_t value) {
     type_ = CHAR_TYPE;
     as<int8_t>() = value;
@@ -290,12 +546,26 @@ class numeric {
     return *this;
   }
 
+  /**
+   * Assigns the double value to this numeric
+   *
+   * @param value The double value that is copied to this numeric's value
+   *
+   * @return This updated numeric
+   */
   numeric& operator=(double value) {
     type_ = DOUBLE_TYPE;
     as<double>() = value;
     return *this;
   }
 
+  /**
+   * Casts the numeric's data to type T
+   *
+   * @tparam T The desired data type
+   *
+   * @return The value of type T
+   */
   template<typename T,
       typename std::enable_if<
           std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type* =
@@ -304,6 +574,13 @@ class numeric {
     return *reinterpret_cast<T*>(data_);
   }
 
+  /**
+   * Casts the numeric's data to type T
+   *
+   * @tparam T The desired data type
+   *
+   * @return The value of type T that is not modifiable
+   */
   template<typename T,
       typename std::enable_if<
           std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type* =
@@ -312,6 +589,11 @@ class numeric {
     return *reinterpret_cast<const T*>(data_);
   }
 
+  /**
+   * Gets a string representation of the numeric
+   *
+   * @return A formatted string containing the type and data of the numeric
+   */
   std::string to_string() const {
     return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
   }
