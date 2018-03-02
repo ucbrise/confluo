@@ -221,7 +221,7 @@ public class RPCClient {
    * @return The RPC record batch builder
    */
   public RPCRecordBatchBuilder getBatchBuilder() {
-    return new RPCRecordBatchBuilder();
+    return new RPCRecordBatchBuilder(curSchema);
   }
 
   /**
