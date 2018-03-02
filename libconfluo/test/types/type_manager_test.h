@@ -138,17 +138,18 @@ TEST_F(TypeManagerTest, FilterTest) {
       record(ip_address(50), ip_address(300), size_type::from_string("1kb")));
 
   size_t i = 0;
-  for (auto r = dtable.execute_filter("a > 0.0.0.3"); !r.empty(); r =
-      r.tail()) {
-    ASSERT_TRUE(r.head().at(1).value().as<ip_address>().get_address() > 33);
+  for (auto r = dtable.execute_filter("a > 0.0.0.3"); r->has_more();
+      r->advance()) {
+    ASSERT_TRUE(r->get().at(1).value().as<ip_address>().get_address() > 33);
     i++;
   }
   ASSERT_EQ(2, i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("c == 1kb"); !r.empty(); r = r.tail()) {
+  for (auto r = dtable.execute_filter("c == 1kb"); r->has_more();
+      r->advance()) {
     ASSERT_TRUE(
-        r.head().at(3).value().as<size_type>().get_bytes()
+        r->get().at(3).value().as<size_type>().get_bytes()
             == static_cast<uint64_t>(1024));
     i++;
   }
@@ -367,7 +368,8 @@ TEST_F(TypeManagerTest, SerializeTest) {
 
   ASSERT_EQ(390, d1.as<int>());
   INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile, immutable_raw_data(&ip, sizeof(ip_address)));
+  addr_type.serialize_op()(outfile,
+                           immutable_raw_data(&ip, sizeof(ip_address)));
   outfile.close();
 
   std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
@@ -393,7 +395,8 @@ TEST_F(TypeManagerTest, DeserializeTest) {
   ASSERT_EQ(-490, d1.as<int>());
 
   INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile, immutable_raw_data(&ip, sizeof(ip_address)));
+  addr_type.serialize_op()(outfile,
+                           immutable_raw_data(&ip, sizeof(ip_address)));
   outfile.close();
 
   std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);

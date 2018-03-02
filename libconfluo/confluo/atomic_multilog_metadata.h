@@ -10,7 +10,6 @@
 #include "io_utils.h"
 #include "schema/schema.h"
 #include "storage/storage.h"
-#include "types/aggregate_types.h"
 
 using namespace utils;
 

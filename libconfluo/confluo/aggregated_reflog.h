@@ -1,8 +1,8 @@
 #ifndef CONFLUO_AGGREGATED_REFLOG_H_
 #define CONFLUO_AGGREGATED_REFLOG_H_
 
-#include "aggregate.h"
-#include "aggregate_info.h"
+#include "aggregate/aggregate.h"
+#include "aggregate/aggregate_info.h"
 #include "container/reflog.h"
 
 namespace confluo {
@@ -27,9 +27,14 @@ class aggregated_reflog : public reflog {
     }
   }
 
-  inline void update_aggregate(int thread_id, size_t aid, const numeric& value,
-                               uint64_t version) {
-    aggregates_[aid].update(thread_id, value, version);
+  inline void seq_update_aggregate(int thread_id, size_t aid,
+                                   const numeric& value, uint64_t version) {
+    aggregates_[aid].seq_update(thread_id, value, version);
+  }
+
+  inline void comb_update_aggregate(int thread_id, size_t aid,
+                                   const numeric& value, uint64_t version) {
+    aggregates_[aid].comb_update(thread_id, value, version);
   }
 
   inline numeric get_aggregate(size_t aid, uint64_t version) const {

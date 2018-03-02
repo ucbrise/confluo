@@ -2,6 +2,7 @@
 #define CONFLUO_CONTAINER_FLATTEN_H_
 
 #include <iterator>
+#include <numeric>
 
 // Based on answer from:
 // https://stackoverflow.com/questions/3623082/flattening-iterator
@@ -16,6 +17,8 @@ class flattened_iterator {
   typedef typename inner_iterator::difference_type difference_type;
   typedef typename inner_iterator::pointer pointer;
   typedef typename inner_iterator::reference reference;
+
+  flattened_iterator() = default;
 
   flattened_iterator(const outer_iterator& it)
       : outer_(it),
@@ -90,6 +93,7 @@ class flattened_container {
   typedef typename container_t::value_type::value_type value_type;
   typedef typename container_t::const_iterator container_iterator;
   typedef flattened_iterator<container_iterator> iterator;
+  typedef flattened_iterator<container_iterator> const_iterator;
 
   flattened_container(const container_t& container)
       : begin_(container.begin()),

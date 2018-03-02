@@ -19,8 +19,8 @@ class timeseries_db : public atomic_multilog {
   void get_range(std::vector<record_t>& out, int64_t ts1, int64_t ts2) {
     std::string expr = "TIMESTAMP >= " + std::to_string(ts1)
         + " && TIMESTAMP <= " + std::to_string(ts2);
-    for (auto r = execute_filter(expr); !r.empty(); r = r.tail()) {
-      out.push_back(r.head());
+    for (auto r = execute_filter(expr); r->has_more(); r->advance()) {
+      out.push_back(r->get());
     }
   }
 
@@ -35,8 +35,8 @@ class timeseries_db : public atomic_multilog {
     std::string exp = "TIMESTAMP " + op + " " + std::to_string(ts);
     auto r = execute_filter(exp);
 
-    if (!r.empty()) {
-      return r.head();
+    if (r->has_more()) {
+      return r->get();
     } else {
       return record_t();
     }

@@ -328,28 +328,28 @@ class test_rpc_client(unittest.TestCase):
             self.assertTrue(i == 3)
             
             val1 = client.get_aggregate("agg1", beg_ms, end_ms)
-            self.assertTrue("int(32)" == val1)
+            self.assertTrue("double(32.000000)" == val1)
             
             val2 = client.get_aggregate("agg2", beg_ms, end_ms)
-            self.assertTrue("int(36)" == val2)
+            self.assertTrue("double(36.000000)" == val2)
             
             val3 = client.get_aggregate("agg3", beg_ms, end_ms)
-            self.assertTrue("int(12)" == val3)
+            self.assertTrue("double(12.000000)" == val3)
             
             val4 = client.get_aggregate("agg4", beg_ms, end_ms)
-            self.assertTrue("int(0)" == val4)
+            self.assertTrue("double(0.000000)" == val4)
             
             val5 = client.get_aggregate("agg5", beg_ms, end_ms)
-            self.assertTrue("int(12)" == val5)
+            self.assertTrue("double(12.000000)" == val5)
             
             val6 = client.get_aggregate("agg6", beg_ms, end_ms)
-            self.assertTrue("int(54)" == val6)
+            self.assertTrue("double(54.000000)" == val6)
             
             val7 = client.get_aggregate("agg7", beg_ms, end_ms)
-            self.assertTrue("int(20)" == val7)
+            self.assertTrue("double(20.000000)" == val7)
             
             val8 = client.get_aggregate("agg8", beg_ms, end_ms)
-            self.assertTrue("int(26)" == val8)
+            self.assertTrue("double(26.000000)" == val8)
             
         except:
             self.stop_server()

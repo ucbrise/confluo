@@ -16,6 +16,8 @@
 #include "atomic_multilog_metadata.h"
 #include "conf/configuration_params.h"
 #include "container/data_log.h"
+#include "container/cursor/record_cursors.h"
+#include "container/cursor/alert_cursor.h"
 #include "container/monolog/monolog.h"
 #include "container/radix_tree.h"
 #include "container/string_map.h"
@@ -392,7 +394,7 @@ class atomic_multilog {
    * @param expr The filter expression
    * @return The result of applying the filter to the atomic multilog
    */
-  lazy::stream<record_t> execute_filter(const std::string& expr) const {
+  std::unique_ptr<record_cursor> execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
@@ -404,7 +406,7 @@ class atomic_multilog {
   numeric execute_aggregate(const std::string& aggregate_expr,
                             const std::string& filter_expr) {
     auto pa = parser::parse_aggregate(aggregate_expr);
-    auto agg = aggregate_type_utils::string_to_agg(pa.agg);
+    aggregator agg = aggregate_manager::get_aggregator(pa.agg);
     uint16_t field_idx = schema_[pa.field_name].idx();
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(filter_expr);
@@ -420,30 +422,25 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(const std::string& filter_name,
-                                      uint64_t begin_ms,
-                                      uint64_t end_ms) const {
+  std::unique_ptr<record_cursor> query_filter(const std::string& filter_name,
+                                              uint64_t begin_ms,
+                                              uint64_t end_ms) const {
     filter_id_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
       throw invalid_operation_exception(
           "Filter " + filter_name + " does not exist.");
     }
 
-    auto res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
+    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
+                                                                    end_ms);
     uint64_t version = rt_.get();
-    auto version_check = [version](uint64_t offset) -> bool {
-      return offset < version;
-    };
-
-    data_log const* d = &data_log_;
-    schema_t const* s = &schema_;
-    auto to_record = [d, s](uint64_t offset) -> record_t {
-      ro_data_ptr ptr;
-      d->cptr(offset, ptr);
-      return s->apply(offset, ptr);
-    };
-
-    return lazy::container_to_stream(res).filter(version_check).map(to_record);
+    std::unique_ptr<offset_cursor> o_cursor(
+        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
+                                                                   res.end(),
+                                                                   version));
+    return std::unique_ptr<record_cursor>(
+        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_,
+                                 parser::compiled_expression()));
   }
 
   /**
@@ -454,15 +451,26 @@ class atomic_multilog {
    * @param additional_filter_expr Additional filter expression
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(
+  std::unique_ptr<record_cursor> query_filter(
       const std::string& filter_name, uint64_t begin_ms, uint64_t end_ms,
       const std::string& additional_filter_expr) const {
     auto t = parser::parse_expression(additional_filter_expr);
     auto e = parser::compile_expression(t, schema_);
-    auto expr_check = [e](const record_t& r) -> bool {
-      return e.test(r);
-    };
-    return query_filter(filter_name, begin_ms, end_ms).filter(expr_check);
+    filter_id_t filter_id;
+    if (filter_map_.get(filter_name, filter_id) == -1) {
+      throw invalid_operation_exception(
+          "Filter " + filter_name + " does not exist.");
+    }
+
+    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
+                                                                    end_ms);
+    uint64_t version = rt_.get();
+    std::unique_ptr<offset_cursor> o_cursor(
+        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
+                                                                   res.end(),
+                                                                   version));
+    return std::unique_ptr<record_cursor>(
+        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_, e));
   }
 
   /**
@@ -489,34 +497,36 @@ class atomic_multilog {
       if ((refs = filters_.at(fid)->lookup(t)) == nullptr)
         continue;
       numeric t_agg = refs->get_aggregate(aid, version);
-      agg = a->agg(agg, t_agg);
+      agg = a->comb_op(agg, t_agg);
     }
     return agg;
   }
 
   /**
-   * Gets the stream of alerts corresponding to a time-range
+   * Obtain a cursor over alerts in a time-range
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
-   * @return Stream of alerts in the time range
+   * @return Cursor over alerts in the time range
    */
-  lazy::stream<alert> get_alerts(uint64_t begin_ms, uint64_t end_ms) const {
-    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms));
+  std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms,
+                                           uint64_t end_ms) const {
+    return get_alerts(begin_ms, end_ms, "");
+
   }
 
   /**
-   * Gets the stream of alerts corresponding to given trigger in a time-range
+   * Obtain a cursor over alerts on a given trigger in a time-range
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
    * @param trigger_name Name of the trigger.
-   * @return Stream of alerts in the time range
+   * @return Cursor over alerts in the time range
    */
-  lazy::stream<alert> get_alerts(uint64_t begin_ms, uint64_t end_ms,
-                                 const std::string& trigger_name) const {
-    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms))
-        .filter([trigger_name](const alert& a) {
-      return a.trigger_name == trigger_name;
-    });
+  std::unique_ptr<alert_cursor> get_alerts(
+      uint64_t begin_ms, uint64_t end_ms,
+      const std::string& trigger_name) const {
+    return std::unique_ptr<alert_cursor>(
+        new trigger_alert_cursor(alerts_.get_alerts(begin_ms, end_ms),
+                                 trigger_name));
   }
 
   /**
@@ -689,8 +699,7 @@ class atomic_multilog {
     auto pa = parser::parse_aggregate(expr);
     const column_t& col = schema_[pa.field_name];
     aggregate_info *a = new aggregate_info(
-        name, aggregate_type_utils::string_to_agg(pa.agg), col.type(),
-        col.idx());
+        name, aggregate_manager::get_aggregator(pa.agg), col.idx());
     aggregate_id.aggregate_idx = filters_.at(filter_id)->add_aggregate(a);
     if (aggregate_map_.put(name, aggregate_id) == -1) {
       ex = management_exception(

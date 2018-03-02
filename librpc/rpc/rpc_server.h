@@ -32,10 +32,18 @@ namespace rpc {
 
 class rpc_service_handler : virtual public rpc_serviceIf {
  public:
-  typedef std::map<rpc_iterator_id, lazy::stream<record_t>> adhoc_map;
-  typedef std::map<rpc_iterator_id, lazy::stream<record_t>> predef_map;
-  typedef std::map<rpc_iterator_id, lazy::stream<record_t>> combined_map;
-  typedef std::map<rpc_iterator_id, lazy::stream<alert>> alerts_map;
+  typedef std::map<rpc_iterator_id, std::unique_ptr<record_cursor>> adhoc_map;
+  typedef std::pair<rpc_iterator_id, std::unique_ptr<record_cursor>> adhoc_entry;
+  typedef std::pair<adhoc_map::iterator, bool> adhoc_status;
+  typedef std::map<rpc_iterator_id, std::unique_ptr<record_cursor>> predef_map;
+  typedef std::pair<rpc_iterator_id, std::unique_ptr<record_cursor>> predef_entry;
+  typedef std::pair<predef_map::iterator, bool> predef_status;
+  typedef std::map<rpc_iterator_id, std::unique_ptr<record_cursor>> combined_map;
+  typedef std::pair<rpc_iterator_id, std::unique_ptr<record_cursor>> combined_entry;
+  typedef std::pair<combined_map::iterator, bool> combined_status;
+  typedef std::map<rpc_iterator_id, std::unique_ptr<alert_cursor>> alerts_map;
+  typedef std::pair<rpc_iterator_id, std::unique_ptr<alert_cursor>> alerts_entry;
+  typedef std::pair<alerts_map::iterator, bool> alerts_status;
 
   rpc_service_handler(confluo_store* store)
       : handler_id_(-1),
@@ -241,8 +249,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     rpc_iterator_id it_id = new_iterator_id();
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     try {
-      auto res = mlog->execute_filter(filter_expr);
-      auto ret = adhoc_.insert(std::make_pair(it_id, res));
+      adhoc_entry entry(it_id, mlog->execute_filter(filter_expr));
+      adhoc_status ret = adhoc_.insert(std::move(entry));
       success = ret.second;
     } catch (parse_exception& ex) {
       rpc_invalid_operation e;
@@ -264,8 +272,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
-    auto res = mlog->query_filter(filter_name, begin_ms, end_ms);
-    auto ret = predef_.insert(std::make_pair(it_id, res));
+    predef_entry entry(it_id, mlog->query_filter(filter_name, begin_ms, end_ms));
+    predef_status ret = predef_.insert(std::move(entry));
     if (!ret.second) {
       rpc_invalid_operation e;
       e.msg = "Duplicate rpc_iterator_id assigned";
@@ -283,8 +291,9 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     rpc_iterator_id it_id = new_iterator_id();
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     try {
-      auto res = mlog->query_filter(filter_name, begin_ms, end_ms, filter_expr);
-      auto ret = combined_.insert(std::make_pair(it_id, res));
+      combined_entry entry(it_id, mlog->query_filter(filter_name,
+          begin_ms, end_ms, filter_expr));
+      combined_status ret = combined_.insert(std::move(entry));
       success = ret.second;
     } catch (parse_exception& ex) {
       rpc_invalid_operation e;
@@ -303,8 +312,9 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void alerts_by_time(rpc_iterator_handle& _return, int64_t id,
       const int64_t begin_ms, const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    auto alerts = store_->get_atomic_multilog(id)->get_alerts(begin_ms, end_ms);
-    auto ret = alerts_.insert(std::make_pair(it_id, alerts));
+    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    alerts_entry entry(it_id, mlog->get_alerts(begin_ms, end_ms));
+    alerts_status ret = alerts_.insert(std::move(entry));
     if (!ret.second) {
       rpc_invalid_operation e;
       e.msg = "Duplicate rpc_iterator_id assigned";
@@ -318,8 +328,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       const std::string& trigger_name, const int64_t begin_ms,
       const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    auto alerts = store_->get_atomic_multilog(id)->get_alerts(begin_ms, end_ms, trigger_name);
-    auto ret = alerts_.insert(std::make_pair(it_id, alerts));
+    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    alerts_entry entry(it_id, mlog->get_alerts(begin_ms, end_ms,
+                                               trigger_name));
+    alerts_status ret = alerts_.insert(std::move(entry));
     if (!ret.second) {
       rpc_invalid_operation e;
       e.msg = "Duplicate rpc_iterator_id assigned";
@@ -329,6 +341,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     alerts_more(_return, it_id);
   }
 
+  // TODO: subscribe to alerts
   void get_more(rpc_iterator_handle& _return, int64_t id,
       const rpc_iterator_descriptor& desc) {
     if (desc.handler_id != handler_id_) {
@@ -359,10 +372,6 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
-  // TODO: get alerts by time and trigger name
-  // TODO: subscribe to alerts
-  // TODO: active alerts
-
   int64_t num_records(int64_t id) {
     return store_->get_atomic_multilog(id)->num_records();
   }
@@ -386,12 +395,12 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
-        record_t rec = res.head();
+      for (; res->has_more() && i < to_read; ++i, res->advance()) {
+        record_t rec = res->get();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
       _return.num_entries = i;
-      _return.has_more = !res.empty();
+      _return.has_more = res->has_more();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
@@ -413,12 +422,12 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
-        record_t rec = res.head();
+      for (; res->has_more() && i < to_read; ++i, res->advance()) {
+        record_t rec = res->get();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
       _return.num_entries = i;
-      _return.has_more = !res.empty();
+      _return.has_more = res->has_more();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
@@ -440,12 +449,12 @@ private:
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
-      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
-        record_t rec = res.head();
+      for (; res->has_more() && i < to_read; ++i, res->advance()) {
+        record_t rec = res->get();
         _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
       }
       _return.num_entries = i;
-      _return.has_more = !res.empty();
+      _return.has_more = res->has_more();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
@@ -465,13 +474,13 @@ private:
       auto& res = alerts_.at(it_id);
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       size_t i = 0;
-      for (; !res.empty() && i < to_read; ++i, res = res.tail()) {
-        alert a = res.head();
+      for (; res->has_more() && i < to_read; ++i, res->advance()) {
+        alert a = res->get();
         _return.data.append(a.to_string());
         _return.data.push_back('\n');
       }
       _return.num_entries = i;
-      _return.has_more = !res.empty();
+      _return.has_more = res->has_more();
     } catch (std::out_of_range& ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
