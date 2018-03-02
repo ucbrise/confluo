@@ -309,6 +309,28 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     return val;
   }
 
+  T decode_index(size_t src_index) {
+    return get(src_index);
+  }
+
+  void decode_partial(T* buffer, size_t src_index, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+      buffer[i] = get(src_index + i);
+    }
+  }
+
+  void decode_full(T* buffer, size_t source_size) {
+    for (size_t i = 0; i < source_size; i++) {
+      buffer[i] = get(i);
+    }
+  }
+      
+  void decode_ptr_index(T* buffer, size_t src_index, size_t source_size) {
+    for (size_t i = 0; i < source_size - src_index; i++) {
+      buffer[i] = get(i + src_index);
+    }
+  }
+
   /**
    * Accesses the array at the specified index
    * @param i The index
