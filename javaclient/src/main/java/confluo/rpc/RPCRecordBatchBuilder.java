@@ -36,7 +36,7 @@ public class RPCRecordBatchBuilder {
     ts = record.getLong();
     timeBlock = (int) (ts / TIME_BLOCK);
 
-    batch.get_blocks().get(timeBlock).set_data(record);
+    batch.getBlocks().get(timeBlock).setData(record);
     numRecords += 1;
 
   }
@@ -48,10 +48,10 @@ public class RPCRecordBatchBuilder {
    */
   public rpc_record_batch getBatch() {
     batch = new rpc_record_batch(new ArrayList<rpc_record_block>(), numRecords);
-    for (long time_block = 0; time_block < batch.get_blocks().size(); time_block++) {
-      ByteBuffer data = batch.get_blocks().get((int) time_block).buffer_for_data();
-      numRecords = batch.get_blocks().get((int) time_block).get_nrecords();
-      batch.get_blocks().add(new rpc_record_block(time_block, data, numRecords));
+    for (long time_block = 0; time_block < batch.getBlocks().size(); time_block++) {
+      ByteBuffer data = batch.getBlocks().get((int) time_block).bufferForData();
+      numRecords = batch.getBlocks().get((int) time_block).getNrecords();
+      batch.getBlocks().add(new rpc_record_block(time_block, data, numRecords));
     }
     clear();
     return batch;
@@ -62,7 +62,7 @@ public class RPCRecordBatchBuilder {
    */
   public void clear() {
     batch = new rpc_record_batch();
-    batch.get_blocks();
+    batch.getBlocks();
   }
 
 }
