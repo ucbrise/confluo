@@ -32,8 +32,8 @@ public class RPCTypeConversions {
   public static Schema convertToSchema(List<rpc_column> rpcSchema) {
     SchemaBuilder builder = new SchemaBuilder();
     for (rpc_column column : rpcSchema) {
-      rpc_data_type type = rpc_data_type.findByValue(column.get_type_id());
-      builder.addColumn(new DataType(type, column.get_type_size()), column.get_name());
+      rpc_data_type type = rpc_data_type.findByValue(column.getTypeId());
+      builder.addColumn(new DataType(type, column.getTypeSize()), column.getName());
     }
     return new Schema(builder.build());
   }

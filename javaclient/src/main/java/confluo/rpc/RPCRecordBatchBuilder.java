@@ -1,7 +1,11 @@
 package confluo.rpc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A builder for a batch of records
@@ -14,17 +18,15 @@ public class RPCRecordBatchBuilder {
   static double TIME_BLOCK = 1e6;
 
   private long numRecords;
-  private long ts;
-  private int timeBlock;
-  private rpc_record_batch batch;
-  private ByteBuffer data;
+  private TreeMap<Long, ByteArrayOutputStream> batch;
+  private Schema schema;
 
   /**
    * Initializes an empty rpc record batch builder
    */
-  public RPCRecordBatchBuilder() {
-    numRecords = 0;
-    clear();
+  public RPCRecordBatchBuilder(Schema schema) {
+    this.numRecords = 0;
+    this.schema = schema;
   }
 
   /**
@@ -32,11 +34,13 @@ public class RPCRecordBatchBuilder {
    *
    * @param record The record to add to the batch builder
    */
-  public void addRecord(ByteBuffer record) {
-    ts = record.getLong();
-    timeBlock = (int) (ts / TIME_BLOCK);
-
-    batch.getBlocks().get(timeBlock).setData(record);
+  public void addRecord(ByteBuffer record) throws IOException {
+    long ts = record.getLong();
+    long timeBlock = (int) (ts / TIME_BLOCK);
+    if (!batch.containsKey(timeBlock)) {
+      batch.put(timeBlock, new ByteArrayOutputStream());
+    }
+    batch.get(timeBlock).write(record.array());
     numRecords += 1;
 
   }
@@ -46,23 +50,26 @@ public class RPCRecordBatchBuilder {
    *
    * @return The record batch containing the records
    */
-  public rpc_record_batch getBatch() {
-    batch = new rpc_record_batch(new ArrayList<rpc_record_block>(), numRecords);
-    for (long time_block = 0; time_block < batch.getBlocks().size(); time_block++) {
-      ByteBuffer data = batch.getBlocks().get((int) time_block).bufferForData();
-      numRecords = batch.getBlocks().get((int) time_block).getNrecords();
-      batch.getBlocks().add(new rpc_record_block(time_block, data, numRecords));
+  public rpc_record_batch getBatch() throws IOException {
+    rpc_record_batch ret = new rpc_record_batch();
+    ret.setNrecords(batch.size());
+    for (Map.Entry<Long, ByteArrayOutputStream> entry: batch.entrySet()) {
+      long timeBlock = entry.getKey();
+      byte[] data = entry.getValue().toByteArray();
+      entry.getValue().close();
+      long nRecords = data.length / schema.getRecordSize();
+      ret.addToBlocks(new rpc_record_block(timeBlock, ByteBuffer.wrap(data), nRecords));
     }
     clear();
-    return batch;
+    return ret;
   }
 
   /**
    * Clears the record batch builder
    */
   public void clear() {
-    batch = new rpc_record_batch();
-    batch.getBlocks();
+    batch.clear();
+    numRecords = 0;
   }
 
 }
