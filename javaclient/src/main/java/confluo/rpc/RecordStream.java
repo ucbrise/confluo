@@ -41,7 +41,7 @@ public class RecordStream implements Iterable<Record> {
    * @return A record containing the next element in the stream
    */
   private Record next() {
-    byte[] data = handle.get_data();
+    byte[] data = handle.getData();
     ByteBuffer handleData = ByteBuffer.allocate((int) (data.length - curOff));
     handleData.order(ByteOrder.LITTLE_ENDIAN);
     for (int i = (int) curOff; i < data.length; i++) {
@@ -50,9 +50,9 @@ public class RecordStream implements Iterable<Record> {
 
     Record next = schema.apply(0, handleData);
     curOff += schema.getRecordSize();
-    if (curOff == handle.get_data().length && handle.is_has_more()) {
+    if (curOff == handle.getData().length && handle.isHasMore()) {
       try {
-        handle = client.get_more(multilogId, handle.get_desc());
+        handle = client.getMore(multilogId, handle.getDesc());
         curOff = 0;
       } catch (TException e) {
         e.printStackTrace();
@@ -68,7 +68,7 @@ public class RecordStream implements Iterable<Record> {
    * @return True if there are any more records in the stream, false otherwise
    */
   private boolean hasMore() {
-    return index < handle.get_num_entries();
+    return index < handle.getNumEntries();
   }
 
   /**

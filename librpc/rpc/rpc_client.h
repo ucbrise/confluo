@@ -23,8 +23,6 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-using boost::shared_ptr;
-
 namespace confluo {
 namespace rpc {
 
@@ -82,10 +80,10 @@ class rpc_client {
    */
   void connect(const std::string& host, int port) {
     LOG_INFO<<"Connecting to " << host << ":" << port;
-    socket_ = boost::shared_ptr<TSocket>(new TSocket(host, port));
-    transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
-    protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
-    client_ = boost::shared_ptr<thrift_client>(new thrift_client(protocol_));
+    socket_ = std::shared_ptr<TSocket>(new TSocket(host, port));
+    transport_ = std::shared_ptr<TTransport>(new TBufferedTransport(socket_));
+    protocol_ = std::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
+    client_ = std::shared_ptr<thrift_client>(new thrift_client(protocol_));
     transport_->open();
     client_->register_handler();
   }
@@ -881,10 +879,10 @@ protected:
   int64_t cur_multilog_id_;
   schema_t cur_schema_;
 
-  shared_ptr<TSocket> socket_;
-  shared_ptr<TTransport> transport_;
-  shared_ptr<TProtocol> protocol_;
-  shared_ptr<thrift_client> client_;
+  std::shared_ptr<TSocket> socket_;
+  std::shared_ptr<TTransport> transport_;
+  std::shared_ptr<TProtocol> protocol_;
+  std::shared_ptr<thrift_client> client_;
 };
 
 }

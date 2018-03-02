@@ -25,8 +25,6 @@ using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
-using boost::shared_ptr;
-
 namespace confluo {
 namespace rpc {
 
@@ -461,7 +459,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     try {
       combined_entry entry(it_id, mlog->query_filter(filter_name,
-          begin_ms, end_ms, filter_expr));
+              begin_ms, end_ms, filter_expr));
       combined_status ret = combined_.insert(std::move(entry));
       success = ret.second;
     } catch (parse_exception& ex) {
@@ -518,7 +516,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     rpc_iterator_id it_id = new_iterator_id();
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     alerts_entry entry(it_id, mlog->get_alerts(begin_ms, end_ms,
-                                               trigger_name));
+            trigger_name));
     alerts_status ret = alerts_.insert(std::move(entry));
     if (!ret.second) {
       rpc_invalid_operation e;
@@ -714,7 +712,7 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
    * @return An rpc service handler for the confluo store
    */
   virtual rpc_serviceIf* getHandler(const TConnectionInfo& conn_info) {
-    shared_ptr<TSocket> sock = boost::dynamic_pointer_cast<TSocket>(
+    std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
         conn_info.transport);
     LOG_INFO<< "Incoming connection\n"
     << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
@@ -751,18 +749,19 @@ class rpc_server {
    *
    * @return A pointer to the server
    */
-  static shared_ptr<TThreadedServer> create(confluo_store* store,
-                                            const std::string& address,
-                                            int port) {
-    shared_ptr<rpc_clone_factory> clone_factory(new rpc_clone_factory(store));
-    shared_ptr<rpc_serviceProcessorFactory> proc_factory(
+  static std::shared_ptr<TThreadedServer> create(confluo_store* store,
+                                                 const std::string& address,
+                                                 int port) {
+    std::shared_ptr<rpc_clone_factory> clone_factory(
+        new rpc_clone_factory(store));
+    std::shared_ptr<rpc_serviceProcessorFactory> proc_factory(
         new rpc_serviceProcessorFactory(clone_factory));
-    shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
-    shared_ptr<TBufferedTransportFactory> transport_factory(
+    std::shared_ptr<TServerSocket> sock(new TServerSocket(address, port));
+    std::shared_ptr<TBufferedTransportFactory> transport_factory(
         new TBufferedTransportFactory());
-    shared_ptr<TBinaryProtocolFactory> protocol_factory(
+    std::shared_ptr<TBinaryProtocolFactory> protocol_factory(
         new TBinaryProtocolFactory());
-    shared_ptr<TThreadedServer> server(
+    std::shared_ptr<TThreadedServer> server(
         new TThreadedServer(proc_factory, sock, transport_factory,
                             protocol_factory));
     return server;
