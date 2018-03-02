@@ -462,19 +462,15 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
     ASSERT_STREQ(ex.what(), message.c_str());
   }
 
-  auto before_alerts = mlog.get_alerts(beg, end);
-  mlog.remove_trigger("trigger2");
-  sleep(1);
-  auto after_alerts = mlog.get_alerts(beg, end);
-
   size_t first_count = 0;
-  size_t second_count = 0;
-
-  for (auto a = before_alerts; !a.empty(); a = a.tail()) {
+  for (auto a = mlog.get_alerts(beg, end); a->has_more(); a->advance()) {
     first_count++;
   }
 
-  for (auto a = after_alerts; !a.empty(); a = a.tail()) {
+  mlog.remove_trigger("trigger2");
+  sleep(1);
+  size_t second_count = 0;
+  for (auto a = mlog.get_alerts(beg, end); a->has_more(); a->advance()) {
     second_count++;
   }
 
@@ -650,57 +646,64 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   sleep(1);  // To make sure all triggers have been evaluated
 
   size_t alert_count = 0;
-  for (auto a = mlog.get_alerts(beg, end); !a.empty(); a = a.tail()) {
-    LOG_INFO<< "Alert: " << a.head().to_string();
-    ASSERT_TRUE(a.head().value >= numeric(10));
+  for (auto a = mlog.get_alerts(beg, end); a->has_more(); a->advance()) {
+    LOG_INFO<< "Alert: " << a->get().to_string();
+    ASSERT_TRUE(a->get().value >= numeric(10));
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);
 
   auto a1 = mlog.get_alerts(beg, end, "trigger1");
-  ASSERT_TRUE(!a1.empty());
-  ASSERT_EQ("trigger1", a1.head().trigger_name);
-  ASSERT_TRUE(numeric(32) == a1.head().value);
-  ASSERT_TRUE(a1.tail().empty());
+  ASSERT_TRUE(a1->has_more());
+  ASSERT_EQ("trigger1", a1->get().trigger_name);
+  ASSERT_TRUE(numeric(32) == a1->get().value);
+  a1->advance();
+  ASSERT_TRUE(a1->empty());
 
   auto a2 = mlog.get_alerts(beg, end, "trigger2");
-  ASSERT_TRUE(!a2.empty());
-  ASSERT_EQ("trigger2", a2.head().trigger_name);
-  ASSERT_TRUE(numeric(36) == a2.head().value);
-  ASSERT_TRUE(a2.tail().empty());
+  ASSERT_TRUE(a2->has_more());
+  ASSERT_EQ("trigger2", a2->get().trigger_name);
+  ASSERT_TRUE(numeric(36) == a2->get().value);
+  a2->advance();
+  ASSERT_TRUE(a2->empty());
 
   auto a3 = mlog.get_alerts(beg, end, "trigger3");
-  ASSERT_TRUE(!a3.empty());
-  ASSERT_EQ("trigger3", a3.head().trigger_name);
-  ASSERT_TRUE(numeric(12) == a3.head().value);
-  ASSERT_TRUE(a3.tail().empty());
+  ASSERT_TRUE(a3->has_more());
+  ASSERT_EQ("trigger3", a3->get().trigger_name);
+  ASSERT_TRUE(numeric(12) == a3->get().value);
+  a3->advance();
+  ASSERT_TRUE(a3->empty());
 
   auto a4 = mlog.get_alerts(beg, end, "trigger4");
-  ASSERT_TRUE(a4.empty());
+  ASSERT_TRUE(a4->empty());
 
   auto a5 = mlog.get_alerts(beg, end, "trigger5");
-  ASSERT_TRUE(!a5.empty());
-  ASSERT_EQ("trigger5", a5.head().trigger_name);
-  ASSERT_TRUE(numeric(12) == a5.head().value);
-  ASSERT_TRUE(a5.tail().empty());
+  ASSERT_TRUE(a5->has_more());
+  ASSERT_EQ("trigger5", a5->get().trigger_name);
+  ASSERT_TRUE(numeric(12) == a5->get().value);
+  a5->advance();
+  ASSERT_TRUE(a5->empty());
 
   auto a6 = mlog.get_alerts(beg, end, "trigger6");
-  ASSERT_TRUE(!a6.empty());
-  ASSERT_EQ("trigger6", a6.head().trigger_name);
-  ASSERT_TRUE(numeric(54) == a6.head().value);
-  ASSERT_TRUE(a6.tail().empty());
+  ASSERT_TRUE(a6->has_more());
+  ASSERT_EQ("trigger6", a6->get().trigger_name);
+  ASSERT_TRUE(numeric(54) == a6->get().value);
+  a6->advance();
+  ASSERT_TRUE(a6->empty());
 
   auto a7 = mlog.get_alerts(beg, end, "trigger7");
-  ASSERT_TRUE(!a7.empty());
-  ASSERT_EQ("trigger7", a7.head().trigger_name);
-  ASSERT_TRUE(numeric(20) == a7.head().value);
-  ASSERT_TRUE(a7.tail().empty());
+  ASSERT_TRUE(a7->has_more());
+  ASSERT_EQ("trigger7", a7->get().trigger_name);
+  ASSERT_TRUE(numeric(20) == a7->get().value);
+  a7->advance();
+  ASSERT_TRUE(a7->empty());
 
   auto a8 = mlog.get_alerts(beg, end, "trigger8");
-  ASSERT_TRUE(!a8.empty());
-  ASSERT_EQ("trigger8", a8.head().trigger_name);
-  ASSERT_TRUE(numeric(26) == a8.head().value);
-  ASSERT_TRUE(a8.tail().empty());
+  ASSERT_TRUE(a8->has_more());
+  ASSERT_EQ("trigger8", a8->get().trigger_name);
+  ASSERT_TRUE(numeric(26) == a8->get().value);
+  a8->advance();
+  ASSERT_TRUE(a8->empty());
 }
 
 TEST_F(AtomicMultilogTest, BatchIndexTest) {
@@ -971,57 +974,64 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   sleep(1);  // To make sure all triggers have been evaluated
 
   size_t alert_count = 0;
-  for (auto a = mlog.get_alerts(beg, end); !a.empty(); a = a.tail()) {
-    LOG_INFO<< "Alert: " << a.head().to_string();
-    ASSERT_TRUE(a.head().value >= numeric(10));
+  for (auto a = mlog.get_alerts(beg, end); a->has_more(); a->advance()) {
+    LOG_INFO<< "Alert: " << a->get().to_string();
+    ASSERT_TRUE(a->get().value >= numeric(10));
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);
 
   auto a1 = mlog.get_alerts(beg, end, "trigger1");
-  ASSERT_TRUE(!a1.empty());
-  ASSERT_EQ("trigger1", a1.head().trigger_name);
-  ASSERT_TRUE(numeric(32) == a1.head().value);
-  ASSERT_TRUE(a1.tail().empty());
+  ASSERT_TRUE(a1->has_more());
+  ASSERT_EQ("trigger1", a1->get().trigger_name);
+  ASSERT_TRUE(numeric(32) == a1->get().value);
+  a1->advance();
+  ASSERT_TRUE(a1->empty());
 
   auto a2 = mlog.get_alerts(beg, end, "trigger2");
-  ASSERT_TRUE(!a2.empty());
-  ASSERT_EQ("trigger2", a2.head().trigger_name);
-  ASSERT_TRUE(numeric(36) == a2.head().value);
-  ASSERT_TRUE(a2.tail().empty());
+  ASSERT_TRUE(a2->has_more());
+  ASSERT_EQ("trigger2", a2->get().trigger_name);
+  ASSERT_TRUE(numeric(36) == a2->get().value);
+  a2->advance();
+  ASSERT_TRUE(a2->empty());
 
   auto a3 = mlog.get_alerts(beg, end, "trigger3");
-  ASSERT_TRUE(!a3.empty());
-  ASSERT_EQ("trigger3", a3.head().trigger_name);
-  ASSERT_TRUE(numeric(12) == a3.head().value);
-  ASSERT_TRUE(a3.tail().empty());
+  ASSERT_TRUE(a3->has_more());
+  ASSERT_EQ("trigger3", a3->get().trigger_name);
+  ASSERT_TRUE(numeric(12) == a3->get().value);
+  a3->advance();
+  ASSERT_TRUE(a3->empty());
 
   auto a4 = mlog.get_alerts(beg, end, "trigger4");
-  ASSERT_TRUE(a4.empty());
+  ASSERT_TRUE(a4->empty());
 
   auto a5 = mlog.get_alerts(beg, end, "trigger5");
-  ASSERT_TRUE(!a5.empty());
-  ASSERT_EQ("trigger5", a5.head().trigger_name);
-  ASSERT_TRUE(numeric(12) == a5.head().value);
-  ASSERT_TRUE(a5.tail().empty());
+  ASSERT_TRUE(a5->has_more());
+  ASSERT_EQ("trigger5", a5->get().trigger_name);
+  ASSERT_TRUE(numeric(12) == a5->get().value);
+  a5->advance();
+  ASSERT_TRUE(a5->empty());
 
   auto a6 = mlog.get_alerts(beg, end, "trigger6");
-  ASSERT_TRUE(!a6.empty());
-  ASSERT_EQ("trigger6", a6.head().trigger_name);
-  ASSERT_TRUE(numeric(54) == a6.head().value);
-  ASSERT_TRUE(a6.tail().empty());
+  ASSERT_TRUE(a6->has_more());
+  ASSERT_EQ("trigger6", a6->get().trigger_name);
+  ASSERT_TRUE(numeric(54) == a6->get().value);
+  a6->advance();
+  ASSERT_TRUE(a6->empty());
 
   auto a7 = mlog.get_alerts(beg, end, "trigger7");
-  ASSERT_TRUE(!a7.empty());
-  ASSERT_EQ("trigger7", a7.head().trigger_name);
-  ASSERT_TRUE(numeric(20) == a7.head().value);
-  ASSERT_TRUE(a7.tail().empty());
+  ASSERT_TRUE(a7->has_more());
+  ASSERT_EQ("trigger7", a7->get().trigger_name);
+  ASSERT_TRUE(numeric(20) == a7->get().value);
+  a7->advance();
+  ASSERT_TRUE(a7->empty());
 
   auto a8 = mlog.get_alerts(beg, end, "trigger8");
-  ASSERT_TRUE(!a8.empty());
-  ASSERT_EQ("trigger8", a8.head().trigger_name);
-  ASSERT_TRUE(numeric(26) == a8.head().value);
-  ASSERT_TRUE(a8.tail().empty());
+  ASSERT_TRUE(a8->has_more());
+  ASSERT_EQ("trigger8", a8->get().trigger_name);
+  ASSERT_TRUE(numeric(26) == a8->get().value);
+  a8->advance();
+  ASSERT_TRUE(a8->empty());
 }
 
 #endif /* CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_ */

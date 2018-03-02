@@ -51,7 +51,8 @@ class batched_cursor {
   }
 
   /**
-   * Advance the cursor and load next element.
+   * Advance the cursor and load next element. If the cursor has has no more
+   * elements to load, this operation does nothing.
    */
   void advance() {
     current_batch_pos_++;
@@ -65,8 +66,16 @@ class batched_cursor {
    * Checks if the cursor has more elements.
    * @return True if the cursor has more elements, false otherwise
    */
-  bool has_more() {
+  bool has_more() const {
     return current_batch_pos_ < current_batch_size_;
+  }
+
+  /**
+   * Checks if the cursor is empty.
+   * @return True if the cursor is empty, false otherwise.
+   */
+  bool empty() const {
+    return !has_more();
   }
 
  protected:
