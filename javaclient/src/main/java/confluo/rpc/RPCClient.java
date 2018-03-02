@@ -52,7 +52,7 @@ public class RPCClient {
     TBinaryProtocol protocol = new TBinaryProtocol(transport);
     client = new rpc_service.Client(protocol);
     transport.open();
-    client.register_handler();
+    client.registerHandler();
   }
 
   /**
@@ -62,7 +62,7 @@ public class RPCClient {
    */
   public void disconnect() throws TException {
     if (transport.isOpen()) {
-      client.deregister_handler();
+      client.deregisterHandler();
       transport.close();
     }
   }
@@ -78,7 +78,7 @@ public class RPCClient {
   public void createAtomicMultilog(String atomicMultilogName, Schema schema, rpc_storage_mode storageMode) throws TException {
     this.curSchema = schema;
     List<rpc_column> rpcSchema = RPCTypeConversions.convertToRPCSchema(schema);
-    curMultilogId = client.create_atomic_multilog(atomicMultilogName, rpcSchema, storageMode);
+    curMultilogId = client.createAtomicMultilog(atomicMultilogName, rpcSchema, storageMode);
   }
 
   /**
@@ -88,9 +88,9 @@ public class RPCClient {
    * @throws TException Cannot set the atomic multilog
    */
   public void setCurrentAtomicMultilog(String atomicMultilogName) throws TException {
-    info = client.get_atomic_multilog_info(atomicMultilogName);
-    curSchema = RPCTypeConversions.convertToSchema(info.get_schema());
-    curMultilogId = info.get_id();
+    info = client.getAtomicMultilogInfo(atomicMultilogName);
+    curSchema = RPCTypeConversions.convertToSchema(info.getSchema());
+    curMultilogId = info.getId();
   }
 
   /**
@@ -102,7 +102,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.remove_atomic_multilog(curMultilogId);
+    client.removeAtomicMultilog(curMultilogId);
     curMultilogId = -1;
   }
 
@@ -117,7 +117,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.add_index(curMultilogId, fieldName, bucketSize);
+    client.addIndex(curMultilogId, fieldName, bucketSize);
   }
 
   /**
@@ -130,7 +130,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.remove_index(curMultilogId, fieldName);
+    client.removeIndex(curMultilogId, fieldName);
   }
 
   /**
@@ -144,7 +144,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.add_filter(curMultilogId, filterName, filterExpr);
+    client.addFilter(curMultilogId, filterName, filterExpr);
   }
 
   /**
@@ -157,7 +157,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.remove_filter(curMultilogId, filterName);
+    client.removeFilter(curMultilogId, filterName);
   }
 
   /**
@@ -172,7 +172,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.add_aggregate(curMultilogId, aggregateName, filterName, aggregateExpr);
+    client.addAggregate(curMultilogId, aggregateName, filterName, aggregateExpr);
   }
 
   /**
@@ -185,7 +185,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.remove_aggregate(curMultilogId, aggregateName);
+    client.removeAggregate(curMultilogId, aggregateName);
   }
 
   /**
@@ -199,7 +199,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.add_trigger(curMultilogId, triggerName, triggerExpr);
+    client.addTrigger(curMultilogId, triggerName, triggerExpr);
   }
 
   /**
@@ -212,7 +212,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    client.remove_trigger(curMultilogId, triggerName);
+    client.removeTrigger(curMultilogId, triggerName);
   }
 
   /**
@@ -221,7 +221,7 @@ public class RPCClient {
    * @return The RPC record batch builder
    */
   public RPCRecordBatchBuilder getBatchBuilder() {
-    return new RPCRecordBatchBuilder();
+    return new RPCRecordBatchBuilder(curSchema);
   }
 
   /**
@@ -268,7 +268,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    return client.query_aggregate(curMultilogId, aggregateName, beginMs, endMs);
+    return client.queryAggregate(curMultilogId, aggregateName, beginMs, endMs);
   }
 
   /**
@@ -282,7 +282,7 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    rpc_iterator_handle handle = client.adhoc_filter(curMultilogId, filterExpr);
+    rpc_iterator_handle handle = client.adhocFilter(curMultilogId, filterExpr);
     return new RecordStream(curMultilogId, curSchema, client, handle);
   }
 
@@ -301,10 +301,10 @@ public class RPCClient {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
     if (filterExpr.equals("")) {
-      rpc_iterator_handle handle = client.predef_filter(curMultilogId, filterName, beginMs, endMs);
+      rpc_iterator_handle handle = client.predefFilter(curMultilogId, filterName, beginMs, endMs);
       return new RecordStream(curMultilogId, curSchema, client, handle);
     } else {
-      rpc_iterator_handle handle = client.combined_filter(curMultilogId, filterName, filterExpr, beginMs, endMs);
+      rpc_iterator_handle handle = client.combinedFilter(curMultilogId, filterName, filterExpr, beginMs, endMs);
       return new RecordStream(curMultilogId, curSchema, client, handle);
     }
   }
@@ -323,10 +323,10 @@ public class RPCClient {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
     if (triggerName.equals("")) {
-      rpc_iterator_handle handle = client.alerts_by_time(curMultilogId, beginMs, endMs);
+      rpc_iterator_handle handle = client.alertsByTime(curMultilogId, beginMs, endMs);
       return new AlertStream(curMultilogId, client, handle);
     } else {
-      rpc_iterator_handle handle = client.alerts_by_time(curMultilogId, beginMs, endMs);
+      rpc_iterator_handle handle = client.alertsByTime(curMultilogId, beginMs, endMs);
       return new AlertStream(curMultilogId, client, handle);
     }
   }
@@ -341,6 +341,6 @@ public class RPCClient {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    return client.num_records(curMultilogId);
+    return client.numRecords(curMultilogId);
   }
 }

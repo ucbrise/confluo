@@ -3,8 +3,6 @@
 
 #include "rpc_service.h"
 
-using boost::shared_ptr;
-
 namespace confluo {
 namespace rpc {
 
@@ -25,7 +23,7 @@ class rpc_record_stream {
    * @param handle The r value handle iterator
    */
   rpc_record_stream(int64_t multilog_id, const schema_t& schema,
-                    shared_ptr<thrift_client> client,
+                    std::shared_ptr<thrift_client> client,
                     rpc_iterator_handle&& handle)
       : multilog_id_(multilog_id),
         schema_(schema),
@@ -82,7 +80,7 @@ class rpc_record_stream {
   schema_t schema_;
   rpc_iterator_handle handle_;
   size_t cur_off_;
-  shared_ptr<thrift_client> client_;
+  std::shared_ptr<thrift_client> client_;
 };
 
 }

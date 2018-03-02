@@ -25,7 +25,7 @@ public class AlertStream implements Iterable<String> {
     this.multilogId = multilogId;
     this.client = client;
     this.handle = handle;
-    this.stream = handle.get_data();
+    this.stream = handle.getData();
   }
 
   /**
@@ -54,9 +54,9 @@ public class AlertStream implements Iterable<String> {
     }
 
     stream = newStream;
-    if (!alert.equals("") && handle.is_has_more()) {
-      handle = client.get_more(multilogId, handle.get_desc());
-      stream = handle.get_data();
+    if (!alert.equals("") && handle.isHasMore()) {
+      handle = client.getMore(multilogId, handle.getDesc());
+      stream = handle.getData();
     }
 
     return alert;
@@ -68,7 +68,7 @@ public class AlertStream implements Iterable<String> {
    * @return True if there are any elements left in the stream, false otherwise
    */
   private boolean hasMore() {
-    return handle.is_has_more() || stream != null;
+    return handle.isHasMore() || stream != null;
   }
 
   /**

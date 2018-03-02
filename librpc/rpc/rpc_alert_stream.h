@@ -5,8 +5,6 @@
 
 #include "rpc_service.h"
 
-using boost::shared_ptr;
-
 namespace confluo {
 namespace rpc {
 
@@ -24,7 +22,7 @@ class rpc_alert_stream {
    * @param client The rpc client
    * @param handle The data for the stream
    */
-  rpc_alert_stream(int64_t table_id, shared_ptr<rpc_client> client,
+  rpc_alert_stream(int64_t table_id, std::shared_ptr<rpc_client> client,
                    rpc_iterator_handle&& handle)
       : table_id_(table_id),
         handle_(std::move(handle)),
@@ -82,7 +80,7 @@ class rpc_alert_stream {
   rpc_iterator_handle handle_;
   std::stringstream stream_;
   std::string alert_;
-  shared_ptr<rpc_client> client_;
+  std::shared_ptr<rpc_client> client_;
 };
 
 }
