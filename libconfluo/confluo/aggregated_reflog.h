@@ -53,7 +53,8 @@ class aggregated_reflog : public reflog {
   }
 
   ~aggregated_reflog() {
-    delete aggregates_;
+    if (aggregates_)
+      delete aggregates_;
   }
 
   /**
@@ -94,8 +95,6 @@ class aggregated_reflog : public reflog {
     aggregates_->atomic_load()[aid].comb_update(thread_id, value, version);
   }
 
-  // TODO remove below convenience funcs
-
   void init_aggregates(size_t num_aggregates, aggregate* aggregates) {
     num_aggregates_ = num_aggregates;
     aggregates_ = new storage::swappable_ptr<aggregate>(aggregates);
@@ -111,14 +110,13 @@ class aggregated_reflog : public reflog {
   }
 
   /**
-   * Gets the number of aggregates
+   * Returns aggregates of the reflog.
+   * Note: it is unsafe to modify this data structure.
    *
-   * @return The number of aggregates
+   * @return aggregates
    */
-  inline numeric get_aggregate(size_t aid, uint64_t version) const {
-    storage::read_only_ptr<aggregate> copy;
-    aggregates_->atomic_copy(copy);
-    return copy.get()[aid].get(version);
+  inline storage::swappable_ptr<aggregate>* aggregates() {
+    return aggregates_;
   }
 
   inline size_t num_aggregates() const {

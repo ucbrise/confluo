@@ -96,7 +96,7 @@ class monolog_linear_bucket {
    */
   void flush(size_t offset, size_t len) {
     storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
-    storage::STORAGE_FNS[mode_].flush(static_cast<T*>(enc_ptr.internal_ptr()) + offset, len * sizeof(T));
+    storage::STORAGE_FNS[mode_].flush(static_cast<T*>(enc_ptr.ptr()) + offset, len * sizeof(T));
   }
 
   /**

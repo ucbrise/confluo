@@ -713,7 +713,7 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
 }
 
 TEST_F(AtomicMultilogTest, BatchIndexTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_index("a");
   mlog.add_index("b");
   mlog.add_index("c", 10);

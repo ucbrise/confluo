@@ -34,6 +34,7 @@
 #include "parser/trigger_parser.h"
 #include "planner/query_planner.h"
 #include "read_tail.h"
+#include "schema/column.h"
 #include "schema/record_batch.h"
 #include "schema/schema.h"
 #include "storage/storage.h"

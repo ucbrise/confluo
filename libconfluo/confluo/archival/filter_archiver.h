@@ -1,6 +1,7 @@
 #ifndef CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_
 #define CONFLUO_ARCHIVAL_FILTER_ARCHIVER_H_
 
+#include "aggregate/aggregate_ops.h"
 #include "aggregated_reflog.h"
 #include "archival_actions.h"
 #include "archival_metadata.h"
@@ -140,8 +141,8 @@ class filter_archiver {
         numeric collapsed_aggregate = reflog.get_aggregate(i, version);
         aggs_writer_.append<data_type>(collapsed_aggregate.type());
         aggs_writer_.append<uint8_t>(collapsed_aggregate.data(), collapsed_aggregate.type().size);
-        new (archived_aggs + i) aggregate(collapsed_aggregate.type(), D_SUM, 1);
-        archived_aggs[i].update(0, collapsed_aggregate, version);
+        new (archived_aggs + i) aggregate(collapsed_aggregate.type(), sum_aggregator, 1);
+        archived_aggs[i].seq_update(0, collapsed_aggregate, version);
       }
       reflog.swap_aggregates(archived_aggs);
       aggs_writer_.commit(filter_aggregates_archival_action(key).to_string());
@@ -216,8 +217,8 @@ class filter_load_utils {
        data_type type = reader.read<data_type>();
        std::string data = reader.read(type.size);
        numeric agg(type, &data[0]);
-       new (archived_aggs + i) aggregate(agg.type(), D_SUM, 1);
-       archived_aggs[i].update(0, agg, archival_metadata.version());
+       new (archived_aggs + i) aggregate(agg.type(), sum_aggregator, 1);
+       archived_aggs[i].seq_update(0, agg, archival_metadata.version());
      }
      tree->get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
    }
