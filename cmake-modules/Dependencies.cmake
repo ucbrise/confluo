@@ -51,23 +51,16 @@ endif()
 
 ExternalProject_Add(lz4
         DOWNLOAD_COMMAND git clone https://github.com/Cyan4973/lz4.git
-        #DOWNLOAD_DIR "${CMAKE_BINARY_DR}/lz4"
         CONFIGURE_COMMAND ""
         BUILD_IN_SOURCE 1
         BUILD_COMMAND make -C lib lib MOREFLAGS=-fPIC
         INSTALL_COMMAND ""
 )
     ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
-    #set_target_properties(lz4 PROPERTIES EXCLUDE_FROM_ALL ON)
-    #include_directories(${SOURCE_DIR}/lib/)
-    #add_library(lz4-git STATIC IMPORTED)
     set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
     set( lz4_STATIC_LIB ${BINARY_DIR}/lib/liblz4.a )
-    #set_property(TARGET lz4-git PROPERTY IMPORTED_LOCATION ${CMAKE_BINARY_DR}/lib/liblz4.a)
-    #add_dependencies(lz4-git lz4)
-    #add_dependencies(TARGET lz4-git)
-    #TARGET_LINK_LIBRARIES(TARGET lz4)
     include_directories(SYSTEM ${lz4_INCLUDE_DIR})
+    link_libraries(gtest ${lz4_STATIC_LIB})
     link_libraries(lz4 ${lz4_STATIC_LIB})
 
 if (BUILD_RPC)

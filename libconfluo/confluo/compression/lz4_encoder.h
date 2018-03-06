@@ -1,5 +1,5 @@
-#ifndef CONFLUO_CONTAINER_BITMAP_LZ4_ENCODER_H_
-#define CONFLUO_CONTAINER_BITMAP_LZ4_ENCODER_H_
+#ifndef CONFLUO_COMPRESSION_LZ4_ENCODER_H_
+#define CONFLUO_COMPRESSION_LZ4_ENCODER_H_
 
 #include <cstdint>
 #include <cassert>
@@ -15,14 +15,25 @@
 namespace confluo {
 
 /**
- * Container for compressed blocks. Takes as input a buffer of bytes
+ * A stateless LZ4 encoder. Takes as input a buffer of bytes
  * and number of bytes per block parameter and splits up the input data
  * into separate blocks that are each compressed using LZ4. These 
  * compressed blocks are fed into the decoder for partial or full decoding.
  */
 class lz4_encoder {
  public:
-  static size_t encode(uint8_t* source_buffer, size_t source_length, size_t bytes_per_block, uint8_t* output_buffer) {
+  /**
+   * Encodes the input buffer using LZ4 compression
+   *
+   * @param source_buffer The unecoded buffer to compress
+   * @param source_length The size of the unencoded buffer in bytes
+   * @param bytes_per_block The number of bytes corresponding to one
+   * encoded block
+   * @param output_buffer The output buffer containing the encoded data
+   *
+   * @return The size of the entire encoded buffer in bytes
+   */
+  static size_t encode(uint8_t* source_buffer, size_t source_length, uint8_t* output_buffer, size_t bytes_per_block = 65536) {
 
     size_t output_array_position = 0;
 
@@ -46,7 +57,16 @@ class lz4_encoder {
     return output_block_position;
   }
 
-  static size_t get_buffer_size(size_t source_size, size_t bytes_per_block) {
+  /**
+   * Gets an upper bound on the size of the encoded buffer in bytes
+   *
+   * @param source_size The size of the unencoded buffer in bytes
+   * @param bytes_per_block The number of bytes corresponding to one 
+   * encoded block
+   *
+   * @return An upper bound on the size of the encoded buffer
+   */
+  static size_t get_buffer_size(size_t source_size, size_t bytes_per_block = 65536) {
     int num_blocks = ceil(source_size / bytes_per_block);
     return sizeof(size_t) * num_blocks + LZ4_compressBound(source_size);
   }
@@ -60,4 +80,4 @@ class lz4_encoder {
 
 }
 
-#endif /* CONFLUO_CONTAINER_BITMAP_LZ4_ENCODER_H_ */
+#endif /* CONFLUO_COMPRESSION_LZ4_ENCODER_H_ */
