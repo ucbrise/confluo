@@ -1,7 +1,7 @@
 include (ExternalProject)
 
 set(GTEST_VERSION "1.8.0")
-set(THRIFT_VERSION "0.11.0")
+set(THRIFT_VERSION "0.10.0")
 set(BOOST_VERSION "1.53")
 set(DOXYGEN_VERSION "1.8")
 
@@ -56,12 +56,13 @@ ExternalProject_Add(lz4
         BUILD_COMMAND make -C lib lib MOREFLAGS=-fPIC
         INSTALL_COMMAND ""
 )
-    ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
-    set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
-    set( lz4_STATIC_LIB ${BINARY_DIR}/lib/liblz4.a )
-    include_directories(SYSTEM ${lz4_INCLUDE_DIR})
-    link_libraries(gtest ${lz4_STATIC_LIB})
-    link_libraries(lz4 ${lz4_STATIC_LIB})
+ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
+set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
+set( lz4_STATIC_LIB ${BINARY_DIR}/lib/liblz4.a )
+include_directories(SYSTEM ${lz4_INCLUDE_DIR})
+link_directories(${lz4_INCLUDE_DIR})
+link_libraries(gtest ${lz4_STATIC_LIB})
+link_libraries(lz4 ${lz4_STATIC_LIB})
 
 if (BUILD_RPC)
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
