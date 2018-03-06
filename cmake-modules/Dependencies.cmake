@@ -1,7 +1,7 @@
 include (ExternalProject)
 
 set(GTEST_VERSION "1.8.0")
-set(THRIFT_VERSION "0.10.0")
+set(THRIFT_VERSION "0.11.0")
 set(BOOST_VERSION "1.53")
 set(DOXYGEN_VERSION "1.8")
 
@@ -63,6 +63,7 @@ include_directories(SYSTEM ${lz4_INCLUDE_DIR})
 link_directories(${lz4_INCLUDE_DIR})
 link_libraries(gtest ${lz4_STATIC_LIB})
 link_libraries(lz4 ${lz4_STATIC_LIB})
+
 
 if (BUILD_RPC)
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
