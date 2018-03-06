@@ -26,7 +26,7 @@ TEST_F(DeltaEncodeTest, DecodeFullTest) {
   uint64_t* dest_buffer = new uint64_t[k_array_size];
 
   delta_encoder::encode(array, k_array_size, encode_buffer);
-  delta_decoder::decode_full(encode_buffer, dest_buffer, k_array_size);
+  delta_decoder::decode(encode_buffer, dest_buffer, k_array_size);
 
   for (size_t i = 0; i < k_array_size; i++) {
     ASSERT_EQ(array[i], dest_buffer[i]);
@@ -53,7 +53,7 @@ TEST_F(DeltaEncodeTest, DecodePartialTest) {
   uint64_t* dest_buffer = new uint64_t[buffer_size];
 
   delta_encoder::encode(array, k_array_size, encode_buffer);
-  delta_decoder::decode_partial(encode_buffer, dest_buffer,
+  delta_decoder::decode(encode_buffer, dest_buffer,
           src_index, buffer_size, k_array_size);
 
   for (size_t i = 0; i < buffer_size; i++) {
@@ -83,7 +83,7 @@ TEST_F(DeltaEncodeTest, DecodePtrIndexTest) {
 
 
   delta_encoder::encode(array, k_array_size, encode_buffer);
-  delta_decoder::decode_ptr_index(encode_buffer, src_index, k_array_size,
+  delta_decoder::decode(encode_buffer, src_index, k_array_size,
           dest_buffer);
 
   for (size_t i = 0; i < buffer_size; i++) {
@@ -108,7 +108,7 @@ TEST_F(DeltaEncodeTest, DecodeIndexTest) {
 
   size_t src_index = 250;
   delta_encoder::encode(array, k_array_size, encode_buffer);
-  uint8_t decoded_val = delta_decoder::decode_index(encode_buffer, 
+  uint8_t decoded_val = delta_decoder::decode(encode_buffer, 
           src_index, k_array_size);
 
   ASSERT_EQ(array[src_index], decoded_val);

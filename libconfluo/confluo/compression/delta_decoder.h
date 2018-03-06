@@ -28,7 +28,7 @@ class delta_decoder {
    *
    * @return The decoded byte
    */
-  static uint8_t decode_index(uint8_t* input_buffer, size_t src_index, 
+  static uint8_t decode(uint8_t* input_buffer, size_t src_index, 
           size_t source_size) {
     elias_gamma_encoded_array<uint64_t> enc_array;
     enc_array.from_byte_array(input_buffer);
@@ -44,7 +44,7 @@ class delta_decoder {
    * @param length The number of bytes to decode
    * @param source_size The size of the unencoded buffer
    */
-  static void decode_partial(uint8_t* input_buffer, uint64_t* dest_buffer, 
+  static void decode(uint8_t* input_buffer, uint64_t* dest_buffer, 
           size_t src_index, size_t length, size_t source_size) {
     
     elias_gamma_encoded_array<uint64_t> enc_array;
@@ -62,7 +62,7 @@ class delta_decoder {
    * @param dest_buffer The decoded buffer to contain the decoded data
    * @param source_size The size of the unencoded array
    */
-  static void decode_full(uint8_t* input_buffer, uint64_t* dest_buffer, 
+  static void decode(uint8_t* input_buffer, uint64_t* dest_buffer, 
           size_t source_size) {
     elias_gamma_encoded_array<uint64_t> enc_array;
     enc_array.from_byte_array(input_buffer);
@@ -80,7 +80,7 @@ class delta_decoder {
    * @param source_size The size of the unencoded buffer
    * @param dest_buffer The buffer containing the decoded bytes
    */
-  static void decode_ptr_index(uint8_t* input_buffer, size_t src_index, size_t source_size, uint64_t* dest_buffer) {
+  static void decode(uint8_t* input_buffer, size_t src_index, size_t source_size, uint64_t* dest_buffer) {
     elias_gamma_encoded_array<uint64_t> enc_array;
     enc_array.from_byte_array(input_buffer);
 
