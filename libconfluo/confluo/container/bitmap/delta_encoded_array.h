@@ -413,9 +413,12 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
 
     size_t temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     uint64_t* data_ptr = this->samples_->data();
-   
-    std::memcpy(data_ptr, buffer + array_size, temp_size);
 
+    for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
+      data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer + 
+              array_size + i * sizeof(uint64_t));
+    }
+   
     array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));;
 
     size = *reinterpret_cast<size_t *>(buffer + array_size);
@@ -428,7 +431,10 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     data_ptr = this->deltas_->data();
 
-    std::memcpy(data_ptr, buffer + array_size, temp_size);
+    for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
+      data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer + 
+              array_size + i * sizeof(uint64_t));
+    }
 
     array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));
 
@@ -445,13 +451,10 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     data_ptr = this->delta_offsets_->data();
 
-    /*for (uint64_t i = 0; i < BITS2BLOCKS(size); i++) {
+    for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
       data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer + array_size + 
               i * sizeof(uint64_t));
-      std::cout << (int) data_ptr[i] << std::endl;
-    }*/
-
-    std::memcpy(data_ptr, buffer + array_size, temp_size);
+    }
 
     array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));
 
