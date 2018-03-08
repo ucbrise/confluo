@@ -47,8 +47,10 @@ class aggregated_reflog : public reflog {
         num_aggregates_(aggregates.size()) {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(sizeof(aggregate) * num_aggregates_, aux));
-    for (size_t i = 0; i < num_aggregates_; i++)
+    storage::lifecycle_util<aggregate>::construct(aggs);
+    for (size_t i = 0; i < num_aggregates_; i++) {
       aggs[i] = aggregates.at(i)->create_aggregate();
+    }
     aggregates_ = new storage::swappable_ptr<aggregate>(aggs);
   }
 

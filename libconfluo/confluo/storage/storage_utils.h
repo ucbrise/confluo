@@ -1,6 +1,7 @@
 #ifndef CONFLUO_STORAGE_STORAGE_UTILS_H_
 #define CONFLUO_STORAGE_STORAGE_UTILS_H_
 
+#include <new>
 #include "ptr_metadata.h"
 
 namespace confluo {
@@ -16,7 +17,7 @@ struct lifecycle_util {
     size_t len = ptr_metadata::get(ptr)->data_size_ / sizeof(T);
     T* casted_ptr = reinterpret_cast<T*>(ptr);
     for (size_t i = 0; i < len; i++) {
-      casted_ptr[i] = new (casted_ptr[i]) T();
+      new (casted_ptr + i) T();
     }
   }
 
@@ -30,7 +31,7 @@ struct lifecycle_util {
     size_t len = ptr_metadata::get(ptr)->data_size_ / sizeof(T);
     T* casted_ptr = reinterpret_cast<T*>(ptr);
     for (size_t i = 0; i < len; i++) {
-      casted_ptr->~T();
+      casted_ptr[i].~T();
     }
   }
 };

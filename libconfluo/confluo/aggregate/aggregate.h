@@ -69,7 +69,6 @@ class aggregate_list {
       : head_(nullptr),
         agg_(invalid_aggregator),
         type_(NONE_TYPE) {
-
   }
 
   /**
@@ -86,9 +85,53 @@ class aggregate_list {
   }
 
   /**
+   * Copy constructor that copies all nodes in the list
+   * Note: not thread-safe
+   * @param other other aggregate_list
+   */
+  aggregate_list(const aggregate_list& other)
+      : head_(nullptr),
+        agg_(other.agg_),
+        type_(other.type_) {
+    aggregate_node* other_tail = atomic::load(&other.head_);
+    while (other_tail != nullptr) {
+      aggregate_node* cur_head = atomic::load(&head_);
+      aggregate_node* new_head = new aggregate_node(other_tail->value(), other_tail->version(), cur_head);
+      atomic::store(&head_, new_head);
+      other_tail = other_tail->next();
+    }
+  }
+
+  /**
+   * Assignment operator that copies all nodes in the list
+   * Note: not thread-safe
+   * @param other other aggregate_list
+   */
+  aggregate_list& operator=(const aggregate_list& other) {
+    head_ = nullptr;
+    agg_ = other.agg_;
+    type_ = other.type_;
+    aggregate_node* other_tail = atomic::load(&other.head_);
+    while (other_tail != nullptr) {
+      aggregate_node* cur_head = atomic::load(&head_);
+      aggregate_node* new_head = new aggregate_node(other_tail->value(), other_tail->version(), cur_head);
+      atomic::store(&head_, new_head);
+      other_tail = other_tail->next();
+    }
+    return *this;
+  }
+
+  /**
    * Default destructor.
    */
-  ~aggregate_list() = default;
+  ~aggregate_list() {
+    aggregate_node* cur_node = atomic::load(&head_);
+    while (cur_node != nullptr) {
+      aggregate_node* next = cur_node->next();
+      delete cur_node;
+      cur_node = next;
+    }
+  }
 
   /**
    * Initializes the type and aggregate of the list
@@ -209,13 +252,49 @@ class aggregate {
       aggs_[i].init(type, agg_);
   }
 
-// TODO for some reason this results in a segfault
-// even though the delete is successful. Fix this.
-//    ~aggregate() {
-//      if (aggs_ != nullptr) {
-//        delete[] aggs_;
-//      }
-//    }
+  aggregate(const aggregate& other)
+      : type_(other.type_),
+        agg_(other.agg_),
+        aggs_(new aggregate_list[other.concurrency_]),
+        concurrency_(other.concurrency_) {
+    for (int i = 0; i < other.concurrency_; i++) {
+      aggs_[i] = other.aggs_[i];
+    }
+  }
+
+  aggregate& operator=(const aggregate& other) {
+    type_ = other.type_;
+    agg_ = other.agg_;
+    aggs_ = new aggregate_list[other.concurrency_];
+    concurrency_ = other.concurrency_;
+    for (int i = 0; i < other.concurrency_; i++) {
+      aggs_[i] = other.aggs_[i];
+    }
+    return *this;
+  }
+
+  aggregate(aggregate&& other) {
+    type_ = std::move(other.type_);
+    agg_= std::move(other.agg_);
+    aggs_ = std::move(other.aggs_);
+    concurrency_ = std::move(other.concurrency_);
+    other.aggs_ = nullptr;
+  }
+
+  aggregate& operator=(aggregate&& other) {
+    type_ = std::move(other.type_);
+    agg_= std::move(other.agg_);
+    aggs_ = std::move(other.aggs_);
+    concurrency_ = std::move(other.concurrency_);
+    other.aggs_ = nullptr;
+    return *this;
+  }
+
+  ~aggregate() {
+    if (aggs_ != nullptr) {
+      delete[] aggs_;
+    }
+  }
 
   void seq_update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].seq_update(value, version);
@@ -234,8 +313,6 @@ class aggregate {
    */
   numeric get(uint64_t version) const {
     numeric val = agg_.zero;
-//    for (int i = 0; i < thread_manager::get_max_concurrency(); i++)
-//      val = agg_.comb_op(val, aggs_[i].get(version));
     for (int i = 0; i < concurrency_; i++)
       val = agg_.comb_op(val, aggs_[i].get(version));
     return val;
