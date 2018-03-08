@@ -33,9 +33,13 @@
 #include "schema/schema.h"
 #include "storage/storage.h"
 #include "time_utils.h"
+#include "json_utils.h"
 #include "string_utils.h"
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace ::confluo::monolog;
 using namespace ::confluo::index;
@@ -43,6 +47,7 @@ using namespace ::confluo::monitor;
 using namespace ::confluo::parser;
 using namespace ::confluo::planner;
 using namespace ::utils;
+namespace pt = boost::property_tree;
 
 namespace confluo {
 
@@ -95,6 +100,41 @@ class atomic_multilog {
                   const std::string& path, const storage::storage_mode& mode,
                   task_pool& pool)
       : atomic_multilog(name, parser::parse_schema(schema), path, mode, pool) {
+  }
+
+  /**
+   * Executes an operation based on a json string
+   * @param json_command The json string containing the command
+   * @return a json string containing the return value of the operation
+   */
+  std::string run_command(const std::string& json_command) {
+    pt::ptree tree;
+    utils::json_utils::json_to_ptree(tree, json);
+    std::string command = pt.get<std::string>("command");
+
+    pt::ptree result;
+
+    if ("add_index" == command) {
+      std::string field_name = pt.get<std::string>("params.field_name");
+      double bucket_size = pt.get("params.bucket_size");
+      add_index(field_name, bucket_size);
+    } else if ("remove_index" == command) {
+      std::string field_name = pt.get<std::string>("params.field_name");
+      remove_index(field_name);
+    } else if ("is_indexed" == command) {
+      std::string field_name = pt.get<std::string>("params.field_name");
+      bool indexed = is_indexed(const std::string& field_name);
+      result.put("is_indexed", indexed);
+    } else if ("add_filter" == command) {
+      std::string name = pt.get<std::string>("params.name");
+      std::string expr = pt.get<std::string>("params.expr");
+      add_filter(name, expr);
+    }
+    // and so on
+
+    std::stringstream ss;
+    pt::json_parser::write_json(ss, result);
+    return ss.str();
   }
 
   // Management ops
