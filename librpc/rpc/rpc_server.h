@@ -98,6 +98,20 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
+  void run_command(int64_t id, const std::string& json_command) {
+    try {
+      store_->get_atomic_multilog(id)->run_command(json_command);
+    } catch(management_exception& ex) {
+      rpc_management_exception e;
+      e.msg = ex.what();
+      throw e;
+    } catch(parse_exception& ex) {
+      rpc_management_exception e;
+      e.msg = ex.what();
+      throw e;
+    }
+  }
+
   void add_index(int64_t id, const std::string& field_name, const double bucket_size) {
     try {
       store_->get_atomic_multilog(id)->add_index(field_name, bucket_size);
