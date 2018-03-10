@@ -223,19 +223,19 @@ TEST_F(StreamTest, BufferTest) {
   read_only_data_log_ptr ptr;
 
   dtable->read(0, ptr);
-  decoded_data_log_ptr decoded = ptr.decode_ptr();
+  decoded_data_log_ptr decoded = ptr.decode();
   std::string buf = std::string(reinterpret_cast<const char*>(decoded.get()),
   DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
   dtable->read(schema_size, ptr);
-  decoded = ptr.decode_ptr();
+  decoded = ptr.decode();
   std::string buf2 = std::string(reinterpret_cast<const char*>(decoded.get()),
   DATA_SIZE);
   ASSERT_EQ(buf2.substr(8, 3), "def");
 
   dtable->read(schema_size * 2, ptr);
-  decoded = ptr.decode_ptr();
+  decoded = ptr.decode();
   std::string buf3 = std::string(reinterpret_cast<const char*>(decoded.get()),
   DATA_SIZE);
   ASSERT_EQ(buf3.substr(8, 3), "ghi");

@@ -13,6 +13,15 @@ class reference_counts {
       : ref_counts_(BOTH_DELTA) {
   }
 
+  reference_counts(reference_counts& other)
+      : ref_counts_(atomic::load(&other.ref_counts_)) {
+  }
+
+  reference_counts operator=(reference_counts& other) {
+    atomic::store(&ref_counts_, atomic::load(&other.ref_counts_));
+    return *this;
+  }
+
   inline void increment_first() {
     atomic::faa(&ref_counts_, FIRST_DELTA);
 

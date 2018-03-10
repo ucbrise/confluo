@@ -144,7 +144,7 @@ class filter_archiver {
         new (archived_aggs + i) aggregate(collapsed_aggregate.type(), sum_aggregator, 1);
         archived_aggs[i].seq_update(0, collapsed_aggregate, version);
       }
-      reflog.swap_aggregates(archived_aggs);
+      reflog.aggregates().swap_ptr(archived_aggs);
       aggs_writer_.commit(filter_aggregates_archival_action(key).to_string());
     }
   }
@@ -213,12 +213,12 @@ class filter_load_utils {
      size_t size = sizeof(aggregate) * num_aggs;
      ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
      aggregate* archived_aggs = static_cast<aggregate*>(ALLOCATOR.alloc(size, aux));
+     storage::lifecycle_util<aggregate>::construct(archived_aggs);
      for (size_t i = 0; i < num_aggs; i++) {
        data_type type = reader.read<data_type>();
        std::string data = reader.read(type.size);
-       numeric agg(type, &data[0]);
-       new (archived_aggs + i) aggregate(agg.type(), sum_aggregator, 1);
-       archived_aggs[i].seq_update(0, agg, archival_metadata.version());
+       archived_aggs[i] = aggregate(type, sum_aggregator, 1);
+       archived_aggs[i].seq_update(0, numeric(type, &data[0]), archival_metadata.version());
      }
      tree->get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
    }
@@ -235,11 +235,11 @@ class filter_load_utils {
    * @param encoded_bucket bucket to initialize at index
    */
   static void init_bucket_ptr(reflog* refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
-    auto* bucket_containers = refs->data();
+    auto& bucket_containers = refs->data();
     size_t bucket_idx, container_idx;
     refs->raw_data_location(idx, container_idx, bucket_idx);
     refs->ensure_alloc(idx, idx);
-    auto* container = atomic::load(&(*bucket_containers)[container_idx]);
+    auto* container = atomic::load(&bucket_containers[container_idx]);
     encoded_reflog_ptr old_data = container[bucket_idx].atomic_load();
     container[bucket_idx].atomic_init(encoded_bucket, old_data);
   }

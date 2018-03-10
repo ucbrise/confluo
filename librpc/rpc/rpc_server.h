@@ -350,7 +350,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     uint64_t limit;
     storage::read_only_encoded_ptr<uint8_t> ptr;
     mlog->read(offset, limit, ptr);
-    auto decoded_ptr = ptr.decode_ptr();
+    auto decoded_ptr = ptr.decode();
     char* data = reinterpret_cast<char*>(decoded_ptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
                            static_cast<size_t>(nrecords * mlog->record_size()));

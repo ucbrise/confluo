@@ -31,7 +31,7 @@ class AtomicMultilogTest : public testing::Test {
     read_only_data_log_ptr data_ptr;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       mlog.read(offsets[i], data_ptr);
-      decoded_data_log_ptr decoded_ptr = data_ptr.decode_ptr();
+      decoded_data_log_ptr decoded_ptr = data_ptr.decode();
       ASSERT_TRUE(decoded_ptr.get() != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {

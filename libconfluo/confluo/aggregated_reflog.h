@@ -13,7 +13,7 @@ namespace confluo {
  * Stores all of the aggregates
  */
 class aggregated_reflog : public reflog {
- public:
+public:
   /** The type of size of the reflog */
   typedef reflog::size_type size_type;
   /** The type of position of the reflog */
@@ -32,9 +32,9 @@ class aggregated_reflog : public reflog {
   typedef reflog::const_iterator const_iterator;
 
   aggregated_reflog()
-      : reflog(),
-        num_aggregates_(0),
-        aggregates_(nullptr) {
+  : reflog(),
+    num_aggregates_(0),
+    aggregates_() {
   }
 
   /**
@@ -43,20 +43,24 @@ class aggregated_reflog : public reflog {
    * @param aggregates The specified aggregates
    */
   aggregated_reflog(const aggregate_log& aggregates)
-      : reflog(),
-        num_aggregates_(aggregates.size()) {
+      : reflog() {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(sizeof(aggregate) * num_aggregates_, aux));
     storage::lifecycle_util<aggregate>::construct(aggs);
     for (size_t i = 0; i < num_aggregates_; i++) {
       aggs[i] = aggregates.at(i)->create_aggregate();
     }
-    aggregates_ = new storage::swappable_ptr<aggregate>(aggs);
+    init_aggregates(aggregates.size(), aggs);
   }
 
-  ~aggregated_reflog() {
-    if (aggregates_)
-      delete aggregates_;
+  /**
+   * Initialize aggregates.
+   * @param num_aggregates number of aggregates
+   * @param aggregates aggregates
+   */
+  void init_aggregates(size_t num_aggregates, aggregate* aggregates) {
+    num_aggregates_ = num_aggregates;
+    aggregates_ = storage::swappable_ptr<aggregate>(aggregates);
   }
 
   /**
@@ -69,7 +73,7 @@ class aggregated_reflog : public reflog {
    */
   inline numeric get_aggregate(size_t aid, uint64_t version) const {
     storage::read_only_ptr<aggregate> copy;
-    aggregates_->atomic_copy(copy);
+    aggregates_.atomic_copy(copy);
     return copy.get()[aid].get(version);
   }
 
@@ -82,7 +86,7 @@ class aggregated_reflog : public reflog {
    * @param version data log version
    */
   inline void seq_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_->atomic_load()[aid].seq_update(thread_id, value, version);
+    aggregates_.atomic_load()[aid].seq_update(thread_id, value, version);
   }
 
   /**
@@ -94,21 +98,11 @@ class aggregated_reflog : public reflog {
    * @param version data log version
    */
   inline void comb_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_->atomic_load()[aid].comb_update(thread_id, value, version);
+    aggregates_.atomic_load()[aid].comb_update(thread_id, value, version);
   }
 
-  void init_aggregates(size_t num_aggregates, aggregate* aggregates) {
-    num_aggregates_ = num_aggregates;
-    aggregates_ = new storage::swappable_ptr<aggregate>(aggregates);
-  }
-
-  /**
-   * Swap aggregates. Assumes no contention with writers calling update_aggregate.
-   * Can only be called once under current swappable_ptr semantics.
-   * @param new_aggregates new aggregates
-   */
-  inline void swap_aggregates(aggregate* new_aggregates) {
-    aggregates_->swap_ptr(new_aggregates);
+  inline size_t num_aggregates() const {
+    return num_aggregates_;
   }
 
   /**
@@ -117,17 +111,13 @@ class aggregated_reflog : public reflog {
    *
    * @return aggregates
    */
-  inline storage::swappable_ptr<aggregate>* aggregates() {
+  inline storage::swappable_ptr<aggregate>& aggregates() {
     return aggregates_;
   }
 
-  inline size_t num_aggregates() const {
-    return num_aggregates_;
-  }
-
- private:
+private:
   size_t num_aggregates_;
-  storage::swappable_ptr<aggregate>* aggregates_; // TODO or array of swappable_ptrs for less contention
+  storage::swappable_ptr<aggregate> aggregates_; // TODO or array of swappable_ptrs for less contention
 };
 
 }

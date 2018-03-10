@@ -1,6 +1,10 @@
 #ifndef CONFLUO_ARCHIVAL_ARCHIVAL_CONSTS_H_
 #define CONFLUO_ARCHIVAL_ARCHIVAL_CONSTS_H_
 
+#include "atomic.h"
+#include "types/primitive_types.h"
+#include "container/reflog.h"
+
 namespace confluo {
 namespace archival {
 
@@ -20,7 +24,7 @@ class archival_utils {
   static void swap_bucket_ptr(reflog& refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
     size_t bucket_idx, container_idx;
     refs.raw_data_location(idx, container_idx, bucket_idx);
-    atomic::load(&((*refs.data())[container_idx]))[bucket_idx].swap_ptr(encoded_bucket);
+    atomic::load(&refs.data()[container_idx])[bucket_idx].swap_ptr(encoded_bucket);
   }
 
   static uint64_t max_in_reflog_bucket(uint64_t* bucket) {

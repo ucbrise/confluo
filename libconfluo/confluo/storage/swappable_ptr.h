@@ -129,6 +129,33 @@ class swappable_ptr {
         ptr_(ptr) {
   }
 
+  /**
+   * Move constructor. Not thread-safe.
+   * @param other other swappable_ptr
+   */
+  swappable_ptr(swappable_ptr&& other) {
+    ref_counts_ = other.ref_counts_;
+    ptr_ = atomic::load(&other.ptr_);
+    T* null = nullptr;
+    atomic::store(&other.ptr_, nullptr);
+  }
+
+  /**
+   * Move assignment operator. Not thread-safe.
+   * @param other other swappable_ptr
+   */
+  swappable_ptr& operator=(swappable_ptr&& other) {
+    ref_counts_ = other.ref_counts_;
+    ptr_ = atomic::load(&other.ptr_);
+    T* null = nullptr;
+    atomic::store(&other.ptr_, null);
+    return *this;
+  }
+
+  /**
+   * Destructor. Delegates deallocation to
+   * allocator if reference count drops to zero.
+   */
   ~swappable_ptr() {
     T* ptr = atomic::load(&ptr_);
     if (ptr != nullptr) {

@@ -250,8 +250,8 @@ class monolog_linear_base {
    * Note: it's dangerous to modify this data structure.
    * @return pointer to underlying array
    */
-  std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS>* data() {
-    return &buckets_;
+  std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS>& data() {
+    return buckets_;
   }
 
  protected:

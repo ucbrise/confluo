@@ -98,11 +98,16 @@ class read_only_encoded_ptr {
     enc_ptr_.encode(idx + offset_, len, data);
   }
 
-  decoded_ptr<T> decode_ptr(size_t idx = 0) const {
-    return enc_ptr_.decode_ptr(idx + offset_);
+  T decode_at(size_t idx) const {
+    return enc_ptr_.decode_at(idx + offset_);
   }
 
-  T decode(size_t idx) const {
+  /**
+   * Decode from index onwards.
+   * @param idx start index to decode from
+   * @return decoded pointer
+   */
+  decoded_ptr<T> decode(size_t idx = 0) const {
     return enc_ptr_.decode(idx + offset_);
   }
 
@@ -152,6 +157,27 @@ class swappable_encoded_ptr {
   swappable_encoded_ptr()
      : ref_counts_(),
        enc_ptr_(encoded_ptr<T>()) {
+  }
+
+  /**
+   * Move constructor. Not thread-safe.
+   * @param other other swappable_ptr
+   */
+  swappable_encoded_ptr(swappable_encoded_ptr&& other) {
+    ref_counts_ = other.ref_counts_;
+    enc_ptr_ = atomic::load(&other.enc_ptr_);
+    atomic::store(&other.enc_ptr_, nullptr);
+  }
+
+  /**
+   * Move assignment operator. Not thread-safe.
+   * @param other other swappable_ptr
+   */
+  swappable_encoded_ptr& operator=(swappable_encoded_ptr&& other) {
+    ref_counts_ = other.ref_counts_;
+    enc_ptr_ = atomic::load(&other.enc_ptr_);
+    atomic::store(&other.enc_ptr_, encoded_ptr<T>());
+    return *this;
   }
 
   /**
@@ -233,7 +259,7 @@ class swappable_encoded_ptr {
    */
   T atomic_get_decode(size_t idx) const {
     ref_counts_.increment_both();
-    T result = atomic::load(&enc_ptr_).decode(idx);
+    T result = atomic::load(&enc_ptr_).decode_at(idx);
     ref_counts_.decrement_both();
     return result;
   }

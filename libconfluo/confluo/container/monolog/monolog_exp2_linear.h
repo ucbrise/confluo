@@ -309,8 +309,8 @@ class monolog_exp2_linear_base {
    * Dangerous to modify this data structure externally.
    * @return pointer to bucket containers that store the data
    */
-  std::array<__atomic_bucket_container_ref, NCONTAINERS>* data() {
-    return &bucket_containers_;
+  std::array<__atomic_bucket_container_ref, NCONTAINERS>& data() {
+    return bucket_containers_;
   }
 
 protected:

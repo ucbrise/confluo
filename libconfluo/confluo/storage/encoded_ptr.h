@@ -14,7 +14,7 @@ using decoded_ptr = typename std::unique_ptr<T, void (*)(T*)>;
 template<typename T>
 class encoded_ptr {
  public:
-  encoded_ptr(void* ptr = nullptr, size_t offset = 0)
+  encoded_ptr(void* ptr = nullptr)
       : ptr_(ptr) {
   }
 
@@ -48,6 +48,12 @@ class encoded_ptr {
     }
   }
 
+  /**
+   * Encode data and store in pointer
+   * @param idx index into decoded representation to store at
+   * @param data buffer of decoded data to encode and store
+   * @param len number of elements of T
+   */
   void encode(size_t idx, const T* data, size_t len) {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
@@ -61,7 +67,12 @@ class encoded_ptr {
     }
   }
 
-  T decode(size_t idx) const {
+  /**
+   * Decode element at index.
+   * @param idx index of data to decode
+   * @return deocoded element
+   */
+  T decode_at(size_t idx) const {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
@@ -73,6 +84,12 @@ class encoded_ptr {
     }
   }
 
+  /**
+   * Decode pointer into buffer.
+   * @param buffer buffer to store decoded data in
+   * @param idx index to start at
+   * @param len number of elements of T
+   */
   void decode(T* buffer, size_t idx, size_t len) const {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
@@ -87,15 +104,15 @@ class encoded_ptr {
   }
 
   /**
-   * Decode entire pointer, starting at index idx.
-   * @param idx index
+   * Decode pointer, starting at an index.
+   * @param idx index to start decoding at
    * @return decoded pointer
    */
-  decoded_ptr<T> decode_ptr(size_t idx = 0) const {
+  decoded_ptr<T> decode(size_t start_idx) const {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + idx;
+        T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_);
         return decoded_ptr<T>(ptr, no_op_delete);
       }
       default: {

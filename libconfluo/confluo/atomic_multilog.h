@@ -8,7 +8,6 @@
 #include <thread>
 
 #include "archival/archival_mode.h"
-#include "archival/archiver.h"
 #include "archival/load_utils.h"
 #include "optional.h"
 #include "exceptions.h"
@@ -16,6 +15,7 @@
 #include "trigger.h"
 #include "types/type_manager.h"
 #include "alert_index.h"
+#include "archival/atomic_multilog_archiver.h"
 #include "atomic_multilog_metadata.h"
 #include "conf/configuration_params.h"
 #include "container/data_log.h"
@@ -472,7 +472,7 @@ class atomic_multilog {
   std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
     read_only_data_log_ptr rptr;
     read(offset, version, rptr);
-    decoded_data_log_ptr dec_ptr = rptr.decode_ptr();
+    decoded_data_log_ptr dec_ptr = rptr.decode();
     return schema_.data_to_record_vector(dec_ptr.get());
   }
 
@@ -1076,7 +1076,7 @@ class atomic_multilog {
   query_planner planner_;
 
   // Archival
-  archiver archiver_;
+  atomic_multilog_archiver archiver_;
   periodic_task archival_task_;
   task_pool archival_pool_;
 

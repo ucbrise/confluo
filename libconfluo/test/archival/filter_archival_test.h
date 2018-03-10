@@ -10,10 +10,10 @@
 #include "storage/ptr_aux_block.h"
 
 using namespace ::confluo;
+using namespace ::confluo::archival;
 
 class FilterArchivalTest : public testing::Test {
  public:
-  typedef archival::filter_log_archiver filter_log_archiver_t;
 
   static const uint64_t kMaxEntries = 1e6;
   static const uint64_t kTimeBlock = 1e3;
@@ -90,7 +90,7 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
+  filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
   reflog const* first_reflog = f.lookup(0);
 
@@ -106,7 +106,7 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
+  filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
   reflog const* first_reflog = f.lookup(0);
 
@@ -127,7 +127,7 @@ TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
+  filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
   reflog const* first_reflog = f.lookup(0);
   reflog const* second_reflog = f.lookup(1);
@@ -163,7 +163,7 @@ TEST_F(FilterArchivalTest, MultipleReflogsArchivedTest) {
 
   filter_log filters;
   filters.push_back(&f);
-  filter_log_archiver_t archiver("/tmp/filter_archives/", &filters);
+  filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
   // archive across contiguous reflogs
   archiver.archive(32000);

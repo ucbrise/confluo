@@ -166,11 +166,11 @@ class index_load_utils {
    * @param encoded_bucket bucket to initialize at index
    */
   static void init_bucket_ptr(reflog* refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
-    auto* bucket_containers = refs->data();
+    auto& bucket_containers = refs->data();
     size_t bucket_idx, container_idx;
     refs->raw_data_location(idx, container_idx, bucket_idx);
     refs->ensure_alloc(idx, idx);
-    auto* container = atomic::load(&(*bucket_containers)[container_idx]);
+    auto* container = atomic::load(&bucket_containers[container_idx]);
     encoded_reflog_ptr old_data = container[bucket_idx].atomic_load();
     container[bucket_idx].atomic_init(encoded_bucket, old_data);
   }

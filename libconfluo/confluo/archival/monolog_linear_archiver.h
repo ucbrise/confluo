@@ -87,7 +87,7 @@ class monolog_linear_archiver {
 
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE);
     void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
-    (*log_->data())[archival_tail_ / BUCKET_SIZE].swap_ptr(encoded_ptr<T>(archived_bucket));
+    log_->data()[archival_tail_ / BUCKET_SIZE].swap_ptr(encoded_ptr<T>(archived_bucket));
   }
 
   incremental_file_writer writer_;
@@ -107,7 +107,7 @@ public:
   template<typename T, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUF_SIZE>
   static void load(const std::string& path, monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE>& log) {
     incremental_file_reader reader(path, "monolog_linear");
-    std::array<monolog_linear_bucket<T, BUF_SIZE>, MAX_BUCKETS>* buckets = log.data();
+    auto& buckets = log.data();
     size_t load_offset = 0;
     while (reader.has_more()) {
       auto action = reader.read_action<monolog_linear_archival_action>();
@@ -116,7 +116,7 @@ public:
 
       ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE);
       void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), size, aux);
-      (*buckets)[load_offset / BUCKET_SIZE].init_ptr(encoded_ptr<T>(encoded_bucket));
+      buckets[load_offset / BUCKET_SIZE].init_ptr(encoded_ptr<T>(encoded_bucket));
 
       log.reserve(BUCKET_SIZE);
       reader.advance<uint8_t>(size);

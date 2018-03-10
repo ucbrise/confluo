@@ -117,7 +117,7 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
   int buffer[3];
   read_only_encoded_ptr<int> result;
   array.ptr(0, result);
-  auto result_ptr = result.decode_ptr();
+  auto result_ptr = result.decode();
   for (size_t i = 0; i < 3; i++) {
     ASSERT_EQ(data[i], result_ptr.get()[i]);
   }

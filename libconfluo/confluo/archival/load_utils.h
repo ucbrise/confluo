@@ -5,10 +5,13 @@
 #include "storage/allocator.h"
 #include "container/data_log.h"
 #include "filter.h"
+#include "filter_archiver.h"
 #include "filter_log.h"
 #include "io/incremental_file_reader.h"
 #include "io/incremental_file_writer.h"
+#include "index_archiver.h"
 #include "index_log.h"
+#include "monolog_linear_archiver.h"
 #include "container/reflog.h"
 #include "storage/ptr_aux_block.h"
 
@@ -27,12 +30,12 @@ class load_utils {
    * @param path path to archived data log
    * @param log log to load into
    */
-  static void load_data_log(const std::string& path, const storage::storage_mode mode, data_log& log) {
+  static void load_data_log(const std::string& path, const storage_mode mode, data_log& log) {
     monolog_linear_load_utils::load<uint8_t,
                                     data_log_constants::MAX_BUCKETS,
                                     data_log_constants::BUCKET_SIZE,
                                     data_log_constants::BUFFER_SIZE>(path, log);
-    if (mode != storage::storage_mode::IN_MEMORY) {
+    if (mode != storage_mode::IN_MEMORY) {
       size_t start = (log.size() + data_log_constants::BUCKET_SIZE - 1) / data_log_constants::BUCKET_SIZE;
       load_data_log_storage(log, start);
     }
@@ -44,13 +47,13 @@ class load_utils {
    * @param start_bucket_idx start bucket
    */
   static void load_data_log_storage(data_log& log, size_t start_bucket_idx) {
-    auto* buckets = log.data();
+    auto& buckets = log.data();
     std::string bucket_path = log.bucket_data_path(start_bucket_idx);
     size_t bucket_idx = start_bucket_idx;
     while (file_utils::exists_file(bucket_path)) {
       ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
       void* bucket = ALLOCATOR.mmap(bucket_path, 0, log.bucket_size(), aux);
-      (*buckets)[bucket_idx].init_ptr(encoded_ptr<uint8_t>(bucket));
+      buckets[bucket_idx].init_ptr(encoded_ptr<uint8_t>(bucket));
       bucket_idx++;
       bucket_path = log.bucket_data_path(bucket_idx);
     }
