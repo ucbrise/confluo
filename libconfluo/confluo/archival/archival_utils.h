@@ -13,20 +13,44 @@ namespace archival {
  */
 class archival_utils {
  public:
+
+  /**
+   * Gets filter archival path for a particular filter.
+   * @param filter_log_path archival path for filter_log
+   * @param filter_log_idx index of filter in filter_log
+   * @return filter archival path
+   */
   static std::string filter_archival_path(const std::string& filter_log_path, size_t filter_log_idx) {
     return filter_log_path + "/filter_" + std::to_string(filter_log_idx) + "/";
   }
 
+  /**
+   * Gets index archival path for a particular index.
+   * @param index_log_path archival path for index_log
+   * @param index_log_idx index of radix tree index in index_log
+   * @return
+   */
   static std::string index_archival_path(const std::string& index_log_path, size_t index_log_idx) {
     return index_log_path + "/index_" + std::to_string(index_log_idx) + "/";
   }
 
+  /**
+   * Convenience method to swap a bucket pointer of a reflog.
+   * @param refs reflog
+   * @param idx starting reflog index of bucket
+   * @param encoded_bucket new bucket to swap in
+   */
   static void swap_bucket_ptr(reflog& refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
     size_t bucket_idx, container_idx;
     refs.raw_data_location(idx, container_idx, bucket_idx);
     atomic::load(&refs.data()[container_idx])[bucket_idx].swap_ptr(encoded_bucket);
   }
 
+  /**
+   * Get maximum offset stored in a reflog bucket.
+   * @param bucket decoded bucket
+   * @return max offset
+   */
   static uint64_t max_in_reflog_bucket(uint64_t* bucket) {
     uint64_t max = 0;
     for (size_t i = 0; i < reflog_constants::BUCKET_SIZE && bucket[i] != limits::ulong_max; i++)

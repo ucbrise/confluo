@@ -35,6 +35,11 @@ class encoded_ptr {
 
   // Encode/decode member functions
 
+  /**
+   * Encode value and store at index.
+   * @param idx index
+   * @param val value
+   */
   void encode(size_t idx, T val) {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
@@ -49,7 +54,7 @@ class encoded_ptr {
   }
 
   /**
-   * Encode data and store in pointer
+   * Encode data and store in pointer.
    * @param idx index into decoded representation to store at
    * @param data buffer of decoded data to encode and store
    * @param len number of elements of T
@@ -105,14 +110,14 @@ class encoded_ptr {
 
   /**
    * Decode pointer, starting at an index.
-   * @param idx index to start decoding at
+   * @param start_idx index to start decoding at
    * @return decoded pointer
    */
   decoded_ptr<T> decode(size_t start_idx) const {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_);
+        T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + start_idx;
         return decoded_ptr<T>(ptr, no_op_delete);
       }
       default: {

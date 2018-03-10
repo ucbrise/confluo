@@ -35,7 +35,9 @@ class monolog_linear_base {
   }
 
   /**
-   * Copy constructor, does not copy data. TODO
+   * Copy constructor.
+   * Note: only initializes member fields. Any data
+   * copying should be done by the super class.
    * @param other other monolog_linear
    */
   monolog_linear_base(const monolog_linear_base& other) {
@@ -43,7 +45,9 @@ class monolog_linear_base {
   }
 
   /**
-   * Copy assignment does not copy data. TODO
+   * Copy assignment.
+   * Note: only initializes member fields. Any data
+   * copying should be done by the super class.
    * @param other
    * @return this
    */
@@ -304,24 +308,28 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
   }
 
   /**
-   * TODO Copy constructor doesn't copy data
-   * @param other another monolog_linear
+   * Copy assignment. Copies all data in the other monolog.
+   * @param other other monolog_linear
    */
   monolog_linear(const monolog_linear& other)
       : monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>(other) {
     atomic::init(&tail_, 0UL);
+    for (size_t i = 0; i < other.size(); i++)
+      this->push_back(other.get(i));
   }
 
   /**
-   * TODO Copy assignment doesn't copy data
-   * @param other
-   * @return this
+   * Copy assignment. Copies all data in the other monolog.
+   * @param other other monolog_linear
+   * @return this copied monolog_linear
    */
   monolog_linear& operator=(const monolog_linear& other) {
     if(&other == this)
       return *this;
     monolog_linear::operator=(other);
     atomic::init(&tail_, 0UL);
+    for (size_t i = 0; i < other.size(); i++)
+      this->push_back(other.get(i));
     return *this;
   }
 

@@ -76,7 +76,6 @@ TEST_F(IndexArchivalTest, IndexCorrectnessTest) {
   index::radix_index index(sizeof(int32_t), 256);
   schema_t s = schema();
   fill(index);
-  LOG_INFO << "verify1";
   verify(index);
 
   index_log indexes;

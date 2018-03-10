@@ -156,7 +156,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
 
   read_only_data_log_ptr ptr;
   mlog->read(0, ptr);
-  decoded_data_log_ptr decoded_ptr = ptr.decode_ptr();
+  decoded_data_log_ptr decoded_ptr = ptr.decode();
   std::string buf = std::string(reinterpret_cast<const char*>(decoded_ptr.get()), DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 

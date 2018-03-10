@@ -24,12 +24,22 @@ class read_only_encoded_ptr {
         ref_counts_(nullptr) {
   }
 
+  /**
+   * Constructor.
+   * @param enc_ptr pointer to encoded data
+   * @param offset offset into data
+   * @param ref_counts reference counts of both pointer states
+   */
   read_only_encoded_ptr(encoded_ptr<T> enc_ptr, size_t offset, reference_counts* ref_counts)
       : enc_ptr_(enc_ptr),
         offset_(offset),
         ref_counts_(ref_counts) {
   }
 
+  /**
+   * Copy constructor. Increments reference count.
+   * @param other other pointer
+   */
   read_only_encoded_ptr(const read_only_encoded_ptr<T>& other)
       : enc_ptr_(other.enc_ptr_),
         offset_(other.offset_),
@@ -41,17 +51,10 @@ class read_only_encoded_ptr {
     }
   }
 
-  ~read_only_encoded_ptr() {
-    decrement_compare_dealloc();
-  }
-
   /**
-   * Assigns another read only pointer to this read only pointer
-   *
-   * @param other The other read only pointer
-   *
-   * @return This read only pointer which has the contents of the other
-   * read only pointer
+   * Assignment operator. Increments reference count.
+   * @param other other pointer
+   * @return this read only pointer
    */
   read_only_encoded_ptr& operator=(const read_only_encoded_ptr<T>& other) {
     // TODO potential infinite loop bug here
@@ -62,6 +65,10 @@ class read_only_encoded_ptr {
       uses_first_count ? ref_counts_->increment_first() : ref_counts_->increment_second();
     }
     return *this;
+  }
+
+  ~read_only_encoded_ptr() {
+    decrement_compare_dealloc();
   }
 
   /**
@@ -78,10 +85,18 @@ class read_only_encoded_ptr {
     ref_counts_ = ref_counts;
   }
 
+  /**
+   * Get encoded pointer to data
+   * @return encoded pointer
+   */
   encoded_ptr<T> get() const {
     return enc_ptr_;
   }
 
+  /**
+   * Set data offset
+   * @param offset offset into decoded representation
+   */
   void set_offset(size_t offset) {
     offset_ = offset;
   }
@@ -90,27 +105,49 @@ class read_only_encoded_ptr {
   // This is necessary since the offset must be stored outside encoded_ptr<T>
   // to minimize the footprint of atomic operations in swappable_ptr<T>.
 
+  /**
+   * Encode value and store at index
+   * @param idx index to store at
+   * @param val value
+   */
   void encode(size_t idx, T val) {
     enc_ptr_.encode(idx + offset_, val);
   }
 
+  /**
+   * Encode data and store starting at index
+   * @param idx start index
+   * @param len length of decoded data
+   * @param data decoded data buffer
+   */
   void encode(size_t idx, size_t len, const T* data) {
     enc_ptr_.encode(idx + offset_, len, data);
   }
 
+  /**
+   * Decode data at index
+   * @param idx index
+   * @return decoded data
+   */
   T decode_at(size_t idx) const {
     return enc_ptr_.decode_at(idx + offset_);
   }
 
   /**
-   * Decode from index onwards.
-   * @param idx start index to decode from
+   * Decode pointer from index onwards.
+   * @param idx start index
    * @return decoded pointer
    */
   decoded_ptr<T> decode(size_t idx = 0) const {
     return enc_ptr_.decode(idx + offset_);
   }
 
+  /**
+   * Decode pointer into buffer
+   * @param buffer buffer to store in
+   * @param idx start index
+   * @param len length of decoded data
+   */
   void decode(T* buffer, size_t idx, size_t len) const {
     enc_ptr_.decode(buffer, idx + offset_, len);
   }

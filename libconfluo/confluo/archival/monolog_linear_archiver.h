@@ -6,6 +6,7 @@
 #include "storage/encoder.h"
 #include "file_utils.h"
 #include "archival_metadata.h"
+#include "archiver.h"
 #include "io/incremental_file_reader.h"
 #include "io/incremental_file_writer.h"
 #include "storage/ptr_aux_block.h"
@@ -19,7 +20,7 @@ using namespace storage;
 using namespace monolog;
 
 template<typename T, size_t MAX_BUCKETS, size_t BUCKET_SIZE, size_t BUF_SIZE>
-class monolog_linear_archiver {
+class monolog_linear_archiver : public archiver {
 
  public:
   typedef monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUF_SIZE> monolog;

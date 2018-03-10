@@ -155,7 +155,7 @@ TEST_F(FilterLoadTest, FilterLogResumeArchivalAfterLoadTest) {
 
     fill(log, f, kMaxEntries / kPerTimeBlock);
 
-    filter_log_archiver_t archiver(path, &filters, false);
+    filter_log_archiver_t archiver(path, &filters);
     archiver.archive(2 * kMaxEntries * record_size);
   }
 

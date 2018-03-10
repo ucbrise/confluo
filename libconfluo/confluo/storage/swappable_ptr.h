@@ -24,12 +24,22 @@ class read_only_ptr {
         ref_counts_(nullptr) {
   }
 
+  /**
+   * Constructor.
+   * @param ptr pointer to data
+   * @param offset offset into data
+   * @param ref_counts reference counts of both pointer states
+   */
   read_only_ptr(T* ptr, size_t offset, reference_counts* ref_counts)
       : ptr_(ptr),
         offset_(offset),
         ref_counts_(ref_counts) {
   }
 
+  /**
+   * Copy constructor. Increments reference count.
+   * @param other other pointer
+   */
   read_only_ptr(const read_only_ptr<T>& other)
       : ptr_(other.ptr_),
         offset_(other.offset_),
@@ -40,10 +50,11 @@ class read_only_ptr {
     }
   }
 
-  ~read_only_ptr() {
-    decrement_compare_dealloc();
-  }
-
+  /**
+   * Assignment operator. Increments reference count.
+   * @param other other pointer
+   * @return this read only pointer
+   */
   read_only_ptr& operator=(const read_only_ptr<T>& other) {
     // TODO potential infinite loop bug here
     init(other.ptr_, other.offset_, other.ref_counts_);
@@ -52,6 +63,10 @@ class read_only_ptr {
       uses_first_count ? ref_counts_->increment_first() : ref_counts_->increment_second();
     }
     return *this;
+  }
+
+  ~read_only_ptr() {
+    decrement_compare_dealloc();
   }
 
   /**
@@ -68,10 +83,18 @@ class read_only_ptr {
     ref_counts_ = ref_counts;
   }
 
+  /**
+   * Get pointer to data
+   * @return pointer
+   */
   T* get() const {
     return ptr_;
   }
 
+  /**
+   * Set data offset
+   * @param offset offset into decoded representation
+   */
   void set_offset(size_t offset) {
     offset_ = offset;
   }

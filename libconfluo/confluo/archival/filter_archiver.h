@@ -5,6 +5,7 @@
 #include "aggregated_reflog.h"
 #include "archival_actions.h"
 #include "archival_metadata.h"
+#include "archiver.h"
 #include "conf/configuration_params.h"
 #include "storage/encoder.h"
 #include "filter.h"
@@ -19,7 +20,7 @@ namespace archival {
 
 using namespace storage;
 
-class filter_archiver {
+class filter_archiver : public archiver {
 
  public:
   /**

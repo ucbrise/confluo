@@ -7,6 +7,7 @@
 #include "aggregated_reflog.h"
 #include "archival_actions.h"
 #include "archival_metadata.h"
+#include "archiver.h"
 #include "schema/column.h"
 #include "conf/configuration_params.h"
 #include "index_log.h"
@@ -21,7 +22,7 @@ namespace archival {
 
 using namespace storage;
 
-class index_archiver {
+class index_archiver : public archiver {
 
  public:
   /**

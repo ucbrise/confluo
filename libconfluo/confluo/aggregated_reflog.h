@@ -32,9 +32,9 @@ public:
   typedef reflog::const_iterator const_iterator;
 
   aggregated_reflog()
-  : reflog(),
-    num_aggregates_(0),
-    aggregates_() {
+      : reflog(),
+        num_aggregates_(0),
+        aggregates_() {
   }
 
   /**
@@ -45,9 +45,10 @@ public:
   aggregated_reflog(const aggregate_log& aggregates)
       : reflog() {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(sizeof(aggregate) * num_aggregates_, aux));
+    size_t alloc_size = sizeof(aggregate) * aggregates.size();
+    aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, aux));
     storage::lifecycle_util<aggregate>::construct(aggs);
-    for (size_t i = 0; i < num_aggregates_; i++) {
+    for (size_t i = 0; i < aggregates.size(); i++) {
       aggs[i] = aggregates.at(i)->create_aggregate();
     }
     init_aggregates(aggregates.size(), aggs);
@@ -101,6 +102,10 @@ public:
     aggregates_.atomic_load()[aid].comb_update(thread_id, value, version);
   }
 
+  /**
+   * Gets the number of aggregates.
+   * @return number of aggregates
+   */
   inline size_t num_aggregates() const {
     return num_aggregates_;
   }
