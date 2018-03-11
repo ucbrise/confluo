@@ -224,9 +224,15 @@ struct trigger_metadata {
  * Writer for metadata
  */
 class metadata_writer {
+
  public:
+  typedef bool metadata_writer_state;
+  static const metadata_writer_state UNINIT = false;
+  static const metadata_writer_state INIT = true;
+
   metadata_writer()
       : metadata_writer("") {
+    state_ = UNINIT;
   }
 
   /**
@@ -235,7 +241,8 @@ class metadata_writer {
    * @param id The id of the storage type 
    */
   metadata_writer(const std::string& path)
-      : filename_(path + "/metadata") {
+      : filename_(path + "/metadata"),
+        state_(INIT) {
     out_.open(filename_);
   }
 
@@ -245,7 +252,8 @@ class metadata_writer {
    * @param schema The schema
    */
   metadata_writer(const metadata_writer& other)
-      : filename_(other.filename_) {
+      : filename_(other.filename_),
+        state_(other.state_) {
     out_.close();
     out_.open(filename_);
   }
@@ -258,11 +266,12 @@ class metadata_writer {
     out_.close();
     filename_ = other.filename_;
     out_.open(filename_);
+    state_ = other.state_;
     return *this;
   }
 
   void write_storage_mode(const storage::storage_mode mode) {
-    if (filename_ != "/metadata") {
+    if (state_) {
       metadata_type type = metadata_type::D_STORAGE_MODE_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, mode);
@@ -271,7 +280,7 @@ class metadata_writer {
   }
 
   void write_archival_mode(const archival::archival_mode mode) {
-    if (filename_ != "/metadata") {
+    if (state_) {
       metadata_type type = metadata_type::D_ARCHIVAL_MODE_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, mode);
@@ -280,7 +289,7 @@ class metadata_writer {
   }
 
   void write_schema(const schema_t& schema) {
-    if (filename_ != "/metadata") {
+    if (state_) {
       metadata_type type = metadata_type::D_SCHEMA_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, schema.columns().size());
@@ -299,7 +308,7 @@ class metadata_writer {
    * @param bucket_size The bucket_size used for lookup
    */
   void write_index_metadata(const std::string& name, double bucket_size) {
-    if (filename_ != "/metadata") {
+    if (state_) {
       metadata_type type = metadata_type::D_INDEX_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -315,7 +324,7 @@ class metadata_writer {
    * @param expr The filter expression
    */
   void write_filter_metadata(const std::string& name, const std::string& expr) {
-    if (filename_ != "/metadata") {
+    if (state_) {
       metadata_type type = metadata_type::D_FILTER_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -334,7 +343,7 @@ class metadata_writer {
   void write_aggregate_metadata(const std::string& name,
                                 const std::string& filter_name,
                                 const std::string& expr) {
-    if (filename_ != "/metadata") {
+    if (state_) {
       metadata_type type = metadata_type::D_AGGREGATE_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -368,6 +377,7 @@ class metadata_writer {
  private:
   std::string filename_;
   std::ofstream out_;
+  metadata_writer_state state_;
 };
 
 /**
