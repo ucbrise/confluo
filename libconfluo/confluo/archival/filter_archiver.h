@@ -168,7 +168,7 @@ class filter_load_utils {
   * @param filter filter to load into
   * @return data log offset until which radix tree has been loaded
   */
- static size_t load_reflogs(const std::string& path, filter::idx_t* filter) {
+ static size_t load_reflogs(const std::string& path, filter::idx_t& filter) {
    incremental_file_reader reader(path, "filter_data");
    size_t data_log_archival_tail = 0;
    while (reader.has_more()) {
@@ -183,7 +183,7 @@ class filter_load_utils {
      ptr_metadata metadata = reader.read<ptr_metadata>();
      size_t bucket_size = metadata.data_size_;
 
-     auto*& refs = filter->get_or_create(cur_key);
+     auto*& refs = filter.get_or_create(cur_key);
      ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
      void* encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), bucket_size, aux);
      init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
@@ -201,7 +201,7 @@ class filter_load_utils {
   * @return data log offset until which radix tree aggregates have been loaded
   */
  template<typename radix_tree>
- static size_t load_reflog_aggregates(const std::string& path, radix_tree* tree) {
+ static size_t load_reflog_aggregates(const std::string& path, radix_tree& tree) {
    incremental_file_reader reader(path, "filter_aggs");
    byte_string cur_key;
    while (reader.has_more()) {
@@ -221,11 +221,11 @@ class filter_load_utils {
          archived_aggs[i] = aggregate(type, sum_aggregator, 1);
          archived_aggs[i].seq_update(0, numeric(type, &data[0]), archival_metadata.version());
        }
-       tree->get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
+       tree.get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);
      }
    }
    reader.truncate(reader.tell(), reader.tell_transaction_log());
-   auto last = tree->get(cur_key);
+   auto last = tree.get(cur_key);
    return last ? *std::max_element(last->begin(), last->end()) : 0;
  }
 

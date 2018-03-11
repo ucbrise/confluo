@@ -106,7 +106,7 @@ class load_utils {
    * @return data log offset to which filter has been archived
    */
   static size_t load_filter(const std::string& path, monitor::filter* filter) {
-    filter::idx_t* tree = filter->data();
+    filter::idx_t& tree = filter->data();
     size_t archival_tail = filter_load_utils::load_reflogs(path, tree);
     size_t archival_tail2 = filter_load_utils::load_reflog_aggregates(path, tree);
     if (archival_tail > archival_tail2) {

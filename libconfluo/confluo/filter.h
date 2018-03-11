@@ -243,8 +243,8 @@ class filter {
    * Note: It is dangerous to modify this data structure.
    * @return underlying radix tree
    */
-  idx_t* data() {
-    return &idx_;
+  idx_t& data() {
+    return idx_;
   }
 
  private:
