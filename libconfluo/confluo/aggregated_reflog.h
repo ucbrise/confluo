@@ -38,8 +38,7 @@ public:
   }
 
   /**
-   * Constructs a reflog of aggregates from a log of aggregates
-   *
+   * Constructor. Initializes aggregates from an aggregate info log.
    * @param aggregates The specified aggregates
    */
   aggregated_reflog(const aggregate_log& aggregates)

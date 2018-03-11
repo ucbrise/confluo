@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 
+#include "archival/archival_mode.h"
 #include "types/numeric.h"
 #include "types/type_manager.h"
 #include "io_utils.h"

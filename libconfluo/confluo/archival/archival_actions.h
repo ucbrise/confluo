@@ -134,10 +134,23 @@ class index_archival_action {
       : action_(action) {
   }
 
+  /**
+   * Constructor.
+   * @param byte_str key
+   * @param archival_tail
+   * @param data_log_tail
+   */
   index_archival_action(byte_string byte_str, size_t archival_tail, size_t data_log_tail)
       : index_archival_action(byte_str.size(), byte_str.data(), archival_tail, data_log_tail) {
   }
 
+  /**
+   * Constructor.
+   * @param key_size size of key
+   * @param archival_tail_key key corresponding to reflog being archived
+   * @param archival_tail offset up to which reflog has been archived
+   * @param data_log_tail corresponding data log offset up to which reflog has been archived
+   */
   index_archival_action(size_t key_size, uint8_t* archival_tail_key,
                         size_t archival_tail, size_t data_log_tail) {
     action_ = "";

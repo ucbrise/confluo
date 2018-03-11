@@ -3,6 +3,7 @@
 
 #include <thread>
 
+#include "archival/archival_utils.h"
 #include "archival/index_log_archiver.h"
 #include "index_log.h"
 #include "container/radix_tree.h"
@@ -11,17 +12,19 @@
 #include "gtest/gtest.h"
 
 using namespace ::confluo;
+using namespace ::confluo::archival;
 
 class IndexLoadTest : public testing::Test {
  public:
 
-  static const size_t NUM_BUCKETS_PER_REFLOG = 8;
-  static const size_t REFLOG_SIZE = NUM_BUCKETS_PER_REFLOG * reflog_constants::BUCKET_SIZE;
+  static const uint64_t NUM_BUCKETS_PER_REFLOG = 2;
+  static const uint64_t REFLOG_SIZE = NUM_BUCKETS_PER_REFLOG * reflog_constants::BUCKET_SIZE;
 
   static void fill(index::radix_index& index) {
     uint64_t accum = 0;
-    for (int32_t i = 0; i < 128; i++) {
-      byte_string key = byte_string(i * 8);
+    for (uint32_t i = 0; i < 128; i++) {
+      uint32_t val = i;
+      byte_string key = byte_string(val);
       for (uint64_t j = accum; j < accum + REFLOG_SIZE; j++) {
         index.insert(key, j);
       }
@@ -32,8 +35,9 @@ class IndexLoadTest : public testing::Test {
 
   static void verify(index::radix_index& index) {
     uint64_t accum = 0;
-    for (int32_t i = 0; i < 128; i++) {
-      byte_string key = byte_string(i * 8);
+    for (uint32_t i = 0; i < 128; i++) {
+      uint32_t val = i;
+      byte_string key = byte_string(val);
       reflog const* s = index.get(key);
       size_t size = s->size();
       for (uint64_t j = accum; j < accum + size; j++) {
@@ -45,7 +49,7 @@ class IndexLoadTest : public testing::Test {
 
   static schema_t schema() {
     schema_builder builder;
-    builder.add_column(SHORT_TYPE, "a");
+    builder.add_column(UINT_TYPE, "a");
     return schema_t(builder.get_columns());
   }
 
@@ -68,29 +72,33 @@ class IndexLoadTest : public testing::Test {
 
 };
 
-const size_t IndexLoadTest::NUM_BUCKETS_PER_REFLOG;
-const size_t IndexLoadTest::REFLOG_SIZE;
+const uint64_t IndexLoadTest::NUM_BUCKETS_PER_REFLOG;
+const uint64_t IndexLoadTest::REFLOG_SIZE;
 
 TEST_F(IndexLoadTest, IndexLogLoadTest) {
 
   std::string path = "/tmp/index_archives/";
   file_utils::clear_dir(path);
+  size_t index_id;
+  schema_t s = schema();
+  size_t field_size = s[s.get_field_index("a")].type().size;
 
   {
-    index::radix_index index(sizeof(int32_t), 256);
-    schema_t s = schema();
+    index::radix_index index(field_size, 256);
     fill(index);
     index_log indexes;
-    indexes.push_back(&index);
+    index_id = indexes.push_back(&index);
+    s[s.get_field_index("a")].set_indexing();
+    s[s.get_field_index("a")].set_indexed(index_id, configuration_params::INDEX_BUCKET_SIZE);
 
     archival::index_log_archiver archiver(path, &indexes, &s);
-    archiver.archive(16 * reflog_constants::BUCKET_SIZE);
+    archiver.archive(1e6);
     verify(index);
   }
 
-  index::radix_index index(sizeof(int32_t), 256);
-  archival::index_load_utils::load(path, &index);
-  verify(index);
+  index::radix_index index2(field_size, 256);
+  archival::index_load_utils::load(archival_utils::index_archival_path(path, index_id), &index2);
+  verify(index2);
 
 }
 

@@ -56,14 +56,16 @@ class index_log_archiver {
   void init_new_archivers() {
     for (size_t i = 0; i < schema_->size(); i++) {
       auto& col = (*schema_)[i];
-      auto id = col.index_id();
-      if (index_archivers_.size() <= id) {
-        index_archivers_.resize(id + 1);
-      }
-      if (col.is_indexed() && index_archivers_[id] == nullptr) {
-        std::string index_path = path_ + "/index_" + std::to_string(i) + "/";
-        file_utils::create_dir(index_path);
-        index_archivers_[id] = new index_archiver(index_path, indexes_->at(id), col);
+      if (col.is_indexed()) {
+        auto id = col.index_id();
+        if (index_archivers_.size() <= id) {
+          index_archivers_.resize(id + 1);
+        }
+        if (index_archivers_[id] == nullptr) {
+          std::string index_path = path_ + "/index_" + std::to_string(id) + "/";
+          file_utils::create_dir(index_path);
+          index_archivers_[id] = new index_archiver(index_path, indexes_->at(id), col);
+        }
       }
     }
   }

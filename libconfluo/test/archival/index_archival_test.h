@@ -21,7 +21,7 @@ class IndexArchivalTest : public testing::Test {
   static void fill(index::radix_index& index) {
     uint64_t accum = 0;
     for (int32_t i = 0; i < 128; i++) {
-      byte_string key = byte_string(i * 8);
+      byte_string key = byte_string(i);
       for (uint64_t j = accum; j < accum + REFLOG_SIZE; j++) {
         index.insert(key, j);
       }
@@ -33,7 +33,7 @@ class IndexArchivalTest : public testing::Test {
   static void verify(index::radix_index& index) {
     uint64_t accum = 0;
     for (int32_t i = 0; i < 128; i++) {
-      byte_string key = byte_string(i * 8);
+      byte_string key = byte_string(i);
       reflog const* s = index.get(key);
       size_t size = s->size();
       for (uint64_t j = accum; j < accum + size; j++) {
@@ -46,7 +46,8 @@ class IndexArchivalTest : public testing::Test {
   static schema_t schema() {
     schema_builder builder;
     builder.add_column(SHORT_TYPE, "a");
-    return schema_t(builder.get_columns());
+    schema_t s = schema_t(builder.get_columns());
+    return s;
   }
 
   static void verify_reflog_archived(reflog const* reflog, size_t reflog_archival_tail) {
@@ -80,6 +81,8 @@ TEST_F(IndexArchivalTest, IndexCorrectnessTest) {
 
   index_log indexes;
   indexes.push_back(&index);
+  s[s.get_field_index("a")].set_indexing();
+  s[s.get_field_index("a")].set_indexed(0, configuration_params::INDEX_BUCKET_SIZE);
 
   std::string path = "/tmp/index_archives/";
   file_utils::clear_dir(path);

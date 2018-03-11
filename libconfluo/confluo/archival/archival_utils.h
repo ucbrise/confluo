@@ -27,11 +27,11 @@ class archival_utils {
   /**
    * Gets index archival path for a particular index.
    * @param index_log_path archival path for index_log
-   * @param index_log_idx index of radix tree index in index_log
+   * @param index_id index id
    * @return
    */
-  static std::string index_archival_path(const std::string& index_log_path, size_t index_log_idx) {
-    return index_log_path + "/index_" + std::to_string(index_log_idx) + "/";
+  static std::string index_archival_path(const std::string& index_log_path, size_t index_id) {
+    return index_log_path + "/index_" + std::to_string(index_id) + "/";
   }
 
   /**

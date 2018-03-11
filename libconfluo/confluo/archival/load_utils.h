@@ -91,8 +91,9 @@ class load_utils {
     for (size_t i = 0; i < schema.size(); i++) {
       auto& col = schema[i];
       if (col.is_indexed()) {
-        auto* index = indexes[col.index_id()];
-        size_t data_log_archival_tail = load_index(archival_utils::index_archival_path(path, i), index);
+        size_t id = col.index_id();
+        auto* index = indexes[id];
+        size_t data_log_archival_tail = load_index(archival_utils::index_archival_path(path, id), index);
         replay_index(index, col.index_id(), log, schema, data_log_archival_tail + schema.record_size());
       }
     }

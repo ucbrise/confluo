@@ -6,6 +6,7 @@
 #include "storage/encoder.h"
 #include "aggregated_reflog.h"
 #include "archival_actions.h"
+#include "archival_utils.h"
 #include "archival_metadata.h"
 #include "archiver.h"
 #include "schema/column.h"
@@ -152,7 +153,7 @@ class index_load_utils {
 
       atomic::type<size_t>* tail = refs->write_tail();
       size_t old_tail = atomic::load(tail);
-      atomic::strong::cas(tail, &old_tail, reflog_idx + bucket_size);
+      atomic::strong::cas(tail, &old_tail, reflog_idx);
 
     }
     reader.truncate(reader.tell(), reader.tell_transaction_log());
