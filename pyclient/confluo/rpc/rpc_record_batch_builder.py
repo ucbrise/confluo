@@ -3,25 +3,24 @@ from ttypes import rpc_record_batch, rpc_record_block
 import struct
 
 class rpc_record_batch_builder:
-    """
-    A builder for a batch of records
+    """ A builder for a batch of records.
+
     Attributes:
-        TIME_BLOCK: The size of a time block for a record batch
+        TIME_BLOCK: The size of a time block for a record batch.
     """
     TIME_BLOCK = 1e6
     
     def __init__(self):
-        """
-        Initializes an empty rpc record batch builder
+        """ Initializes an empty rpc record batch builder.
         """
         self.num_records_ = 0
         self.clear()
 
     def add_record(self, record):
-        """
-        Adds a record to the batch builder
+        """ Adds a record to the batch builder.
+
         Args:
-            record: The record to add to the batch builder
+            record: The record to add to the batch builder.
         """
         ts = struct.unpack('l', record[:8])[0]
         time_block = int(ts / self.TIME_BLOCK)
@@ -30,10 +29,10 @@ class rpc_record_batch_builder:
         self.num_records_ += 1
 
     def get_batch(self):
-        """
-        Gets the record batch
+        """ Gets the record batch.
+
         Returns:
-            The record batch containing the records
+            The record batch containing the records.
         """
         batch = rpc_record_batch([], self.num_records_)
         for time_block in self.batch_:
@@ -44,8 +43,7 @@ class rpc_record_batch_builder:
         return batch
 
     def clear(self):
-        """
-        Clears the record batch builder
+        """ Clears the record batch builder.
         """
         self.batch_ = defaultdict(list)
         self.batch_sizes_ = {}

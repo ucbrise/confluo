@@ -12,6 +12,9 @@ namespace confluo {
 
 class aggregate;
 
+/**
+ * A node containing data about the aggregate 
+ */
 struct aggregate_node {
 
   aggregate_node()
@@ -242,6 +245,13 @@ class aggregate {
         concurrency_(0) {
   }
 
+  /**
+   * Initializes an aggregate based on the data type and other aggregate
+   *
+   * @param type The type of the aggregate
+   * @param agg The aggregate to initialize
+   * @param concurrency Max number of threads to run
+   */
   aggregate(const data_type& type, const aggregator& agg,
             int concurrency = thread_manager::get_max_concurrency())
       : type_(type),
@@ -252,6 +262,11 @@ class aggregate {
       aggs_[i].init(type, agg_);
   }
 
+  /**
+   * Initializes an aggregate from another aggregate
+   *
+   * @param other The other aggregate used to initialize this aggregate
+   */
   aggregate(const aggregate& other)
       : type_(other.type_),
         agg_(other.agg_),
@@ -262,6 +277,13 @@ class aggregate {
     }
   }
 
+  /**
+   * Assigns another aggregate to this aggregate
+   *
+   * @param other The other aggregate used to initialize this aggregate
+   *
+   * @return This updated aggregate
+   */
   aggregate& operator=(const aggregate& other) {
     type_ = other.type_;
     agg_ = other.agg_;
@@ -273,6 +295,11 @@ class aggregate {
     return *this;
   }
 
+  /**
+   * Moves the other aggregate to this aggregate
+   *
+   * @param other The other r value aggregate
+   */
   aggregate(aggregate&& other) {
     type_ = std::move(other.type_);
     agg_= std::move(other.agg_);
@@ -281,6 +308,13 @@ class aggregate {
     other.aggs_ = nullptr;
   }
 
+  /**
+   * Assigns another aggregate to this aggregate using move semantics
+   *
+   * @param other The other aggregate to move to this aggregate
+   *
+   * @return This updated aggregate
+   */
   aggregate& operator=(aggregate&& other) {
     type_ = std::move(other.type_);
     agg_= std::move(other.agg_);
@@ -290,16 +324,33 @@ class aggregate {
     return *this;
   }
 
+  /**
+   * Deallocates the aggregate
+   */
   ~aggregate() {
     if (aggs_ != nullptr) {
       delete[] aggs_;
     }
   }
 
+  /**
+   * Sequentially updates the aggregate for a thread
+   *
+   * @param thread_id The identifier for the thread
+   * @param value The value to update to
+   * @param version The version of the multilog
+   */
   void seq_update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].seq_update(value, version);
   }
 
+  /**
+   * A combinational update of an aggregate for a thread
+   *
+   * @param thread_id The identifier for a thread
+   * @param value The value of the numeric
+   * @param version The version of the multilog
+   */
   void comb_update(int thread_id, const numeric& value, uint64_t version) {
     aggs_[thread_id].comb_update(value, version);
   }

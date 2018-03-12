@@ -45,7 +45,7 @@ add_custom_command(
 add_custom_target(doxygen_cpp ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cpp.log)
 
-file(GLOB CPP_CLIENT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../libconfluo/confluo/*.h)
+#file(GLOB CPP_CLIENT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../librpc/rpc/*.h)
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cpp_client.log
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${DOXYGEN_CPP_CLIENT_IN} ${CPP_CLIENT_SOURCES}
@@ -57,6 +57,30 @@ add_custom_command(
 add_custom_target(doxygen_cpp_client ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cpp_client.log)
 
+set(PY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../docs/pyclient/source)
+set(PY_OUTPUT_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}/../build/docs/site/python_client_api)
+
+add_custom_target(pyclient-doc
+  ALL
+  sphinx-build
+  -b
+  html
+  ${PY_SOURCE_DIR}
+  ${PY_OUTPUT_DIR}
+)
+
+set(API_DOC_DIR ${CMAKE_CURRENT_BINARY_DIR}/site/java_client_api/)
+set(DOC_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../javaclient/src/main/java/confluo/rpc/*.java)
+set(JAVADOC_STRING "Javaclient API Documentation")
+add_custom_target(javadoc 
+	ALL 
+    javadoc
+	-sourcepath ${DOC_SRC_DIR}
+	-d ${API_DOC_DIR}
+    -classpath "${CMAKE_CURRENT_SOURCE_DIR}/.m2/repository/org/apache/thrift/libthrift/@THRIFT_VERSION@/libthrift-@THRIFT_VERSION@.jar"
+)
+
 # serve documentation website locally
 add_custom_target(docs_serve
   COMMAND ${MKDOCS_EXECUTABLE} serve
@@ -64,4 +88,3 @@ add_custom_target(docs_serve
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Serving Documentation built by MkDocs"
   VERBATIM)
-

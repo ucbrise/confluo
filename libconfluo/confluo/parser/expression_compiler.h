@@ -15,7 +15,7 @@ namespace spirit = boost::spirit;
  * from the expression.
  */
 struct compiled_predicate {
-    /**
+   /**
      * Constructs a predicate from the specified fields
      *
      * @param attr The field of the predicate
@@ -266,6 +266,7 @@ struct compiled_expression : public std::set<compiled_minterm> {
  */
 class utree_expand_conjunction {
  public:
+  /** The result type */
   typedef compiled_expression result_type;
 
   /**
@@ -292,7 +293,6 @@ class utree_expand_conjunction {
 
   /**
    * Operation for function type
-   * @param spirit::function_base The function passed in
    * @throw parse_exception Functions are not supported
    * @return The result
    */
@@ -380,6 +380,7 @@ class utree_compile_expression {
    * () operator that evaluates the compiled expression
    * @tparam T The type operator is called on
    * @throw parse_exception
+   * @return The result of the operator
    */
   template<typename T>
   result_type operator()(T) const {
@@ -389,6 +390,7 @@ class utree_compile_expression {
   /**
    * () operator that evaluates the compiled expression
    * @throw parse_exception
+   * @return The result of the operator
    */
   result_type operator()(spirit::function_base const&) const {
     throw parse_exception("Functions not supported");

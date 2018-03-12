@@ -16,6 +16,13 @@ namespace planner {
  */
 class query_plan : public std::vector<std::shared_ptr<query_op>> {
  public:
+  /**
+   * Initializes the query plan
+   *
+   * @param dlog The data log
+   * @param schema The schema for the query plan
+   * @param expr The query plan expression
+   */
   query_plan(const data_log* dlog, const schema_t* schema,
              const parser::compiled_expression& expr)
       : std::vector<std::shared_ptr<query_op>>(),
@@ -25,6 +32,11 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
 
   }
 
+  /**
+   * Gets a string representation of the query plan
+   *
+   * @return std::string
+   */
   std::string to_string() {
     if (!is_optimized()) {
       return at(0)->to_string() + "(" + expr_.to_string() + ")";
@@ -45,10 +57,26 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
     return !(size() == 1 && at(0)->op_type() == query_op_type::D_SCAN_OP);
   }
 
+  /**
+   * Executes the query plan 
+   *
+   * @param version The version of the multilog
+   *
+   * @return The pointer to the result of the query plan execution
+   */
   std::unique_ptr<record_cursor> execute(uint64_t version) {
     return is_optimized() ? using_indexes(version) : using_full_scan(version);
   }
 
+  /**
+   * Gets the aggregate for the query plan
+   *
+   * @param version The version of the atomic multilog
+   * @param field_idx The field index
+   * @param agg The aggregator for the aggregate
+   *
+   * @return The aggregate numeric
+   */
   numeric aggregate(uint64_t version, uint16_t field_idx,
                     const aggregator& agg) {
     std::unique_ptr<record_cursor> cursor = execute(version);

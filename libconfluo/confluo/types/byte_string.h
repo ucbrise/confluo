@@ -145,6 +145,7 @@ class immutable_byte_string {
   uint8_t* data_;
   size_t size_;
 
+  /** The byte string class */
   friend class byte_string;
 };
 

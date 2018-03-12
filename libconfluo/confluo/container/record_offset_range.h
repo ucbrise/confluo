@@ -11,6 +11,7 @@ namespace confluo {
 */
 class record_offset_range {
  public:
+  /** The value type */
   typedef uint64_t value_type;
   /**
    * Iterator for all of the records
@@ -18,6 +19,7 @@ class record_offset_range {
   class iterator : public std::iterator<std::input_iterator_tag, uint64_t,
       uint64_t, const uint64_t*, uint64_t> {
    public:
+    /** The value type */
     typedef uint64_t value_type;
 
     /**
@@ -46,7 +48,7 @@ class record_offset_range {
     /**
      * Increments this iterator by a specified amount
      *
-     * @param int The amount to advance the iterator by
+     * 
      *
      * @return A pointer to this iterator advanced
      */

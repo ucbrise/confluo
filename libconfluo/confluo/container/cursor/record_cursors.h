@@ -13,8 +13,17 @@ namespace confluo {
 
 typedef batched_cursor<record_t> record_cursor;
 
+/**
+ * A distinct record cursor
+ */
 class distinct_record_cursor : public record_cursor {
  public:
+  /**
+   * Initializes a distinct record cursor
+   *
+   * @param r_cursor A pointer to the record cursor
+   * @param batch_size The number of records in the batch
+   */
   distinct_record_cursor(std::unique_ptr<record_cursor> r_cursor,
                          size_t batch_size = 64)
       : record_cursor(batch_size),
@@ -22,6 +31,11 @@ class distinct_record_cursor : public record_cursor {
     init();
   }
 
+  /**
+   * Loads the next batch from the cursor
+   *
+   * @return The size of the batch
+   */
   virtual size_t load_next_batch() override {
     size_t i = 0;
     for (; i < current_batch_.size() && r_cursor_->has_more();
@@ -42,14 +56,34 @@ class distinct_record_cursor : public record_cursor {
   std::unique_ptr<record_cursor> r_cursor_;
 };
 
+/**
+ * Makes a distinct record cursor
+ *
+ * @param r_cursor A pointer to the record cursor
+ * @param batch_size The number of records in the batch
+ *
+ * @return A pointer to the record cursor
+ */
 std::unique_ptr<record_cursor> make_distinct(
     std::unique_ptr<record_cursor> r_cursor, size_t batch_size = 64) {
   return std::unique_ptr<record_cursor>(
       new distinct_record_cursor(std::move(r_cursor), batch_size));
 }
 
+/**
+ * A record cursor that filters out records
+ */
 class filter_record_cursor : public record_cursor {
  public:
+  /**
+   * Initializes the filter record
+   *
+   * @param o_cursor The offset cursor
+   * @param dlog The data log pointer
+   * @param schema The schema
+   * @param cexpr The filter expression
+   * @param batch_size The number of records in the batch
+   */
   filter_record_cursor(std::unique_ptr<offset_cursor> o_cursor,
                        const data_log* dlog, const schema_t* schema,
                        const parser::compiled_expression& cexpr,
@@ -62,6 +96,11 @@ class filter_record_cursor : public record_cursor {
     init();
   }
 
+  /**
+   * Loads the next batch from the cursor
+   *
+   * @return The size of the batch
+   */
   virtual size_t load_next_batch() override {
     size_t i = 0;
     for (; i < current_batch_.size() && o_cursor_->has_more();

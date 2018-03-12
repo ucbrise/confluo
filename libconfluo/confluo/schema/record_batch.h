@@ -69,7 +69,7 @@ class record_batch_builder {
 
   /**
    * Adds record data to the batch
-   * @param rec The record data to be added
+   * @param data The record data to be added
    */
   void add_record(const void* data) {
     size_t record_size = schema_.record_size();

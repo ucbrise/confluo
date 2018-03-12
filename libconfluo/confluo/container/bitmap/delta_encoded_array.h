@@ -21,8 +21,11 @@ namespace confluo {
 template<typename T, uint32_t sampling_rate = 128>
 class delta_encoded_array {
  public:
+  /** The size type */
   typedef size_t size_type;
+  /** The position type */
   typedef size_t pos_type;
+  /** The width type */
   typedef uint8_t width_type;
 
   /**
@@ -178,8 +181,11 @@ class delta_encoded_array {
     }
   }
 
+  /** The samples in the delta encoded array */
   unsized_bitmap_array<T>* samples_;
+  /** The offsets in the delta encoded array */
   unsized_bitmap_array<pos_type>* delta_offsets_;
+  /** The deltas in the delta encoded array */
   bitmap* deltas_;
 
  private:
@@ -260,8 +266,11 @@ static struct elias_gamma_prefix_sum {
 template<typename T, uint32_t sampling_rate = 128>
 class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
  public:
+  /** The size type */
   typedef typename delta_encoded_array<T>::size_type size_type;
+  /** The position type */
   typedef typename delta_encoded_array<T>::pos_type pos_type;
+  /** The width type */
   typedef typename delta_encoded_array<T>::width_type width_type;
 
   using delta_encoded_array<T>::encoding_size;

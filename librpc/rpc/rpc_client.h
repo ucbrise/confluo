@@ -32,6 +32,7 @@ namespace rpc {
  */
 class rpc_client {
  public:
+  /** The thrift client type */
   typedef rpc_serviceClient thrift_client;
 
   /**
@@ -393,6 +394,14 @@ class rpc_client {
   }
 
   // TODO: Add tests
+  /**
+   * Executes an aggregate
+   *
+   * @param aggregate_expr The aggregate expression
+   * @param filter_expr The filter expression
+   *
+   * @return A string containing the aggregate
+   */
   std::string execute_aggregate(const std::string& aggregate_expr,
       const std::string& filter_expr) {
     if (cur_multilog_id_ == -1) {
@@ -598,7 +607,7 @@ class rpc_client {
   /**
    * Asynchronous call the read  function
    *
-   * @param return The records that are read
+   * @param _return The records that are read
    * @param offset The offset to read from
    */
   void send_read(record_data& _return, int64_t offset) {
@@ -876,12 +885,18 @@ class rpc_client {
   }
 
 protected:
+  /** The multilog identifier for the client */
   int64_t cur_multilog_id_;
+  /** The schema of the multilog */
   schema_t cur_schema_;
 
+  /** The socket for the client to connect to */
   std::shared_ptr<TSocket> socket_;
+  /** The client transport */
   std::shared_ptr<TTransport> transport_;
+  /** The client protocol */
   std::shared_ptr<TProtocol> protocol_;
+  /** The thrift client */
   std::shared_ptr<thrift_client> client_;
 };
 

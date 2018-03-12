@@ -35,6 +35,7 @@ enum and_or
  */
 class utree_dbg_print {
  public:
+  /** The result type of the debug tree */
   typedef void result_type;
 
   utree_dbg_print() = default;
@@ -43,7 +44,6 @@ class utree_dbg_print {
    * Handles unrecognized type case
    *
    * @tparam T The data type
-   * @param T The type of argument passed in
    */
   template<typename T>
   void operator()(T) const {
@@ -97,7 +97,6 @@ class utree_dbg_print {
   /**
    * Prints the function
    *
-   * @param spirit::function_base The function to print
    */
   void operator()(spirit::function_base const&) const {
     return (*this)("<function>\n");
@@ -109,6 +108,7 @@ class utree_dbg_print {
  */
 class utree_to_op {
  public:
+  /** The result type */
   typedef int result_type;
 
   utree_to_op() = default;
@@ -151,6 +151,7 @@ class utree_to_op {
  */
 class utree_to_string {
  public:
+  /** The result type */
   typedef std::string result_type;
 
   utree_to_string() = default;
@@ -158,7 +159,6 @@ class utree_to_string {
   /**
    * Handles the case for unrecognized types
    * @tparam T The data type
-   * @param T The type of the argument
    * @throw parse_exception The type is not recognized
    * @return The result
    */
@@ -169,7 +169,6 @@ class utree_to_string {
 
   /**
    * Handles the case for functions passed in
-   * @param spirit::function_base The function passed in
    * @throw parse_exception Functions are not supported for to string
    * @return The result
    */
@@ -201,6 +200,7 @@ class utree_to_string {
  */
 class utree_negate {
  public:
+  /** The result type */
   typedef spirit::utree result_type;
 
   utree_negate() = default;
@@ -208,7 +208,6 @@ class utree_negate {
   /**
    * Handles the case for unrecognized types
    * @tparam T The data type
-   * @param T The type of the argument passed in
    * @throw parse_exception The type is not recognized
    * @return The tree
    */
@@ -278,7 +277,6 @@ class utree_negate {
 
   /**
    * Handles the case when functinos are passed in
-   * @param spirit::function_base The function passed in the argument
    * @throw parse_exception Functions are not supported for this operator
    * @return The tree
    */
@@ -299,6 +297,7 @@ struct expr {
    */
   template<typename T1, typename T2 = void>
   struct result {
+    /** The type of the result */
     using type = void;
   };
 
@@ -339,8 +338,9 @@ struct pred {
   * @tparam T1 The first type
   * @tparam T2 The second type
   */
- template<typename T1, typename T2 = void>
+  template<typename T1, typename T2 = void>
   struct result {
+    /** The type of the result */
     using type = void;
   };
 
@@ -371,22 +371,37 @@ struct pred {
   int const op;
 };
 
+/** Less than predicate function */
 boost::phoenix::function<pred> const LT = pred(reational_op_id::LT);
+/** Less than or equal to predicate function */
 boost::phoenix::function<pred> const LE = pred(reational_op_id::LE);
+/** Greater than predicate function */
 boost::phoenix::function<pred> const GT = pred(reational_op_id::GT);
+/** Greater than or equal to predicate function */
 boost::phoenix::function<pred> const GE = pred(reational_op_id::GE);
+/** Equality predicate function */
 boost::phoenix::function<pred> const EQ = pred(reational_op_id::EQ);
+/** Not equal to predicate function */
 boost::phoenix::function<pred> const NEQ = pred(reational_op_id::NEQ);
 
+/** Conjunction predicate function */
 boost::phoenix::function<expr> const CONJ = expr(and_or::AND);
+/** Disjoint predicate function */
 boost::phoenix::function<expr> const DISJ = expr(and_or::OR);
 
 /**
  * Negated expression
  */
 struct negate_expr {
+  /**
+   * The result of the expression
+   *
+   * @tparam T1 The type of first operand
+   * @tparam T2 The type of the second operand
+   */
   template<typename T1, typename T2 = void>
   struct result {
+    /** The type of the result */
     typedef void type;
   };
 
@@ -456,12 +471,19 @@ struct expression_parser : qi::grammar<I, ascii::space_type, spirit::utree()> {
     value = +(char_("_+-.") | alnum) | quoted_string;
   }
 
+  /** Expression rule */
   qi::rule<I, ascii::space_type, spirit::utree()> exp;
+  /** Term rule */
   qi::rule<I, ascii::space_type, spirit::utree()> term;
+  /** Factor rule */
   qi::rule<I, ascii::space_type, spirit::utree()> factor;
+  /** Predicate rule */
   qi::rule<I, ascii::space_type, spirit::utree()> predicate;
+  /** Identifier rule */
   qi::rule<I, ascii::space_type, std::string()> identifier;
+  /** Value rule */
   qi::rule<I, ascii::space_type, std::string()> value;
+  /** Quoted string rule */
   qi::rule<I, ascii::space_type, std::string()> quoted_string;
 };
 

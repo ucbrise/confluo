@@ -14,7 +14,9 @@ namespace confluo {
  */
 struct record_t {
  public:
+  /** The iterator for the record */
   typedef std::vector<field_t>::iterator iterator;
+  /** The constant iterator for the record */
   typedef std::vector<field_t>::const_iterator const_iterator;
 
   /**

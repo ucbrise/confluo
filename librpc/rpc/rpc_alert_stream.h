@@ -13,6 +13,7 @@ namespace rpc {
  */
 class rpc_alert_stream {
  public:
+  /** The rpc client type */
   typedef rpc_serviceClient rpc_client;
 
   /**
