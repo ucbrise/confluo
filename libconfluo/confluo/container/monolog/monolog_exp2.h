@@ -421,8 +421,8 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   /**
    * Constructs a default monolog iterator
    */
-  monolog_exp2()
-      : tail_(0) {
+  monolog_exp2(size_t count = 0)
+      : tail_(count) {
   }
 
   /**

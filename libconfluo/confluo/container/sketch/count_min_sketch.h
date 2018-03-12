@@ -33,14 +33,22 @@ class count_min_sketch {
         num_buckets_(num_buckets),
         counters_(new size_t[num_estimates_ * num_buckets_]()),
         hash_manager_(&manager) {
-  }
-
-  ~count_min_sketch() {
-    delete[] counters_;
+    hash_manager_->guarantee_initialized(num_estimates_);
+    LOG_INFO << "num_buckets: " << num_buckets_;
+    LOG_INFO << "num_ests: " << num_estimates_;
   }
 
   /**
-   * Update count estimates for element
+   * Fix this in copy constructed/assigned cases
+   */
+  ~count_min_sketch() {
+    if (counters_) {
+      delete[] counters_;
+    }
+  }
+
+  /**
+   * Update count estimates for element.
    * @param elem element
    */
   void update(T elem) {
@@ -51,7 +59,7 @@ class count_min_sketch {
   }
 
   /**
-   * Estimate count of element
+   * Estimate count of element.
    * @param elem element
    * @return estimated count
    */
@@ -73,8 +81,8 @@ class count_min_sketch {
    */
   // TODO rename func
   static count_min_sketch create_parameterized(double gamma, double epsilon, hash_manager& manager) {
-    return count_min_sketch(this->perror_to_num_estimates(gamma),
-                            this->error_margin_to_num_buckets(epsilon),
+    return count_min_sketch(count_min_sketch<T>::perror_to_num_estimates(gamma),
+                            count_min_sketch<T>::error_margin_to_num_buckets(epsilon),
                             manager);
   }
 
@@ -86,8 +94,8 @@ class count_min_sketch {
    */
   static size_t perror_to_num_estimates(double gamma) {
     // TODO assert
-    size_t n = std::pow(2, sizeof(T)) - 1;
-    return std::ceil(std::log(n / gamma));
+    double n = std::pow(2, sizeof(T) * 8) - 1;
+    return std::ceil(std::log2(n / gamma));
   }
 
   /**
