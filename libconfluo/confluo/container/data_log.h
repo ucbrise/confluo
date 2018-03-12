@@ -1,7 +1,11 @@
 #ifndef CONFLUO_CONTAINER_DATA_LOG_H_
 #define CONFLUO_CONTAINER_DATA_LOG_H_
 
+#include "storage/encoder.h"
 #include "monolog/monolog.h"
+#include "archival/monolog_linear_archiver.h"
+
+using namespace ::confluo::monolog;
 
 namespace confluo {
 
@@ -11,21 +15,30 @@ namespace confluo {
 class data_log_constants {
  public:
   /** Maximum number of blocks */
-  static constexpr size_t MAX_BLOCKS = 65536;
+  static const size_t MAX_BUCKETS = 65536;
   /** The size of each block */
-  static constexpr size_t BLOCK_SIZE = 67108864;
+  static const size_t BUCKET_SIZE = 67108864;
   /** The size of the buffer */
-  static constexpr size_t BUFFER_SIZE = 1048576;
+  static const size_t BUFFER_SIZE = 1048576;
 };
 
-constexpr size_t data_log_constants::MAX_BLOCKS;
-constexpr size_t data_log_constants::BLOCK_SIZE;
-constexpr size_t data_log_constants::BUFFER_SIZE;
+const size_t data_log_constants::MAX_BUCKETS;
+const size_t data_log_constants::BUCKET_SIZE;
+const size_t data_log_constants::BUFFER_SIZE;
 
-typedef monolog::monolog_linear<uint8_t, data_log_constants::MAX_BLOCKS,
-    data_log_constants::BLOCK_SIZE, data_log_constants::BUFFER_SIZE> data_log;
+typedef monolog_linear<uint8_t,
+                       data_log_constants::MAX_BUCKETS,
+                       data_log_constants::BUCKET_SIZE,
+                       data_log_constants::BUFFER_SIZE> data_log;
 
-typedef storage::read_only_ptr<uint8_t> ro_data_ptr;
+typedef archival::monolog_linear_archiver<uint8_t,
+                                          data_log_constants::MAX_BUCKETS,
+                                          data_log_constants::BUCKET_SIZE,
+                                          data_log_constants::BUFFER_SIZE> data_log_archiver;
+
+typedef storage::read_only_encoded_ptr<uint8_t> read_only_data_log_ptr;
+typedef storage::encoded_ptr<uint8_t> encoded_data_log_ptr;
+typedef storage::decoded_ptr<uint8_t> decoded_data_log_ptr;
 
 }
 

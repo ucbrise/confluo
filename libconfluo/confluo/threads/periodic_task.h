@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "../../libutils/utils/atomic.h"
+#include "atomic.h"
 #include "logger.h"
 
 /**

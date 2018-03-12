@@ -2,7 +2,6 @@
 #define CONFLUO_STORAGE_MEMPOOL_STAT_H_
 
 #include "atomic.h"
-#include "conf/configuration_params.h"
 
 namespace confluo {
 namespace storage {
@@ -15,10 +14,10 @@ class memory_stat {
 
  public:
   /**
-   * Initializes the memory statistics
+   * Initializes memory statistics.
    */
-  memory_stat() :
-    memory_used_(0) {
+  memory_stat()
+      : memory_used_(0) {
   }
 
   /**

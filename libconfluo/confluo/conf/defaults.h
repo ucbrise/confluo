@@ -2,8 +2,29 @@
 #define CONFLUO_CONF_DEFAULTS_H_
 
 #include <thread>
+#include "storage/ptr_aux_block.h"
 
 namespace confluo {
+
+/**
+ * Default archival configuration parameters
+ */
+class archival_defaults {
+ public:
+  static const uint64_t DEFAULT_PERIODICITY_MS = 5 * 60 * 1e3;
+  static const size_t DEFAULT_MAX_FILE_SIZE = 1024 * 1024 * 1024;
+  static const uint8_t DEFAULT_DATA_LOG_ENCODING_TYPE = storage::encoding_type::D_UNENCODED;
+  static const uint8_t DEFAULT_REFLOG_ENCODING_TYPE = storage::encoding_type::D_UNENCODED;
+  static const uint64_t DEFAULT_IN_MEMORY_DATALOG_WINDOW_BYTES = 1e10; // TODO % of physical memory
+  static const uint64_t DEFAULT_IN_MEMORY_FILTER_WINDOW_NS = 10 * 1e3;
+};
+
+const size_t archival_defaults::DEFAULT_MAX_FILE_SIZE;
+const uint64_t archival_defaults::DEFAULT_PERIODICITY_MS;
+const uint8_t archival_defaults::DEFAULT_DATA_LOG_ENCODING_TYPE;
+const uint8_t archival_defaults::DEFAULT_REFLOG_ENCODING_TYPE;
+const uint64_t archival_defaults::DEFAULT_IN_MEMORY_DATALOG_WINDOW_BYTES;
+const uint64_t archival_defaults::DEFAULT_IN_MEMORY_FILTER_WINDOW_NS;
 
 /**
  * Default configuration parameters
@@ -19,6 +40,7 @@ class defaults {
   /** Default maximum amount of memory */
   static constexpr size_t DEFAULT_MAX_MEMORY = 1e9;
   /** Default monitor window in milliseoncds */
+  static constexpr uint64_t DEFAULT_MEMORY_MONITOR_PERIODICITY_MS = 1;
   static constexpr uint64_t DEFAULT_MONITOR_WINDOW_MS = 10;
   /** Default periodicity for monitor in milliseconds */
   static constexpr uint64_t DEFAULT_MONITOR_PERIODICITY_MS = 1;
@@ -28,6 +50,7 @@ const int defaults::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
 constexpr double defaults::DEFAULT_INDEX_BUCKET_SIZE;
 constexpr size_t defaults::DEFAULT_MAX_MEMORY;
 constexpr uint64_t defaults::DEFAULT_TIME_RESOLUTION_NS;
+constexpr uint64_t defaults::DEFAULT_MEMORY_MONITOR_PERIODICITY_MS;
 constexpr uint64_t defaults::DEFAULT_MONITOR_WINDOW_MS;
 constexpr uint64_t defaults::DEFAULT_MONITOR_PERIODICITY_MS;
 

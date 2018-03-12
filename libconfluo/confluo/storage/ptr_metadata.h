@@ -4,8 +4,10 @@
 namespace confluo {
 namespace storage {
 
+// TODO add enums to convert between raw byte types
+
 /**
- * The type of allocator
+ * Type of allocation.
  */
 struct alloc_type {
   /** Default allocation */
@@ -18,36 +20,21 @@ const uint8_t alloc_type::D_DEFAULT;
 const uint8_t alloc_type::D_MMAP;
 
 /**
- * Type of state
- */
-struct state_type {
-  /** In memory state */
-  static const uint8_t D_IN_MEMORY = 0;
-  /** Archived state */
-  static const uint8_t D_ARCHIVED = 1;
-};
-
-const uint8_t state_type::D_IN_MEMORY;
-const uint8_t state_type::D_ARCHIVED;
-
-/**
- * Metadata from the pointer
+ * Pointer metadata set for memory allocated by the
+ * allocator. Not all fields may necessarily be set.
  */
 typedef struct ptr_metadata {
-  /** Size of pointer */
-  size_t size_ : 32;
-  /** Identifier of the thread */
-  uint8_t thread_id_ : 8;
-  /** The state of the pointer */
-  uint8_t state_ : 4;
-  /** The allocation type */
-  uint8_t alloc_type_ : 4;
-  /** Amount unused */
-  int unused: 16;
+
+  // Do NOT re-order.
+  uint32_t data_size_ : 32; // size of data
+  uint16_t offset_: 16; // data offset from allocated pointer location
+  uint16_t thread_id_ : 11; // allocating thread id
+  uint8_t alloc_type_ : 1; // allocation type
+  uint8_t aux_ : 4; // data-related state information
 
   /**
    * Get metadata associated with a pointer
-   * @param ptr The pointer to get metadaata from
+   * @param ptr The pointer to get metadaata of
    * @return The metadata associated with the pointer
    */
   static ptr_metadata* get(void* ptr) {

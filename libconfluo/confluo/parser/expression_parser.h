@@ -8,6 +8,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 
 #include <string>
+#include <set>
 
 #include "types/relational_ops.h"
 

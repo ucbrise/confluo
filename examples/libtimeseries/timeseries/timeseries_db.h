@@ -11,7 +11,7 @@ class timeseries_db : public atomic_multilog {
   timeseries_db(const std::string& name, const std::vector<column_t>& schema,
                 const std::string& path, const storage::storage_mode& storage,
                 task_pool& task_pool)
-      : atomic_multilog(name, schema, path, storage, task_pool) {
+      : atomic_multilog(name, schema, path, storage, archival_mode::OFF, task_pool) {
     // Index the timestamp column by calling add_index
     add_index("TIMESTAMP");
   }
@@ -45,7 +45,7 @@ class timeseries_db : public atomic_multilog {
   void compute_diff(std::vector<record_t>& pts, uint64_t from_version,
                     uint64_t to_version) {
     for (uint64_t v = from_version; v < to_version; v += record_size()) {
-      ro_data_ptr ptr;
+      read_only_data_log_ptr ptr;
       read(v, ptr);
       pts.push_back(record_t(v, ptr, record_size()));
     }

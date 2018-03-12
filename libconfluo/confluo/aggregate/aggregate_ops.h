@@ -1,6 +1,7 @@
 #ifndef CONFLUO_TYPES_AGGREGATE_OPS_H_
 #define CONFLUO_TYPES_AGGREGATE_OPS_H_
 
+#include "types/data_type.h"
 #include "types/numeric.h"
 
 namespace confluo {

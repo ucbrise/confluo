@@ -74,6 +74,17 @@ class byte_utils {
     return (__val << 32) | ((__val >> 32) & 0xFFFFFFFFULL);
   }
 
+  template<typename T>
+  static T reverse_as(uint8_t* data, size_t size) {
+    uint8_t *buf = new uint8_t[size];
+    for (size_t i = 0; i < size; i++) {
+      buf[size - i - 1] = data[i];
+    }
+    T val = *reinterpret_cast<T*>(buf);
+    delete[] buf;
+    return val;
+  }
+
 };
 
 }

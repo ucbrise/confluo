@@ -7,12 +7,15 @@
 #include <numeric>
 #include <thread>
 
+#include "archival/archival_mode.h"
+#include "archival/load_utils.h"
 #include "optional.h"
 #include "exceptions.h"
 #include "parser/expression_compiler.h"
 #include "trigger.h"
 #include "types/type_manager.h"
 #include "alert_index.h"
+#include "archival/atomic_multilog_archiver.h"
 #include "atomic_multilog_metadata.h"
 #include "conf/configuration_params.h"
 #include "container/data_log.h"
@@ -31,6 +34,7 @@
 #include "parser/trigger_parser.h"
 #include "planner/query_planner.h"
 #include "read_tail.h"
+#include "schema/column.h"
 #include "schema/record_batch.h"
 #include "schema/schema.h"
 #include "storage/storage.h"
@@ -39,6 +43,7 @@
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
 
+using namespace ::confluo::archival;
 using namespace ::confluo::monolog;
 using namespace ::confluo::index;
 using namespace ::confluo::monitor;
@@ -113,25 +118,86 @@ class atomic_multilog {
    * @param pool The pool of tasks
    */
   atomic_multilog(const std::string& name, const std::vector<column_t>& schema,
-                  const std::string& path, const storage::storage_mode& mode,
-                  task_pool& pool)
+                  const std::string& path, const storage::storage_mode& s_mode,
+                  const archival_mode& a_mode, task_pool& pool)
       : name_(name),
         schema_(schema),
-        data_log_("data_log", path, mode),
-        rt_(path, mode),
-        metadata_(path, mode),
+        data_log_("data_log", path, s_mode),
+        rt_(path, s_mode),
+        metadata_(path),
         planner_(&data_log_, &indexes_, &schema_),
+        archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
+        archival_task_("archival"),
+        archival_pool_(),
         mgmt_pool_(pool),
         monitor_task_("monitor") {
+    data_log_.pre_alloc();
     metadata_.write_schema(schema_);
+    metadata_.write_storage_mode(s_mode);
+    metadata_.write_archival_mode(a_mode);
     monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
                         configuration_params::MONITOR_PERIODICITY_MS);
+    if (a_mode == archival_mode::ON) {
+      archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
+                           archival_configuration_params::PERIODICITY_MS);
+    }
   }
 
   atomic_multilog(const std::string& name, const std::string& schema,
-                  const std::string& path, const storage::storage_mode& mode,
-                  task_pool& pool)
-      : atomic_multilog(name, parser::parse_schema(schema), path, mode, pool) {
+                  const std::string& path, const storage::storage_mode& storage_mode,
+                  const archival_mode& a_mode, task_pool& pool)
+      : atomic_multilog(name, parser::parse_schema(schema), path, storage_mode, a_mode, pool) {
+  }
+
+  /**
+   * Constructor that initializes atomic multilog from existing archives.
+   * @param name The atomic multilog name
+   * @param path The path of the atomic multilog
+   * @param pool The pool of tasks
+   */
+  atomic_multilog(const std::string& name, const std::string& path, task_pool& pool)
+      : name_(name),
+        schema_(),
+        metadata_(path),
+        planner_(&data_log_, &indexes_, &schema_),
+        archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
+        archival_task_("archival"),
+        archival_pool_(),
+        mgmt_pool_(pool),
+        monitor_task_("monitor") {
+    storage_mode s_mode;
+    archival_mode a_mode;
+    load_metadata(path, s_mode, a_mode);
+    data_log_ = data_log_type("data_log", path, s_mode);
+    rt_ = read_tail_type(path, s_mode);
+    load(s_mode);
+    monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
+                        configuration_params::MONITOR_PERIODICITY_MS);
+    if (a_mode == archival_mode::ON) {
+      archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
+                           archival_configuration_params::PERIODICITY_MS);
+    }
+  }
+
+  /**
+   * Force archival of multilog up to the read tail.
+   */
+  void archive() {
+    archive(rt_.get());
+  }
+
+  /**
+   * Force archival of multilog up to an offset.
+   * @param offset The offset of the data into the data log
+   */
+  void archive(size_t offset) {
+    optional<management_exception> ex;
+    std::future<void> ret = archival_pool_.submit([this, offset] {
+      archiver_.archive(offset);
+    });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
   }
 
   // Management ops
@@ -342,10 +408,7 @@ class atomic_multilog {
   size_t append(void* data) {
     size_t record_size = schema_.record_size();
     size_t offset = data_log_.append((const uint8_t*) data, record_size);
-
-    ro_data_ptr ptr;
-    data_log_.ptr(offset, ptr);
-    record_t r = schema_.apply(offset, ptr);
+    record_t r = schema_.apply_unsafe(offset, data);
 
     size_t nfilters = filters_.size();
     for (size_t i = 0; i < nfilters; i++)
@@ -381,14 +444,13 @@ class atomic_multilog {
    * @param version The tail pointer's location
    * @param ptr The read-only pointer to store in
    */
-  void read(uint64_t offset, uint64_t& version, ro_data_ptr& ptr) const {
+  void read(uint64_t offset, uint64_t& version, storage::read_only_encoded_ptr<uint8_t>& ptr) const {
     version = rt_.get();
     if (offset < version) {
       data_log_.cptr(offset, ptr);
-      record_t r = schema_.apply(offset, ptr);
       return;
     }
-    ptr.init(nullptr, 0, nullptr);
+    ptr.init(nullptr);
   }
 
   /**
@@ -396,7 +458,7 @@ class atomic_multilog {
    * @param offset The location of the data
    * @param ptr The read-only pointer to store in
    */
-  void read(uint64_t offset, ro_data_ptr& ptr) const {
+  void read(uint64_t offset, storage::read_only_encoded_ptr<uint8_t>& ptr) const {
     uint64_t version;
     read(offset, version, ptr);
   }
@@ -408,9 +470,10 @@ class atomic_multilog {
    * @return Return the corresponding record.
    */
   std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
-    ro_data_ptr rptr;
+    read_only_data_log_ptr rptr;
     read(offset, version, rptr);
-    return schema_.data_to_record_vector(rptr.get());
+    decoded_data_log_ptr dec_ptr = rptr.decode();
+    return schema_.data_to_record_vector(dec_ptr.get());
   }
 
   /**
@@ -597,6 +660,65 @@ class atomic_multilog {
   }
 
  protected:
+  /**
+   * Load multilog from archives. Expects metadata to be loaded
+   * and archiver to be initialized.
+   * Note: no reads/writes should occur during this period, since the data log is being initialized.
+   * @param mode The storage mode used in the previous life-cycle of this multilog
+   */
+  void load(const storage::storage_mode& mode) {
+    load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
+    load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
+    load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
+    rt_.advance(0, data_log_.size());
+  }
+
+  void load_metadata(const std::string& path, storage_mode& s_mode, archival_mode& a_mode) {
+    metadata_reader reader(path);
+    metadata_writer temp = metadata_;
+    metadata_ = metadata_writer(); // metadata shouldn't be written while loading
+    while (reader.has_next()) {
+      switch (reader.next_type()) {
+      case D_SCHEMA_METADATA: {
+        schema_ = reader.next_schema();
+        break;
+      }
+      case D_FILTER_METADATA: {
+        auto filter_metadata = reader.next_filter_metadata();
+        add_filter(filter_metadata.filter_name(), filter_metadata.expr());
+        break;
+      }
+      case D_INDEX_METADATA: {
+        auto index_metadata = reader.next_index_metadata();
+        add_index(index_metadata.field_name(), index_metadata.bucket_size());
+        break;
+      }
+      case D_AGGREGATE_METADATA: {
+        auto agg_metadata = reader.next_aggregate_metadata();
+        add_aggregate(agg_metadata.aggregate_name(), agg_metadata.filter_name(),
+            agg_metadata.aggregate_expression());
+        break;
+      }
+      case D_TRIGGER_METADATA: {
+        auto trigger_metadata = reader.next_trigger_metadata();
+        optional<management_exception> ex;
+        add_trigger_task(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
+            trigger_metadata.periodicity_ms(), ex);
+        break;
+      }
+      case D_STORAGE_MODE_METADATA: {
+        s_mode = reader.next_storage_mode();
+        break;
+      }
+      case D_ARCHIVAL_MODE_METADATA: {
+        a_mode = reader.next_archival_mode();
+        break;
+      }
+      }
+    }
+    metadata_ = temp;
+  }
+
   /**
    * Updates the record block
    * @param log_offset The offset of the log
@@ -810,8 +932,7 @@ class atomic_multilog {
    * @param ex The exception when the trigger cannot be added
    */
   void add_trigger_task(const std::string& name, const std::string& expr,
-                        uint64_t periodicity_ms,
-                        optional<management_exception>& ex) {
+                        uint64_t periodicity_ms, optional<management_exception>& ex) {
     trigger_id_t trigger_id;
     if (trigger_map_.get(name, trigger_id) != -1) {
       ex = management_exception("Trigger " + name + " already exists.");
@@ -867,6 +988,21 @@ class atomic_multilog {
   }
 
   /**
+   * Archives until only a configured number of bytes
+   * of the data log are resident in memory.
+   */
+  void archival_task() {
+    optional<management_exception> ex;
+    std::future<void> ret = archival_pool_.submit([this] {
+      if (rt_.get() > archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES)
+        archiver_.archive(rt_.get() - archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES);
+    });
+    ret.wait();
+    if (ex.has_value())
+      throw ex.value();
+  }
+
+  /**
    * Monitors the task executed on the atomic multilog
    */
   void monitor_task() {
@@ -908,8 +1044,7 @@ class atomic_multilog {
    * @param time_bucket The time_bucket to check
    * @param version The version to check
    */
-  void check_time_bucket(filter* f, trigger* t, size_t tid,
-                         uint64_t time_bucket, uint64_t version) {
+  void check_time_bucket(filter* f, trigger* t, size_t tid, uint64_t time_bucket, uint64_t version) {
     size_t window_size = t->periodicity_ms();
     for (uint64_t ms = time_bucket - window_size; ms <= time_bucket; ms++) {
       const aggregated_reflog* ar = f->lookup(ms);
@@ -939,6 +1074,11 @@ class atomic_multilog {
   string_map<trigger_id_t> trigger_map_;
 
   query_planner planner_;
+
+  // Archival
+  atomic_multilog_archiver archiver_;
+  periodic_task archival_task_;
+  task_pool archival_pool_;
 
   // Manangement
   task_pool& mgmt_pool_;

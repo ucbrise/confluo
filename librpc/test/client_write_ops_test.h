@@ -70,13 +70,13 @@ class ClientWriteOpsTest : public testing::Test {
     return data;
   }
 
-  static confluo_store* simple_table_store(std::string atomic_multilog_name,
-                                           storage::storage_mode id) {
+static confluo_store* simple_multilog_store(std::string atomic_multilog_name,
+                                            storage::storage_mode mode) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         atomic_multilog_name,
         schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
-        id);
+        mode);
     return store;
   }
 
@@ -137,10 +137,9 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
 }
 
 TEST_F(ClientWriteOpsTest, WriteTest) {
-
   std::string atomic_multilog_name = "my_multilog";
 
-  auto store = simple_table_store(atomic_multilog_name, storage::IN_MEMORY);
+  auto store = simple_multilog_store(atomic_multilog_name, storage::storage_mode::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -155,10 +154,10 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   int64_t ts = utils::time_utils::cur_ns();
   client.append(make_simple_record(ts, "abc"));
 
-  ro_data_ptr ptr;
+  read_only_data_log_ptr ptr;
   mlog->read(0, ptr);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()),
-  DATA_SIZE);
+  decoded_data_log_ptr decoded_ptr = ptr.decode();
+  std::string buf = std::string(reinterpret_cast<const char*>(decoded_ptr.get()), DATA_SIZE);
   ASSERT_EQ(buf.substr(8, 3), "abc");
 
   client.disconnect();

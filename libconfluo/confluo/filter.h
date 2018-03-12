@@ -46,6 +46,7 @@ class filter {
   // nanosecond time-stamps can be handled by the index.
   typedef index::radix_tree<aggregated_reflog> idx_t;
   typedef idx_t::rt_result range_result;
+  typedef idx_t::rt_reflog_result reflog_result;
 
   /**
    * Constructor that initializes filter with provided compiled expression and
@@ -170,6 +171,17 @@ class filter {
         refs->comb_update_aggregate(tid, j, local_aggs[j], version);
   }
 
+  // TODO rename later
+  /**
+   * Get the RefLog corresponding to given time-block.
+   *
+   * @param ts_block Given time-block.
+   * @return Corresponding RefLog.
+   */
+  aggregated_reflog* lookup_unsafe(uint64_t ts_block) const {
+    return idx_.get_unsafe(byte_string(ts_block));
+  }
+
   /**
    * Get the RefLog corresponding to given time-block.
    *
@@ -194,6 +206,18 @@ class filter {
   }
 
   /**
+   * Get the range of reflogs that lie between time-blocks.
+   * @param ts_block_begin beginning time-block
+   * @param ts_block_end end time-block
+   * @return an iterator over reflogs in the time range
+   */
+  reflog_result lookup_range_reflogs(uint64_t ts_block_begin,
+                                     uint64_t ts_block_end) const {
+    return idx_.range_lookup_reflogs(byte_string(ts_block_begin),
+                                     byte_string(ts_block_end));
+  }
+
+  /**
    * Invalidates the filter expression
    *
    * @return True if the filter was succesfully validated, false otherwise
@@ -213,6 +237,14 @@ class filter {
    */
   bool is_valid() {
     return atomic::load(&is_valid_);
+  }
+
+  /**
+   * Note: It is dangerous to modify this data structure.
+   * @return underlying radix tree
+   */
+  idx_t& data() {
+    return idx_;
   }
 
  private:

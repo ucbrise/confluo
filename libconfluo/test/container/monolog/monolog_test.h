@@ -115,11 +115,11 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
   array.set(0, data, 3);
 
   int buffer[3];
-  read_only_ptr<int> result;
+  read_only_encoded_ptr<int> result;
   array.ptr(0, result);
-  int* result_ptr = result.get();
+  auto result_ptr = result.decode();
   for (size_t i = 0; i < 3; i++) {
-    ASSERT_EQ(data[i], *(result_ptr + i));
+    ASSERT_EQ(data[i], result_ptr.get()[i]);
   }
 
   array.ensure_alloc(5, 8);
@@ -131,6 +131,8 @@ TEST_F(MonoLogTest, MonoLogExp2LinearBaseReadWriteTest) {
   array.set_unsafe(5, new_data, 3);
   array.get(buffer, 5, 3);
   ASSERT_EQ(new_data[0], buffer[0]);
+  ASSERT_EQ(new_data[1], buffer[1]);
+  ASSERT_EQ(new_data[2], buffer[2]);
 }
 
 TEST_F(MonoLogTest, MonoLogExp2LinearTest) {
@@ -143,34 +145,28 @@ TEST_F(MonoLogTest, MonoLogExp2LinearTest) {
 }
 
 TEST_F(MonoLogTest, MonoLogLinearIMTest) {
-  monolog_linear<uint8_t, 8, 1048576, 1024> array("mlog", "/tmp",
-                                                   storage::IN_MEMORY);
+  monolog_linear<uint8_t, 8, 1048576, 1024> array("mlog", "/tmp", IN_MEMORY);
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_linear<uint8_t, 8, 1048576, 1024> arr("mlog", "/tmp",
-                                                   storage::IN_MEMORY);
+    monolog_linear<uint8_t, 8, 1048576, 1024> arr("mlog", "/tmp", IN_MEMORY);
     monolog_test_mt(arr, num_threads);
   }
 }
 
 TEST_F(MonoLogTest, MonoLogLinearDRTest) {
-  monolog_linear<uint8_t, 8, 1048576, 1024> array("mlog", "/tmp",
-                                                   storage::DURABLE_RELAXED);
+  monolog_linear<uint8_t, 8, 1048576, 1024> array("mlog", "/tmp", DURABLE_RELAXED);
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_linear<uint8_t, 8, 1048576, 1024> arr("mlog", "/tmp",
-                                                   storage::DURABLE_RELAXED);
+    monolog_linear<uint8_t, 8, 1048576, 1024> arr("mlog", "/tmp", DURABLE_RELAXED);
     monolog_test_mt(arr, num_threads);
   }
 }
 
 TEST_F(MonoLogTest, MonoLogLinearDTest) {
-  monolog_linear<uint8_t, 8, 1048576, 1024> array("mlog", "/tmp",
-                                                   storage::DURABLE);
+  monolog_linear<uint8_t, 8, 1048576, 1024> array("mlog", "/tmp", DURABLE);
   monolog_test(array);
   for (uint32_t num_threads = 1; num_threads <= 4; num_threads++) {
-    monolog_linear<uint8_t, 8, 1048576, 1024> arr("mlog", "/tmp",
-                                                   storage::DURABLE);
+    monolog_linear<uint8_t, 8, 1048576, 1024> arr("mlog", "/tmp", DURABLE);
     monolog_test_mt(arr, num_threads);
   }
 }
