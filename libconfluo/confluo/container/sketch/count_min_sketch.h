@@ -2,24 +2,30 @@
 #define CONFLUO_CONTAINER_SKETCH_COUNT_MIN_SKETCH_H_
 
 #include <vector>
+#include "atomic.h".
 #include "hash_manager.h"
 #include "types/primitive_types.h"
 
 namespace confluo {
 namespace sketch {
 
-template<typename T>
+/**
+ * Thread-safe count-min-sketch.
+ */
+template<typename T, typename counter_t = size_t>
 class count_min_sketch {
 
  public:
+  typedef atomic::type<counter_t> atomic_counter_t;
+
   /**
    * Constructor.
    * @param manager hash manager
    */
-  count_min_sketch(const hash_manager& manager)
-      : count_min_sketch(count_min_sketch<T>::perror_to_num_estimates(0.01),
-                         count_min_sketch<T>::error_margin_to_num_buckets(0.01),
-                         manager) {
+  count_min_sketch(hash_manager& manager)
+      : count_min_sketch<T, counter_t>(count_min_sketch<T>::perror_to_num_estimates(0.01),
+                                       count_min_sketch<T>::error_margin_to_num_buckets(0.01),
+                                       manager) {
   }
 
   /**
@@ -31,11 +37,9 @@ class count_min_sketch {
   count_min_sketch(size_t num_estimates, size_t num_buckets, hash_manager& manager)
       : num_estimates_(num_estimates),
         num_buckets_(num_buckets),
-        counters_(new size_t[num_estimates_ * num_buckets_]()),
+        counters_(new atomic_counter_t[num_estimates_ * num_buckets_]()),
         hash_manager_(&manager) {
     hash_manager_->guarantee_initialized(num_estimates_);
-    LOG_INFO << "num_buckets: " << num_buckets_;
-    LOG_INFO << "num_ests: " << num_estimates_;
   }
 
   /**
@@ -53,8 +57,8 @@ class count_min_sketch {
    */
   void update(T elem) {
     for (size_t i = 0; i < num_estimates_; i++) {
-      int bucket_idx = hash_manager_->hash(elem, i) % num_buckets_;
-      counters_[num_buckets_ * i + bucket_idx]++;
+      int bucket_idx = hash_manager_->hash(i, elem) % num_buckets_;
+      atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], 1);
     }
   }
 
@@ -63,11 +67,11 @@ class count_min_sketch {
    * @param elem element
    * @return estimated count
    */
-  size_t estimate(T elem) {
-    size_t min_estimate = limits::ulong_max;
+  counter_t estimate(T elem) {
+    counter_t min_estimate = std::numeric_limits<counter_t>::max();
     for (size_t i = 0; i < num_estimates_; i++) {
-      size_t bucket_idx = hash_manager_->hash(elem, i) % num_buckets_;
-      min_estimate = std::min(min_estimate, counters_[num_buckets_ * i + bucket_idx]);
+      size_t bucket_idx = hash_manager_->hash(i, elem) % num_buckets_;
+      min_estimate = std::min(min_estimate, atomic::load(&counters_[num_buckets_ * i + bucket_idx]));
     }
     return min_estimate;
   }
@@ -111,7 +115,7 @@ class count_min_sketch {
   size_t num_estimates_; // t
   size_t num_buckets_; // b
 
-  size_t* counters_;
+  atomic_counter_t* counters_;
   hash_manager* hash_manager_;
 
 };

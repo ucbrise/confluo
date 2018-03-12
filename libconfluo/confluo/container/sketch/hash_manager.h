@@ -2,6 +2,7 @@
 #define CONFLUO_CONTAINER_SKETCH_HASH_MANAGER_H_
 
 #include <vector>
+#include "container/monolog/monolog_exp2.h"
 #include "rand_utils.h"
 
 namespace confluo {
@@ -19,7 +20,7 @@ class simple_hash {
       : simple_hash(0, 0) {
   }
 
-  simple_hash(int a, int b)
+  simple_hash(size_t a, size_t b)
       : a_(a),
         b_(b) {
   }
@@ -37,29 +38,39 @@ class simple_hash {
 
  private:
   size_t a_, b_;
+
 };
 
 const size_t simple_hash::LONG_PRIME;
 
 class hash_manager {
  public:
-  hash_manager(size_t num_hashes = 1)
-      : hashes_(num_hashes) {
+  hash_manager(size_t num_hashes = 0)
+      : hashes_() {
+    this->guarantee_initialized(num_hashes);
   }
 
+  /**
+   * Guarantee enough hashes are intialized.
+   * TODO trivial concurrency handling: may initialize more than required. fix this
+   * @param num_hashes number of hashes
+   */
   void guarantee_initialized(size_t num_hashes) {
-    size_t num_new_hashes = num_hashes > hashes_.size() ? num_hashes - hashes_.size() : 0;
-    for (size_t i = 0; i < num_new_hashes; i++)
-      hashes_.push_back(simple_hash::generate_random());
+    size_t cur_size = hashes_.size();
+    size_t num_new_hashes = num_hashes > cur_size ? num_hashes - cur_size : 0;
+    size_t start = hashes_.reserve(num_new_hashes);
+    for (size_t i = 0; i < num_new_hashes; i++) {
+      hashes_[start + i] = simple_hash::generate_random();
+    }
   }
 
   template<typename T>
-  size_t hash(T elem, size_t hash_id) {
+  size_t hash(size_t hash_id, T elem) {
     return hashes_[hash_id].apply<T>(elem);
   }
 
  private:
-  std::vector<simple_hash> hashes_;
+  monolog_exp2<simple_hash> hashes_;
 
 };
 
