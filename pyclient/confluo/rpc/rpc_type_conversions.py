@@ -18,6 +18,7 @@ def convert_to_rpc_schema(schema):
 
 def convert_to_schema(rpc_schema):
     """ Converts an rpc schema to a schema for confluo.
+
     Args:
         rpc_schema: The rpc_schema to convert.
     Returns:

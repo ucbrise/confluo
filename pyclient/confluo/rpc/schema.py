@@ -7,6 +7,7 @@ class schema:
     """
     def __init__(self, columns):
         """ Initializes the schema to the list of columns passed in.
+
         Args:
             columns: The list of columns that make up the schema.
         """
@@ -17,6 +18,7 @@ class schema:
 
     def apply(self, offset, data):
         """ Adds data to the schema.
+
         Args:
             offset: The offset in the record where the data is
             data: The data to add.
@@ -33,6 +35,7 @@ class column:
     """
     def __init__(self, idx, offset, dtype, name, min_value, max_value):
         """ Initializes a column in the schema.
+
         Args:
             idx: The index of the column.
             offset: The offset of the column.
@@ -48,13 +51,15 @@ class column:
         self.min_value_ = min_value
         self.max_value = max_value
 
-    """ Adds data to the column.
-    Args:
-        data: The data to add.
-    Returns:
-        A field containing the data.
-    """
     def apply(self, data):
+        """ Adds data to the column.
+
+        Args:
+            data: The data to add.
+        Returns:
+            A field containing the data.
+        """
+
         return field(self.idx_, self.data_type_, data[self.offset_ : self.offset_ + self.data_type_.size_])
 
 class record:
@@ -63,6 +68,7 @@ class record:
     def __init__(self, log_offset, data, size):
         """
         Initializes a record to the specified values.
+
         Args:
             log_offset: The offset from the log.
             data: The data the record should hold.
@@ -76,6 +82,7 @@ class record:
 
     def push_back(self, value):
         """ Adds a value to the record.
+
         Args:
             value: The value to add.
         """
@@ -83,8 +90,9 @@ class record:
 
     def at(self, idx):
         """ Gets a field at a specific index.
+
         Args:
-            The index of the desired field.
+            idx: The index of the desired field.
         Returns:
             The desired field.
         """
@@ -92,6 +100,7 @@ class record:
 
 class field:
     """ Contains data stored as part of a record.
+
     Attributes:
         FORMAT_CODES: Identifiers for different data types.
     """
@@ -108,6 +117,7 @@ class field:
 
     def __init__(self, idx, dtype, data):
         """ Initializes the field to the data passed in.
+
         Args:
             idx: The index of the field.
             dtype: The data type the value of the field contains.
@@ -119,6 +129,7 @@ class field:
 
     def unpack(self):
         """ Unpacks the field to get the data.
+
         Returns:
             The data in the field.
         """

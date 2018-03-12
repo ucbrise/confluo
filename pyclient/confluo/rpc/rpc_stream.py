@@ -72,6 +72,7 @@ class alert_stream:
     def has_more(self):
         """ Checks whether the stream has any more elements.
 
-        Returns: True if there are any elements left in the stream, false otherwise.
+        Returns: 
+            True if there are any elements left in the stream, false otherwise.
         """
         return self.handle_.has_more or not self.stream_
