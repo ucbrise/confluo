@@ -32,7 +32,7 @@
   <!-- ====================================================================== -->
 
   <path id="build.classpath">
-    <pathelement location="${maven.repo.local}/org/apache/thrift/libthrift/0.10.0/libthrift-0.10.0.jar"/>
+    <pathelement location="${maven.repo.local}/org/apache/thrift/libthrift/@THRIFT_VERSION@/libthrift-@THRIFT_VERSION@.jar"/>
     <pathelement location="${maven.repo.local}/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar"/>
     <pathelement location="${maven.repo.local}/org/apache/httpcomponents/httpclient/4.4.1/httpclient-4.4.1.jar"/>
     <pathelement location="${maven.repo.local}/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"/>
@@ -40,7 +40,7 @@
     <pathelement location="${maven.repo.local}/org/apache/httpcomponents/httpcore/4.4.1/httpcore-4.4.1.jar"/>
   </path>
   <path id="build.test.classpath">
-    <pathelement location="${maven.repo.local}/org/apache/thrift/libthrift/0.10.0/libthrift-0.10.0.jar"/>
+    <pathelement location="${maven.repo.local}/org/apache/thrift/libthrift/@THRIFT_VERSION@/libthrift-@THRIFT_VERSION@.jar"/>
     <pathelement location="${maven.repo.local}/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar"/>
     <pathelement location="${maven.repo.local}/org/apache/httpcomponents/httpclient/4.4.1/httpclient-4.4.1.jar"/>
     <pathelement location="${maven.repo.local}/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"/>
@@ -73,9 +73,9 @@
           description="Download all dependencies" 
           unless="maven.mode.offline">
     <mkdir dir="${maven.repo.local}"/>
-    <mkdir dir="${maven.repo.local}/org/apache/thrift/libthrift/0.10.0"/>
-    <get src="https://repo.maven.apache.org/maven2/org/apache/thrift/libthrift/0.10.0/libthrift-0.10.0.jar" 
-         dest="${maven.repo.local}/org/apache/thrift/libthrift/0.10.0/libthrift-0.10.0.jar" 
+    <mkdir dir="${maven.repo.local}/org/apache/thrift/libthrift/@THRIFT_VERSION@"/>
+    <get src="https://repo.maven.apache.org/maven2/org/apache/thrift/libthrift/@THRIFT_VERSION@/libthrift-@THRIFT_VERSION@.jar" 
+         dest="${maven.repo.local}/org/apache/thrift/libthrift/@THRIFT_VERSION@/libthrift-@THRIFT_VERSION@.jar" 
          usetimestamp="false" 
          ignoreerrors="true"/>
     <mkdir dir="${maven.repo.local}/org/slf4j/slf4j-api/1.7.12"/>

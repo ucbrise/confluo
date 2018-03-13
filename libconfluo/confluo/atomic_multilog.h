@@ -16,6 +16,8 @@
 #include "atomic_multilog_metadata.h"
 #include "conf/configuration_params.h"
 #include "container/data_log.h"
+#include "container/cursor/record_cursors.h"
+#include "container/cursor/alert_cursor.h"
 #include "container/monolog/monolog.h"
 #include "container/radix_tree.h"
 #include "container/string_map.h"
@@ -51,25 +53,60 @@ namespace pt = boost::property_tree;
 
 namespace confluo {
 
+/**
+* The main data structure for the data store
+*/
 class atomic_multilog {
  public:
+  /**
+   * Type of data log
+   */
   typedef data_log data_log_type;
+
+  /**
+   * Type of schema
+   */
   typedef schema_t schema_type;
+
+  /**
+   * Type of read tail
+   */
   typedef read_tail read_tail_type;
+
+
+  /**
+   * Type of metadata_writer
+   */
   typedef metadata_writer metadata_writer_type;
 
+  /**
+   * Identifier for filter
+   */
   typedef size_t filter_id_t;
 
+  /**
+   * Identifier for aggregate
+   */
   struct aggregate_id_t {
+    /** The filter index */
     filter_id_t filter_idx;
+    /** The aggregate index */
     size_t aggregate_idx;
   };
 
+  /**
+   * Identifier for trigger
+   */
   struct trigger_id_t {
+    /** Identifier for the aggregate */
     aggregate_id_t aggregate_id;
+    /** Index of the trigger */
     size_t trigger_idx;
   };
 
+  /**
+   * List of alerts
+   */
   typedef alert_index::alert_list alert_list;
 
   /**
@@ -466,7 +503,7 @@ class atomic_multilog {
    * @param expr The filter expression
    * @return The result of applying the filter to the atomic multilog
    */
-  lazy::stream<record_t> execute_filter(const std::string& expr) const {
+  std::unique_ptr<record_cursor> execute_filter(const std::string& expr) const {
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(expr);
     auto cexpr = parser::compile_expression(t, schema_);
@@ -478,7 +515,7 @@ class atomic_multilog {
   numeric execute_aggregate(const std::string& aggregate_expr,
                             const std::string& filter_expr) {
     auto pa = parser::parse_aggregate(aggregate_expr);
-    auto agg = aggregate_type_utils::string_to_agg(pa.agg);
+    aggregator agg = aggregate_manager::get_aggregator(pa.agg);
     uint16_t field_idx = schema_[pa.field_name].idx();
     uint64_t version = rt_.get();
     auto t = parser::parse_expression(filter_expr);
@@ -494,30 +531,25 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(const std::string& filter_name,
-                                      uint64_t begin_ms,
-                                      uint64_t end_ms) const {
+  std::unique_ptr<record_cursor> query_filter(const std::string& filter_name,
+                                              uint64_t begin_ms,
+                                              uint64_t end_ms) const {
     filter_id_t filter_id;
     if (filter_map_.get(filter_name, filter_id) == -1) {
       throw invalid_operation_exception(
           "Filter " + filter_name + " does not exist.");
     }
 
-    auto res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
+    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
+                                                                    end_ms);
     uint64_t version = rt_.get();
-    auto version_check = [version](uint64_t offset) -> bool {
-      return offset < version;
-    };
-
-    data_log const* d = &data_log_;
-    schema_t const* s = &schema_;
-    auto to_record = [d, s](uint64_t offset) -> record_t {
-      ro_data_ptr ptr;
-      d->cptr(offset, ptr);
-      return s->apply(offset, ptr);
-    };
-
-    return lazy::container_to_stream(res).filter(version_check).map(to_record);
+    std::unique_ptr<offset_cursor> o_cursor(
+        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
+                                                                   res.end(),
+                                                                   version));
+    return std::unique_ptr<record_cursor>(
+        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_,
+                                 parser::compiled_expression()));
   }
 
   /**
@@ -528,15 +560,26 @@ class atomic_multilog {
    * @param additional_filter_expr Additional filter expression
    * @return A stream containing the results of the filter
    */
-  lazy::stream<record_t> query_filter(
+  std::unique_ptr<record_cursor> query_filter(
       const std::string& filter_name, uint64_t begin_ms, uint64_t end_ms,
       const std::string& additional_filter_expr) const {
     auto t = parser::parse_expression(additional_filter_expr);
     auto e = parser::compile_expression(t, schema_);
-    auto expr_check = [e](const record_t& r) -> bool {
-      return e.test(r);
-    };
-    return query_filter(filter_name, begin_ms, end_ms).filter(expr_check);
+    filter_id_t filter_id;
+    if (filter_map_.get(filter_name, filter_id) == -1) {
+      throw invalid_operation_exception(
+          "Filter " + filter_name + " does not exist.");
+    }
+
+    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
+                                                                    end_ms);
+    uint64_t version = rt_.get();
+    std::unique_ptr<offset_cursor> o_cursor(
+        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
+                                                                   res.end(),
+                                                                   version));
+    return std::unique_ptr<record_cursor>(
+        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_, e));
   }
 
   /**
@@ -563,34 +606,36 @@ class atomic_multilog {
       if ((refs = filters_.at(fid)->lookup(t)) == nullptr)
         continue;
       numeric t_agg = refs->get_aggregate(aid, version);
-      agg = a->agg(agg, t_agg);
+      agg = a->comb_op(agg, t_agg);
     }
     return agg;
   }
 
   /**
-   * Gets the stream of alerts corresponding to a time-range
+   * Obtain a cursor over alerts in a time-range
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
-   * @return Stream of alerts in the time range
+   * @return Cursor over alerts in the time range
    */
-  lazy::stream<alert> get_alerts(uint64_t begin_ms, uint64_t end_ms) const {
-    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms));
+  std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms,
+                                           uint64_t end_ms) const {
+    return get_alerts(begin_ms, end_ms, "");
+
   }
 
   /**
-   * Gets the stream of alerts corresponding to given trigger in a time-range
+   * Obtain a cursor over alerts on a given trigger in a time-range
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
    * @param trigger_name Name of the trigger.
-   * @return Stream of alerts in the time range
+   * @return Cursor over alerts in the time range
    */
-  lazy::stream<alert> get_alerts(uint64_t begin_ms, uint64_t end_ms,
-                                 const std::string& trigger_name) const {
-    return lazy::container_to_stream(alerts_.get_alerts(begin_ms, end_ms))
-        .filter([trigger_name](const alert& a) {
-      return a.trigger_name == trigger_name;
-    });
+  std::unique_ptr<alert_cursor> get_alerts(
+      uint64_t begin_ms, uint64_t end_ms,
+      const std::string& trigger_name) const {
+    return std::unique_ptr<alert_cursor>(
+        new trigger_alert_cursor(alerts_.get_alerts(begin_ms, end_ms),
+                                 trigger_name));
   }
 
   /**
@@ -665,6 +710,13 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Adds an index to the schema for a given field
+   *
+   * @param field_name The name of the field to index
+   * @param bucket_size The bucket_size used for indexing
+   * @param ex The exception when the index could not be added
+   */
   void add_index_task(const std::string& field_name, double bucket_size,
                       optional<management_exception>& ex) {
     uint16_t idx;
@@ -694,6 +746,12 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Removes an index for a given field in the schema
+   *
+   * @param field_name The name of the field to index
+   * @param ex The exception when the index could not be removed
+   */
   void remove_index_task(const std::string& field_name,
                          optional<management_exception>& ex) {
     uint16_t idx;
@@ -712,6 +770,13 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Adds a filter to be executed on the data
+   *
+   * @param name The name of the filter
+   * @param expr The filter expression to execute
+   * @param ex The exception when the filter could not be added
+   */
   void add_filter_task(const std::string& name, const std::string& expr,
                        optional<management_exception>& ex) {
     filter_id_t filter_id;
@@ -730,6 +795,12 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Removes a filter that was created
+   *
+   * @param name The name of the filter
+   * @param ex The exception when the filter could not be removed
+   */
   void remove_filter_task(const std::string& name,
                           optional<management_exception>& ex) {
     filter_id_t filter_id;
@@ -745,6 +816,14 @@ class atomic_multilog {
     filter_map_.remove(name, filter_id);
   }
 
+  /**
+   * Adds an aggregate 
+   *
+   * @param name The name of the aggregate
+   * @param filter_name The name of the filter
+   * @param expr The filter expression
+   * @param ex The exception if the aggregate could not be added
+   */
   void add_aggregate_task(const std::string& name,
                           const std::string& filter_name,
                           const std::string& expr,
@@ -763,8 +842,7 @@ class atomic_multilog {
     auto pa = parser::parse_aggregate(expr);
     const column_t& col = schema_[pa.field_name];
     aggregate_info *a = new aggregate_info(
-        name, aggregate_type_utils::string_to_agg(pa.agg), col.type(),
-        col.idx());
+        name, aggregate_manager::get_aggregator(pa.agg), col.idx());
     aggregate_id.aggregate_idx = filters_.at(filter_id)->add_aggregate(a);
     if (aggregate_map_.put(name, aggregate_id) == -1) {
       ex = management_exception(
@@ -774,6 +852,12 @@ class atomic_multilog {
     metadata_.write_aggregate_metadata(name, filter_name, expr);
   }
 
+  /**
+   * Removes an aggregate
+   *
+   * @param name The name of the aggregate to remove
+   * @param ex The exception if the aggregate cannot be removed
+   */
   void remove_aggregate_task(const std::string& name,
                              optional<management_exception>& ex) {
     aggregate_id_t aggregate_id;
@@ -790,6 +874,15 @@ class atomic_multilog {
     aggregate_map_.remove(name, aggregate_id);
   }
 
+  /**
+   * Adds a trigger to the atomic multilog
+   *
+   * @param name The name of the trigger
+   * @param expr The trigger expression
+   * @param periodicity_ms The periodicity of the trigger measured in
+   * milliseconds
+   * @param ex The exception when the trigger cannot be added
+   */
   void add_trigger_task(const std::string& name, const std::string& expr,
                         uint64_t periodicity_ms,
                         optional<management_exception>& ex) {
@@ -822,6 +915,12 @@ class atomic_multilog {
     metadata_.write_trigger_metadata(name, expr, periodicity_ms);
   }
 
+  /**
+   * Removes a trigger from the atomic multilog
+   *
+   * @param name The name of the trigger
+   * @param ex The exception when the trigger could not be removed
+   */
   void remove_trigger_task(const std::string& name,
                            optional<management_exception>& ex) {
     trigger_id_t trigger_id;
@@ -874,6 +973,15 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Checks the time bucket and adds alerts when necessary
+   *
+   * @param f The filter 
+   * @param t The trigger
+   * @param tid The thread identifier
+   * @param time_bucket The time_bucket to check
+   * @param version The version to check
+   */
   void check_time_bucket(filter* f, trigger* t, size_t tid,
                          uint64_t time_bucket, uint64_t version) {
     size_t window_size = t->periodicity_ms();

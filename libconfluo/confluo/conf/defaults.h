@@ -5,13 +5,22 @@
 
 namespace confluo {
 
+/**
+ * Default configuration parameters
+ */
 class defaults {
  public:
+  /** The thread hardware concurrency */
   static const int HARDWARE_CONCURRENCY;
+  /** Default bucket size for index */
   static constexpr double DEFAULT_INDEX_BUCKET_SIZE = 1.0;
+  /** Default time resolution in nanoseconds */
   static constexpr uint64_t DEFAULT_TIME_RESOLUTION_NS = 1e6;
+  /** Default maximum amount of memory */
   static constexpr size_t DEFAULT_MAX_MEMORY = 1e9;
+  /** Default monitor window in milliseoncds */
   static constexpr uint64_t DEFAULT_MONITOR_WINDOW_MS = 10;
+  /** Default periodicity for monitor in milliseconds */
   static constexpr uint64_t DEFAULT_MONITOR_PERIODICITY_MS = 1;
 };
 

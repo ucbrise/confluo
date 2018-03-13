@@ -31,22 +31,40 @@ namespace storage {
 
 using namespace ::utils;
 
+/** Allocate function that allocates a file of a certain size */
 typedef void* (*allocate_fn)(const std::string& path, size_t size);
+/** Allocates a block in a file of a certain size */
 typedef uint8_t* (*allocate_block_fn)(const std::string& path, size_t size);
+/** Frees the given pointer */
 typedef void (*free_fn)(void* ptr, size_t size);
+/** Flushes the memory specified by the pointer */
 typedef void (*flush_fn)(void* ptr, size_t size);
 
+/**
+ * Contains the particular storage mode
+ */
 enum storage_mode {
+  /** Stores data in memory */
   IN_MEMORY = 0,
+  /** Has relaxed linearizable guarantees */
   DURABLE_RELAXED = 1,
+  /** Persisted storage */
   DURABLE = 2
 };
 
+/**
+ * Functionality for a storage function
+ */
 struct storage_functions {
+  /** The particular storage mode */
   storage_mode mode;
+  /** The allocation function */
   allocate_fn allocate;
+  /** The function that allocates a block of memory */
   allocate_block_fn allocate_block;
+  /** Function that frees memory */
   free_fn free;
+  /** Function that flushes memory */
   flush_fn flush;
 };
 
@@ -203,17 +221,21 @@ struct durable {
   }
 };
 
+/** Storage functionality for in memory mode */
 static storage_functions IN_MEMORY_FNS = { storage_mode::IN_MEMORY,
     in_memory::allocate, in_memory::allocate_block, in_memory::free_mem,
     in_memory::flush };
 
+/** Storage functionality for durable relaxed mode */
 static storage_functions DURABLE_RELAXED_FNS = { storage_mode::DURABLE_RELAXED,
     durable_relaxed::allocate, durable_relaxed::allocate_block,
     durable_relaxed::free, durable_relaxed::flush };
 
+/** Storage functionality for durable mode */
 static storage_functions DURABLE_FNS = { storage_mode::DURABLE,
     durable::allocate, durable::allocate_block, durable::free, durable::flush };
 
+/** Contains the storage functions for all storage modes */
 static storage_functions STORAGE_FNS[3] = { IN_MEMORY_FNS, DURABLE_RELAXED_FNS,
     DURABLE_FNS };
 

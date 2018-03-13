@@ -1,7 +1,6 @@
 #ifndef CONFLUO_AGGREGATE_INFO_H_
 #define CONFLUO_AGGREGATE_INFO_H_
 
-#include "types/aggregate_types.h"
 #include "types/data_type.h"
 #include "parser/aggregate_parser.h"
 #include "trigger_log.h"
@@ -10,21 +9,22 @@ using namespace confluo::monitor;
 
 namespace confluo {
 
+/**
+* Information about the aggregate
+*/
 class aggregate_info {
  public:
   /**
    * Constructor to initialize aggregate_info
    *
    * @param name The name of the aggregate.
-   * @param atype Type of the aggregate.
+   * @param agg The aggregator.
    * @param field_type Type of field.
    * @param field_idx Index of field in schema.
    */
-  aggregate_info(const std::string& name, aggregate_type atype,
-                 data_type field_type, uint16_t field_idx)
+  aggregate_info(const std::string& name, aggregator agg, uint16_t field_idx)
       : name_(name),
-        agg_type_(atype),
-        field_type_(field_type),
+        agg_(agg),
         field_idx_(field_idx),
         is_valid_(true) {
   }
@@ -38,27 +38,11 @@ class aggregate_info {
   }
 
   /**
-   * Gets the aggregate type
-   * @return The aggregate type
+   * Gets the result data type for the aggregate.
+   * @return The result data type for the aggregate.
    */
-  aggregate_type agg_type() const {
-    return agg_type_;
-  }
-
-  /**
-   * Gets the data type for the aggregate.
-   * @return The data type for the aggregate.
-   */
-  data_type agg_data_type() const {
-    return agg_type_ == aggregate_type::D_CNT ? LONG_TYPE : field_type_;
-  }
-
-  /**
-   * Gets the data type of the field
-   * @return The field data type
-   */
-  data_type field_type() const {
-    return field_type_;
+  data_type result_type() const {
+    return agg_.result_type;
   }
 
   /**
@@ -75,33 +59,51 @@ class aggregate_info {
    * @return Numeric value with the aggregate's data type.
    */
   numeric value(const std::string& str) {
-    return numeric::parse(str, agg_data_type());
+    return numeric::parse(str, result_type());
   }
 
   /**
-   * Aggregates the data
+   * Aggregates the data using the combine operator.
    * @param a The numeric
    * @param s The snapshot of the schema
    * @param data The data
    * @return An aggregate of the data based on the numeric
    */
-  numeric agg(const numeric& a, const schema_snapshot& s, void* data) {
+  numeric comb_op(const numeric& a, const schema_snapshot& s, void* data) {
     numeric b(s.get(data, field_idx_));
-    return aggregators[agg_type_].agg(
-        a.type().is_none() ? aggregators[agg_type_].zero(field_type_) : a,
-        agg_type_ == aggregate_type::D_CNT ? count_one : b);
+    return comb_op(a, b);
   }
 
   /**
-   * Aggregates the data
+   * Aggregates the data using the combine operator.
    * @param a A numeric
    * @param b Another numeric
    * @return An aggregate of the two numerics
    */
-  numeric agg(const numeric& a, const numeric& b) {
-    return aggregators[agg_type_].agg(
-        a.type().is_none() ? aggregators[agg_type_].zero(field_type_) : a,
-        agg_type_ == aggregate_type::D_CNT ? count_one : b);
+  numeric comb_op(const numeric& a, const numeric& b) {
+    return agg_.comb_op(a.is_valid() ? a : zero(), b);
+  }
+
+  /**
+   * Aggregates the data using the combine operator.
+   * @param a The numeric
+   * @param s The snapshot of the schema
+   * @param data The data
+   * @return An aggregate of the data based on the numeric
+   */
+  numeric seq_op(const numeric& a, const schema_snapshot& s, void* data) {
+    numeric b(s.get(data, field_idx_));
+    return seq_op(a, b);
+  }
+
+  /**
+   * Aggregates the data using the combine operator.
+   * @param a A numeric
+   * @param b Another numeric
+   * @return An aggregate of the two numerics
+   */
+  numeric seq_op(const numeric& a, const numeric& b) {
+    return agg_.seq_op(a.is_valid() ? a : zero(), b);
   }
 
   /**
@@ -109,7 +111,7 @@ class aggregate_info {
    * @return Zero value for the aggregate
    */
   numeric zero() {
-    return aggregators[agg_type_].zero(field_type_);
+    return agg_.zero;
   }
 
   /**
@@ -118,7 +120,7 @@ class aggregate_info {
    * @return The aggregate
    */
   aggregate create_aggregate() const {
-    return aggregate(agg_data_type(), agg_type_);
+    return aggregate(result_type(), agg_);
   }
 
   /**
@@ -180,8 +182,7 @@ class aggregate_info {
   std::string name_;
 
   // Parsed information
-  aggregate_type agg_type_;
-  data_type field_type_;
+  aggregator agg_;
   uint16_t field_idx_;
 
   // Other metadata
@@ -189,6 +190,9 @@ class aggregate_info {
   atomic::type<bool> is_valid_;
 };
 
+/**
+ * @brief Log of aggregate_info pointers
+ */
 typedef monolog::monolog_exp2<aggregate_info*> aggregate_log;
 
 }

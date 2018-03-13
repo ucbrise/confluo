@@ -27,8 +27,11 @@ class monolog_exp2_linear_base {
  public:
   typedef storage::swappable_ptr<T> __atomic_bucket_ref;
   typedef storage::read_only_ptr<T> __atomic_bucket_copy_ref;
-  typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
+  typedef atomic::type<__atomic_bucket_ref *> __atomic_bucket_container_ref;
 
+  /**
+   * Default constructor
+   */
   monolog_exp2_linear_base()
       : fcs_hibit_(bit_utils::highest_bit(FCS)) {
     __atomic_bucket_ref* null_ptr = nullptr;
@@ -44,6 +47,9 @@ class monolog_exp2_linear_base {
     atomic::init(&bucket_containers_[0], first_container);
   }
 
+  /**
+   * Destructor
+   */
   ~monolog_exp2_linear_base() {
     size_t num_buckets = FCB;
     for (auto& x : bucket_containers_) {
@@ -207,7 +213,7 @@ class monolog_exp2_linear_base {
    * @param idx monolog index
    * param data_ptr location to store pointer to data at
    */
-   void ptr(size_t idx, __atomic_bucket_copy_ref& data_ptr) const {
+  void ptr(size_t idx, __atomic_bucket_copy_ref& data_ptr) const {
     size_t pos = idx + FCS;
     size_t hibit = bit_utils::highest_bit(pos);
     size_t highest_cleared = pos ^ (1 << hibit);
@@ -216,7 +222,7 @@ class monolog_exp2_linear_base {
     size_t container_idx = hibit - fcs_hibit_;
 
     load_bucket_copy(container_idx, bucket_idx, data_ptr);
-   }
+  }
 
   /**
    * Gets the data at index idx.
@@ -335,14 +341,14 @@ protected:
   }
 
   /**
-   * Tries to allocate a bucket. If another thread already succeeded in allocating
-   * the bucket, the current thread deallocates.
+   * Tries to allocate a bucket. If another thread already succeeded in
+   * allocating the bucket, the current thread deallocates.
    * @param container container to put bucket pointer in
    * @param bucket_idx index into the container to allocate bucket at
    * @param copy copy of pointer to allocated bucket
    */
   void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx,
-                           __atomic_bucket_copy_ref& copy) {
+      __atomic_bucket_copy_ref& copy) {
     T* new_bucket_data = ALLOCATOR.alloc<T>(BUCKET_SIZE);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(new_bucket_data)) {
@@ -351,6 +357,13 @@ protected:
     container[bucket_idx].atomic_copy(copy);
   }
 
+  /**
+   * Tries to allocate a bucket. If another thread already succeeded in
+   * allocating the bucket, the current thread deallocates.
+   * @param container container to put bucket pointer in
+   * @param bucket_idx index into the container to allocate bucket at
+   * @return ointer to allocated bucket
+   */
   T* try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx) {
     T* new_bucket_data = ALLOCATOR.alloc<T>(BUCKET_SIZE);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
@@ -368,9 +381,11 @@ protected:
    * @param copy read-only pointer to store in
    * @param bucket_offset bucket offset to offset the copy's internal pointer
    */
-  void load_bucket_copy(size_t container_idx, size_t bucket_idx, __atomic_bucket_copy_ref& copy,
-                        size_t bucket_offset = 0) const {
-    atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_copy(copy, bucket_offset);
+  void load_bucket_copy(size_t container_idx, size_t bucket_idx,
+      __atomic_bucket_copy_ref& copy,
+      size_t bucket_offset = 0) const {
+    atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_copy(
+        copy, bucket_offset);
   }
 
 private:
@@ -403,20 +418,45 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> iterator;
   typedef monolog_iterator<monolog_exp2_linear<T, NCONTAINERS>> const_iterator;
 
+  /**
+   * Constructs a relaxed monolog implementation
+   */
   monolog_exp2_linear()
       : tail_(0) {
   }
 
+  /**
+   * Reserves space for data in the monolog
+   *
+   * @param count The amount of space to reserve
+   *
+   * @return The resultant tail
+   */
   size_t reserve(size_t count) {
     return atomic::faa(&tail_, count);
   }
 
+  /**
+   * Adds a value to the monolog
+   *
+   * @param val The value to add
+   *
+   * @return The index of the new value
+   */
   size_t push_back(const T& val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
   }
 
+  /**
+   * Adds a range of values to the monolog
+   *
+   * @param start The start of the range
+   * @param end The end of the range
+   *
+   * @return The index of the range
+   */
   size_t push_back_range(const T& start, const T& end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
@@ -425,18 +465,40 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS,
     return idx;
   }
 
+  /**
+   * Gets the element at an index
+   *
+   * @param idx The index of the desired element
+   *
+   * @return The element
+   */
   const T at(size_t idx) const {
     return this->get(idx);
   }
 
+  /**
+   * Gets the size of the monolog
+   *
+   * @return The size of the monolog
+   */
   size_t size() const {
     return atomic::load(&tail_);
   }
 
+  /**
+   * Gets the beginning of the monolog iterator
+   *
+   * @return Iterator of the beginning of the monolog
+   */
   iterator begin() const {
     return iterator(this, 0);
   }
 
+  /**
+   * Gets the end of the monolog iterator
+   *
+   * @return Iterator of the end of the monolog
+   */
   iterator end() const {
     return iterator(this, size());
   }

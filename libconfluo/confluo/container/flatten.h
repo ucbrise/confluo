@@ -2,10 +2,15 @@
 #define CONFLUO_CONTAINER_FLATTEN_H_
 
 #include <iterator>
+#include <numeric>
 
 // Based on answer from:
 // https://stackoverflow.com/questions/3623082/flattening-iterator
 
+/**
+ * A flattened iterator
+ *
+ */
 template<typename outer_iterator>
 class flattened_iterator {
  public:
@@ -17,11 +22,20 @@ class flattened_iterator {
   typedef typename inner_iterator::pointer pointer;
   typedef typename inner_iterator::reference reference;
 
+  flattened_iterator() = default;
+
   flattened_iterator(const outer_iterator& it)
       : outer_(it),
         outer_end_(it) {
   }
 
+  /**
+   * Constructs a flattened iterator from the beginning and end of the
+   * iterator
+   *
+   * @param it The outer iterator
+   * @param end The end of the outer iterator
+   */
   flattened_iterator(const outer_iterator& it, const outer_iterator& end)
       : outer_(it),
         outer_end_(end) {
@@ -32,14 +46,29 @@ class flattened_iterator {
     skip_invalid();
   }
 
+  /**
+   * Dereferences the flattened iterator
+   *
+   * @return The inner iterator
+   */
   reference operator*() const {
     return *inner_;
   }
 
+  /**
+   * Gets the value at the inner iterator
+   *
+   * @return A pointer to the value at the inner iterator
+   */
   pointer operator->() const {
     return &*inner_;
   }
 
+  /**
+   * Advanced the flattened iterator
+   *
+   * @return The new flattened iterator at the advanced position
+   */
   flattened_iterator& operator++() {
     ++inner_;
     if (inner_ == outer_->end())
@@ -47,12 +76,28 @@ class flattened_iterator {
     return *this;
   }
 
+  /**
+   * Advances the flattened iterator by a specified amount
+   *
+   * @param int The amount to advance the flattened iterator
+   *
+   * @return The advanced flattened iterator
+   */
   flattened_iterator operator++(int) {
     flattened_iterator it(*this);
     ++*this;
     return it;
   }
 
+  /**
+   * Performs an equality comparison between two flattened iterators
+   *
+   * @param a The first flattened iterator
+   * @param b The other flattened iterator
+   *
+   * @return True if the first flattened iterator is equal to the other
+   * flattened iterator, false otherwise
+   */
   friend bool operator==(const flattened_iterator& a,
                          const flattened_iterator& b) {
     if (a.outer_ != b.outer_)
@@ -65,6 +110,15 @@ class flattened_iterator {
     return true;
   }
 
+  /**
+   * Performs a not equal comparison between two flattened iterators
+   *
+   * @param a The first flattened iterator
+   * @param b The second flattened iterator
+   *
+   * @return True if the first flattened iterator is not equal to the 
+   * second, false otherwise
+   */
   friend bool operator!=(const flattened_iterator& a,
                          const flattened_iterator& b) {
     return !(a == b);
@@ -84,26 +138,51 @@ class flattened_iterator {
   inner_iterator inner_;
 };
 
+/**
+ * A flattened container
+ */
 template<typename container_t>
 class flattened_container {
  public:
   typedef typename container_t::value_type::value_type value_type;
   typedef typename container_t::const_iterator container_iterator;
   typedef flattened_iterator<container_iterator> iterator;
+  typedef flattened_iterator<container_iterator> const_iterator;
 
+  /**
+   * Constructs a flattened container from another flattend container
+   *
+   * @param container The container used to intialize this flattend
+   * container
+   */
   flattened_container(const container_t& container)
       : begin_(container.begin()),
         end_(container.end()) {
   }
 
+  /**
+   * Gets the beginning of the iterator
+   *
+   * @return The iterator at the beginning
+   */
   iterator begin() const {
     return iterator(begin_, end_);
   }
 
+  /**
+   * Gets the end of the ierator
+   *
+   * @return The iterator at the end
+   */
   iterator end() const {
     return iterator(end_);
   }
 
+  /**
+   * Gets the number of elements in the flattened container
+   *
+   * @return The number of elements in the flattened container
+   */
   size_t count() const {
     return std::accumulate(
         begin(), end(), static_cast<size_t>(0),

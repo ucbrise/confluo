@@ -161,8 +161,8 @@ TEST_F(FilterTest, AggregateTest) {
   std::string expr("value >= 50000");
   auto cexpr = get_expr(expr);
   filter f(cexpr);
-  aggregate_info *a = new aggregate_info("agg1", aggregate_type::D_MAX,
-                                         LONG_TYPE, 0);
+  aggregate_info *a = new aggregate_info(
+      "agg1", aggregate_manager::get_aggregator("max"), 0);
   size_t aid = f.add_aggregate(a);
   ASSERT_EQ(0, aid);
   fill(f);
@@ -178,8 +178,8 @@ TEST_F(FilterTest, MultiThreadedAggregateTest) {
   std::string expr("value >= 50000");
   auto cexpr = get_expr(expr);
   filter f(cexpr);
-  aggregate_info *a = new aggregate_info("agg1", aggregate_type::D_MAX,
-                                         LONG_TYPE, 0);
+  aggregate_info *a = new aggregate_info(
+      "agg1", aggregate_manager::get_aggregator("max"), 0);
   size_t aid = f.add_aggregate(a);
   ASSERT_EQ(0, aid);
   fill_mt(f, 4);

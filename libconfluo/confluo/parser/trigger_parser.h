@@ -11,9 +11,15 @@
 namespace confluo {
 namespace parser {
 
+/**
+ * The attributes that make up a trigger
+ */
 struct parsed_trigger {
+  /** The name of the aggregate */
   std::string aggregate_name;
+  /** The name of the relational operator */
   std::string relop;
+  /** The threshold event when the trigger occurs */
   std::string threshold;
 };
 
@@ -34,9 +40,17 @@ namespace ascii = boost::spirit::ascii;
 namespace spirit = boost::spirit;
 namespace phx = boost::phoenix;
 
+/**
+ * A trigger parser using grammars and rules
+ *
+ * @tparam I
+ */
 template<typename I>
 class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()> {
  public:
+  /**
+   * Constructs a trigger parser from a grammar
+   */
   trigger_parser()
       : trigger_parser::base_type(trig) {
     using qi::alpha;
@@ -58,6 +72,14 @@ class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()
   qi::rule<I, ascii::space_type, std::string()> thresh;
 };
 
+/**
+ * Parses a trigger from a string
+ *
+ * @param t The string that the trigger is parsed from
+ * @throw parse_exception
+ *
+ * @return A parsed trigger
+ */
 parsed_trigger parse_trigger(const std::string& t) {
   using boost::spirit::ascii::space;
   typedef std::string::const_iterator iterator_type;

@@ -11,6 +11,12 @@ namespace monolog {
 
 using namespace ::utils;
 
+/**
+ * Block in a monolog
+ *
+ * @tparam T The data type
+ * @tparam BUFFER_SIZE Extra buffer space.
+ */
 template<typename T, size_t BUFFER_SIZE = 1048576>
 class monolog_block {
  public:
@@ -21,6 +27,9 @@ class monolog_block {
   static const block_state UNINIT = false;
   static const block_state INIT = true;
 
+  /**
+   * Default constructor for the monolog block.
+   */
   monolog_block()
       : path_(""),
         state_(UNINIT),
@@ -29,6 +38,14 @@ class monolog_block {
         mode_(storage::IN_MEMORY) {
   }
 
+  /**
+   * Constructor to initialize the monolog block with specified path, size and
+   * storage mode.
+   *
+   * @param path The data path for the monolog block.
+   * @param size The size of the monolog block.
+   * @param storage The storage mode of the monolog block.
+   */
   monolog_block(const std::string& path, size_t size,
                 const storage::storage_mode& storage)
       : path_(path),
@@ -38,6 +55,11 @@ class monolog_block {
         mode_(storage) {
   }
 
+  /**
+   * Copy constructor.
+   *
+   * @param other Another monolog block.
+   */
   monolog_block(const monolog_block<T, BUFFER_SIZE>& other)
       : path_(other.path_),
         state_(other.state_),
@@ -48,6 +70,14 @@ class monolog_block {
     data_.atomic_init(copy.ptr_);
   }
 
+  /**
+   * Initializes the monolog block with specified path, size and
+   * storage mode.
+   *
+   * @param path The data path for the monolog block.
+   * @param size The size of the monolog block.
+   * @param storage The storage mode of the monolog block.
+   */
   void init(const std::string& path, const size_t size,
             const storage::storage_mode& mode) {
     path_ = path;
@@ -55,6 +85,11 @@ class monolog_block {
     mode_ = mode;
   }
 
+  /**
+   * storage_size
+   *
+   * @return size_t
+   */
   size_t storage_size() const {
     if (data_.atomic_load() != nullptr)
       return (size_ + BUFFER_SIZE) * sizeof(T);
@@ -117,14 +152,32 @@ class monolog_block {
     memcpy(data_.atomic_load() + offset, data, len * sizeof(T));
   }
 
+  /**
+   * Get the value at the specified index.
+   *
+   * @param i The index to get the value from.
+   *
+   * @return The value at the specified index.
+   */
   const T at(size_t i) const {
     return data_.atomic_get(i);
   }
 
+  /**
+   * Read a specified number of elements from monolog at a specified offset.
+   * @param offset The offset to read from.
+   * @param data The buffer that the data will be read into.
+   * @param len The number of bytes to read.
+   */
   void read(size_t offset, T* data, size_t len) const {
     memcpy(data, data_.atomic_copy()->get() + offset, len * sizeof(T));
   }
 
+  /**
+   * operator[] (reference)
+   * @param i Index of reference to get.
+   * @return Reference to requested data.
+   */
   T& operator[](size_t i) {
     __atomic_block_copy_ref copy;
     data_.atomic_copy(copy);
@@ -133,6 +186,11 @@ class monolog_block {
     return copy.get()[i];
   }
 
+  /**
+   * Gets a pointer to the data at specified offset
+   * @param offset offset into the block
+   * @param data_ptr read-only pointer to store in
+   */
   void ptr(size_t offset, __atomic_block_copy_ref& data_ptr) {
     data_.atomic_copy(data_ptr, offset);
     if (data_ptr.get() == nullptr) {
@@ -141,10 +199,22 @@ class monolog_block {
     }
   }
 
+  /**
+   * Gets a const pointer to the data at specified offset
+   * @param offset offset into the block
+   * @param data_ptr read-only pointer to store in
+   */
   void cptr(size_t offset, __atomic_block_copy_ref& data_ptr) const {
     data_.atomic_copy(data_ptr, offset);
   }
 
+  /**
+   * operator=
+   *
+   * @param other Another monolog block
+   *
+   * @return Reference to updated monolog block.
+   */
   monolog_block& operator=(const monolog_block<T, BUFFER_SIZE>& other) {
     path_ = other.path_;
     atomic::init(&state_, atomic::load(&other.state_));
@@ -154,6 +224,9 @@ class monolog_block {
     return *this;
   }
 
+  /**
+   * Ensure that the monolog block is allocated.
+   */
   void ensure_alloc() {
     if (data_.atomic_load() == nullptr) {
       __atomic_block_copy_ref copy;
@@ -170,6 +243,10 @@ class monolog_block {
   }
 
 private:
+  /**
+   * Try to allocate space for block.
+   * @param copy An atomic copy reference of the allocated space.
+   */
   void try_allocate(__atomic_block_copy_ref& copy) {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
@@ -188,6 +265,10 @@ private:
     data_.atomic_copy(copy);
   }
 
+  /**
+   * Try to allocate space for the monolog block.
+   * @return The allocated space.
+   */
   T* try_allocate() {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {

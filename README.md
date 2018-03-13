@@ -8,4 +8,4 @@ Confluo is a system for real-time monitoring and analysis of data, that supports
 * online queries at millisecond timescale; and 
 * ad-hoc queries using minimal CPU resources.
 
-Documentation can be found [here](docs).
+Documentation can be found [here](https://ucbrise.github.io/confluo/).

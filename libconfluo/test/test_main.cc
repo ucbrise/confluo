@@ -2,10 +2,11 @@
 
 #include "error_handling.h"
 #include "gtest/gtest.h"
-#include "aggregate_test.h"
+#include "aggregate/aggregate_test.h"
 #include "aggregated_reflog_test.h"
 #include "container/bitmap/bitmap_test.h"
 #include "container/bitmap/bitmap_array_test.h"
+#include "container/cursor/batched_cursor_test.h"
 #include "types/byte_string_test.h"
 #include "schema/column_test.h"
 #include "types/data_types_test.h"

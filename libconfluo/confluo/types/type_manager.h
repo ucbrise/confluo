@@ -6,6 +6,9 @@
 
 namespace confluo {
 
+/**
+ * Manages adding types and utility functions for types
+ */
 class type_manager {
  public:
   /**
@@ -63,22 +66,35 @@ class type_manager {
    * @return True if id is primitive, false otherwise
    */
   static bool is_primitive(size_t id) {
-    return id >= 1 && id <= 8;
+    return id >= 1 && id <= 12;
   }
 };
 
+/** The none data type */
 static data_type NONE_TYPE = data_type(0, 0);
+/** The boolean data type */
 static data_type BOOL_TYPE = type_manager::get_type("bool");
+/** The character data type */
 static data_type CHAR_TYPE = type_manager::get_type("char");
+/** The unsigned character data type */
 static data_type UCHAR_TYPE = type_manager::get_type("uchar");
+/** The short data type */
 static data_type SHORT_TYPE = type_manager::get_type("short");
+/** The unsigned short data type */
 static data_type USHORT_TYPE = type_manager::get_type("ushort");
+/** The integer data type */
 static data_type INT_TYPE = type_manager::get_type("int");
+/** The unsigned integer data type */
 static data_type UINT_TYPE = type_manager::get_type("uint");
+/** The long data type */
 static data_type LONG_TYPE = type_manager::get_type("long");
+/** The unsigned long data type */
 static data_type ULONG_TYPE = type_manager::get_type("ulong");
+/** The single precision floating point data type */
 static data_type FLOAT_TYPE = type_manager::get_type("float");
+/** The double precision floating point data type */
 static data_type DOUBLE_TYPE = type_manager::get_type("double");
+/** The string data type */
 static data_type STRING_TYPE(size_t size) {
   return type_manager::get_type("string", size);
 }

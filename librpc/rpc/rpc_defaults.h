@@ -4,9 +4,13 @@
 namespace confluo {
 namespace rpc {
 
+/**
+ * Holder of default values for parameters
+ */
 class rpc_defaults {
  public:
   // Iterator
+  /** Default batch size for the iterator */
   static const size_t DEFAULT_ITERATOR_BATCH_SIZE = 20;
 };
 
