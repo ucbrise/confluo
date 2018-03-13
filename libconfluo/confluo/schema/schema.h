@@ -287,7 +287,6 @@ class schema_t {
     }
   }
 
-<<<<<<< HEAD
   void* json_to_data(const std::string& json) const {
     pt::ptree tree;
     utils::json_utils::json_to_ptree(tree, json);
@@ -316,14 +315,12 @@ class schema_t {
     }
   }
 
-=======
   /**
    * Converts the pointer to record data to a vector of records
    *
    * @param ret The vector of string records that is filled up
    * @param data The pointer to the record data
    */
->>>>>>> single-machine
   void data_to_record_vector(std::vector<std::string>& ret,
                              const void* data) const {
     for (size_t i = 0; i < size(); i++) {
