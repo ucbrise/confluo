@@ -30,6 +30,7 @@ class rpc_serviceIf {
   virtual int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
   virtual void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) = 0;
   virtual void remove_atomic_multilog(const int64_t multilog_id) = 0;
+  virtual void run_command(const int64_t multilog_id, const std::string& json_command) = 0;
   virtual void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size) = 0;
   virtual void remove_index(const int64_t multilog_id, const std::string& field_name) = 0;
   virtual void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr) = 0;
@@ -100,6 +101,9 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
     return;
   }
   void remove_atomic_multilog(const int64_t /* multilog_id */) {
+    return;
+  }
+  void run_command(const int64_t /* multilog_id */, const std::string& /* json_command */) {
     return;
   }
   void add_index(const int64_t /* multilog_id */, const std::string& /* field_name */, const double /* bucket_size */) {
@@ -709,6 +713,123 @@ class rpc_service_remove_atomic_multilog_presult {
   rpc_management_exception ex;
 
   _rpc_service_remove_atomic_multilog_presult__isset __isset;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+
+};
+
+typedef struct _rpc_service_run_command_args__isset {
+  _rpc_service_run_command_args__isset() : multilog_id(false), json_command(false) {}
+  bool multilog_id :1;
+  bool json_command :1;
+} _rpc_service_run_command_args__isset;
+
+class rpc_service_run_command_args {
+ public:
+
+  rpc_service_run_command_args(const rpc_service_run_command_args&);
+  rpc_service_run_command_args& operator=(const rpc_service_run_command_args&);
+  rpc_service_run_command_args() : multilog_id(0), json_command() {
+  }
+
+  virtual ~rpc_service_run_command_args() throw();
+  int64_t multilog_id;
+  std::string json_command;
+
+  _rpc_service_run_command_args__isset __isset;
+
+  void __set_multilog_id(const int64_t val);
+
+  void __set_json_command(const std::string& val);
+
+  bool operator == (const rpc_service_run_command_args & rhs) const
+  {
+    if (!(multilog_id == rhs.multilog_id))
+      return false;
+    if (!(json_command == rhs.json_command))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_run_command_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_run_command_args & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+
+class rpc_service_run_command_pargs {
+ public:
+
+
+  virtual ~rpc_service_run_command_pargs() throw();
+  const int64_t* multilog_id;
+  const std::string* json_command;
+
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_run_command_result__isset {
+  _rpc_service_run_command_result__isset() : ex(false) {}
+  bool ex :1;
+} _rpc_service_run_command_result__isset;
+
+class rpc_service_run_command_result {
+ public:
+
+  rpc_service_run_command_result(const rpc_service_run_command_result&);
+  rpc_service_run_command_result& operator=(const rpc_service_run_command_result&);
+  rpc_service_run_command_result() {
+  }
+
+  virtual ~rpc_service_run_command_result() throw();
+  rpc_management_exception ex;
+
+  _rpc_service_run_command_result__isset __isset;
+
+  void __set_ex(const rpc_management_exception& val);
+
+  bool operator == (const rpc_service_run_command_result & rhs) const
+  {
+    if (!(ex == rhs.ex))
+      return false;
+    return true;
+  }
+  bool operator != (const rpc_service_run_command_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const rpc_service_run_command_result & ) const;
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t write(Protocol_* oprot) const;
+
+};
+
+typedef struct _rpc_service_run_command_presult__isset {
+  _rpc_service_run_command_presult__isset() : ex(false) {}
+  bool ex :1;
+} _rpc_service_run_command_presult__isset;
+
+class rpc_service_run_command_presult {
+ public:
+
+
+  virtual ~rpc_service_run_command_presult() throw();
+  rpc_management_exception ex;
+
+  _rpc_service_run_command_presult__isset __isset;
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -3254,6 +3375,9 @@ class rpc_serviceClientT : virtual public rpc_serviceIf {
   void remove_atomic_multilog(const int64_t multilog_id);
   void send_remove_atomic_multilog(const int64_t multilog_id);
   void recv_remove_atomic_multilog();
+  void run_command(const int64_t multilog_id, const std::string& json_command);
+  void send_run_command(const int64_t multilog_id, const std::string& json_command);
+  void recv_run_command();
   void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
   void send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
   void recv_add_index();
@@ -3352,6 +3476,8 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
   void process_get_atomic_multilog_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_remove_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_run_command(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_run_command(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_add_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_index(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
   void process_remove_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -3410,6 +3536,9 @@ class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Proto
     processMap_["remove_atomic_multilog"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_remove_atomic_multilog,
       &rpc_serviceProcessorT::process_remove_atomic_multilog);
+    processMap_["run_command"] = ProcessFunctions(
+      &rpc_serviceProcessorT::process_run_command,
+      &rpc_serviceProcessorT::process_run_command);
     processMap_["add_index"] = ProcessFunctions(
       &rpc_serviceProcessorT::process_add_index,
       &rpc_serviceProcessorT::process_add_index);
@@ -3547,6 +3676,15 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
       ifaces_[i]->remove_atomic_multilog(multilog_id);
     }
     ifaces_[i]->remove_atomic_multilog(multilog_id);
+  }
+
+  void run_command(const int64_t multilog_id, const std::string& json_command) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->run_command(multilog_id, json_command);
+    }
+    ifaces_[i]->run_command(multilog_id, json_command);
   }
 
   void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size) {
@@ -3784,6 +3922,9 @@ class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
   void remove_atomic_multilog(const int64_t multilog_id);
   int32_t send_remove_atomic_multilog(const int64_t multilog_id);
   void recv_remove_atomic_multilog(const int32_t seqid);
+  void run_command(const int64_t multilog_id, const std::string& json_command);
+  int32_t send_run_command(const int64_t multilog_id, const std::string& json_command);
+  void recv_run_command(const int32_t seqid);
   void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
   int32_t send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
   void recv_add_index(const int32_t seqid);

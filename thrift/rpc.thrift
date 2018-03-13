@@ -99,7 +99,7 @@ service rpc_service {
           throws (1: rpc_management_exception ex),
 
   // Execute function specified by JSON
-  string run_command(1: i64 multilog_id, 2: string json_command)
+  void run_command(1: i64 multilog_id, 2: string json_command)
           throws (1: rpc_management_exception ex),
   
   // Table ops
@@ -130,7 +130,6 @@ service rpc_service {
   
   // Read ops
   binary read(1: i64 multilog_id, 2: i64 offset, 3: i64 nrecords),
-  string read_json(1: i64 multilog_id, 2: i64 offset),
   string query_aggregate(1: i64 multilog_id, 2: string aggregate_name, 
                          3: i64 begin_ms, 4: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
