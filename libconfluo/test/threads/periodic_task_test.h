@@ -1,7 +1,7 @@
 #ifndef CONFLUO_TEST_PERIODIC_TASK_TEST_H_
 #define CONFLUO_TEST_PERIODIC_TASK_TEST_H_
 
-#include "../confluo/threads/periodic_task.h"
+#include "threads/periodic_task.h"
 
 #include "gtest/gtest.h"
 

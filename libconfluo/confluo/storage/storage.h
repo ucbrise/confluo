@@ -17,9 +17,10 @@
 #include "assertions.h"
 #include "file_utils.h"
 #include "mmap_utils.h"
-#include "storage/ptr.h"
+#include "storage/ptr_aux_block.h"
 #include "storage/ptr_metadata.h"
 #include "storage_allocator.h"
+#include "swappable_encoded_ptr.h"
 
 #define PROT_RW PROT_READ | PROT_WRITE
 
@@ -34,7 +35,7 @@ using namespace ::utils;
 /** Allocate function that allocates a file of a certain size */
 typedef void* (*allocate_fn)(const std::string& path, size_t size);
 /** Allocates a block in a file of a certain size */
-typedef uint8_t* (*allocate_block_fn)(const std::string& path, size_t size);
+typedef void* (*allocate_bucket_fn)(const std::string& path, size_t size);
 /** Frees the given pointer */
 typedef void (*free_fn)(void* ptr, size_t size);
 /** Flushes the memory specified by the pointer */
@@ -60,8 +61,8 @@ struct storage_functions {
   storage_mode mode;
   /** The allocation function */
   allocate_fn allocate;
-  /** The function that allocates a block of memory */
-  allocate_block_fn allocate_block;
+  /** The function that allocates a bucket of memory */
+  allocate_bucket_fn allocate_bucket;
   /** Function that frees memory */
   free_fn free;
   /** Function that flushes memory */
@@ -84,14 +85,15 @@ struct in_memory {
   }
 
   /**
-   * Allocates a block of new memory.
+   * Allocates a bucket of new memory.
    *
    * @param path Backing file (unused).
    * @param size Size of requested block.
    * @return Allocated block.
    */
-  inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.alloc<uint8_t>(size / sizeof(uint8_t));
+  inline static void* allocate_bucket(const std::string& path, size_t size) {
+    ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+    return ALLOCATOR.alloc(size, aux);
   }
 
   /**
@@ -129,7 +131,7 @@ struct durable_relaxed {
    * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
+    int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
     file_utils::truncate_file(fd, size);
     void* data = mmap_utils::map(fd, nullptr, 0, size);
     file_utils::close_file(fd);
@@ -137,14 +139,15 @@ struct durable_relaxed {
   }
 
   /**
-   * Allocates a block of new memory.
+   * Allocates a bucket of new memory.
    *
    * @param path Backing file.
    * @param size Size of requested block.
    * @return Allocated block.
    */
-  inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap<uint8_t>(path, size / sizeof(uint8_t));
+  inline static void* allocate_bucket(const std::string& path, size_t size) {
+    ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+    return ALLOCATOR.mmap(path, size, aux);
   }
 
   /**
@@ -182,7 +185,7 @@ struct durable {
    * @return Allocated bytes.
    */
   inline static void* allocate(const std::string& path, size_t size) {
-    int fd = utils::file_utils::create_file(path, O_CREAT | O_TRUNC | O_RDWR);
+    int fd = utils::file_utils::open_file(path, O_CREAT | O_TRUNC | O_RDWR);
     file_utils::truncate_file(fd, size);
     void* data = mmap_utils::map(fd, nullptr, 0, size);
     file_utils::close_file(fd);
@@ -190,14 +193,15 @@ struct durable {
   }
 
   /**
-   * Allocates a block of new memory.
+   * Allocates a bucket of new memory.
    *
    * @param path Backing file.
    * @param size Size of requested block.
    * @return Allocated block.
    */
-  inline static uint8_t* allocate_block(const std::string& path, size_t size) {
-    return ALLOCATOR.mmap<uint8_t>(path, size / sizeof(uint8_t));
+  inline static void* allocate_bucket(const std::string& path, size_t size) {
+    ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
+    return ALLOCATOR.mmap(path, size, aux);
   }
 
   /**
@@ -223,17 +227,17 @@ struct durable {
 
 /** Storage functionality for in memory mode */
 static storage_functions IN_MEMORY_FNS = { storage_mode::IN_MEMORY,
-    in_memory::allocate, in_memory::allocate_block, in_memory::free_mem,
+    in_memory::allocate, in_memory::allocate_bucket, in_memory::free_mem,
     in_memory::flush };
 
 /** Storage functionality for durable relaxed mode */
 static storage_functions DURABLE_RELAXED_FNS = { storage_mode::DURABLE_RELAXED,
-    durable_relaxed::allocate, durable_relaxed::allocate_block,
+    durable_relaxed::allocate, durable_relaxed::allocate_bucket,
     durable_relaxed::free, durable_relaxed::flush };
 
 /** Storage functionality for durable mode */
 static storage_functions DURABLE_FNS = { storage_mode::DURABLE,
-    durable::allocate, durable::allocate_block, durable::free, durable::flush };
+    durable::allocate, durable::allocate_bucket, durable::free, durable::flush };
 
 /** Contains the storage functions for all storage modes */
 static storage_functions STORAGE_FNS[3] = { IN_MEMORY_FNS, DURABLE_RELAXED_FNS,

@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 
+#include "archival/archival_mode.h"
 #include "types/numeric.h"
 #include "types/type_manager.h"
 #include "io_utils.h"
@@ -20,8 +21,8 @@ namespace confluo {
  */
 enum metadata_type
   : uint32_t {
-    /** Metadata for the schema */
-    D_SCHEMA_METADATA = 0,
+  /** Metadata for the schema */
+  D_SCHEMA_METADATA = 0,
   /** Metadata for the index */
   D_INDEX_METADATA = 1,
   /** Metadata for filters */
@@ -29,7 +30,11 @@ enum metadata_type
   /** Metadata for aggregates */
   D_AGGREGATE_METADATA = 3,
   /** Metadata for triggers */
-  D_TRIGGER_METADATA = 4
+  D_TRIGGER_METADATA = 4,
+  /** Metadata for storage mode */
+  D_STORAGE_MODE_METADATA = 5,
+  /** Metadata for archival mode */
+  D_ARCHIVAL_MODE_METADATA = 6
 };
 
 /**
@@ -219,27 +224,72 @@ struct trigger_metadata {
  * Writer for metadata
  */
 class metadata_writer {
+
  public:
+  typedef bool metadata_writer_state;
+  static const metadata_writer_state UNINIT = false;
+  static const metadata_writer_state INIT = true;
+
+  metadata_writer()
+      : metadata_writer("") {
+    state_ = UNINIT;
+  }
+
   /**
    * Constructor that initializes metadata writer
    * @param path The path of where the metadata is
    * @param id The id of the storage type 
    */
-  metadata_writer(const std::string& path, storage::storage_mode id)
+  metadata_writer(const std::string& path)
       : filename_(path + "/metadata"),
-        id_(id) {
-    if (id_ != storage::storage_mode::IN_MEMORY) {
-      out_.open(filename_);
-    }
+        state_(INIT) {
+    out_.open(filename_);
   }
 
   /**
-   * Writes the schema metadata
+   * Initializes the schema metadata writer
    *
    * @param schema The schema
    */
+  metadata_writer(const metadata_writer& other)
+      : filename_(other.filename_),
+        state_(other.state_) {
+    out_.close();
+    out_.open(filename_);
+  }
+
+  ~metadata_writer() {
+    out_.close();
+  }
+
+  metadata_writer& operator=(const metadata_writer& other) {
+    out_.close();
+    filename_ = other.filename_;
+    out_.open(filename_);
+    state_ = other.state_;
+    return *this;
+  }
+
+  void write_storage_mode(const storage::storage_mode mode) {
+    if (state_) {
+      metadata_type type = metadata_type::D_STORAGE_MODE_METADATA;
+      io_utils::write(out_, type);
+      io_utils::write(out_, mode);
+      io_utils::flush(out_);
+    }
+  }
+
+  void write_archival_mode(const archival::archival_mode mode) {
+    if (state_) {
+      metadata_type type = metadata_type::D_ARCHIVAL_MODE_METADATA;
+      io_utils::write(out_, type);
+      io_utils::write(out_, mode);
+      io_utils::flush(out_);
+    }
+  }
+
   void write_schema(const schema_t& schema) {
-    if (id_ != storage::storage_mode::IN_MEMORY) {
+    if (state_) {
       metadata_type type = metadata_type::D_SCHEMA_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, schema.columns().size());
@@ -258,7 +308,7 @@ class metadata_writer {
    * @param bucket_size The bucket_size used for lookup
    */
   void write_index_metadata(const std::string& name, double bucket_size) {
-    if (id_ != storage::storage_mode::IN_MEMORY) {
+    if (state_) {
       metadata_type type = metadata_type::D_INDEX_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -274,7 +324,7 @@ class metadata_writer {
    * @param expr The filter expression
    */
   void write_filter_metadata(const std::string& name, const std::string& expr) {
-    if (id_ != storage::storage_mode::IN_MEMORY) {
+    if (state_) {
       metadata_type type = metadata_type::D_FILTER_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -293,7 +343,7 @@ class metadata_writer {
   void write_aggregate_metadata(const std::string& name,
                                 const std::string& filter_name,
                                 const std::string& expr) {
-    if (id_ != storage::storage_mode::IN_MEMORY) {
+    if (state_) {
       metadata_type type = metadata_type::D_AGGREGATE_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, name);
@@ -314,7 +364,7 @@ class metadata_writer {
   void write_trigger_metadata(const std::string& trigger_name,
                               const std::string& trigger_expr,
                               const uint64_t periodicity_ms) {
-    if (id_ != storage::storage_mode::IN_MEMORY) {
+    if (filename_ != "/metadata") {
       metadata_type type = metadata_type::D_TRIGGER_METADATA;
       io_utils::write(out_, type);
       io_utils::write(out_, trigger_name);
@@ -327,7 +377,7 @@ class metadata_writer {
  private:
   std::string filename_;
   std::ofstream out_;
-  storage::storage_mode id_;
+  metadata_writer_state state_;
 };
 
 /**
@@ -343,6 +393,10 @@ class metadata_reader {
   metadata_reader(const std::string& path)
       : filename_(path + "/metadata"),
         in_(filename_) {
+  }
+
+  bool has_next() {
+    return !in_.eof();
   }
 
   /**
@@ -414,6 +468,14 @@ class metadata_reader {
     std::string trigger_expr = io_utils::read<std::string>(in_);
     uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
     return trigger_metadata(trigger_name, trigger_expr, periodicity_ms);
+  }
+
+  storage::storage_mode next_storage_mode() {
+    return io_utils::read<storage::storage_mode>(in_);
+  }
+
+  archival::archival_mode next_archival_mode() {
+    return io_utils::read<archival::archival_mode>(in_);
   }
 
  private:

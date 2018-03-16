@@ -598,6 +598,14 @@ class numeric {
     return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
   }
 
+  data_type type() {
+    return type_;
+  }
+
+  uint8_t* data() {
+    return data_;
+  }
+
  private:
   data_type type_;
   uint8_t data_[MAX_SIZE];

@@ -67,7 +67,7 @@ class filter_record_cursor : public record_cursor {
     for (; i < current_batch_.size() && o_cursor_->has_more();
         ++i, o_cursor_->advance()) {
       uint64_t o = o_cursor_->get();
-      ro_data_ptr ptr;
+      read_only_data_log_ptr ptr;
       dlog_->cptr(o, ptr);
       if (!cexpr_.test(current_batch_[i] = schema_->apply(o, ptr))) {
         i--;

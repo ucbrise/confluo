@@ -611,6 +611,26 @@ class radix_tree {
 
   /**
    * Get the reflog corresponding to a given key; returns null if the key has
+   * not been indexed. Unsafe to modify the returned reflog.
+   *
+   * @param key The key to lookup.
+   *
+   * @return The reflog corresponding to the key.
+   */
+  reflog* get_unsafe(const key_t& key) const {
+    node_t* node = root_;
+    size_t d;
+    for (d = 0; d < depth_; d++) {
+      node_t* child = atomic::load(&(node->children()[key[d]]));
+      if (child == nullptr)
+        return nullptr;
+      node = child;
+    }
+    return node->refs();
+  }
+
+  /**
+   * Get the reflog corresponding to a given key; returns null if the key has
    * not been indexed.
    *
    * @param key The key to lookup.

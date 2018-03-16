@@ -539,12 +539,37 @@ class byte_string {
     return *this;
   }
 
+  template<typename T>
+  inline T as() const {
+    T val;
+#if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
+    val = *reinterpret_cast<T*>(data_);
+#elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
+    val = byte_utils::reverse_as<T>(data_, size_);
+#else
+    if (byte_utils::is_big_endian()) {
+      val = *reinterpret_cast<T*>(data_);
+    } else {
+      val = byte_utils::reverse(data_, size_);
+    }
+#endif
+    return val;
+  }
+
   /**
    * Copies the byte_string data into an immutable form
    * @return An immutable_byte_string with the same data
    */
   immutable_byte_string copy() const {
     return immutable_byte_string(data_, size_);
+  }
+
+  uint8_t* data() {
+    return data_;
+  }
+
+  size_t size() {
+    return size_;
   }
 
   /**

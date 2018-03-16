@@ -1,10 +1,14 @@
 #ifndef UTILS_FILE_UTILS_H_
 #define UTILS_FILE_UTILS_H_
 
+#include <stdio.h>
+#include <dirent.h>
+
 #include <unistd.h>
 #include <cstdlib>
 #include <string>
 #include <errno.h>
+#include <ftw.h>
 #include <climits>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -41,12 +45,27 @@ class file_utils {
     mkdir(tmp, S_IRWXU);
   }
 
+  static void clear_dir(const std::string& path) {
+    delete_dir(path);
+    create_dir(path);
+  }
+
+  static void delete_dir(const std::string& path) {
+    nftw(path.c_str(), unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
+  }
+
   static bool exists_file(const std::string& path) {
     struct stat buf;
     return stat(path.c_str(), &buf) == 0;
   }
 
-  static int create_file(const std::string& path, int flags) {
+  static int delete_file(const std::string& path) {
+    int ret = remove(path.c_str());
+    assert_throw(ret != -1, "remove(" << path << "):" << strerror(errno));
+    return ret;
+  }
+
+  static int open_file(const std::string& path, int flags) {
     int ret = open(path.c_str(), flags, PERMISSIONS);
     assert_throw(
         ret != -1,
@@ -54,7 +73,7 @@ class file_utils {
     return ret;
   }
 
-  static void truncate_file(std::string& path, size_t size) {
+  static void truncate_file(const std::string& path, size_t size) {
     int ret = truncate(path.c_str(), size);
     assert_throw(
         ret != -1,
@@ -78,6 +97,14 @@ class file_utils {
     realpath(path.c_str(), full_path);
     return std::string(full_path);
   }
+
+ private:
+  static int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+      int ret = remove(fpath);
+      assert_throw(ret != -1, "remove(" << fpath << "):" << strerror(errno));
+      return ret;
+  }
+
 };
 
 }

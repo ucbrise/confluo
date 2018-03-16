@@ -29,15 +29,14 @@ class AtomicMultilogTest : public testing::Test {
     }
 
     record_t r;
+    read_only_data_log_ptr data_ptr;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      ro_data_ptr data_ptr;
       mlog.read(offsets[i], data_ptr);
-      ASSERT_TRUE(data_ptr.get() != nullptr);
+      decoded_data_log_ptr decoded_ptr = data_ptr.decode();
+      ASSERT_TRUE(decoded_ptr.get() != nullptr);
       uint8_t expected = i % 256;
-      uint8_t* data = data_ptr.get();
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-
-        ASSERT_EQ(data[j], expected);
+        ASSERT_EQ(decoded_ptr.get()[j], expected);
       }
     }
     ASSERT_EQ(MAX_RECORDS, mlog.num_records());
@@ -157,7 +156,7 @@ TEST_F(AtomicMultilogTest, AppendAndGetInMemoryTest) {
   atomic_multilog mlog(
       "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
-      "/tmp", storage::IN_MEMORY, MGMT_POOL);
+      "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
 }
 
@@ -165,7 +164,7 @@ TEST_F(AtomicMultilogTest, AppendAndGetDurableTest) {
   atomic_multilog mlog(
       "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
-      "/tmp", storage::DURABLE, MGMT_POOL);
+      "/tmp", storage::DURABLE, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
 }
 
@@ -173,12 +172,12 @@ TEST_F(AtomicMultilogTest, AppendAndGetDurableRelaxedTest) {
   atomic_multilog mlog(
       "my_table",
       schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
-      "/tmp", storage::DURABLE_RELAXED, MGMT_POOL);
+      "/tmp", storage::DURABLE_RELAXED, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
 }
 
 TEST_F(AtomicMultilogTest, AppendAndGetRecordTest1) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
 
   typedef std::vector<std::string> rec_vector;
   rec_vector rec1 { "false", "0", "0", "0", "0", "0.000000", "0.010000", "abc" };
@@ -225,7 +224,7 @@ TEST_F(AtomicMultilogTest, AppendAndGetRecordTest1) {
 }
 
 TEST_F(AtomicMultilogTest, AppendAndGetRecordTest2) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
 
   typedef std::vector<std::string> rec_vector;
   rec_vector rec1 { "0", "false", "0", "0", "0", "0", "0.000000", "0.010000",
@@ -273,8 +272,17 @@ TEST_F(AtomicMultilogTest, AppendAndGetRecordTest2) {
   ASSERT_EQ(rec8, res8);
 }
 
+TEST_F(AtomicMultilogTest, ArchiveTest) {
+  atomic_multilog mlog(
+      "my_table",
+      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
+  test_append_and_get(mlog);
+  mlog.archive();
+}
+
 TEST_F(AtomicMultilogTest, IndexTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_index("a");
   mlog.add_index("b");
   mlog.add_index("c", 10);
@@ -359,8 +367,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("a == true && b > 4"); r->has_more();
-      r->advance()) {
+  for (auto r = mlog.execute_filter("a == true && b > 4"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -368,8 +375,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("a == true && (b > 4 || c <= 30)");
-      r->has_more(); r->advance()) {
+  for (auto r = mlog.execute_filter("a == true && (b > 4 || c <= 30)"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r->get().at(2).value().to_data().as<int8_t>() > '4'
@@ -379,8 +385,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog.execute_filter("a == true && (b > 4 || f > 0.1)");
-      r->has_more(); r->advance()) {
+  for (auto r = mlog.execute_filter("a == true && (b > 4 || f > 0.1)"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r->get().at(2).value().to_data().as<int8_t>() > '4'
@@ -391,7 +396,7 @@ TEST_F(AtomicMultilogTest, IndexTest) {
 }
 
 TEST_F(AtomicMultilogTest, RemoveIndexTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
 
   mlog.add_index("a", 1);
   mlog.add_index("b", 1);
@@ -422,7 +427,7 @@ TEST_F(AtomicMultilogTest, RemoveIndexTest) {
 // TODO: Separate out the tests
 // TODO: Add tests for aggregates only
 TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_filter("filter1", "a == true");
   mlog.add_filter("filter2", "b > 4");
   mlog.add_aggregate("agg1", "filter1", "SUM(d)");
@@ -443,8 +448,7 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
   mlog.append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = mlog.query_filter("filter1", beg, end); r->has_more();
-      r->advance()) {
+  for (auto r = mlog.query_filter("filter1", beg, end); r->has_more(); r->advance()) {
     i++;
   }
 
@@ -490,7 +494,7 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
 
 // TODO: Separate out the tests
 TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_filter("filter1", "a == true");
   mlog.add_filter("filter2", "b > 4");
   mlog.add_filter("filter3", "c <= 30");
@@ -515,6 +519,8 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   mlog.install_trigger("trigger6", "agg6 >= 10");
   mlog.install_trigger("trigger7", "agg7 >= 10");
   mlog.install_trigger("trigger8", "agg8 >= 10");
+
+  sleep(1);
 
   int64_t now_ns = time_utils::cur_ns();
   int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
@@ -645,7 +651,7 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   ASSERT_TRUE(numeric(26) == val8);
 
   // Test triggers
-  sleep(1);  // To make sure all triggers have been evaluated
+  sleep(3);  // To make sure all triggers have been evaluated
 
   size_t alert_count = 0;
   for (auto a = mlog.get_alerts(beg, end); a->has_more(); a->advance()) {
@@ -709,7 +715,7 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
 }
 
 TEST_F(AtomicMultilogTest, BatchIndexTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_index("a");
   mlog.add_index("b");
   mlog.add_index("c", 10);
@@ -823,7 +829,7 @@ TEST_F(AtomicMultilogTest, BatchIndexTest) {
 // TODO: Separate out the tests
 // TODO: Add tests for aggregates only
 TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_filter("filter1", "a == true");
   mlog.add_filter("filter2", "b > 4");
   mlog.add_filter("filter3", "c <= 30");
