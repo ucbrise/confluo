@@ -150,39 +150,49 @@ class atomic_multilog {
     std::string command = tree.get<std::string>("command");
 
     pt::ptree result;
+    result.put("status", "success");
 
-    if ("add_index" == command) {
-      std::string field_name = tree.get<std::string>("params.field_name");
-      double bucket_size = tree.get<double>("params.bucket_size");
-      add_index(field_name, bucket_size);
-    } else if ("remove_index" == command) {
-      std::string field_name = tree.get<std::string>("params.field_name");
-      remove_index(field_name);
-    } else if ("is_indexed" == command) {
-      std::string field_name = tree.get<std::string>("params.field_name");
-      bool indexed = is_indexed(field_name);
-      result.put("is_indexed", indexed);
-    } else if ("add_filter" == command) {
-      std::string name = tree.get<std::string>("params.name");
-      std::string expr = tree.get<std::string>("params.expr");
-      add_filter(name, expr);
-    } else if ("remove_filter" == command) {
-      std::string name = tree.get<std::string>("params.name");
-      remove_filter(name);
-    } else if ("add_aggregate" == command) {
-      std::string name = tree.get<std::string>("params.name");
-      std::string filter_name = tree.get<std::string>("params.filter_name");
-      std::string expr = tree.get<std::string>("params.expr");
-      add_aggregate(name, filter_name, expr);
-    } else if ("remove_aggregate" == command) {
-      std::string name = tree.get<std::string>("params.name");
-      remove_aggregate(name);
-    } else if ("install_trigger" == command) {
-      std::string name = tree.get<std::string>("params.name");
-      std::string expr = tree.get<std::string>("params.expr");
-      uint64_t periodicity_ms = tree.get("params.periodicity_ms", configuration_params::MONITOR_PERIODICITY_MS);
-      install_trigger(name, expr, periodicity_ms);
+    try {
+      if ("add_index" == command) {
+        std::string field_name = tree.get<std::string>("params.field_name");
+        double bucket_size = tree.get<double>("params.bucket_size");
+        add_index(field_name, bucket_size);
+      } else if ("remove_index" == command) {
+        std::string field_name = tree.get<std::string>("params.field_name");
+        remove_index(field_name);
+      } else if ("is_indexed" == command) {
+        std::string field_name = tree.get<std::string>("params.field_name");
+        bool indexed = is_indexed(field_name);
+        result.put("is_indexed", indexed);
+      } else if ("add_filter" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        std::string expr = tree.get<std::string>("params.expr");
+        add_filter(name, expr);
+      } else if ("remove_filter" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        remove_filter(name);
+      } else if ("add_aggregate" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        std::string filter_name = tree.get<std::string>("params.filter_name");
+        std::string expr = tree.get<std::string>("params.expr");
+        add_aggregate(name, filter_name, expr);
+      } else if ("remove_aggregate" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        remove_aggregate(name);
+      } else if ("install_trigger" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        std::string expr = tree.get<std::string>("params.expr");
+        uint64_t periodicity_ms = tree.get("params.periodicity_ms", configuration_params::MONITOR_PERIODICITY_MS);
+        install_trigger(name, expr, periodicity_ms);
+      } else if ("remove_trigger" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        remove_trigger(name);
+      }
+    } catch (const management_exception& e) {
+      result.put("exception", e.what());
+      result.put("status", "fail");
     }
+
 
     // and so on
 
