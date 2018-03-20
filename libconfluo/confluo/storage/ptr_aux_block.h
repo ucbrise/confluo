@@ -22,6 +22,8 @@ const uint8_t state_type::D_ARCHIVED;
  */
 typedef struct encoding_type {
   static const uint8_t D_UNENCODED = 0;
+  static const uint8_t D_LZ4 = 1;
+  static const uint8_t D_DELTA = 2;
 } encoding_type;
 
 const uint8_t encoding_type::D_UNENCODED;
