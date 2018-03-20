@@ -8,13 +8,11 @@
 namespace confluo {
 namespace sketch {
 
-// TODO resolve all race conditions
-
 // TODO rename
 class simple_hash {
 
  public:
-  static const size_t LONG_PRIME = 4294967311;
+  static const size_t PRIME = 4294967311;
 
   simple_hash()
       : simple_hash(0, 0) {
@@ -29,11 +27,11 @@ class simple_hash {
   //    size_t operator()(T elem) { TODO: can i template overriden func call?
   size_t apply(T elem) {
     std::string str(reinterpret_cast<const char*>(&elem), sizeof(T));
-    return (a_ * std::hash<std::string>{}(str) + b_) % LONG_PRIME;
+    return (a_ * std::hash<std::string>{}(str) + b_) % PRIME;
   }
 
   static simple_hash generate_random() {
-    return simple_hash(utils::rand_utils::rand_uint64(LONG_PRIME), utils::rand_utils::rand_uint64(LONG_PRIME));
+    return simple_hash(utils::rand_utils::rand_uint64(PRIME), utils::rand_utils::rand_uint64(PRIME));
   }
 
  private:
@@ -41,10 +39,14 @@ class simple_hash {
 
 };
 
-const size_t simple_hash::LONG_PRIME;
+const size_t simple_hash::PRIME;
 
 class hash_manager {
  public:
+  /**
+   * Constructor.
+   * @param num_hashes number of hashes
+   */
   hash_manager(size_t num_hashes = 0)
       : hashes_() {
     this->guarantee_initialized(num_hashes);
@@ -64,6 +66,12 @@ class hash_manager {
     }
   }
 
+  /**
+   * Hash element.
+   * @param hash_id id of hash to use
+   * @param elem element to hash
+   * @return hashed value
+   */
   template<typename T>
   size_t hash(size_t hash_id, T elem) {
     return hashes_[hash_id].apply<T>(elem);
