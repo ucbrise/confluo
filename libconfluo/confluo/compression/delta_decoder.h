@@ -45,7 +45,7 @@ class delta_decoder {
    * @param source_size The size of the unencoded buffer
    */
   static void decode(uint8_t* input_buffer, uint64_t* dest_buffer,
-                     size_t src_index, size_t length) {
+                     size_t src_index, size_t length, size_t source_size) {
     elias_gamma_encoded_array<uint64_t> enc_array;
     enc_array.from_byte_array(input_buffer);
 

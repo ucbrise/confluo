@@ -2,6 +2,7 @@
 #define CONFLUO_STORAGE_ENCODER_H_
 
 #include "compression/delta_encoder.h"
+#include "compression/lz4_encoder.h"
 #include "exceptions.h"
 #include "ptr_aux_block.h"
 #include "ptr_metadata.h"

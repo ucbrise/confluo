@@ -169,7 +169,7 @@ class encoded_ptr {
 
  private:
   static void no_op_delete(T* ptr) { }
-  template<typename T> static void array_delete(T* ptr) { std::default_delete<T[]>()(ptr); }
+  template<typename U> static void array_delete(U* ptr) { std::default_delete<U[]>()(ptr); }
 
   void* ptr_; // encoded data stored at this pointer
 

@@ -12,6 +12,8 @@
 
 namespace confluo {
 
+using namespace ::utils;
+
 /**
  * The bitmap class. Stores a bit-array of a fixed size, and supports access and
  * modifications via efficient bitwise arithmetic.
