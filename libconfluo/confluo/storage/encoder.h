@@ -1,6 +1,7 @@
 #ifndef CONFLUO_STORAGE_ENCODER_H_
 #define CONFLUO_STORAGE_ENCODER_H_
 
+#include "compression/delta_encoder.h"
 #include "exceptions.h"
 #include "ptr_aux_block.h"
 #include "ptr_metadata.h"
@@ -46,6 +47,21 @@ class encoder {
       case encoding_type::D_UNENCODED: {
         return data_ptr(data_ptr::simple_ptr(reinterpret_cast<uint8_t*>(ptr), no_op_delete), size);
       }
+      case encoding_type::D_DELTA: {
+        uint64_t* casted = reinterpret_cast<uint64_t*>(ptr);
+        size_t array_len = size / sizeof(uint64_t);
+        size_t encoded_size = compression::delta_encoder::get_buffer_size(casted, array_len);
+        uint8_t* encoded = new uint8_t[encoded_size];
+        compression::delta_encoder::encode(casted, array_len, encoded);
+        return data_ptr(data_ptr::simple_ptr(encoded, array_delete), encoded_size);
+      }
+      case encoding_type::D_LZ4: {
+        uint8_t* casted = reinterpret_cast<uint8_t*>(ptr);
+        size_t encoded_size = compression::lz4_encoder::get_buffer_size(size);
+        uint8_t* encoded = new uint8_t[encoded_size];
+        compression::lz4_encoder::encode(casted, encoded_size, encoded);
+        return data_ptr(data_ptr::simple_ptr(encoded, array_delete), encoded_size);
+      }
       default : {
         THROW(illegal_state_exception, "Invalid encoding type!");
       }
@@ -54,6 +70,7 @@ class encoder {
 
  private:
   static void no_op_delete(uint8_t* ptr) { }
+  static void array_delete(uint8_t* ptr) { std::default_delete<uint8_t[]>()(ptr); }
 
 };
 
