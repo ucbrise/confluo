@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 
 using namespace confluo;
+using namespace confluo::compression;
 
 class LZ4EncodeTest : public testing::Test {
  public:
