@@ -13,6 +13,7 @@
 #include "lz4.h"
 
 namespace confluo {
+namespace compression {
 
 /**
  * A stateless LZ4 encoder. Takes as input a buffer of bytes
@@ -42,8 +43,7 @@ class lz4_encoder {
 
     for (size_t i = 0; i < source_length; i += bytes_per_block) {
       uint8_t* output_ptr = output_buffer + output_block_position;
-      size_t size = encode((char*) output_ptr, (char*) (source_buffer + i), 
-              bytes_per_block);
+      size_t size = encode((char*) output_ptr, (char*) (source_buffer + i), bytes_per_block);
       output_block_position += size;
 
       uint8_t* output_array_ptr = output_buffer + output_array_position;
@@ -78,6 +78,7 @@ class lz4_encoder {
 
 };
 
+}
 }
 
 #endif /* CONFLUO_COMPRESSION_LZ4_ENCODER_H_ */
