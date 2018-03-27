@@ -24,10 +24,8 @@ class simple_hash {
   }
 
   template<typename T>
-  //    size_t operator()(T elem) { TODO: can i template overriden func call?
   size_t apply(T elem) {
-    std::string str(reinterpret_cast<const char*>(&elem), sizeof(T));
-    return (a_ * std::hash<std::string>{}(str) + b_) % PRIME;
+    return (a_ * std::hash<T>{}(elem) + b_) % PRIME;
   }
 
   static simple_hash generate_random() {
@@ -54,15 +52,13 @@ class hash_manager {
 
   /**
    * Guarantee enough hashes are intialized.
-   * TODO trivial concurrency handling: may initialize more than required. fix this
    * @param num_hashes number of hashes
    */
   void guarantee_initialized(size_t num_hashes) {
     size_t cur_size = hashes_.size();
     size_t num_new_hashes = num_hashes > cur_size ? num_hashes - cur_size : 0;
-    size_t start = hashes_.reserve(num_new_hashes);
     for (size_t i = 0; i < num_new_hashes; i++) {
-      hashes_[start + i] = simple_hash::generate_random();
+      hashes_.push_back(simple_hash::generate_random());
     }
   }
 
@@ -78,7 +74,7 @@ class hash_manager {
   }
 
  private:
-  monolog_exp2<simple_hash> hashes_;
+  std::vector<simple_hash> hashes_;
 
 };
 

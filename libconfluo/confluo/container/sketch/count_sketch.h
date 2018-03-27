@@ -94,7 +94,7 @@ class count_sketch {
     for (size_t i = 0; i < num_estimates_; i++) {
       int bucket_idx = hash_manager_.hash(i, elem) % num_buckets_;
       counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, elem));
-      size_t old_count = atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], 1);
+      counter_t old_count = atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
       median_buf[i] = sign * old_count;
     }
     return median<counter_t>(median_buf);
@@ -114,7 +114,7 @@ class count_sketch {
                         manager);
   }
 
- private:
+  // TODO move
   /**
    * Number of estimates per update computed from probability of error
    * @param gamma desired probability of error
@@ -133,9 +133,10 @@ class count_sketch {
    */
   static size_t error_margin_to_num_buckets(double epsilon) {
     // TODO assert
-    return std::ceil(std::exp(1) / epsilon);
+    return std::ceil(std::exp(1) / (epsilon * epsilon));
   }
 
+ private:
   static counter_t to_sign(size_t num) {
     return num % 2 == 1 ? 1 : -1;
   }

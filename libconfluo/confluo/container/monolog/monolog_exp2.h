@@ -425,6 +425,21 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
       : tail_(count) {
   }
 
+  monolog_exp2(const monolog_exp2& other) {
+    atomic::store(&tail_, other.size());
+    for (size_t i = 0; i < this->size(); i++) {
+      this->set(i, other.at(i));
+    }
+  }
+
+  monolog_exp2& operator=(const monolog_exp2& other) {
+    atomic::store(&tail_, other.size());
+    for (size_t i = 0; i < this->size(); i++) {
+      this->set(i, other.at(i));
+    }
+    return *this;
+  }
+
   /**
    * Reserves a certain amount of space
    *
