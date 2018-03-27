@@ -21,15 +21,15 @@ namespace compression {
 class delta_decoder {
  public:
   /**
-   * Decodes a single byte at a given index
+   * Decodes a single element at a given index
    *
    * @param input_buffer The encoded buffer to decode
    * @param src_index The index to decode at
    * @param source_size The length of the non encoded buffer
    *
-   * @return The decoded byte
+   * @return The decoded element
    */
-  static uint8_t decode(uint8_t* input_buffer, size_t src_index, size_t source_size) {
+  static uint64_t decode(uint8_t* input_buffer, size_t src_index) {
     elias_gamma_encoded_array<uint64_t> enc_array;
     enc_array.from_byte_array(input_buffer);
     return enc_array.get(src_index);
@@ -45,7 +45,7 @@ class delta_decoder {
    * @param source_size The size of the unencoded buffer
    */
   static void decode(uint8_t* input_buffer, uint64_t* dest_buffer,
-                     size_t src_index, size_t length, size_t source_size) {
+                     size_t src_index, size_t length) {
     elias_gamma_encoded_array<uint64_t> enc_array;
     enc_array.from_byte_array(input_buffer);
 
