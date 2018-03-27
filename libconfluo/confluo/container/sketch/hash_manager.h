@@ -24,8 +24,13 @@ class simple_hash {
   }
 
   template<typename T>
-  size_t apply(T elem) {
-    return (a_ * std::hash<T>{}(elem) + b_) % PRIME;
+  typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type apply(T elem) {
+    return (a_ * std::hash<T>(elem) + b_) % PRIME;
+  }
+
+  template<typename T>
+  typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type apply(T elem) {
+    return (a_ * elem + b_) % PRIME;
   }
 
   static simple_hash generate_random() {
