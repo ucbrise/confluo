@@ -58,27 +58,27 @@ class count_sketch {
   }
 
   /**
-   * Update count estimates for element.
-   * @param elem element
+   * Update count estimates for key.
+   * @param key key
    */
-  void update(T elem) {
+  void update(T key) {
     for (size_t i = 0; i < num_estimates_; i++) {
-      int bucket_idx = hash_manager_.hash(i, elem) % num_buckets_;
-      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, elem));
+      int bucket_idx = hash_manager_.hash(i, key) % num_buckets_;
+      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, key));
       atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
     }
   }
 
   /**
-   * Estimate count of element.
-   * @param elem element
+   * Estimate count of a key.
+   * @param key key
    * @return estimated count
    */
-  counter_t estimate(T elem) {
+  counter_t estimate(T key) {
     std::vector<counter_t> median_buf(num_estimates_);
     for (size_t i = 0; i < num_estimates_; i++) {
-      size_t bucket_idx = hash_manager_.hash(i, elem) % num_buckets_;
-      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, elem));
+      size_t bucket_idx = hash_manager_.hash(i, key) % num_buckets_;
+      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, key));
       median_buf[i] = sign * atomic::load(&counters_[num_buckets_ * i + bucket_idx]);
     }
     return median<counter_t>(median_buf);
@@ -86,14 +86,14 @@ class count_sketch {
 
   /**
    * Update counts and get the old estimate.
-   * @param elem element
+   * @param key key
    * @return old estimated count
    */
-  counter_t update_and_estimate(T elem) {
+  counter_t update_and_estimate(T key) {
     std::vector<counter_t> median_buf(num_estimates_);
     for (size_t i = 0; i < num_estimates_; i++) {
-      int bucket_idx = hash_manager_.hash(i, elem) % num_buckets_;
-      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, elem));
+      int bucket_idx = hash_manager_.hash(i, key) % num_buckets_;
+      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, key));
       counter_t old_count = atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
       median_buf[i] = sign * old_count;
     }
