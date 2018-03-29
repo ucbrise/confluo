@@ -28,8 +28,9 @@ class delta_encoder {
    * @param source_length The length of the input buffer array
    * @param output_buffer The buffer containing the encoded data
    */
-  static void encode(uint64_t* source_buffer, size_t source_length, uint8_t* output_buffer) {
-    elias_gamma_encoded_array<uint64_t> enc_array(source_buffer, source_length);
+  template<typename T>
+  static void encode(T* source_buffer, size_t source_length, uint8_t* output_buffer) {
+    elias_gamma_encoded_array<T> enc_array(source_buffer, source_length);
     enc_array.to_byte_array(output_buffer);
   }
 
@@ -41,8 +42,9 @@ class delta_encoder {
    *
    * @return An upper bound on the size of the encoded data
    */
-  static size_t get_buffer_size(uint64_t* source_buffer, size_t source_length) {
-    elias_gamma_encoded_array<uint64_t> enc_array(source_buffer, source_length);
+  template<typename T>
+  static size_t get_buffer_size(T* source_buffer, size_t source_length) {
+    elias_gamma_encoded_array<T> enc_array(source_buffer, source_length);
     return enc_array.storage_size();
   }
 

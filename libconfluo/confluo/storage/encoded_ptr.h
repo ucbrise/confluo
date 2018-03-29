@@ -92,11 +92,11 @@ class encoded_ptr {
         return ptr[idx];
       }
       case encoding_type::D_DELTA: {
-        T decoded = 0; // = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
+        T decoded = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
         return decoded;
       }
       case encoding_type::D_LZ4: {
-        T decoded = 0; // = compression::lz4_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
+        T decoded = 0;//= compression::lz4_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
         return decoded;
       }
       default: {
@@ -121,7 +121,7 @@ class encoded_ptr {
       }
       case encoding_type::D_DELTA: {
         size_t encoded_size = metadata->data_size_;
-//        compression::delta_decoder::decode(ptr, buffer, idx, len);
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), buffer, idx, len);
         break;
       }
       case encoding_type::D_LZ4: {

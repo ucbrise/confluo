@@ -22,8 +22,7 @@ TEST_F(DeltaEncodeTest, DecodeFullTest) {
     array[i] = i % 100;
   }
 
-  uint8_t* encode_buffer = new 
-      uint8_t[delta_encoder::get_buffer_size(array, k_array_size)];
+  uint8_t* encode_buffer = new uint8_t[delta_encoder::get_buffer_size(array, k_array_size)];
   uint64_t* dest_buffer = new uint64_t[k_array_size];
 
   delta_encoder::encode(array, k_array_size, encode_buffer);

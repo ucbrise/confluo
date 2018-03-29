@@ -340,18 +340,15 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   size_t to_byte_array(uint8_t* buffer) {
     size_t array_size = 0;
     uint8_t width = this->samples_->bit_width();
-    std::memcpy(buffer, reinterpret_cast<const char *>(&width), 
-            sizeof(uint8_t));
+    std::memcpy(buffer, reinterpret_cast<const char*>(&width), sizeof(uint8_t));
     array_size += sizeof(uint8_t);
 
     size_t num_bits = this->samples_->num_bits();
-    std::memcpy(buffer + array_size, 
-            reinterpret_cast<const char*>(&num_bits), sizeof(size_t));
+    std::memcpy(buffer + array_size, reinterpret_cast<const char*>(&num_bits), sizeof(size_t));
     array_size += sizeof(size_t);
 
     size_t data_size = sizeof(uint64_t) * BITS2BLOCKS(num_bits);
-    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
-                this->samples_->data()), data_size);
+    std::memcpy(buffer + array_size, reinterpret_cast<const char*>(this->samples_->data()), data_size);
 
     array_size += data_size;
 
@@ -419,7 +416,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
               array_size + i * sizeof(uint64_t));
     }
    
-    array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));;
+    array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));
 
     size = *reinterpret_cast<size_t *>(buffer + array_size);
     array_size += sizeof(size_t);
