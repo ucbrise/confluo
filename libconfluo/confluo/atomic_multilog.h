@@ -253,6 +253,13 @@ class atomic_multilog {
       } else if ("remove_trigger" == command) {
         std::string name = tree.get<std::string>("params.name");
         remove_trigger(name);
+      } else if ("append" == command) {
+        std::string json = tree.get<std::string>("params.json");
+        size_t offset = append(json);
+        result.put("offset", offset);
+      } else if ("read" == command) {
+        size_t offset = tree.get<size_t>("params.offset");
+        return read_json(offset);
       }
     } catch (const management_exception& e) {
       result.put("exception", e.what());
