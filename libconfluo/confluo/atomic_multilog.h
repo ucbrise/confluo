@@ -580,9 +580,10 @@ class atomic_multilog {
    * @return the JSON string
    */
   std::string read_json(uint64_t offset, uint64_t& version) const {
-    ro_data_ptr rptr;
+    read_only_data_log_ptr rptr;
     read(offset, version, rptr);
-    return schema_.data_to_json(rptr.get());
+    decoded_data_log_ptr dec_ptr = rptr.decode();
+    return schema_.data_to_json(dec_ptr.get());
   }
 
   /**

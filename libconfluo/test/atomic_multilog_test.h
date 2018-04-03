@@ -1043,7 +1043,7 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
 }
 
 TEST_F(AtomicMultilogTest, JsonAppendTest) {
-  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
 
   std::string rec1 = "{\"A\": false, \"B\": 0, \"C\": 0, \"D\": 0, \"E\": 0, \"F\": 0.000000, \"G\": 0.010000, \"H\": \"abc\" }";
   std::string rec2 = "{\"A\": true, \"B\": 1, \"C\": 10, \"D\": 2, \"E\": 1, \"F\": 0.100000, \"G\": 0.020000, \"H\": \"defg\" }";
