@@ -39,9 +39,13 @@
 #include "schema/schema.h"
 #include "storage/storage.h"
 #include "time_utils.h"
+#include "json_utils.h"
 #include "string_utils.h"
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace ::confluo::archival;
 using namespace ::confluo::monolog;
@@ -50,6 +54,7 @@ using namespace ::confluo::monitor;
 using namespace ::confluo::parser;
 using namespace ::confluo::planner;
 using namespace ::utils;
+namespace pt = boost::property_tree;
 
 namespace confluo {
 
@@ -198,6 +203,75 @@ class atomic_multilog {
     ret.wait();
     if (ex.has_value())
       throw ex.value();
+  }
+
+  /**
+   * Executes an operation based on a json string
+   * @param json_command The json string containing the command
+   * @return a json string containing the return value of the operation
+   */
+  std::string run_command(const std::string& json_command) {
+    pt::ptree tree;
+    utils::json_utils::json_to_ptree(tree, json_command);
+    std::string command = tree.get<std::string>("command");
+
+    pt::ptree result;
+    result.put("status", "success");
+
+    try {
+      if ("add_index" == command) {
+        std::string field_name = tree.get<std::string>("params.field_name");
+        double bucket_size = tree.get<double>("params.bucket_size");
+        add_index(field_name, bucket_size);
+      } else if ("remove_index" == command) {
+        std::string field_name = tree.get<std::string>("params.field_name");
+        remove_index(field_name);
+      } else if ("is_indexed" == command) {
+        std::string field_name = tree.get<std::string>("params.field_name");
+        bool indexed = is_indexed(field_name);
+        result.put("is_indexed", indexed);
+      } else if ("add_filter" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        std::string expr = tree.get<std::string>("params.expr");
+        add_filter(name, expr);
+      } else if ("remove_filter" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        remove_filter(name);
+      } else if ("add_aggregate" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        std::string filter_name = tree.get<std::string>("params.filter_name");
+        std::string expr = tree.get<std::string>("params.expr");
+        add_aggregate(name, filter_name, expr);
+      } else if ("remove_aggregate" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        remove_aggregate(name);
+      } else if ("install_trigger" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        std::string expr = tree.get<std::string>("params.expr");
+        uint64_t periodicity_ms = tree.get("params.periodicity_ms", configuration_params::MONITOR_PERIODICITY_MS);
+        install_trigger(name, expr, periodicity_ms);
+      } else if ("remove_trigger" == command) {
+        std::string name = tree.get<std::string>("params.name");
+        remove_trigger(name);
+      } else if ("append" == command) {
+        std::string json = tree.get<std::string>("params.json");
+        size_t offset = append(json);
+        result.put("offset", offset);
+      } else if ("read" == command) {
+        size_t offset = tree.get<size_t>("params.offset");
+        return read_json(offset);
+      }
+    } catch (const management_exception& e) {
+      result.put("exception", e.what());
+      result.put("status", "fail");
+    }
+
+
+    // and so on
+
+    std::stringstream ss;
+    pt::json_parser::write_json(ss, result);
+    return ss.str();
   }
 
   // Management ops
@@ -439,6 +513,18 @@ class atomic_multilog {
   }
 
   /**
+   * Appends a record given by a JSON string to the atomic multilog
+   * @param json The JSON string
+   * @return The offset in data log where the record is written
+   */
+  size_t append(const std::string& json) {
+    void* buf = schema_.json_to_data(json);
+    size_t off = append(buf);
+    delete[] reinterpret_cast<uint8_t*>(buf);
+    return off;
+  }
+
+  /**
    * Reads the data from the atomic multilog
    * @param offset The location of where the data is stored
    * @param version The tail pointer's location
@@ -485,6 +571,29 @@ class atomic_multilog {
   std::vector<std::string> read(uint64_t offset) const {
     uint64_t version;
     return read(offset, version);
+  }
+
+  /**
+   * Reads the data as a JSON string based on the offset
+   * @param offset The location of the data
+   * @param version The current version
+   * @return the JSON string
+   */
+  std::string read_json(uint64_t offset, uint64_t& version) const {
+    read_only_data_log_ptr rptr;
+    read(offset, version, rptr);
+    decoded_data_log_ptr dec_ptr = rptr.decode();
+    return schema_.data_to_json(dec_ptr.get());
+  }
+
+  /**
+   * Reads the data as a JSON string based on the offset
+   * @param offset The location of the data
+   * @return the JSON string
+   */
+  std::string read_json(uint64_t offset) const {
+    uint64_t version;
+    return read_json(offset, version);
   }
 
   /**

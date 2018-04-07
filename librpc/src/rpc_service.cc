@@ -90,6 +90,22 @@ rpc_service_remove_atomic_multilog_presult::~rpc_service_remove_atomic_multilog_
 }
 
 
+rpc_service_run_command_args::~rpc_service_run_command_args() throw() {
+}
+
+
+rpc_service_run_command_pargs::~rpc_service_run_command_pargs() throw() {
+}
+
+
+rpc_service_run_command_result::~rpc_service_run_command_result() throw() {
+}
+
+
+rpc_service_run_command_presult::~rpc_service_run_command_presult() throw() {
+}
+
+
 rpc_service_add_index_args::~rpc_service_add_index_args() throw() {
 }
 

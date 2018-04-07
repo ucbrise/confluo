@@ -97,6 +97,10 @@ service rpc_service {
   rpc_atomic_multilog_info get_atomic_multilog_info(1: string name),
   void remove_atomic_multilog(1: i64 multilog_id)
           throws (1: rpc_management_exception ex),
+
+  // Execute function specified by JSON
+  void run_command(1: i64 multilog_id, 2: string json_command)
+          throws (1: rpc_management_exception ex),
   
   // Table ops
   void add_index(1: i64 multilog_id, 2: string field_name, 

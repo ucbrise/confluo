@@ -2,6 +2,7 @@
 #define CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 
 #include "atomic_multilog.h"
+#include "json_utils.h"
 
 #include "gtest/gtest.h"
 
@@ -40,6 +41,7 @@ class AtomicMultilogTest : public testing::Test {
     }
     ASSERT_EQ(MAX_RECORDS, mlog.num_records());
   }
+
 
   static std::vector<column_t> s;
 
@@ -1038,6 +1040,69 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   ASSERT_TRUE(numeric(26) == a8->get().value);
   a8->advance();
   ASSERT_TRUE(a8->empty());
+}
+
+TEST_F(AtomicMultilogTest, JsonAppendTest) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
+
+  std::string rec1 = "{\"A\": false, \"B\": 0, \"C\": 0, \"D\": 0, \"E\": 0, \"F\": 0.000000, \"G\": 0.010000, \"H\": \"abc\" }";
+  std::string rec2 = "{\"A\": true, \"B\": 1, \"C\": 10, \"D\": 2, \"E\": 1, \"F\": 0.100000, \"G\": 0.020000, \"H\": \"defg\" }";
+  std::string rec3 = "{\"A\": false, \"B\": 2, \"C\": 20, \"D\": 4, \"E\": 10, \"F\": 0.200000, \"G\": 0.030000, \"H\": \"hijkl\" }";
+  std::string rec4 = "{\"A\": true, \"B\": 3, \"C\": 30, \"D\": 6, \"E\": 100, \"F\": 0.300000, \"G\": 0.040000, \"H\": \"mnopqr\" }";
+  std::string rec5 = "{\"A\": false, \"B\": 4, \"C\": 40, \"D\": 8, \"E\": 1000, \"F\": 0.400000, \"G\": 0.050000, \"H\": \"stuvwx\" }";
+  std::string rec6 = "{\"A\": true, \"B\": 5, \"C\": 50, \"D\": 10, \"E\": 10000, \"F\": 0.500000, \"G\": 0.060000, \"H\": \"yyy\" }";
+  std::string rec7 = "{\"A\": false, \"B\": 6, \"C\": 60, \"D\": 12, \"E\": 100000, \"F\": 0.600000, \"G\": 0.070000, \"H\": \"zzz\" }";
+  std::string rec8 = "{\"A\": true, \"B\": 7, \"C\": 70, \"D\": 14, \"E\": 1000000, \"F\": 0.700000, \"G\": 0.080000, \"H\": \"zzz\" }";
+
+  pt::ptree exp1; utils::json_utils::json_to_ptree(exp1, rec1);
+  pt::ptree exp2; utils::json_utils::json_to_ptree(exp2, rec2);
+  pt::ptree exp3; utils::json_utils::json_to_ptree(exp3, rec3);
+  pt::ptree exp4; utils::json_utils::json_to_ptree(exp4, rec4);
+  pt::ptree exp5; utils::json_utils::json_to_ptree(exp5, rec5);
+  pt::ptree exp6; utils::json_utils::json_to_ptree(exp6, rec6);
+  pt::ptree exp7; utils::json_utils::json_to_ptree(exp7, rec7);
+  pt::ptree exp8; utils::json_utils::json_to_ptree(exp8, rec8);
+
+  ASSERT_EQ(mlog.record_size() * 0, mlog.append(rec1));
+  ASSERT_EQ(mlog.record_size() * 1, mlog.append(rec2));
+  ASSERT_EQ(mlog.record_size() * 2, mlog.append(rec3));
+  ASSERT_EQ(mlog.record_size() * 3, mlog.append(rec4));
+  ASSERT_EQ(mlog.record_size() * 4, mlog.append(rec5));
+  ASSERT_EQ(mlog.record_size() * 5, mlog.append(rec6));
+  ASSERT_EQ(mlog.record_size() * 6, mlog.append(rec7));
+  ASSERT_EQ(mlog.record_size() * 7, mlog.append(rec8));
+
+  std::string res1 = mlog.read_json(mlog.record_size() * 0);
+  std::string res2 = mlog.read_json(mlog.record_size() * 1);
+  std::string res3 = mlog.read_json(mlog.record_size() * 2);
+  std::string res4 = mlog.read_json(mlog.record_size() * 3);
+  std::string res5 = mlog.read_json(mlog.record_size() * 4);
+  std::string res6 = mlog.read_json(mlog.record_size() * 5);
+  std::string res7 = mlog.read_json(mlog.record_size() * 6);
+  std::string res8 = mlog.read_json(mlog.record_size() * 7);
+
+  pt::ptree tree1; utils::json_utils::json_to_ptree(tree1, res1);
+  pt::ptree tree2; utils::json_utils::json_to_ptree(tree2, res2);
+  pt::ptree tree3; utils::json_utils::json_to_ptree(tree3, res3);
+  pt::ptree tree4; utils::json_utils::json_to_ptree(tree4, res4);
+  pt::ptree tree5; utils::json_utils::json_to_ptree(tree5, res5);
+  pt::ptree tree6; utils::json_utils::json_to_ptree(tree6, res6);
+  pt::ptree tree7; utils::json_utils::json_to_ptree(tree7, res7);
+  pt::ptree tree8; utils::json_utils::json_to_ptree(tree8, res8);
+
+  std::string keys[8] = {"A", "B", "C", "D", "E", "F", "G", "H"};
+
+  for (const std::string &key: keys) {
+    ASSERT_EQ(exp1.get<std::string>(key), tree1.get<std::string>(key));
+    ASSERT_EQ(exp2.get<std::string>(key), tree2.get<std::string>(key));
+    ASSERT_EQ(exp3.get<std::string>(key), tree3.get<std::string>(key));
+    ASSERT_EQ(exp4.get<std::string>(key), tree4.get<std::string>(key));
+    ASSERT_EQ(exp5.get<std::string>(key), tree5.get<std::string>(key));
+    ASSERT_EQ(exp6.get<std::string>(key), tree6.get<std::string>(key));
+    ASSERT_EQ(exp7.get<std::string>(key), tree7.get<std::string>(key));
+    ASSERT_EQ(exp8.get<std::string>(key), tree8.get<std::string>(key));
+  }
+
 }
 
 #endif /* CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_ */

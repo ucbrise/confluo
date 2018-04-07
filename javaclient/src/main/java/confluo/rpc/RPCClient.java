@@ -107,6 +107,18 @@ public class RPCClient {
   }
 
   /**
+   * Executes a command specified by a JSON string
+   *
+   * @throws TException Cannot execute the command
+   */
+  public void runCommand(String jsonCommand) throws TException {
+    if (curMultilogId == -1) {
+      throw new IllegalStateException("Must set Atomic Multilog first");
+    }
+    client.runCommand(curMultilogId, jsonCommand);
+  }
+
+  /**
    * Adds an index to the atomic multilog
    *
    * @param fieldName  The name of the associated field

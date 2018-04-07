@@ -51,6 +51,14 @@ class Iface(object):
         """
         pass
 
+    def run_command(self, multilog_id, json_command):
+        """
+        Parameters:
+         - multilog_id
+         - json_command
+        """
+        pass
+
     def add_index(self, multilog_id, field_name, bucket_size):
         """
         Parameters:
@@ -385,6 +393,39 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = remove_atomic_multilog_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def run_command(self, multilog_id, json_command):
+        """
+        Parameters:
+         - multilog_id
+         - json_command
+        """
+        self.send_run_command(multilog_id, json_command)
+        self.recv_run_command()
+
+    def send_run_command(self, multilog_id, json_command):
+        self._oprot.writeMessageBegin('run_command', TMessageType.CALL, self._seqid)
+        args = run_command_args()
+        args.multilog_id = multilog_id
+        args.json_command = json_command
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_run_command(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = run_command_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -1109,6 +1150,7 @@ class Processor(Iface, TProcessor):
         self._processMap["create_atomic_multilog"] = Processor.process_create_atomic_multilog
         self._processMap["get_atomic_multilog_info"] = Processor.process_get_atomic_multilog_info
         self._processMap["remove_atomic_multilog"] = Processor.process_remove_atomic_multilog
+        self._processMap["run_command"] = Processor.process_run_command
         self._processMap["add_index"] = Processor.process_add_index
         self._processMap["remove_index"] = Processor.process_remove_index
         self._processMap["add_filter"] = Processor.process_add_filter
@@ -1268,6 +1310,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("remove_atomic_multilog", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_run_command(self, seqid, iprot, oprot):
+        args = run_command_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = run_command_result()
+        try:
+            self._handler.run_command(args.multilog_id, args.json_command)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except rpc_management_exception as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("run_command", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2397,6 +2465,141 @@ class remove_atomic_multilog_result(object):
         return not (self == other)
 all_structs.append(remove_atomic_multilog_result)
 remove_atomic_multilog_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [rpc_management_exception, None], None, ),  # 1
+)
+
+
+class run_command_args(object):
+    """
+    Attributes:
+     - multilog_id
+     - json_command
+    """
+
+
+    def __init__(self, multilog_id=None, json_command=None,):
+        self.multilog_id = multilog_id
+        self.json_command = json_command
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.multilog_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.json_command = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('run_command_args')
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
+            oprot.writeFieldEnd()
+        if self.json_command is not None:
+            oprot.writeFieldBegin('json_command', TType.STRING, 2)
+            oprot.writeString(self.json_command.encode('utf-8') if sys.version_info[0] == 2 else self.json_command)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(run_command_args)
+run_command_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'multilog_id', None, None, ),  # 1
+    (2, TType.STRING, 'json_command', 'UTF8', None, ),  # 2
+)
+
+
+class run_command_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = rpc_management_exception()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('run_command_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(run_command_result)
+run_command_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [rpc_management_exception, None], None, ),  # 1
 )

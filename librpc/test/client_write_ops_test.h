@@ -300,6 +300,148 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   }
 }
 
+TEST_F(ClientWriteOpsTest, AddIndexByJsonTest) {
+
+  std::string atomic_multilog_name = "my_multilog";
+
+  auto store = new confluo_store("/tmp");
+  store->create_atomic_multilog(atomic_multilog_name, schema(),
+                                storage::IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  std::string json1 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"a\", \"bucket_size\": 1}}";
+  std::string json2 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"b\", \"bucket_size\": 1}}";
+  std::string json3 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"c\", \"bucket_size\": 10}}";
+  std::string json4 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"d\", \"bucket_size\": 2}}";
+  std::string json5 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"e\", \"bucket_size\": 100}}";
+  std::string json6 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"f\", \"bucket_size\": 0.1}}";
+  std::string json7 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"g\", \"bucket_size\": 0.01}}";
+  std::string json8 = "{\"command\": \"add_index\", \"params\": {\"field_name\": \"h\", \"bucket_size\": 1}}";
+
+  client.run_command(json1);
+  client.run_command(json2);
+  client.run_command(json3);
+  client.run_command(json4);
+  client.run_command(json5);
+  client.run_command(json6);
+  client.run_command(json7);
+  client.run_command(json8);
+
+  mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
+  mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
+  mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
+  mlog->append(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
+  mlog->append(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+  mlog->append(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
+  mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+  mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+
+  size_t i = 0;
+  for (auto r = mlog->execute_filter("a == true"); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("b > 4"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(3), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("c <= 30"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(3).value().to_data().as<int16_t>() <= 30);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("d == 0"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(4).value().to_data().as<int32_t>() == 0);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(1), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("e <= 100"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() <= 100);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("f > 0.1"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(6).value().to_data().as<float>() > 0.1);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(6), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("g < 0.06"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(7).value().to_data().as<double>() < 0.06);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(5), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("h == zzz"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(
+        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
+            == "zzz");
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(2), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("a == true && b > 4"); r->has_more();
+      r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(2), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("a == true && (b > 4 || c <= 30)");
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(4), i);
+
+  i = 0;
+  for (auto r = mlog->execute_filter("a == true && (b > 4 || f > 0.1)");
+      r->has_more(); r->advance()) {
+    ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
+    ASSERT_TRUE(
+        r->get().at(2).value().to_data().as<int8_t>() > '4'
+            || r->get().at(6).value().to_data().as<float>() > 0.1);
+    i++;
+  }
+  ASSERT_EQ(static_cast<size_t>(3), i);
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
 TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
 
   std::string atomic_multilog_name = "my_multilog";
@@ -325,22 +467,59 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   client.add_filter("filter6", "f > 0.1");
   client.add_filter("filter7", "g < 0.06");
   client.add_filter("filter8", "h == zzz");
-  client.add_aggregate("agg1", "filter1", "SUM(d)");
-  client.add_aggregate("agg2", "filter2", "SUM(d)");
-  client.add_aggregate("agg3", "filter3", "SUM(d)");
-  client.add_aggregate("agg4", "filter4", "SUM(d)");
-  client.add_aggregate("agg5", "filter5", "SUM(d)");
-  client.add_aggregate("agg6", "filter6", "SUM(d)");
-  client.add_aggregate("agg7", "filter7", "SUM(d)");
-  client.add_aggregate("agg8", "filter8", "SUM(d)");
-  client.install_trigger("trigger1", "agg1 >= 10");
-  client.install_trigger("trigger2", "agg2 >= 10");
-  client.install_trigger("trigger3", "agg3 >= 10");
-  client.install_trigger("trigger4", "agg4 >= 10");
-  client.install_trigger("trigger5", "agg5 >= 10");
-  client.install_trigger("trigger6", "agg6 >= 10");
-  client.install_trigger("trigger7", "agg7 >= 10");
-  client.install_trigger("trigger8", "agg8 >= 10");
+
+  std::string json1 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg1\", \"filter_name\": \"filter1\", \"expr\": \"SUM(d)\"}}";
+  std::string json2 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg2\", \"filter_name\": \"filter2\", \"expr\": \"SUM(d)\"}}";
+  std::string json3 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg3\", \"filter_name\": \"filter3\", \"expr\": \"SUM(d)\"}}";
+  std::string json4 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg4\", \"filter_name\": \"filter4\", \"expr\": \"SUM(d)\"}}";
+  std::string json5 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg5\", \"filter_name\": \"filter5\", \"expr\": \"SUM(d)\"}}";
+  std::string json6 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg6\", \"filter_name\": \"filter6\", \"expr\": \"SUM(d)\"}}";
+  std::string json7 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg7\", \"filter_name\": \"filter7\", \"expr\": \"SUM(d)\"}}";
+  std::string json8 = "{\"command\": \"add_aggregate\", \"params\": {\"name\": \"agg8\", \"filter_name\": \"filter8\", \"expr\": \"SUM(d)\"}}";
+
+  client.run_command(json1);
+  client.run_command(json2);
+  client.run_command(json3);
+  client.run_command(json4);
+  client.run_command(json5);
+  client.run_command(json6);
+  client.run_command(json7);
+  client.run_command(json8);
+
+  // client.add_aggregate("agg1", "filter1", "SUM(d)");
+  // client.add_aggregate("agg2", "filter2", "SUM(d)");
+  // client.add_aggregate("agg3", "filter3", "SUM(d)");
+  // client.add_aggregate("agg4", "filter4", "SUM(d)");
+  // client.add_aggregate("agg5", "filter5", "SUM(d)");
+  // client.add_aggregate("agg6", "filter6", "SUM(d)");
+  // client.add_aggregate("agg7", "filter7", "SUM(d)");
+  // client.add_aggregate("agg8", "filter8", "SUM(d)");
+
+  json1 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger1\", \"expr\": \"agg1 >= 10\"}}";
+  json2 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger2\", \"expr\": \"agg2 >= 10\"}}";
+  json3 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger3\", \"expr\": \"agg3 >= 10\"}}";
+  json4 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger4\", \"expr\": \"agg4 >= 10\"}}";
+  json5 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger5\", \"expr\": \"agg5 >= 10\"}}";
+  json6 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger6\", \"expr\": \"agg6 >= 10\"}}";
+  json7 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger7\", \"expr\": \"agg7 >= 10\"}}";
+  json8 = "{\"command\": \"install_trigger\", \"params\": {\"name\": \"trigger8\", \"expr\": \"agg8 >= 10\"}}";
+
+  client.run_command(json1);
+  client.run_command(json2);
+  client.run_command(json3);
+  client.run_command(json4);
+  client.run_command(json5);
+  client.run_command(json6);
+  client.run_command(json7);
+  client.run_command(json8);
+  // client.install_trigger("trigger1", "agg1 >= 10");
+  // client.install_trigger("trigger2", "agg2 >= 10");
+  // client.install_trigger("trigger3", "agg3 >= 10");
+  // client.install_trigger("trigger4", "agg4 >= 10");
+  // client.install_trigger("trigger5", "agg5 >= 10");
+  // client.install_trigger("trigger6", "agg6 >= 10");
+  // client.install_trigger("trigger7", "agg7 >= 10");
+  // client.install_trigger("trigger8", "agg8 >= 10");
 
   mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;

@@ -139,6 +139,13 @@ class rpc_client {
     cur_multilog_id_ = -1;
   }
 
+  void run_command(const std::string& json_command) {
+    if (cur_multilog_id_ == -1) {
+      throw illegal_state_exception("Must set atomic multilog first");
+    }
+    client_->run_command(cur_multilog_id_, json_command);
+  }
+
   /**
    * Adds an index to the particular field
    *

@@ -8,6 +8,11 @@
 #include <string>
 #include <map>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+
 #include "exceptions.h"
 #include "types/immutable_value.h"
 #include "schema/column.h"
@@ -15,9 +20,11 @@
 #include "schema/record.h"
 #include "schema_snapshot.h"
 #include "string_utils.h"
+#include "json_utils.h"
 #include "types/data_type.h"
 
 using namespace utils;
+namespace pt = boost::property_tree;
 
 // FIXME: Add storage mode
 // FIXME: Nullable records
@@ -282,6 +289,34 @@ class schema_t {
     }
   }
 
+  void* json_to_data(const std::string& json) const {
+    pt::ptree tree;
+    utils::json_utils::json_to_ptree(tree, json);
+
+    if (tree.size() == columns_.size()) {
+      // Timestamp is provided
+      void* buf = new uint8_t[record_size_]();
+      for (auto col: columns_) {
+        void* fptr = reinterpret_cast<uint8_t*>(buf) + col.offset();
+        col.type().parse_op()(tree.get<std::string>(col.name()), fptr);
+      }
+      return buf;
+    } else if (tree.size() == columns_.size() - 1) {
+      // Timestamp is not provided so generate one
+      void* buf = new uint8_t[record_size_]();
+      uint64_t ts = time_utils::cur_ns();
+      memcpy(buf, &ts, sizeof(uint64_t));
+      for (size_t i = 1; i < columns_.size(); i++) {
+        column_t col = columns_[i];
+        void* fptr = reinterpret_cast<uint8_t*>(buf) + col.offset();
+        col.type().parse_op()(tree.get<std::string>(col.name()), fptr);
+      }
+      return buf;
+    } else {
+      THROW(invalid_operation_exception, "Record does not match schema");
+    }
+  }
+
   /**
    * Converts the pointer to record data to a vector of records
    *
@@ -307,6 +342,26 @@ class schema_t {
   std::vector<std::string> data_to_record_vector(const void* data) const {
     std::vector<std::string> ret;
     data_to_record_vector(ret, data);
+    return ret;
+  }
+
+  void data_to_json(std::string& ret, const void* data) const {
+    pt::ptree pt;
+    for (size_t i = 0; i < size(); i++) {
+      const void* fptr = reinterpret_cast<const uint8_t*>(data)
+          + columns_[i].offset();
+      data_type ftype = columns_[i].type();
+      std::string val = ftype.to_string_op()(immutable_raw_data(fptr, ftype.size));
+      pt.put(columns_[i].name(), val);
+    }
+    std::stringstream ss;
+    pt::json_parser::write_json(ss, pt);
+    ret = ss.str();
+  }
+
+  std::string data_to_json(const void* data) const {
+    std::string ret;
+    data_to_json(ret, data);
     return ret;
   }
 

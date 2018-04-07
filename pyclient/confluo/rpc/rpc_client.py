@@ -90,6 +90,16 @@ class rpc_client:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_atomic_multilog(self.cur_multilog_id_)
         self.cur_multilog_id_ = -1
+
+    def run_command(self, json_command):
+        """
+        Executes a command specified by a JSON string
+        Raises:
+            ValueError
+        """
+        if self.cur_multilog_id_ == -1:
+            raise ValueError("Must set atomic multilog first.")
+        self.client_.run_command(self.cur_multilog_id_, json_command)
     
     def add_index(self, field_name, bucket_size=1):
         """
