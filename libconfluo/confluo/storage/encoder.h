@@ -51,10 +51,9 @@ class encoder {
       case encoding_type::D_DELTA: {
         uint64_t* casted = reinterpret_cast<uint64_t*>(ptr);
         size_t array_len = size / sizeof(uint64_t);
-        size_t encoded_size = compression::delta_encoder::get_buffer_size(casted, array_len);
-        uint8_t* encoded = new uint8_t[encoded_size];
-        compression::delta_encoder::encode(casted, array_len, encoded);
-        return data_ptr(data_ptr::simple_ptr(encoded, array_delete), encoded_size);
+        uint8_t* encoded = compression::delta_encoder::encode(casted, array_len);
+        size_t encoded_size = compression::delta_encoder::get_buffer_size(encoded);
+        return data_ptr(data_ptr::simple_ptr(encoded + sizeof(size_t *), array_delete), encoded_size);
       }
       case encoding_type::D_LZ4: {
         uint8_t* casted = reinterpret_cast<uint8_t*>(ptr);

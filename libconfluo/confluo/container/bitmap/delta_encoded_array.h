@@ -449,7 +449,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     data_ptr = this->delta_offsets_->data();
 
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
-      data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer + array_size + 
+      data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer + array_size +
               i * sizeof(uint64_t));
     }
 

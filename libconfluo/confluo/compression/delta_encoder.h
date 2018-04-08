@@ -26,7 +26,6 @@ class delta_encoder {
    *
    * @param source_buffer The buffer data to encode
    * @param source_length The length of the input buffer array
-   * @param output_buffer The buffer containing the encoded data
    */
   template<typename T>
   static void encode(T* source_buffer, size_t source_length, uint8_t* output_buffer) {
@@ -37,10 +36,9 @@ class delta_encoder {
   /**
    * Gets the size for the encoded buffer
    *
-   * @param source_buffer The input buffer for encoding
-   * @param source_length The size of the input buffer
+   * @param encoded_buffer The encoded buffer
    *
-   * @return An upper bound on the size of the encoded data
+   * @return The size of the encoded buffer
    */
   template<typename T>
   static size_t get_buffer_size(T* source_buffer, size_t source_length) {
