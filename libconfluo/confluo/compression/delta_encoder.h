@@ -26,24 +26,27 @@ class delta_encoder {
    *
    * @param source_buffer The buffer data to encode
    * @param source_length The length of the input buffer array
-   * @param output_buffer The buffer containing the encoded data
    */
-  static void encode(uint64_t* source_buffer, size_t source_length, uint8_t* output_buffer) {
+  static uint8_t* encode(uint64_t* source_buffer, size_t source_length) {
     elias_gamma_encoded_array<uint64_t> enc_array(source_buffer, source_length);
-    enc_array.to_byte_array(output_buffer);
+    uint8_t* output_buffer = new uint8_t[enc_array.storage_size() + sizeof(size_t *)];
+
+    size_t encode_size = enc_array.storage_size();
+    std::memcpy(output_buffer, &encode_size, sizeof(size_t *));
+    enc_array.to_byte_array(output_buffer + sizeof(size_t *));
+
+    return output_buffer;
   }
 
   /**
    * Gets the size for the encoded buffer
    *
-   * @param source_buffer The input buffer for encoding
-   * @param source_length The size of the input buffer
+   * @param encoded_buffer The encoded buffer
    *
-   * @return An upper bound on the size of the encoded data
+   * @return The size of the encoded buffer
    */
-  static size_t get_buffer_size(uint64_t* source_buffer, size_t source_length) {
-    elias_gamma_encoded_array<uint64_t> enc_array(source_buffer, source_length);
-    return enc_array.storage_size();
+  static size_t get_buffer_size(uint8_t* encoded_buffer) {
+    return *reinterpret_cast<size_t *>(encoded_buffer);
   }
 
 };
