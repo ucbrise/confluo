@@ -31,7 +31,7 @@ class delta_decoder {
    */
   static uint64_t decode(uint8_t* input_buffer, size_t src_index) {
     elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
     return enc_array.get(src_index);
   }
 
@@ -47,7 +47,7 @@ class delta_decoder {
   static void decode(uint8_t* input_buffer, uint64_t* dest_buffer,
                      size_t src_index, size_t length) {
     elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
 
     for (size_t i = 0; i < length; i++) {
       dest_buffer[i] = enc_array.get(src_index + i);
@@ -63,7 +63,7 @@ class delta_decoder {
    */
   static void decode(uint8_t* input_buffer, uint64_t* dest_buffer, size_t source_size) {
     elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
 
     for (size_t i = 0; i < source_size; i++) {
       dest_buffer[i] = enc_array.get(i);
@@ -80,7 +80,7 @@ class delta_decoder {
    */
   static void decode(uint8_t* input_buffer, size_t src_index, size_t source_size, uint64_t* dest_buffer) {
     elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
 
     for (size_t i = 0; i < source_size - src_index; i++) {
       dest_buffer[i] = enc_array.get(i + src_index);
