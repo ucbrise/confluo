@@ -28,10 +28,16 @@ class delta_decoder {
    *
    * @return The decoded element
    */
+<<<<<<< HEAD
   template<typename T>
   static T decode(uint8_t* input_buffer, size_t src_index) {
     elias_gamma_encoded_array<T> enc_array;
     enc_array.from_byte_array(input_buffer);
+=======
+  static uint64_t decode(uint8_t* input_buffer, size_t src_index) {
+    elias_gamma_encoded_array<uint64_t> enc_array;
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
+>>>>>>> Moved the offset logic to the decode functions
     return enc_array.get(src_index);
   }
 
@@ -43,10 +49,18 @@ class delta_decoder {
    * @param src_index The index to start decoding from
    * @param length The number of elements to decode
    */
+<<<<<<< HEAD
   template<typename T>
   static void decode(uint8_t* input_buffer, T* dest_buffer, size_t src_index, size_t length) {
     elias_gamma_encoded_array<T> enc_array;
     enc_array.from_byte_array(input_buffer);
+=======
+  static void decode(uint8_t* input_buffer, uint64_t* dest_buffer,
+                     size_t src_index, size_t length) {
+    elias_gamma_encoded_array<uint64_t> enc_array;
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
+
+>>>>>>> Moved the offset logic to the decode functions
     for (size_t i = 0; i < length; i++) {
       dest_buffer[i] = enc_array.get(src_index + i);
     }
