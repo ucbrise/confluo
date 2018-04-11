@@ -398,7 +398,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    * @return The number of bytes that were deserialized
    */
   size_t from_byte_array(uint8_t* buffer) {
-    size_t array_size = 0;
+    size_t array_size = sizeof(size_t);
     uint8_t bit_width;
     bit_width = *reinterpret_cast<uint8_t *>(buffer + array_size);
     array_size += sizeof(uint8_t);
