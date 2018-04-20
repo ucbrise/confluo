@@ -3,6 +3,8 @@
 
 #include <functional>
 #include <unistd.h>
+//#include <jemalloc/jemalloc.h>
+#include <gperftools/tcmalloc.h>
 
 #include "conf/configuration_params.h"
 #include "exceptions.h"
@@ -55,7 +57,7 @@ class storage_allocator {
     mem_stat_.increment(alloc_size);
 
     // allocate contiguous memory for both the ptr and metadata
-    void* ptr = malloc(alloc_size);
+    void* ptr = tc_malloc(alloc_size);//je_malloc(alloc_size);//malloc(alloc_size);//malloc(alloc_size);
     ptr_metadata* md = new (ptr) ptr_metadata;
     void* data_ptr = reinterpret_cast<void*>(md + 1);
 
@@ -135,7 +137,9 @@ class storage_allocator {
     switch (md->alloc_type_) {
     case alloc_type::D_DEFAULT:
       md->~ptr_metadata();
-      free(md);
+      //free(md);
+      //je_free(md);
+        tc_free(md);
       mem_stat_.decrement(alloc_size);
       break;
     case alloc_type::D_MMAP:

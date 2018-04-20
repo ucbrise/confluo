@@ -47,6 +47,23 @@ if (BUILD_TESTS)
   add_library(gtest_main STATIC IMPORTED GLOBAL)
   set_target_properties(gtest_main PROPERTIES IMPORTED_LOCATION
     ${GTEST_MAIN_STATIC_LIB})
+
+  #find_library(JEMALLOC_LIB jemalloc)
+  #link_directories(${JEMALLOC_LIB})
+  #target_link_libraries(SYSTEM ${JEMALLOC_LIB} jemalloc)
+  #link_libraries(jemalloc ${JEMALLOC_LIB})
+  #target_link_libraries(SYSTEM, ${JEMALLOC_LIB})
+  #find_library(jemalloc_location NAMES libjemalloc.a)
+  #message(STATUS ${jemalloc_location})
+  #add_library(jemalloc STATIC IMPORTED)
+  #set_target_properties(jemalloc PROPERTIES IMPORTED_LOCATION ${jemalloc_location})
+
+  #target_link_libraries( test zmq )
+  #link_libraries(gtest jemalloc)
+  find_library(TCMALLOC_LIB NAMES libtcmalloc_minimal.a tcmalloc_minimal)
+  link_libraries(gtest "${TCMALLOC_LIB}")
+  #target_link_libraries(TARGET ${TCMALLOC_LIB})
+
 endif()
 
 ExternalProject_Add(lz4
