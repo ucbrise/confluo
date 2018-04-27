@@ -197,6 +197,13 @@ if (BUILD_TESTS)
   target_link_libraries(ctest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
   add_dependencies(ctest googletest lz4)
   set_target_properties(ctest PROPERTIES LINKER_LANGUAGE CXX)
+  #file(GLOB_RECURSE test_sources test/*.cc)
+  #add_executable(ctest ${test_sources})
+  #target_link_libraries(ctest ${TEST_LINK_LIBS})
+  #add_dependencies(ctest googletest)
+
+  add_dependencies(ctest jemalloc)
+  target_link_libraries(ctest ${JEMALLOC_LIBRARIES})
 
   # Register test
   enable_testing()
