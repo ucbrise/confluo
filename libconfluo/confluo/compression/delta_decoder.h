@@ -28,9 +28,10 @@ class delta_decoder {
    *
    * @return The decoded element
    */
-  static uint64_t decode(uint8_t* input_buffer, size_t src_index) {
-    elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
+  template<typename T>
+  static T decode(uint8_t* input_buffer, size_t src_index) {
+    elias_gamma_encoded_array<T> enc_array;
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
     return enc_array.get(src_index);
   }
 
@@ -42,48 +43,30 @@ class delta_decoder {
    * @param src_index The index to start decoding from
    * @param length The number of bytes to decode
    */
-  static void decode(uint8_t* input_buffer, uint64_t* dest_buffer,
-                     size_t src_index, size_t length) {
-    elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
-
+  template<typename T>
+  static void decode(uint8_t* input_buffer, T* dest_buffer, size_t src_index, size_t length) {
+    elias_gamma_encoded_array<T> enc_array;
+    enc_array.from_byte_array(input_buffer + sizeof(size_t));
     for (size_t i = 0; i < length; i++) {
       dest_buffer[i] = enc_array.get(src_index + i);
     }
   }
 
   /**
-   * Decodes the full input buffer
-   *
-   * @param input_buffer The encoded buffer to decode
-   * @param dest_buffer The decoded buffer to contain the decoded data
-   */
-  static void decode(uint8_t* input_buffer, uint64_t* dest_buffer) {
-    elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
-
-    size_t source_size = *reinterpret_cast<size_t *>(input_buffer);
-
-    for (size_t i = 0; i < source_size; i++) {
-      dest_buffer[i] = enc_array.get(i);
-    }
-  }
-      
-  /**
    * Decodes the whole pointer starting from the specified index
    *
    * @param input_buffer The encoded buffer
-   * @param src_index The index to start decoding from
    * @param dest_buffer The buffer containing the decoded bytes
+   * @param src_index The index to start decoding from
    */
-  static void decode(uint8_t* input_buffer, size_t src_index, uint64_t* dest_buffer) {
-    elias_gamma_encoded_array<uint64_t> enc_array;
-    enc_array.from_byte_array(input_buffer);
+  template<typename T>
+  static void decode(uint8_t* input_buffer, T* dest_buffer, size_t src_index = 0) {
+    size_t source_size = decoded_size(input_buffer);
+    decode<T>(input_buffer, dest_buffer, src_index, source_size - src_index);
+  }
 
-    size_t source_size = *reinterpret_cast<size_t *>(input_buffer);
-    for (size_t i = 0; i < source_size - src_index; i++) {
-      dest_buffer[i] = enc_array.get(i + src_index);
-    }
+  static size_t decoded_size(uint8_t* input_buffer) {
+    return *reinterpret_cast<size_t*>(input_buffer);
   }
 
 };
