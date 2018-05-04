@@ -22,18 +22,15 @@ TEST_F(DeltaEncodeTest, DecodeFullTest) {
     array[i] = i % 100;
   }
 
-  uint8_t* encode_buffer = new uint8_t[delta_encoder::get_buffer_size(array, k_array_size)];
   uint64_t* dest_buffer = new uint64_t[k_array_size];
-
-  delta_encoder::encode(array, k_array_size, encode_buffer);
-  delta_decoder::decode(encode_buffer, dest_buffer, k_array_size);
+  auto encoded_buffer = delta_encoder::encode(array, k_array_size);
+  delta_decoder::decode<uint64_t>(encoded_buffer.get(), dest_buffer);
 
   for (size_t i = 0; i < k_array_size; i++) {
     ASSERT_EQ(array[i], dest_buffer[i]);
   }
 
   delete[] array;
-  delete[] encode_buffer;
   delete[] dest_buffer;
 }
 
@@ -48,19 +45,16 @@ TEST_F(DeltaEncodeTest, DecodePartialTest) {
   size_t src_index = 250;
   size_t buffer_size = 600;
 
-  uint8_t* encode_buffer = new uint8_t[delta_encoder::get_buffer_size(array, k_array_size)];
-  
   uint64_t* dest_buffer = new uint64_t[buffer_size];
 
-  delta_encoder::encode(array, k_array_size, encode_buffer);
-  delta_decoder::decode(encode_buffer, dest_buffer, src_index, buffer_size);
+  auto encoded_buffer = delta_encoder::encode(array, k_array_size);
+  delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index, buffer_size);
 
   for (size_t i = 0; i < buffer_size; i++) {
     ASSERT_EQ(array[i + src_index], dest_buffer[i]);
   }
 
   delete[] array;
-  delete[] encode_buffer;
   delete[] dest_buffer;
 }
 
@@ -75,21 +69,16 @@ TEST_F(DeltaEncodeTest, DecodePtrIndexTest) {
   size_t src_index = 250;
   size_t buffer_size = k_array_size - src_index;
 
-  uint8_t* encode_buffer = new uint8_t[delta_encoder::get_buffer_size(array, k_array_size)];
-  
   uint64_t* dest_buffer = new uint64_t[buffer_size];
+  auto encoded_buffer = delta_encoder::encode(array, k_array_size);
 
-
-  delta_encoder::encode(array, k_array_size, encode_buffer);
-  delta_decoder::decode(encode_buffer, src_index, k_array_size,
-          dest_buffer);
+  delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index);
 
   for (size_t i = 0; i < buffer_size; i++) {
     ASSERT_EQ(array[i + src_index], dest_buffer[i]);
   }
 
   delete[] array;
-  delete[] encode_buffer;
   delete[] dest_buffer;
 }
 
@@ -101,17 +90,13 @@ TEST_F(DeltaEncodeTest, DecodeIndexTest) {
     array[i] = i;
   }
 
-  uint8_t* encode_buffer = new 
-      uint8_t[delta_encoder::get_buffer_size(array, k_array_size)];
-
   size_t src_index = 250;
-  delta_encoder::encode(array, k_array_size, encode_buffer);
-  uint8_t decoded_val = delta_decoder::decode(encode_buffer, src_index);
+  auto encoded_buffer = delta_encoder::encode(array, k_array_size);
+  uint8_t decoded_val = delta_decoder::decode<uint64_t>(encoded_buffer.get(), src_index);
 
   ASSERT_EQ(array[src_index], decoded_val);
 
   delete[] array;
-  delete[] encode_buffer;
 }
 
 

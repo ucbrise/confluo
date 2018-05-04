@@ -36,8 +36,9 @@ TEST_F(DeltaEncodedArrayTest, ToFromByteArrayTest) {
   elias_gamma_encoded_array<uint64_t> enc_array(array, k_array_size);
   size_t size = enc_array.storage_size();
 
-  uint8_t* buffer = new uint8_t[size];
-  size_t byte_array_size = enc_array.to_byte_array(buffer);
+  uint8_t* buffer = new uint8_t[size + sizeof(size_t)];
+  std::memcpy(buffer, &size, sizeof(size_t));
+  size_t byte_array_size = enc_array.to_byte_array(buffer + sizeof(size_t));
 
   ASSERT_EQ(size, byte_array_size);
 
