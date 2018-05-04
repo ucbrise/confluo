@@ -148,6 +148,7 @@ class lz4_decoder {
 
     size_t decoded_buf_size = decoded_size(input_buffer);
     encode_size -= sizeof(size_t);
+    input_buffer += sizeof(size_t);
 
     int compress_index = src_index / BYTES_PER_BLOCK;
     int position_within_block = src_index % BYTES_PER_BLOCK;

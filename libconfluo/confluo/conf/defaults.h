@@ -13,7 +13,7 @@ class archival_defaults {
  public:
   static const uint64_t DEFAULT_PERIODICITY_MS = 5 * 60 * 1e3;
   static const size_t DEFAULT_MAX_FILE_SIZE = 1024 * 1024 * 1024;
-  static const uint8_t DEFAULT_DATA_LOG_ENCODING_TYPE = storage::encoding_type::D_LZ4;
+  static const uint8_t DEFAULT_DATA_LOG_ENCODING_TYPE = storage::encoding_type::D_UNENCODED;
   static const uint8_t DEFAULT_REFLOG_ENCODING_TYPE = storage::encoding_type::D_DELTA;
   static const uint64_t DEFAULT_IN_MEMORY_DATALOG_WINDOW_BYTES = 1e10; // TODO % of physical memory
   static const uint64_t DEFAULT_IN_MEMORY_FILTER_WINDOW_NS = 10 * 1e3;

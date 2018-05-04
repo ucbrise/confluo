@@ -325,8 +325,8 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    */
   size_t storage_size() {
     return sizeof(uint8_t) * 2 + sizeof(size_t) * 3 + 
-        (BITS2BLOCKS(this->samples_->num_bits()) * sizeof(uint64_t)) + 
-        (BITS2BLOCKS(this->deltas_->num_bits()) * sizeof(uint64_t)) + 
+        (BITS2BLOCKS(this->samples_->num_bits()) * sizeof(uint64_t)) +
+        (BITS2BLOCKS(this->deltas_->num_bits()) * sizeof(uint64_t)) +
         (BITS2BLOCKS(this->delta_offsets_->num_bits()) * sizeof(uint64_t));
   }
 
@@ -367,19 +367,19 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
 
 
     width = this->delta_offsets_->bit_width();
-    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+    std::memcpy(buffer + array_size, reinterpret_cast<const char*>(
                 &width), sizeof(uint8_t));
     array_size += sizeof(uint8_t);
     
 
     num_bits = this->delta_offsets_->num_bits();
-    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+    std::memcpy(buffer + array_size, reinterpret_cast<const char*>(
                 &num_bits), sizeof(size_t));
     array_size += sizeof(size_t);
 
 
     data_size = sizeof(uint64_t) * BITS2BLOCKS(num_bits);
-    std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
+    std::memcpy(buffer + array_size, reinterpret_cast<const char*>(
                 this->delta_offsets_->data()), data_size);
 
     array_size += data_size;
@@ -412,7 +412,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     uint64_t* data_ptr = this->samples_->data();
 
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
-      data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer + 
+      data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer +
               array_size + i * sizeof(uint64_t));
     }
    
@@ -429,27 +429,26 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     data_ptr = this->deltas_->data();
 
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
-      data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer + 
+      data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer +
               array_size + i * sizeof(uint64_t));
     }
 
     array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));
 
-    bit_width = *reinterpret_cast<uint8_t *>(buffer + array_size);
+    bit_width = *reinterpret_cast<uint8_t*>(buffer + array_size);
     array_size += sizeof(uint8_t);
 
     size = *reinterpret_cast<size_t*>(buffer + array_size);
     array_size += sizeof(size_t);
 
     delete this->delta_offsets_;
-    this->delta_offsets_ = new unsized_bitmap_array<pos_type>(size, 
-            bit_width);
+    this->delta_offsets_ = new unsized_bitmap_array<pos_type>(size, bit_width);
 
     temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     data_ptr = this->delta_offsets_->data();
 
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
-      data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer + array_size + 
+      data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer + array_size +
               i * sizeof(uint64_t));
     }
 
