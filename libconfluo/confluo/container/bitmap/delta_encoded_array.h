@@ -338,7 +338,10 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    * @return The number of bytes needed for serialization
    */
   size_t to_byte_array(uint8_t* buffer) {
+    // The current position in the buffer
     size_t array_size = 0;
+
+    // Serializes the samples
     uint8_t width = this->samples_->bit_width();
     std::memcpy(buffer, reinterpret_cast<const char *>(&width), 
             sizeof(uint8_t));
@@ -356,6 +359,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     array_size += data_size;
 
 
+    // Serializes the deltas
     num_bits = this->deltas_->num_bits();
     std::memcpy(buffer + array_size,
             reinterpret_cast<const char *>(&num_bits), sizeof(size_t));
@@ -369,6 +373,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     array_size += data_size;
 
 
+    // Serializes the delta offsets
     width = this->delta_offsets_->bit_width();
     std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
                 &width), sizeof(uint8_t));
@@ -400,6 +405,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
   size_t from_byte_array(uint8_t* buffer) {
     size_t array_size = sizeof(size_t);
     uint8_t bit_width;
+    // Deserializes the width
     bit_width = *reinterpret_cast<uint8_t *>(buffer + array_size);
     array_size += sizeof(uint8_t);
 
@@ -407,7 +413,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     size_t size = *reinterpret_cast<size_t*>(buffer + array_size);
     array_size += sizeof(size_t);
 
-
+    // Deserializes the samples
     delete this->samples_;
     this->samples_ = new unsized_bitmap_array<T>(size, bit_width);
 
@@ -424,7 +430,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     size = *reinterpret_cast<size_t *>(buffer + array_size);
     array_size += sizeof(size_t);
 
-
+    // Deserializes the deltas
     delete this->deltas_;
     this->deltas_ = new bitmap(size);
 
@@ -444,6 +450,7 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
     size = *reinterpret_cast<size_t*>(buffer + array_size);
     array_size += sizeof(size_t);
 
+    // Deserializes the delta offsets
     delete this->delta_offsets_;
     this->delta_offsets_ = new unsized_bitmap_array<pos_type>(size, 
             bit_width);

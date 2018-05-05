@@ -150,12 +150,14 @@ class lz4_decoder {
     int compress_index = src_index / bytes_per_block;
     int position_within_block = src_index % bytes_per_block;
 
+    // Gets the offset into the buffer where the desired block lies
     size_t offset = *reinterpret_cast<size_t*>(input_buffer + compress_index * sizeof(size_t));
     uint8_t* temp_buffer = new uint8_t[bytes_per_block];
 
     size_t compress_size = 0;
     int max_index = source_size / bytes_per_block;
 
+    // Gets the size of the encoded block
     if (compress_index + 1 < max_index) {
       compress_size = *reinterpret_cast<size_t*>(input_buffer +
                       (compress_index + 1) * sizeof(size_t)) - offset;
@@ -163,8 +165,10 @@ class lz4_decoder {
       compress_size = encode_size - offset;
     }
 
+    // Decompresses the desired block
     LZ4_decompress_safe((char*) input_buffer + offset, (char*) temp_buffer, compress_size, bytes_per_block);
     uint8_t val;
+    // Gets the desired byte into the buffer
     std::memcpy(&val, &temp_buffer[position_within_block], sizeof(uint8_t));
     delete[] temp_buffer;
     return val;
