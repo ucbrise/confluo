@@ -13,7 +13,7 @@ class DeltaEncodedArrayTest : public testing::Test {
 
 TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayTest) {
 
-  uint64_t *array = new uint64_t[kArraySize];
+  uint64_t* array = new uint64_t[kArraySize];
   for (uint64_t i = 0; i < kArraySize; i++) {
     array[i] = i;
   }
@@ -28,7 +28,7 @@ TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayTest) {
 TEST_F(DeltaEncodedArrayTest, ToFromByteArrayTest) {
   uint64_t k_array_size = 1000;
 
-  uint64_t *array = new uint64_t[k_array_size];
+  uint64_t* array = new uint64_t[k_array_size];
   for (uint64_t i = 0; i < k_array_size; i++) {
     array[i] = i;
   }
@@ -42,10 +42,10 @@ TEST_F(DeltaEncodedArrayTest, ToFromByteArrayTest) {
 
   ASSERT_EQ(size, byte_array_size);
 
-  uint64_t *t_array = new uint64_t[k_array_size];
+  uint64_t* t_array = new uint64_t[k_array_size];
 
   elias_gamma_encoded_array<uint64_t> test_array(t_array, k_array_size);
-  size_t from_size = test_array.from_byte_array(buffer);
+  size_t from_size = test_array.from_byte_array(buffer + sizeof(size_t));
 
   for (uint64_t i = 0; i < k_array_size; i++) {
     ASSERT_EQ(array[i], test_array[i]);

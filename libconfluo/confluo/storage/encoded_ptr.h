@@ -92,11 +92,11 @@ class encoded_ptr {
         return ptr[idx];
       }
       case encoding_type::D_DELTA: {
-        T decoded = 0; // = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
+        T decoded = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
         return decoded;
       }
       case encoding_type::D_LZ4: {
-        T decoded = 0; // = compression::lz4_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
+        T decoded = compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), metadata->data_size_, idx);
         return decoded;
       }
       default: {
@@ -120,13 +120,13 @@ class encoded_ptr {
         break;
       }
       case encoding_type::D_DELTA: {
-        size_t encoded_size = metadata->data_size_;
-//        compression::delta_decoder::decode(ptr, buffer, idx, len);
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), buffer, idx, len);
         break;
       }
       case encoding_type::D_LZ4: {
         size_t encoded_size = metadata->data_size_;
-//        compression::lz4_decoder::decode<T>(ptr, buffer, idx, len);
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), encoded_size,
+                                           reinterpret_cast<uint8_t*>(buffer), idx, len);
         break;
       }
       default: {
@@ -149,17 +149,17 @@ class encoded_ptr {
       }
       case encoding_type::D_DELTA: {
         size_t encoded_size = metadata->data_size_;
-        size_t decoded_size = 0; // compression::delta_decoder::decoded_size<T>();
+        size_t decoded_size = compression::delta_decoder::decoded_size(this->ptr_as<uint8_t>());
         T* decoded = new T[decoded_size];
-        // compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), start_idx, encoded_size, decoded);
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), decoded, start_idx);
         return decoded_ptr<T>(decoded, array_delete<T>);
       }
       case encoding_type::D_LZ4: {
         size_t encoded_size = metadata->data_size_;
-        size_t decoded_size = 0; // compression::lz4_decoder::decoded_size<T>();
-        T* decoded = new T[decoded_size];
-        // compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), start_idx, encoded_size, decoded);
-        return decoded_ptr<T>(decoded, array_delete<T>);
+        size_t decoded_size = compression::lz4_decoder<>::decoded_size(this->ptr_as<uint8_t>());
+        uint8_t* decoded = new uint8_t[decoded_size];
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), encoded_size, decoded, start_idx);
+        return decoded_ptr<T>(reinterpret_cast<T*>(decoded), array_delete<T>);
       }
       default: {
         THROW(illegal_state_exception, "Invalid encoding type!");

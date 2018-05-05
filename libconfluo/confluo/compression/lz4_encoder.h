@@ -11,9 +11,12 @@
 #include <math.h>
 
 #include "lz4.h"
+#include "storage/unique_byte_array.h"
 
 namespace confluo {
 namespace compression {
+
+using namespace storage;
 
 /**
  * A stateless LZ4 encoder. Takes as input a buffer of bytes
@@ -21,6 +24,7 @@ namespace compression {
  * into separate blocks that are each compressed using LZ4. These 
  * compressed blocks are fed into the decoder for partial or full decoding.
  */
+template<size_t BYTES_PER_BLOCK = 65536>
 class lz4_encoder {
  public:
   /**
@@ -28,22 +32,22 @@ class lz4_encoder {
    *
    * @param source_buffer The unecoded buffer to compress
    * @param source_length The size of the unencoded buffer in bytes
-   * @param bytes_per_block The number of bytes corresponding to one
-   * encoded block
    * @param output_buffer The output buffer containing the encoded data
    *
    * @return The size of the entire encoded buffer in bytes
    */
-  static size_t encode(uint8_t* source_buffer, size_t source_length, uint8_t* output_buffer, size_t bytes_per_block = 65536) {
+  static unique_byte_array encode(uint8_t* source_buffer, size_t source_length) {
 
-    size_t output_array_position = 0;
+    uint8_t* output_buffer = new uint8_t[get_buffer_size(source_length) + sizeof(size_t)];
+    std::memcpy(output_buffer, &source_length, sizeof(size_t));
+    output_buffer += sizeof(size_t);
 
-    int num_blocks = ceil(source_length / bytes_per_block);
+    int num_blocks = ceil(source_length / BYTES_PER_BLOCK);
     size_t output_block_position = sizeof(size_t) * num_blocks;
-
-    for (size_t i = 0; i < source_length; i += bytes_per_block) {
+    size_t output_array_position = 0;
+    for (size_t i = 0; i < source_length; i += BYTES_PER_BLOCK) {
       uint8_t* output_ptr = output_buffer + output_block_position;
-      size_t size = encode((char*) output_ptr, (char*) (source_buffer + i), bytes_per_block);
+      size_t size = encode((char*) output_ptr, (char*) (source_buffer + i), BYTES_PER_BLOCK);
       output_block_position += size;
 
       uint8_t* output_array_ptr = output_buffer + output_array_position;
@@ -54,7 +58,7 @@ class lz4_encoder {
       output_array_position += bytes;
     }
 
-    return output_block_position;
+    return unique_byte_array(output_buffer - sizeof(size_t), output_block_position + sizeof(size_t));
   }
 
   /**
@@ -66,8 +70,8 @@ class lz4_encoder {
    *
    * @return An upper bound on the size of the encoded buffer
    */
-  static size_t get_buffer_size(size_t source_size, size_t bytes_per_block = 65536) {
-    int num_blocks = ceil(source_size / bytes_per_block);
+  static size_t get_buffer_size(size_t source_size) {
+    int num_blocks = ceil(source_size / BYTES_PER_BLOCK);
     return sizeof(size_t) * num_blocks + LZ4_compressBound(source_size);
   }
 
