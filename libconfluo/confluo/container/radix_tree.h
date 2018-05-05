@@ -42,7 +42,6 @@ struct radix_tree_node {
         depth(node_depth),
         is_leaf(true),
         parent(node_parent) {
-    //data = new reflog(std::forward<ARGS>(args)...);
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     void* raw = ALLOCATOR.alloc(sizeof(reflog), aux);
     data = new(raw) reflog(std::forward<ARGS>(args)...);
@@ -62,7 +61,6 @@ struct radix_tree_node {
         depth(node_depth),
         is_leaf(false),
         parent(node_parent) {
-    //data = new child_t[node_width];
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     size_t alloc_size = sizeof(child_t*) * node_width;
     data = ALLOCATOR.alloc(alloc_size, aux);
@@ -549,11 +547,8 @@ class radix_tree {
    */
   radix_tree(size_t depth, size_t width)
       : width_(width),
-        depth_(depth)
-        //root_(new node_t(0, width, 0, nullptr)) {
-  {
+        depth_(depth) {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    //root_ = static_cast<node_t *>(ALLOCATOR.alloc(sizeof(node_t), aux));
     void* raw = ALLOCATOR.alloc(sizeof(node_t), aux);
     root_ = new(raw) node_t(0, width, 0, nullptr);
   }
@@ -593,7 +588,6 @@ class radix_tree {
       node_t* child = nullptr;
       if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
         // Try & allocate child node
-        //child = new node_t(key[d], width_, d + 1, node);
         storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
         void* raw = ALLOCATOR.alloc(sizeof(node_t), aux);
         child = new(raw) node_t(key[d], width_, d + 1, node);
@@ -604,7 +598,6 @@ class radix_tree {
         // successful thread allocated as the de-facto storage for child node.
         if (!atomic::strong::cas(&(node->children()[key[d]]), &expected,
                                  child)) {
-          //delete child;
           ALLOCATOR.dealloc(child);
           child = expected;
         }
@@ -618,8 +611,6 @@ class radix_tree {
     node_t* child = nullptr;
     if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
       // Try & allocate child node
-      //child = new node_t(key[d], width_, d + 1, node, true,
-      //                   std::forward<ARGS>(args)...);
       storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
       void* raw = ALLOCATOR.alloc(sizeof(node_t), aux);
       child = new(raw) node_t(key[d], width_, d + 1, node, true, std::forward<ARGS>(args)...);
@@ -629,7 +620,6 @@ class radix_tree {
       // then it should de-allocate memory, and accept whatever the
       // successful thread allocated as the de-facto storage for child node.
       if (!atomic::strong::cas(&(node->children()[key[d]]), &expected, child)) {
-        //delete child;
         ALLOCATOR.dealloc(child);
         child = expected;
       }

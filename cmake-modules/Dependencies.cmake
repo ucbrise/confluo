@@ -67,17 +67,11 @@ if (BUILD_TESTS)
           PREFIX ${JEMALLOC_PREFIX}
           BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
           CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
-          INSTALL_COMMAND make install_lib
+          INSTALL_COMMAND make install_lib install_include
           LOG_CONFIGURE ON
           LOG_BUILD ON
           LOG_INSTALL ON)
   message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
-  install(FILES ${JEMALLOC_LIBRARIES} DESTINATION lib)
-
-  include_directories(SYSTEM ${JEMALLOC_INCLUDE_DIR})
-  link_directories(${JEMALLOC_INCLUDE_DIR})
-  link_libraries(gtest ${JEMALLOC_LIBRARIES})
-  link_libraries(jemalloc ${JEMALLOC_LIBRARIES})
 
 endif()
 
