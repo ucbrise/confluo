@@ -45,6 +45,8 @@ add_library(rpcclient STATIC
         src/rpc_service.cc
         rpc/rpc_types.h
         src/rpc_types.cc)
+target_link_libraries(confluod ${JEMALLOC_LIBRARIES})
+add_dependencies(confluod jemalloc)
 target_link_libraries(rpcclient thriftstatic)
 add_dependencies(rpcclient thrift)
 
@@ -76,6 +78,10 @@ if (BUILD_TESTS)
   enable_testing()
   add_test(RpcTest ${EXECUTABLE_OUTPUT_PATH}/rpctest)
 endif()
+
+if (NOT APPLE AND UNIX)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+endif ()
 
 # install
 install(DIRECTORY rpc/
