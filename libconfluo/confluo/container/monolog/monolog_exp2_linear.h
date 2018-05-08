@@ -54,7 +54,6 @@ class monolog_exp2_linear_base {
       __atomic_bucket_ref* container = atomic::load(&x);
       if (container != nullptr) {
         delete[] container;
-        //ALLOCATOR.dealloc(container);
       }
       num_buckets = num_buckets << 1U;
     }

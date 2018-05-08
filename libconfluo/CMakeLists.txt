@@ -1,4 +1,7 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+if (NOT APPLE AND UNIX)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+endif ()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
@@ -202,16 +205,15 @@ if (BUILD_TESTS)
   #target_link_libraries(ctest ${TEST_LINK_LIBS})
   #add_dependencies(ctest googletest)
 
+  file(GLOB_RECURSE test_sources test/*.cc)
+  add_executable(ctest ${test_sources})
+  target_link_libraries(ctest ${TEST_LINK_LIBS} ${JEMALLOC_LIBRARIES})
+  add_dependencies(ctest googletest)
   add_dependencies(ctest jemalloc)
-  target_link_libraries(ctest ${JEMALLOC_LIBRARIES})
 
   # Register test
   enable_testing()
   add_test(ConfluoTest ${EXECUTABLE_OUTPUT_PATH}/ctest)
-endif ()
-
-if (NOT APPLE AND UNIX)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
 endif ()
 
 # install

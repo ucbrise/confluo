@@ -75,10 +75,8 @@ struct radix_tree_node {
    */
   ~radix_tree_node() {
     if (is_leaf) {
-      delete refs();
-      //ALLOCATOR.dealloc(refs());
+      ALLOCATOR.dealloc(refs());
     } else {
-      //delete[] children();
       ALLOCATOR.dealloc(children());
     }
   }
