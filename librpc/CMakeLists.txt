@@ -55,7 +55,7 @@ set(SERVER_SOURCES src/rpc_constants.cc
                    src/rpc_server.cc 
                    src/rpc_types.cc)
 add_executable(confluod ${SERVER_SOURCES})
-target_link_libraries(confluod ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${JEMALLOC_LIBRARIES})
+target_link_libraries(confluod thriftstatic ${JEMALLOC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(confluod thrift)
 
 add_dependencies(confluod jemalloc)
