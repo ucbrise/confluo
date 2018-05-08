@@ -207,7 +207,7 @@ if (BUILD_TESTS)
 
   file(GLOB_RECURSE test_sources test/*.cc)
   add_executable(ctest ${test_sources})
-  target_link_libraries(ctest ${TEST_LINK_LIBS} ${JEMALLOC_LIBRARIES})
+  target_link_libraries(ctest ${TEST_LINK_LIBS} ${JEMALLOC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   add_dependencies(ctest googletest)
   add_dependencies(ctest jemalloc)
 
