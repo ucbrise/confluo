@@ -15,9 +15,9 @@ if (BUILD_TESTS)
   # Build test
   file(GLOB_RECURSE test_sources test/*.cc)
   add_executable(ctest ${test_sources})
-  target_link_libraries(ctest ${TEST_LINK_LIBS})
-  add_dependencies(ctest googletest)
-  
+  target_link_libraries(ctest ${TEST_LINK_LIBS} ${lz4_STATIC_LIB})
+  add_dependencies(ctest googletest lz4)
+
   # Register test
   enable_testing()
   add_test(ConfluoTest ${EXECUTABLE_OUTPUT_PATH}/ctest)

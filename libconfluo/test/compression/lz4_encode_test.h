@@ -16,7 +16,7 @@ class LZ4EncodeTest : public testing::Test {
 size_t const LZ4EncodeTest::BYTES_PER_BLOCK;
 
 TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
-  size_t size = 10000;
+  size_t size = 11048;
   uint8_t* source = new uint8_t[size];
 
   for (size_t i = 0; i < size; i++) {
@@ -26,7 +26,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
   uint8_t* destination = new uint8_t[size];
 
   auto encoded_buffer = lz4_encoder<BYTES_PER_BLOCK>::encode(source, size);
-  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), encoded_buffer.size(), destination);
+  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), destination);
 
   for (size_t i = 0; i < size; i++) {
     ASSERT_EQ(source[i], destination[i]);
@@ -37,7 +37,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
 }
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
-  size_t size = 10000;
+  size_t size = 11048;
   uint8_t* source = new uint8_t[size];
 
   for (size_t i = 0; i < size; i++) {
@@ -50,7 +50,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
   uint8_t* destination = new uint8_t[dest_size];
 
   auto encoded_buffer = lz4_encoder<BYTES_PER_BLOCK>::encode(source, size);
-  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), encoded_buffer.size(), destination, src_index, dest_size);
+  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), destination, src_index, dest_size);
 
   for (size_t i = 0; i < dest_size; i++) {
     ASSERT_EQ(source[i + src_index], destination[i]);
@@ -61,7 +61,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
 }
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialLessThanBlockSizeTest) {
-  size_t size = 10000;
+  size_t size = 11048;
   uint8_t* source = new uint8_t[size];
 
   for (size_t i = 0; i < size; i++) {
@@ -74,7 +74,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLessThanBlockSizeTest) {
 
   uint8_t *destination = new uint8_t[dest_size];
   auto encoded_buffer = lz4_encoder<BYTES_PER_BLOCK>::encode(source, size);
-  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), encoded_buffer.size(), destination, src_index, dest_size);
+  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), destination, src_index, dest_size);
 
   for (size_t i = 0; i < dest_size; i++) {
     ASSERT_EQ(source[i + src_index], destination[i]);
@@ -85,7 +85,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLessThanBlockSizeTest) {
 }
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialLastIndexTest) {
-  size_t size = 10000;
+  size_t size = 11048;
   uint8_t* source = new uint8_t[size];
 
   for (size_t i = 0; i < size; i++) {
@@ -97,7 +97,8 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLastIndexTest) {
 
   uint8_t *destination = new uint8_t[dest_size];
   auto encoded_buffer = lz4_encoder<BYTES_PER_BLOCK>::encode(source, size);
-  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), encoded_buffer.size(), destination, src_index, dest_size);
+
+  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), destination, src_index, dest_size);
 
   for (size_t i = 0; i < dest_size; i++) {
     ASSERT_EQ(source[i + src_index], destination[i]);
@@ -108,7 +109,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLastIndexTest) {
 }
 
 TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
-  size_t size = 10000;
+  size_t size = 11048;
   uint8_t* source = new uint8_t[size];
 
   for (size_t i = 0; i < size; i++) {
@@ -119,7 +120,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
 
   auto encoded_buffer = lz4_encoder<BYTES_PER_BLOCK>::encode(source, size);
   uint8_t decoded_value = lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(),
-                                                               encoded_buffer.size(), src_index);
+                                                               src_index);
 
   ASSERT_EQ(source[src_index], decoded_value);
 
@@ -129,7 +130,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
 
 TEST_F(LZ4EncodeTest, EncodeDecodeIdxPtrTest) {
 
-  size_t size = 10000;
+  size_t size = 11048;
   uint8_t* source = new uint8_t[size];
 
   for (size_t i = 0; i < size; i++) {
@@ -142,7 +143,7 @@ TEST_F(LZ4EncodeTest, EncodeDecodeIdxPtrTest) {
   uint8_t* destination = new uint8_t[dest_size];
 
   auto encoded_buffer = lz4_encoder<BYTES_PER_BLOCK>::encode(source, size);
-  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), encoded_buffer.size(), destination, src_index);
+  lz4_decoder<BYTES_PER_BLOCK>::decode(encoded_buffer.get(), destination, src_index);
 
   for (size_t i = 0; i < dest_size; i++) {
     ASSERT_EQ(source[i + src_index], destination[i]);

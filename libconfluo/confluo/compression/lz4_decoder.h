@@ -10,6 +10,7 @@
 #include <math.h>
 
 #include "lz4.h"
+#include "compression/lz4_encoder.h"
 
 namespace confluo {
 namespace compression {
@@ -26,17 +27,17 @@ class lz4_decoder {
    * input buffer
    *
    * @param input_buffer The LZ4 encoded buffer
-   * @param encode_size The size of the LZ4 encoded buffer
    * @param source_size The size of the unencoded buffer
    * @param buffer The destination buffer to be filled with decoded data
    * @param src_index The index into the unencoded buffer to begin
    * decoding
    * @param length The number of bytes to decode
    */
-  static void decode(uint8_t* input_buffer, size_t encode_size, uint8_t* dest_buffer, size_t src_index, size_t length) {
+  static void decode(uint8_t* input_buffer, uint8_t* dest_buffer, size_t src_index, size_t length) {
     size_t decoded_buf_size = decoded_size(input_buffer);
-    encode_size -= sizeof(size_t);
     input_buffer += sizeof(size_t);
+
+    size_t encode_size = lz4_encoder<BYTES_PER_BLOCK>::get_buffer_size(decoded_buf_size);
 
     int compress_index = src_index / BYTES_PER_BLOCK;
     int position_within_block = src_index % BYTES_PER_BLOCK;
@@ -54,11 +55,15 @@ class lz4_decoder {
       compress_size = encode_size - offset;
     }
 
+    // Decompresses the block where the offset is
     LZ4_decompress_safe((char*) input_buffer + offset, (char*) temp_buffer, compress_size, BYTES_PER_BLOCK);
     size_t len = 0;
+    // Checks whether the number of bytes to decode is less than the block size
     if (position_within_block + length < BYTES_PER_BLOCK) {
+      // If so we only want to decode the number of bytes passed in as a parameter
       len = length;
     } else {
+      // Otherwise we need to decode more bytes, so the number of bytes decoded is the block size - offset
       len = BYTES_PER_BLOCK - position_within_block;
     }
     std::memcpy(dest_buffer, temp_buffer + position_within_block, len);
@@ -139,15 +144,14 @@ class lz4_decoder {
    *
    * @param input_buffer The LZ4 encoded buffer to decode
    * @param src_index The index into the unencoded buffer to decode from
-   * @param encode_size The number of bytes the LZ4 encoded buffer contains
    * @param bytes_per_block The number of bytes in the unencoded buffer corresponding to one encoded block
    *
    * @return The decoded byte
    */
-  static uint8_t decode(uint8_t* input_buffer, size_t encode_size, size_t src_index) {
+  static uint8_t decode(uint8_t* input_buffer, size_t src_index) {
 
     size_t decoded_buf_size = decoded_size(input_buffer);
-    encode_size -= sizeof(size_t);
+    size_t encode_size = lz4_encoder<BYTES_PER_BLOCK>::get_buffer_size(decoded_buf_size);
     input_buffer += sizeof(size_t);
 
     int compress_index = src_index / BYTES_PER_BLOCK;
@@ -180,14 +184,15 @@ class lz4_decoder {
    * Decodes the whole LZ4 encoded pointer starting from a particular index
    *
    * @param input_buffer The LZ4 encoded buffer
-   * @param encode_size The size of the encoded buffer in bytes
    * @param dest_buffer The buffer to contain the decoded data
    * @param src_index The index into the unencoded buffer to start decoding
    * the pointer from
    */
-  static void decode(uint8_t* input_buffer, size_t encode_size, uint8_t* dest_buffer, size_t src_index = 0) {
+  static void decode(uint8_t* input_buffer, uint8_t* dest_buffer, size_t src_index = 0) {
     size_t length = decoded_size(input_buffer) - src_index;
-    decode(input_buffer, encode_size, dest_buffer, src_index, length);
+    size_t decoded_buf_size = decoded_size(input_buffer);
+    size_t encode_size = lz4_encoder<BYTES_PER_BLOCK>::get_buffer_size(decoded_buf_size);
+    decode(input_buffer, dest_buffer, src_index, length);
   }
 
   static size_t decoded_size(uint8_t* input_buffer) {
