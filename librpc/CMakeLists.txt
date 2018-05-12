@@ -35,7 +35,7 @@ if (BUILD_TESTS)
   # Build test
   file(GLOB_RECURSE TEST_SOURCES test/*.cc)
   add_executable(rpctest ${TEST_SOURCES})
-  target_link_libraries(rpctest ${TEST_LINK_LIBS} rpcclient thriftstatic)
+  target_link_libraries(rpctest ${TEST_LINK_LIBS} rpcclient thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(rpctest googletest thrift)
   
   # Register test
