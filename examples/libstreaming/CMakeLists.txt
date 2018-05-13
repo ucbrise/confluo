@@ -19,8 +19,8 @@ if (BUILD_TESTS)
   # Build test
   file(GLOB_RECURSE test_sources test/*.cc)
   add_executable(stest ${test_sources})
-  target_link_libraries(stest ${TEST_LINK_LIBS} rpcclient thriftstatic)
-  add_dependencies(stest googletest rpctest thrift)
+  target_link_libraries(stest ${TEST_LINK_LIBS} rpcclient thriftstatic ${lz4_STATIC_LIB})
+  add_dependencies(stest googletest rpctest thrift lz4)
   
   # Register test
   enable_testing()

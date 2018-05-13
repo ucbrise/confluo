@@ -17,8 +17,8 @@ if (BUILD_TESTS)
   # Build test
   file(GLOB_RECURSE test_sources test/*.cc)
   add_executable(tstest ${test_sources})
-  target_link_libraries(tstest ${TEST_LINK_LIBS})
-  add_dependencies(tstest googletest)
+  target_link_libraries(tstest ${TEST_LINK_LIBS} ${lz4_STATIC_LIB})
+  add_dependencies(tstest googletest lz4)
   
   # Register test
   enable_testing()
