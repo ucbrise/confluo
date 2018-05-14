@@ -41,7 +41,7 @@ class delta_decoder {
    * @param input_buffer The encoded buffer
    * @param dest_buffer The decoded buffer to contain the decoded bytes
    * @param src_index The index to start decoding from
-   * @param length The number of bytes to decode
+   * @param length The number of elements to decode
    */
   template<typename T>
   static void decode(uint8_t* input_buffer, T* dest_buffer, size_t src_index, size_t length) {
@@ -51,7 +51,7 @@ class delta_decoder {
       dest_buffer[i] = enc_array.get(src_index + i);
     }
   }
-
+      
   /**
    * Decodes the whole pointer starting from the specified index
    *

@@ -10,8 +10,8 @@ using namespace confluo;
 using namespace confluo::compression;
 
 class DeltaEncodeTest : public testing::Test {
- public:
-  const uint64_t kArraySize = (1024ULL * 1024ULL);  // 1 KBytes
+public:
+    const uint64_t kArraySize = (1024ULL * 1024ULL);  // 1 KBytes
 };
 
 TEST_F(DeltaEncodeTest, DecodeFullTest) {
@@ -47,13 +47,8 @@ TEST_F(DeltaEncodeTest, DecodePartialTest) {
 
   uint64_t* dest_buffer = new uint64_t[buffer_size];
 
-<<<<<<< HEAD
-  uint8_t* encode_buffer = delta_encoder::encode(array, k_array_size);
-  delta_decoder::decode(encode_buffer, dest_buffer, src_index, buffer_size);
-=======
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
   delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index, buffer_size);
->>>>>>> Modified tests to reflect iface changes.
 
   for (size_t i = 0; i < buffer_size; i++) {
     ASSERT_EQ(array[i + src_index], dest_buffer[i]);
@@ -74,18 +69,10 @@ TEST_F(DeltaEncodeTest, DecodePtrIndexTest) {
   size_t src_index = 250;
   size_t buffer_size = k_array_size - src_index;
 
-<<<<<<< HEAD
-
-  uint64_t* dest_buffer = new uint64_t[buffer_size];
-  uint8_t* encode_buffer = delta_encoder::encode(array, k_array_size);
-
-  delta_decoder::decode(encode_buffer, src_index, dest_buffer);
-=======
   uint64_t* dest_buffer = new uint64_t[buffer_size];
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
 
   delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index);
->>>>>>> Modified tests to reflect iface changes.
 
   for (size_t i = 0; i < buffer_size; i++) {
     ASSERT_EQ(array[i + src_index], dest_buffer[i]);
@@ -104,13 +91,8 @@ TEST_F(DeltaEncodeTest, DecodeIndexTest) {
   }
 
   size_t src_index = 250;
-<<<<<<< HEAD
-  uint8_t* encode_buffer = delta_encoder::encode(array, k_array_size);
-  uint8_t decoded_val = delta_decoder::decode(encode_buffer, src_index);
-=======
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
   uint8_t decoded_val = delta_decoder::decode<uint64_t>(encoded_buffer.get(), src_index);
->>>>>>> Modified tests to reflect iface changes.
 
   ASSERT_EQ(array[src_index], decoded_val);
 
