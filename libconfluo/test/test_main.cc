@@ -28,6 +28,7 @@
 #include "storage/memory_stat_test.h"
 #include "container/monolog/monolog_test.h"
 #include "archival/monolog_linear_archival_test.h"
+#include "archival/monolog_linear_load_test.h"
 #include "types/mutable_value_test.h"
 #include "threads/periodic_task_test.h"
 #include "storage/ptr_test.h"
