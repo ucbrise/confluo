@@ -28,7 +28,7 @@ class unique_byte_array {
   }
 
  private:
-  static void array_delete(uint8_t* ptr) { std::default_delete<uint8_t[]>()(ptr); }
+  static void array_delete(uint8_t* ptr) { delete[] ptr; }
 
   simple_ptr ptr_;
   size_t size_;

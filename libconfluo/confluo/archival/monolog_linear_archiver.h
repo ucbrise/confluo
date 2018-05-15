@@ -78,7 +78,7 @@ class monolog_linear_archiver : public archiver {
    */
   void archive_bucket(T* bucket) {
     auto metadata = ptr_metadata::get(bucket);
-    auto encoded_bucket = encoder::encode(bucket, BUCKET_SIZE,
+    auto encoded_bucket = encoder::encode(bucket, metadata->data_size_,
                                           archival_configuration_params::DATA_LOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
     auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);

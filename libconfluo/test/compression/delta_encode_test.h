@@ -99,6 +99,4 @@ TEST_F(DeltaEncodeTest, DecodeIndexTest) {
   delete[] array;
 }
 
-
-
 #endif /* CONFLUO_TEST_DELTA_ENCODE_TEST_H_ */
