@@ -91,12 +91,12 @@ class encoded_ptr {
       case encoding_type::D_UNENCODED: {
         return ptr[idx];
       }
-      case encoding_type::D_DELTA: {
+      case encoding_type::D_ELIAS_GAMMA: {
         T decoded = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
         return decoded;
       }
       case encoding_type::D_LZ4: {
-        T decoded = compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), metadata->data_size_, idx);
+        T decoded = compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), idx);
         return decoded;
       }
       default: {
@@ -112,20 +112,18 @@ class encoded_ptr {
    * @param len number of elements of T
    */
   void decode(T* buffer, size_t idx, size_t len) const {
-    auto* metadata = ptr_metadata::get(ptr_);
-    auto aux = ptr_aux_block::get(metadata);
+    auto aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
         memcpy(buffer, &this->ptr_as<T>()[idx], sizeof(T) * len);
         break;
       }
-      case encoding_type::D_DELTA: {
+      case encoding_type::D_ELIAS_GAMMA: {
         compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), buffer, idx, len);
         break;
       }
       case encoding_type::D_LZ4: {
-        size_t encoded_size = metadata->data_size_;
-        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), encoded_size,
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(),
                                            reinterpret_cast<uint8_t*>(buffer), idx, len);
         break;
       }
@@ -147,7 +145,7 @@ class encoded_ptr {
       case encoding_type::D_UNENCODED: {
         return decoded_ptr<T>(this->ptr_as<T>() + start_idx, no_op_delete);
       }
-      case encoding_type::D_DELTA: {
+      case encoding_type::D_ELIAS_GAMMA: {
         size_t encoded_size = metadata->data_size_;
         size_t decoded_size = compression::delta_decoder::decoded_size(this->ptr_as<uint8_t>());
         T* decoded = new T[decoded_size];
@@ -155,10 +153,9 @@ class encoded_ptr {
         return decoded_ptr<T>(decoded, array_delete<T>);
       }
       case encoding_type::D_LZ4: {
-        size_t encoded_size = metadata->data_size_;
         size_t decoded_size = compression::lz4_decoder<>::decoded_size(this->ptr_as<uint8_t>());
         uint8_t* decoded = new uint8_t[decoded_size];
-        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), encoded_size, decoded, start_idx);
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), decoded, start_idx);
         return decoded_ptr<T>(reinterpret_cast<T*>(decoded), array_delete<T>);
       }
       default: {

@@ -25,7 +25,7 @@ class encoder {
       case encoding_type::D_UNENCODED: {
         return unique_byte_array(reinterpret_cast<uint8_t*>(ptr), size, no_op_delete);
       }
-      case encoding_type::D_DELTA: {
+      case encoding_type::D_ELIAS_GAMMA: {
         uint64_t* casted = reinterpret_cast<uint64_t*>(ptr);
         size_t array_len = size / sizeof(uint64_t);
         return compression::delta_encoder::encode<uint64_t>(casted, array_len);
