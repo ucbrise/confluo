@@ -62,7 +62,7 @@ size_t archival_configuration_params::MAX_FILE_SIZE = confluo_conf.get<size_t>(
 uint8_t archival_configuration_params::DATA_LOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
     "data_log_archival_encoding", archival_defaults::DEFAULT_DATA_LOG_ENCODING_TYPE);
 uint8_t archival_configuration_params::REFLOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
-    "reflog_archival_encoding", archival_defaults::DEFAULT_REFLOG_ENCODING_TYPE);
+    "reflog_archival_encoding", archival_defaults::DEFAULT_ELIAS_GAMMA_ENCODING_TYPE);
 
 size_t configuration_params::MAX_MEMORY = confluo_conf.get<size_t>(
     "max_memory", defaults::DEFAULT_MAX_MEMORY);

@@ -50,7 +50,7 @@ if (BUILD_TESTS)
 endif()
 
 ExternalProject_Add(lz4
-        DOWNLOAD_COMMAND git clone https://github.com/Cyan4973/lz4.git
+        URL https://github.com/lz4/lz4/archive/v1.8.2.tar.gz
         CONFIGURE_COMMAND ""
         BUILD_IN_SOURCE 1
         BUILD_COMMAND make -C lib lib MOREFLAGS=-fPIC

@@ -14,7 +14,7 @@ class archival_defaults {
   static const uint64_t DEFAULT_PERIODICITY_MS = 5 * 60 * 1e3;
   static const size_t DEFAULT_MAX_FILE_SIZE = 1024 * 1024 * 1024;
   static const uint8_t DEFAULT_DATA_LOG_ENCODING_TYPE = storage::encoding_type::D_UNENCODED;
-  static const uint8_t DEFAULT_REFLOG_ENCODING_TYPE = storage::encoding_type::D_DELTA;
+  static const uint8_t DEFAULT_ELIAS_GAMMA_ENCODING_TYPE = storage::encoding_type::D_DELTA;
   static const uint64_t DEFAULT_IN_MEMORY_DATALOG_WINDOW_BYTES = 1e10; // TODO % of physical memory
   static const uint64_t DEFAULT_IN_MEMORY_FILTER_WINDOW_NS = 10 * 1e3;
 };
@@ -22,7 +22,7 @@ class archival_defaults {
 const size_t archival_defaults::DEFAULT_MAX_FILE_SIZE;
 const uint64_t archival_defaults::DEFAULT_PERIODICITY_MS;
 const uint8_t archival_defaults::DEFAULT_DATA_LOG_ENCODING_TYPE;
-const uint8_t archival_defaults::DEFAULT_REFLOG_ENCODING_TYPE;
+const uint8_t archival_defaults::DEFAULT_ELIAS_GAMMA_ENCODING_TYPE;
 const uint64_t archival_defaults::DEFAULT_IN_MEMORY_DATALOG_WINDOW_BYTES;
 const uint64_t archival_defaults::DEFAULT_IN_MEMORY_FILTER_WINDOW_NS;
 

@@ -338,46 +338,50 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    * @return The number of bytes needed for serialization
    */
   size_t to_byte_array(uint8_t* buffer) {
+    // The position
     size_t array_size = 0;
+    // Serializes the width field of samples
     uint8_t width = this->samples_->bit_width();
     std::memcpy(buffer, reinterpret_cast<const char*>(&width), sizeof(uint8_t));
     array_size += sizeof(uint8_t);
 
+    // Serializes the num bits field of samples
     size_t num_bits = this->samples_->num_bits();
     std::memcpy(buffer + array_size, reinterpret_cast<const char*>(&num_bits), sizeof(size_t));
     array_size += sizeof(size_t);
 
+    // Serializes the samples data
     size_t data_size = sizeof(uint64_t) * BITS2BLOCKS(num_bits);
     std::memcpy(buffer + array_size, reinterpret_cast<const char*>(this->samples_->data()), data_size);
 
     array_size += data_size;
 
-
+    // Serializes the num bits field of deltas
     num_bits = this->deltas_->num_bits();
     std::memcpy(buffer + array_size,
             reinterpret_cast<const char *>(&num_bits), sizeof(size_t));
     array_size += sizeof(size_t);
 
-
+    // Serializes the deltas data
     data_size = sizeof(uint64_t) * BITS2BLOCKS(num_bits);
     std::memcpy(buffer + array_size, reinterpret_cast<const char *>(
                 this->deltas_->data()), data_size);
 
     array_size += data_size;
 
-
+    // Serializes the bit width field of delta offsets
     width = this->delta_offsets_->bit_width();
     std::memcpy(buffer + array_size, reinterpret_cast<const char*>(
                 &width), sizeof(uint8_t));
     array_size += sizeof(uint8_t);
     
-
+    // Serializes the num bits field of delta offsets
     num_bits = this->delta_offsets_->num_bits();
     std::memcpy(buffer + array_size, reinterpret_cast<const char*>(
                 &num_bits), sizeof(size_t));
     array_size += sizeof(size_t);
 
-
+    // Serializes the delta offsets data
     data_size = sizeof(uint64_t) * BITS2BLOCKS(num_bits);
     std::memcpy(buffer + array_size, reinterpret_cast<const char*>(
                 this->delta_offsets_->data()), data_size);
@@ -395,22 +399,26 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    * @return The number of bytes that were deserialized
    */
   size_t from_byte_array(uint8_t* buffer) {
+    // The buffer deserialization position
     size_t array_size = 0;
     uint8_t bit_width;
+    // Reads in the bit width field for samples
     bit_width = *reinterpret_cast<uint8_t *>(buffer + array_size);
     array_size += sizeof(uint8_t);
 
-
+    // Reads in the size for samples
     size_t size = *reinterpret_cast<size_t*>(buffer + array_size);
     array_size += sizeof(size_t);
 
 
     delete this->samples_;
+    // Instantiates the samples based on the above parameters
     this->samples_ = new unsized_bitmap_array<T>(size, bit_width);
 
     size_t temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     uint64_t* data_ptr = this->samples_->data();
 
+    // Reads in the data for samples
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
       data_ptr[i] = *reinterpret_cast<uint64_t *>(buffer +
               array_size + i * sizeof(uint64_t));
@@ -418,16 +426,18 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    
     array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));
 
+    // Reads in the deltas size
     size = *reinterpret_cast<size_t *>(buffer + array_size);
     array_size += sizeof(size_t);
 
-
     delete this->deltas_;
+    // Instantiates the deltas bitmap
     this->deltas_ = new bitmap(size);
 
     temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     data_ptr = this->deltas_->data();
 
+    // Reads in the data for deltas
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
       data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer +
               array_size + i * sizeof(uint64_t));
@@ -435,18 +445,22 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
 
     array_size += (BITS2BLOCKS(size) * sizeof(uint64_t));
 
+    // Reads in the bit width for delta offsets
     bit_width = *reinterpret_cast<uint8_t*>(buffer + array_size);
     array_size += sizeof(uint8_t);
 
+    // Reads in the size for delta offsets
     size = *reinterpret_cast<size_t*>(buffer + array_size);
     array_size += sizeof(size_t);
 
     delete this->delta_offsets_;
+    // Instantiates delta offsets from above parameters
     this->delta_offsets_ = new unsized_bitmap_array<pos_type>(size, bit_width);
 
     temp_size = (BITS2BLOCKS(size) * sizeof(uint64_t));
     data_ptr = this->delta_offsets_->data();
 
+    // Deserializes the delta offsets data
     for (size_t i = 0; i < BITS2BLOCKS(size); i++) {
       data_ptr[i] = *reinterpret_cast<uint64_t*>(buffer + array_size +
               i * sizeof(uint64_t));
