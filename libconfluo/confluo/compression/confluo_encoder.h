@@ -1,17 +1,19 @@
-#ifndef CONFLUO_STORAGE_ENCODER_H_
-#define CONFLUO_STORAGE_ENCODER_H_
+#ifndef CONFLUO_COMPRESSION_CONFLUO_ENCODER_H_
+#define CONFLUO_COMPRESSION_CONFLUO_ENCODER_H_
 
-#include "compression/delta_encoder.h"
-#include "compression/lz4_encoder.h"
+#include "delta_encoder.h"
+#include "lz4_encoder.h"
 #include "exceptions.h"
-#include "ptr_aux_block.h"
-#include "ptr_metadata.h"
-#include "unique_byte_array.h"
+#include "storage/ptr_aux_block.h"
+#include "storage/ptr_metadata.h"
+#include "container/unique_byte_array.h"
 
 namespace confluo {
-namespace storage {
+namespace compression {
 
-class encoder {
+using namespace storage;
+
+class confluo_encoder {
  public:
 
   /**
@@ -48,4 +50,4 @@ class encoder {
 }
 }
 
-#endif /* CONFLUO_STORAGE_ENCODER_H_ */
+#endif /* CONFLUO_COMPRESSION_CONFLUO_ENCODER_H_ */

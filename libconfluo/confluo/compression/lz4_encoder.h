@@ -11,12 +11,10 @@
 #include <math.h>
 
 #include "lz4.h"
-#include "storage/unique_byte_array.h"
+#include "container/unique_byte_array.h"
 
 namespace confluo {
 namespace compression {
-
-using namespace storage;
 
 /**
  * A stateless LZ4 encoder. Takes as input a buffer of bytes

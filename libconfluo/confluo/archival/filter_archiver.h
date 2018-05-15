@@ -7,7 +7,7 @@
 #include "archival_metadata.h"
 #include "archiver.h"
 #include "conf/configuration_params.h"
-#include "storage/encoder.h"
+#include "compression/confluo_encoder.h"
 #include "filter.h"
 #include "storage/ptr_aux_block.h"
 #include "storage/ptr_metadata.h"
@@ -18,6 +18,7 @@
 namespace confluo {
 namespace archival {
 
+using namespace compression;
 using namespace storage;
 
 class filter_archiver : public archiver {
@@ -106,7 +107,7 @@ class filter_archiver : public archiver {
   void archive_bucket(byte_string key, reflog& refs, uint64_t* bucket, size_t offset) {
     auto* metadata = ptr_metadata::get(bucket);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
-    auto encoded_bucket = encoder::encode(bucket, bucket_size * sizeof(uint64_t),
+    auto encoded_bucket = confluo_encoder::encode(bucket, bucket_size * sizeof(uint64_t),
                                           archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
 

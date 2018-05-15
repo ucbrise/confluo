@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 
-#include "storage/encoder.h"
 #include "aggregated_reflog.h"
 #include "archival_actions.h"
 #include "archival_utils.h"
@@ -11,6 +10,7 @@
 #include "archiver.h"
 #include "schema/column.h"
 #include "conf/configuration_params.h"
+#include "compression/confluo_encoder.h"
 #include "index_log.h"
 #include "io/incremental_file_reader.h"
 #include "io/incremental_file_writer.h"
@@ -21,6 +21,7 @@
 namespace confluo {
 namespace archival {
 
+using namespace compression;
 using namespace storage;
 
 class index_archiver : public archiver {
@@ -96,7 +97,7 @@ class index_archiver : public archiver {
   size_t archive_bucket(byte_string key, reflog& refs, size_t idx, uint64_t* bucket, size_t offset) {
     auto metadata_copy = *(ptr_metadata::get(bucket));
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - idx);
-    auto raw_encoded_bucket = encoder::encode(bucket, bucket_size * sizeof(uint64_t),
+    auto raw_encoded_bucket = confluo_encoder::encode(bucket, bucket_size * sizeof(uint64_t),
                                               archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t enc_size = raw_encoded_bucket.size();
     metadata_copy.data_size_ = enc_size;

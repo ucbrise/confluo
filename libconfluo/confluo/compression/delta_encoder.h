@@ -10,12 +10,10 @@
 #include <vector>
 #include <math.h>
 #include "container/bitmap/delta_encoded_array.h"
-#include "storage/unique_byte_array.h"
+#include "container/unique_byte_array.h"
 
 namespace confluo {
 namespace compression {
-
-using namespace storage;
 
 /**
  * A stateless encoder. Takes as input a buffer of bytes and applies delta
