@@ -19,7 +19,7 @@ TEST_F(DeltaEncodeTest, DecodeFullTest) {
 
   uint64_t *array = new uint64_t[k_array_size];
   for (uint64_t i = 0; i < k_array_size; i++) {
-    array[i] = i % 100;
+    array[i] = i;
   }
 
   uint64_t* dest_buffer = new uint64_t[k_array_size];
