@@ -21,8 +21,8 @@ set(SERVER_SOURCES src/rpc_constants.cc
                    src/rpc_server.cc 
                    src/rpc_types.cc)
 add_executable(confluod ${SERVER_SOURCES})
-target_link_libraries(confluod ${CMAKE_THREAD_LIBS_INIT} thriftstatic)
-add_dependencies(confluod thrift)
+target_link_libraries(confluod ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB})
+add_dependencies(confluod thrift lz4)
 
 set(CLIENT_SOURCES src/rpc_constants.cc 
                    src/rpc_service.cc 
@@ -35,7 +35,7 @@ if (BUILD_TESTS)
   # Build test
   file(GLOB_RECURSE TEST_SOURCES test/*.cc)
   add_executable(rpctest ${TEST_SOURCES})
-  target_link_libraries(rpctest ${TEST_LINK_LIBS} rpcclient thriftstatic)
+  target_link_libraries(rpctest ${TEST_LINK_LIBS} rpcclient thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(rpctest googletest thrift)
   
   # Register test

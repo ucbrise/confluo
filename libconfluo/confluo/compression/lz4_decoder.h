@@ -153,8 +153,7 @@ class lz4_decoder {
    *
    * @param input_buffer The LZ4 encoded buffer
    * @param dest_buffer The buffer to contain the decoded data
-   * @param src_index The index into the unencoded buffer to start decoding
-   * the pointer from
+   * @param src_index The index into the unencoded buffer to start decoding the pointer from
    */
   static void decode(uint8_t* input_buffer, uint8_t* dest_buffer, size_t src_index = 0) {
     size_t length = decoded_size(input_buffer) - src_index;

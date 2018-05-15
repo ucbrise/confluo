@@ -50,7 +50,7 @@ if (BUILD_TESTS)
 endif()
 
 ExternalProject_Add(lz4
-        DOWNLOAD_COMMAND git clone https://github.com/Cyan4973/lz4.git
+        URL https://github.com/lz4/lz4/archive/v1.8.2.tar.gz
         CONFIGURE_COMMAND ""
         BUILD_IN_SOURCE 1
         BUILD_COMMAND make -C lib lib MOREFLAGS=-fPIC
@@ -60,10 +60,6 @@ ExternalProject_Get_Property(lz4 SOURCE_DIR BINARY_DIR)
 set( lz4_INCLUDE_DIR "${SOURCE_DIR}/lib" )
 set( lz4_STATIC_LIB ${BINARY_DIR}/lib/liblz4.a )
 include_directories(SYSTEM ${lz4_INCLUDE_DIR})
-link_directories(${lz4_INCLUDE_DIR})
-link_libraries(gtest ${lz4_STATIC_LIB})
-link_libraries(lz4 ${lz4_STATIC_LIB})
-
 
 if (BUILD_RPC)
   set(THRIFT_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
