@@ -43,7 +43,7 @@ class lz4_encoder {
     output_buffer += sizeof(size_t);
 
     int num_blocks = ceil(source_length / BYTES_PER_BLOCK);
-    size_t output_block_position = sizeof(size_t) * num_blocks;
+    size_t output_block_position = sizeof(size_t) * num_blocks + sizeof(size_t);
     size_t output_array_position = 0;
     for (size_t i = 0; i < source_length; i += BYTES_PER_BLOCK) {
       uint8_t* output_ptr = output_buffer + output_block_position;
@@ -72,7 +72,7 @@ class lz4_encoder {
    */
   static size_t get_buffer_size(size_t source_size) {
     int num_blocks = ceil(source_size / BYTES_PER_BLOCK);
-    return sizeof(size_t) * num_blocks + LZ4_compressBound(source_size);
+    return sizeof(size_t) * num_blocks + LZ4_compressBound(std::max(source_size, BYTES_PER_BLOCK));
   }
 
  private:
