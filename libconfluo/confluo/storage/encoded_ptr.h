@@ -1,6 +1,8 @@
 #ifndef CONFLUO_STORAGE_ENCODED_PTR_H_
 #define CONFLUO_STORAGE_ENCODED_PTR_H_
 
+#include "compression/delta_decoder.h"
+#include "compression/lz4_decoder.h"
 #include "ptr_metadata.h"
 
 namespace confluo {
@@ -33,7 +35,11 @@ class encoded_ptr {
     return static_cast<U*>(ptr_);
   }
 
+  //
   // Encode/decode member functions
+  //
+
+  // TODO maybe change encode to write since encoded writes aren't supported?
 
   /**
    * Encode value and store at index.
@@ -44,7 +50,7 @@ class encoded_ptr {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        static_cast<T*>(ptr_)[idx] = val;
+        this->ptr_as<T>()[idx] = val;
         break;
       }
       default: {
@@ -63,7 +69,7 @@ class encoded_ptr {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        memcpy(&static_cast<T*>(ptr_)[idx], data, sizeof(T) * len);
+        memcpy(&this->ptr_as<T>()[idx], data, sizeof(T) * len);
         break;
       }
       default: {
@@ -78,10 +84,20 @@ class encoded_ptr {
    * @return deocoded element
    */
   T decode_at(size_t idx) const {
-    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    auto* metadata = ptr_metadata::get(ptr_);
+    auto aux = ptr_aux_block::get(metadata);
+    T* ptr = this->ptr_as<T>();
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        return static_cast<T*>(ptr_)[idx];
+        return ptr[idx];
+      }
+      case encoding_type::D_ELIAS_GAMMA: {
+        T decoded = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
+        return decoded;
+      }
+      case encoding_type::D_LZ4: {
+        T decoded = compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), idx);
+        return decoded;
       }
       default: {
         THROW(illegal_state_exception, "Invalid encoding type!");
@@ -96,10 +112,19 @@ class encoded_ptr {
    * @param len number of elements of T
    */
   void decode(T* buffer, size_t idx, size_t len) const {
-    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    auto aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        memcpy(buffer, &static_cast<T*>(ptr_)[idx], sizeof(T) * len);
+        memcpy(buffer, &this->ptr_as<T>()[idx], sizeof(T) * len);
+        break;
+      }
+      case encoding_type::D_ELIAS_GAMMA: {
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), buffer, idx, len);
+        break;
+      }
+      case encoding_type::D_LZ4: {
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(),
+                                           reinterpret_cast<uint8_t*>(buffer), idx, len);
         break;
       }
       default: {
@@ -114,11 +139,24 @@ class encoded_ptr {
    * @return decoded pointer
    */
   decoded_ptr<T> decode(size_t start_idx) const {
-    ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
+    auto* metadata = ptr_metadata::get(ptr_);
+    auto aux = ptr_aux_block::get(metadata);
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        T* ptr = ptr_ == nullptr ? nullptr : static_cast<T*>(ptr_) + start_idx;
-        return decoded_ptr<T>(ptr, no_op_delete);
+        return decoded_ptr<T>(this->ptr_as<T>() + start_idx, no_op_delete);
+      }
+      case encoding_type::D_ELIAS_GAMMA: {
+        size_t encoded_size = metadata->data_size_;
+        size_t decoded_size = compression::delta_decoder::decoded_size(this->ptr_as<uint8_t>());
+        T* decoded = new T[decoded_size];
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), decoded, start_idx);
+        return decoded_ptr<T>(decoded, array_delete<T>);
+      }
+      case encoding_type::D_LZ4: {
+        size_t decoded_size = compression::lz4_decoder<>::decoded_size(this->ptr_as<uint8_t>());
+        uint8_t* decoded = new uint8_t[decoded_size];
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), decoded, start_idx);
+        return decoded_ptr<T>(reinterpret_cast<T*>(decoded), array_delete<T>);
       }
       default: {
         THROW(illegal_state_exception, "Invalid encoding type!");
@@ -127,11 +165,8 @@ class encoded_ptr {
   }
 
  private:
-  /**
-   * No-op.
-   * @param ptr pointer
-   */
   static void no_op_delete(T* ptr) { }
+  template<typename U> static void array_delete(U* ptr) { std::default_delete<U[]>()(ptr); }
 
   void* ptr_; // encoded data stored at this pointer
 

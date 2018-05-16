@@ -3,10 +3,10 @@
 
 #include <thread>
 
-#include "storage/encoder.h"
 #include "filter.h"
 #include "archival/filter_archiver.h"
 #include "gtest/gtest.h"
+
 #include "archival/load_utils.h"
 #include "schema/schema.h"
 #include "types/type_manager.h"

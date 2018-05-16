@@ -55,6 +55,14 @@ class reference_counts {
     return (atomic::fas(&ref_counts_, SECOND_DELTA) >> SECOND_SHIFT) == 1;
   }
 
+  uint32_t get_first() {
+    return atomic::load(&ref_counts_) & FIRST_MASK;
+  }
+
+  uint32_t get_second() {
+    return atomic::load(&ref_counts_) >> SECOND_SHIFT;
+  }
+
  private:
   atomic::type<uint32_t> ref_counts_;
 

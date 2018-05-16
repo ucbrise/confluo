@@ -12,6 +12,8 @@
 
 namespace confluo {
 
+using namespace ::utils;
+
 /**
  * The bitmap class. Stores a bit-array of a fixed size, and supports access and
  * modifications via efficient bitwise arithmetic.
@@ -102,6 +104,10 @@ class bitmap {
    */
   bool get_bit(pos_type i) const {
     return GETBITVAL(data_, i);
+  }
+
+  void set_size(size_type size) {
+    size_ = size;
   }
 
   // Integer operations

@@ -3,7 +3,6 @@
 
 #include "gtest/gtest.h"
 
-#include "storage/encoder.h"
 #include "archival/load_utils.h"
 #include "container/monolog/monolog_linear.h"
 #include "archival/monolog_linear_archiver.h"

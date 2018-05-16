@@ -1,7 +1,6 @@
 #ifndef CONFLUO_CONTAINER_DATA_LOG_H_
 #define CONFLUO_CONTAINER_DATA_LOG_H_
 
-#include "storage/encoder.h"
 #include "monolog/monolog.h"
 #include "archival/monolog_linear_archiver.h"
 

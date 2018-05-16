@@ -3,10 +3,10 @@
 
 #include <thread>
 
-#include "storage/encoder.h"
 #include "filter.h"
 #include "archival/filter_log_archiver.h"
 #include "gtest/gtest.h"
+
 #include "storage/ptr_aux_block.h"
 
 using namespace ::confluo;

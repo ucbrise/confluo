@@ -2,7 +2,6 @@
 #define CONFLUO_ARCHIVAL_FILTER_LOG_ARCHIVER_H_
 
 #include "archival_utils.h"
-#include "storage/encoder.h"
 #include "filter_archiver.h"
 #include "filter_log.h"
 

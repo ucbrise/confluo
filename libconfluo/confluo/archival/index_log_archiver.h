@@ -1,7 +1,6 @@
 #ifndef CONFLUO_ARCHIVAL_INDEX_LOG_ARCHIVER_H_
 #define CONFLUO_ARCHIVAL_INDEX_LOG_ARCHIVER_H_
 
-#include "storage/encoder.h"
 #include "index_archiver.h"
 #include "index_log.h"
 #include "schema/schema.h"

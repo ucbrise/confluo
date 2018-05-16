@@ -3,7 +3,6 @@
 
 #include "conf/defaults.h"
 #include "config_utils.h"
-#include "storage/encoder.h"
 
 namespace confluo {
 
