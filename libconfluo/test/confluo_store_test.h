@@ -28,14 +28,11 @@ class ConfluoStoreTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      storage::read_only_encoded_ptr<uint8_t> ptr;
-      dtable.read(offsets[i], ptr);
-      auto decoded_ptr = ptr.decode();
-      uint8_t* data = decoded_ptr.get();
-      ASSERT_TRUE(data != nullptr);
+      data_log_ptr ptr = dtable.read_raw(offsets[i]);
+      ASSERT_TRUE(ptr.get() != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-        ASSERT_EQ(data[j], expected);
+        ASSERT_EQ(ptr.get()[j], expected);
       }
     }
     ASSERT_EQ(MAX_RECORDS, dtable.num_records());
