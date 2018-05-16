@@ -14,11 +14,15 @@ using namespace ::utils;
 template<typename T, size_t BUFFER_SIZE = 1048576>
 class monolog_linear_bucket {
  public:
+  /** The atomic block reference type */
   typedef storage::swappable_encoded_ptr<T> __atomic_block_ref;
+  /** The atomic block copy reference type */
   typedef storage::read_only_encoded_ptr<T> __atomic_block_copy_ref;
-
+  /** The block state type */
   typedef bool block_state;
+  /** The uninitialized block state */
   static const block_state UNINIT = false;
+  /** The initialized block state */
   static const block_state INIT = true;
 
   /**
@@ -69,7 +73,7 @@ class monolog_linear_bucket {
    *
    * @param path The data path for the monolog block.
    * @param size The size of the monolog block.
-   * @param storage The storage mode of the monolog block.
+   * @param mode The storage mode of the monolog block.
    */
   void init(const std::string& path, const size_t size,
             const storage::storage_mode& mode) {
@@ -79,9 +83,9 @@ class monolog_linear_bucket {
   }
 
   /**
-   * storage_size
+   * Gets the storage size of the monolog
    *
-   * @return size_t
+   * @return The storage size in bytes
    */
   size_t storage_size() const {
     if (data_.atomic_load() != nullptr)
@@ -283,9 +287,11 @@ class monolog_linear_bucket {
   storage::storage_mode mode_;
 };
 
+/** The initialized monolog block state */
 template<typename T, size_t BUFFER_SIZE>
 const bool monolog_linear_bucket<T, BUFFER_SIZE>::INIT;
 
+/** The uninitialized monolog state */
 template<typename T, size_t BUFFER_SIZE>
 const bool monolog_linear_bucket<T, BUFFER_SIZE>::UNINIT;
 

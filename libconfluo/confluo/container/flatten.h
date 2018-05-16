@@ -14,16 +14,27 @@
 template<typename outer_iterator>
 class flattened_iterator {
  public:
+  /** The inner iterator */
   typedef typename outer_iterator::value_type::const_iterator inner_iterator;
 
+  /** The iterator category */
   typedef std::forward_iterator_tag iterator_category;
+  /** The value type */
   typedef typename inner_iterator::value_type value_type;
+  /** The difference type */
   typedef typename inner_iterator::difference_type difference_type;
+  /** The iterator */
   typedef typename inner_iterator::pointer pointer;
+  /** Reference to the inner iterator */
   typedef typename inner_iterator::reference reference;
 
   flattened_iterator() = default;
 
+  /**
+   * Initializes a flattened iterator
+   *
+   * @param it The outer iterator to initialize this flattened iterator
+   */
   flattened_iterator(const outer_iterator& it)
       : outer_(it),
         outer_end_(it) {
@@ -79,7 +90,7 @@ class flattened_iterator {
   /**
    * Advances the flattened iterator by a specified amount
    *
-   * @param int The amount to advance the flattened iterator
+   * 
    *
    * @return The advanced flattened iterator
    */
@@ -144,9 +155,13 @@ class flattened_iterator {
 template<typename container_t>
 class flattened_container {
  public:
+  /** The value type of the container */
   typedef typename container_t::value_type::value_type value_type;
+  /** The container iterator */
   typedef typename container_t::const_iterator container_iterator;
+  /** The iterator */
   typedef flattened_iterator<container_iterator> iterator;
+  /** The constant iterator */
   typedef flattened_iterator<container_iterator> const_iterator;
 
   /**

@@ -22,7 +22,7 @@ struct trigger {
    * is defined
    * @param op Trigger's relational operator
    * @param threshold Trigger's threshold
-   * @param periodicity Trigger's periodicity
+   * @param periodicity_ms Trigger's periodicity in milliseconds
    */
   trigger(const std::string& name, const std::string& aggregate_name,
           reational_op_id op, const numeric& threshold,

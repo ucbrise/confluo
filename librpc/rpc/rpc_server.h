@@ -33,17 +33,29 @@ namespace rpc {
  */
 class rpc_service_handler : virtual public rpc_serviceIf {
  public:
+  /** The adhoc_map type */
   typedef std::map<rpc_iterator_id, std::unique_ptr<record_cursor>> adhoc_map;
+  /** The adhoc entry type */
   typedef std::pair<rpc_iterator_id, std::unique_ptr<record_cursor>> adhoc_entry;
+  /** The adhoc status type */
   typedef std::pair<adhoc_map::iterator, bool> adhoc_status;
+  /** The map type */
   typedef std::map<rpc_iterator_id, std::unique_ptr<record_cursor>> predef_map;
+  /** The entry type */
   typedef std::pair<rpc_iterator_id, std::unique_ptr<record_cursor>> predef_entry;
+  /** The status type */
   typedef std::pair<predef_map::iterator, bool> predef_status;
+  /** The combined map type */
   typedef std::map<rpc_iterator_id, std::unique_ptr<record_cursor>> combined_map;
+  /** The combined map entry type */
   typedef std::pair<rpc_iterator_id, std::unique_ptr<record_cursor>> combined_entry;
+  /** The combined status type */
   typedef std::pair<combined_map::iterator, bool> combined_status;
+  /** The alerts map type */
   typedef std::map<rpc_iterator_id, std::unique_ptr<alert_cursor>> alerts_map;
+  /** The alerts entry type */
   typedef std::pair<rpc_iterator_id, std::unique_ptr<alert_cursor>> alerts_entry;
+  /** The alerts status type */
   typedef std::pair<alerts_map::iterator, bool> alerts_status;
 
   /**
@@ -375,6 +387,14 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   }
 
   // TODO: Add tests
+  /**
+   * Sets the adhoc aggregate
+   *
+   * @param _return The return value containing the aggregate
+   * @param id The identifier for the multilog
+   * @param aggregate_expr The aggregate expression 
+   * @param filter_expr The filter expression
+   */
   void adhoc_aggregate(std::string& _return, int64_t id,
       const std::string& aggregate_expr,
       const std::string& filter_expr) {
@@ -527,6 +547,13 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     alerts_more(_return, it_id);
   }
 
+  /**
+   * Gets more from the map
+   *
+   * @param _return The The iterator handle 
+   * @param id The identifier
+   * @param desc The iterator description
+   */
   void get_more(rpc_iterator_handle& _return, int64_t id,
       const rpc_iterator_descriptor& desc) {
     if (desc.handler_id != handler_id_) {
@@ -557,6 +584,13 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     }
   }
 
+  /**
+   * Gets the number of records from the store
+   *
+   * @param id The identifier of the multilog
+   *
+   * @return The number of records
+   */
   int64_t num_records(int64_t id) {
     return store_->get_atomic_multilog(id)->num_records();
   }

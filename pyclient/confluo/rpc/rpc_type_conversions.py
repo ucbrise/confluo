@@ -3,12 +3,12 @@ from schema import schema_builder, schema
 from data_types import data_type
 
 def convert_to_rpc_schema(schema):
-    """
-    Converts a schema to an rpc schema for the client
+    """ Converts a schema to an rpc schema for the client.
+
     Args:
-        schema: The schema to convert
+        schema: The schema to convert.
     Returns:
-        The rpc schema
+        The rpc schema.
     """
     rpc_columns = []
     for column in schema.columns_:
@@ -17,12 +17,12 @@ def convert_to_rpc_schema(schema):
     return rpc_columns
 
 def convert_to_schema(rpc_schema):
-    """
-    Converts an rpc schema to a schema for confluo
+    """ Converts an rpc schema to a schema for confluo.
+
     Args:
-        rpc_schema: The rpc_schema to convert
+        rpc_schema: The rpc_schema to convert.
     Returns:
-        The schema for confluo
+        The schema for confluo.
     """
     builder = schema_builder()
     for column in rpc_schema:

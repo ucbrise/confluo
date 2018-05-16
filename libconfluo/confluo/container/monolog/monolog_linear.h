@@ -259,8 +259,11 @@ class monolog_linear_base {
   }
 
  protected:
+  /** The name of the monolog */
   std::string name_;
+  /** The path for data of the monolog */
   std::string data_path_;
+  /** The array of monolog buckets */
   std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS> buckets_;
 
 };
@@ -273,16 +276,27 @@ template<typename T, size_t MAX_BUCKETS = 4096, size_t BUCKET_SIZE = 268435456, 
 class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE> {
  public:
   // Type definitions
+  /** The size type */
   typedef size_t size_type;
+  /** The position type */
   typedef size_t pos_type;
+  /** The value type */
   typedef T value_type;
+  /** The difference type */
   typedef T difference_type;
+  /** The pointer type */
   typedef T* pointer;
+  /** The reference type */
   typedef T reference;
+  /** This type */
   typedef monolog_linear<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE> this_type;
+  /** The iterator type */
   typedef monolog_iterator<this_type> iterator;
+  /** The constant iterator type */
   typedef monolog_iterator<this_type> const_iterator;
+  /** The bucket iterator type */
   typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> bucket_iterator;
+  /** The constant bucket iterator type */
   typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> const_bucket_iterator;
 
   /**

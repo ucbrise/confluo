@@ -43,8 +43,10 @@ class configuration_params {
   /** Monitor configuration parameters */
   static uint64_t MEMORY_MONITOR_PERIODICITY_MS;
   static uint64_t MONITOR_WINDOW_MS;
+  /** Monitor periodicity in milliseconds */
   static uint64_t MONITOR_PERIODICITY_MS;
 };
+
 
 static utils::configuration_map confluo_conf(
     utils::config_utils::read_from_env(

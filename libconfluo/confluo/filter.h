@@ -42,9 +42,10 @@ inline bool default_filter(const record_t& r) {
  */
 class filter {
  public:
-  // Type definition for time partitioned index; parameters ensure all
-  // nanosecond time-stamps can be handled by the index.
+  /** Type definition for time partitioned index; parameters ensure all
+  nanosecond time-stamps can be handled by the index. */
   typedef index::radix_tree<aggregated_reflog> idx_t;
+  /** The filter range result */
   typedef idx_t::rt_result range_result;
   typedef idx_t::rt_reflog_result reflog_result;
 
@@ -54,7 +55,6 @@ class filter {
    *
    * @param exp Compiled expression.
    * @param fn Filter function.
-   * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
    */
   filter(const compiled_expression& exp, filter_fn fn = default_filter)
       : exp_(exp),
@@ -67,7 +67,6 @@ class filter {
    * Constructor that initializes the filter function with the provided one.
    *
    * @param fn Provided filter function.
-   * @param monitor_granularity_ms Time-granularity (milliseconds) for monitor.
    */
   filter(filter_fn fn = default_filter)
       : exp_(),
@@ -140,6 +139,10 @@ class filter {
   /**
    * Updates the filter index with new data points. If data points
    * pass the filter, their references are stored.
+   * @param log_offset The offset from the log
+   * @param snap The snapshot of the schema
+   * @param block The record block
+   * @param record_size The size of the record
    */
   void update(size_t log_offset, const schema_snapshot& snap,
               record_block& block, size_t record_size) {

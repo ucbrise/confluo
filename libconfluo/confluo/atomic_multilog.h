@@ -114,7 +114,7 @@ class atomic_multilog {
    * @param name The atomic multilog name
    * @param schema The schema for the atomic multilog
    * @param path The path of the atomic multilog
-   * @param storage The storage mode of the atomic multilog
+   * @param mode The storage mode of the atomic multilog
    * @param pool The pool of tasks
    */
   atomic_multilog(const std::string& name, const std::vector<column_t>& schema,
@@ -143,6 +143,15 @@ class atomic_multilog {
     }
   }
 
+  /**
+   * Initializes an atomic multilog from the given parameters
+   *
+   * @param name The name of the atomic multilog
+   * @param schema The schema of the atomic multilog
+   * @param path The path to store multilog data
+   * @param mode The storage mode of the multilog
+   * @param pool The pool of tasks for the multilog
+   */
   atomic_multilog(const std::string& name, const std::string& schema,
                   const std::string& path, const storage::storage_mode& storage_mode,
                   const archival_mode& a_mode, task_pool& pool)
@@ -204,6 +213,7 @@ class atomic_multilog {
   /**
    * Adds index to the atomic multilog
    * @param field_name The name of the field in the atomic multilog
+   * @param bucket_size The size of the bucket
    * @throw ex Management exception
    */
   void add_index(const std::string& field_name, double bucket_size =
@@ -321,6 +331,7 @@ class atomic_multilog {
    * Adds trigger to the atomic multilog
    * @param name The name of the trigger
    * @param expr The trigger expression to be executed
+   * @param periodicity_ms The periodicity in milliseconds
    * @throw ex Management exception
    */
   void install_trigger(const std::string& name, const std::string& expr,
@@ -355,7 +366,7 @@ class atomic_multilog {
 
   /**
    * Removes trigger from the atomic multilog
-   * @param trigger_name The name of the trigger
+   * @param name The name of the trigger
    * @throw Management exception
    */
   void remove_trigger(const std::string& name) {
@@ -479,7 +490,6 @@ class atomic_multilog {
   /**
    * Read the record given the offset into the data log
    * @param offset The offset of the data into the data log
-   * @param version The current version
    * @return Return the corresponding record.
    */
   std::vector<std::string> read(uint64_t offset) const {
@@ -501,6 +511,14 @@ class atomic_multilog {
   }
 
   // TODO: Add tests
+  /**
+   * Executes an aggregate
+   *
+   * @param aggregate_expr The aggregate expression
+   * @param filter_expr The filter expression
+   *
+   * @return A numeric containing the result of the aggregate
+   */
   numeric execute_aggregate(const std::string& aggregate_expr,
                             const std::string& filter_expr) {
     auto pa = parser::parse_aggregate(aggregate_expr);
@@ -1057,22 +1075,34 @@ class atomic_multilog {
     }
   }
 
+  /** The name of the multilog */
   std::string name_;
+  /** The schema of the multilog */
   schema_type schema_;
 
+  /** The data log */
   data_log_type data_log_;
+  /** The read tail */
   read_tail_type rt_;
+  /** The metadata associated with the multilog */
   metadata_writer_type metadata_;
 
   // In memory structures
+  /** The list of filters */
   filter_log filters_;
+  /** The list of indexes */
   index_log indexes_;
+  /** The list of alerts */
   alert_index alerts_;
 
+  /** A map from id to filter */
   string_map<filter_id_t> filter_map_;
+  /** A map from id to aggregate */
   string_map<aggregate_id_t> aggregate_map_;
+  /** A map from id to trigger */
   string_map<trigger_id_t> trigger_map_;
 
+  /** The query planner for the multilog */
   query_planner planner_;
 
   // Archival
@@ -1081,7 +1111,9 @@ class atomic_multilog {
   task_pool archival_pool_;
 
   // Manangement
+  /** The pool of tasks */
   task_pool& mgmt_pool_;
+  /** The monitor task */
   periodic_task monitor_task_;
 }
 ;

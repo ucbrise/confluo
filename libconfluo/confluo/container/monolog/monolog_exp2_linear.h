@@ -27,8 +27,11 @@ namespace monolog {
 template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear_base {
  public:
+  /** The bucket pointer type */
   typedef storage::swappable_encoded_ptr<T> __atomic_bucket_ref;
+  /** The bucket copy reference type */
   typedef storage::read_only_encoded_ptr<T> __atomic_bucket_copy_ref;
+  /** The bucket container reference type */
   typedef atomic::type<__atomic_bucket_ref*> __atomic_bucket_container_ref;
 
   /**
@@ -204,7 +207,7 @@ class monolog_exp2_linear_base {
   /**
    * Gets a pointer to the data at index idx
    * @param idx monolog index
-   * param data_ptr location to store pointer to data at
+   * @param data_ptr location to store pointer to data at
    */
   void ptr(size_t idx, __atomic_bucket_copy_ref& data_ptr) const {
     size_t pos = idx + FCS;
@@ -406,16 +409,27 @@ template<class T, size_t NCONTAINERS = 32, size_t BUCKET_SIZE = 1024>
 class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCKET_SIZE> {
  public:
   // Type definitions
+  /** The size type */
   typedef size_t size_type;
+  /** The position type */
   typedef size_t pos_type;
+  /** The value type */
   typedef T value_type;
+  /** The difference type */
   typedef T difference_type;
+  /** The pointer type */
   typedef T* pointer;
+  /** The reference type */
   typedef T reference;
+  /** This type */
   typedef monolog_exp2_linear<T, NCONTAINERS, BUCKET_SIZE> this_type;
+  /** The iterator type */
   typedef monolog_iterator<this_type> iterator;
+  /** The constant iterator type */
   typedef monolog_iterator<this_type> const_iterator;
+  /** The bucket iterator type */
   typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> bucket_iterator;
+  /** The constant bucket iterator type */
   typedef monolog_bucket_iterator<this_type, BUCKET_SIZE> const_bucket_iterator;
 
   /**

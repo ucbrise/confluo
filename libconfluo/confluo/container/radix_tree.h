@@ -18,8 +18,11 @@ namespace index {
  */
 template<typename reflog>
 struct radix_tree_node {
+  /** The radix node type */
   typedef radix_tree_node<reflog> node_t;
+  /** The child type */
   typedef atomic::type<node_t*> child_t;
+  /** The key */
   typedef byte_string key_t;
 
   /**
@@ -274,10 +277,15 @@ struct radix_tree_node {
     }
   }
 
+  /** Key of the radix tree node */
   uint8_t key;
+  /** Depth of the radix tree node */
   uint8_t depth;
+  /** Data that the node contains */
   void* data;
+  /** Whether the node is a leaf node */
   bool is_leaf;
+  /** The parent of the radix tree node */
   node_t* parent;
 };
 
@@ -287,11 +295,17 @@ struct radix_tree_node {
 template<typename reflog>
 class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
  public:
+  /** The node type */
   typedef radix_tree_node<reflog> node_t;
+  /** The key */
   typedef byte_string key_t;
+  /** The value type */
   typedef reflog value_type;
+  /** The self reflog type */
   typedef rt_reflog_it<reflog> self_type;
+  /** The reflog reference */
   typedef reflog& reference;
+  /** The reflog pointer */
   typedef reflog* pointer;
 
   /**
@@ -376,7 +390,6 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   /**
    * operator++ (postfix)
    *
-   * @param int Postfix argument
    *
    * @return Updated iterator
    */
@@ -430,8 +443,11 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
 template<typename reflog>
 class rt_reflog_range_result {
  public:
+  /** The value type */
   typedef reflog value_type;
+  /** The constant iterator type */
   typedef rt_reflog_it<reflog> const_iterator;
+  /** The iterator type */
   typedef rt_reflog_it<reflog> iterator;
 
   /**
@@ -499,13 +515,20 @@ class rt_reflog_range_result {
 template<typename reflog>
 class radix_tree {
  public:
+  /** The node type */
   typedef radix_tree_node<reflog> node_t;
+  /** The key */
   typedef byte_string key_t;
+  /** The value type */
   typedef typename reflog::value_type value_t;
 
+  /** The iterator type for reflog */
   typedef rt_reflog_it<reflog> iterator;
+  /** The range result type */
   typedef rt_reflog_range_result<reflog> rt_reflog_result;
+  /** The result type */
   typedef flattened_container<rt_reflog_range_result<reflog>> rt_result;
+  /** The range iterator type */
   typedef typename rt_result::iterator range_iterator;
 
   /**
@@ -827,6 +850,7 @@ class radix_tree {
   node_t* root_;
 };
 
+/** The radix index */
 typedef radix_tree<reflog> radix_index;
 
 }

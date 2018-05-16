@@ -78,7 +78,6 @@ class value_reference {
   /**
    * Gets the current value and increments it after
    *
-   * @param int The next reference to get
    *
    * @return The non incremented value
    */
@@ -102,7 +101,6 @@ class value_reference {
   /**
    * Gets the decremented value
    *
-   * @param int Where to decrement the reference
    *
    * @return The decremented value type
    */
@@ -221,12 +219,18 @@ class value_reference {
 template<typename bitmap_array_impl>
 class bitmap_array_iterator {
  public:
+  /** The position type */
   typedef typename bitmap_array_impl::pos_type pos_type;
 
+  /** The difference type */
   typedef typename bitmap_array_impl::difference_type difference_type;
+  /** The value type */
   typedef typename bitmap_array_impl::value_type value_type;
+  /** The bitmap pointer */
   typedef typename bitmap_array_impl::pointer pointer;
+  /** The bitmap reference */
   typedef typename bitmap_array_impl::reference reference;
+  /** The iterator category */
   typedef typename bitmap_array_impl::iterator_category iterator_category;
 
   /**
@@ -270,7 +274,7 @@ class bitmap_array_iterator {
   /**
    * operator++ (postfix)
    *
-   * @param int Postfix argument
+   * 
    *
    * @return Updated iterator
    */
@@ -293,7 +297,7 @@ class bitmap_array_iterator {
   /**
    * operator-- (postfix)
    *
-   * @param int Postfix argument
+   * 
    *
    * @return Updated iterator
    */
@@ -462,17 +466,27 @@ class bitmap_array_iterator {
   pos_type pos_;
 };
 
+/**
+ * An iterator for a bitmap array
+ */
 template<typename bitmap_array_impl>
 class const_bitmap_array_iterator {
  public:
+  /** The position type */
   typedef typename bitmap_array_impl::pos_type pos_type;
 
+  /** The difference type */
   typedef typename bitmap_array_impl::difference_type difference_type;
+  /** The value type */
   typedef typename bitmap_array_impl::value_type value_type;
+  /** The bitmap pointer */
   typedef typename bitmap_array_impl::pointer pointer;
+  /** Theb bitmap reference */
   typedef typename bitmap_array_impl::reference reference;
+  /** The iterator category */
   typedef typename bitmap_array_impl::iterator_category iterator_category;
 
+  /** The constant reference */
   typedef typename bitmap_array_impl::value_type const_reference;
 
   /**
@@ -508,7 +522,6 @@ class const_bitmap_array_iterator {
   /**
    * operator++ (postfix)
    *
-   * @param int Postfix argument
    *
    * @return Updated iterator
    */
@@ -531,7 +544,6 @@ class const_bitmap_array_iterator {
   /**
    * operator-- (postfix)
    *
-   * @param int Postfix argument
    *
    * @return Updated iterator
    */
@@ -810,7 +822,9 @@ class bitmap_array_base : public bitmap {
 
  protected:
   // Data members
+  /** The number of elements */
   size_type num_elements_;
+  /** The bit width */
   width_type bit_width_;
 };
 
@@ -823,11 +837,16 @@ template<typename T>
 class unsized_bitmap_array : public bitmap {
  public:
   // Type definitions
+  /** The size type */
   typedef typename bitmap_array_base<T>::size_type size_type;
+  /** The width type */
   typedef typename bitmap_array_base<T>::width_type width_type;
+  /** The position type */
   typedef typename bitmap_array_base<T>::pos_type pos_type;
 
+  /** The bitmap reference */
   typedef value_reference<unsized_bitmap_array<T>> reference;
+  /** The value type */
   typedef T value_type;
 
   // Constructors and destructors
@@ -989,16 +1008,26 @@ class unsigned_bitmap_array : public bitmap_array_base<T> {
       "Signed types cannot be used with unsigned_bitmap_array.");
 
   // Type definitions
+  /** The size type */
   typedef typename bitmap_array_base<T>::size_type size_type;
+  /** The width type */
   typedef typename bitmap_array_base<T>::width_type width_type;
+  /** The position type */
   typedef typename bitmap_array_base<T>::pos_type pos_type;
 
+  /** The difference type */
   typedef ptrdiff_t difference_type;
+  /** The value type */
   typedef T value_type;
+  /** The bitmap array pointer */
   typedef T* pointer;
+  /** The value reference */
   typedef value_reference<unsigned_bitmap_array<T>> reference;
+  /** The bitmap array iterator */
   typedef bitmap_array_iterator<unsigned_bitmap_array<T>> iterator;
+  /** The constant bitmap array iterator */
   typedef const_bitmap_array_iterator<unsigned_bitmap_array<T>> const_iterator;
+  /** The iterator category */
   typedef std::random_access_iterator_tag iterator_category;
 
   /**
@@ -1166,16 +1195,26 @@ class signed_bitmap_array : public bitmap_array_base<T> {
       "Unsigned types cannot be used with signed_bitmap_array.");
 
   // Type definitions
+  /** The size type */
   typedef typename bitmap_array_base<T>::size_type size_type;
+  /** The width type */
   typedef typename bitmap_array_base<T>::width_type width_type;
+  /** The position type */
   typedef typename bitmap_array_base<T>::pos_type pos_type;
 
+  /** The difference type */
   typedef ptrdiff_t difference_type;
+  /** The value type */
   typedef T value_type;
+  /** The bitmap array pointer */
   typedef T* pointer;
+  /** The value reference */
   typedef value_reference<signed_bitmap_array<T>> reference;
+  /** The bitmap array iterator */
   typedef bitmap_array_iterator<signed_bitmap_array<T>> iterator;
+  /** The constant bitmap array iterator */
   typedef const_bitmap_array_iterator<signed_bitmap_array<T>> const_iterator;
+  /** The iterator category */
   typedef std::random_access_iterator_tag iterator_category;
 
   /**

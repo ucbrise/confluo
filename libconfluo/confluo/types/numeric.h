@@ -12,6 +12,14 @@ class numeric;
 /** Helpers for casting numerics **/
 static numeric cast(const numeric& val, const data_type& type);
 
+/**
+ * Gets the greater data type 
+ *
+ * @param t1 The first data type
+ * @param t2 The second data type
+ *
+ * @return The greater data type based on id
+ */
 static data_type max(const data_type& t1, const data_type& t2) {
   return type_manager::get_type(std::max(t1.id, t2.id));
 }
@@ -59,41 +67,81 @@ class numeric {
     as<int8_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from an unsigned character value
+   *
+   * @param val The unsigned character value to create this numeric
+   */
   numeric(uint8_t val)
       : type_(UCHAR_TYPE) {
     as<uint8_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from the signed short value
+   *
+   * @param val The signed short value to create this numeric from
+   */
   numeric(int16_t val)
       : type_(SHORT_TYPE) {
     as<int16_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from the unsigned short value
+   *
+   * @param val The unsigned short value used to create this numeric
+   */
   numeric(uint16_t val)
       : type_(USHORT_TYPE) {
     as<uint16_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from the integer value
+   *
+   * @param val The integer value used to construct this numeric
+   */
   numeric(int32_t val)
       : type_(INT_TYPE) {
     as<int32_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from an unsigned integer value
+   *
+   * @param val The unsigned integer value used to construct the numeric
+   */
   numeric(uint32_t val)
       : type_(UINT_TYPE) {
     as<uint32_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from a signed long value
+   *
+   * @param val The signed long value used to construct this numeric
+   */
   numeric(int64_t val)
       : type_(LONG_TYPE) {
     as<int64_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from an unsigned long value
+   *
+   * @param val The unsigned long value used to construct this numeric
+   */
   numeric(uint64_t val)
       : type_(ULONG_TYPE) {
     as<uint64_t>() = val;
   }
 
+  /**
+   * Constructs a numeric from a float value
+   *
+   * @param val The float value used to construct this numeric
+   */
   numeric(float val)
       : type_(FLOAT_TYPE) {
     as<float>() = val;
@@ -137,10 +185,23 @@ class numeric {
     memcpy(data_, val.ptr(), type_.size);
   }
 
+  /**
+   * Gets whether this numeric is valid
+   *
+   * @return True if this numeric is valid, false otherwise
+   */
   bool is_valid() const {
     return !type_.is_none();
   }
 
+  /**
+   * Parses the numeric from a string
+   *
+   * @param str The string to parse the numeric from
+   * @param type The data type of the numeric
+   *
+   * @return A numeric generated from the contents of the string
+   */
   static numeric parse(const std::string& str, const data_type& type) {
     numeric value(type);
     type.parse_op()(str, value.data_);
@@ -498,48 +559,105 @@ class numeric {
     return *this;
   }
 
+  /**
+   * Assigns the unsigned character value to this numeric
+   *
+   * @param value The unsigned character value that is copied to this
+   * numeric's value
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(uint8_t value) {
     type_ = UCHAR_TYPE;
     as<uint8_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the short value to this numeric
+   *
+   * @param value The short value that is copied to this numeric's value
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(int16_t value) {
     type_ = SHORT_TYPE;
     as<int16_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the unsigned short value to this numeric
+   *
+   * @param value The unsigned short value to assign to this numeric
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(uint16_t value) {
     type_ = USHORT_TYPE;
     as<uint16_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the integer value to this numeric
+   *
+   * @param value The integer value to assign to this numeric
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(int32_t value) {
     type_ = INT_TYPE;
     as<int32_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the unsigned integer value to this numeric
+   *
+   * @param value The unsigned integer value to assign to this numeric
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(uint32_t value) {
     type_ = UINT_TYPE;
     as<uint32_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the long value to this numeric
+   *
+   * @param value The long value to assign to this numeric
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(int64_t value) {
     type_ = LONG_TYPE;
     as<int64_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the unsigned long value to this numeric
+   *
+   * @param value The value to assign to this numeric
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(uint64_t value) {
     type_ = ULONG_TYPE;
     as<uint64_t>() = value;
     return *this;
   }
 
+  /**
+   * Assigns the float value to this numeric
+   *
+   * @param value The float value to assign to this numeric
+   *
+   * @return The updated numeric
+   */
   numeric& operator=(float value) {
     type_ = FLOAT_TYPE;
     as<float>() = value;
@@ -616,36 +734,95 @@ using cast_fn = numeric (*)(const numeric& v);
 
 namespace detail {
 
+/**
+ * Casts one numeric to the another type
+ *
+ * @tparam IN The type of the input numeric
+ * @tparam OUT The desired type for the output
+ */
 template<typename IN, typename OUT>
 struct cast_helper {
+  /**
+   * Casts one numeric to another type
+   *
+   * @param v The numeric to cast
+   *
+   * @return The casted numeric
+   */
   static numeric cast(const numeric& v) {
     return numeric(static_cast<OUT>(v.as<IN>()));
   }
 };
 
+/**
+ * Casts one numeric to the same type
+ *
+ * @tparam T The type to cast the numeric to
+ */
 template<typename T>
 struct cast_helper<T, T> {
+  /**
+   * Casts one numeric to another type
+   *
+   * @param v The numeric to cast
+   *
+   * @return The casted numeric
+   */
   static numeric cast(const numeric& v) {
     return v;
   }
 };
 
+/**
+ * Casts a numeric of the void type to the OUT type
+ *
+ * @tparam OUT The desired output type
+ */
 template<typename OUT>
 struct cast_helper<void, OUT> {
+  /**
+   * Casts a numeric to another type
+   *
+   * @param v The numeric to cast
+   * @throw invalid_cast_exception Cannot cast from void type
+   * @return The casted numeric
+   */
   static numeric cast(const numeric& v) {
     throw invalid_cast_exception("Cannot cast none type to any other type");
   }
 };
 
+/**
+ * Casts a numeric from the in type to void
+ *
+ * @tparam IN The type of the input numeric
+ */
 template<typename IN>
 struct cast_helper<IN, void> {
+  /**
+   * Casts a numeric to another type
+   *
+   * @param v The numeric to cast
+   * @throw invalid_cast_exception Cannot cast to void type
+   * @return The casted numeric
+   */
   static numeric cast(const numeric& v) {
     throw invalid_cast_exception("Cannot cast any type to none type");
   }
 };
 
+/**
+ * Casts a numeric from the void type to the void type
+ */
 template<>
 struct cast_helper<void, void> {
+  /**
+   * Casts a numeric to another type
+   *
+   * @param v The numeric to cast
+   * @throw invalid_cast_exception Cannot cast to void type
+   * @return The casted numeric
+   */
   static numeric cast(const numeric& v) {
     throw invalid_cast_exception("Cannot cast none type to none type");
   }
@@ -653,11 +830,27 @@ struct cast_helper<void, void> {
 
 }
 
+/**
+ * Casts a numeric from one type to another
+ *
+ * @tparam IN The type of the input numeric
+ * @tparam OUT The desired output type
+ * @param v The input numeric
+ *
+ * @return The casted numeric
+ */
 template<typename IN, typename OUT>
 numeric type_cast(const numeric& v) {
   return detail::cast_helper<IN, OUT>::cast(v);
 }
 
+/**
+ * Initializes the type cast operators for all the types
+ *
+ * @tparam IN The type of the input numeric
+ *
+ * @return A vector containing all of the casting operators
+ */
 template<typename IN>
 static std::vector<cast_fn> init_type_cast_ops() {
   return {type_cast<IN, void>, type_cast<IN, bool>, type_cast<IN, int8_t>, type_cast<IN, uint8_t>,
@@ -666,6 +859,9 @@ static std::vector<cast_fn> init_type_cast_ops() {
     type_cast<IN, float>, type_cast<IN, double>};
 }
 
+/**
+ * A vector containing the cast operators for all the types
+ */
 static std::vector<std::vector<cast_fn>> CAST_OPS = {
     init_type_cast_ops<void>(), init_type_cast_ops<bool>(), init_type_cast_ops<
         int8_t>(), init_type_cast_ops<uint8_t>(), init_type_cast_ops<int16_t>(),
@@ -674,6 +870,15 @@ static std::vector<std::vector<cast_fn>> CAST_OPS = {
     init_type_cast_ops<uint64_t>(), init_type_cast_ops<float>(),
     init_type_cast_ops<double>() };
 
+/**
+ * Indexes into the cast operators vector to call the appropriate cast
+ * function
+ *
+ * @param val The numeric to cast
+ * @param type The type to cast the numeric to
+ *
+ * @return The casted numeric
+ */
 static numeric cast(const numeric& val, const data_type& type) {
   return CAST_OPS[val.type().id][type.id](val);
 }

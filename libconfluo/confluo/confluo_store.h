@@ -35,7 +35,7 @@ class confluo_store {
    *
    * @param name The name of the atomic multilog
    * @param schema List of columns that define the schema
-   * @param id The storage mode of the atomic multilog
+   * @param mode The storage mode of the confluo store
    * @return The id of the atomic multilog
    */
   int64_t create_atomic_multilog(const std::string& name,
@@ -58,7 +58,7 @@ class confluo_store {
    *
    * @param name The name of the atomic multilog
    * @param schema Schema string
-   * @param id The storage mode of the atomic multilog
+   * @param mode The storage mode of the confluo store
    * @return The id of the atomic multilog
    */
   int64_t create_atomic_multilog(const std::string& name,

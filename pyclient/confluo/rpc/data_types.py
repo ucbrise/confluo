@@ -2,23 +2,22 @@ from ttypes import rpc_data_type
 
 
 class type_id:
-    """
-    Contains the primitive types
+    """ Contains the primitive types.
 
     Attributes:
-        NONE: The none type
-        BOOL: The boolean type
-        CHAR: The character type
-        UCHAR: The unsigned character type
-        SHORT: The short type
-        USHORT: The unsigned short type
-        INT: The integer type
-        UINT: The unsigned integer type
-        LONG: The long type
-        ULONG: The unsigned long type
-        FLOAT: The single precision floating type
-        DOUBLE: The double type
-        STRING: The string type
+        NONE: The none type.
+        BOOL: The boolean type.
+        CHAR: The character type.
+        UCHAR: The unsigned character type.
+        SHORT: The short type.
+        USHORT: The unsigned short type.
+        INT: The integer type.
+        UINT: The unsigned integer type.
+        LONG: The long type.
+        ULONG: The unsigned long type.
+        FLOAT: The single precision floating type.
+        DOUBLE: The double type.
+        STRING: The string type.
     """
 
     NONE = rpc_data_type.RPC_NONE
@@ -37,40 +36,39 @@ class type_id:
 
 
 class data_type:
-    """
-    Functionality for data types
+    """ Functionality for data types.
+
     """
     
     def __init__(self, typeid, size=0):
-        """
-        Initializes a data type based on id and size
+        """ Initializes a data type based on id and size.
+
         Args:
-            typeid: The id of the data type
-            size: The size of the data type
+            typeid: The id of the data type.
+            size: The size of the data type.
         """
         self.type_id_ = typeid
         self.size_ = size
 
     def __eq__(self, other):
-        """
-        Performs an equality check between this data type and the other
-        data type
+        """ Performs an equality check between this data type and the other data type.
+
         Args:
-            other: The other data type for comparison
+            other: The other data type for comparison.
         Returns:
-            True if the two data types are equal, false otherwise
+            True if the two data types are equal, false otherwise.
         """
         if other.type_id_ == self.type_id_ and other.size_ == self.size_:
             return True 
         return False
 
     def __ne__(self, other):
-        """
-        Performs a not equal comparison between two data types
+        """ Performs a not equal comparison between two data types.
+
         Args:
-            other: The other data type for comparison
+            other: The other data type for comparison.
         Returns:
-            True if the two data types are equal, false otherwise
+            True if the two data types are equal, false otherwise.
         """
         return not self.__eq__(other)
 

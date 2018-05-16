@@ -21,9 +21,13 @@ using namespace ::utils;
 class bitmap {
  public:
   // Type definitions
+  /** Position type */
   typedef size_t pos_type;
+  /** The size type */
   typedef size_t size_type;
+  /** The data type */
   typedef uint64_t data_type;
+  /** The width type */
   typedef uint8_t width_type;
 
   // Constructors and Destructors
@@ -38,8 +42,7 @@ class bitmap {
 
   /**
    * Constructor that initializes the bitmap
-   * @param num_bits Number of bits in the bitmap
-   * @param size The size of the bitmap
+   * @param num_bits The size of the bitmap
    */
   bitmap(size_type num_bits) {
     data_ = new data_type[BITS2BLOCKS(num_bits)]();
@@ -115,7 +118,8 @@ class bitmap {
    * Sets the value at a specific position
    * @param pos The position
    * @param val The value
-   * @param width_type The type of the block width
+   * @param bits The number of bits
+   * @return The value
    */
   template<typename T>
   typename std::enable_if<std::is_arithmetic<T>::value>::type set_val_pos(
@@ -140,7 +144,7 @@ class bitmap {
   /**
    * Gets the value at the position
    * @param pos The position
-   * @param width_type The type of the block width
+   * @param bits The number of bits
    * @return The data at the position
    */
   template<typename T>
@@ -199,7 +203,9 @@ class bitmap {
 
  protected:
   // Data members
+  /** The bitmap data */
   data_type *data_;
+  /** The bitmap size */
   size_type size_;
 };
 

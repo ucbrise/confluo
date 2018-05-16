@@ -1,15 +1,14 @@
 class record_stream:
-    """
-    A stream of records and associated functionality
+    """ A stream of records and associated functionality.
     """
     def __init__(self, multilog_id, schema, client, handle):
-        """
-        Initializes an empty record stream
+        """ Initializes an empty record stream.
+
         Args:
-            multilog_id: The identifier for the atomic multilog
-            schema: The associated schema
-            client: The rpc client
-            handle: Iterator through the stream
+            multilog_id: The identifier for the atomic multilog.
+            schema: The associated schema.
+            client: The rpc client.
+            handle: Iterator through the stream.
         """
         self.multilog_id_ = multilog_id
         self.schema_ = schema
@@ -18,10 +17,10 @@ class record_stream:
         self.cur_off_ = 0
 
     def __iter__(self):
-        """
-        Iterator for the record stream
+        """ Iterator for the record stream.
+
         Yields:
-            record: The next element in the stream
+            record: The next element in the stream.
         """
         while self.has_more():
             yield self.schema_.apply(0, self.handle_.data[self.cur_off_:])
@@ -31,26 +30,24 @@ class record_stream:
                 self.cur_off_ = 0
 
     def has_more(self):
-        """
-        Checks whether the stream has any more elements
+        """ Checks whether the stream has any more elements.
+
         Returns:
-            True if there are any more records in the stream, false
-            otherwise
+            True if there are any more records in the stream, false otherwise
         """
         return self.handle_.has_more or self.cur_off_ != len(self.handle_.data)
 
 class alert_stream:
-    """
-    A stream of alerts
+    """ A stream of alerts.
     """
 
     def __init__(self, multilog_id, client, handle):
-        """
-        Initializes a stream of alerts to the data passed in
+        """ Initializes a stream of alerts to the data passed in.
+
         Args:
-            multilog_id: The identifier of the atomic multilog
-            client: The rpc client
-            handle: The iterator for the stream
+            multilog_id: The identifier of the atomic multilog.
+            client: The rpc client.
+            handle: The iterator for the stream.
         """
         self.multilog_id_ = multilog_id
         self.client_ = client
@@ -58,10 +55,10 @@ class alert_stream:
         self.stream_ = handle.data
         
     def __iter__(self):
-        """
-        Iterates through the alert stream
+        """ Iterates through the alert stream.
+
         Yields:
-            alert: The next alert in the stream
+            alert: The next alert in the stream.
         """
         while self.has_more():
             end_idx = alert.find("\n")
@@ -73,9 +70,9 @@ class alert_stream:
                 self.stream_ = self.handle_.data
 
     def has_more(self):
-        """
-        Checks whether the stream has any more elements
-        Returns: True if there are any elements left in the stream,
-        false otherwise
+        """ Checks whether the stream has any more elements.
+
+        Returns: 
+            True if there are any elements left in the stream, false otherwise.
         """
         return self.handle_.has_more or not self.stream_

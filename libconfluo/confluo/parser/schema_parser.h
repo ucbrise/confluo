@@ -51,9 +51,13 @@ struct schema_parser : public qi::grammar<I, ascii::space_type, kv_list()> {
     value = +char_("a-zA-Z0-9()");
   }
 
+  /** The schema rule */
   qi::rule<I, ascii::space_type, kv_list()> sch;
+  /** The key value rule */
   qi::rule<I, ascii::space_type, kv_pair()> kv;
+  /** The key rule */
   qi::rule<I, ascii::space_type, std::string()> key;
+  /** The value rule */
   qi::rule<I, ascii::space_type, std::string()> value;
 };
 

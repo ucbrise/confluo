@@ -14,7 +14,127 @@ namespace confluo {
 namespace monolog {
 
 /**
- * @class
+ * Iterator over monolog data.
+ */
+template<typename monolog_impl>
+class monolog_iterator : public std::iterator<std::input_iterator_tag,
+    typename monolog_impl::value_type, typename monolog_impl::difference_type,
+    typename monolog_impl::pointer, typename monolog_impl::reference> {
+ public:
+  /** The value type of the monolog */
+  typedef typename monolog_impl::value_type value_type;
+  /** The difference type of the monolog */
+  typedef typename monolog_impl::difference_type difference_type;
+  /** The pointer to the monolog */
+  typedef typename monolog_impl::pointer pointer;
+  /** The reference to the monolog */
+  typedef typename monolog_impl::reference reference;
+
+  /**
+   * Initializes an empty monolog iterator
+   */
+  monolog_iterator()
+      : impl_(nullptr),
+        pos_(0) {
+  }
+
+  /**
+   * Constructs a iterator from a monolog implementation
+   *
+   * @param impl The monolog implementation
+   * @param pos The position of the iterator in the monolog
+   */
+  monolog_iterator(const monolog_impl* impl, size_t pos)
+      : impl_(impl),
+        pos_(pos) {
+  }
+
+  /**
+   * Dereferences the pointer at a given position
+   *
+   * @return The reference at the position
+   */
+  reference operator*() const {
+    return impl_->get(pos_);
+  }
+
+  /**
+   * Gets the pointer at a given position
+   *
+   * @return The pointer at the given position
+   */
+  pointer operator->() const {
+    return impl_->ptr(pos_);
+  }
+
+  /**
+   * Advances the monolog iterator
+   *
+   * @return This advanced monolog iterator
+   */
+  monolog_iterator& operator++() {
+    pos_++;
+    return *this;
+  }
+
+  /**
+   * Advances the monolog iterator by a specified amount
+   *
+   *
+   * @return This advanced monolog iterator
+   */
+  monolog_iterator operator++(int) {
+    monolog_iterator it = *this;
+    ++(*this);
+    return it;
+  }
+
+  /**
+   * Checks whether the other monolog iterator is equal to this monolog
+   * iterator
+   *
+   * @param other The other monolog iterator
+   *
+   * @return True if this monolog iterator is equal to the other monolog
+   * iterator, false otherwise
+   */
+  bool operator==(monolog_iterator other) const {
+    return (impl_ == other.impl_) && (pos_ == other.pos_);
+  }
+
+  /**
+   * Checks whether the other monolog iterator is not equal to this
+   * monolog iterator
+   *
+   * @param other The other monolog iterator
+   *
+   * @return True if this monolog iterator is not equal to the other
+   * monolog iterator
+   */
+  bool operator!=(monolog_iterator other) const {
+    return !(*this == other);
+  }
+
+  /**
+   * Assigns another monolog iterator to this monolog iterator
+   *
+   * @param other The other monolog iterator
+   *
+   * @return This updated monolog iterator
+   */
+  monolog_iterator& operator=(const monolog_iterator& other) {
+    impl_ = other.impl_;
+    pos_ = other.pos_;
+    return *this;
+  }
+
+ private:
+  const monolog_impl* impl_;
+  size_t pos_;
+};
+
+/**
+>>>>>>> Doc generators for cpp, java, and python
  * The base class for MonoLog.
  *
  * Implements get/set/multiget/multiset functionalities,
@@ -25,9 +145,12 @@ namespace monolog {
 template<class T, size_t NBUCKETS = 32>
 class monolog_exp2_base {
  public:
+  /** The bits for the monolog base */
   static const size_t FBS = 16;
+  /** The high bit */
   static const size_t FBS_HIBIT = 4;
 
+  /** The monolog bucket type */
   typedef atomic::type<T*> __atomic_bucket_ref;
 
   /**
@@ -242,7 +365,7 @@ class monolog_exp2_base {
   }
 
  protected:
-  /* Tries to allocate the specifies bucket. If another thread has 
+  /** Tries to allocate the specifies bucket. If another thread has 
    * already succeeded in allocating the bucket, the current thread 
    * deallocates and returns.
    * @param bucket_idx The index of the specified bucket
@@ -264,7 +387,8 @@ class monolog_exp2_base {
     return new_bucket;
   }
 
-  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;  // Stores the pointers to the buckets for MonoLog.
+  /** Stores the pointers to the buckets for MonoLog. */
+  std::array<__atomic_bucket_ref, NBUCKETS> buckets_;
 };
 
 /**
@@ -277,13 +401,21 @@ template<class T, size_t NBUCKETS = 32>
 class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
  public:
   // Type definitions
+  /** The size type */
   typedef size_t size_type;
+  /** The position type */
   typedef size_t pos_type;
+  /** The value type */
   typedef T value_type;
+  /** The difference type */
   typedef T difference_type;
+  /** The pointer to the monolog */
   typedef T* pointer;
+  /** The reference */
   typedef T reference;
+  /** The iterator for the monolog */
   typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> iterator;
+  /** The constant iterator for the monolog */
   typedef monolog_iterator<monolog_exp2<T, NBUCKETS>> const_iterator;
 
   /**

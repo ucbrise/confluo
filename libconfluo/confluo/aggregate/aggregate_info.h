@@ -19,7 +19,6 @@ class aggregate_info {
    *
    * @param name The name of the aggregate.
    * @param agg The aggregator.
-   * @param field_type Type of field.
    * @param field_idx Index of field in schema.
    */
   aggregate_info(const std::string& name, aggregator agg, uint16_t field_idx)

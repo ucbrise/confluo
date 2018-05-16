@@ -13,10 +13,15 @@ using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
  * Encapsulation of an aggregate and zero function
  */
 struct aggregator {
+  /** The name of the aggregator */
   std::string name;
+  /** The sequential aggregate function */
   aggregate_fn seq_op;
+  /** The combinational aggregate function */
   aggregate_fn comb_op;
+  /** The result of the aggregator */
   data_type result_type;
+  /** The numeric representing zero */
   numeric zero;
 };
 
@@ -72,22 +77,45 @@ inline numeric invalid_agg(const numeric& a, const numeric& b) {
   throw invalid_operation_exception("Invalid aggregation performed.");
 }
 
+/**
+ * The invalid aggregator
+ */
 static aggregator invalid_aggregator = { "invalid", invalid_agg, invalid_agg,
     NONE_TYPE, numeric() };
+/**
+ * The sum aggregator
+ */
 static aggregator sum_aggregator = { "sum", sum_agg, sum_agg, DOUBLE_TYPE,
     numeric(DOUBLE_TYPE, DOUBLE_TYPE.zero()) };
+/**
+ * The min aggregator
+ */
 static aggregator min_aggregator = { "min", min_agg, min_agg, DOUBLE_TYPE,
     numeric(DOUBLE_TYPE, DOUBLE_TYPE.max()) };
+/**
+ * The max aggregator
+ */
 static aggregator max_aggregator = { "max", max_agg, max_agg, DOUBLE_TYPE,
     numeric(DOUBLE_TYPE, DOUBLE_TYPE.min()) };
 static aggregator count_aggregator = { "count", count_agg, sum_agg, ULONG_TYPE,
     numeric(ULONG_TYPE, ULONG_TYPE.zero()) };
 
+/**
+ * A vector containing the aggregators
+ */
 static std::vector<aggregator> AGGREGATORS { invalid_aggregator, sum_aggregator,
     min_aggregator, max_aggregator, count_aggregator };
 
+/** The type of aggregate */
 typedef size_t aggregate_type;
 
+/**
+ * Finds an aggregator from name
+ *
+ * @param name The name of the aggregator
+ *
+ * @return The matching aggregator
+ */
 aggregate_type find_aggregator_id(const std::string& name) {
   std::string uname = utils::string_utils::to_upper(name);
   for (unsigned int i = 0; i < AGGREGATORS.size(); i++) {

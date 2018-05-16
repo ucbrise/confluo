@@ -172,8 +172,15 @@ class full_scan_op : public query_op {
  */
 class index_op : public query_op {
  public:
+  /** The key range for the index operation */
   typedef std::pair<byte_string, byte_string> key_range;
 
+  /**
+   * Initializes the index operation
+   *
+   * @param index The radix index
+   * @param range The key range for the index
+   */
   index_op(const index::radix_index* index, const key_range& range)
       : query_op(query_op_type::D_INDEX_OP),
         index_(index),
@@ -199,6 +206,11 @@ class index_op : public query_op {
     return index_->approx_count(range_.first, range_.second);
   }
 
+  /**
+   * The query index operation
+   *
+   * @return The radix index for the query index
+   */
   index::radix_index::rt_result query_index() {
     return index_->range_lookup(range_.first, range_.second);
   }

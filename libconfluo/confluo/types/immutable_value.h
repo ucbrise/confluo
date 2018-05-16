@@ -216,7 +216,9 @@ class immutable_value {
   }
 
  protected:
+  /** The data type */
   data_type type_;
+  /** The pointer of the immutable value */
   void* ptr_;
 };
 

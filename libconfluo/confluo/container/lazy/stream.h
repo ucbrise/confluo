@@ -29,6 +29,7 @@ class stream {
   /** Pointer to the generator */
   using generator_ptr_t = std::shared_ptr<generator_t>;
 
+  /** The null stream */
   static stream<T> nil;
 
   /**
@@ -65,6 +66,7 @@ class stream {
         empty_(other.empty_) {
   }
 
+  /** The stream base type */
   template<typename U>
   using base_type = typename std::remove_const<typename std::remove_reference<U>::type>;
 
@@ -153,6 +155,11 @@ class stream {
   }
 
   // TODO: Add tests
+  /**
+   * Gets the size of the stream
+   *
+   * @return The number of elements in the stream
+   */
   size_t size() const {
     size_t count = 0;
     stream t = *this;
@@ -220,6 +227,16 @@ class stream {
   }
 
   // TODO: Add tests
+  /**
+   * Folds the stream left
+   *
+   * @tparam U The type of the start
+   * @tparam F The type of the function
+   * @param start The start of the stream
+   * @param f The stream function
+   *
+   * @return The accumulator
+   */
   template<typename U, typename F>
   U fold_left(const U& start, F&& f) const {
     U accum = start;

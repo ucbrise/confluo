@@ -7,6 +7,9 @@
 
 namespace confluo {
 
+/**
+ * A batched cursor
+ */
 template<typename T>
 class batched_cursor {
  public:
