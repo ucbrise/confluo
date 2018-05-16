@@ -42,9 +42,7 @@ TEST_F(DeltaEncodedArrayTest, ToFromByteArrayTest) {
 
   ASSERT_EQ(size, byte_array_size);
 
-  uint64_t* t_array = new uint64_t[k_array_size];
-
-  elias_gamma_encoded_array<uint64_t> test_array(t_array, k_array_size);
+  elias_gamma_encoded_array<uint64_t> test_array;
   size_t from_size = test_array.from_byte_array(buffer + sizeof(size_t));
 
   for (uint64_t i = 0; i < k_array_size; i++) {
