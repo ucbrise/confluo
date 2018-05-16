@@ -45,7 +45,9 @@ class bitmap {
    * @param num_bits The size of the bitmap
    */
   bitmap(size_type num_bits) {
-    data_ = new data_type[BITS2BLOCKS(num_bits)]();
+    storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
+    size_t alloc_size = sizeof(data_type *) * BITS2BLOCKS(num_bits);
+    data_ = static_cast<data_type *>(ALLOCATOR.alloc(alloc_size, aux));
     size_ = num_bits;
   }
 
@@ -54,7 +56,8 @@ class bitmap {
    */
   virtual ~bitmap() {
     if (data_ != NULL) {
-      delete[] data_;
+      //delete[] data_;
+      ALLOCATOR.dealloc(data_);
       data_ = NULL;
     }
   }
@@ -193,7 +196,9 @@ class bitmap {
     in.read(reinterpret_cast<char *>(&size_), sizeof(size_type));
     in_size += sizeof(size_type);
 
-    data_ = new data_type[BITS2BLOCKS(size_)];
+    storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
+    size_t alloc_size = sizeof(data_type *) * BITS2BLOCKS(size_);
+    data_ = static_cast<data_type *>(ALLOCATOR.alloc(alloc_size, aux));
     in.read(reinterpret_cast<char *>(data_),
     BITS2BLOCKS(size_) * sizeof(data_type));
     in_size += (BITS2BLOCKS(size_) * sizeof(data_type));

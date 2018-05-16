@@ -64,7 +64,7 @@ struct radix_tree_node {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     size_t alloc_size = sizeof(child_t*) * node_width;
     data = ALLOCATOR.alloc(alloc_size, aux);
-    storage::lifecycle_util<reflog>::construct(data);
+
     for (size_t i = 0; i < node_width; i++) {
       atomic::init(&(children()[i]), static_cast<node_t*>(nullptr));
     }

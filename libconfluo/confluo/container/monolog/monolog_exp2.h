@@ -3,6 +3,7 @@
 
 #include <array>
 #include <vector>
+#include <container/reflog.h>
 
 #include "atomic.h"
 #include "bit_utils.h"
@@ -162,6 +163,7 @@ class monolog_exp2_base {
     for (auto& x : buckets_) {
       atomic::init(&x, null_ptr);
     }
+
     atomic::init(&buckets_[0], new T[FBS]);
   }
 

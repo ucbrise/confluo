@@ -99,7 +99,6 @@ class aggregate_list {
     aggregate_node* other_tail = atomic::load(&other.head_);
     while (other_tail != nullptr) {
       aggregate_node* cur_head = atomic::load(&head_);
-      //aggregate_node* new_head = new aggregate_node(other_tail->value(), other_tail->version(), cur_head);
       storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
       void* raw = ALLOCATOR.alloc(sizeof(aggregate_node), aux);
       aggregate_node* new_head = new(raw) aggregate_node(other_tail->value(), other_tail->version(), cur_head);
@@ -120,7 +119,6 @@ class aggregate_list {
     aggregate_node* other_tail = atomic::load(&other.head_);
     while (other_tail != nullptr) {
       aggregate_node* cur_head = atomic::load(&head_);
-      //aggregate_node* new_head = new aggregate_node(other_tail->value(), other_tail->version(), cur_head);
       storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
       void* raw = ALLOCATOR.alloc(sizeof(aggregate_node), aux);
       aggregate_node* new_head = new(raw) aggregate_node(other_tail->value(), other_tail->version(), cur_head);
@@ -137,7 +135,6 @@ class aggregate_list {
     aggregate_node* cur_node = atomic::load(&head_);
     while (cur_node != nullptr) {
       aggregate_node* next = cur_node->next();
-      //delete cur_node;
       ALLOCATOR.dealloc(cur_node);
       cur_node = next;
     }
@@ -185,8 +182,6 @@ class aggregate_list {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
     numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
-    //aggregate_node *node = new aggregate_node(agg_.comb_op(old_agg, value),
-    //                                          version, cur_head);
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     void* raw = ALLOCATOR.alloc(sizeof(aggregate_node), aux);
     aggregate_node* node = new(raw) aggregate_node(agg_.comb_op(old_agg, value), version, cur_head);
@@ -203,7 +198,6 @@ class aggregate_list {
     aggregate_node *cur_head = atomic::load(&head_);
     aggregate_node *req = get_node(cur_head, version);
     numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
-    //aggregate_node *node = new aggregate_node(agg_.seq_op(old_agg, value), version, cur_head);
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     void* raw = ALLOCATOR.alloc(sizeof(aggregate_node), aux);
     aggregate_node* node = new(raw) aggregate_node(agg_.seq_op(old_agg, value), version, cur_head);

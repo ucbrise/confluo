@@ -56,8 +56,6 @@ include(Functions)
 # Dependencies
 include(Dependencies)
 
-#target_link_libraries(confluod ${JEMALLOC_LIBRARIES})
-
 # Testing
 if (BUILD_TESTS)
   include(CTest)
