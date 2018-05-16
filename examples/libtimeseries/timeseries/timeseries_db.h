@@ -45,8 +45,8 @@ class timeseries_db : public atomic_multilog {
   void compute_diff(std::vector<record_t>& pts, uint64_t from_version,
                     uint64_t to_version) {
     for (uint64_t v = from_version; v < to_version; v += record_size()) {
-      data_log_ptr ptr = read_raw(v);
-      pts.push_back(record_t(v, ptr, record_size()));
+      std::unique_ptr<uint8_t>  ptr = read_raw(v);
+      pts.push_back(record_t(v, ptr.get(), record_size()));
     }
   }
 

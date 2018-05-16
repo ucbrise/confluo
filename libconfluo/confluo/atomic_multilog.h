@@ -455,7 +455,7 @@ class atomic_multilog {
    * @param version The current version
    * @return The read-only pointer to the data
    */
-  data_log_ptr read_raw(uint64_t offset, uint64_t& version) const {
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const {
     read_only_data_log_ptr rptr;
     version = rt_.get();
     if (offset < version) {
@@ -463,7 +463,7 @@ class atomic_multilog {
     } else {
       rptr.init(nullptr);
     }
-    return rptr.decode();
+    return rptr.decode_copy();
   }
 
   /**
@@ -471,7 +471,7 @@ class atomic_multilog {
    * @param offset The offset into the data log at which the data is stored
    * @return The read-only pointer to the data
    */
-  data_log_ptr read_raw(uint64_t offset) const {
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset) const {
     uint64_t version;
     return read_raw(offset, version);
   }
@@ -483,8 +483,14 @@ class atomic_multilog {
    * @return Return the corresponding record.
    */
   std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
-    data_log_ptr dec_ptr = read_raw(offset, version);
-    return schema_.data_to_record_vector(dec_ptr.get());
+    read_only_data_log_ptr rptr;
+    version = rt_.get();
+    if (offset < version) {
+      data_log_.cptr(offset, rptr);
+    } else {
+      rptr.init(nullptr);
+    }
+    return schema_.data_to_record_vector(rptr.decode().get());
   }
 
   /**

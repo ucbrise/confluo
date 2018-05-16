@@ -29,7 +29,7 @@ class AtomicMultilogTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      data_log_ptr ptr = mlog.read_raw(offsets[i]);
+      std::unique_ptr<uint8_t> ptr = mlog.read_raw(offsets[i]);
       ASSERT_TRUE(ptr.get() != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {

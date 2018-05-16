@@ -360,7 +360,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     uint64_t limit;
-    data_log_ptr ptr = mlog->read_raw(offset, limit);
+    std::unique_ptr<uint8_t> ptr = mlog->read_raw(offset, limit);
     char* data = reinterpret_cast<char*>(ptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
                            static_cast<size_t>(nrecords * mlog->record_size()));

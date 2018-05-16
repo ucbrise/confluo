@@ -30,7 +30,7 @@ class TimeseriesDBTest : public testing::Test {
 
     record_t r;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      data_log_ptr ptr = mlog.read_raw(offsets[i]);
+      std::unique_ptr<uint8_t> ptr = mlog.read_raw(offsets[i]);
       ASSERT_TRUE(ptr != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
@@ -154,7 +154,7 @@ TEST_F(TimeseriesDBTest, AppendTest) {
   size_t offset3 = ts.append(record(true, '1', 3, 5, 12, 0.5, 0.01, "abc"));
   int64_t end = r.ts;
 
-  data_log_ptr ptr = ts.read_raw(offset);
+  std::unique_ptr<uint8_t> ptr = ts.read_raw(offset);
   uint8_t* data = ptr.get();
   // 64 bits = 8 bytes
   int64_t calculated = get_time(data);

@@ -164,6 +164,34 @@ class encoded_ptr {
     }
   }
 
+  std::unique_ptr<T> decode_copy(size_t start_idx) const {
+    auto* metadata = ptr_metadata::get(ptr_);
+    auto aux = ptr_aux_block::get(metadata);
+    switch (aux.encoding_) {
+      case encoding_type::D_UNENCODED: {
+        T* decoded = new T[metadata->data_size_ - start_idx];
+        memcpy(decoded, this->ptr_as<T>() + start_idx, metadata->data_size_ - start_idx);
+        return std::unique_ptr<T>(decoded);
+      }
+      case encoding_type::D_ELIAS_GAMMA: {
+        size_t encoded_size = metadata->data_size_;
+        size_t decoded_size = compression::delta_decoder::decoded_size(this->ptr_as<uint8_t>());
+        T* decoded = new T[decoded_size];
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), decoded, start_idx);
+        return std::unique_ptr<T>(decoded);
+      }
+      case encoding_type::D_LZ4: {
+        size_t decoded_size = compression::lz4_decoder<>::decoded_size(this->ptr_as<uint8_t>());
+        uint8_t* decoded = new uint8_t[decoded_size];
+        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), decoded, start_idx);
+        return std::unique_ptr<T>(decoded);
+      }
+      default: {
+        THROW(illegal_state_exception, "Invalid encoding type!");
+      }
+    }
+  }
+
  private:
   static void no_op_delete(T* ptr) { }
   template<typename U> static void array_delete(U* ptr) { std::default_delete<U[]>()(ptr); }

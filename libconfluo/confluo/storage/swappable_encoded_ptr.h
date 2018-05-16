@@ -152,6 +152,16 @@ class read_only_encoded_ptr {
     enc_ptr_.decode(buffer, idx + offset_, len);
   }
 
+  /**
+   * Decode pointer from index onwards.
+   * Copies data into a separate buffer.
+   * @param idx start index
+   * @return decoded pointer
+   */
+  std::unique_ptr<T> decode_copy(size_t idx = 0) const {
+    return enc_ptr_.decode_copy(idx + offset_);
+  }
+
  private:
   /**
    * Decrements the reference count if pointer and reference count are
