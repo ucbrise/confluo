@@ -47,7 +47,7 @@ typedef void (*flush_fn)(void* ptr, size_t size);
 enum storage_mode {
   /** Stores data in memory */
   IN_MEMORY = 0,
-  /** Has relaxed linearizable guarantees */
+  /** Has relaxed durability guarantees */
   DURABLE_RELAXED = 1,
   /** Persisted storage */
   DURABLE = 2
