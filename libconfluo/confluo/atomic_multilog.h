@@ -194,7 +194,7 @@ class atomic_multilog {
 
   /**
    * Force archival of multilog up to an offset.
-   * @param offset The offset of the data into the data log
+   * @param offset The offset into the data log at which the data is stored
    */
   void archive(size_t offset) {
     optional<management_exception> ex;
@@ -444,28 +444,30 @@ class atomic_multilog {
   }
 
   /**
-   * Reads the data from the atomic multilog
-   * @param offset The location of where the data is stored
-   * @param version The tail pointer's location
-   * @param ptr The read-only pointer to store in
+   * Reads the raw data from the atomic multilog at the specified offset
+   * @param offset The offset into the data log at which the data is stored
+   * @param version The current version
+   * @return The read-only pointer to the data
    */
-  void read(uint64_t offset, uint64_t &version, storage::read_only_encoded_ptr<uint8_t> &ptr) const {
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const {
+    read_only_data_log_ptr rptr;
     version = rt_.get();
     if (offset < version) {
-      data_log_.cptr(offset, ptr);
-      return;
+      data_log_.cptr(offset, rptr);
+    } else {
+      rptr.init(nullptr);
     }
-    ptr.init(nullptr);
+    return rptr.decode_copy();
   }
 
   /**
-   * Reads the data based on the offset
-   * @param offset The location of the data
-   * @param ptr The read-only pointer to store in
+   * Reads the raw data from the atomic multilog at the specified offset
+   * @param offset The offset into the data log at which the data is stored
+   * @return The read-only pointer to the data
    */
-  void read(uint64_t offset, storage::read_only_encoded_ptr<uint8_t> &ptr) const {
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset) const {
     uint64_t version;
-    read(offset, version, ptr);
+    return read_raw(offset, version);
   }
 
   /**
@@ -476,9 +478,13 @@ class atomic_multilog {
    */
   std::vector<std::string> read(uint64_t offset, uint64_t &version) const {
     read_only_data_log_ptr rptr;
-    read(offset, version, rptr);
-    decoded_data_log_ptr dec_ptr = rptr.decode();
-    return schema_.data_to_record_vector(dec_ptr.get());
+    version = rt_.get();
+    if (offset < version) {
+      data_log_.cptr(offset, rptr);
+    } else {
+      rptr.init(nullptr);
+    }
+    return schema_.data_to_record_vector(rptr.decode().get());
   }
 
   /**
