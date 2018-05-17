@@ -326,6 +326,17 @@ protected:
   __atomic_bucket_ref* try_allocate_container(size_t container_idx) {
     size_t num_buckets = 1U << (container_idx + FCB_HIBIT);
     __atomic_bucket_ref* new_container = new __atomic_bucket_ref[num_buckets]();
+    /*storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
+    size_t alloc_size = sizeof(__atomic_bucket_ref*) * num_buckets;
+    __atomic_bucket_ref* new_container = static_cast<__atomic_bucket_ref*>(ALLOCATOR.alloc(alloc_size, aux));
+
+    for (size_t i = 0; i < num_buckets; i++) {
+      storage::ptr_aux_block aux_cont(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
+      void* raw = ALLOCATOR.alloc(sizeof(__atomic_bucket_ref), aux);
+      __atomic_bucket_ref* expr = new_container + i;
+      expr = new(raw) __atomic_bucket_ref();
+      //new_container[i] = *(new(raw) __atomic_bucket_ref());
+    }*/
     __atomic_bucket_ref* expected = nullptr;
 
     // Only one thread will be successful in replacing the nullptr reference with newly
@@ -333,6 +344,7 @@ protected:
     if (!atomic::strong::cas(&bucket_containers_[container_idx], &expected, new_container)) {
       // All other threads will deallocate the newly allocated container.
       delete[] new_container;
+      //ALLOCATOR.dealloc(new_container);
       return expected;
     }
     return new_container;
