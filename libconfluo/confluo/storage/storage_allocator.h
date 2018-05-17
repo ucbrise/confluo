@@ -1,6 +1,7 @@
 #ifndef CONFLUO_STORAGE_STORAGE_ALLOCATOR_H_
 #define CONFLUO_STORAGE_STORAGE_ALLOCATOR_H_
 
+#include <functional>
 #include <unistd.h>
 
 #include "conf/configuration_params.h"

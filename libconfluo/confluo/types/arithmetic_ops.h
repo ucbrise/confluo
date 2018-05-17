@@ -260,6 +260,20 @@ inline void multiply(void* res, const immutable_raw_data& v1, const immutable_ra
 }
 
 /**
+ * Performs binary multiplication and stores the result in the
+ * result pointer
+ *
+ * @tparam T The data type of the immutable values
+ * @param res The result of the multiplication
+ * @param v1 The first operand of the multiplication expression
+ * @param v2 The second operand of the multiplication expression
+ */
+template<>
+inline void multiply<bool>(void* res, const immutable_raw_data& v1, const immutable_raw_data& v2) {
+  *(reinterpret_cast<bool*>(res)) = v1.as<bool>() && v2.as<bool>();
+}
+
+/**
  * Performs binary multiplication and stores the result in the 
  * result pointer for strings
  *
@@ -412,6 +426,19 @@ inline void modulo<double>(void* res, const immutable_raw_data& v1, const immuta
 template<typename T>
 inline void bw_not(void* res, const immutable_raw_data& v) {
   *(reinterpret_cast<T*>(res)) = ~v.as<T>();
+}
+
+/**
+ * Performs bitwise not operation and stores the result in the
+ * result pointer
+ *
+ * @tparam T The type of data the immutable value contains
+ * @param res The result of the bitwise not operation
+ * @param v1 The immutable value that the operator is applied to
+ */
+template<>
+inline void bw_not<bool>(void* res, const immutable_raw_data& v) {
+  *(reinterpret_cast<bool*>(res)) = !v.as<bool>();
 }
 
 /**
@@ -692,6 +719,20 @@ inline void bw_lshift(void* res, const immutable_raw_data& v1, const immutable_r
 }
 
 /**
+ * Performs bitwise left shift operation and stores the result in the
+ * result pointer for strings
+ *
+ * @param res The result of the bitwise xor operation
+ * @param v1 The value to shift
+ * @param v2 The amount to shift by
+ * @throw unsupported_exception
+ */
+template<>
+inline void bw_lshift<bool>(void* res, const immutable_raw_data& v1, const immutable_raw_data& v2) {
+  THROW(unsupported_exception, "<< not supported for bool type");
+}
+
+/**
  * Performs bitwise left shift operation and stores the result in the 
  * result pointer for strings
  *
@@ -759,6 +800,20 @@ inline void bw_lshift<double>(void* res, const immutable_raw_data& v1, const imm
 template<typename T>
 inline void bw_rshift(void* res, const immutable_raw_data& v1, const immutable_raw_data& v2) {
   *(reinterpret_cast<T*>(res)) = v1.as<T>() >> v2.as<T>();
+}
+
+/**
+ * Performs bitwise right shift operation and stores the result in the
+ * result pointer for bools
+ *
+ * @param res The result of the bitwise xor operation
+ * @param v1 The value to shift
+ * @param v2 The amount to shift by
+ * @throw unsupported_exception
+ */
+template<>
+inline void bw_rshift<bool>(void* res, const immutable_raw_data& v1, const immutable_raw_data& v2) {
+  THROW(unsupported_exception, ">> not supported for bool type");
 }
 
 /**
