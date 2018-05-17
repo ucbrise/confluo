@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(confluo CXX C)
+project(confluo C CXX)
 
 set(CONFLUO_VERSION_MAJOR "0")
 set(CONFLUO_VERSION_MINOR "1")
@@ -11,15 +11,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake-modules")
-
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-  message(FATAL_ERROR "${CMAKE_CXX_COMPILER} has no C++11 support.")
-endif()
-enable_language(C)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(SUPPRESS_WARN_FLAGS 
@@ -65,7 +59,6 @@ include(Dependencies)
 # Testing
 if (BUILD_TESTS)
   include(CTest)
-  set(TEST_LINK_LIBS gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 # Utilities

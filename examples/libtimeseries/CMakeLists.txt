@@ -8,18 +8,21 @@ set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../libutils/utils)
 set(TIMESERIES_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/timeseries)
 
 include_directories(${GTEST_INCLUDE_DIR}
-  ${CONFLUO_INCLUDE}
-  ${UTILS_INCLUDE}
-  ${TIMESERIES_INCLUDE}
-  ${Boost_INCLUDE_DIRS})
+        ${CONFLUO_INCLUDE}
+        ${UTILS_INCLUDE}
+        ${TIMESERIES_INCLUDE}
+        ${Boost_INCLUDE_DIRS})
 
 if (BUILD_TESTS)
   # Build test
   file(GLOB_RECURSE test_sources test/*.cc)
-  add_executable(tstest ${test_sources})
-  target_link_libraries(tstest ${TEST_LINK_LIBS} ${lz4_STATIC_LIB})
+  add_executable(tstest
+          timeseries/timeseries_db.h
+          test/test_main.cc
+          test/timeseries_db_test.h)
+  target_link_libraries(tstest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
   add_dependencies(tstest googletest lz4)
-  
+
   # Register test
   enable_testing()
   add_test(TimeseriesTest ${EXECUTABLE_OUTPUT_PATH}/tstest)

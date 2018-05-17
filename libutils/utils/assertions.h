@@ -62,7 +62,7 @@ class assertion {
         line_(line) {
   }
 
-  virtual ~assertion() {
+  virtual ~assertion() noexcept(false) {
     if (!msg_.str().empty())
       msg_ << ": ";
 

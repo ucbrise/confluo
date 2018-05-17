@@ -9,19 +9,23 @@ set(RPC_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../librpc/rpc)
 set(STREAM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/streaming)
 
 include_directories(${GTEST_INCLUDE_DIR}
-  ${CONFLUO_INCLUDE}
-  ${UTILS_INCLUDE}
-  ${RPC_INCLUDE}
-  ${STREAM_INCLUDE}
-  ${Boost_INCLUDE_DIRS})
+        ${CONFLUO_INCLUDE}
+        ${UTILS_INCLUDE}
+        ${RPC_INCLUDE}
+        ${STREAM_INCLUDE}
+        ${Boost_INCLUDE_DIRS})
 
 if (BUILD_TESTS)
   # Build test
-  file(GLOB_RECURSE test_sources test/*.cc)
-  add_executable(stest ${test_sources})
-  target_link_libraries(stest ${TEST_LINK_LIBS} rpcclient thriftstatic ${lz4_STATIC_LIB})
+  add_executable(stest
+          streaming/stream_producer.h
+          streaming/stream_consumer.h
+          test/streaming_test_utils.h
+          test/test_main.cc
+          test/stream_test.h)
+  target_link_libraries(stest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(stest googletest rpctest thrift lz4)
-  
+
   # Register test
   enable_testing()
   add_test(StreamTest ${EXECUTABLE_OUTPUT_PATH}/stest)

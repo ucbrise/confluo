@@ -16,26 +16,60 @@ include_directories(${gtest_SOURCE_DIR}/include
   ${Boost_INCLUDE_DIR})
   
 # Build server executable
-set(SERVER_SOURCES src/rpc_constants.cc
-                   src/rpc_service.cc 
-                   src/rpc_server.cc 
-                   src/rpc_types.cc)
-add_executable(confluod ${SERVER_SOURCES})
+add_executable(confluod
+        rpc/rpc_type_conversions.h
+        rpc/rpc_client.h
+        rpc/rpc_configuration_params.h
+        rpc/rpc_alert_stream.h
+        rpc/rpc_record_stream.h
+        rpc/rpc_server.h
+        rpc/rpc_constants.h
+        rpc/rpc_types.tcc
+        rpc/rpc_service.h
+        rpc/rpc_record_batch_builder.h
+        rpc/rpc_defaults.h
+        rpc/rpc_types.h
+        rpc/rpc_service.tcc
+        src/rpc_constants.cc
+        src/rpc_service.cc
+        src/rpc_server.cc
+        src/rpc_types.cc)
 target_link_libraries(confluod ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB})
 add_dependencies(confluod thrift lz4)
 
-set(CLIENT_SOURCES src/rpc_constants.cc 
-                   src/rpc_service.cc 
-                   src/rpc_types.cc)
-add_library(rpcclient STATIC ${CLIENT_SOURCES})
+add_library(rpcclient STATIC
+        rpc/rpc_constants.h
+        src/rpc_constants.cc
+        rpc/rpc_service.h
+        rpc/rpc_service.tcc
+        src/rpc_service.cc
+        rpc/rpc_types.h
+        src/rpc_types.cc)
 target_link_libraries(rpcclient thriftstatic)
 add_dependencies(rpcclient thrift)
 
 if (BUILD_TESTS)
   # Build test
-  file(GLOB_RECURSE TEST_SOURCES test/*.cc)
-  add_executable(rpctest ${TEST_SOURCES})
-  target_link_libraries(rpctest ${TEST_LINK_LIBS} rpcclient thriftstatic ${lz4_STATIC_LIB})
+  add_executable(rpctest
+          rpc/rpc_type_conversions.h
+          rpc/rpc_client.h
+          rpc/rpc_configuration_params.h
+          rpc/rpc_alert_stream.h
+          rpc/rpc_record_stream.h
+          rpc/rpc_server.h
+          rpc/rpc_constants.h
+          rpc/rpc_types.tcc
+          rpc/rpc_service.h
+          rpc/rpc_record_batch_builder.h
+          rpc/rpc_defaults.h
+          rpc/rpc_types.h
+          rpc/rpc_service.tcc
+          test/client_read_ops_test.h
+          test/test_main.cc
+          test/client_connection_test.h
+          test/rpc_test_utils.h
+          test/client_write_ops_test.h)
+  target_link_libraries(rpctest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(rpctest googletest thrift)
   
   # Register test
