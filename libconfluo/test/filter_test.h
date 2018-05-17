@@ -50,7 +50,7 @@ class FilterTest : public testing::Test {
     for (size_t i = 1; i <= num_threads; i++) {
       workers.push_back(
           std::thread(
-              [i, &f, this] {
+              [i, &f] {
                 ASSERT_TRUE(thread_manager::register_thread() != -1);
                 size_t begin = (i - 1) * kMaxEntries, end = i * kMaxEntries;
                 for (size_t j = begin; j < end; j++) {

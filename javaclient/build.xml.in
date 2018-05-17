@@ -50,7 +50,17 @@
     <pathelement location="${maven.repo.local}/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"/>
   </path>
 
-   <!-- ====================================================================== -->
+  <pathconvert refid="build.classpath" property="build.jarlist" pathsep="," dirsep="/">
+    <!-- 
+        <fileset> will want relative paths, so we need to strip 
+        the leading /. result: "foo/bar/baz.txt,qux/quux/quuux.txt"
+    -->
+    <map from="/" to=""/> 
+  </pathconvert>
+
+  <fileset id="build.jarfileset" dir="/" includes="${build.jarlist}"/>
+
+  <!-- ====================================================================== -->
   <!-- Cleaning up target                                                     -->
   <!-- ====================================================================== -->
 
@@ -147,7 +157,9 @@
          compress="true" 
          index="false"
          basedir="${maven.build.outputDir}" 
-         excludes="**/package.html"/>
+         excludes="**/package.html">
+      <zipgroupfileset refid="build.jarfileset"/>
+    </jar>
   </target>
 
   <!-- ====================================================================== -->
