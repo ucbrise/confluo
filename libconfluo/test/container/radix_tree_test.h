@@ -42,6 +42,20 @@ TEST_F(RadixTreeTest, UpperLowerBoundTest) {
   ASSERT_EQ(static_cast<size_t>(32), it5->at(0));
 }
 
+TEST_F(RadixTreeTest, IteratorTest) {
+  radix_index tree(sizeof(int32_t), 256);
+  for (int32_t i = 0; i < 512; i++)
+    tree.insert(byte_string(i), i);
+
+  auto reflogs = tree.range_lookup_reflogs(0, 10000);
+  int32_t i = 0;
+  for (auto it = reflogs.begin(); it != reflogs.end(); it++) {
+    auto& refs = *it;
+    ASSERT_EQ(it.key(), byte_string(i));
+    i++;
+  }
+}
+
 TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
   radix_index tree(sizeof(int32_t), 256);
   for (int32_t i = 0; i < 256; i++)
