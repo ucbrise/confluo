@@ -42,15 +42,15 @@ class delta_encoded_array {
    */
   virtual ~delta_encoded_array() {
     if (samples_) {
-      ALLOCATOR.dealloc(samples_);
+      delete samples_;
       samples_ = nullptr;
     }
     if (delta_offsets_) {
-      ALLOCATOR.dealloc(delta_offsets_);
+      delete delta_offsets_;
       delta_offsets_ = nullptr;
     }
     if (deltas_) {
-      ALLOCATOR.dealloc(deltas_);
+      delete deltas_;
       deltas_ = nullptr;
     }
   }
@@ -79,22 +79,11 @@ class delta_encoded_array {
   virtual size_type deserialize(std::istream& in) {
     size_type in_size = 0;
 
-    storage::ptr_aux_block samples_aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    void* samples_raw = ALLOCATOR.alloc(sizeof(unsized_bitmap_array<T>), samples_aux);
-    samples_ = new(samples_raw) unsized_bitmap_array<T>();
-
+    samples_ = new unsized_bitmap_array<T>();
     in_size += samples_->deserialize(in);
-
-    storage::ptr_aux_block delta_off_aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    void* delta_off_raw = ALLOCATOR.alloc(sizeof(unsized_bitmap_array<pos_type>), delta_off_aux);
-    delta_offsets_ = new(delta_off_raw) unsized_bitmap_array<pos_type>();
-
+    delta_offsets_ = new unsized_bitmap_array<pos_type>();
     in_size += delta_offsets_->deserialize(in);
-
-    storage::ptr_aux_block deltas_aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    void* deltas_raw = ALLOCATOR.alloc(sizeof(bitmap), deltas_aux);
-    deltas_ = new(deltas_raw) bitmap();
-
+    deltas_ = new bitmap();
     in_size += deltas_->deserialize(in);
 
     return in_size;
@@ -172,27 +161,23 @@ class delta_encoded_array {
     if (samples.size() == 0) {
       samples_ = NULL;
     } else {
-      storage::ptr_aux_block samples_aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-      void* samples_raw = ALLOCATOR.alloc(sizeof(unsized_bitmap_array<T>), samples_aux);
-      samples_ = new(samples_raw) unsized_bitmap_array<T>(&samples[0], samples.size(), sample_bits);
+      samples_ = new unsized_bitmap_array<T>(&samples[0], samples.size(),
+                                             sample_bits);
     }
 
     if (cum_delta_size == 0) {
       deltas_ = NULL;
     } else {
-      storage::ptr_aux_block deltas_aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-      void* deltas_raw = ALLOCATOR.alloc(sizeof(bitmap), deltas_aux);
-      deltas_ = new(deltas_raw) bitmap(cum_delta_size);
-
+      deltas_ = new bitmap(cum_delta_size);
       encode_deltas(&deltas[0], deltas.size());
     }
 
     if (delta_offsets.size() == 0) {
       delta_offsets_ = NULL;
     } else {
-      storage::ptr_aux_block delta_off_aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-      void* delta_off_raw = ALLOCATOR.alloc(sizeof(unsized_bitmap_array<pos_type>), delta_off_aux);
-      delta_offsets_ = new(delta_off_raw) unsized_bitmap_array<pos_type>(&delta_offsets[0], delta_offsets.size(), delta_offset_bits);
+      delta_offsets_ = new unsized_bitmap_array<pos_type>(&delta_offsets[0],
+                                                          delta_offsets.size(),
+                                                          delta_offset_bits);
     }
   }
 
