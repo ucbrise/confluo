@@ -1,8 +1,9 @@
 #ifndef CONFLUO_CONF_CONFIGURATION_PARAMS_H_
 #define CONFLUO_CONF_CONFIGURATION_PARAMS_H_
 
-#include "conf/defaults.h"
+#include "configuration_parser.h"
 #include "config_utils.h"
+#include "defaults.h"
 
 namespace confluo {
 
@@ -60,10 +61,12 @@ uint64_t archival_configuration_params::IN_MEMORY_FILTER_WINDOW_NS = confluo_con
     "archival_in_memory_filter_window_ns", archival_defaults::DEFAULT_IN_MEMORY_FILTER_WINDOW_NS);
 size_t archival_configuration_params::MAX_FILE_SIZE = confluo_conf.get<size_t>(
     "max_archival_file_size", archival_defaults::DEFAULT_MAX_FILE_SIZE);
-uint8_t archival_configuration_params::DATA_LOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
-    "data_log_archival_encoding", archival_defaults::DEFAULT_DATA_LOG_ENCODING_TYPE);
-uint8_t archival_configuration_params::REFLOG_ENCODING_TYPE = confluo_conf.get<uint8_t>(
-    "reflog_archival_encoding", archival_defaults::DEFAULT_REFLOG_ENCODING_TYPE);
+uint8_t archival_configuration_params::DATA_LOG_ENCODING_TYPE = configuration_parser::to_encoding_type(
+    confluo_conf.get<std::string>("data_log_archival_encoding",
+                                  archival_defaults::DEFAULT_DATA_LOG_ENCODING_TYPE));
+uint8_t archival_configuration_params::REFLOG_ENCODING_TYPE = configuration_parser::to_encoding_type(
+    confluo_conf.get<std::string>("reflog_archival_encoding",
+                                  archival_defaults::DEFAULT_REFLOG_ENCODING_TYPE));
 
 size_t configuration_params::MAX_MEMORY = confluo_conf.get<size_t>(
     "max_memory", defaults::DEFAULT_MAX_MEMORY);
