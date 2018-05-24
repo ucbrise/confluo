@@ -436,7 +436,7 @@ class atomic_multilog {
    * @param record The record to be stored
    * @return The offset in data log where the record is written
    */
-  size_t append(const std::vector<std::string> &record) {
+  size_t append(const std::vector<std::string>& record) {
     void *buf = schema_.record_vector_to_data(record);
     size_t off = append(buf);
     delete[] reinterpret_cast<uint8_t *>(buf);
@@ -444,57 +444,78 @@ class atomic_multilog {
   }
 
   /**
-   * Reads the raw data from the atomic multilog at the specified offset
+   * Reads data from the atomic multilog at the specified offset into a pointer.
+   * This read variant is the most efficient, since it avoids copies when possible.
    * @param offset The offset into the data log at which the data is stored
    * @param version The current version
-   * @return The read-only pointer to the data
+   * @param ptr The pointer to populate
    */
-  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const {
-    read_only_data_log_ptr rptr;
+  void read(uint64_t offset, uint64_t& version, read_only_data_log_ptr& ptr) const {
     version = rt_.get();
     if (offset < version) {
-      data_log_.cptr(offset, rptr);
+      data_log_.cptr(offset, ptr);
     } else {
-      rptr.init(nullptr);
+      ptr.init(nullptr);
     }
-    return rptr.decode_copy();
   }
 
   /**
-   * Reads the raw data from the atomic multilog at the specified offset
+   * Reads data from the atomic multilog at the specified offset into a pointer.
+   * This read variant is the most efficient, since it avoids copies when possible.
    * @param offset The offset into the data log at which the data is stored
-   * @return The read-only pointer to the data
+   * @param ptr The pointer to populate
    */
-  std::unique_ptr<uint8_t> read_raw(uint64_t offset) const {
+  void read(uint64_t offset, read_only_data_log_ptr& ptr) const {
     uint64_t version;
-    return read_raw(offset, version);
+    read(offset, version, ptr);
   }
 
   /**
-   * Read the record given the offset into the data log
-   * @param offset The offset of the data into the data log
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
    * @param version The current version
-   * @return Return the corresponding record.
+   * @return The corresponding record as a vector of strings.
    */
-  std::vector<std::string> read(uint64_t offset, uint64_t &version) const {
+  std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
     read_only_data_log_ptr rptr;
-    version = rt_.get();
-    if (offset < version) {
-      data_log_.cptr(offset, rptr);
-    } else {
-      rptr.init(nullptr);
-    }
-    return schema_.data_to_record_vector(rptr.decode().get());
+    read(offset, version, rptr);
+    data_ptr dptr = rptr.decode();
+    return schema_.data_to_record_vector(dptr.get());
   }
 
   /**
-   * Read the record given the offset into the data log
-   * @param offset The offset of the data into the data log
-   * @return Return the corresponding record.
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @return The corresponding record
    */
   std::vector<std::string> read(uint64_t offset) const {
     uint64_t version;
     return read(offset, version);
+  }
+
+  /**
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @param version The current version
+   * @return Pointer to the corresponding raw record bytes
+   */
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const {
+    read_only_data_log_ptr rptr;
+    read(offset, version, rptr);
+    return rptr.decode(offset, schema_.record_size());
+  }
+
+  /**
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @param version The current version
+   * @return Pointer to the corresponding raw record bytes
+   */
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset) const {
+    uint64_t version;
+    read_only_data_log_ptr rptr;
+    read(offset, version, rptr);
+    return rptr.decode(offset, schema_.record_size());
   }
 
   /**
