@@ -350,7 +350,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   }
 
   /**
-   * Reads a record string from the atomic multilog
+   * Reads n record strings from the atomic multilog
    *
    * @param _return The record string read
    * @param id The identifier of the atomic multilog
@@ -360,8 +360,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
     atomic_multilog* mlog = store_->get_atomic_multilog(id);
     uint64_t limit;
-    std::unique_ptr<uint8_t> ptr = mlog->read_raw(offset, limit);
-    char* data = reinterpret_cast<char*>(ptr.get());
+    read_only_data_log_ptr ptr;
+    mlog->read(offset, limit, ptr);
+    data_ptr dptr = ptr.decode();
+    char* data = reinterpret_cast<char*>(dptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
                            static_cast<size_t>(nrecords * mlog->record_size()));
     _return.assign(data, size);

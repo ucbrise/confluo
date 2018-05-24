@@ -103,7 +103,7 @@ class read_only_encoded_ptr {
 
   // Forwarding encode/decode member functions over encoded_ptr<T> below.
   // This is necessary since the offset must be stored outside encoded_ptr<T>
-  // to minimize the footprint of atomic operations in swappable_ptr<T>.
+  // to minimize the footprint of atomic operations in swappable_encoded_ptr<T>.
 
   /**
    * Encode value and store at index
@@ -143,7 +143,8 @@ class read_only_encoded_ptr {
   }
 
   /**
-   * Decode pointer into buffer
+   * Decodes length bytes of pointer from
+   * index onwards and stores in a buffer.
    * @param buffer buffer to store in
    * @param idx start index
    * @param len length of decoded data
@@ -153,13 +154,17 @@ class read_only_encoded_ptr {
   }
 
   /**
-   * Decode pointer from index onwards.
-   * Copies data into a separate buffer.
+   * Decodes length bytes of pointer from index onwards.
    * @param idx start index
+   * @param len length of decoded data
    * @return decoded pointer
    */
-  std::unique_ptr<T> decode_copy(size_t idx = 0) const {
-    return enc_ptr_.decode_copy(idx + offset_);
+  std::unique_ptr<T> decode(size_t idx, size_t len) const {
+    return enc_ptr_.decode(idx + offset_, len);
+  }
+
+  T operator[](size_t idx) {
+    return decode_at(idx);
   }
 
  private:
