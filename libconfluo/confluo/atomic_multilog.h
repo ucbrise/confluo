@@ -502,7 +502,7 @@ class atomic_multilog {
   std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const {
     read_only_data_log_ptr rptr;
     read(offset, version, rptr);
-    return rptr.decode(offset, schema_.record_size());
+    return rptr.decode(0, schema_.record_size());
   }
 
   /**
@@ -513,9 +513,7 @@ class atomic_multilog {
    */
   std::unique_ptr<uint8_t> read_raw(uint64_t offset) const {
     uint64_t version;
-    read_only_data_log_ptr rptr;
-    read(offset, version, rptr);
-    return rptr.decode(offset, schema_.record_size());
+    return read_raw(offset, version);
   }
 
   /**

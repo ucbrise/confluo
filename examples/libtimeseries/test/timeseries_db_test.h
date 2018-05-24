@@ -158,15 +158,15 @@ TEST_F(TimeseriesDBTest, AppendTest) {
 
   std::unique_ptr<uint8_t> ptr = ts.read_raw(offset);
   int64_t calculated = get_time(ptr.get());
-  ASSERT_EQ(time, calculated);
+  ASSERT_EQ(time, *reinterpret_cast<int64_t*>(ptr.get()));
 
   ptr = ts.read_raw(offset1);
-  calculated = get_time(ptr.get());
-  ASSERT_EQ(time1, calculated);
+  int64_t calculated2 = get_time(ptr.get());
+  ASSERT_EQ(time1, *reinterpret_cast<int64_t*>(ptr.get()));
 
   ptr = ts.read_raw(offset2);
   calculated = get_time(ptr.get());
-  ASSERT_EQ(time2, calculated);
+  ASSERT_EQ(time2, *reinterpret_cast<int64_t*>(ptr.get()));
 
   ptr = ts.read_raw(offset3);
   calculated = get_time(ptr.get());

@@ -108,23 +108,23 @@ class encoded_ptr {
   /**
    * Decode pointer into buffer.
    * @param buffer buffer to store decoded data in
-   * @param idx index to start at
-   * @param len number of elements of T
+   * @param start_idx index to start at
+   * @param len number of elements
    */
-  void decode(T* buffer, size_t idx, size_t len) const {
+  void decode(T* buffer, size_t start_idx, size_t len) const {
     auto aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        memcpy(buffer, &this->ptr_as<T>()[idx], sizeof(T) * len);
+        memcpy(buffer, &this->ptr_as<T>()[start_idx], sizeof(T) * len);
         break;
       }
       case encoding_type::D_ELIAS_GAMMA: {
-        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), buffer, idx, len);
+        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), buffer, start_idx, len);
         break;
       }
       case encoding_type::D_LZ4: {
         compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(),
-                                           reinterpret_cast<uint8_t*>(buffer), idx, len);
+                                           reinterpret_cast<uint8_t*>(buffer), start_idx, len);
         break;
       }
       default: {
@@ -136,9 +136,9 @@ class encoded_ptr {
   /**
    * Decode pointer and store in a newly allocated buffer,
    * managed by a unique_ptr instance.
-   * @param start_idx
-   * @param len
-   * @return
+   * @param start_idx index to start at
+   * @param len number of elements
+   * @return pointer to decoded buffer
    */
   std::unique_ptr<T> decode(size_t start_idx, size_t len) const {
     T* decoded = new T[len];
