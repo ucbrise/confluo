@@ -35,24 +35,19 @@ class query_op {
    *
    * @param op The type of query operation
    */
-  query_op(const query_op_type& op)
-      : op_(op) {
-  }
+  query_op(const query_op_type& op);
 
   /**
    * Destructs the query operation
    */
-  virtual ~query_op() {
-  }
+  virtual ~query_op();
 
   /**
    * Gets the operation type
    *
    * @return The query operation type
    */
-  query_op_type op_type() {
-    return op_;
-  }
+  query_op_type op_type();
 
   /**
    * Gets the cost of the query operation
@@ -81,27 +76,21 @@ class no_op : public query_op {
   /**
    * Constructs a no op query operation
    */
-  no_op()
-      : query_op(query_op_type::D_NO_OP) {
-  }
+  no_op();
 
   /**
    * Gets a string representation of the no op
    *
    * @return A string containing the representation of no op
    */
-  virtual std::string to_string() const override {
-    return "no_op";
-  }
+  virtual std::string to_string() const override;
 
   /**
    * Gets the cost of a no op
    *
    * @return The cost of a no op
    */
-  virtual uint64_t cost() const override {
-    return UINT64_C(0);
-  }
+  virtual uint64_t cost() const override;
 };
 
 /**
@@ -112,9 +101,7 @@ class no_valid_index_op : public query_op {
   /**
    * Constructs a no valid index query operation
    */
-  no_valid_index_op()
-      : query_op(query_op_type::D_NO_VALID_INDEX_OP) {
-  }
+  no_valid_index_op();
 
   /**
    * Gets a string representation of the no valid index operation
@@ -122,18 +109,14 @@ class no_valid_index_op : public query_op {
    * @return A string containing the representation of a no valid index
    * operation
    */
-  virtual std::string to_string() const override {
-    return "no_valid_index_op";
-  }
+  virtual std::string to_string() const override;
 
   /**
    * Gets the cost of the no valid index operation
    *
    * @return The cost of the no valid index operation
    */
-  virtual uint64_t cost() const override {
-    return UINT64_MAX;
-  }
+  virtual uint64_t cost() const override;
 };
 
 /**
@@ -142,9 +125,7 @@ class no_valid_index_op : public query_op {
  */
 class full_scan_op : public query_op {
  public:
-  full_scan_op()
-      : query_op(query_op_type::D_SCAN_OP) {
-  }
+  full_scan_op();
 
   /**
    * Gets a string representation of the full scan operation
@@ -152,18 +133,14 @@ class full_scan_op : public query_op {
    * @return A formatted string containing the name and expression
    * of the operation
    */
-  virtual std::string to_string() const override {
-    return "full_scan";
-  }
+  virtual std::string to_string() const override;
 
   /**
    * Gets the cost of the full scan operation
    *
    * @return The cost of the full scan operation
    */
-  virtual uint64_t cost() const override {
-    return UINT64_MAX;
-  }
+  virtual uint64_t cost() const override;
 };
 
 /**
@@ -181,39 +158,28 @@ class index_op : public query_op {
    * @param index The radix index
    * @param range The key range for the index
    */
-  index_op(const index::radix_index* index, const key_range& range)
-      : query_op(query_op_type::D_INDEX_OP),
-        index_(index),
-        range_(range) {
-  }
+  index_op(const index::radix_index* index, const key_range& range);
 
   /**
    * Gets a string representation of the index operation
    *
    * @return Information about the index operation in a string
    */
-  virtual std::string to_string() const override {
-    return "range(" + range_.first.to_string() + "," + range_.second.to_string()
-        + ")" + " on index=" + index_->to_string();
-  }
+  virtual std::string to_string() const override;
 
   /**
    * Gets the cost of the index operation
    *
    * @return The cost of the index operation
    */
-  virtual uint64_t cost() const override {
-    return index_->approx_count(range_.first, range_.second);
-  }
+  virtual uint64_t cost() const override;
 
   /**
    * The query index operation
    *
    * @return The radix index for the query index
    */
-  index::radix_index::rt_result query_index() {
-    return index_->range_lookup(range_.first, range_.second);
-  }
+  index::radix_index::rt_result query_index();
 
  private:
   const index::radix_index* index_;

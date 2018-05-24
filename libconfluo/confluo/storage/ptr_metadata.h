@@ -1,6 +1,7 @@
 #ifndef CONFLUO_STORAGE_PTR_METADATA_H_
 #define CONFLUO_STORAGE_PTR_METADATA_H_
 
+#include <cstdint>
 namespace confluo {
 namespace storage {
 
@@ -15,9 +16,6 @@ struct alloc_type {
   /** Memory mapped allocation */
   static const uint8_t D_MMAP = 1;
 };
-
-const uint8_t alloc_type::D_DEFAULT;
-const uint8_t alloc_type::D_MMAP;
 
 /**
  * Pointer metadata set for memory allocated by the
@@ -37,9 +35,7 @@ typedef struct ptr_metadata {
    * @param ptr The pointer to get metadaata of
    * @return The metadata associated with the pointer
    */
-  static ptr_metadata* get(void* ptr) {
-    return static_cast<ptr_metadata*>(ptr) - 1;
-  }
+  static ptr_metadata *get(void *ptr);
 
 } ptr_metadata;
 

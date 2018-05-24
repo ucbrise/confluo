@@ -1,6 +1,8 @@
 #ifndef CONFLUO_TYPES_SERDE_OPS_H_
 #define CONFLUO_TYPES_SERDE_OPS_H_
 
+#include <fstream>
+#include "exceptions.h"
 #include "raw_data.h"
 
 namespace confluo {

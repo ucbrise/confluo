@@ -1,6 +1,9 @@
 #ifndef UTILS_IO_UTILS_H_
 #define UTILS_IO_UTILS_H_
 
+#include <iostream>
+#include <string>
+
 namespace utils {
 
 class io_utils {

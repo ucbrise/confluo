@@ -38,7 +38,7 @@ add_executable(confluod
         src/rpc_service.cc
         src/rpc_server.cc
         src/rpc_types.cc)
-target_link_libraries(confluod ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB})
+target_link_libraries(confluod confluo ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB})
 add_dependencies(confluod thrift lz4)
 
 add_library(rpcclient STATIC

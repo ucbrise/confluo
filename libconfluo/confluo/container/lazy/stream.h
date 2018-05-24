@@ -393,7 +393,7 @@ stream<T> stream<T>::nil;
  * @return The flattened stream
  */
 template<typename U>
-static stream<U> flatten(stream<stream<U>> s) {
+stream<U> flatten(stream<stream<U>> s) {
   while (!s.empty() && s.head().empty()) {
     s = s.tail();
   }
@@ -418,7 +418,7 @@ static stream<U> flatten(stream<stream<U>> s) {
  * @return Stream with the elements in the iterator
  */
 template<typename I>
-static stream<typename I::value_type> iterator_to_stream(I it, I e) {
+stream<typename I::value_type> iterator_to_stream(I it, I e) {
   if (it == e) {
     return stream<typename I::value_type>::nil;
   }
@@ -436,7 +436,7 @@ static stream<typename I::value_type> iterator_to_stream(I it, I e) {
  * @return Stream with all of the elements in the iterator
  */
 template<typename C>
-static stream<typename C::value_type> container_to_stream(C const& c) {
+stream<typename C::value_type> container_to_stream(C const& c) {
   return iterator_to_stream(c.begin(), c.end());
 }
 

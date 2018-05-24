@@ -23,18 +23,14 @@ class schema_snapshot {
    *
    * @param snap The snapshot of the column to add
    */
-  void add_column(const column_snapshot& snap) {
-    snapshot_.push_back(snap);
-  }
+  void add_column(const column_snapshot& snap);
 
   /**
    * Adds an r value reference column snapshot to the schema snapshot
    *
    * @param snap The r value reference to a column snapshot
    */
-  void add_column(column_snapshot&& snap) {
-    snapshot_.push_back(std::move(snap));
-  }
+  void add_column(column_snapshot&& snap);
 
   /**
    * Gets the data for a specific column in the schema snapshot
@@ -44,11 +40,7 @@ class schema_snapshot {
    *
    * @return An immutable value representing the data at the column
    */
-  immutable_value get(void* data, uint32_t i) const {
-    return immutable_value(
-        snapshot_[i].type,
-        reinterpret_cast<uint8_t*>(data) + snapshot_[i].offset);
-  }
+  immutable_value get(void* data, uint32_t i) const;
 
   /**
    * Gets the time key of the schema snapshot
@@ -57,10 +49,7 @@ class schema_snapshot {
    *
    * @return The byte string containing the time
    */
-  byte_string time_key(int64_t time_block) const {
-    return LONG_TYPE.key_transform()(
-        immutable_raw_data(reinterpret_cast<uint8_t*>(&time_block), LONG_TYPE.size), 1.0);
-  }
+  byte_string time_key(int64_t time_block) const;
 
   /**
    * Gets the key of the schema snapshot
@@ -70,12 +59,7 @@ class schema_snapshot {
    *
    * @return Byte string containing the key of the snapshot
    */
-  byte_string get_key(void* ptr, uint32_t i) const {
-    return snapshot_[i].type.key_transform()(
-        immutable_raw_data(reinterpret_cast<uint8_t*>(ptr) + snapshot_[i].offset,
-             snapshot_[i].type.size),
-        snapshot_[i].index_bucket_size);
-  }
+  byte_string get_key(void* ptr, uint32_t i) const;
 
   /**
    * Gets the timestamp of the schema snapshot
@@ -85,9 +69,7 @@ class schema_snapshot {
    *
    * @return The timestamp of the schema snapshot
    */
-  int64_t get_timestamp(void* ptr) const {
-    return *reinterpret_cast<int64_t*>(ptr);
-  }
+  int64_t get_timestamp(void* ptr) const;
 
   /**
    * Whether the specified column snapshot is indexed
@@ -96,9 +78,7 @@ class schema_snapshot {
    *
    * @return True if the column snapshot is indexed, false otherwise
    */
-  bool is_indexed(size_t i) const {
-    return snapshot_[i].indexed;
-  }
+  bool is_indexed(size_t i) const;
 
   /**
    * Gets the id of the index of a column snapshot
@@ -107,9 +87,7 @@ class schema_snapshot {
    *
    * @return The identifier for the index
    */
-  uint32_t index_id(size_t i) const {
-    return snapshot_[i].index_id;
-  }
+  uint32_t index_id(size_t i) const;
 
   /**
    * Gets the bucket size of a column snapshot
@@ -118,18 +96,14 @@ class schema_snapshot {
    *
    * @return The bucket size of the specified column snapshot
    */
-  double index_bucket_size(size_t i) const {
-    return snapshot_[i].index_bucket_size;
-  }
+  double index_bucket_size(size_t i) const;
 
   /**
    * Gets the number of columns in the schema snapshot
    *
    * @return The number of columns in the schema snapshot
    */
-  size_t num_columns() const {
-    return snapshot_.size();
-  }
+  size_t num_columns() const;
 
  private:
   std::vector<column_snapshot> snapshot_;

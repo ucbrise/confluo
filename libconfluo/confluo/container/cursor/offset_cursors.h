@@ -35,8 +35,7 @@ class data_log_cursor : public offset_cursor {
    */
   virtual size_t load_next_batch() override {
     size_t i = 0;
-    for (; i < current_batch_.size() && current_offset_ < version_;
-        i++, current_offset_ += record_size_) {
+    for (; i < current_batch_.size() && current_offset_ < version_; i++, current_offset_ += record_size_) {
       current_batch_[i] = current_offset_;
     }
     return i;
@@ -64,8 +63,7 @@ class offset_iterator_cursor : public offset_cursor {
    * @param version The version of the data log
    * @param batch_size The number of records in the batch
    */
-  offset_iterator_cursor(const iterator& begin, const iterator& end,
-                         uint64_t version, size_t batch_size = 64)
+  offset_iterator_cursor(const iterator &begin, const iterator &end, uint64_t version, size_t batch_size = 64)
       : offset_cursor(batch_size),
         cur_(begin),
         end_(end),

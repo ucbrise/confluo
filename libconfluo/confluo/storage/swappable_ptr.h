@@ -30,7 +30,7 @@ class read_only_ptr {
    * @param offset offset into data
    * @param ref_counts reference counts of both pointer states
    */
-  read_only_ptr(T* ptr, size_t offset, reference_counts* ref_counts)
+  read_only_ptr(T *ptr, size_t offset, reference_counts *ref_counts)
       : ptr_(ptr),
         offset_(offset),
         ref_counts_(ref_counts) {
@@ -40,7 +40,7 @@ class read_only_ptr {
    * Copy constructor. Increments reference count.
    * @param other other pointer
    */
-  read_only_ptr(const read_only_ptr<T>& other)
+  read_only_ptr(const read_only_ptr<T> &other)
       : ptr_(other.ptr_),
         offset_(other.offset_),
         ref_counts_(other.ref_counts_) {
@@ -55,7 +55,7 @@ class read_only_ptr {
    * @param other other pointer
    * @return this read only pointer
    */
-  read_only_ptr& operator=(const read_only_ptr<T>& other) {
+  read_only_ptr &operator=(const read_only_ptr<T> &other) {
     // TODO potential infinite loop bug here
     init(other.ptr_, other.offset_, other.ref_counts_);
     if (ref_counts_ != nullptr) {
@@ -76,7 +76,7 @@ class read_only_ptr {
    * @param offset logical offset into data
    * @param ref_counts
    */
-  void init(T* ptr, size_t offset = 0, reference_counts* ref_counts = nullptr) {
+  void init(T *ptr, size_t offset = 0, reference_counts *ref_counts = nullptr) {
     decrement_compare_dealloc();
     ptr_ = ptr;
     offset_ = offset;
@@ -87,7 +87,7 @@ class read_only_ptr {
    * Get pointer to data
    * @return pointer
    */
-  T* get() const {
+  T *get() const {
     return ptr_;
   }
 
@@ -118,9 +118,9 @@ class read_only_ptr {
     }
   }
 
-  T* ptr_; // pointer to data
+  T *ptr_; // pointer to data
   size_t offset_; // logical offset into decoded data
-  reference_counts* ref_counts_; // pointer to reference counts stored in the swappable_ptr ancestor
+  reference_counts *ref_counts_; // pointer to reference counts stored in the swappable_ptr ancestor
 
 };
 
@@ -138,8 +138,8 @@ class swappable_ptr {
 
  public:
   swappable_ptr()
-     : ref_counts_(),
-       ptr_(nullptr) {
+      : ref_counts_(),
+        ptr_(nullptr) {
   }
 
   /**
@@ -147,7 +147,7 @@ class swappable_ptr {
    * protect from premature deallocation by a copy
    * @param ptr pointer
    */
-  swappable_ptr(T* ptr)
+  swappable_ptr(T *ptr)
       : ref_counts_(),
         ptr_(ptr) {
   }
@@ -156,10 +156,10 @@ class swappable_ptr {
    * Move constructor. Not thread-safe.
    * @param other other swappable_ptr
    */
-  swappable_ptr(swappable_ptr&& other) {
+  swappable_ptr(swappable_ptr &&other) {
     ref_counts_ = other.ref_counts_;
     ptr_ = atomic::load(&other.ptr_);
-    T* null = nullptr;
+    T *null = nullptr;
     atomic::store(&other.ptr_, nullptr);
   }
 
@@ -167,10 +167,10 @@ class swappable_ptr {
    * Move assignment operator. Not thread-safe.
    * @param other other swappable_ptr
    */
-  swappable_ptr& operator=(swappable_ptr&& other) {
+  swappable_ptr &operator=(swappable_ptr &&other) {
     ref_counts_ = other.ref_counts_;
     ptr_ = atomic::load(&other.ptr_);
-    T* null = nullptr;
+    T *null = nullptr;
     atomic::store(&other.ptr_, null);
     return *this;
   }
@@ -180,7 +180,7 @@ class swappable_ptr {
    * allocator if reference count drops to zero.
    */
   ~swappable_ptr() {
-    T* ptr = atomic::load(&ptr_);
+    T *ptr = atomic::load(&ptr_);
     if (ptr != nullptr) {
       auto aux = ptr_aux_block::get(ptr_metadata::get(ptr));
       if (aux.state_ == state_type::D_IN_MEMORY && ref_counts_.decrement_first_and_compare()) {
@@ -197,8 +197,8 @@ class swappable_ptr {
    * @param ptr pointer
    * @return true if initialization successful, otherwise false
    */
-  bool atomic_init(T* ptr) {
-    T* expected = nullptr;
+  bool atomic_init(T *ptr) {
+    T *expected = nullptr;
     return atomic::strong::cas(&ptr_, &expected, ptr);
   }
 
@@ -208,7 +208,7 @@ class swappable_ptr {
    * access create a read-only copy.
    * @return pointer
    */
-  T* atomic_load() const {
+  T *atomic_load() const {
     return atomic::load(&ptr_);
   }
 
@@ -219,12 +219,12 @@ class swappable_ptr {
    * concurrent calls to swap_ptr.
    * @param new_ptr new pointer
    */
-  void swap_ptr(T* new_ptr) {
+  void swap_ptr(T *new_ptr) {
     if (new_ptr == nullptr) {
       THROW(memory_exception, "Pointer cannot be null!");
     }
     // Get old pointer
-    T* old_ptr = atomic::load(&ptr_);
+    T *old_ptr = atomic::load(&ptr_);
     // Store new pointer
     atomic::store(&ptr_, new_ptr);
     // Deallocate old pointer if there are no copies.
@@ -251,13 +251,13 @@ class swappable_ptr {
    * @param copy reference to pointer to store in
    * @param offset offset into pointer
    */
-  void atomic_copy(read_only_ptr<T>& copy, size_t offset = 0) const {
+  void atomic_copy(read_only_ptr<T> &copy, size_t offset = 0) const {
     // Increment both counters to guarantee that the loaded
     // pointer can't be deallocated if there are no copies.
     // Protects against loading before a swap begins and
     // making a copy after the swap finishes.
     ref_counts_.increment_both();
-    T* ptr = atomic::load(&ptr_);
+    T *ptr = atomic::load(&ptr_);
 
     if (ptr == nullptr) {
       // Decrement both ref counts (no possibility of them reaching 0 here)
@@ -286,13 +286,13 @@ class swappable_ptr {
   /**
    * Decrements the first ref count, and destroys & deallocates the pointer if it reaches 0.
    */
-  static void destroy_dealloc(T* ptr) {
+  static void destroy_dealloc(T *ptr) {
     lifecycle_util<T>::destroy(ptr);
     ALLOCATOR.dealloc(ptr);
   }
 
   mutable reference_counts ref_counts_; // mutable reference counts for logically const functions
-  atomic::type<T*> ptr_;
+  atomic::type<T *> ptr_;
 };
 
 }

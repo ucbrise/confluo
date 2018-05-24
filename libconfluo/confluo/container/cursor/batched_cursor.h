@@ -40,7 +40,7 @@ class batched_cursor {
    *
    * @return The current element at cursor.
    */
-  T const& get() const {
+  T const &get() const {
     return current_batch_[current_batch_pos_];
   }
 
@@ -49,7 +49,7 @@ class batched_cursor {
    *
    * @return The current element at cursor.
    */
-  T const& operator*() const {
+  T const &operator*() const {
     return get();
   }
 

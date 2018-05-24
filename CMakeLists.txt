@@ -17,10 +17,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(SUPPRESS_WARN_FLAGS 
-    "${SUPPRESS_WARN_FLAGS} -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-result -Wno-conversion-null" )
+    "${SUPPRESS_WARN_FLAGS} -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-result -Wno-conversion-null" )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(SUPPRESS_WARN_FLAGS 
-    "${SUPPRESS_WARN_FLAGS} -Wno-unused-variable -Wno-unused-parameter -Wno-missing-field-initializers -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-private-field -Wno-unused-const-variable")
+    "${SUPPRESS_WARN_FLAGS} -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter -Wno-missing-field-initializers -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-private-field -Wno-unused-const-variable")
 endif()
 
 # SUPPRESS_WARN_FLAGS must go **after** all flags

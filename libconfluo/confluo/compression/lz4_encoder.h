@@ -34,21 +34,21 @@ class lz4_encoder {
    *
    * @return The size of the entire encoded buffer in bytes
    */
-  static unique_byte_array encode(uint8_t* source_buffer, size_t source_length) {
+  static unique_byte_array encode(uint8_t *source_buffer, size_t source_length) {
 
-    uint8_t* output_buffer = new uint8_t[get_buffer_size(source_length) + sizeof(size_t)];
+    uint8_t *output_buffer = new uint8_t[get_buffer_size(source_length) + sizeof(size_t)];
     std::memcpy(output_buffer, &source_length, sizeof(size_t));
     output_buffer += sizeof(size_t);
 
-    int num_blocks = ceil(source_length / BYTES_PER_BLOCK);
+    int num_blocks = static_cast<int>(ceil(source_length / BYTES_PER_BLOCK));
     size_t output_block_position = sizeof(size_t) * num_blocks + sizeof(size_t);
     size_t output_array_position = 0;
     for (size_t i = 0; i < source_length; i += BYTES_PER_BLOCK) {
-      uint8_t* output_ptr = output_buffer + output_block_position;
-      size_t size = encode((char*) output_ptr, (char*) (source_buffer + i), BYTES_PER_BLOCK);
+      uint8_t *output_ptr = output_buffer + output_block_position;
+      size_t size = encode((char *) output_ptr, (char *) (source_buffer + i), BYTES_PER_BLOCK);
       output_block_position += size;
 
-      uint8_t* output_array_ptr = output_buffer + output_array_position;
+      uint8_t *output_array_ptr = output_buffer + output_array_position;
       size_t bytes = sizeof(size_t);
       size_t offset = output_block_position - size;
       std::memcpy(output_array_ptr, &offset, bytes);
@@ -69,13 +69,16 @@ class lz4_encoder {
    * @return An upper bound on the size of the encoded buffer
    */
   static size_t get_buffer_size(size_t source_size) {
-    int num_blocks = ceil(source_size / BYTES_PER_BLOCK);
-    return sizeof(size_t) * num_blocks + LZ4_compressBound(std::max(source_size, BYTES_PER_BLOCK));
+    int num_blocks = static_cast<int>(ceil(source_size / BYTES_PER_BLOCK));
+    return sizeof(size_t) * num_blocks + LZ4_compressBound((int) std::max(source_size, BYTES_PER_BLOCK));
   }
 
  private:
-  static size_t encode(char* buffer, char* source, size_t source_size) {
-    return LZ4_compress_default(source, buffer, source_size, LZ4_compressBound(source_size));
+  static size_t encode(char *buffer, char *source, size_t source_size) {
+    return static_cast<size_t>(LZ4_compress_default(source,
+                                                    buffer,
+                                                    static_cast<int>(source_size),
+                                                    LZ4_compressBound(static_cast<int>(source_size))));
   }
 
 };

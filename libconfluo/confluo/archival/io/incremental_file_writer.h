@@ -1,6 +1,8 @@
 #ifndef CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_
 #define CONFLUO_ARCHIVAL_INCR_FILE_WRITER_H_
 
+#include <iostream>
+#include <fstream>
 #include "file_utils.h"
 #include "incremental_file_offset.h"
 #include "incremental_file_stream.h"
@@ -13,54 +15,18 @@ namespace archival {
 
 class incremental_file_writer : public incremental_file_stream {
  public:
-  incremental_file_writer(const std::string& path, const std::string& file_prefix, size_t max_file_size)
-      : incremental_file_stream(path, file_prefix) {
-    max_file_size_ = max_file_size;
-    init();
-  }
+  incremental_file_writer(const std::string& path, const std::string& file_prefix, size_t max_file_size);
 
-  incremental_file_writer(const incremental_file_writer& other)
-      : incremental_file_stream() {
-    close();
-    file_num_ = other.file_num_;
-    dir_path_ = other.dir_path_;
-    file_prefix_ = other.file_prefix_;
-    max_file_size_ = other.max_file_size_;
-    cur_ofs_ = open_new(cur_path());
-    transaction_log_ofs_ = open_new(transaction_log_path());
-  }
+  incremental_file_writer(const incremental_file_writer& other);
 
-  ~incremental_file_writer() {
-    close();
-  }
+  ~incremental_file_writer();
 
-  incremental_file_writer& operator=(const incremental_file_writer& other) {
-    close();
-    file_num_ = other.file_num_;
-    dir_path_ = other.dir_path_;
-    file_prefix_ = other.file_prefix_;
-    max_file_size_ = other.max_file_size_;
-    cur_ofs_ = open_new(cur_path());
-    transaction_log_ofs_ = open_new(transaction_log_path());
-    return *this;
-  }
+  incremental_file_writer& operator=(const incremental_file_writer& other);
 
   /**
    * Initialize state.
    */
-  void init() {
-    if (file_utils::exists_file(transaction_log_path())) {
-      std::ifstream transaction_log_ifs(transaction_log_path());
-      while (file_utils::exists_file(cur_path())) {
-        file_num_++;
-      }
-      file_num_--;
-      open();
-    } else {
-      cur_ofs_ = open_new(cur_path());
-      transaction_log_ofs_ = open_new(transaction_log_path());
-    }
-  }
+  void init();
 
   template<typename T>
   incremental_file_offset append(T* data, size_t len) {
@@ -102,57 +68,25 @@ class incremental_file_writer : public incremental_file_stream {
     transaction_log_ofs_->flush();
   }
 
-  incremental_file_offset tell() {
-    return incremental_file_offset(cur_path(), cur_ofs_->tellp());
-  }
+  incremental_file_offset tell();
 
-  void flush() {
-    cur_ofs_->flush();
-    transaction_log_ofs_->flush();
-  }
+  void flush();
 
-  void open() {
-    cur_ofs_ = open_existing(cur_path());
-    transaction_log_ofs_ = open_existing(transaction_log_path());
-  }
+  void open();
 
-  void close() {
-    if (cur_ofs_) {
-      close(cur_ofs_);
-    }
-    if (transaction_log_ofs_)
-      close(transaction_log_ofs_);
-  }
+  void close();
 
  private:
 
-  bool fits_in_cur_file(size_t append_size) {
-    size_t off = cur_ofs_->tellp();
-    return off + append_size < max_file_size_;
-  }
+  bool fits_in_cur_file(size_t append_size);
 
-  incremental_file_offset open_new_next() {
-    close(cur_ofs_);
-    file_num_++;
-    cur_ofs_ = open_new(cur_path());
-    return tell();
-  }
+  incremental_file_offset open_new_next();
 
-  static std::ofstream* open_new(const std::string& path) {
-   return new std::ofstream(path, std::ios::out | std::ios::trunc);
- }
+  static std::ofstream* open_new(const std::string& path);
 
-   static std::ofstream* open_existing(const std::string& path) {
-    // std::ios::in required to prevent truncation, caused by lack of std::ios::app
-    return new std::ofstream(path, std::ios::in | std::ios::out | std::ios::ate);
-  }
+   static std::ofstream* open_existing(const std::string& path);
 
-   static void close(std::ofstream*& ofs) {
-    if (ofs->is_open())
-      ofs->close();
-    delete ofs;
-    ofs = nullptr;
-  }
+   static void close(std::ofstream*& ofs);
 
   std::ofstream* cur_ofs_;
   std::ofstream* transaction_log_ofs_;

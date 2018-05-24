@@ -30,8 +30,6 @@ namespace storage {
 // TODO: Add documentation
 // TODO: Improve allocation using pools and file consolidation.
 
-using namespace ::utils;
-
 /** Allocate function that allocates a file of a certain size */
 typedef void* (*allocate_fn)(const std::string& path, size_t size);
 /** Allocates a block in a file of a certain size */
@@ -226,22 +224,16 @@ struct durable {
 };
 
 /** Storage functionality for in memory mode */
-static storage_functions IN_MEMORY_FNS = { storage_mode::IN_MEMORY,
-    in_memory::allocate, in_memory::allocate_bucket, in_memory::free_mem,
-    in_memory::flush };
+extern storage_functions IN_MEMORY_FNS;
 
 /** Storage functionality for durable relaxed mode */
-static storage_functions DURABLE_RELAXED_FNS = { storage_mode::DURABLE_RELAXED,
-    durable_relaxed::allocate, durable_relaxed::allocate_bucket,
-    durable_relaxed::free, durable_relaxed::flush };
+extern storage_functions DURABLE_RELAXED_FNS;
 
 /** Storage functionality for durable mode */
-static storage_functions DURABLE_FNS = { storage_mode::DURABLE,
-    durable::allocate, durable::allocate_bucket, durable::free, durable::flush };
+extern storage_functions DURABLE_FNS;
 
 /** Contains the storage functions for all storage modes */
-static storage_functions STORAGE_FNS[3] = { IN_MEMORY_FNS, DURABLE_RELAXED_FNS,
-    DURABLE_FNS };
+extern storage_functions STORAGE_FNS[3];
 
 }
 }

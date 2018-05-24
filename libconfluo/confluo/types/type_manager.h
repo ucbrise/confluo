@@ -3,6 +3,7 @@
 
 #include "exceptions.h"
 #include "type_properties.h"
+#include "data_type.h"
 
 namespace confluo {
 
@@ -17,11 +18,7 @@ class type_manager {
    * @param type_def Properties for data type
    * @return Type id.
    */
-  static size_t register_type(const type_properties& type_def) {
-    size_t id = DATA_TYPES.size();
-    DATA_TYPES.push_back(type_def);
-    return id;
-  }
+  static size_t register_type(const type_properties& type_def);
 
   /**
    * Get type from type name and size
@@ -30,10 +27,7 @@ class type_manager {
    * @param size Size; if not provided, assumes the default type size.
    * @return Wrapper around data type
    */
-  static data_type get_type(const std::string& type_name, size_t size = 0) {
-    size_t id = find_type_properties(type_name);
-    return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
-  }
+  static data_type get_type(const std::string& type_name, size_t size = 0);
 
   /**
    * Get type from type id and size
@@ -42,12 +36,7 @@ class type_manager {
    * @param size Size; if not provided, assumes the default type size.
    * @return Wrapper around data type
    */
-  static data_type get_type(size_t id, size_t size = 0) {
-    if (id < DATA_TYPES.size()) {
-      return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
-    }
-    return data_type();
-  }
+  static data_type get_type(size_t id, size_t size = 0);
 
   /**
    * Checks if type is valid
@@ -55,9 +44,7 @@ class type_manager {
    * @param id Id to check.
    * @return True if id is valid, false otherwise
    */
-  static bool is_valid_id(size_t id) {
-    return id >= 1 && id < DATA_TYPES.size();
-  }
+  static bool is_valid_id(size_t id);
 
   /**
    * Checks if type is primitive
@@ -65,39 +52,35 @@ class type_manager {
    * @param id Id to check.
    * @return True if id is primitive, false otherwise
    */
-  static bool is_primitive(size_t id) {
-    return id >= 1 && id <= 12;
-  }
+  static bool is_primitive(size_t id);
 };
 
 /** The none data type */
-static data_type NONE_TYPE = data_type(0, 0);
+extern data_type NONE_TYPE;
 /** The boolean data type */
-static data_type BOOL_TYPE = type_manager::get_type("bool");
+extern data_type BOOL_TYPE;
 /** The character data type */
-static data_type CHAR_TYPE = type_manager::get_type("char");
+extern data_type CHAR_TYPE;
 /** The unsigned character data type */
-static data_type UCHAR_TYPE = type_manager::get_type("uchar");
+extern data_type UCHAR_TYPE;
 /** The short data type */
-static data_type SHORT_TYPE = type_manager::get_type("short");
+extern data_type SHORT_TYPE;
 /** The unsigned short data type */
-static data_type USHORT_TYPE = type_manager::get_type("ushort");
+extern data_type USHORT_TYPE;
 /** The integer data type */
-static data_type INT_TYPE = type_manager::get_type("int");
+extern data_type INT_TYPE;
 /** The unsigned integer data type */
-static data_type UINT_TYPE = type_manager::get_type("uint");
+extern data_type UINT_TYPE;
 /** The long data type */
-static data_type LONG_TYPE = type_manager::get_type("long");
+extern data_type LONG_TYPE;
 /** The unsigned long data type */
-static data_type ULONG_TYPE = type_manager::get_type("ulong");
+extern data_type ULONG_TYPE;
 /** The single precision floating point data type */
-static data_type FLOAT_TYPE = type_manager::get_type("float");
+extern data_type FLOAT_TYPE;
 /** The double precision floating point data type */
-static data_type DOUBLE_TYPE = type_manager::get_type("double");
+extern data_type DOUBLE_TYPE;
 /** The string data type */
-static data_type STRING_TYPE(size_t size) {
-  return type_manager::get_type("string", size);
-}
+data_type STRING_TYPE(size_t size);
 
 }
 

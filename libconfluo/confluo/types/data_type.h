@@ -9,7 +9,11 @@
 #include <cstring>
 
 #include "primitive_types.h"
-#include "type_properties.h"
+#include "serde_ops.h"
+#include "string_ops.h"
+#include "arithmetic_ops.h"
+#include "key_ops.h"
+#include "relational_ops.h"
 
 namespace confluo {
 
@@ -27,10 +31,7 @@ struct data_type {
    * Initializes the data type to have a default identifier and
    * zero bytes for the size
    */
-  data_type()
-      : id(0),
-        size(0) {
-  }
+  data_type();
 
   /**
    * Constructs a data type with the specified identifier and size in bytes
@@ -38,12 +39,7 @@ struct data_type {
    * @param _id The unique identifier for the data type
    * @param _size The size of the data type in bytes
    */
-  data_type(uint16_t _id, size_t _size)
-      : id(_id),
-        size(_size) {
-    id = _id;
-    size = _size;
-  }
+  data_type(uint16_t _id, size_t _size);
 
   /**
    * Assigns contents of another data type to this data type
@@ -52,11 +48,7 @@ struct data_type {
    * this data type
    * @return Reference to this data type
    */
-  inline data_type& operator=(const data_type& other) {
-    id = other.id;
-    size = other.size;
-    return *this;
-  }
+  data_type& operator=(const data_type& other);
 
   /**
    * Checks for equality between this data type and another data type
@@ -66,9 +58,7 @@ struct data_type {
    * @return True if the characteristics of the data types match, false
    * otherwise
    */
-  inline bool operator==(const data_type& other) const {
-    return id == other.id && size == other.size;
-  }
+  bool operator==(const data_type& other) const;
 
   /**
    * Checks for inequality between two data types
@@ -78,45 +68,35 @@ struct data_type {
    * @return True if at least one of the characteristics of the data types
    * don't match, false otherwise
    */
-  inline bool operator!=(const data_type& other) const {
-    return id != other.id || size != other.size;
-  }
+  bool operator!=(const data_type& other) const;
 
   /**
    * Fetches the minimum value for this data type
    *
    * @return A pointer to the minimum value for this data type
    */
-  void* min() const {
-    return DATA_TYPES[id].min;
-  }
+  void* min() const;
 
   /**
    * Fetches the maximum value for this data type
    *
    * @return A pointer to the maximum value for this data type
    */
-  void* max() const {
-    return DATA_TYPES[id].max;
-  }
+  void* max() const;
 
   /**
    * Gets the step value for this data type
    *
    * @return A pointer to the step value for this data type
    */
-  void* one() const {
-    return DATA_TYPES[id].one;
-  }
+  void* one() const;
 
   /**
    * Gets the value that represents zero for this data type
    *
    * @return A pointer to the zero value for this data type
    */
-  void* zero() const {
-    return DATA_TYPES[id].zero;
-  }
+  void* zero() const;
 
   /**
    * Fetches the desired relational operator based on id
@@ -126,9 +106,7 @@ struct data_type {
    *
    * @return A reference to the relational operator
    */
-  inline const relational_op_t& relop(reational_op_id rid) const {
-    return DATA_TYPES[id].relational_ops[rid];
-  }
+  const relational_op_t& relop(reational_op_id rid) const;
 
   /**
    * Fetches the desired unary operator based on id
@@ -138,9 +116,7 @@ struct data_type {
    *
    * @return A reference to the unary operator
    */
-  inline const unary_op_t& unaryop(unary_op_id uid) const {
-    return DATA_TYPES[id].unary_ops[uid];
-  }
+  const unary_op_t& unaryop(unary_op_id uid) const;
 
   /**
    * Fetches the desired binary operator based on id
@@ -150,18 +126,14 @@ struct data_type {
    *
    * @return A reference to the desired binary operator
    */
-  inline const binary_op_t& binaryop(binary_op_id bid) const {
-    return DATA_TYPES[id].binary_ops[bid];
-  }
+  const binary_op_t& binaryop(binary_op_id bid) const;
 
   /**
    * Fetches the key transform operator for this data type
    *
    * @return The key transform operator associated with this data type
    */
-  inline const key_op_t& key_transform() const {
-    return DATA_TYPES[id].key_transform_op;
-  }
+  const key_op_t& key_transform() const;
 
   /**
    * Gets the operator that serializes objects of this data type
@@ -169,9 +141,7 @@ struct data_type {
    * @return A reference to the serialize operator associated with this
    * data type
    */
-  inline const serialize_op_t& serialize_op() const {
-    return DATA_TYPES[id].serialize_op;
-  }
+  const serialize_op_t& serialize_op() const;
 
   /**
    * Fetches the operator that deserializes objects of this data type
@@ -179,9 +149,7 @@ struct data_type {
    * @return A reference to the deserialize operator associated with this
    * data type
    */
-  inline const deserialize_op_t& deserialize_op() const {
-    return DATA_TYPES[id].deserialize_op;
-  }
+  const deserialize_op_t& deserialize_op() const;
 
   /**
    * Gets the operator that parses objects of this data type from strings
@@ -189,9 +157,7 @@ struct data_type {
    * @return A reference to the parse operator associated with this data
    * type
    */
-  inline const parse_op_t& parse_op() const {
-    return DATA_TYPES[id].parse_op;
-  }
+  const parse_op_t& parse_op() const;
 
   /**
    * Gets the operator that returns the string representation of objects
@@ -200,73 +166,56 @@ struct data_type {
    * @return A reference to the to string operator associated with this
    * data type
    */
-  inline const to_string_op_t& to_string_op() const {
-    return DATA_TYPES[id].to_string_op;
-  }
+  const to_string_op_t& to_string_op() const;
 
   /**
    * Checkes whether this data type is valid
    *
    * @return True if this data type is valid, false otherwise
    */
-  inline bool is_valid() const {
-    return id >= 1 && id < DATA_TYPES.size();
-  }
+  bool is_valid() const;
 
   /**
    * Determines whether this data type is none
    *
    * @return True if this data type is none, false otherwise
    */
-  inline bool is_none() const {
-    return id == 0;
-  }
+  bool is_none() const;
 
   /**
    * Determines whether this data type is primitive
    *
    * @return True if this is a primitive data type, false otherwise
    */
-  inline bool is_primitive() const {
-    return id >= 1 && id <= 8;
-  }
+  bool is_primitive() const;
 
   /**
    * Determines whether this data type is numeric
    *
    * @return True if this data type is numeric, false otherwise
    */
-  inline bool is_numeric() const {
-    return DATA_TYPES[id].is_numeric;
-  }
+  bool is_numeric() const;
 
   /**
    * Gets the name of this data type
    *
    * @return The name of this data type
    */
-  inline std::string name() const {
-    return DATA_TYPES[id].name;
-  }
+  std::string name() const;
 
   /**
    * Checks whether this data type is bounded by max and min values
    *
    * @return True if this data type is bounded, false otherwise
    */
-  inline bool is_bounded() const {
-    return DATA_TYPES[id].min != nullptr && DATA_TYPES[id].max != nullptr;
-  }
+  bool is_bounded() const;
 
   /**
    * Serializes information about this data type into an output stream
    *
    * @param out The output stream which contains the data
    */
-  inline void serialize(std::ostream& out) const {
-    out.write(reinterpret_cast<const char*>(&id), sizeof(size_t));
-    out.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
-  }
+  void serialize(std::ostream& out) const;
 
   /**
    * Deserializes data from an input stream to construct this data type
@@ -276,12 +225,7 @@ struct data_type {
    *
    * @return data_type
    */
-  inline static data_type deserialize(std::istream& in) {
-    size_t id, size;
-    in.read(reinterpret_cast<char*>(&id), sizeof(size_t));
-    in.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-    return data_type(id, size);
-  }
+  static data_type deserialize(std::istream& in);
 
   /**
    * Constructs a data type from a string representation of the type
@@ -290,23 +234,7 @@ struct data_type {
    *
    * @return The data type matching the string representation
    */
-  inline static data_type from_string(const std::string& str) {
-    std::regex type_re("([a-zA-Z_]+)(?:\\(([[:digit:]]*)\\))?");
-    std::smatch type_parts;
-    if (std::regex_match(str, type_parts, type_re)) {
-      std::string name = type_parts[1].str();
-      size_t size = 0;
-      if (type_parts.size() == 3 && type_parts[2].str() != "") {
-        size = std::stoull(type_parts[2].str());
-      }
-      size_t id = find_type_properties(name);
-      if (id == 0) {
-        THROW(parse_exception, "Unknown type name " + str);
-      }
-      return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
-    }
-    THROW(parse_exception, "Malformed type name " + str);
-  }
+  static data_type from_string(const std::string& str);
 };
 
 }

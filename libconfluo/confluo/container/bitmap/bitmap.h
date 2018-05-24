@@ -66,7 +66,7 @@ class bitmap {
    * Gets the data
    * @return The data
    */
-  data_type* data() {
+  data_type *data() {
     return data_;
   }
 
@@ -108,10 +108,10 @@ class bitmap {
    * @return The bit value at the index
    */
   bool get_bit(pos_type i) const {
-    return GETBITVAL(data_, i);
+    return static_cast<bool>(GETBITVAL(data_, i));
   }
 
-  void set_size(size_type size) {
+  virtual void set_size(size_type size) {
     size_ = size;
   }
 
@@ -124,22 +124,17 @@ class bitmap {
    * @return The value
    */
   template<typename T>
-  typename std::enable_if<std::is_arithmetic<T>::value>::type set_val_pos(
-      pos_type pos, T val, width_type bits) {
+  typename std::enable_if<std::is_arithmetic<T>::value>::type set_val_pos(pos_type pos, T val, width_type bits) {
     pos_type s_off = pos % 64;
     pos_type s_idx = pos / 64;
 
     if (s_off + bits <= 64) {
       // Can be accommodated in 1 bitmap block
-      data_[s_idx] = (data_[s_idx]
-          & (low_bits_set[s_off] | low_bits_unset[s_off + bits]))
-          | val << s_off;
+      data_[s_idx] = (data_[s_idx] & (low_bits_set[s_off] | low_bits_unset[s_off + bits])) | val << s_off;
     } else {
       // Must use 2 bitmap blocks
       data_[s_idx] = (data_[s_idx] & low_bits_set[s_off]) | val << s_off;
-      data_[s_idx + 1] =
-          (data_[s_idx + 1] & low_bits_unset[(s_off + bits) % 64])
-              | (val >> (64 - s_off));
+      data_[s_idx + 1] = (data_[s_idx + 1] & low_bits_unset[(s_off + bits) % 64]) | (val >> (64 - s_off));
     }
   }
 
@@ -150,8 +145,7 @@ class bitmap {
    * @return The data at the position
    */
   template<typename T>
-  typename std::enable_if<std::is_arithmetic<T>::value, T>::type get_val_pos(
-      pos_type pos, width_type bits) const {
+  typename std::enable_if<std::is_arithmetic<T>::value, T>::type get_val_pos(pos_type pos, width_type bits) const {
     pos_type s_off = pos % 64;
     pos_type s_idx = pos / 64;
 
@@ -160,8 +154,7 @@ class bitmap {
       return static_cast<T>((data_[s_idx] >> s_off) & low_bits_set[bits]);
     } else {
       // Must be read from two blocks
-      return static_cast<T>(((data_[s_idx] >> s_off)
-          | (data_[s_idx + 1] << (64 - s_off))) & low_bits_set[bits]);
+      return static_cast<T>(((data_[s_idx] >> s_off) | (data_[s_idx + 1] << (64 - s_off))) & low_bits_set[bits]);
     }
   }
 
@@ -171,7 +164,7 @@ class bitmap {
    * @param out The output stream where the bitmap is serialized
    * @return The size of the data in the stream
    */
-  virtual size_type serialize(std::ostream& out) {
+  virtual size_type serialize(std::ostream &out) {
     size_t out_size = 0;
 
     out.write(reinterpret_cast<const char *>(&size_), sizeof(size_type));
@@ -188,12 +181,11 @@ class bitmap {
    * @param in The input stream where the bitmap is read from
    * @return The size of the data from the stream
    */
-  virtual size_type deserialize(std::istream& in) {
+  virtual size_type deserialize(std::istream &in) {
     size_t in_size = 0;
 
     in.read(reinterpret_cast<char *>(&size_), sizeof(size_type));
     in_size += sizeof(size_type);
-
     size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(size_);
     data_ = static_cast<data_type *>(ALLOCATOR.alloc(alloc_size));
     memset(data_, 0, alloc_size);

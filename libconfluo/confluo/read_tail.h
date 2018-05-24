@@ -18,10 +18,7 @@ class read_tail {
   /**
    * Constructs a null read tail
    */
-  read_tail() {
-    read_tail_ = nullptr;
-    mode_ = storage::IN_MEMORY;
-  }
+  read_tail();
 
   /**
    * Initializes a read tail based on the path of the data and the storage
@@ -30,9 +27,7 @@ class read_tail {
    * @param data_path The data path
    * @param mode The storage mode
    */
-  read_tail(const std::string& data_path, const storage::storage_mode& mode) {
-    init(data_path, mode);
-  }
+  read_tail(const std::string& data_path, const storage::storage_mode& mode);
 
   /**
    * Initializes the read tail to the beginning
@@ -40,21 +35,14 @@ class read_tail {
    * @param data_path The data path of the read tail
    * @param mode The storage mode of the read tail
    */
-  void init(const std::string& data_path, const storage::storage_mode& mode) {
-    mode_ = mode;
-    read_tail_ = (atomic::type<uint64_t>*) storage::STORAGE_FNS[mode_].allocate(
-        data_path + "/read_tail", sizeof(uint64_t));
-    atomic::store(read_tail_, UINT64_C(0));
-  }
+  void init(const std::string& data_path, const storage::storage_mode& mode);
 
   /**
    * Loads the read tail marker
    *
    * @return The read tail marker
    */
-  uint64_t get() const {
-    return atomic::load(read_tail_);
-  }
+  uint64_t get() const;
 
   /**
    * Advances the read tail marker by the specified number of bytes
@@ -62,17 +50,10 @@ class read_tail {
    * @param old_tail The old tail marker
    * @param bytes The number of bytes to advance the read tail marker
    */
-  void advance(uint64_t old_tail, uint32_t bytes) {
-    uint64_t expected = old_tail;
-    while (!atomic::weak::cas(read_tail_, &expected, old_tail + bytes)) {
-      expected = old_tail;
-      std::this_thread::yield();
-    }
-    storage::STORAGE_FNS[mode_].flush(read_tail_, sizeof(uint64_t));
-  }
+  void advance(uint64_t old_tail, uint32_t bytes);
 
  private:
-  atomic::type<uint64_t>* read_tail_;
+  atomic::type<uint64_t>* read_tail_{};
   storage::storage_mode mode_;
 };
 

@@ -10,7 +10,7 @@
 namespace confluo {
 
 /**
- * Stores all of the aggregates
+ * Reflog with aggregates
  */
 class aggregated_reflog : public reflog {
 public:
@@ -31,36 +31,20 @@ public:
   /** The type of constant iterator for the reflog */
   typedef reflog::const_iterator const_iterator;
 
-  aggregated_reflog()
-      : reflog(),
-        num_aggregates_(0),
-        aggregates_() {
-  }
+  aggregated_reflog();
 
   /**
    * Constructor. Initializes aggregates from an aggregate info log.
    * @param aggregates The specified aggregates
    */
-  aggregated_reflog(const aggregate_log& aggregates)
-      : reflog() {
-    size_t alloc_size = sizeof(aggregate) * aggregates.size();
-    aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size));
-    storage::lifecycle_util<aggregate>::construct(aggs);
-    for (size_t i = 0; i < aggregates.size(); i++) {
-      aggs[i] = aggregates.at(i)->create_aggregate();
-    }
-    init_aggregates(aggregates.size(), aggs);
-  }
+  explicit aggregated_reflog(const aggregate_log& aggregates);
 
   /**
    * Initialize aggregates.
    * @param num_aggregates number of aggregates
    * @param aggregates aggregates
    */
-  void init_aggregates(size_t num_aggregates, aggregate* aggregates) {
-    num_aggregates_ = num_aggregates;
-    aggregates_ = storage::swappable_ptr<aggregate>(aggregates);
-  }
+  void init_aggregates(size_t num_aggregates, aggregate* aggregates);
 
   /**
    * Gets the specified aggregate
@@ -70,11 +54,7 @@ public:
    *
    * @return A numeric that contains the aggregate value
    */
-  inline numeric get_aggregate(size_t aid, uint64_t version) const {
-    storage::read_only_ptr<aggregate> copy;
-    aggregates_.atomic_copy(copy);
-    return copy.get()[aid].get(version);
-  }
+  numeric get_aggregate(size_t aid, uint64_t version) const;
 
   /**
    * Updates an aggregate. Assumes no contention with archiver calling swap_aggregates.
@@ -84,9 +64,7 @@ public:
    * @param value value to update with
    * @param version data log version
    */
-  inline void seq_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_.atomic_load()[aid].seq_update(thread_id, value, version);
-  }
+  void seq_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version);
 
   /**
    * Updates an aggregate. Assumes no contention with archiver calling swap_aggregates.
@@ -96,17 +74,13 @@ public:
    * @param value value to update with
    * @param version data log version
    */
-  inline void comb_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version) {
-    aggregates_.atomic_load()[aid].comb_update(thread_id, value, version);
-  }
+  void comb_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version);
 
   /**
    * Gets the number of aggregates.
    * @return number of aggregates
    */
-  inline size_t num_aggregates() const {
-    return num_aggregates_;
-  }
+  size_t num_aggregates() const;
 
   /**
    * Returns aggregates of the reflog.
@@ -114,9 +88,7 @@ public:
    *
    * @return aggregates
    */
-  inline storage::swappable_ptr<aggregate>& aggregates() {
-    return aggregates_;
-  }
+  storage::swappable_ptr<aggregate>& aggregates();
 
 private:
   size_t num_aggregates_;

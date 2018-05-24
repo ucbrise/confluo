@@ -17,11 +17,7 @@ class aggregate_manager {
    *
    * @return The size of the manager
    */
-  static size_t register_aggregate(const aggregator& agg) {
-    size_t id = AGGREGATORS.size();
-    AGGREGATORS.push_back(agg);
-    return id;
-  }
+  static size_t register_aggregate(const aggregator &agg);
 
   /**
    * Gets an aggregate from the name
@@ -30,9 +26,7 @@ class aggregate_manager {
    *
    * @return The type of the aggregate
    */
-  static aggregate_type get_aggregator_id(const std::string& name) {
-    return find_aggregator_id(name);
-  }
+  static aggregate_type get_aggregator_id(const std::string &name);
 
   /**
    * Gets the aggregator based on name
@@ -41,9 +35,7 @@ class aggregate_manager {
    *
    * @return The aggregator matching the name
    */
-  static aggregator get_aggregator(const std::string& name) {
-    return AGGREGATORS[get_aggregator_id(name)];
-  }
+  static aggregator get_aggregator(const std::string &name);
 
   /**
    * Gets aggregator based on id
@@ -52,12 +44,7 @@ class aggregate_manager {
    *
    * @return The matching aggregator
    */
-  static aggregator get_aggregator(size_t id) {
-    if (id < AGGREGATORS.size()) {
-      return AGGREGATORS[id];
-    }
-    return AGGREGATORS[0];
-  }
+  static aggregator get_aggregator(size_t id);
 
   /**
    * Gets whether the id is a valid aggregator
@@ -66,9 +53,7 @@ class aggregate_manager {
    *
    * @return True if id is a valid aggregator, false otherwise
    */
-  static bool is_valid_id(size_t id) {
-    return id >= 1 && id < AGGREGATORS.size();
-  }
+  static bool is_valid_id(size_t id);
 };
 
 }

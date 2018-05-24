@@ -23,11 +23,11 @@ namespace spirit = boost::spirit;
  * Encapsulates and or operators
  */
 enum and_or
-  : int {
-    /** And identifier */
-    AND = 6,
+    : int {
+  /** And identifier */
+      AND = 6,
   /** Or identifier */
-  OR = 7
+      OR = 7
 };
 
 /**
@@ -71,36 +71,20 @@ class utree_dbg_print {
    *
    * @param str The string to print the characters from
    */
-  void operator()(spirit::utf8_string_range_type const& str) const {
-    typedef spirit::utf8_string_range_type::const_iterator iterator;
-    iterator i = str.begin();
-    fprintf(stderr, " \"");
-    for (; i != str.end(); ++i)
-      fprintf(stderr, "%c", *i);
-    fprintf(stderr, "\" ");
-  }
+  void operator()(spirit::utf8_string_range_type const &str) const;
 
   /**
    * Prints the corresponding relational operator
    *
    * @param op The identifier of the relational operator
    */
-  void operator()(int op) const {
-    if (op < 6) {
-      reational_op_id id = static_cast<reational_op_id>(op);
-      fprintf(stderr, " %s ", relop_utils::op_to_str(id).c_str());
-    } else {
-      fprintf(stderr, " %s ", (op == and_or::AND) ? "AND" : "OR");
-    }
-  }
+  void operator()(int op) const;
 
   /**
    * Prints the function
    *
    */
-  void operator()(spirit::function_base const&) const {
-    return (*this)("<function>\n");
-  }
+  void operator()(spirit::function_base const &) const;
 };
 
 /**
@@ -130,9 +114,7 @@ class utree_to_op {
    * @throw parse_exception This type is not recognized
    * @return The result
    */
-  result_type operator()(spirit::function_base const&) const {
-    throw parse_exception("Functions not supported");
-  }
+  result_type operator()(spirit::function_base const &) const;
 
   /**
    * Returns the op id associated
@@ -141,9 +123,7 @@ class utree_to_op {
    *
    * @return The result which is the operator identifier
    */
-  result_type operator()(int op) const {
-    return op;
-  }
+  result_type operator()(int op) const;
 };
 
 /**
@@ -172,9 +152,7 @@ class utree_to_string {
    * @throw parse_exception Functions are not supported for to string
    * @return The result
    */
-  result_type operator()(spirit::function_base const&) const {
-    throw parse_exception("Functions not supported");
-  }
+  result_type operator()(spirit::function_base const &) const;
 
   /**
    * Iterates through the string and returns the result
@@ -183,16 +161,7 @@ class utree_to_string {
    *
    * @return The result of combining all of the values in the iterator
    */
-  result_type operator()(spirit::utf8_string_range_type const& str) const {
-    typedef spirit::utf8_string_range_type::const_iterator iterator;
-    iterator it = str.begin(), end = str.end();
-
-    result_type out;
-    for (; it != end; ++it)
-      out += *it;
-
-    return out;
-  }
+  result_type operator()(spirit::utf8_string_range_type const &str) const;
 };
 
 /**
@@ -241,9 +210,7 @@ class utree_negate {
    *
    * @return The tree containing the contents from the specified range
    */
-  spirit::utree operator()(spirit::utf8_string_range_type const& str) const {
-    return str;
-  }
+  spirit::utree operator()(spirit::utf8_string_range_type const &str) const;
 
   /**
    * Gets the tree associated with operator id
@@ -252,38 +219,16 @@ class utree_negate {
    *
    * @return The tree associated with the operator identifier
    */
-  spirit::utree operator()(int op) const {
-    switch (op) {
-      case reational_op_id::EQ:
-        return spirit::utree(reational_op_id::NEQ);
-      case reational_op_id::NEQ:
-        return spirit::utree(reational_op_id::EQ);
-      case reational_op_id::LT:
-        return spirit::utree(reational_op_id::GE);
-      case reational_op_id::GT:
-        return spirit::utree(reational_op_id::LE);
-      case reational_op_id::LE:
-        return spirit::utree(reational_op_id::GT);
-      case reational_op_id::GE:
-        return spirit::utree(reational_op_id::LT);
-      case and_or::AND:
-        return spirit::utree(and_or::OR);
-      case and_or::OR:
-        return spirit::utree(and_or::AND);
-    }
-    return spirit::utree::invalid_type();
-  }
-
+  spirit::utree operator()(int op) const;
 
   /**
    * Handles the case when functinos are passed in
    * @throw parse_exception Functions are not supported for this operator
    * @return The tree
    */
-  spirit::utree operator()(spirit::function_base const&) const {
-    throw parse_exception("Function is not supported yet");
-  }
+  spirit::utree operator()(spirit::function_base const &) const;
 };
+
 
 /**
  * All of the components that make up an expression
@@ -306,9 +251,7 @@ struct expr {
    *
    * @param op The operator identifier
    */
-  expr(int op)
-      : op(op) {
-  }
+  expr(int op);
 
   /**
    * Initializes the tree to the components of the expression
@@ -316,13 +259,7 @@ struct expr {
    * @param t The tree to initialize
    * @param rhs The right hand side of the expression
    */
-  void operator()(spirit::utree& t, spirit::utree const& rhs) const {
-    spirit::utree lhs;
-    lhs.swap(t);
-    t.push_back(op);
-    t.push_back(lhs);
-    t.push_back(rhs);
-  }
+  void operator()(spirit::utree &t, spirit::utree const &rhs) const;
 
   /** The operator in the expression */
   int const op;
@@ -332,12 +269,12 @@ struct expr {
  * Components that make up a predicate
  */
 struct pred {
- /**
-  * The result of a predicate
-  *
-  * @tparam T1 The first type
-  * @tparam T2 The second type
-  */
+  /**
+   * The result of a predicate
+   *
+   * @tparam T1 The first type
+   * @tparam T2 The second type
+   */
   template<typename T1, typename T2 = void>
   struct result {
     /** The type of the result */
@@ -349,9 +286,7 @@ struct pred {
    *
    * @param op The operator id
    */
-  pred(const int op)
-      : op(op) {
-  }
+  pred(const int op);
 
   /**
    * Initializes the tree to the components of the predicate
@@ -359,35 +294,11 @@ struct pred {
    * @param t The tree to initialize
    * @param rhs The right hand side of the predicate
    */
-  void operator()(spirit::utree& t, spirit::utree const& rhs) const {
-    spirit::utree lhs;
-    lhs.swap(t);
-    t.push_back(op);
-    t.push_back(lhs);
-    t.push_back(rhs);
-  }
+  void operator()(spirit::utree &t, spirit::utree const &rhs) const;
 
   /** The operator associated with the predicate */
   int const op;
 };
-
-/** Less than predicate function */
-boost::phoenix::function<pred> const LT = pred(reational_op_id::LT);
-/** Less than or equal to predicate function */
-boost::phoenix::function<pred> const LE = pred(reational_op_id::LE);
-/** Greater than predicate function */
-boost::phoenix::function<pred> const GT = pred(reational_op_id::GT);
-/** Greater than or equal to predicate function */
-boost::phoenix::function<pred> const GE = pred(reational_op_id::GE);
-/** Equality predicate function */
-boost::phoenix::function<pred> const EQ = pred(reational_op_id::EQ);
-/** Not equal to predicate function */
-boost::phoenix::function<pred> const NEQ = pred(reational_op_id::NEQ);
-
-/** Conjunction predicate function */
-boost::phoenix::function<expr> const CONJ = expr(and_or::AND);
-/** Disjoint predicate function */
-boost::phoenix::function<expr> const DISJ = expr(and_or::OR);
 
 /**
  * Negated expression
@@ -411,24 +322,42 @@ struct negate_expr {
    * @param expr The expression to negate
    * @param rhs The right hand side of the expression
    */
-  void operator()(spirit::utree& expr, spirit::utree const& rhs) const {
-    expr.clear();
-    expr = spirit::utree::visit(rhs, utree_negate());
-  }
+  void operator()(spirit::utree &expr, spirit::utree const &rhs) const;
 };
 
+/** Less than predicate function */
+boost::phoenix::function<pred> const LT = pred(reational_op_id::LT);
+/** Less than or equal to predicate function */
+boost::phoenix::function<pred> const LE = pred(reational_op_id::LE);
+/** Greater than predicate function */
+boost::phoenix::function<pred> const GT = pred(reational_op_id::GT);
+/** Greater than or equal to predicate function */
+boost::phoenix::function<pred> const GE = pred(reational_op_id::GE);
+/** Equality predicate function */
+boost::phoenix::function<pred> const EQ = pred(reational_op_id::EQ);
+/** Not equal to predicate function */
+boost::phoenix::function<pred> const NEQ = pred(reational_op_id::NEQ);
+
+/** Conjunction expression */
+boost::phoenix::function<expr> const CONJ = expr(and_or::AND);
+/** Disjoint expression */
+boost::phoenix::function<expr> const DISJ = expr(and_or::OR);
+
+/** Negation expression */
 boost::phoenix::function<negate_expr> NEG;
 
-/* <expression>::=<term>{"||"<term>}
+/**
+ * Parser of expressions
+ *
+ * Grammar:
+ * \verbatim
+ * <expression>::=<term>{"||"<term>}
  * <term>::=<factor>{"&&"<factor>}
  * <factor>::=<predicate> | "!"<factor> | '('<expression>')'
  * <predicate>::= <identifier>"<"<value> | <identifier>">"<value> ...
  * <identifier>::= "alnum*"
  * <value>::= "alnum*"
- */
-
-/**
- * Parser of expressions
+ * \endverbatim
  *
  * @tparam I The type of expression
  */
@@ -494,22 +423,7 @@ struct expression_parser : qi::grammar<I, ascii::space_type, spirit::utree()> {
  *
  * @return The tree representing the contents of the expression
  */
-static spirit::utree parse_expression(const std::string& e) {
-  using boost::spirit::utree;
-  using boost::spirit::ascii::space;
-  typedef std::string::const_iterator iterator_type;
-  typedef expression_parser<iterator_type> grammar;
-  grammar g;
-  std::string::const_iterator iter = e.begin();
-  std::string::const_iterator end = e.end();
-  utree ut;
-  bool r = phrase_parse(iter, end, g, space, ut);
-  if (iter != end || !r) {
-    std::string rest(iter, end);
-    throw parse_exception(std::string("Parse failed at ") + rest);
-  }
-  return ut;
-}
+spirit::utree parse_expression(const std::string &e);
 
 }
 }

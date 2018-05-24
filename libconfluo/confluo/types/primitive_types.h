@@ -42,103 +42,103 @@ enum primitive_type
 namespace limits {
 
 /** The minimum boolean value */
-static bool bool_min = std::numeric_limits<bool>::lowest();
+extern bool bool_min;
 /** The zero boolean value */
-static bool bool_zero = false;
+extern bool bool_zero;
 /** The boolean value representing one */
-static bool bool_one = true;
+extern bool bool_one;
 /** The max boolean value */
-static bool bool_max = std::numeric_limits<bool>::max();
+extern bool bool_max;
 
 /** The minimum character value */
-static int8_t char_min = std::numeric_limits<int8_t>::lowest();
+extern int8_t char_min;
 /** The zero character value */
-static int8_t char_zero = static_cast<int8_t>(0);
+extern int8_t char_zero;
 /** The character value representing one */
-static int8_t char_one = static_cast<int8_t>(1);
+extern int8_t char_one;
 /** The max character value */
-static int8_t char_max = std::numeric_limits<int8_t>::max();
+extern int8_t char_max;
 
 /** The minimum unsigned character */
-static uint8_t uchar_min = std::numeric_limits<uint8_t>::lowest();
+extern uint8_t uchar_min;
 /** The unsigned character value representing zero */
-static uint8_t uchar_zero = static_cast<uint8_t>(0);
+extern uint8_t uchar_zero;
 /** The unsigned character value representing one */
-static uint8_t uchar_one = static_cast<uint8_t>(1);
+extern uint8_t uchar_one;
 /** The maximum unsigned character value */
-static uint8_t uchar_max = std::numeric_limits<uint8_t>::max();
+extern uint8_t uchar_max;
 
 /** The minimum short value */
-static int16_t short_min = std::numeric_limits<int16_t>::lowest();
+extern int16_t short_min;
 /** The zero short value */
-static int16_t short_zero = static_cast<int16_t>(0);
+extern int16_t short_zero;
 /** The short value representing one */
-static int16_t short_one = static_cast<int16_t>(1);
+extern int16_t short_one;
 /** The max short value */
-static int16_t short_max = std::numeric_limits<int16_t>::max();
+extern int16_t short_max;
 
 /** The minimum unsigned short value */
-static uint16_t ushort_min = std::numeric_limits<uint16_t>::lowest();
+extern uint16_t ushort_min;
 /** The zero unsigned short value */
-static uint16_t ushort_zero = static_cast<uint16_t>(0);
+extern uint16_t ushort_zero;
 /** The unsigned short value representing one */
-static uint16_t ushort_one = static_cast<uint16_t>(1);
+extern uint16_t ushort_one;
 /** The maximum unsigned short value */
-static uint16_t ushort_max = std::numeric_limits<uint16_t>::max();
+extern uint16_t ushort_max;
 
 /** The minimum integer value */
-static int32_t int_min = std::numeric_limits<int32_t>::lowest();
+extern int32_t int_min;
 /** The zero integer value */
-static int32_t int_zero = static_cast<int32_t>(0);
+extern int32_t int_zero;
 /** The integer value representing one */
-static int32_t int_one = static_cast<int32_t>(1);
+extern int32_t int_one;
 /** The max integer value */
-static int32_t int_max = std::numeric_limits<int32_t>::max();
+extern int32_t int_max;
 
 /** The minimum unsigned integer value */
-static uint32_t uint_min = std::numeric_limits<uint32_t>::lowest();
+extern uint32_t uint_min;
 /** The zero unsigned integer value */
-static uint32_t uint_zero = static_cast<uint32_t>(0);
+extern uint32_t uint_zero;
 /** The unsigned integer value representing one */
-static uint32_t uint_one = static_cast<uint32_t>(1);
+extern uint32_t uint_one;
 /** The maximum unsigned integer value */
-static uint32_t uint_max = std::numeric_limits<uint32_t>::max();
+extern uint32_t uint_max;
 
 /** The minimum long value */
-static int64_t long_min = std::numeric_limits<int64_t>::lowest();
+extern int64_t long_min;
 /** The zero long value */
-static int64_t long_zero = static_cast<int64_t>(0);
+extern int64_t long_zero;
 /** The long value representing one */
-static int64_t long_one = static_cast<int64_t>(1);
+extern int64_t long_one;
 /** The max long value */
-static int64_t long_max = std::numeric_limits<int64_t>::max();
+extern int64_t long_max;
 
 /** The minimum unsigned long value */
-static uint64_t ulong_min = std::numeric_limits<uint64_t>::lowest();
+extern uint64_t ulong_min;
 /** The zero unsigned long value */
-static uint64_t ulong_zero = static_cast<uint64_t>(0);
+extern uint64_t ulong_zero;
 /** The unsigned long value representing one */
-static uint64_t ulong_one = static_cast<uint64_t>(1);
+extern uint64_t ulong_one;
 /** The max unsigned long value */
-static uint64_t ulong_max = std::numeric_limits<uint64_t>::max();
+extern uint64_t ulong_max;
 
 /** The minimum float value */
-static float float_min = std::numeric_limits<float>::lowest();
+extern float float_min;
 /** The zero float value */
-static float float_zero = static_cast<float>(0.0);
+extern float float_zero;
 /** The float value representing one */
-static float float_one = static_cast<float>(1.0);
+extern float float_one;
 /** The max float value */
-static float float_max = std::numeric_limits<float>::max();
+extern float float_max;
 
 /** The minimum double value */
-static double double_min = std::numeric_limits<double>::lowest();
+extern double double_min;
 /** The zero double value */
-static double double_zero = static_cast<double>(0.0);
+extern double double_zero;
 /** The double value representing one */
-static double double_one = static_cast<double>(1.0);
+extern double double_one;
 /** The max double value */
-static double double_max = std::numeric_limits<double>::max();
+extern double double_max;
 }
 
 }

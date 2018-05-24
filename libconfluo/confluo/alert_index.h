@@ -26,9 +26,7 @@ class alert_index {
   /**
    * Initializing an alert_index
    */
-  alert_index()
-      : idx_(8, 256) {
-  }
+  alert_index();
 
   // Note: single threaded
   /**
@@ -39,14 +37,11 @@ class alert_index {
    * @param value the trigger value
    * @param version marker for the trigger
    */
-  void add_alert(uint64_t time_bucket, const std::string& trigger_name,
-                 const std::string& trigger_expr, const numeric& value,
-                 uint64_t version) {
-    auto log = idx_.get_or_create(make_key(time_bucket));
-    if (find_alert(log, trigger_name, value) == -1)
-      log->push_back(
-          alert(time_bucket, trigger_name, trigger_expr, value, version));
-  }
+  void add_alert(uint64_t time_bucket,
+                 const std::string &trigger_name,
+                 const std::string &trigger_expr,
+                 const numeric &value,
+                 uint64_t version);
 
   /**
    * Fetches alerts from range between timestamps
@@ -54,26 +49,26 @@ class alert_index {
    * @param t2 second timestamp
    * @return list of alerts between timestamp range
    */
-  alert_list get_alerts(uint64_t t1, uint64_t t2) const {
-    return idx_.range_lookup(make_key(t1), make_key(t2));
-  }
+  alert_list get_alerts(uint64_t t1, uint64_t t2) const;
 
  private:
-  byte_string make_key(uint64_t time_bucket) const {
-    return byte_string(time_bucket);
-  }
+  /**
+   * Make a key from time bucket
+   *
+   * @param time_bucket The time bucket
+   * @return The corresponding key
+   */
+  byte_string make_key(uint64_t time_bucket) const;
 
-  int64_t find_alert(alert_log* log, const std::string& trigger_name,
-                     const numeric& value) const {
-    size_t nalerts = log->size();
-    for (size_t i = 0; i < nalerts; i++) {
-      const alert& a = log->at(i);
-      if (a.trigger_name == trigger_name && a.value == value) {
-        return i;
-      }
-    }
-    return -1;
-  }
+  /**
+   * Find an alert from the trigger name and value
+   *
+   * @param log The alert log
+   * @param trigger_name The trigger name
+   * @param value The trigger value
+   * @return The alert index
+   */
+  int64_t find_alert(alert_log *log, const std::string &trigger_name, const numeric &value) const;
 
   idx_t idx_;
 };

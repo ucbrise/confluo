@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "exceptions.h"
 #include "string_utils.h"
 
 using namespace utils;

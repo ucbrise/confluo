@@ -13,11 +13,11 @@ struct lifecycle_util {
    * Construction using placement new.
    * @param ptr pointer to array allocated by an allocator
    */
-  static void construct(void* ptr) {
+  static void construct(void *ptr) {
     size_t len = ptr_metadata::get(ptr)->data_size_ / sizeof(T);
-    T* casted_ptr = reinterpret_cast<T*>(ptr);
+    T *casted_ptr = reinterpret_cast<T *>(ptr);
     for (size_t i = 0; i < len; i++) {
-      new (casted_ptr + i) T();
+      new(casted_ptr + i) T();
     }
   }
 
@@ -27,9 +27,9 @@ struct lifecycle_util {
    * since delete[] would not call the destructor.
    * @param ptr pointer to array allocated by an allocator
    */
-  static void destroy(void* ptr) {
+  static void destroy(void *ptr) {
     size_t len = ptr_metadata::get(ptr)->data_size_ / sizeof(T);
-    T* casted_ptr = reinterpret_cast<T*>(ptr);
+    T *casted_ptr = reinterpret_cast<T *>(ptr);
     for (size_t i = 0; i < len; i++) {
       casted_ptr[i].~T();
     }
@@ -41,7 +41,7 @@ struct lifecycle_util {
  */
 template<class T>
 struct lifecycle_util<T, std::enable_if<std::is_fundamental<T>::value>> {
-  static void destroy(void* ptr) { }
+  static void destroy(void *ptr) {}
 };
 
 }

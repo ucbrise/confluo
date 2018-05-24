@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 
+#include "monolog_iterator.h"
 #include "storage/swappable_encoded_ptr.h"
 #include "atomic.h"
 #include "monolog_linear_bucket.h"
@@ -74,10 +75,12 @@ class monolog_linear_base {
     }
   }
 
+  /**
+   * Pre-allocates the first bucket.
+   */
   void pre_alloc() {
     buckets_[0].ensure_alloc();
   }
-
 
   /**
    * Get the name of the monolog.
@@ -88,10 +91,19 @@ class monolog_linear_base {
     return name_;
   }
 
+  /**
+   * Get the bucket size.
+   * @return The bucket size.
+   */
   size_t bucket_size() {
     return BUCKET_SIZE + BUFFER_SIZE;
   }
 
+  /**
+   * Get the bucket data path for a bucket index.
+   * @param bucket_idx The bucket index.
+   * @return The bucket data path.
+   */
   std::string bucket_data_path(size_t bucket_idx) const {
     return data_path() + "/" + name() + "_" + std::to_string(bucket_idx) + ".dat";
   }
@@ -242,13 +254,7 @@ class monolog_linear_base {
    *
    * @return storage size of the monolog
    */
-  size_t storage_size() const {
-    size_t bucket_size = buckets_.size() * sizeof(monolog_linear_bucket<T, BUCKET_SIZE>);
-    size_t data_size = 0;
-    for (size_t i = 0; i < buckets_.size(); i++)
-      data_size += buckets_[i].storage_size();
-    return bucket_size + data_size;
-  }
+  size_t storage_size() const;
 
   /**
    * Note: it's dangerous to modify this data structure.
@@ -441,11 +447,19 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
     return iterator(this, size());
   }
 
-  iterator begin_bucket() const {
+  /**
+   * Get an iterator over the first bucket
+   * @return Iterator over the first bucket
+   */
+  bucket_iterator begin_bucket() const {
     return bucket_iterator(this, 0);
   }
 
-  iterator end_bucket() const {
+  /**
+   * Get an iterator over the last bucket
+   * @return Iterator over the last bucket
+   */
+  bucket_iterator end_bucket() const {
     return bucket_iterator(this, size() + BUCKET_SIZE - (size() % BUCKET_SIZE));
   }
 
