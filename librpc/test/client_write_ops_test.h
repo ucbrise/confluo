@@ -165,9 +165,8 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   int64_t ts = utils::time_utils::cur_ns();
   client.append(make_simple_record(ts, "abc"));
 
-  std::unique_ptr<uint8_t> ptr = mlog->read_raw(0);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf.substr(8, 3), "abc");
+  std::string buf = mlog->read(0)[1];
+  ASSERT_EQ(buf, "abc");
 
   client.disconnect();
   server->stop();

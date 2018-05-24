@@ -220,18 +220,14 @@ TEST_F(StreamTest, BufferTest) {
   client.buffer(make_simple_record(ts, "ghi"));
   client.flush();
 
+  std::string buf = dtable->read(0)[1];
+  ASSERT_EQ(buf, "abc");
 
-  std::unique_ptr<uint8_t> ptr = dtable->read_raw(0);
-  std::string buf = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf.substr(8, 3), "abc");
+  std::string buf2 = dtable->read(schema_size)[1];
+  ASSERT_EQ(buf2, "def");
 
-  ptr = dtable->read_raw(schema_size);
-  std::string buf2 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf2.substr(8, 3), "def");
-
-  ptr = dtable->read_raw(schema_size * 2);
-  std::string buf3 = std::string(reinterpret_cast<const char*>(ptr.get()), DATA_SIZE);
-  ASSERT_EQ(buf3.substr(8, 3), "ghi");
+  std::string buf3 = dtable->read(schema_size * 2)[1];
+  ASSERT_EQ(buf3, "ghi");
 
   client.disconnect();
   server->stop();

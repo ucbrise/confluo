@@ -27,13 +27,13 @@ class AtomicMultilogTest : public testing::Test {
       offsets.push_back(offset);
     }
 
-    record_t r;
-    for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      std::unique_ptr<uint8_t> ptr = mlog.read_raw(offsets[i]);
-      ASSERT_TRUE(ptr.get() != nullptr);
+     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
+      read_only_data_log_ptr ptr;
+      mlog.read(offsets[i], ptr);
+      ASSERT_TRUE(ptr.get().ptr() != nullptr);
       uint8_t expected = i % 256;
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
-        ASSERT_EQ(ptr.get()[j], expected);
+        ASSERT_EQ(ptr[j], expected);
       }
     }
     ASSERT_EQ(MAX_RECORDS, mlog.num_records());
