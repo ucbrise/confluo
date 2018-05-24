@@ -134,6 +134,19 @@ class encoded_ptr {
   }
 
   /**
+   * Decode pointer and store in a newly allocated buffer,
+   * managed by a unique_ptr instance.
+   * @param start_idx
+   * @param len
+   * @return
+   */
+  std::unique_ptr<T> decode(size_t start_idx, size_t len) const {
+    T* decoded = new T[len];
+    decode(decoded, start_idx, len);
+    return std::unique_ptr<T>(decoded);
+  }
+
+  /**
    * Decode pointer, starting at an index.
    * @param start_idx index to start decoding at
    * @return decoded pointer
@@ -157,34 +170,6 @@ class encoded_ptr {
         uint8_t* decoded = new uint8_t[decoded_size];
         compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), decoded, start_idx);
         return decoded_ptr<T>(reinterpret_cast<T*>(decoded), array_delete<T>);
-      }
-      default: {
-        THROW(illegal_state_exception, "Invalid encoding type!");
-      }
-    }
-  }
-
-  std::unique_ptr<T> decode_copy(size_t start_idx) const {
-    auto* metadata = ptr_metadata::get(ptr_);
-    auto aux = ptr_aux_block::get(metadata);
-    switch (aux.encoding_) {
-      case encoding_type::D_UNENCODED: {
-        T* decoded = new T[metadata->data_size_ - start_idx];
-        memcpy(decoded, this->ptr_as<T>() + start_idx, metadata->data_size_ - start_idx);
-        return std::unique_ptr<T>(decoded);
-      }
-      case encoding_type::D_ELIAS_GAMMA: {
-        size_t encoded_size = metadata->data_size_;
-        size_t decoded_size = compression::delta_decoder::decoded_size(this->ptr_as<uint8_t>());
-        T* decoded = new T[decoded_size];
-        compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), decoded, start_idx);
-        return std::unique_ptr<T>(decoded);
-      }
-      case encoding_type::D_LZ4: {
-        size_t decoded_size = compression::lz4_decoder<>::decoded_size(this->ptr_as<uint8_t>());
-        uint8_t* decoded = new uint8_t[decoded_size];
-        compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), decoded, start_idx);
-        return std::unique_ptr<T>(decoded);
       }
       default: {
         THROW(illegal_state_exception, "Invalid encoding type!");
