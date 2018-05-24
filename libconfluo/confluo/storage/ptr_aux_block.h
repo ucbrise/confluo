@@ -27,6 +27,8 @@ typedef struct encoding_type {
 } encoding_type;
 
 const uint8_t encoding_type::D_UNENCODED;
+const uint8_t encoding_type::D_LZ4;
+const uint8_t encoding_type::D_ELIAS_GAMMA;
 
 /**
  * Pointer auxillary block containing
