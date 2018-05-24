@@ -200,7 +200,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return parent->advance(t_key, t_width, t_depth);
     } else {
-      t_key[depth - 1] = child->key;
+      t_key[child->depth - 1] = child->key;
       return child->advance_descend(t_key, t_width, t_depth);
     }
   }
@@ -216,8 +216,7 @@ struct radix_tree_node {
    *
    * @return Pointer to the advanced node.
    */
-  const node_t* advance_descend(key_t& t_key, size_t t_width,
-                                size_t t_depth) const {
+  const node_t* advance_descend(key_t& t_key, size_t t_width, size_t t_depth) const {
     if (is_leaf)
       return this;
 
@@ -225,7 +224,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return advance(t_key, t_width, t_depth);
     } else {
-      t_key[depth - 1] = child->key;
+      t_key[child->depth - 1] = child->key;
       return child->advance_descend(t_key, t_width, t_depth);
     }
   }
@@ -247,7 +246,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return parent->retreat(t_key, t_width, t_depth);
     } else {
-      t_key[depth - 1] = child->key;
+      t_key[child->depth - 1] = child->key;
       return child->retreat_descend(t_key, t_width, t_depth);
     }
   }
@@ -272,7 +271,7 @@ struct radix_tree_node {
     if (child == nullptr) {
       return retreat(t_key, t_width, t_depth);
     } else {
-      t_key[depth - 1] = child->key;
+      t_key[child->depth - 1] = child->key;
       return child->retreat_descend(t_key, t_width, t_depth);
     }
   }
