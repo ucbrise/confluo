@@ -11,6 +11,13 @@ class DeltaEncodedArrayTest : public testing::Test {
   const uint64_t kArraySize = (1024ULL * 1024ULL);  // 1 KBytes
 };
 
+TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayOneElemTest) {
+  uint64_t* array = new uint64_t[1];
+  array[0] = 10;
+  elias_gamma_encoded_array<uint64_t> enc_array(array, 1);
+  size_t buffer_size = enc_array.storage_size() + sizeof(size_t);
+}
+
 TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayTest) {
 
   uint64_t* array = new uint64_t[kArraySize];

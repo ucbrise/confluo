@@ -41,7 +41,6 @@ class defaults {
   /** Default maximum amount of memory */
   static constexpr size_t DEFAULT_MAX_MEMORY = 1e9;
   /** Default monitor window in milliseoncds */
-  static constexpr uint64_t DEFAULT_MEMORY_MONITOR_PERIODICITY_MS = 1;
   static constexpr uint64_t DEFAULT_MONITOR_WINDOW_MS = 10;
   /** Default periodicity for monitor in milliseconds */
   static constexpr uint64_t DEFAULT_MONITOR_PERIODICITY_MS = 1;
@@ -51,7 +50,6 @@ const int defaults::HARDWARE_CONCURRENCY = std::thread::hardware_concurrency();
 constexpr double defaults::DEFAULT_INDEX_BUCKET_SIZE;
 constexpr size_t defaults::DEFAULT_MAX_MEMORY;
 constexpr uint64_t defaults::DEFAULT_TIME_RESOLUTION_NS;
-constexpr uint64_t defaults::DEFAULT_MEMORY_MONITOR_PERIODICITY_MS;
 constexpr uint64_t defaults::DEFAULT_MONITOR_WINDOW_MS;
 constexpr uint64_t defaults::DEFAULT_MONITOR_PERIODICITY_MS;
 
