@@ -333,10 +333,10 @@ class elias_gamma_encoded_array : public delta_encoded_array<T, sampling_rate> {
    * @return The length of the serialized encoded array in bytes
    */
   size_t storage_size() {
-    return sizeof(uint8_t) * 2 + sizeof(size_t) * 3 + 
-        (BITS2BLOCKS(this->samples_->num_bits()) * sizeof(uint64_t)) +
-        (BITS2BLOCKS(this->deltas_->num_bits()) * sizeof(uint64_t)) +
-        (BITS2BLOCKS(this->delta_offsets_->num_bits()) * sizeof(uint64_t));
+    size_t samples_size = this->samples_ ? (BITS2BLOCKS(this->samples_->num_bits()) * sizeof(uint64_t)) : 0;
+    size_t deltas_size = this->deltas_ ? (BITS2BLOCKS(this->deltas_->num_bits()) * sizeof(uint64_t)) : 0;
+    size_t offs_size = this->delta_offsets_ ? (BITS2BLOCKS(this->delta_offsets_->num_bits()) * sizeof(uint64_t)) : 0;
+    return sizeof(uint8_t) * 2 + sizeof(size_t) * 3 + samples_size + deltas_size + offs_size;
   }
 
   /**

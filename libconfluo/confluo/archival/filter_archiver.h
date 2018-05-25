@@ -108,7 +108,7 @@ class filter_archiver : public archiver {
     auto* metadata = ptr_metadata::get(bucket);
     size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
     auto encoded_bucket = confluo_encoder::encode(bucket, bucket_size * sizeof(uint64_t),
-                                          archival_configuration_params::REFLOG_ENCODING_TYPE);
+                                                  archival_configuration_params::REFLOG_ENCODING_TYPE);
     size_t enc_size = encoded_bucket.size();
 
     auto archival_metadata = radix_tree_archival_metadata(key, refs_tail_, bucket_size);
