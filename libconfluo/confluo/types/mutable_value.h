@@ -28,7 +28,7 @@ class mutable_value : public immutable_value {
    * @param type The type of data
    * @param value The data itself for the mutable value
    */
-  mutable_value(const data_type& type, immutable_raw_data value);
+  mutable_value(const data_type &type, immutable_raw_data value);
 
   /**
    * Constructs a mutable 
@@ -36,7 +36,7 @@ class mutable_value : public immutable_value {
    * @param type The type
    * @param value The value
    */
-  mutable_value(const data_type& type, const void* value);
+  mutable_value(const data_type &type, const void *value);
 
   /**
    * Constructs a boolean mutable value
@@ -96,7 +96,7 @@ class mutable_value : public immutable_value {
    *
    * @param str The string to construct a mutable value from
    */
-  mutable_value(const std::string& str);
+  mutable_value(const std::string &str);
 
   /**
    * Constructs a mutable value from an immutable value
@@ -104,7 +104,7 @@ class mutable_value : public immutable_value {
    * @param other The immutable value whose contents are used to construct
    * this mutable value
    */
-  mutable_value(const immutable_value& other);
+  mutable_value(const immutable_value &other);
 
   /**
    * Constructs a mutable value from the given mutable value
@@ -112,7 +112,7 @@ class mutable_value : public immutable_value {
    * @param other The mutable value whose contents are copied into this
    * mutable value
    */
-  mutable_value(const mutable_value& other);
+  mutable_value(const mutable_value &other);
 
   /**
    * Moves the contents of the rvalue mutable value to this mutable value
@@ -120,7 +120,7 @@ class mutable_value : public immutable_value {
    * @param other The rvalue mutable value that is moved into this mutable
    * value
    */
-  mutable_value(mutable_value&& other);
+  mutable_value(mutable_value &&other);
 
   /**
    * Deallocates the data in this mutable value
@@ -135,7 +135,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value containing the contents of the string
    */
-  static mutable_value parse(const std::string& str, const data_type& type);
+  static mutable_value parse(const std::string &str, const data_type &type);
 
   /**
    * Copies the data from this mutable value to an immutable value
@@ -153,7 +153,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value containing the result of the unary operation
    */
-  static mutable_value unaryop(unary_op_id id, const immutable_value& n);
+  static mutable_value unaryop(unary_op_id id, const immutable_value &n);
 
   /**
    * Unary negation operator 
@@ -162,7 +162,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value that contains the negated value
    */
-  friend mutable_value operator-(const immutable_value& n);
+  friend mutable_value operator-(const immutable_value &n);
 
   /**
    * Unary positive operator 
@@ -171,7 +171,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value that contains the value of the immutable value
    */
-  friend mutable_value operator+(const immutable_value& n);
+  friend mutable_value operator+(const immutable_value &n);
 
   /**
    * Bitwise not unary operator
@@ -181,7 +181,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the resultant value with all of
    * the bits flipped
    */
-  friend mutable_value operator~(const immutable_value& n);
+  friend mutable_value operator~(const immutable_value &n);
 
   /**
    * Performs a binary operation on two immutable values
@@ -192,7 +192,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value containing the result of the binary operation
    */
-  static mutable_value binaryop(binary_op_id id, const immutable_value& first, const immutable_value& second);
+  static mutable_value binaryop(binary_op_id id, const immutable_value &first, const immutable_value &second);
 
   /**
    * The addition operator
@@ -202,7 +202,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value containing the sum of the two immutable values
    */
-  friend mutable_value operator+(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator+(const immutable_value &first, const immutable_value &second);
 
   /**
    * The subtraction operator
@@ -213,7 +213,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the difference of the two 
    * immutable values
    */
-  friend mutable_value operator-(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator-(const immutable_value &first, const immutable_value &second);
 
   /**
    * The multiplication operator
@@ -225,7 +225,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the product of the two 
    * immutable values
    */
-  friend mutable_value operator*(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator*(const immutable_value &first, const immutable_value &second);
 
   /**
    * The division operator
@@ -236,7 +236,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value containing the quotient of the expression
    */
-  friend mutable_value operator/(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator/(const immutable_value &first, const immutable_value &second);
 
   /**
    * The modulo operator
@@ -246,7 +246,7 @@ class mutable_value : public immutable_value {
    *
    * @return A mutable value containing the remainder 
    */
-  friend mutable_value operator%(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator%(const immutable_value &first, const immutable_value &second);
 
   /**
    * The bitwise and operator
@@ -257,7 +257,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the result of the bitwise and
    * operator applied to the two operands
    */
-  friend mutable_value operator&(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator&(const immutable_value &first, const immutable_value &second);
 
   /**
    * The bitwise or operator
@@ -268,7 +268,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the result of the bitwise or
    * operator applied to the two operands
    */
-  friend mutable_value operator|(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator|(const immutable_value &first, const immutable_value &second);
 
   /**
    * The bitwise xor operator
@@ -279,7 +279,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the result of the bitwise xor
    * operator applied to the two operands
    */
-  friend mutable_value operator^(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator^(const immutable_value &first, const immutable_value &second);
 
   /**
    * The bitwise left shift operator
@@ -290,7 +290,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the result of the bitwise left
    * shift operator applied to the two operands
    */
-  friend mutable_value operator<<(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator<<(const immutable_value &first, const immutable_value &second);
 
   /**
    * The bitwise right shift operator
@@ -301,7 +301,7 @@ class mutable_value : public immutable_value {
    * @return A mutable value containing the result of the bitwise right
    * shift operator applied to the two operands
    */
-  friend mutable_value operator>>(const immutable_value& first, const immutable_value& second);
+  friend mutable_value operator>>(const immutable_value &first, const immutable_value &second);
 
   // TODO: Add more assignment operators
   /**
@@ -312,7 +312,7 @@ class mutable_value : public immutable_value {
    *
    * @return This updated mutable value
    */
-  mutable_value& operator=(const immutable_value& other);
+  mutable_value &operator=(const immutable_value &other);
 
   /**
    * Assigns another mutable value to this mutable value
@@ -322,7 +322,7 @@ class mutable_value : public immutable_value {
    *
    * @return This updated mutable value
    */
-  mutable_value& operator=(const mutable_value& other);
+  mutable_value &operator=(const mutable_value &other);
 
   /**
    * Moves the rvalue mutable value into this mutable value
@@ -332,9 +332,8 @@ class mutable_value : public immutable_value {
    *
    * @return This updated mutable value
    */
-  mutable_value& operator=(mutable_value&& other);
-}
-;
+  mutable_value &operator=(mutable_value &&other);
+};
 
 }
 

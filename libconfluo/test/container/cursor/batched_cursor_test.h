@@ -13,7 +13,7 @@ class BatchedCursorTest : public testing::Test {
  public:
   class int_cursor : public batched_cursor<int> {
    public:
-    int_cursor(const std::vector<int>& elems, size_t batch_size = 64)
+    int_cursor(const std::vector<int> &elems, size_t batch_size = 64)
         : batched_cursor<int>(batch_size),
           cur_(elems.begin()),
           end_(elems.end()) {

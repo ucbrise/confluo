@@ -17,7 +17,7 @@ void index_archiver::archive(size_t offset) {
   byte_string max = column_.max().to_key(column_.index_bucket_size());
   auto reflogs = index_->range_lookup_reflogs(min, max);
   for (auto it = reflogs.begin(); it != reflogs.end(); it++) {
-    auto& refs = *it;
+    auto &refs = *it;
     archive_reflog(it.key(), refs, offset);
   }
   writer_.close();
@@ -30,7 +30,7 @@ void index_archiver::archive_reflog(byte_string key, reflog &refs, size_t offset
     read_only_reflog_ptr bucket_ptr;
     refs.ptr(reflog_idx - reflog_idx % reflog_constants::BUCKET_SIZE, bucket_ptr);
     // Optimized get: we can assume any pointer in memory is unencoded.
-    uint64_t* data = bucket_ptr.get().ptr_as<uint64_t>();
+    uint64_t *data = bucket_ptr.get().ptr_as<uint64_t>();
     auto aux = ptr_aux_block::get(ptr_metadata::get(data));
     // Skip if already archived.
     if (aux.state_ != state_type::D_IN_MEMORY) {
@@ -62,7 +62,7 @@ size_t index_archiver::archive_bucket(byte_string key, reflog &refs, size_t idx,
   // Only swap pointer for full buckets.
   if (bucket_size == reflog_constants::BUCKET_SIZE) {
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
-    void* enc_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
+    void *enc_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
     archival_utils::swap_bucket_ptr(refs, idx, encoded_reflog_ptr(enc_bucket));
   }
   return idx + bucket_size;
@@ -84,14 +84,14 @@ size_t index_load_utils::load(const std::string &path, index::radix_index *index
     ptr_metadata metadata = reader.read<ptr_metadata>();
     size_t bucket_size = metadata.data_size_;
 
-    auto*& refs = index->get_or_create(cur_key);
+    auto *&refs = index->get_or_create(cur_key);
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
-    void* encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
+    void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
     init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
     reader.advance<uint8_t>(bucket_size);
     reflog_idx += archival_metadata.bucket_size();
 
-    atomic::type<size_t>* tail = refs->write_tail();
+    atomic::type<size_t> *tail = refs->write_tail();
     size_t old_tail = atomic::load(tail);
     atomic::strong::cas(tail, &old_tail, reflog_idx);
 
@@ -101,11 +101,11 @@ size_t index_load_utils::load(const std::string &path, index::radix_index *index
 }
 
 void index_load_utils::init_bucket_ptr(reflog *refs, size_t idx, encoded_reflog_ptr encoded_bucket) {
-  auto& bucket_containers = refs->data();
+  auto &bucket_containers = refs->data();
   size_t bucket_idx, container_idx;
   refs->raw_data_location(idx, container_idx, bucket_idx);
   refs->ensure_alloc(idx, idx);
-  auto* container = atomic::load(&bucket_containers[container_idx]);
+  auto *container = atomic::load(&bucket_containers[container_idx]);
   encoded_reflog_ptr old_data = container[bucket_idx].atomic_load();
   container[bucket_idx].atomic_init(encoded_bucket, old_data);
 }

@@ -37,7 +37,7 @@ class query_planner {
    * @param idx_list A pointer to an index_log
    * @param schema A pointer to the schema
    */
-  query_planner(const data_log* dlog, const index_log* idx_list, const schema_t* schema);
+  query_planner(const data_log *dlog, const index_log *idx_list, const schema_t *schema);
 
   /**
    * Converts a compiled_expression to a list of query_ops
@@ -45,7 +45,7 @@ class query_planner {
    * @throws illegal_state_exception
    * @return the query plan that contains a list of query_ops
    */
-  query_plan plan(const parser::compiled_expression& expr) const;
+  query_plan plan(const parser::compiled_expression &expr) const;
 
  private:
   /**
@@ -56,7 +56,7 @@ class query_planner {
    *
    * @return A key range containing the combination of the given key ranges
    */
-  key_range merge_range(const key_range& r1, const key_range& r2) const;
+  key_range merge_range(const key_range &r1, const key_range &r2) const;
 
   /**
    * Adds a key range to the given key range map
@@ -67,7 +67,7 @@ class query_planner {
    *
    * @return True if the range was successfully added, false otherwise
    */
-  bool add_range(key_range_map& ranges, uint32_t id, const key_range& r) const;
+  bool add_range(key_range_map &ranges, uint32_t id, const key_range &r) const;
 
   /**
    * Optimizes the compiled minterm expression using the key ranges
@@ -76,11 +76,11 @@ class query_planner {
    *
    * @return Pointer to the optimized query operation
    */
-  std::shared_ptr<query_op> optimize_minterm(const parser::compiled_minterm& m) const;
+  std::shared_ptr<query_op> optimize_minterm(const parser::compiled_minterm &m) const;
 
-  const data_log* dlog_;
-  const index_log* idx_list_;
-  const schema_t* schema_;
+  const data_log *dlog_;
+  const index_log *idx_list_;
+  const schema_t *schema_;
 };
 
 }

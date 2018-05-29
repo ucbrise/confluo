@@ -10,7 +10,7 @@ using namespace ::confluo::monolog;
 using namespace ::confluo;
 
 // Stateless filter
-inline bool filter1(const record_t& r) {
+inline bool filter1(const record_t &r) {
   return r.timestamp() % 10000 == 0;
 }
 
@@ -30,22 +30,22 @@ class FilterTest : public testing::Test {
     }
   }__attribute__((packed));
 
-  void fill(filter& f) {
+  void fill(filter &f) {
     ASSERT_TRUE(thread_manager::register_thread() != -1);
     for (size_t i = 0; i < kMaxEntries; i++) {
       data_point p(i * kTimeBlock, i);
-      record_t r(i, reinterpret_cast<uint8_t*>(&p), sizeof(data_point));
+      record_t r(i, reinterpret_cast<uint8_t *>(&p), sizeof(data_point));
       r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
       r.push_back(
           field_t(1, LONG_TYPE,
-                  reinterpret_cast<char*>(r.data()) + sizeof(int64_t), false, 0,
+                  reinterpret_cast<char *>(r.data()) + sizeof(int64_t), false, 0,
                   0.0));
       f.update(r);
     }
     ASSERT_TRUE(thread_manager::deregister_thread() != -1);
   }
 
-  void fill_mt(filter& f, uint32_t num_threads) {
+  void fill_mt(filter &f, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (size_t i = 1; i <= num_threads; i++) {
       workers.push_back(
@@ -55,21 +55,26 @@ class FilterTest : public testing::Test {
                 size_t begin = (i - 1) * kMaxEntries, end = i * kMaxEntries;
                 for (size_t j = begin; j < end; j++) {
                   data_point p((j - begin) * kTimeBlock, j);
-                  record_t r(j, reinterpret_cast<uint8_t*>(&p), sizeof(data_point));
+                  record_t r(j, reinterpret_cast<uint8_t *>(&p), sizeof(data_point));
                   r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
-                  r.push_back(field_t(1, LONG_TYPE, reinterpret_cast<char*>(r.data()) + sizeof(int64_t), false, 0, 0.0));
+                  r.push_back(field_t(1,
+                                      LONG_TYPE,
+                                      reinterpret_cast<char *>(r.data()) + sizeof(int64_t),
+                                      false,
+                                      0,
+                                      0.0));
                   f.update(r);
                 }
                 ASSERT_TRUE(thread_manager::deregister_thread() != -1);
               }));
     }
 
-    for (std::thread& worker : workers) {
+    for (std::thread &worker : workers) {
       worker.join();
     }
   }
 
-  static compiled_expression get_expr(std::string& expr) {
+  static compiled_expression get_expr(std::string &expr) {
     schema_builder builder;
     builder.add_column(LONG_TYPE, "value");
     schema_t schema(builder.get_columns());
@@ -84,7 +89,7 @@ TEST_F(FilterTest, FilterFunctionTest) {
 
   size_t accum = 0;
   for (size_t t = 0; t < 100; t++) {
-    reflog const* s = f.lookup(t);
+    reflog const *s = f.lookup(t);
     size_t size = s->size();
     ASSERT_EQ(static_cast<size_t>(100), size);
     for (uint32_t i = accum; i < accum + size; i++) {
@@ -97,7 +102,7 @@ TEST_F(FilterTest, FilterFunctionTest) {
   size_t count = res.count();
   ASSERT_EQ(static_cast<size_t>(4 * 100), count);
   size_t i = 0;
-  for (const uint64_t& r : res) {
+  for (const uint64_t &r : res) {
     ASSERT_EQ(i * 10, r);
     i++;
   }
@@ -109,7 +114,7 @@ TEST_F(FilterTest, FilterFunctionTest) {
     uint64_t n_filtered_entries = (kMaxEntries * num_threads) / 10;
     std::vector<size_t> counts(n_filtered_entries, 0);
     for (size_t t = 0; t < 100; t++) {
-      reflog const* s = f1.lookup(t);
+      reflog const *s = f1.lookup(t);
       size_t size = s->size();
       ASSERT_EQ(100 * num_threads, size);
       for (uint32_t i = 0; i < size; i++) {
@@ -138,7 +143,7 @@ TEST_F(FilterTest, FilterExpressionTest) {
 
   size_t accum = 50000;
   for (size_t t = 50; t < 100; t++) {
-    reflog const* s = f.lookup(t);
+    reflog const *s = f.lookup(t);
     size_t size = s->size();
     ASSERT_EQ(static_cast<size_t>(1000), size);
     for (uint32_t i = accum; i < accum + size; i++) {
@@ -151,7 +156,7 @@ TEST_F(FilterTest, FilterExpressionTest) {
   size_t count = res.count();
   ASSERT_EQ(static_cast<size_t>(3 * 1000), count);
   size_t i = 50000;
-  for (const uint64_t& r : res) {
+  for (const uint64_t &r : res) {
     ASSERT_EQ(i, r);
     i++;
   }
@@ -168,7 +173,7 @@ TEST_F(FilterTest, AggregateTest) {
   fill(f);
   uint64_t version = kMaxEntries + sizeof(data_point);
   for (size_t t = 50; t < 100; t++) {
-    const aggregated_reflog* ar = f.lookup(t);
+    const aggregated_reflog *ar = f.lookup(t);
     int64_t expected = ((t + 1) * kTimeBlock - 1) * 1000;
     ASSERT_TRUE(numeric(expected) == ar->get_aggregate(aid, version));
   }
@@ -185,7 +190,7 @@ TEST_F(FilterTest, MultiThreadedAggregateTest) {
   fill_mt(f, 4);
   uint64_t version = 4 * kMaxEntries + sizeof(data_point);
   for (size_t t = 50; t < 100; t++) {
-    const aggregated_reflog* ar = f.lookup(t);
+    const aggregated_reflog *ar = f.lookup(t);
     int64_t expected = ((t + 1) * kTimeBlock - 1) * 1000;
     ASSERT_TRUE(numeric(expected) == ar->get_aggregate(aid, version));
   }

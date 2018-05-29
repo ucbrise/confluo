@@ -16,9 +16,9 @@ namespace utils {
 #define SETBITVAL(data, i) SETBIT((data)[(i) / 64], (i) % 64)
 #define CLRBITVAL(data, i) CLRBIT((data)[(i) / 64], (i) % 64)
 
-const uint64_t all_set = -1ULL;
+const uint64_t all_set = static_cast<const uint64_t>(-1ULL);
 
-static constexpr uint64_t high_bits_set[65] = { 0x0000000000000000ULL,
+constexpr uint64_t high_bits_set[65] = { 0x0000000000000000ULL,
     0x8000000000000000ULL, 0xC000000000000000ULL, 0xE000000000000000ULL,
     0xF000000000000000ULL, 0xF800000000000000ULL, 0xFC00000000000000ULL,
     0xFE00000000000000ULL, 0xFF00000000000000ULL, 0xFF80000000000000ULL,
@@ -42,7 +42,7 @@ static constexpr uint64_t high_bits_set[65] = { 0x0000000000000000ULL,
     0xFFFFFFFFFFFFFFF8ULL, 0xFFFFFFFFFFFFFFFCULL, 0xFFFFFFFFFFFFFFFEULL,
     0xFFFFFFFFFFFFFFFFULL };
 
-static constexpr uint64_t high_bits_unset[65] = { 0xFFFFFFFFFFFFFFFFULL,
+constexpr uint64_t high_bits_unset[65] = { 0xFFFFFFFFFFFFFFFFULL,
     0x7FFFFFFFFFFFFFFFULL, 0x3FFFFFFFFFFFFFFFULL, 0x1FFFFFFFFFFFFFFFULL,
     0x0FFFFFFFFFFFFFFFULL, 0x07FFFFFFFFFFFFFFULL, 0x03FFFFFFFFFFFFFFULL,
     0x01FFFFFFFFFFFFFFULL, 0x00FFFFFFFFFFFFFFULL, 0x007FFFFFFFFFFFFFULL,
@@ -66,7 +66,7 @@ static constexpr uint64_t high_bits_unset[65] = { 0xFFFFFFFFFFFFFFFFULL,
     0x0000000000000007ULL, 0x0000000000000003ULL, 0x0000000000000001ULL,
     0x0000000000000000ULL };
 
-static constexpr uint64_t low_bits_set[65] = { 0x0000000000000000ULL,
+constexpr uint64_t low_bits_set[65] = { 0x0000000000000000ULL,
     0x0000000000000001ULL, 0x0000000000000003ULL, 0x0000000000000007ULL,
     0x000000000000000FULL, 0x000000000000001FULL, 0x000000000000003FULL,
     0x000000000000007FULL, 0x00000000000000FFULL, 0x00000000000001FFULL,
@@ -90,7 +90,7 @@ static constexpr uint64_t low_bits_set[65] = { 0x0000000000000000ULL,
     0x1FFFFFFFFFFFFFFFULL, 0x3FFFFFFFFFFFFFFFULL, 0x7FFFFFFFFFFFFFFFULL,
     0xFFFFFFFFFFFFFFFFULL };
 
-static constexpr uint64_t low_bits_unset[65] = { 0xFFFFFFFFFFFFFFFFULL,
+constexpr uint64_t low_bits_unset[65] = { 0xFFFFFFFFFFFFFFFFULL,
     0xFFFFFFFFFFFFFFFEULL, 0xFFFFFFFFFFFFFFFCULL, 0xFFFFFFFFFFFFFFF8ULL,
     0xFFFFFFFFFFFFFFF0ULL, 0xFFFFFFFFFFFFFFE0ULL, 0xFFFFFFFFFFFFFFC0ULL,
     0xFFFFFFFFFFFFFF80ULL, 0xFFFFFFFFFFFFFF00ULL, 0xFFFFFFFFFFFFFE00ULL,
@@ -132,7 +132,7 @@ class bit_utils {
   }
 
   static inline bool get_bit(uint64_t n, uint64_t i) {
-    return (n >> i) & UINT64_C(1);
+    return static_cast<bool>((n >> i) & UINT64_C(1));
   }
 
   static inline uint64_t set_bit(uint64_t n, uint64_t i) {
@@ -152,15 +152,15 @@ class bit_utils {
     return (n != 0) && ((n & (n - 1)) == 0);
   }
 
-  static uint32_t bit_width(uint64_t n) {
+  static inline uint32_t bit_width(uint64_t n) {
     return highest_bit(n) + 1;
   }
 
-  static uint8_t popcount_64(uint64_t n) {
+  static inline uint8_t popcount_64(uint64_t n) {
     return __builtin_popcountll(n);
   }
 
-  static uint16_t popcount_512(uint64_t *data) {
+  static inline uint16_t popcount_512(uint64_t *data) {
     return __builtin_popcountll(*data) + __builtin_popcountll(*(data + 1))
         + __builtin_popcountll(*(data + 2)) + __builtin_popcountll(*(data + 3))
         + __builtin_popcountll(*(data + 4)) + __builtin_popcountll(*(data + 5))

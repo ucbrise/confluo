@@ -59,7 +59,7 @@ class TypeManagerTest : public testing::Test {
   static data_type addr_type;
   static data_type sz_type;
 
-  static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
+  static void generate_bytes(uint8_t *buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
     for (uint32_t i = 0; i < len; i++) {
       buf[i] = val_uint8;
@@ -75,21 +75,21 @@ class TypeManagerTest : public testing::Test {
 
   static rec r;
 
-  static void* record(ip_address a, ip_address b, size_type c) {
+  static void *record(ip_address a, ip_address b, size_type c) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c};
-    return reinterpret_cast<void*>(&r);
+    return reinterpret_cast<void *>(&r);
   }
 
-  static void compile(compiled_expression& cexp, const std::string& exp,
-                      const schema_t& schema) {
+  static void compile(compiled_expression &cexp, const std::string &exp,
+                      const schema_t &schema) {
     auto t = parse_expression(exp);
     cexp = compile_expression(t, schema);
   }
 
-  static compiled_predicate predicate(const std::string& attr,
+  static compiled_predicate predicate(const std::string &attr,
                                       reational_op_id id,
-                                      const std::string& value) {
+                                      const std::string &value) {
     return compiled_predicate(attr, id, value, schema());
   }
 
@@ -112,10 +112,10 @@ std::vector<column_t> TypeManagerTest::s = schema();
 task_pool TypeManagerTest::MGMT_POOL;
 
 TEST_F(TypeManagerTest, RegisterTest) {
-  ASSERT_EQ(limits::int_one, *reinterpret_cast<int*>(addr_type.one()));
-  ASSERT_EQ(limits::int_min, *reinterpret_cast<int*>(addr_type.min()));
-  ASSERT_EQ(limits::int_max, *reinterpret_cast<int*>(addr_type.max()));
-  ASSERT_EQ(limits::int_zero, *reinterpret_cast<int*>(addr_type.zero()));
+  ASSERT_EQ(limits::int_one, *reinterpret_cast<int *>(addr_type.one()));
+  ASSERT_EQ(limits::int_min, *reinterpret_cast<int *>(addr_type.min()));
+  ASSERT_EQ(limits::int_max, *reinterpret_cast<int *>(addr_type.max()));
+  ASSERT_EQ(limits::int_zero, *reinterpret_cast<int *>(addr_type.zero()));
   ASSERT_STREQ("ip_address", addr_type.name().c_str());
   ASSERT_EQ(13, confluo::type_manager::get_type("ip_address").id);
   ASSERT_STREQ("ip_address", s[1].type().name().c_str());
@@ -139,7 +139,7 @@ TEST_F(TypeManagerTest, FilterTest) {
 
   size_t i = 0;
   for (auto r = dtable.execute_filter("a > 0.0.0.3"); r->has_more();
-      r->advance()) {
+       r->advance()) {
     ASSERT_TRUE(r->get().at(1).value().as<ip_address>().get_address() > 33);
     i++;
   }
@@ -147,7 +147,7 @@ TEST_F(TypeManagerTest, FilterTest) {
 
   i = 0;
   for (auto r = dtable.execute_filter("c == 1kb"); r->has_more();
-      r->advance()) {
+       r->advance()) {
     ASSERT_TRUE(
         r->get().at(3).value().as<size_type>().get_bytes()
             == static_cast<uint64_t>(1024));
@@ -374,11 +374,11 @@ TEST_F(TypeManagerTest, SerializeTest) {
 
   std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
   int32_t val_read;
-  infile.read(reinterpret_cast<char*>(&val_read), INT_TYPE.size);
+  infile.read(reinterpret_cast<char *>(&val_read), INT_TYPE.size);
   ASSERT_EQ(390, val_read);
 
   ip_address addr_read;
-  infile.read(reinterpret_cast<char*>(&addr_read), addr_type.size);
+  infile.read(reinterpret_cast<char *>(&addr_read), addr_type.size);
   ASSERT_EQ(1163468770, addr_read.get_address());
 
   infile.close();

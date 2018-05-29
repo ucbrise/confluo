@@ -25,7 +25,7 @@ class immutable_byte_string {
    * @param data The sequence of bytes
    * @param size The number of bytes the data contains
    */
-  immutable_byte_string(uint8_t* data, size_t size);
+  immutable_byte_string(uint8_t *data, size_t size);
 
   /**
    * Selects a particular byte of the string
@@ -43,7 +43,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte string is less than the other
    * immutable_byte_string, false otherwise
    */
-  bool operator<(const immutable_byte_string& other) const;
+  bool operator<(const immutable_byte_string &other) const;
 
   /**
    * Performs a less than or equal to comparison of two 
@@ -53,8 +53,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is less than or equal
    * to the other immutable_byte_string, false otherwise
    */
-  bool operator<=(const immutable_byte_string& other) const;
-
+  bool operator<=(const immutable_byte_string &other) const;
 
   /**
    * Performs a greater than comparison of two 
@@ -64,7 +63,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is greater than the other 
    * immutable_byte_string, false otherwise
    */
-  bool operator>(const immutable_byte_string& other) const;
+  bool operator>(const immutable_byte_string &other) const;
 
   /**
    * Performs a greater than or equal to comparison of two 
@@ -74,7 +73,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is greater than or equal
    * to the other immutable_byte_string, false otherwise
    */
-  bool operator>=(const immutable_byte_string& other) const;
+  bool operator>=(const immutable_byte_string &other) const;
 
   /**
    * Performs an equality comparison of two 
@@ -84,7 +83,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is equal
    * to the other immutable_byte_string, false otherwise
    */
-  bool operator==(const immutable_byte_string& other) const;
+  bool operator==(const immutable_byte_string &other) const;
 
   /**
    * Performs a not equal to comparison of two 
@@ -94,7 +93,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is not equal
    * to the other immutable_byte_string, false otherwise
    */
-  bool operator!=(const immutable_byte_string& other) const;
+  bool operator!=(const immutable_byte_string &other) const;
 
   /**
    * Assigns the contents of another immutable_byte_string to this
@@ -102,7 +101,7 @@ class immutable_byte_string {
    * @param other A reference to the other immutable_byte_string
    * @return A pointer to this immutable_byte_string
    */
-  immutable_byte_string& operator=(const immutable_byte_string& other);
+  immutable_byte_string &operator=(const immutable_byte_string &other);
 
   /**
    * Constructs a string representation of the immutable_byte_string
@@ -112,7 +111,7 @@ class immutable_byte_string {
   std::string to_string() const;
 
  private:
-  uint8_t* data_;
+  uint8_t *data_;
   size_t size_;
 
   /** The byte string class */
@@ -243,12 +242,12 @@ class byte_string {
    */
   template<typename T, typename std::enable_if<
       std::is_integral<T>::value && !std::is_same<T, bool>::value
-          && std::is_signed<T>::value, T>::type* = nullptr>
+          && std::is_signed<T>::value, T>::type * = nullptr>
   byte_string(T val)
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
     typedef typename std::make_unsigned<T>::type UT;
-    UT uval = val ^ (UT(1) << (sizeof(UT) * 8 - 1));
+    UT uval = val ^(UT(1) << (sizeof(UT) * 8 - 1));
 #if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
     uval = utils::byte_utils::byte_swap(uval);
@@ -265,7 +264,7 @@ class byte_string {
    */
   template<typename T, typename std::enable_if<
       std::is_integral<T>::value && !std::is_same<T, bool>::value
-          && !std::is_signed<T>::value, T>::type* = nullptr>
+          && !std::is_signed<T>::value, T>::type * = nullptr>
   byte_string(T val)
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
@@ -282,7 +281,7 @@ class byte_string {
    * Constructs a byte_string from another byte_string
    * @param str Reference to the string to copy from
    */
-  byte_string(const std::string& str);
+  byte_string(const std::string &str);
 
   /**
    * Constructs a byte_string from copying a certain number of characters
@@ -290,26 +289,26 @@ class byte_string {
    * @param str The reference string to copy from
    * @param length The number of characters to copy
    */
-  byte_string(const std::string& str, size_t length);
+  byte_string(const std::string &str, size_t length);
 
   /**
    * Constructs a byte_string from an immutable_byte_string
    * @param other A reference to the immutable_byte_string that is
    * copied from
    */
-  byte_string(const immutable_byte_string& other);
+  byte_string(const immutable_byte_string &other);
 
   /**
    * Constructs a byte_string from another byte_string
    * @param other A reference to the other byte_string to copy from
    */
-  byte_string(const byte_string& other);
+  byte_string(const byte_string &other);
 
   /**
    * Initializes a given byte_string
    * @param other A double referenced byte_string to be initialized
    */
-  byte_string(byte_string&& other);
+  byte_string(byte_string &&other);
 
   /**
    * Deallocates the data for the byte_string
@@ -321,7 +320,7 @@ class byte_string {
    * @param idx The index of the desired byte in the byte_string
    * @return A reference to the byte at the desired index
    */
-  uint8_t& operator[](size_t idx);
+  uint8_t &operator[](size_t idx);
 
   /**
    * Access the byte at the specified index
@@ -338,7 +337,7 @@ class byte_string {
    * @return True if this byte_string is less than the other
    * byte_string, false otherwise
    */
-  bool operator<(const byte_string& other) const;
+  bool operator<(const byte_string &other) const;
 
   /**
    * Performs a less than or equal to comparison of two byte_strings 
@@ -348,7 +347,7 @@ class byte_string {
    * @return True if this byte_string is less than or equal to the other
    * byte_string, false otherwise
    */
-  bool operator<=(const byte_string& other) const;
+  bool operator<=(const byte_string &other) const;
 
   /**
    * Performs a greater than comparison of two byte_strings 
@@ -358,7 +357,7 @@ class byte_string {
    * @return True if this byte_string is greater than the other
    * byte_string, false otherwise
    */
-  bool operator>(const byte_string& other) const;
+  bool operator>(const byte_string &other) const;
 
   /**
    * Performs a greater than or equal to comparison of two byte_strings 
@@ -368,7 +367,7 @@ class byte_string {
    * @return True if this byte_string is greater than or equal to the other
    * byte_string, false otherwise
    */
-  bool operator>=(const byte_string& other) const;
+  bool operator>=(const byte_string &other) const;
 
   /**
    * Performs an equality comparison of two byte_strings 
@@ -378,7 +377,7 @@ class byte_string {
    * @return True if this byte_string is equal to the other
    * byte_string, false otherwise
    */
-  bool operator==(const byte_string& other) const;
+  bool operator==(const byte_string &other) const;
 
   /**
    * Performs a not equal comparison of two byte_strings 
@@ -388,19 +387,19 @@ class byte_string {
    * @return True if this byte_string is not equal to the other
    * byte_string, false otherwise
    */
-  bool operator!=(const byte_string& other) const;
+  bool operator!=(const byte_string &other) const;
 
   /**
    * Increments the value of the byte_string
    * @return A reference to the incremented byte_string
    */
-  byte_string& operator++();
+  byte_string &operator++();
 
   /**
    * Decrements the value of the byte_string
    * @return A reference to the decremented byte_string
    */
-  byte_string& operator--();
+  byte_string &operator--();
 
   /**
    * Assigns the value of an immutable_byte_string to a byte_string
@@ -408,14 +407,14 @@ class byte_string {
    * for assignment
    * @return A byte_string with the copied data
    */
-  byte_string& operator=(const immutable_byte_string& other);
+  byte_string &operator=(const immutable_byte_string &other);
 
   /**
    * Assigns the contents of another byte_string to this byte_string
    * @param other Reference to the byte_string to copy from
    * @return The byte_string with the copied data
    */
-  byte_string& operator=(const byte_string& other);
+  byte_string &operator=(const byte_string &other);
 
   /**
    * Assigns a double referenced byte_string to this byte_string
@@ -424,7 +423,7 @@ class byte_string {
    * @return A byte string reference with the data of the other
    * byte_string
    */
-  byte_string& operator=(byte_string&& other);
+  byte_string &operator=(byte_string &&other);
 
   template<typename T>
   inline T as() const {
@@ -449,7 +448,7 @@ class byte_string {
    */
   immutable_byte_string copy() const;
 
-  uint8_t* data();
+  uint8_t *data();
 
   size_t size();
 
@@ -461,7 +460,7 @@ class byte_string {
 
  private:
   size_t size_;
-  uint8_t* data_;
+  uint8_t *data_;
 };
 
 }

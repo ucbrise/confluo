@@ -73,7 +73,7 @@ immutable_raw_data mutable_raw_data::immutable() const {
 
 void mutable_raw_data::free() {
   if (ptr != nullptr) {
-    delete[] reinterpret_cast<uint8_t*>(ptr);
+    delete[] reinterpret_cast<uint8_t *>(ptr);
     ptr = nullptr;
     size = 0;
   }
@@ -82,6 +82,40 @@ void mutable_raw_data::free() {
 void mutable_raw_data::allocate(size_t sz) {
   ptr = new uint8_t[sz];
   size = sz;
+}
+
+/**
+ * Converts the immutable raw data to a string
+ *
+ * @return The data in string form
+ */
+template<>
+std::string immutable_raw_data::as<std::string>() const {
+  const char *buf = reinterpret_cast<const char *>(ptr);
+  return std::string(buf, size);
+}
+
+/**
+ * Converts the raw mutable data to be in string form
+ *
+ * @return String representation of the raw mutable data
+ */
+template<>
+std::string mutable_raw_data::as<std::string>() const {
+  return std::string(reinterpret_cast<const char *>(ptr), size);
+}
+
+/**
+ * Sets the data of the raw mutable value to a specified string value
+ *
+ * @param str The string data to turn into a raw mutable value
+ *
+ * @return A reference to the mutable raw data that stores the string value
+ */
+template<>
+mutable_raw_data &mutable_raw_data::set<std::string>(const std::string &str) {
+  memcpy(ptr, str.data(), str.length());
+  return *this;
 }
 
 }

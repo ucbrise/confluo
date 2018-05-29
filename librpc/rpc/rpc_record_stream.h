@@ -1,6 +1,7 @@
 #ifndef RPC_RPC_RECORD_STREAM_H_
 #define RPC_RPC_RECORD_STREAM_H_
 
+#include "schema/schema.h"
 #include "rpc_service.h"
 
 namespace confluo {
@@ -24,56 +25,35 @@ class rpc_record_stream {
    */
   rpc_record_stream(int64_t multilog_id, const schema_t& schema,
                     std::shared_ptr<thrift_client> client,
-                    rpc_iterator_handle&& handle)
-      : multilog_id_(multilog_id),
-        schema_(schema),
-        handle_(std::move(handle)),
-        cur_off_(0),
-        client_(std::move(client)) {
-  }
+                    rpc_iterator_handle&& handle);
 
   /**
    * Gets the record data from the schema
    *
    * @return The record at the offset
    */
-  record_t get() {
-    return schema_.apply_unsafe(0, &handle_.data[cur_off_]);
-  }
+  record_t get();
 
   /**
    * Advances the stream to get the next record
    *
    * @return This record stream advanced
    */
-  rpc_record_stream& operator++() {
-    if (has_more()) {
-      cur_off_ += schema_.record_size();
-      if (cur_off_ == handle_.data.size() && handle_.has_more) {
-        client_->get_more(handle_, multilog_id_, handle_.desc);
-        cur_off_ = 0;
-      }
-    }
-    return *this;
-  }
+  rpc_record_stream& operator++();
 
   /**
    * Checks to see if the record stream has any more elements
    *
    * @return True if there are any elements left, false otherwise
    */
-  bool has_more() const {
-    return handle_.has_more || cur_off_ != handle_.data.size();
-  }
+  bool has_more() const;
 
   /**
    * Checks to see if the record stream is empty
    *
    * @return True if the record stream is empty, false otherwise
    */
-  bool empty() const {
-    return !has_more();
-  }
+  bool empty() const;
 
  private:
   int64_t multilog_id_;

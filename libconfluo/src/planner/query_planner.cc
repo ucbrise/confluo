@@ -54,9 +54,9 @@ bool query_planner::add_range(query_planner::key_range_map &ranges,
 std::shared_ptr<query_op> query_planner::optimize_minterm(const parser::compiled_minterm &m) const {
   // Get valid, condensed key-ranges for indexed attributes
   key_range_map m_key_ranges;
-  for (const auto& p : m) {
+  for (const auto &p : m) {
     uint32_t idx = p.field_idx();
-    const auto& col = (*schema_)[idx];
+    const auto &col = (*schema_)[idx];
     if (col.is_indexed() && p.op() != reational_op_id::NEQ) {
       double bucket_size = col.index_bucket_size();
       key_range r;
@@ -100,7 +100,7 @@ std::shared_ptr<query_op> query_planner::optimize_minterm(const parser::compiled
   // Now we only need to return the minimum cost index lookup
   uint32_t min_id;
   size_t min_cost = UINT64_MAX;
-  for (const auto& m_entry : m_key_ranges) {
+  for (const auto &m_entry : m_key_ranges) {
     size_t cost;
     // TODO: Make the cost function pluggable
     if ((cost = idx_list_->at(m_entry.first)->approx_count(

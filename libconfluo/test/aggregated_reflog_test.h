@@ -150,7 +150,7 @@ TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
     }));
   }
 
-  for (auto& w : workers) {
+  for (auto &w : workers) {
     if (w.joinable())
       w.join();
   }

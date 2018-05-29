@@ -20,7 +20,7 @@ class archival_utils {
    * @param filter_log_idx index of filter in filter_log
    * @return filter archival path
    */
-  static std::string filter_archival_path(const std::string& filter_log_path, size_t filter_log_idx);
+  static std::string filter_archival_path(const std::string &filter_log_path, size_t filter_log_idx);
 
   /**
    * Gets index archival path for a particular index.
@@ -28,7 +28,7 @@ class archival_utils {
    * @param index_id index id
    * @return
    */
-  static std::string index_archival_path(const std::string& index_log_path, size_t index_id);
+  static std::string index_archival_path(const std::string &index_log_path, size_t index_id);
 
   /**
    * Convenience method to swap a bucket pointer of a reflog.
@@ -36,14 +36,14 @@ class archival_utils {
    * @param idx starting reflog index of bucket
    * @param encoded_bucket new bucket to swap in
    */
-  static void swap_bucket_ptr(reflog& refs, size_t idx, encoded_reflog_ptr encoded_bucket);
+  static void swap_bucket_ptr(reflog &refs, size_t idx, encoded_reflog_ptr encoded_bucket);
 
   /**
    * Get maximum offset stored in a reflog bucket.
    * @param bucket decoded bucket
    * @return max offset
    */
-  static uint64_t max_in_reflog_bucket(uint64_t* bucket);
+  static uint64_t max_in_reflog_bucket(uint64_t *bucket);
 
 };
 

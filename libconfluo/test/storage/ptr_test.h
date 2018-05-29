@@ -27,7 +27,7 @@ TEST_F(PtrTest, CopyTest) {
   size_t initial_mem_usage = ALLOCATOR.memory_utilization();
 
   {
-    void* data = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE, ptr_aux_block());
+    void *data = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE, ptr_aux_block());
     encoded_ptr<uint64_t> enc_ptr(data);
     swappable_encoded_ptr<uint64_t> ptr(enc_ptr);
 
@@ -50,7 +50,6 @@ TEST_F(PtrTest, CopyTest) {
   ASSERT_EQ(initial_mem_usage, ALLOCATOR.memory_utilization());
 }
 
-
 TEST_F(PtrTest, SwapTest) {
   size_t initial_mem_usage = ALLOCATOR.memory_utilization();
 
@@ -58,8 +57,8 @@ TEST_F(PtrTest, SwapTest) {
     ptr_aux_block aux_unarchived(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
     ptr_aux_block aux_archived(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
 
-    void* data = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE, aux_unarchived);
-    void* data_swapped = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE, aux_archived);
+    void *data = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE, aux_unarchived);
+    void *data_swapped = ALLOCATOR.alloc(sizeof(uint64_t) * ARRAY_SIZE, aux_archived);
 
     encoded_ptr<uint64_t> enc_ptr(data);
     encoded_ptr<uint64_t> enc_swapped_ptr(data_swapped);
@@ -94,6 +93,5 @@ TEST_F(PtrTest, SwapTest) {
   // second pointer is deallocated, since the root pointer and all readers go out of scope
   ASSERT_EQ(initial_mem_usage, ALLOCATOR.memory_utilization());
 }
-
 
 #endif /* CONFLUO_TEST_PTR_TEST_H_ */

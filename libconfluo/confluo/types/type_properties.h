@@ -113,8 +113,7 @@ namespace detail {
 #define TONE(name) name ## _one
 #define TZERO(name) name ## _zero
 #define DEFINE_PRIMITIVE(TNAME, T)\
-    build_properties<T>(#TNAME, sizeof(T), true, &limits::TMIN(TNAME),\
-                        &limits::TMAX(TNAME), &limits::TONE(TNAME),\
+    build_properties<T>(#TNAME, sizeof(T), true, &limits::TMIN(TNAME), &limits::TMAX(TNAME), &limits::TONE(TNAME),\
                         &limits::TZERO(TNAME))
 
 /**

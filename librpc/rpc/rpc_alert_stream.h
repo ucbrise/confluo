@@ -23,39 +23,21 @@ class rpc_alert_stream {
    * @param client The rpc client
    * @param handle The data for the stream
    */
-  rpc_alert_stream(int64_t table_id, std::shared_ptr<rpc_client> client,
-                   rpc_iterator_handle&& handle)
-      : table_id_(table_id),
-        handle_(std::move(handle)),
-        stream_(handle_.data) {
-    if (has_more()) {
-      std::getline(stream_, alert_);
-    }
-  }
+  rpc_alert_stream(int64_t table_id, std::shared_ptr<rpc_client> client, rpc_iterator_handle&& handle);
 
   /**
    * Gets the alert
    *
    * @return String containing the alert
    */
-  const std::string& get() const {
-    return alert_;
-  }
+  const std::string& get() const;
 
   /**
    * Advances the alert stream
    *
    * @return This updated rpc alert stream 
    */
-  rpc_alert_stream& operator++() {
-    if (has_more()) {
-      if (!std::getline(stream_, alert_) && handle_.has_more) {
-        client_->get_more(handle_, table_id_, handle_.desc);
-        stream_.str(handle_.data);
-      }
-    }
-    return *this;
-  }
+  rpc_alert_stream& operator++();
 
   /**
    * Checks whether there is any more elements in the stream
@@ -63,18 +45,14 @@ class rpc_alert_stream {
    * @return True if the stream or handle has any more elements, false
    * otherwise
    */
-  bool has_more() const {
-    return !stream_.eof() || handle_.has_more;
-  }
+  bool has_more() const;
 
   /**
    * Checks whether the alert stream is empty
    *
    * @return True if the alert stream is empty, false otherwise
    */
-  bool empty() const {
-    return !has_more();
-  }
+  bool empty() const;
 
  private:
   int64_t table_id_;

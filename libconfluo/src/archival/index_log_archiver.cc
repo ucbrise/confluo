@@ -15,14 +15,14 @@ index_log_archiver::index_log_archiver(const std::string &path, index_log *index
 }
 
 index_log_archiver::~index_log_archiver() {
-  for (auto* archiver : index_archivers_)
+  for (auto *archiver : index_archivers_)
     delete archiver;
 }
 
 void index_log_archiver::archive(size_t offset) {
   init_new_archivers();
   for (size_t i = 0; i < schema_->size(); i++) {
-    auto& col = (*schema_)[i];
+    auto &col = (*schema_)[i];
     if (col.is_indexed()) {
       index_archivers_.at(col.index_id())->archive(offset);
     }
@@ -31,7 +31,7 @@ void index_log_archiver::archive(size_t offset) {
 
 void index_log_archiver::init_new_archivers() {
   for (size_t i = 0; i < schema_->size(); i++) {
-    auto& col = (*schema_)[i];
+    auto &col = (*schema_)[i];
     if (col.is_indexed()) {
       auto id = col.index_id();
       if (index_archivers_.size() <= id) {

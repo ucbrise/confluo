@@ -64,7 +64,7 @@ class thread_manager {
    *
    * @return A pointer to the thread info
    */
-  static thread_info* init_thread_info();
+  static thread_info *init_thread_info();
 
   /**
    * Finds the given thread
@@ -90,7 +90,7 @@ class thread_manager {
   /** The maximum amount of threads Confluo supports */
   static int MAX_CONCURRENCY;
   /** The thread info */
-  static thread_info* THREAD_INFO;
+  static thread_info *THREAD_INFO;
 };
 
 }

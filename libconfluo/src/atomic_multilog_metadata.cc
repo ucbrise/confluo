@@ -96,7 +96,7 @@ void metadata_writer::write_schema(const schema_t &schema) {
     metadata_type type = metadata_type::D_SCHEMA_METADATA;
     io_utils::write(out_, type);
     io_utils::write(out_, schema.columns().size());
-    for (auto& col : schema.columns()) {
+    for (auto &col : schema.columns()) {
       io_utils::write(out_, col.name());
       col.type().serialize(out_);
     }

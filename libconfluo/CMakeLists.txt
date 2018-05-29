@@ -3,9 +3,6 @@ if (NOT APPLE AND UNIX)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
 endif ()
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-
 set(CONFLUO_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/confluo)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 
@@ -187,7 +184,12 @@ add_library(confluo STATIC
         src/types/raw_data.cc
         src/types/numeric.cc
         src/types/type_properties.cc
-        src/types/type_manager.cc)
+        src/types/type_manager.cc
+        src/container/cursor/alert_cursor.cc
+        src/container/cursor/offset_cursors.cc
+        src/container/cursor/record_cursors.cc
+        src/conf/configuration_parser.cc)
+target_link_libraries(confluo confluoutils)
 
 if (BUILD_TESTS)
   # Build test
@@ -241,7 +243,6 @@ if (BUILD_TESTS)
           test/confluo_store_test.h)
   target_link_libraries(ctest confluo gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
   add_dependencies(ctest googletest lz4)
-  set_target_properties(ctest PROPERTIES LINKER_LANGUAGE CXX)
 
   file(GLOB_RECURSE test_sources test/*.cc)
   target_link_libraries(ctest ${TEST_LINK_LIBS} ${JEMALLOC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
@@ -250,10 +251,14 @@ if (BUILD_TESTS)
 
   # Register test
   enable_testing()
-  add_test(ConfluoTest ${CMAKE_CURRENT_BINARY_DIR}/ctest)
+  add_test(ConfluoTest ctest)
 endif ()
 
 # install
+install(TARGETS confluo
+        RUNTIME DESTINATION bin
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib)
 install(DIRECTORY confluo/
         DESTINATION include
         FILES_MATCHING PATTERN "*")

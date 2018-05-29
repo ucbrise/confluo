@@ -7,7 +7,7 @@
 namespace confluo {
 
 /** Function pointer for the aggregation function */
-using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
+using aggregate_fn = numeric (*)(const numeric &v1, const numeric &v2);
 
 /**
  * Encapsulation of an aggregate and zero function
@@ -34,7 +34,7 @@ extern numeric count_one;
  * @param b Second numeric
  * @return The sum of the two numerics
  */
-numeric sum_agg(const numeric& a, const numeric& b);
+numeric sum_agg(const numeric &a, const numeric &b);
 
 /**
  * Finds the min of two numerics
@@ -42,7 +42,7 @@ numeric sum_agg(const numeric& a, const numeric& b);
  * @param b Second numeric
  * @return The minimum of the two numerics
  */
-numeric min_agg(const numeric& a, const numeric& b);
+numeric min_agg(const numeric &a, const numeric &b);
 
 /**
  * Finds the max of two numerics
@@ -50,22 +50,22 @@ numeric min_agg(const numeric& a, const numeric& b);
  * @param b Second numeric
  * @return The maximum of the two numerics
  */
-numeric max_agg(const numeric& a, const numeric& b);
+numeric max_agg(const numeric &a, const numeric &b);
 
 /**
  * Counts the numerics (equivalent to sum)
- * @param a First numeric 
+ * @param a First numeric
  * @param b Second numeric
  * @return The sum of the two numerics
  */
-numeric count_agg(const numeric& a, const numeric& b);
+numeric count_agg(const numeric &a, const numeric &b);
 
 /**
  * Throws an exception for an invalid aggregate operation
- * @param a First numeric 
+ * @param a First numeric
  * @param b Second numeric
  */
-numeric invalid_agg(const numeric& a, const numeric& b);
+numeric invalid_agg(const numeric &a, const numeric &b);
 
 /**
  * The invalid aggregator
@@ -103,7 +103,7 @@ typedef size_t aggregate_type;
  *
  * @return The matching aggregator
  */
-aggregate_type find_aggregator_id(const std::string& name);
+aggregate_type find_aggregator_id(const std::string &name);
 
 }
 

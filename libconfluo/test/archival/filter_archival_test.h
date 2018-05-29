@@ -30,16 +30,16 @@ class FilterArchivalTest : public testing::Test {
     }
   }__attribute__((packed));
 
-  void fill(filter& f) {
+  void fill(filter &f) {
     ASSERT_TRUE(thread_manager::register_thread() != -1);
     for (size_t i = 0; i < kMaxEntries / kPerTimeBlock; i++) {
       for (size_t j = i * kPerTimeBlock; j < (i + 1) * kPerTimeBlock; j++) {
         data_point p(i * kTimeBlock, j);
-        record_t r(j, reinterpret_cast<uint8_t*>(&p), sizeof(data_point));
+        record_t r(j, reinterpret_cast<uint8_t *>(&p), sizeof(data_point));
         r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
         r.push_back(
             field_t(1, LONG_TYPE,
-                    reinterpret_cast<char*>(r.data()) + sizeof(int64_t), false, 0,
+                    reinterpret_cast<char *>(r.data()) + sizeof(int64_t), false, 0,
                     0.0));
         f.update(r);
       }
@@ -47,10 +47,10 @@ class FilterArchivalTest : public testing::Test {
     ASSERT_TRUE(thread_manager::deregister_thread() != -1);
   }
 
-  void verify(filter& f) {
+  void verify(filter &f) {
     size_t accum = 0;
     for (size_t t = 0; t < 100; t++) {
-      reflog const* s = f.lookup(t);
+      reflog const *s = f.lookup(t);
       size_t size = s->size();
       ASSERT_EQ(static_cast<size_t>(10000), size);
       for (uint32_t i = accum; i < accum + size; i++) {
@@ -60,24 +60,24 @@ class FilterArchivalTest : public testing::Test {
     }
   }
 
-  void verify_reflog_archived(reflog const* reflog, size_t reflog_archival_tail) {
+  void verify_reflog_archived(reflog const *reflog, size_t reflog_archival_tail) {
     for (uint32_t i = 0; i < reflog_archival_tail; i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
-      void* ptr = bucket_ptr.get().ptr();
+      void *ptr = bucket_ptr.get().ptr();
       auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
       ASSERT_EQ(aux.state_, storage::state_type::D_ARCHIVED);
     }
     for (uint32_t i = reflog_archival_tail; i < reflog->size(); i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
-      void* ptr = bucket_ptr.get().ptr();
+      void *ptr = bucket_ptr.get().ptr();
       auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
       ASSERT_EQ(aux.state_, storage::state_type::D_IN_MEMORY);
     }
   }
 
-  static bool filter_none(const record_t& r) {
+  static bool filter_none(const record_t &r) {
     return true;
   }
 
@@ -92,7 +92,7 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestSingleCall) {
   filters.push_back(&f);
   filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
-  reflog const* first_reflog = f.lookup(0);
+  reflog const *first_reflog = f.lookup(0);
 
   verify(f);
   archiver.archive(32768);
@@ -108,7 +108,7 @@ TEST_F(FilterArchivalTest, FilterCorrectnessTestMultipleCalls) {
   filters.push_back(&f);
   filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
-  reflog const* first_reflog = f.lookup(0);
+  reflog const *first_reflog = f.lookup(0);
 
   verify(f);
   archiver.archive(1000);
@@ -129,8 +129,8 @@ TEST_F(FilterArchivalTest, FirstReflogArchivedTest) {
   filters.push_back(&f);
   filter_log_archiver archiver("/tmp/filter_archives/", &filters);
 
-  reflog const* first_reflog = f.lookup(0);
-  reflog const* second_reflog = f.lookup(1);
+  reflog const *first_reflog = f.lookup(0);
+  reflog const *second_reflog = f.lookup(1);
 
   verify_reflog_archived(first_reflog, 0);
 

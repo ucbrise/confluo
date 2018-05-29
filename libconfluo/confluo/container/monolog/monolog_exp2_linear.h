@@ -454,7 +454,7 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
    *
    * @return The index of the new value
    */
-  size_t push_back(const T& val) {
+  size_t push_back(const T &val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
@@ -468,7 +468,7 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
    *
    * @return The index of the range
    */
-  size_t push_back_range(const T& start, const T& end) {
+  size_t push_back_range(const T &start, const T &end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
     for (size_t i = 0; i < cnt; i++)
@@ -526,7 +526,7 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
    * Dangerous to modify this tail externally.
    * @return pointer to write tail
    */
-  atomic::type<size_t>* write_tail() {
+  atomic::type<size_t> *write_tail() {
     return &tail_;
   }
 

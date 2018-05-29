@@ -38,7 +38,7 @@ class filter_archival_action {
 
   filter_archival_action(byte_string radix_tree_key, size_t reflog_idx, size_t data_log_offset);
 
-  filter_archival_action(uint8_t* radix_tree_key, size_t reflog_idx, size_t data_log_offset);
+  filter_archival_action(uint8_t *radix_tree_key, size_t reflog_idx, size_t data_log_offset);
 
   std::string to_string();
 
@@ -77,7 +77,7 @@ class filter_aggregates_archival_action {
 
   filter_aggregates_archival_action(byte_string byte_str);
 
-  filter_aggregates_archival_action(uint8_t* archival_tail_key);
+  filter_aggregates_archival_action(uint8_t *archival_tail_key);
 
   std::string to_string();
 
@@ -116,7 +116,7 @@ class index_archival_action {
    * @param archival_tail offset up to which reflog has been archived
    * @param data_log_tail corresponding data log offset up to which reflog has been archived
    */
-  index_archival_action(size_t key_size, uint8_t* archival_tail_key,
+  index_archival_action(size_t key_size, uint8_t *archival_tail_key,
                         size_t archival_tail, size_t data_log_tail);
 
   std::string to_string();

@@ -19,7 +19,7 @@ class index_log_archiver {
    * @param indexes index log to archive
    * @param schema data schema
    */
-  index_log_archiver(const std::string& path, index_log* indexes, schema_t* schema);
+  index_log_archiver(const std::string &path, index_log *indexes, schema_t *schema);
 
   /**
    * Default destructor.
@@ -40,9 +40,9 @@ class index_log_archiver {
   void init_new_archivers();
 
   std::string path_;
-  std::vector<index_archiver*> index_archivers_;
-  index_log* indexes_;
-  schema_t* schema_;
+  std::vector<index_archiver *> index_archivers_;
+  index_log *indexes_;
+  schema_t *schema_;
 
 };
 

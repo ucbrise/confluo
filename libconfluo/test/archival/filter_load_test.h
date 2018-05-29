@@ -33,13 +33,13 @@ class FilterLoadTest : public testing::Test {
     }
   }__attribute__((packed));
 
-  void fill(data_log& log, filter& f, size_t start = 0) {
+  void fill(data_log &log, filter &f, size_t start = 0) {
     schema_t schema = build_schema();
     for (size_t i = start; i < start + kMaxEntries / kPerTimeBlock; i++) {
       for (size_t j = i * kPerTimeBlock; j < (i + 1) * kPerTimeBlock; j++) {
         data_point p(i * kTimeBlock, j);
-        size_t off = log.append(reinterpret_cast<uint8_t*>(&p), schema.record_size());
-        record_t r = schema.apply_unsafe(off, reinterpret_cast<uint8_t*>(&p));
+        size_t off = log.append(reinterpret_cast<uint8_t *>(&p), schema.record_size());
+        record_t r = schema.apply_unsafe(off, reinterpret_cast<uint8_t *>(&p));
         f.update(r);
       }
     }
@@ -49,19 +49,19 @@ class FilterLoadTest : public testing::Test {
     return schema_t(schema_builder().add_column(LONG_TYPE, "long_field").get_columns());
   }
 
-  void verify(filter& f) {
+  void verify(filter &f) {
     size_t accum = 0;
     for (size_t t = 0; t < 100; t++) {
-      reflog const* s = f.lookup(t);
+      reflog const *s = f.lookup(t);
       size_t size = s->size();
-      for (uint32_t i = accum; i < accum + size; i ++) {
+      for (uint32_t i = accum; i < accum + size; i++) {
         ASSERT_EQ(i * 16, s->at(i - accum));
       }
       accum += size;
     }
   }
 
-  static bool filter_none(const record_t& r) {
+  static bool filter_none(const record_t &r) {
     return true;
   }
 

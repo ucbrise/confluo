@@ -16,13 +16,13 @@ namespace planner {
  */
 enum query_op_type {
   /** Operation that does nothing */
-  D_NO_OP = 0,
+      D_NO_OP = 0,
   /** Operation that scans the data store */
-  D_SCAN_OP = 1,
+      D_SCAN_OP = 1,
   /** Operation that is invalid */
-  D_NO_VALID_INDEX_OP = 2,
+      D_NO_VALID_INDEX_OP = 2,
   /** Index operation */
-  D_INDEX_OP = 3
+      D_INDEX_OP = 3
 };
 
 /**
@@ -35,7 +35,7 @@ class query_op {
    *
    * @param op The type of query operation
    */
-  query_op(const query_op_type& op);
+  query_op(const query_op_type &op);
 
   /**
    * Destructs the query operation
@@ -158,7 +158,7 @@ class index_op : public query_op {
    * @param index The radix index
    * @param range The key range for the index
    */
-  index_op(const index::radix_index* index, const key_range& range);
+  index_op(const index::radix_index *index, const key_range &range);
 
   /**
    * Gets a string representation of the index operation
@@ -182,7 +182,7 @@ class index_op : public query_op {
   index::radix_index::rt_result query_index();
 
  private:
-  const index::radix_index* index_;
+  const index::radix_index *index_;
   key_range range_;
 };
 

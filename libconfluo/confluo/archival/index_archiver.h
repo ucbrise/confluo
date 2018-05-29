@@ -33,7 +33,7 @@ class index_archiver : public archiver {
    * @param index index to archive
    * @param column column corresponding to the index
    */
-  index_archiver(const std::string& path, index::radix_index* index, const column_t column);
+  index_archiver(const std::string &path, index::radix_index *index, const column_t column);
 
   /**
    * Archive index up to a data log offset.
@@ -48,7 +48,7 @@ class index_archiver : public archiver {
    * @param refs reflog
    * @param offset data log offset to archive reflog up to
    */
-  void archive_reflog(byte_string key, reflog& refs, size_t offset);
+  void archive_reflog(byte_string key, reflog &refs, size_t offset);
 
   /**
    * Archives a reflog bucket of a reflog corresponding to a radix tree key.
@@ -59,9 +59,9 @@ class index_archiver : public archiver {
    * @param offset max data log offset in bucket
    * @return reflog index to which bucket is archived
    */
-  size_t archive_bucket(byte_string key, reflog& refs, size_t idx, uint64_t* bucket, size_t offset);
+  size_t archive_bucket(byte_string key, reflog &refs, size_t idx, uint64_t *bucket, size_t offset);
 
-  index::radix_index* index_;
+  index::radix_index *index_;
   std::unordered_map<std::string, uint64_t> reflog_tails_;
   column_t column_;
   incremental_file_writer writer_;
@@ -76,7 +76,7 @@ class index_load_utils {
    * @param index index to load into
    * @return data log offset until which radix tree has been archived
    */
-  static size_t load(const std::string& path, index::radix_index* index);
+  static size_t load(const std::string &path, index::radix_index *index);
 
  private:
   /**
@@ -85,11 +85,10 @@ class index_load_utils {
    * @param idx reflog index
    * @param encoded_bucket bucket to initialize at index
    */
-  static void init_bucket_ptr(reflog* refs, size_t idx, encoded_reflog_ptr encoded_bucket);
+  static void init_bucket_ptr(reflog *refs, size_t idx, encoded_reflog_ptr encoded_bucket);
 };
 
 }
 }
-
 
 #endif /* CONFLUO_ARCHIVAL_INDEX_ARCHIVER_H_ */

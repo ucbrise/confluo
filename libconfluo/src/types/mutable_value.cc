@@ -6,7 +6,7 @@ mutable_value::mutable_value(data_type type)
     : immutable_value(type, type.is_none() ? nullptr : new uint8_t[type.size]()) {
 }
 mutable_value::mutable_value(const data_type &type, immutable_raw_data value)
-    : immutable_value(type, const_cast<void*>(value.ptr)) {
+    : immutable_value(type, const_cast<void *>(value.ptr)) {
   type_.unaryop(unary_op_id::ASSIGN)(ptr_, value);
 }
 mutable_value::mutable_value(const data_type &type, const void *value)
@@ -66,7 +66,7 @@ mutable_value::mutable_value(mutable_value &&other)
 }
 mutable_value::~mutable_value() {
   if (ptr_ != nullptr && !type_.is_none())
-    delete[] reinterpret_cast<uint8_t*>(ptr_);
+    delete[] reinterpret_cast<uint8_t *>(ptr_);
 }
 mutable_value mutable_value::parse(const std::string &str, const data_type &type) {
   mutable_value value(type);
@@ -131,7 +131,7 @@ mutable_value &mutable_value::operator=(const immutable_value &other) {
   type_ = other.type();
   if (!type_.is_none()) {
     if (ptr_ != nullptr)
-      delete[] reinterpret_cast<uint8_t*>(ptr_);
+      delete[] reinterpret_cast<uint8_t *>(ptr_);
     ptr_ = new uint8_t[type_.size];
     type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
   }
@@ -141,7 +141,7 @@ mutable_value &mutable_value::operator=(const mutable_value &other) {
   type_ = other.type();
   if (!type_.is_none()) {
     if (ptr_ != nullptr)
-      delete[] reinterpret_cast<uint8_t*>(ptr_);
+      delete[] reinterpret_cast<uint8_t *>(ptr_);
     ptr_ = new uint8_t[type_.size];
     type_.unaryop(unary_op_id::ASSIGN)(ptr_, other.to_data());
   }
@@ -150,7 +150,7 @@ mutable_value &mutable_value::operator=(const mutable_value &other) {
 mutable_value &mutable_value::operator=(mutable_value &&other) {
   if (this != &other) {
     if (ptr_ != nullptr)
-      delete[] reinterpret_cast<uint8_t*>(ptr_);
+      delete[] reinterpret_cast<uint8_t *>(ptr_);
 
     type_ = other.type_;
     ptr_ = other.ptr_;

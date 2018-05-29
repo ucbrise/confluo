@@ -86,8 +86,6 @@ class storage_allocator {
 
 };
 
-const int storage_allocator::MAX_CLEANUP_RETRIES;
-
 }
 }
 

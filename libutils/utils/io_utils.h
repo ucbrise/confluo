@@ -25,35 +25,10 @@ class io_utils {
     return val;
   }
 
-  static std::string read(std::istream& in, size_t length) {
-    std::string value;
-    value.resize(length);
-    in.read(&value[0], length);
-    return value;
-  }
+  static std::string read(std::istream& in, size_t length);
 
-  static void flush(std::ostream& out) {
-    out.flush();
-  }
-
+  static void flush(std::ostream& out);
 };
-
-template<>
-void io_utils::write<std::string>(std::ostream& out, const std::string& value) {
-  size_t size = value.length();
-  out.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
-  out.write(value.c_str(), value.length());
-}
-
-template<>
-std::string io_utils::read<std::string>(std::istream& in) {
-  size_t size;
-  in.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-  std::string value;
-  value.resize(size);
-  in.read(&value[0], size);
-  return value;
-}
 
 }
 

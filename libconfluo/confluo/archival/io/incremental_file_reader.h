@@ -17,7 +17,7 @@ namespace archival {
 class incremental_file_reader : public incremental_file_stream {
 
  public:
-  incremental_file_reader(const std::string& path, const std::string& file_prefix);
+  incremental_file_reader(const std::string &path, const std::string &file_prefix);
 
   ~incremental_file_reader();
 
@@ -25,7 +25,7 @@ class incremental_file_reader : public incremental_file_stream {
   incremental_file_offset advance(size_t len) {
     if (eof())
       open_next();
-    else if (tell().offset() + len * sizeof(T)  > eof_offset())
+    else if (tell().offset() + len * sizeof(T) > eof_offset())
       THROW(illegal_state_exception, "Stream processed incorrectly!");
     cur_ifs_->seekg(len * sizeof(T), std::ios::cur);
     return tell();
@@ -65,9 +65,9 @@ class incremental_file_reader : public incremental_file_stream {
 
   void open_next();
 
-  static std::ifstream* open(const std::string& path);
+  static std::ifstream *open(const std::string &path);
 
-  std::ifstream* cur_ifs_;
+  std::ifstream *cur_ifs_;
   std::ifstream transaction_log_ifs_;
 
 };

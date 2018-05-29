@@ -13,7 +13,7 @@ namespace confluo {
  * Reflog with aggregates
  */
 class aggregated_reflog : public reflog {
-public:
+ public:
   /** The type of size of the reflog */
   typedef reflog::size_type size_type;
   /** The type of position of the reflog */
@@ -37,14 +37,14 @@ public:
    * Constructor. Initializes aggregates from an aggregate info log.
    * @param aggregates The specified aggregates
    */
-  explicit aggregated_reflog(const aggregate_log& aggregates);
+  explicit aggregated_reflog(const aggregate_log &aggregates);
 
   /**
    * Initialize aggregates.
    * @param num_aggregates number of aggregates
    * @param aggregates aggregates
    */
-  void init_aggregates(size_t num_aggregates, aggregate* aggregates);
+  void init_aggregates(size_t num_aggregates, aggregate *aggregates);
 
   /**
    * Gets the specified aggregate
@@ -64,7 +64,7 @@ public:
    * @param value value to update with
    * @param version data log version
    */
-  void seq_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version);
+  void seq_update_aggregate(int thread_id, size_t aid, const numeric &value, uint64_t version);
 
   /**
    * Updates an aggregate. Assumes no contention with archiver calling swap_aggregates.
@@ -74,7 +74,7 @@ public:
    * @param value value to update with
    * @param version data log version
    */
-  void comb_update_aggregate(int thread_id, size_t aid, const numeric& value, uint64_t version);
+  void comb_update_aggregate(int thread_id, size_t aid, const numeric &value, uint64_t version);
 
   /**
    * Gets the number of aggregates.
@@ -88,9 +88,9 @@ public:
    *
    * @return aggregates
    */
-  storage::swappable_ptr<aggregate>& aggregates();
+  storage::swappable_ptr<aggregate> &aggregates();
 
-private:
+ private:
   size_t num_aggregates_;
   storage::swappable_ptr<aggregate> aggregates_; // TODO or array of swappable_ptrs for less contention
 };

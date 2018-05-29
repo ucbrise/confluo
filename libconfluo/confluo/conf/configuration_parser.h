@@ -13,15 +13,11 @@ class encoding_params {
   static const std::string ELIAS_GAMMA;
 };
 
-const std::string encoding_params::UNENCODED = "unencoded";
-const std::string encoding_params::LZ4 = "lz4";
-const std::string encoding_params::ELIAS_GAMMA = "elias_gamma";
-
 class configuration_parser {
 
  public:
 
-  static uint8_t to_encoding_type(const std::string& param) {
+  static uint8_t to_encoding_type(const std::string &param) {
     if (param == encoding_params::UNENCODED) {
       return storage::encoding_type::D_UNENCODED;
     } else if (param == encoding_params::LZ4) {

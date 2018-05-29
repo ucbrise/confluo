@@ -38,13 +38,12 @@ size_t type_manager::register_type(const type_properties &type_def) {
 }
 
 data_type type_manager::get_type(const std::string &type_name, size_t size) {
-  size_t id = find_type_properties(type_name);
-  return data_type(static_cast<uint16_t>(id), DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
+  return data_type(type_name, size);
 }
 
 data_type type_manager::get_type(size_t id, size_t size) {
   if (id < DATA_TYPES.size()) {
-    return data_type(static_cast<uint16_t>(id), DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
+    return data_type(static_cast<uint16_t>(id), size);
   }
   return data_type();
 }

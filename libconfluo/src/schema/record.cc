@@ -12,7 +12,7 @@ record_t::record_t()
 }
 
 record_t::record_t(size_t log_offset, uint8_t *data, size_t size)
-    : timestamp_(*reinterpret_cast<int64_t*>(data)),
+    : timestamp_(*reinterpret_cast<int64_t *>(data)),
       log_offset_(log_offset),
       data_(data),
       ptr_(),
@@ -28,7 +28,7 @@ record_t::record_t(size_t log_offset, storage::read_only_encoded_ptr<uint8_t> da
       size_(size),
       version_(log_offset + size) {
   storage::decoded_ptr<uint8_t> ptr = data.decode();
-  timestamp_ = *reinterpret_cast<int64_t*>(ptr.get());
+  timestamp_ = *reinterpret_cast<int64_t *>(ptr.get());
   data_ = ptr.get();
 }
 
@@ -90,7 +90,7 @@ size_t record_t::length() const {
 
 std::string record_t::to_string() const {
   std::string str = "(";
-  for (auto& f : *this) {
+  for (auto &f : *this) {
     str += f.to_string() + ", ";
   }
   str.pop_back();

@@ -21,7 +21,6 @@ class archival_defaults {
   static const uint64_t DEFAULT_IN_MEMORY_FILTER_WINDOW_NS = static_cast<const uint64_t>(10 * 1e3);
 };
 
-
 /**
  * Default configuration parameters
  */

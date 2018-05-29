@@ -23,7 +23,7 @@ class confluo_store {
    * Constructor for creating confluo store
    * @param data_path The data path for the store
    */
-  explicit confluo_store(const std::string& data_path);
+  explicit confluo_store(const std::string &data_path);
 
   /**
    * Adds a atomic multilog to confluo store
@@ -33,8 +33,8 @@ class confluo_store {
    * @param mode The storage mode of the confluo store
    * @return The id of the atomic multilog
    */
-  int64_t create_atomic_multilog(const std::string& name,
-                                 const std::vector<column_t>& schema,
+  int64_t create_atomic_multilog(const std::string &name,
+                                 const std::vector<column_t> &schema,
                                  storage::storage_mode mode = storage::IN_MEMORY,
                                  archival::archival_mode a_mode = archival_mode::OFF);
 
@@ -46,8 +46,8 @@ class confluo_store {
    * @param mode The storage mode of the confluo store
    * @return The id of the atomic multilog
    */
-  int64_t create_atomic_multilog(const std::string& name,
-                                 const std::string& schema,
+  int64_t create_atomic_multilog(const std::string &name,
+                                 const std::string &schema,
                                  storage::storage_mode mode = storage::IN_MEMORY,
                                  archival::archival_mode a_mode = archival_mode::OFF);
 
@@ -59,35 +59,35 @@ class confluo_store {
    * @param a_mode Archival mode
    * @return The id of the atomic multilog
    */
-  int64_t load_atomic_multilog(const std::string& name);
+  int64_t load_atomic_multilog(const std::string &name);
 
   /**
    * Gets the id of the atomic multilog
    * @param name The name of the atomic multilog
    * @return The id of the atomic multilog
    */
-  int64_t get_atomic_multilog_id(const std::string& name) const;
+  int64_t get_atomic_multilog_id(const std::string &name) const;
 
   /**
    * Gets the specified atomic multilog
    * @param name The name of the atomic multilog
    * @return The atomic multilog that matches name
    */
-  atomic_multilog* get_atomic_multilog(const std::string& name);
+  atomic_multilog *get_atomic_multilog(const std::string &name);
 
   /**
    * Gets the specified atomic multilog by id
    * @param id The id of the atomic multilog
    * @return The atomic multilog that matches the id
    */
-  atomic_multilog* get_atomic_multilog(int64_t id);
+  atomic_multilog *get_atomic_multilog(int64_t id);
 
   /**
    * Removes a atomic multilog specified by the name
    * @param name The name of the atomic multilog
    * @return The index of the removed atomic multilog or -1 if it doesn't exist
    */
-  int64_t remove_atomic_multilog(const std::string& name);
+  int64_t remove_atomic_multilog(const std::string &name);
 
   /**
    * Removes the atomic multilog specified by the id
@@ -118,11 +118,11 @@ class confluo_store {
    *
    * @return Identifier for the created atomic multilog
    */
-  int64_t create_atomic_multilog_task(const std::string& name,
-                                      const std::vector<column_t>& schema,
+  int64_t create_atomic_multilog_task(const std::string &name,
+                                      const std::vector<column_t> &schema,
                                       storage::storage_mode mode,
                                       archival::archival_mode a_mode,
-                                      optional<management_exception>& ex);
+                                      optional<management_exception> &ex);
 
   /**
    * Task to create a new atomic multilog
@@ -134,11 +134,11 @@ class confluo_store {
    *
    * @return Identifier for the created atomic multilog
    */
-  int64_t create_atomic_multilog_task(const std::string& name,
-                                      const std::string& schema,
+  int64_t create_atomic_multilog_task(const std::string &name,
+                                      const std::string &schema,
                                       storage::storage_mode mode,
                                       archival::archival_mode a_mode,
-                                      optional<management_exception>& ex);
+                                      optional<management_exception> &ex);
 
   /**
    * Task to load atomic multilog
@@ -147,8 +147,8 @@ class confluo_store {
    * @param ex The exception if load fails
    * @return Identifier for the loaded atomic multilog
    */
-  int64_t load_atomic_multilog_task(const std::string& name,
-                                    optional<management_exception>& ex);
+  int64_t load_atomic_multilog_task(const std::string &name,
+                                    optional<management_exception> &ex);
 
   // Metadata
   std::string data_path_;
@@ -157,7 +157,7 @@ class confluo_store {
   task_pool mgmt_pool_;
 
   // Tables
-  monolog::monolog_exp2<atomic_multilog*> atomic_multilogs_;
+  monolog::monolog_exp2<atomic_multilog *> atomic_multilogs_;
   string_map<size_t> multilog_map_;
 };
 

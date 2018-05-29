@@ -1,3 +1,4 @@
+#include "string_utils.h"
 #include "schema/column.h"
 
 namespace confluo {
@@ -17,7 +18,7 @@ column_t::column_t(uint16_t idx,
     : idx_(idx),
       type_(type),
       offset_(offset),
-      name_(string_utils::to_upper(name)),
+      name_(utils::string_utils::to_upper(name)),
       min_(min),
       max_(max) {
 }
@@ -76,7 +77,7 @@ bool column_t::disable_indexing() {
 
 field_t column_t::apply(void *data) const {
   return field_t(idx_, type_,
-                 reinterpret_cast<unsigned char*>(data) + offset_,
+                 reinterpret_cast<unsigned char *>(data) + offset_,
                  is_indexed(), idx_state_.id(), idx_state_.bucket_size());
 }
 

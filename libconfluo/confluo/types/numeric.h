@@ -674,7 +674,9 @@ struct cast_helper<void, void> {
  * @return The casted numeric
  */
 template<typename IN, typename OUT>
-numeric type_cast(const numeric &v);
+numeric type_cast(const numeric &v) {
+  return detail::cast_helper<IN, OUT>::cast(v);
+}
 
 /**
  * Initializes the type cast operators for all the types
@@ -684,13 +686,17 @@ numeric type_cast(const numeric &v);
  * @return A vector containing all of the casting operators
  */
 template<typename IN>
-std::vector<cast_fn> init_type_cast_ops();
+std::vector<cast_fn> init_type_cast_ops() {
+  return {type_cast<IN, void>, type_cast<IN, bool>, type_cast<IN, int8_t>, type_cast<IN, uint8_t>,
+          type_cast<IN, int16_t>, type_cast<IN, uint16_t>, type_cast<IN, int32_t>,
+          type_cast<IN, uint32_t>, type_cast<IN, int64_t>, type_cast<IN, uint64_t>,
+          type_cast<IN, float>, type_cast<IN, double>};
+}
 
 /**
  * A vector containing the cast operators for all the types
  */
 extern std::vector<std::vector<cast_fn>> CAST_OPS;
-
 
 }
 

@@ -24,7 +24,7 @@ struct field_t {
    * @param index_id The id of the index
    * @param index_bucket_size The index bucket size
    */
-  field_t(uint16_t idx, const data_type& type, void* data, bool indexed, uint16_t index_id, double index_bucket_size);
+  field_t(uint16_t idx, const data_type &type, void *data, bool indexed, uint16_t index_id, double index_bucket_size);
 
   /**
    * Returns the index of the field
@@ -38,14 +38,14 @@ struct field_t {
    *
    * @return The data type of the fiedl
    */
-  const data_type& type() const;
+  const data_type &type() const;
 
   /**
    * Gets the value of the field
    *
    * @return The immutable value of the field
    */
-  const immutable_value& value() const;
+  const immutable_value &value() const;
 
   /**
    * Returns whether the field is indexed

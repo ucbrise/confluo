@@ -19,7 +19,7 @@ class periodic_task {
    * Constructor for periodic name that initializes the task
    * @param name The name of the task
    */
-  periodic_task(const std::string& name);
+  periodic_task(const std::string &name);
 
   /**
    * Default destructor that stops the task
@@ -41,7 +41,7 @@ class periodic_task {
    */
   bool start(std::function<void(void)> task, uint64_t interval_ms = 1);
 
-private:
+ private:
   std::string name_;
   atomic::type<bool> enabled_;
   std::thread executor_;

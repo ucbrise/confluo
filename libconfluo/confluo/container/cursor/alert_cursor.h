@@ -26,29 +26,14 @@ class trigger_alert_cursor : public alert_cursor {
    * @param trigger_name The name of the trigger
    * @param batch_size The number of records in the batch
    */
-  trigger_alert_cursor(const alert_list &alerts, const std::string &trigger_name, size_t batch_size = 64)
-      : alert_cursor(batch_size),
-        cur_(alerts.begin()),
-        end_(alerts.end()),
-        trigger_name_(trigger_name) {
-    init();
-  }
+  trigger_alert_cursor(const alert_list &alerts, const std::string &trigger_name, size_t batch_size = 64);
 
   /**
    * Loads the next record batch
    *
    * @return The size of the batch
    */
-  virtual size_t load_next_batch() override {
-    size_t i = 0;
-    for (; i < current_batch_.size() && cur_ != end_; ++i, ++cur_) {
-      current_batch_[i] = *cur_;
-      if (trigger_name_ != "" && trigger_name_ != current_batch_[i].trigger_name) {
-        --i;
-      }
-    }
-    return i;
-  }
+  virtual size_t load_next_batch() override;
 
  private:
   alert_iterator cur_;

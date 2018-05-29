@@ -7,7 +7,7 @@
 
 using namespace confluo;
 
-class TaskTest: public testing::Test {
+class TaskTest : public testing::Test {
 };
 
 TEST_F(TaskTest, AddTaskTest) {

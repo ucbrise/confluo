@@ -18,7 +18,7 @@ class filter_log_archiver {
    * @param path directory to archive in
    * @param filters filter log to archive
    */
-  filter_log_archiver(const std::string& path, filter_log* filters);
+  filter_log_archiver(const std::string &path, filter_log *filters);
 
   /**
    * Default destructor.
@@ -40,8 +40,8 @@ class filter_log_archiver {
   void init_new_archivers();
 
   std::string path_;
-  std::vector<filter_archiver*> filter_archivers_;
-  filter_log* filters_;
+  std::vector<filter_archiver *> filter_archivers_;
+  filter_log *filters_;
 
 };
 

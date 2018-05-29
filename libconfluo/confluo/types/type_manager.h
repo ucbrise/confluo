@@ -18,7 +18,7 @@ class type_manager {
    * @param type_def Properties for data type
    * @return Type id.
    */
-  static size_t register_type(const type_properties& type_def);
+  static size_t register_type(const type_properties &type_def);
 
   /**
    * Get type from type name and size
@@ -27,7 +27,7 @@ class type_manager {
    * @param size Size; if not provided, assumes the default type size.
    * @return Wrapper around data type
    */
-  static data_type get_type(const std::string& type_name, size_t size = 0);
+  static data_type get_type(const std::string &type_name, size_t size = 0);
 
   /**
    * Get type from type id and size

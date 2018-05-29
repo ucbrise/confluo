@@ -40,7 +40,7 @@ aggregate_list::aggregate_list(const aggregate_list &other)
     : head_(nullptr),
       agg_(other.agg_),
       type_(other.type_) {
-  aggregate_node* other_tail = atomic::load(&other.head_);
+  aggregate_node *other_tail = atomic::load(&other.head_);
   while (other_tail != nullptr) {
     aggregate_node* cur_head = atomic::load(&head_);
     void* raw = ALLOCATOR.alloc(sizeof(aggregate_node));
@@ -54,7 +54,7 @@ aggregate_list &aggregate_list::operator=(const aggregate_list &other) {
   head_ = nullptr;
   agg_ = other.agg_;
   type_ = other.type_;
-  aggregate_node* other_tail = atomic::load(&other.head_);
+  aggregate_node *other_tail = atomic::load(&other.head_);
   while (other_tail != nullptr) {
     aggregate_node* cur_head = atomic::load(&head_);
     void* raw = ALLOCATOR.alloc(sizeof(aggregate_node));
@@ -66,7 +66,7 @@ aggregate_list &aggregate_list::operator=(const aggregate_list &other) {
 }
 
 aggregate_list::~aggregate_list() {
-  aggregate_node* cur_node = atomic::load(&head_);
+  aggregate_node *cur_node = atomic::load(&head_);
   while (cur_node != nullptr) {
     aggregate_node* next = cur_node->next();
     cur_node->~aggregate_node();
@@ -165,7 +165,7 @@ aggregate &aggregate::operator=(const aggregate &other) {
 
 aggregate::aggregate(aggregate &&other) noexcept {
   type_ = other.type_;
-  agg_= std::move(other.agg_);
+  agg_ = std::move(other.agg_);
   aggs_ = other.aggs_;
   concurrency_ = other.concurrency_;
   other.aggs_ = nullptr;
@@ -173,7 +173,7 @@ aggregate::aggregate(aggregate &&other) noexcept {
 
 aggregate &aggregate::operator=(aggregate &&other) noexcept {
   type_ = other.type_;
-  agg_= std::move(other.agg_);
+  agg_ = std::move(other.agg_);
   aggs_ = other.aggs_;
   concurrency_ = other.concurrency_;
   other.aggs_ = nullptr;

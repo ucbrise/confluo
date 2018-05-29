@@ -12,7 +12,7 @@ class incremental_file_stream {
  public:
   incremental_file_stream();
 
-  incremental_file_stream(const std::string& path, const std::string& file_prefix);
+  incremental_file_stream(const std::string &path, const std::string &file_prefix);
 
   std::string cur_path();
 

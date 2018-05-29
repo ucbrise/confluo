@@ -33,51 +33,18 @@ class logger {
  public:
   static log_level LOG_LEVEL;
 
-  logger() {
-    msg_level_ = log_level::INFO;
-  }
+  logger();
 
-  virtual ~logger() {
-    os_ << std::endl;
-    if (msg_level_ >= LOG_LEVEL) {
-      fprintf(stderr, "%s", os_.str().c_str());
-      fflush(stderr);
-    }
-  }
+  virtual ~logger();
 
-  std::ostringstream& get(const log_level level) {
-    msg_level_ = level;
-    os_ << time_utils::current_date_time();
-    os_ << " " << to_string(level) << ": ";
-    return os_;
-  }
+  std::ostringstream& get(const log_level level);
 
  private:
-  std::string to_string(const log_level level) {
-    switch (level) {
-      case log_level::TRACE:
-        return "TRACE";
-      case log_level::DEBUG:
-        return "DEBUG";
-      case log_level::INFO:
-        return "INFO";
-      case log_level::WARN:
-        return "WARN";
-      case log_level::ERROR:
-        return "ERROR";
-      case log_level::FATAL:
-        return "FATAL";
-      default:
-        return "";
-    }
-    return "";
-  }
+  std::string to_string(const log_level level);
 
   std::ostringstream os_;
   log_level msg_level_;
 };
-
-log_level logger::LOG_LEVEL = log_level::INFO;
 
 }
 }

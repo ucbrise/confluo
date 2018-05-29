@@ -3,6 +3,8 @@
 namespace confluo {
 namespace storage {
 
+const int storage_allocator::MAX_CLEANUP_RETRIES;
+
 storage_allocator::storage_allocator()
     : mem_stat_(),
       mmap_stat_(),

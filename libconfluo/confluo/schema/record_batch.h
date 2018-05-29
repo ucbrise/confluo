@@ -58,19 +58,19 @@ class record_batch_builder {
    * Constructor for record batch builder
    * @param schema Schema for the atomic multilog
    */
-  record_batch_builder(const schema_t& schema);
+  record_batch_builder(const schema_t &schema);
 
   /**
    * Adds record data to the batch
    * @param data The record data to be added
    */
-  void add_record(const void* data);
+  void add_record(const void *data);
 
   /**
    * Adds record to the batch
    * @param rec The record to be added
    */
-  void add_record(const std::vector<std::string>& rec);
+  void add_record(const std::vector<std::string> &rec);
 
   /**
    * Gets the batch of records
@@ -81,7 +81,7 @@ class record_batch_builder {
  private:
   std::map<int64_t, size_t> batch_sizes_;
   std::map<int64_t, std::stringstream> batch_;
-  const schema_t& schema_;
+  const schema_t &schema_;
 };
 
 }

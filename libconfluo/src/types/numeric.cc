@@ -161,17 +161,6 @@ numeric operator<<(const numeric &first, const numeric &second) {
 numeric operator>>(const numeric &first, const numeric &second) {
   return numeric::binaryop(binary_op_id::BW_RSHIFT, first, second);
 }
-template<typename IN, typename OUT>
-numeric type_cast(const numeric &v) {
-  return detail::cast_helper<IN, OUT>::cast(v);
-}
-template<typename IN>
-std::vector<cast_fn> init_type_cast_ops() {
-  return {type_cast<IN, void>, type_cast<IN, bool>, type_cast<IN, int8_t>, type_cast<IN, uint8_t>,
-          type_cast<IN, int16_t>, type_cast<IN, uint16_t>, type_cast<IN, int32_t>,
-          type_cast<IN, uint32_t>, type_cast<IN, int64_t>, type_cast<IN, uint64_t>,
-          type_cast<IN, float>, type_cast<IN, double>};
-}
 numeric &numeric::operator=(const immutable_value &other) {
   type_ = other.type();
   if (!type_.is_numeric())

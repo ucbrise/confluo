@@ -2,6 +2,10 @@
 
 namespace confluo {
 
+const uint8_t index_state_t::UNINDEXED;
+const uint8_t index_state_t::INDEXING;
+const uint8_t index_state_t::INDEXED;
+
 index_state_t::index_state_t()
     : state_(UNINDEXED),
       id_(UINT16_MAX),

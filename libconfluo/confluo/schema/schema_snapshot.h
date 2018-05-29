@@ -23,14 +23,14 @@ class schema_snapshot {
    *
    * @param snap The snapshot of the column to add
    */
-  void add_column(const column_snapshot& snap);
+  void add_column(const column_snapshot &snap);
 
   /**
    * Adds an r value reference column snapshot to the schema snapshot
    *
    * @param snap The r value reference to a column snapshot
    */
-  void add_column(column_snapshot&& snap);
+  void add_column(column_snapshot &&snap);
 
   /**
    * Gets the data for a specific column in the schema snapshot
@@ -40,7 +40,7 @@ class schema_snapshot {
    *
    * @return An immutable value representing the data at the column
    */
-  immutable_value get(void* data, uint32_t i) const;
+  immutable_value get(void *data, uint32_t i) const;
 
   /**
    * Gets the time key of the schema snapshot
@@ -59,7 +59,7 @@ class schema_snapshot {
    *
    * @return Byte string containing the key of the snapshot
    */
-  byte_string get_key(void* ptr, uint32_t i) const;
+  byte_string get_key(void *ptr, uint32_t i) const;
 
   /**
    * Gets the timestamp of the schema snapshot
@@ -69,7 +69,7 @@ class schema_snapshot {
    *
    * @return The timestamp of the schema snapshot
    */
-  int64_t get_timestamp(void* ptr) const;
+  int64_t get_timestamp(void *ptr) const;
 
   /**
    * Whether the specified column snapshot is indexed

@@ -20,7 +20,7 @@ class IndexLoadTest : public testing::Test {
   static const uint64_t NUM_BUCKETS_PER_REFLOG = 2;
   static const uint64_t REFLOG_SIZE = NUM_BUCKETS_PER_REFLOG * reflog_constants::BUCKET_SIZE;
 
-  static void fill(index::radix_index& index) {
+  static void fill(index::radix_index &index) {
     uint64_t accum = 0;
     for (uint32_t i = 0; i < 128; i++) {
       uint32_t val = i;
@@ -33,12 +33,12 @@ class IndexLoadTest : public testing::Test {
     }
   }
 
-  static void verify(index::radix_index& index) {
+  static void verify(index::radix_index &index) {
     uint64_t accum = 0;
     for (uint32_t i = 0; i < 128; i++) {
       uint32_t val = i;
       byte_string key = byte_string(val);
-      reflog const* s = index.get(key);
+      reflog const *s = index.get(key);
       size_t size = s->size();
       for (uint64_t j = accum; j < accum + size; j++) {
         ASSERT_EQ(j, s->at(j - accum));
@@ -53,18 +53,18 @@ class IndexLoadTest : public testing::Test {
     return schema_t(builder.get_columns());
   }
 
-  static void verify_reflog_archived(reflog const* reflog, size_t reflog_archival_tail) {
+  static void verify_reflog_archived(reflog const *reflog, size_t reflog_archival_tail) {
     for (uint32_t i = 0; i < reflog_archival_tail; i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
-      void* ptr = bucket_ptr.get().ptr();
+      void *ptr = bucket_ptr.get().ptr();
       auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
       ASSERT_EQ(aux.state_, storage::state_type::D_ARCHIVED);
     }
     for (uint32_t i = reflog_archival_tail; i < reflog->size(); i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
-      void* ptr = bucket_ptr.get().ptr();
+      void *ptr = bucket_ptr.get().ptr();
       auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
       ASSERT_EQ(aux.state_, storage::state_type::D_IN_MEMORY);
     }

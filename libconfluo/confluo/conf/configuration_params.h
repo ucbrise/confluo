@@ -47,6 +47,8 @@ class configuration_params {
   static uint64_t MONITOR_PERIODICITY_MS;
 };
 
+extern utils::configuration_map confluo_conf;
+
 }
 
 #endif /* CONFLUO_CONF_CONFIGURATION_PARAMS_H_ */

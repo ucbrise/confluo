@@ -23,7 +23,7 @@ if (BUILD_TESTS)
           test/streaming_test_utils.h
           test/test_main.cc
           test/stream_test.h)
-  target_link_libraries(stest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
+  target_link_libraries(stest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient confluo thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(stest googletest rpctest thrift lz4)
 
   # Register test

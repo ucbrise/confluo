@@ -27,7 +27,7 @@ class read_tail {
    * @param data_path The data path
    * @param mode The storage mode
    */
-  read_tail(const std::string& data_path, const storage::storage_mode& mode);
+  read_tail(const std::string &data_path, const storage::storage_mode &mode);
 
   /**
    * Initializes the read tail to the beginning
@@ -35,7 +35,7 @@ class read_tail {
    * @param data_path The data path of the read tail
    * @param mode The storage mode of the read tail
    */
-  void init(const std::string& data_path, const storage::storage_mode& mode);
+  void init(const std::string &data_path, const storage::storage_mode &mode);
 
   /**
    * Loads the read tail marker
@@ -53,7 +53,7 @@ class read_tail {
   void advance(uint64_t old_tail, uint32_t bytes);
 
  private:
-  atomic::type<uint64_t>* read_tail_{};
+  atomic::type<uint64_t> *read_tail_{};
   storage::storage_mode mode_;
 };
 

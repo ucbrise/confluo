@@ -229,7 +229,7 @@ class utree_expand_conjunction {
    * @return The result
    */
   template<typename Iterator>
-  result_type operator()(boost::iterator_range<Iterator> const& range) const {
+  result_type operator()(boost::iterator_range<Iterator> const &range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
     result_type e;
     iterator i = range.begin();
@@ -258,7 +258,7 @@ class utree_expand_conjunction {
       case and_or::AND: {
         compiled_expression lor = spirit::utree::visit(*(++i), *this);
         auto r = *(++i);
-        for (auto& lor_m : lor) {
+        for (auto &lor_m : lor) {
           result_type tmp = spirit::utree::visit(
               r, utree_expand_conjunction(lor_m, schema_));
           std::set_union(e.begin(), e.end(), tmp.begin(), tmp.end(),
@@ -292,7 +292,7 @@ class utree_compile_expression {
    *
    * @param schema The schema used to initialize the compiled expression
    */
-  utree_compile_expression(const schema_t& schema);
+  utree_compile_expression(const schema_t &schema);
 
   /**
    * () operator that evaluates the compiled expression
@@ -310,7 +310,7 @@ class utree_compile_expression {
    * @throw parse_exception
    * @return The result of the operator
    */
-  result_type operator()(spirit::function_base const&) const;
+  result_type operator()(spirit::function_base const &) const;
 
   /**
    * () operator that evaluates the compiled expression
@@ -321,7 +321,7 @@ class utree_compile_expression {
    * @return The result of evaluating the expression
    */
   template<typename Iterator>
-  result_type operator()(boost::iterator_range<Iterator> const& range) const {
+  result_type operator()(boost::iterator_range<Iterator> const &range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
     result_type e;
     iterator i = range.begin();
@@ -350,7 +350,7 @@ class utree_compile_expression {
       case and_or::AND: {
         result_type left = spirit::utree::visit(*(++i), *this);
         auto r = *(++i);
-        for (auto& m : left) {
+        for (auto &m : left) {
           result_type tmp = spirit::utree::visit(
               r, utree_expand_conjunction(m, schema_));
           std::set_union(e.begin(), e.end(), tmp.begin(), tmp.end(),

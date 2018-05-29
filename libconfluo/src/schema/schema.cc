@@ -30,7 +30,7 @@ column_t const &schema_t::operator[](size_t idx) const {
 column_t &schema_t::operator[](const std::string &name) {
   try {
     return columns_[name_map_.at(string_utils::to_upper(name))];
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     THROW(invalid_operation_exception,
           "No such attribute " + name + ": " + e.what());
   }
@@ -39,7 +39,7 @@ column_t &schema_t::operator[](const std::string &name) {
 column_t const &schema_t::operator[](const std::string &name) const {
   try {
     return columns_[name_map_.at(string_utils::to_upper(name))];
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     THROW(invalid_operation_exception,
           "No such attribute " + name + ": " + e.what());
   }
@@ -62,7 +62,7 @@ record_t schema_t::apply(size_t offset, storage::read_only_encoded_ptr<uint8_t> 
 }
 
 record_t schema_t::apply_unsafe(size_t offset, void *data) const {
-  record_t r(offset, reinterpret_cast<uint8_t*>(data), record_size_);
+  record_t r(offset, reinterpret_cast<uint8_t *>(data), record_size_);
   r.reserve(columns_.size());
   for (uint16_t i = 0; i < columns_.size(); i++)
     r.push_back(columns_[i].apply(r.data()));
@@ -71,7 +71,7 @@ record_t schema_t::apply_unsafe(size_t offset, void *data) const {
 
 schema_snapshot schema_t::snapshot() const {
   schema_snapshot snap;
-  for (const column_t& col : columns_) {
+  for (const column_t &col : columns_) {
     snap.add_column(col.snapshot());
   }
   return snap;
@@ -97,19 +97,19 @@ std::string schema_t::to_string() const {
 void *schema_t::record_vector_to_data(const std::vector<std::string> &record) const {
   if (record.size() == columns_.size()) {
     // Timestamp is provided
-    void* buf = new uint8_t[record_size_]();
+    void *buf = new uint8_t[record_size_]();
     for (size_t i = 0; i < columns_.size(); i++) {
-      void* fptr = reinterpret_cast<uint8_t*>(buf) + columns_[i].offset();
+      void *fptr = reinterpret_cast<uint8_t *>(buf) + columns_[i].offset();
       columns_[i].type().parse_op()(record.at(i), fptr);
     }
     return buf;
   } else if (record.size() == columns_.size() - 1) {
     // Timestamp is not provided -- generate one
-    void* buf = new uint8_t[record_size_]();
+    void *buf = new uint8_t[record_size_]();
     uint64_t ts = time_utils::cur_ns();
     memcpy(buf, &ts, sizeof(uint64_t));
     for (size_t i = 1; i < columns_.size(); i++) {
-      void* fptr = reinterpret_cast<uint8_t*>(buf) + columns_[i].offset();
+      void *fptr = reinterpret_cast<uint8_t *>(buf) + columns_[i].offset();
       columns_[i].type().parse_op()(record.at(i - 1), fptr);
     }
     return buf;
@@ -123,7 +123,7 @@ void schema_t::record_vector_to_data(std::string &out, const std::vector<std::st
     // Timestamp is provided
     out.resize(record_size_);
     for (size_t i = 0; i < columns_.size(); i++) {
-      void* fptr = reinterpret_cast<uint8_t*>(&out[0]) + columns_[i].offset();
+      void *fptr = reinterpret_cast<uint8_t *>(&out[0]) + columns_[i].offset();
       columns_[i].type().parse_op()(record.at(i), fptr);
     }
   } else if (record.size() == columns_.size() - 1) {
@@ -132,7 +132,7 @@ void schema_t::record_vector_to_data(std::string &out, const std::vector<std::st
     uint64_t ts = time_utils::cur_ns();
     memcpy(&out[0], &ts, sizeof(uint64_t));
     for (size_t i = 1; i < columns_.size(); i++) {
-      void* fptr = reinterpret_cast<uint8_t*>(&out[0]) + columns_[i].offset();
+      void *fptr = reinterpret_cast<uint8_t *>(&out[0]) + columns_[i].offset();
       columns_[i].type().parse_op()(record.at(i - 1), fptr);
     }
   } else {
@@ -142,7 +142,7 @@ void schema_t::record_vector_to_data(std::string &out, const std::vector<std::st
 
 void schema_t::data_to_record_vector(std::vector<std::string> &ret, const void *data) const {
   for (size_t i = 0; i < size(); i++) {
-    const void* fptr = reinterpret_cast<const uint8_t*>(data) + columns_[i].offset();
+    const void *fptr = reinterpret_cast<const uint8_t *>(data) + columns_[i].offset();
     data_type ftype = columns_[i].type();
     ret.push_back(ftype.to_string_op()(immutable_raw_data(fptr, ftype.size)));
   }

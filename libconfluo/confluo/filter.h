@@ -24,7 +24,7 @@ namespace monitor {
  * @param r The record
  * @return True if the record passes the filter, false otherwise.
  */
-typedef bool (*filter_fn)(const record_t& r);
+typedef bool (*filter_fn)(const record_t &r);
 
 /**
  * Default filter function that allows all records to pass.
@@ -32,7 +32,7 @@ typedef bool (*filter_fn)(const record_t& r);
  * @param r The record
  * @return True if the record passes the filter, false otherwise.
  */
-inline bool default_filter(const record_t& r) {
+inline bool default_filter(const record_t &r) {
   return true;
 }
 
@@ -56,7 +56,7 @@ class filter {
    * @param exp Compiled expression.
    * @param fn Filter function.
    */
-  explicit filter(const compiled_expression& exp, filter_fn fn = default_filter);
+  explicit filter(const compiled_expression &exp, filter_fn fn = default_filter);
 
   /**
    * Constructor that initializes the filter function with the provided one.
@@ -71,7 +71,7 @@ class filter {
    * @param a Reference to the aggregate.
    * @return Aggregate id.
    */
-  size_t add_aggregate(aggregate_info* a);
+  size_t add_aggregate(aggregate_info *a);
 
   /**
    * Invalidate aggregate identified by id.
@@ -87,7 +87,7 @@ class filter {
    * @param id for the aggregate.
    * @return Reference to aggregate corresponding to id.
    */
-  aggregate_info* get_aggregate_info(size_t id);
+  aggregate_info *get_aggregate_info(size_t id);
 
   /**
    * Get the number of aggregates associated with this filter.
@@ -102,7 +102,7 @@ class filter {
    *
    * @param r Record being tested.
    */
-  void update(const record_t& r);
+  void update(const record_t &r);
 
   /**
    * Updates the filter index with new data points. If data points
@@ -112,7 +112,7 @@ class filter {
    * @param block The record block
    * @param record_size The size of the record
    */
-  void update(size_t log_offset, const schema_snapshot& snap, record_block& block, size_t record_size);
+  void update(size_t log_offset, const schema_snapshot &snap, record_block &block, size_t record_size);
 
   // TODO rename later
   /**
@@ -121,7 +121,7 @@ class filter {
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
-  aggregated_reflog* lookup_unsafe(uint64_t ts_block) const;
+  aggregated_reflog *lookup_unsafe(uint64_t ts_block) const;
 
   /**
    * Get the RefLog corresponding to given time-block.
@@ -129,7 +129,7 @@ class filter {
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
-  aggregated_reflog const* lookup(uint64_t ts_block) const;
+  aggregated_reflog const *lookup(uint64_t ts_block) const;
 
   /**
    * Get the range of offsets that lie in a given time-block.
@@ -166,7 +166,7 @@ class filter {
    * Note: It is dangerous to modify this data structure.
    * @return underlying radix tree
    */
-  idx_t& data();
+  idx_t &data();
 
  private:
   compiled_expression exp_;         // The compiled filter expression

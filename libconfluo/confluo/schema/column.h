@@ -31,9 +31,9 @@ class column_t {
    * @param min The min value of the column
    * @param max The max value of the column
    */
-  column_t(uint16_t idx, uint16_t offset, const data_type& type,
-           const std::string& name, const mutable_value& min,
-           const mutable_value& max);
+  column_t(uint16_t idx, uint16_t offset, const data_type &type,
+           const std::string &name, const mutable_value &min,
+           const mutable_value &max);
 
   /**
    * Gets name
@@ -45,7 +45,7 @@ class column_t {
    * Gets type
    * @return The type of the data the column has
    */
-  const data_type& type() const;
+  const data_type &type() const;
 
   /**
    * Gets offset
@@ -112,13 +112,13 @@ class column_t {
    * @return True if disabled false otherwise
    */
   bool disable_indexing();
-    
+
   /**
    * Creates column from data
    * @param data The data that the column stores
    * @return The new column
    */
-  field_t apply(void* data) const;
+  field_t apply(void *data) const;
 
   /**
    * Takes a snapshot of the column data

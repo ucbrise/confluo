@@ -11,7 +11,7 @@ namespace confluo {
 /** A function that maps raw immutable data into a byte string used for
  * lookup 
  */
-typedef byte_string (*key_op_t)(const immutable_raw_data& v, double bucket_size);
+typedef byte_string (*key_op_t)(const immutable_raw_data &v, double bucket_size);
 
 /**
  * Converts raw immutable data into a byte string based on bucket size for
@@ -24,7 +24,7 @@ typedef byte_string (*key_op_t)(const immutable_raw_data& v, double bucket_size)
  * @return The byte string 
  */
 template<typename T>
-byte_string key_transform(const immutable_raw_data& v, double bucket_size) {
+inline byte_string key_transform(const immutable_raw_data &v, double bucket_size) {
   return byte_string(static_cast<T>(v.as<T>() / static_cast<T>(bucket_size)));
 }
 
@@ -38,8 +38,8 @@ byte_string key_transform(const immutable_raw_data& v, double bucket_size) {
  * @return The byte string associated with the float immutable value
  */
 template<>
-byte_string key_transform<float>(const immutable_raw_data& v, double bucket_size) {
-  float val = v.as<float>() / bucket_size;
+inline byte_string key_transform<float>(const immutable_raw_data &v, double bucket_size) {
+  float val = static_cast<float>(v.as<float>() / bucket_size);
   if (val < std::numeric_limits<int32_t>::min()) {
     return byte_string(std::numeric_limits<int32_t>::min());
   } else if (val > std::numeric_limits<int32_t>::max()) {
@@ -58,7 +58,7 @@ byte_string key_transform<float>(const immutable_raw_data& v, double bucket_size
  * @return The byte string associated with the double immutable value
  */
 template<>
-byte_string key_transform<double>(const immutable_raw_data& v, double bucket_size) {
+inline byte_string key_transform<double>(const immutable_raw_data &v, double bucket_size) {
   double val = v.as<double>() / bucket_size;
   if (val < std::numeric_limits<int64_t>::min()) {
     return byte_string(std::numeric_limits<int64_t>::min());
@@ -79,7 +79,7 @@ byte_string key_transform<double>(const immutable_raw_data& v, double bucket_siz
  * data as a string
  */
 template<>
-byte_string key_transform<std::string>(const immutable_raw_data& v, double bucket_size) {
+inline byte_string key_transform<std::string>(const immutable_raw_data &v, double) {
   return byte_string(v.as<std::string>());
 }
 
@@ -94,7 +94,7 @@ byte_string key_transform<std::string>(const immutable_raw_data& v, double bucke
  * types
  */
 template<>
-byte_string key_transform<void>(const immutable_raw_data& data, double bucket_size) {
+inline byte_string key_transform<void>(const immutable_raw_data &data, double) {
   THROW(unsupported_exception, "key_transform not supported for none type");
 }
 

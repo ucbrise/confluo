@@ -27,7 +27,7 @@ struct index_state_t {
    *
    * @param other The other index state to construct this index state from
    */
-  index_state_t(const index_state_t& other);
+  index_state_t(const index_state_t &other);
 
   /**
    * Gets the id of this index state
@@ -51,7 +51,7 @@ struct index_state_t {
    * @return This index state which has the contents of the other index
    * state
    */
-  index_state_t& operator=(const index_state_t& other);
+  index_state_t &operator=(const index_state_t &other);
 
   /**
    * Checks whether this index state is in the indexed stage
@@ -92,10 +92,6 @@ struct index_state_t {
   uint16_t id_;
   double bucket_size_;
 };
-
-const uint8_t index_state_t::UNINDEXED;
-const uint8_t index_state_t::INDEXING;
-const uint8_t index_state_t::INDEXED;
 
 }
 

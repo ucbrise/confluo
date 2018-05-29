@@ -11,9 +11,9 @@ using namespace utils;
 namespace confluo {
 
 /** Parses the contents from the given string to the data */
-typedef void (*parse_op_t)(const std::string&, void*);
+typedef void (*parse_op_t)(const std::string &, void *);
 /** Gets the string representation of the immutable raw data */
-typedef std::string (*to_string_op_t)(const immutable_raw_data&);
+typedef std::string (*to_string_op_t)(const immutable_raw_data &);
 
 /**
  * Parses the given string and sets the specified pointer to the contents
@@ -24,11 +24,11 @@ typedef std::string (*to_string_op_t)(const immutable_raw_data&);
  * @param out The pointer that is set
  */
 template<typename T>
-void parse(const std::string& str, void* out) {
+inline void parse(const std::string &str, void *out) {
   try {
     T val = string_utils::lexical_cast<T>(str);
     memcpy(out, &val, sizeof(T));
-  } catch (std::bad_cast& ex) {
+  } catch (std::bad_cast &ex) {
     throw invalid_operation_exception("Cannot parse " + str);
   }
 }
@@ -43,7 +43,7 @@ void parse(const std::string& str, void* out) {
  * type
  */
 template<>
-void parse<void>(const std::string& str, void* out) {
+inline void parse<void>(const std::string &str, void *out) {
   THROW(unsupported_exception, "Cannot parse none type");
 }
 
@@ -55,9 +55,9 @@ void parse<void>(const std::string& str, void* out) {
  * @param out The pointer that is set
  */
 template<>
-void parse<std::string>(const std::string& str, void* out) {
+inline void parse<std::string>(const std::string &str, void *out) {
   memcpy(out, str.data(), str.length());
-  *(reinterpret_cast<char*>(out) + str.length()) = '\0';
+  *(reinterpret_cast<char *>(out) + str.length()) = '\0';
 }
 
 /**
@@ -69,7 +69,7 @@ void parse<std::string>(const std::string& str, void* out) {
  * @return String representation of the immutable data
  */
 template<typename T>
-std::string to_string(const immutable_raw_data& data) {
+inline std::string to_string(const immutable_raw_data &data) {
   return std::to_string(data.as<T>());
 }
 
@@ -82,7 +82,7 @@ std::string to_string(const immutable_raw_data& data) {
  * @return String representation of the immutable data
  */
 template<>
-std::string to_string<bool>(const immutable_raw_data& data) {
+inline std::string to_string<bool>(const immutable_raw_data &data) {
   return data.as<bool>() ? "true" : "false";
 }
 
@@ -95,7 +95,7 @@ std::string to_string<bool>(const immutable_raw_data& data) {
  * @return String representation of the immutable data
  */
 template<>
-std::string to_string<int8_t>(const immutable_raw_data& data) {
+inline std::string to_string<int8_t>(const immutable_raw_data &data) {
   return std::string(1, data.as<char>());
 }
 
@@ -110,7 +110,7 @@ std::string to_string<int8_t>(const immutable_raw_data& data) {
  * @return String representation of the immutable data
  */
 template<>
-std::string to_string<void>(const immutable_raw_data& data) {
+inline std::string to_string<void>(const immutable_raw_data &data) {
   THROW(unsupported_exception, "Cannot convert none type to string");
 }
 
@@ -123,8 +123,8 @@ std::string to_string<void>(const immutable_raw_data& data) {
  * @return String representation of the immutable data
  */
 template<>
-std::string to_string<std::string>(const immutable_raw_data& data) {
-  return std::string(reinterpret_cast<const char*>(data.ptr));
+inline std::string to_string<std::string>(const immutable_raw_data &data) {
+  return std::string(reinterpret_cast<const char *>(data.ptr));
 }
 
 }

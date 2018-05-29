@@ -31,8 +31,8 @@ struct parsed_trigger {
 BOOST_FUSION_ADAPT_STRUCT(
     confluo::parser::parsed_trigger,
     (std::string, aggregate_name)
-    (std::string, relop)
-    (std::string, threshold))
+        (std::string, relop)
+        (std::string, threshold))
 
 namespace confluo {
 namespace parser {
@@ -82,7 +82,7 @@ class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()
  *
  * @return A parsed trigger
  */
-parsed_trigger parse_trigger(const std::string& t);
+parsed_trigger parse_trigger(const std::string &t);
 
 }
 }

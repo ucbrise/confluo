@@ -15,14 +15,14 @@ task_queue::~task_queue() {
 }
 
 void task_queue::invalidate(void) {
-  std::lock_guard<std::mutex> lock { mutex_ };
+  std::lock_guard<std::mutex> lock{mutex_};
   valid_ = false;
   condition_.notify_all();
 }
 
 bool task_queue::dequeue(task_queue::function_t &out) {
   std::unique_lock<std::mutex> lock(mutex_);
-  condition_.wait(lock, [this]() {return !queue_.empty() || !valid_;});
+  condition_.wait(lock, [this]() { return !queue_.empty() || !valid_; });
 
   /*
    * Using the condition in the predicate ensures that spurious wakeups with a valid
@@ -65,7 +65,7 @@ void task_worker::start() {
       if (queue_.dequeue(task)) {
         try {
           task();
-        } catch(std::exception& e) {
+        } catch (std::exception &e) {
           LOG_ERROR << "Could not execute task: " << e.what();
           fprintf(stderr, "Exception: %s\n", e.what());
         }
@@ -89,7 +89,7 @@ task_pool::task_pool(size_t num_workers) {
 
 task_pool::~task_pool() {
   queue_.invalidate();
-  for (task_worker* worker : workers_) {
+  for (task_worker *worker : workers_) {
     delete worker;
   }
 }

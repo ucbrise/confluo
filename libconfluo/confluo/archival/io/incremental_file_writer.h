@@ -15,13 +15,13 @@ namespace archival {
 
 class incremental_file_writer : public incremental_file_stream {
  public:
-  incremental_file_writer(const std::string& path, const std::string& file_prefix, size_t max_file_size);
+  incremental_file_writer(const std::string &path, const std::string &file_prefix, size_t max_file_size);
 
-  incremental_file_writer(const incremental_file_writer& other);
+  incremental_file_writer(const incremental_file_writer &other);
 
   ~incremental_file_writer();
 
-  incremental_file_writer& operator=(const incremental_file_writer& other);
+  incremental_file_writer &operator=(const incremental_file_writer &other);
 
   /**
    * Initialize state.
@@ -29,7 +29,7 @@ class incremental_file_writer : public incremental_file_stream {
   void init();
 
   template<typename T>
-  incremental_file_offset append(T* data, size_t len) {
+  incremental_file_offset append(T *data, size_t len) {
     if (!fits_in_cur_file(sizeof(T) * len))
       open_new_next();
     incremental_file_offset incr_file_off = tell();
@@ -52,7 +52,7 @@ class incremental_file_writer : public incremental_file_stream {
    * TODO Need something more generic
    */
   template<typename T, typename U>
-  incremental_file_offset append(T* t_data, size_t t_len, U* u_data, size_t u_len) {
+  incremental_file_offset append(T *t_data, size_t t_len, U *u_data, size_t u_len) {
     if (!fits_in_cur_file((sizeof(T) * t_len) + (sizeof(U) * u_len)))
       open_new_next();
     incremental_file_offset incr_file_off = tell();
@@ -82,14 +82,14 @@ class incremental_file_writer : public incremental_file_stream {
 
   incremental_file_offset open_new_next();
 
-  static std::ofstream* open_new(const std::string& path);
+  static std::ofstream *open_new(const std::string &path);
 
-   static std::ofstream* open_existing(const std::string& path);
+  static std::ofstream *open_existing(const std::string &path);
 
-   static void close(std::ofstream*& ofs);
+  static void close(std::ofstream *&ofs);
 
-  std::ofstream* cur_ofs_;
-  std::ofstream* transaction_log_ofs_;
+  std::ofstream *cur_ofs_;
+  std::ofstream *transaction_log_ofs_;
 
   size_t max_file_size_;
 

@@ -31,7 +31,7 @@ struct record_t {
    * @param data raw pointer to data
    * @param size size of data
    */
-  record_t(size_t log_offset, uint8_t* data, size_t size);
+  record_t(size_t log_offset, uint8_t *data, size_t size);
 
   /**
    * Constructor using a raw pointer
@@ -53,14 +53,14 @@ struct record_t {
    *
    * @param val The value to add
    */
-  void push_back(const field_t& val);
+  void push_back(const field_t &val);
 
   /**
    * Adds an r value reference to the record
    *
    * @param val The r value reference to add
    */
-  void push_back(field_t&& val);
+  void push_back(field_t &&val);
 
   /**
    * Gets the field at a particular index
@@ -69,7 +69,7 @@ struct record_t {
    *
    * @return The field at that index
    */
-  const field_t& operator[](uint16_t idx) const;
+  const field_t &operator[](uint16_t idx) const;
 
   /**
    * Gets the field at a particular index
@@ -78,7 +78,7 @@ struct record_t {
    *
    * @return The field at that index
    */
-  const field_t& at(uint16_t idx) const;
+  const field_t &at(uint16_t idx) const;
 
   /**
    * Gets the timestamp of this record
@@ -99,7 +99,7 @@ struct record_t {
    *
    * @return The data that's held in this record
    */
-  uint8_t* data() const;
+  uint8_t *data() const;
 
   /**
    * The version of the log the record is in
@@ -158,12 +158,12 @@ struct record_t {
    * @return True if this record is equal to the other record, false
    * otherwise
    */
-  bool operator==(const record_t& other) const;
+  bool operator==(const record_t &other) const;
 
  private:
   int64_t timestamp_;
   size_t log_offset_;
-  uint8_t* data_;
+  uint8_t *data_;
   storage::read_only_encoded_ptr<uint8_t> ptr_;
   size_t size_;
   uint64_t version_;
@@ -185,7 +185,7 @@ struct hash<confluo::record_t> {
    * @return The hash of the record, which in this case is just the
    * log offset
    */
-  size_t operator()(const confluo::record_t& k) const {
+  size_t operator()(const confluo::record_t &k) const {
     return k.log_offset();
   }
 };

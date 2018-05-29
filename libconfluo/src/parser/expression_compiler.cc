@@ -51,14 +51,14 @@ void compiled_minterm::add(compiled_predicate &&p) {
 }
 
 bool compiled_minterm::test(const record_t &r) const {
-  for (auto& p : *this)
+  for (auto &p : *this)
     if (!p.test(r))
       return false;
   return true;
 }
 
 bool compiled_minterm::test(const schema_snapshot &snap, void *data) const {
-  for (auto& p : *this)
+  for (auto &p : *this)
     if (!p.test(snap, data))
       return false;
   return true;
@@ -67,7 +67,7 @@ bool compiled_minterm::test(const schema_snapshot &snap, void *data) const {
 std::string compiled_minterm::to_string() const {
   std::string s = "";
   size_t i = 0;
-  for (auto& p : *this) {
+  for (auto &p : *this) {
     s += p.to_string();
     if (++i < size())
       s += " and ";
@@ -83,7 +83,7 @@ bool compiled_expression::test(const record_t &r) const {
   if (empty())
     return true;
 
-  for (auto& p : *this)
+  for (auto &p : *this)
     if (p.test(r))
       return true;
 
@@ -94,7 +94,7 @@ bool compiled_expression::test(const schema_snapshot &snap, void *data) const {
   if (empty())
     return true;
 
-  for (auto& p : *this)
+  for (auto &p : *this)
     if (p.test(snap, data))
       return true;
 
@@ -105,7 +105,7 @@ std::string compiled_expression::to_string() const {
   std::string ret = "";
   size_t s = size();
   size_t i = 0;
-  for (auto& p : *this) {
+  for (auto &p : *this) {
     ret += p.to_string();
     if (++i < s - 1)
       ret += " or ";

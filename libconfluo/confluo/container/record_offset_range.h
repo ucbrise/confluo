@@ -17,7 +17,7 @@ class record_offset_range {
    * Iterator for all of the records
    */
   class iterator : public std::iterator<std::input_iterator_tag, uint64_t,
-      uint64_t, const uint64_t*, uint64_t> {
+                                        uint64_t, const uint64_t *, uint64_t> {
    public:
     /** The value type */
     typedef uint64_t value_type;
@@ -40,7 +40,7 @@ class record_offset_range {
      *
      * @return This iterator advanced
      */
-    iterator& operator++() {
+    iterator &operator++() {
       offset_ += record_size_;
       return *this;
     }

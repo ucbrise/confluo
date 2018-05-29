@@ -12,13 +12,13 @@ using namespace ::confluo;
 class ConfluoStoreTest : public testing::Test {
  public:
   static task_pool MGMT_POOL;
-  static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
+  static void generate_bytes(uint8_t *buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
     for (uint32_t i = 0; i < len; i++)
       buf[i] = val_uint8;
   }
 
-  void test_append_and_get(atomic_multilog& dtable) {
+  void test_append_and_get(atomic_multilog &dtable) {
     std::vector<uint64_t> offsets;
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       ConfluoStoreTest::generate_bytes(data_, DATA_SIZE, i);
@@ -56,7 +56,7 @@ class ConfluoStoreTest : public testing::Test {
   static rec r;
   static char test_str[16];
 
-  static char* test_string(const char* str) {
+  static char *test_string(const char *str) {
     size_t len = std::min(static_cast<size_t>(16), strlen(str));
     memcpy(test_str, str, len);
     for (size_t i = len; i < 16; i++) {
@@ -65,8 +65,8 @@ class ConfluoStoreTest : public testing::Test {
     return test_str;
   }
 
-  static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-                      float f, double g, const char* h) {
+  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
+                      float f, double g, const char *h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
@@ -74,7 +74,7 @@ class ConfluoStoreTest : public testing::Test {
     for (size_t i = len; i < 16; i++) {
       r.h[i] = '\0';
     }
-    return reinterpret_cast<void*>(&r);
+    return reinterpret_cast<void *>(&r);
   }
 
   static std::vector<column_t> schema() {
@@ -133,7 +133,7 @@ TEST_F(ConfluoStoreTest, RemoveTableTest) {
   ASSERT_NE(-1, store.remove_atomic_multilog(id));
   try {
     store.remove_atomic_multilog("my_table");
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     ASSERT_STREQ("No such atomic multilog my_table", e.what());
   }
 }

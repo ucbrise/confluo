@@ -27,7 +27,7 @@ struct parsed_aggregate {
 }
 
 BOOST_FUSION_ADAPT_STRUCT(confluo::parser::parsed_aggregate,
-                          (std::string, agg) (std::string, field_name))
+                          (std::string, agg)(std::string, field_name))
 
 namespace confluo {
 namespace parser {
@@ -75,7 +75,7 @@ class aggregate_parser : public qi::grammar<I, ascii::space_type, parsed_aggrega
  *
  * @return The parsed aggregate from the string
  */
-parsed_aggregate parse_aggregate(const std::string& t);
+parsed_aggregate parse_aggregate(const std::string &t);
 
 }
 }

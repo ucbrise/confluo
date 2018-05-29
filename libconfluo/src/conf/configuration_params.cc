@@ -2,9 +2,8 @@
 
 namespace confluo {
 
-static utils::configuration_map confluo_conf(
-    utils::config_utils::read_from_env(
-        "CONFLUO_CONF", "/etc/conf/confluo.conf:./conf/confluo.conf"));
+utils::configuration_map
+    confluo_conf(utils::config_utils::read_from_env("CONFLUO_CONF", "/etc/conf/confluo.conf:./conf/confluo.conf"));
 
 uint64_t archival_configuration_params::PERIODICITY_MS = confluo_conf.get<uint64_t>(
     "archival_periodicity_ms", archival_defaults::DEFAULT_PERIODICITY_MS);

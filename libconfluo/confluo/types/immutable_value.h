@@ -20,7 +20,7 @@ class immutable_value {
    *
    * @param type The data type to create an immutable value from
    */
-  immutable_value(const data_type& type = NONE_TYPE);
+  immutable_value(const data_type &type = NONE_TYPE);
 
   /**
    * Constructs an immutable value from a given data type and pointer to
@@ -29,20 +29,20 @@ class immutable_value {
    * @param type The data type of the immutable value
    * @param data The data the immutable value contains
    */
-  immutable_value(const data_type& type, void* data);
+  immutable_value(const data_type &type, void *data);
 
   /**
    * Gets the data type of this immutable value
    *
    * @return The data type associated with this immutable value
    */
-  data_type const& type() const;
+  data_type const &type() const;
 
   /**
    * Gets the data associated with this immutable value
    * @return Pointer to the data of this immutable value
    */
-  void const* ptr() const;
+  void const *ptr() const;
 
   /**
    * Fetches the raw data of this immutable value
@@ -73,7 +73,7 @@ class immutable_value {
    * @return A boolean value representing the result of the relational
    * operation
    */
-  static bool relop(reational_op_id id, const immutable_value& first, const immutable_value& second);
+  static bool relop(reational_op_id id, const immutable_value &first, const immutable_value &second);
 
   /**
    * Performs a less than comparison between two immutable values
@@ -84,7 +84,7 @@ class immutable_value {
    * @return True if the first immutable value is less than the second,
    * false otherwise
    */
-  friend bool operator <(const immutable_value& first, const immutable_value& second);
+  friend bool operator<(const immutable_value &first, const immutable_value &second);
 
   /**
    * Performs a less than or equal to comparison between two immutable
@@ -96,7 +96,7 @@ class immutable_value {
    * @return True if the first immutable value is less than or equal to
    * the second immutable value
    */
-  friend bool operator <=(const immutable_value& first, const immutable_value& second);
+  friend bool operator<=(const immutable_value &first, const immutable_value &second);
 
   /**
    * Performs a greater than comparison between two immutable values
@@ -107,7 +107,7 @@ class immutable_value {
    * @return True if the first immutable value is greater than the second,
    * false otherwise
    */
-  friend bool operator >(const immutable_value& first, const immutable_value& second);
+  friend bool operator>(const immutable_value &first, const immutable_value &second);
 
   /**
    * Performs a greater than or equal to comparison between two immutable
@@ -119,7 +119,7 @@ class immutable_value {
    * @return True if the first immutable value is less than the second,
    * false otherwise
    */
-  friend bool operator >=(const immutable_value& first, const immutable_value& second);
+  friend bool operator>=(const immutable_value &first, const immutable_value &second);
 
   /**
    * Performs an equality comparison between two immutable values
@@ -130,7 +130,7 @@ class immutable_value {
    * @return True if the first immutable value is equal to the second,
    * false otherwise
    */
-  friend bool operator ==(const immutable_value& first, const immutable_value& second);
+  friend bool operator==(const immutable_value &first, const immutable_value &second);
 
   /**
    * Performs a not equal comparison between two immutable values
@@ -141,7 +141,7 @@ class immutable_value {
    * @return True if the first immutable value is not equal to the second,
    * false otherwise
    */
-  friend bool operator !=(const immutable_value& first, const immutable_value& second);
+  friend bool operator!=(const immutable_value &first, const immutable_value &second);
 
   /**
    * Converts immutable value data to a specified type
@@ -151,8 +151,8 @@ class immutable_value {
    * @return The data of type T
    */
   template<typename T>
-  T& as() {
-    return *reinterpret_cast<T*>(ptr_);
+  T &as() {
+    return *reinterpret_cast<T *>(ptr_);
   }
 
   /**
@@ -163,8 +163,8 @@ class immutable_value {
    * @return The data of type T that is unmodifiable
    */
   template<typename T>
-  const T& as() const {
-    return *reinterpret_cast<const T*>(ptr_);
+  const T &as() const {
+    return *reinterpret_cast<const T *>(ptr_);
   }
 
   /**
@@ -178,7 +178,7 @@ class immutable_value {
   /** The data type */
   data_type type_;
   /** The pointer of the immutable value */
-  void* ptr_;
+  void *ptr_;
 };
 
 }

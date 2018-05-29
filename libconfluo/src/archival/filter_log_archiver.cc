@@ -14,7 +14,7 @@ filter_log_archiver::filter_log_archiver(const std::string &path, filter_log *fi
 }
 
 filter_log_archiver::~filter_log_archiver() {
-  for (auto* archiver : filter_archivers_)
+  for (auto *archiver : filter_archivers_)
     delete archiver;
 }
 

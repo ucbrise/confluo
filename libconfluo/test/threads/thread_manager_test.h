@@ -29,7 +29,7 @@ TEST_F(ThreadManagerTest, MultiThreadedRegisterDeregisterTest) {
     }));
   }
 
-  for (auto& t : threads) {
+  for (auto &t : threads) {
     if (t.joinable())
       t.join();
   }

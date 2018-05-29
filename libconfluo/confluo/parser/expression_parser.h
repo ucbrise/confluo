@@ -57,7 +57,7 @@ class utree_dbg_print {
    * @param range The range of nodes to visit
    */
   template<typename Iterator>
-  void operator()(boost::iterator_range<Iterator> const& range) const {
+  void operator()(boost::iterator_range<Iterator> const &range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
     fprintf(stderr, "(");
     for (iterator i = range.begin(); i != range.end(); ++i) {
@@ -194,7 +194,7 @@ class utree_negate {
    * @return The tree with all of the visited nodes in the range
    */
   template<typename Iterator>
-  spirit::utree operator()(boost::iterator_range<Iterator> const& range) const {
+  spirit::utree operator()(boost::iterator_range<Iterator> const &range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
     spirit::utree ut;
     for (iterator i = range.begin(); i != range.end(); ++i) {
@@ -228,7 +228,6 @@ class utree_negate {
    */
   spirit::utree operator()(spirit::function_base const &) const;
 };
-
 
 /**
  * All of the components that make up an expression
@@ -344,7 +343,7 @@ boost::phoenix::function<expr> const CONJ = expr(and_or::AND);
 boost::phoenix::function<expr> const DISJ = expr(and_or::OR);
 
 /** Negation expression */
-boost::phoenix::function<negate_expr> NEG;
+boost::phoenix::function<negate_expr> const NEG;
 
 /**
  * Parser of expressions

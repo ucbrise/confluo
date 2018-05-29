@@ -17,7 +17,7 @@ std::vector<column_t> parse_schema(const std::string &s) {
     throw parse_exception(std::string("Parse failed at ") + rest);
   }
   schema_builder b;
-  for (const auto& kv : kvs) {
+  for (const auto &kv : kvs) {
     b.add_column(data_type::from_string(kv.second), kv.first);
   }
   return b.get_columns();

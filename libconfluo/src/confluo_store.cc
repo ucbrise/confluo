@@ -111,7 +111,7 @@ int64_t confluo_store::create_atomic_multilog_task(const std::string &name,
     return INT64_C(-1);
   }
   utils::file_utils::create_dir(data_path_ + "/" + name);
-  atomic_multilog* t = new atomic_multilog(name, schema, data_path_ + "/" + name,
+  atomic_multilog *t = new atomic_multilog(name, schema, data_path_ + "/" + name,
                                            mode, a_mode, mgmt_pool_);
   id = atomic_multilogs_.push_back(t);
   if (multilog_map_.put(name, id) == -1) {
@@ -133,7 +133,7 @@ int64_t confluo_store::create_atomic_multilog_task(const std::string &name,
     return INT64_C(-1);
   }
   utils::file_utils::create_dir(data_path_ + "/" + name);
-  atomic_multilog* t = new atomic_multilog(name, schema, data_path_ + "/" + name,
+  atomic_multilog *t = new atomic_multilog(name, schema, data_path_ + "/" + name,
                                            mode, a_mode, mgmt_pool_);
   id = atomic_multilogs_.push_back(t);
   if (multilog_map_.put(name, id) == -1) {
@@ -150,7 +150,7 @@ int64_t confluo_store::load_atomic_multilog_task(const std::string &name, option
     ex = management_exception("Table " + name + " already loaded.");
     return INT64_C(-1);
   }
-  atomic_multilog* t = new atomic_multilog(name, data_path_ + "/" + name, mgmt_pool_);
+  atomic_multilog *t = new atomic_multilog(name, data_path_ + "/" + name, mgmt_pool_);
   id = atomic_multilogs_.push_back(t);
   if (multilog_map_.put(name, id) == -1) {
     ex = management_exception(

@@ -20,7 +20,7 @@ namespace assert {
 
 namespace detail {
 
-static inline void _assert_fail(const char* expr, const char* file, int line,
+inline void _assert_fail(const char* expr, const char* file, int line,
                                 const std::string& msg) {
   std::ostringstream out;
   if (!msg.empty())
@@ -56,25 +56,9 @@ class assertion_failure_exception : public std::exception {
 
 class assertion {
  public:
-  assertion(const char* expr, const char* file, int line)
-      : expr_(expr),
-        file_(file),
-        line_(line) {
-  }
+  assertion(const char* expr, const char* file, int line);
 
-  virtual ~assertion() noexcept(false) {
-    if (!msg_.str().empty())
-      msg_ << ": ";
-
-    std::string expr_str(expr_);
-    if (expr_str == "false" || expr_str == "FALSE" || expr_str == "0")
-      msg_ << "Unreachable code assertion";
-    else
-      msg_ << "Assertion '" << expr_str << "'";
-
-    msg_ << " failed, file '" << file_ << "' at line " << line_;
-    throw assertion_failure_exception(msg_.str());
-  }
+  virtual ~assertion() noexcept(false);
 
   std::ostringstream& get() {
     return msg_;

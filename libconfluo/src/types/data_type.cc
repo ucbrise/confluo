@@ -3,6 +3,19 @@
 
 namespace confluo {
 
+std::vector<type_properties> DATA_TYPES = detail::init_primitives();
+
+size_t find_type_properties(const std::string &name) {
+  std::string uname = utils::string_utils::to_upper(name);
+  for (unsigned int i = 0; i < DATA_TYPES.size(); i++) {
+    std::string tname = utils::string_utils::to_upper(DATA_TYPES[i].name);
+    if (uname.compare(tname) == 0) {
+      return i;
+    }
+  }
+  return 0;
+}
+
 data_type::data_type()
     : id(0),
       size(0) {
@@ -10,9 +23,12 @@ data_type::data_type()
 
 data_type::data_type(uint16_t _id, size_t _size)
     : id(_id),
-      size(_size) {
-  id = _id;
-  size = _size;
+      size(DATA_TYPES[id].size ? DATA_TYPES[id].size : _size) {
+}
+
+data_type::data_type(const std::string &name, size_t _size)
+    : id(find_type_properties(name)),
+      size(DATA_TYPES[id].size ? DATA_TYPES[id].size : _size) {
 }
 
 data_type &data_type::operator=(const data_type &other) {
@@ -102,14 +118,14 @@ bool data_type::is_bounded() const {
 }
 
 void data_type::serialize(std::ostream &out) const {
-  out.write(reinterpret_cast<const char*>(&id), sizeof(size_t));
-  out.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
+  out.write(reinterpret_cast<const char *>(&id), sizeof(size_t));
+  out.write(reinterpret_cast<const char *>(&size), sizeof(size_t));
 }
 
 data_type data_type::deserialize(std::istream &in) {
   size_t id, size;
-  in.read(reinterpret_cast<char*>(&id), sizeof(size_t));
-  in.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+  in.read(reinterpret_cast<char *>(&id), sizeof(size_t));
+  in.read(reinterpret_cast<char *>(&size), sizeof(size_t));
   return data_type(id, size);
 }
 
@@ -126,7 +142,7 @@ data_type data_type::from_string(const std::string &str) {
     if (id == 0) {
       THROW(parse_exception, "Unknown type name " + str);
     }
-    return data_type(id, DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
+    return data_type(static_cast<uint16_t>(id), DATA_TYPES[id].size ? DATA_TYPES[id].size : size);
   }
   THROW(parse_exception, "Malformed type name " + str);
 }

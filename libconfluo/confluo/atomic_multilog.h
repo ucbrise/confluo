@@ -252,7 +252,7 @@ class atomic_multilog {
    * @param record The record to be stored
    * @return The offset in data log where the record is written
    */
-  size_t append(const std::vector<std::string>& record);
+  size_t append(const std::vector<std::string> &record);
 
   /**
    * Reads data from the atomic multilog at the specified offset into a pointer.
@@ -261,7 +261,7 @@ class atomic_multilog {
    * @param version The current version
    * @param ptr The pointer to populate
    */
-  void read(uint64_t offset, uint64_t& version, read_only_data_log_ptr& ptr) const;
+  void read(uint64_t offset, uint64_t &version, read_only_data_log_ptr &ptr) const;
 
   /**
    * Reads data from the atomic multilog at the specified offset into a pointer.
@@ -269,7 +269,7 @@ class atomic_multilog {
    * @param offset The offset into the data log at which the data is stored
    * @param ptr The pointer to populate
    */
-  void read(uint64_t offset, read_only_data_log_ptr& ptr) const;
+  void read(uint64_t offset, read_only_data_log_ptr &ptr) const;
 
   /**
    * Reads a record given an offset into the data log
@@ -277,7 +277,7 @@ class atomic_multilog {
    * @param version The current version
    * @return The corresponding record as a vector of strings.
    */
-  std::vector<std::string> read(uint64_t offset, uint64_t& version) const;
+  std::vector<std::string> read(uint64_t offset, uint64_t &version) const;
 
   /**
    * Reads a record given an offset into the data log
@@ -292,7 +292,7 @@ class atomic_multilog {
    * @param version The current version
    * @return Pointer to the corresponding raw record bytes
    */
-  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const;
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t &version) const;
 
   /**
    * Reads a record given an offset into the data log

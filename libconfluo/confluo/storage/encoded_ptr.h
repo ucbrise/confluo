@@ -120,7 +120,7 @@ class encoded_ptr {
    * @param start_idx index to start at
    * @param len number of elements
    */
-  void decode(T* buffer, size_t start_idx, size_t len) const {
+  void decode(T *buffer, size_t start_idx, size_t len) const {
     auto aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
@@ -133,7 +133,7 @@ class encoded_ptr {
       }
       case encoding_type::D_LZ4: {
         compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(),
-                                           reinterpret_cast<uint8_t*>(buffer), start_idx, len);
+                                           reinterpret_cast<uint8_t *>(buffer), start_idx, len);
         break;
       }
       default: {
@@ -150,7 +150,7 @@ class encoded_ptr {
    * @return pointer to decoded buffer
    */
   std::unique_ptr<T> decode(size_t start_idx, size_t len) const {
-    T* decoded = new T[len];
+    T *decoded = new T[len];
     decode(decoded, start_idx, len);
     return std::unique_ptr<T>(decoded);
   }

@@ -371,10 +371,10 @@ class monolog_exp2_base {
    * @param bucket_idx The index of the specified bucket
    * @return The specified bucket
    */
-  T* try_allocate_bucket(size_t bucket_idx) {
+  T *try_allocate_bucket(size_t bucket_idx) {
     size_t size = (1U << (bucket_idx + FBS_HIBIT));
-    T* new_bucket = new T[size];
-    T* expected = NULL;
+    T *new_bucket = new T[size];
+    T *expected = NULL;
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.

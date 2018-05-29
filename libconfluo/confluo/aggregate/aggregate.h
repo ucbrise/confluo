@@ -44,12 +44,12 @@ struct aggregate_node {
   /**
    * @return A pointer to the next aggregate
    */
-  aggregate_node* next();
+  aggregate_node *next();
 
  private:
   numeric value_;
   uint64_t version_;
-  aggregate_node* next_;
+  aggregate_node *next_;
 };
 
 /**
@@ -76,14 +76,14 @@ class aggregate_list {
    * Note: not thread-safe
    * @param other other aggregate_list
    */
-  aggregate_list(const aggregate_list& other);
+  aggregate_list(const aggregate_list &other);
 
   /**
    * Assignment operator that copies all nodes in the list
    * Note: not thread-safe
    * @param other other aggregate_list
    */
-  aggregate_list& operator=(const aggregate_list& other);
+  aggregate_list &operator=(const aggregate_list &other);
 
   /**
    * Default destructor.
@@ -95,7 +95,7 @@ class aggregate_list {
    * @param type The data type of the aggregate
    * @param agg The aggregator
    */
-  void init(data_type type, const aggregator& agg) {
+  void init(data_type type, const aggregator &agg) {
     type_ = type;
     agg_ = agg;
   }
@@ -122,7 +122,7 @@ class aggregate_list {
    * @param value The value with which the aggregate is to be updated.
    * @param version The aggregate version.
    */
-  void comb_update(const numeric& value, uint64_t version);
+  void comb_update(const numeric &value, uint64_t version);
 
   /**
    * Update the aggregate value with the given version, using the sequential operator.
@@ -130,7 +130,7 @@ class aggregate_list {
    * @param value The value with which the aggregate is to be updated.
    * @param version The aggregate version.
    */
-  void seq_update(const numeric& value, uint64_t version);
+  void seq_update(const numeric &value, uint64_t version);
 
  private:
   /**
@@ -139,9 +139,9 @@ class aggregate_list {
    * @param version The expected version for the node being searched for.
    * @return The node that satisfies the constraints above (if any), nullptr otherwise.
    */
-  aggregate_node* get_node(aggregate_node *head, uint64_t version) const;
+  aggregate_node *get_node(aggregate_node *head, uint64_t version) const;
 
-  atomic::type<aggregate_node*> head_;
+  atomic::type<aggregate_node *> head_;
   aggregator agg_;
   data_type type_;
 };
@@ -163,7 +163,7 @@ class aggregate {
    * @param agg The aggregate to initialize
    * @param concurrency Max number of threads to run
    */
-  aggregate(const data_type& type, aggregator agg,
+  aggregate(const data_type &type, aggregator agg,
             int concurrency = thread_manager::get_max_concurrency());
 
   /**
@@ -171,7 +171,7 @@ class aggregate {
    *
    * @param other The other aggregate used to initialize this aggregate
    */
-  aggregate(const aggregate& other);
+  aggregate(const aggregate &other);
 
   /**
    * Assigns another aggregate to this aggregate
@@ -180,14 +180,14 @@ class aggregate {
    *
    * @return This updated aggregate
    */
-  aggregate& operator=(const aggregate& other);
+  aggregate &operator=(const aggregate &other);
 
   /**
    * Moves the other aggregate to this aggregate
    *
    * @param other The other r value aggregate
    */
-  aggregate(aggregate&& other) noexcept;
+  aggregate(aggregate &&other) noexcept;
 
   /**
    * Assigns another aggregate to this aggregate using move semantics
@@ -196,7 +196,7 @@ class aggregate {
    *
    * @return This updated aggregate
    */
-  aggregate& operator=(aggregate&& other) noexcept;
+  aggregate &operator=(aggregate &&other) noexcept;
 
   /**
    * Deallocates the aggregate
@@ -210,7 +210,7 @@ class aggregate {
    * @param value The value to update to
    * @param version The version of the multilog
    */
-  void seq_update(int thread_id, const numeric& value, uint64_t version);
+  void seq_update(int thread_id, const numeric &value, uint64_t version);
 
   /**
    * A combinational update of an aggregate for a thread
@@ -219,7 +219,7 @@ class aggregate {
    * @param value The value of the numeric
    * @param version The version of the multilog
    */
-  void comb_update(int thread_id, const numeric& value, uint64_t version);
+  void comb_update(int thread_id, const numeric &value, uint64_t version);
 
   /**
    * Gets the aggregate at the specified version
@@ -233,7 +233,7 @@ class aggregate {
  private:
   data_type type_;
   aggregator agg_;
-  aggregate_list* aggs_;
+  aggregate_list *aggs_;
   int concurrency_;
 };
 

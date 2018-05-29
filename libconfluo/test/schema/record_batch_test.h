@@ -19,7 +19,7 @@ class RecordBatchTest : public testing::Test {
     double g;
     char h[16];
 
-    friend bool operator==(const rec& a, const rec& b) {
+    friend bool operator==(const rec &a, const rec &b) {
       return a.ts == b.ts && a.a == b.a && a.b == b.b && a.c == b.c
           && a.d == b.d && a.e == b.e && a.f == b.f && a.g == b.g;
     }
@@ -28,16 +28,16 @@ class RecordBatchTest : public testing::Test {
   static std::vector<column_t> s;
   static rec r;
 
-  void* record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e,
+  void *record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e,
                float f, double g) {
     r = {ts, a, b, c, d, e, f, g, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0}};
+                                   0, 0, 0}};
     return &r;
   }
 
   std::string record_str(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-      float f, double g) {
-    const char* str = reinterpret_cast<const char*>(record(ts, a, b, c, d, e, f, g));
+                         float f, double g) {
+    const char *str = reinterpret_cast<const char *>(record(ts, a, b, c, d, e, f, g));
     return std::string(str, sizeof(rec));
   }
 
@@ -117,15 +117,15 @@ TEST_F(RecordBatchTest, RecordBatchBuilderTest2) {
   record_batch_builder builder(schema);
   typedef RecordBatchTest::rec rec;
 
-  builder.add_record( { "0", "true", "a", "0", "0", "0", "0.0", "0.0", "" });
-  builder.add_record( { "0", "false", "b", "1", "1", "1", "1.0", "1.0", "" });
-  builder.add_record( { "0", "true", "c", "2", "2", "2", "2.0", "2.0", "" });
+  builder.add_record({"0", "true", "a", "0", "0", "0", "0.0", "0.0", ""});
+  builder.add_record({"0", "false", "b", "1", "1", "1", "1.0", "1.0", ""});
+  builder.add_record({"0", "true", "c", "2", "2", "2", "2.0", "2.0", ""});
 
-  builder.add_record( { "1000000", "false", "d", "3", "3", "3", "3.0", "3.0", "" });
-  builder.add_record( { "1000000", "true", "e", "4", "4", "4", "4.0", "4.0", "" });
+  builder.add_record({"1000000", "false", "d", "3", "3", "3", "3.0", "3.0", ""});
+  builder.add_record({"1000000", "true", "e", "4", "4", "4", "4.0", "4.0", ""});
 
-  builder.add_record( { "2000000", "false", "f", "5", "5", "5", "5.0", "5.0", "" });
-  builder.add_record( { "2000000", "true", "g", "6", "6", "6", "6.0", "6.0", "" });
+  builder.add_record({"2000000", "false", "f", "5", "5", "5", "5.0", "5.0", ""});
+  builder.add_record({"2000000", "true", "g", "6", "6", "6", "6.0", "6.0", ""});
 
   auto batch = builder.get_batch();
 

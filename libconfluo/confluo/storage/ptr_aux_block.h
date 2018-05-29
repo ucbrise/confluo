@@ -39,7 +39,7 @@ typedef struct ptr_aux_block {
 
   ptr_aux_block(uint8_t state, uint8_t encoding);
 
-  static ptr_aux_block get(ptr_metadata* metadata);
+  static ptr_aux_block get(ptr_metadata *metadata);
 
 } aux_block;
 

@@ -1,12 +1,5 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
-if (NOT APPLE AND UNIX)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
-endif ()
-
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-
 set(RPC_INCLUDE rpc)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 set(CONFLUO_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libconfluo/confluo)
@@ -37,9 +30,16 @@ add_executable(confluod
         src/rpc_constants.cc
         src/rpc_service.cc
         src/rpc_server.cc
-        src/rpc_types.cc)
-target_link_libraries(confluod confluo ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB})
-add_dependencies(confluod thrift lz4)
+        src/rpc_types.cc
+        src/rpc_alert_stream.cc
+        src/rpc_client.cc
+        src/rpc_configuration_params.cc
+        src/rpc_defaults.cc
+        src/rpc_record_batch_builder.cc
+        src/rpc_record_stream.cc
+        src/rpc_type_conversions.cc)
+target_link_libraries(confluod confluo ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB} ${JEMALLOC_LIBRARIES})
+add_dependencies(confluod thrift lz4 jemalloc)
 
 add_library(rpcclient STATIC
         rpc/rpc_constants.h
@@ -48,16 +48,21 @@ add_library(rpcclient STATIC
         rpc/rpc_service.tcc
         src/rpc_service.cc
         rpc/rpc_types.h
-        src/rpc_types.cc)
-target_link_libraries(confluod ${JEMALLOC_LIBRARIES})
-set(SERVER_SOURCES src/rpc_constants.cc
-                   src/rpc_service.cc 
-                   src/rpc_server.cc 
-                   src/rpc_types.cc)
-target_link_libraries(confluod thriftstatic ${JEMALLOC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-add_dependencies(confluod thrift)
-
-add_dependencies(confluod jemalloc)
+        src/rpc_types.cc
+        rpc/rpc_client.h
+        src/rpc_client.cc
+        rpc/rpc_alert_stream.h
+        src/rpc_alert_stream.cc
+        rpc/rpc_record_batch_builder.h
+        src/rpc_record_batch_builder.cc
+        rpc/rpc_type_conversions.h
+        src/rpc_type_conversions.cc
+        rpc/rpc_record_stream.h
+        src/rpc_record_stream.cc
+        rpc/rpc_configuration_params.h
+        src/rpc_configuration_params.cc
+        rpc/rpc_defaults.h
+        src/rpc_defaults.cc)
 target_link_libraries(rpcclient thriftstatic)
 add_dependencies(rpcclient thrift)
 
@@ -82,12 +87,12 @@ if (BUILD_TESTS)
           test/client_connection_test.h
           test/rpc_test_utils.h
           test/client_write_ops_test.h)
-  target_link_libraries(rpctest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
+  target_link_libraries(rpctest confluo gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(rpctest googletest thrift)
   
   # Register test
   enable_testing()
-  add_test(RpcTest ${EXECUTABLE_OUTPUT_PATH}/rpctest)
+  add_test(RpcTest rpctest)
 endif()
 
 # install

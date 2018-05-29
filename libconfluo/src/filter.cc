@@ -34,7 +34,7 @@ size_t filter::num_aggregates() const {
 
 void filter::update(const record_t &r) {
   if (exp_.test(r) && fn_(r)) {
-    aggregated_reflog* refs = idx_.insert(
+    aggregated_reflog *refs = idx_.insert(
         byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS),
         r.log_offset(), aggregates_);
     int tid = thread_manager::get_id();
@@ -50,11 +50,11 @@ void filter::update(const record_t &r) {
 
 void filter::update(size_t log_offset, const schema_snapshot &snap, record_block &block, size_t record_size) {
   int tid = thread_manager::get_id();
-  aggregated_reflog* refs = nullptr;
+  aggregated_reflog *refs = nullptr;
   std::vector<numeric> local_aggs;
 
   for (size_t i = 0; i < block.nrecords; i++) {
-    void* cur_rec = reinterpret_cast<uint8_t*>(&block.data[i * record_size]);
+    void *cur_rec = reinterpret_cast<uint8_t *>(&block.data[i * record_size]);
     uint64_t rec_off = log_offset + i * record_size;
     if (exp_.test(snap, cur_rec)) {
       if (refs == nullptr) {

@@ -68,7 +68,7 @@ struct schema_parser : public qi::grammar<I, ascii::space_type, kv_list()> {
  *
  * @return A vector of columns that contains data that make up the schema
  */
-std::vector<column_t> parse_schema(const std::string& s);
+std::vector<column_t> parse_schema(const std::string &s);
 
 }
 }

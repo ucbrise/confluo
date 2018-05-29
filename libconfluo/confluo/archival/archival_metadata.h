@@ -28,14 +28,14 @@ class filter_aggregates_archival_metadata {
    * @param reader archives reader
    * @return metadata
    */
-  static filter_aggregates_archival_metadata read(incremental_file_reader& reader);
+  static filter_aggregates_archival_metadata read(incremental_file_reader &reader);
 
   /**
    * Append metadata to file.
    * @param metadata archival metadata
    * @param writer archives writer
    */
-  static void append(filter_aggregates_archival_metadata metadata, incremental_file_writer& writer);
+  static void append(filter_aggregates_archival_metadata metadata, incremental_file_writer &writer);
 
   /**
    *
@@ -79,7 +79,7 @@ class radix_tree_archival_metadata {
    * @param key_size size of radix tree key
    * @return metadata
    */
-  static radix_tree_archival_metadata read(incremental_file_reader& reader, size_t key_size) {
+  static radix_tree_archival_metadata read(incremental_file_reader &reader, size_t key_size) {
     byte_string key = byte_string(reader.read(key_size));
     size_t reflog_idx = reader.read<size_t>();
     size_t bucket_len = reader.read<size_t>();
@@ -91,7 +91,7 @@ class radix_tree_archival_metadata {
    * @param metadata archival metadata
    * @param writer archives writer
    */
-  static void append(radix_tree_archival_metadata metadata, incremental_file_writer& writer) {
+  static void append(radix_tree_archival_metadata metadata, incremental_file_writer &writer) {
     writer.append<uint8_t>(metadata.key_.data(), metadata.key_.size());
     writer.append<size_t>(metadata.reflog_index_);
     writer.append<size_t>(metadata.bucket_size_);

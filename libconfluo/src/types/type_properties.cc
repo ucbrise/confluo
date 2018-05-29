@@ -64,16 +64,4 @@ std::vector<type_properties> detail::init_primitives() {
   return props;
 }
 
-std::vector<type_properties> DATA_TYPES = detail::init_primitives();
-size_t find_type_properties(const std::string &name) {
-  std::string uname = utils::string_utils::to_upper(name);
-  for (unsigned int i = 0; i < DATA_TYPES.size(); i++) {
-    std::string tname = utils::string_utils::to_upper(DATA_TYPES[i].name);
-    if (uname.compare(tname) == 0) {
-      return i;
-    }
-  }
-  return 0;
-}
-
 }

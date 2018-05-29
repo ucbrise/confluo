@@ -29,7 +29,7 @@ class byte_utils {
  public:
   static inline bool is_big_endian() {
     int num = 1;
-    return !(*(char *) &num == 1);
+    return *(char *) &num != 1;
   }
 
   static inline uint8_t byte_swap(uint8_t __val) {
@@ -45,7 +45,7 @@ class byte_utils {
   }
 
   static inline int16_t byte_swap(int16_t __val) {
-    return (__val << 8) | ((__val >> 8) & 0xFF);
+    return static_cast<int16_t>((__val << 8) | ((__val >> 8) & 0xFF));
   }
 
   static inline uint32_t byte_swap(uint32_t __val) {

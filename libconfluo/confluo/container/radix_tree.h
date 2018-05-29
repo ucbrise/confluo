@@ -21,7 +21,7 @@ struct radix_tree_node {
   /** The radix node type */
   typedef radix_tree_node<reflog> node_t;
   /** The child type */
-  typedef atomic::type<node_t*> child_t;
+  typedef atomic::type<node_t *> child_t;
   /** The key */
   typedef byte_string key_t;
 
@@ -123,7 +123,7 @@ struct radix_tree_node {
    *
    * @return A pointer to the first child
    */
-  const node_t* first_child(size_t width) const {
+  const node_t *first_child(size_t width) const {
     size_t cur_key = 0;
     const node_t* child = nullptr;
     while (cur_key < width && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
@@ -139,7 +139,7 @@ struct radix_tree_node {
    *
    * @return A pointer to the child
    */
-  const node_t* last_child(size_t width) const {
+  const node_t *last_child(size_t width) const {
     int16_t cur_key = width - 1;
     const node_t* child = nullptr;
     while (cur_key >= 0 && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
@@ -156,7 +156,7 @@ struct radix_tree_node {
    *
    * @return node_t
    */
-  const node_t* next_child(uint8_t key, size_t width) const {
+  const node_t *next_child(uint8_t key, size_t width) const {
     size_t cur_key = key + 1;
     const node_t* child = nullptr;
     while (cur_key < width && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
@@ -173,7 +173,7 @@ struct radix_tree_node {
    *
    * @return A pointer to the child node (nullptr if none were found).
    */
-  const node_t* prev_child(uint8_t key, size_t width) const {
+  const node_t *prev_child(uint8_t key, size_t width) const {
     if (key == 0)
       return nullptr;
 
@@ -222,7 +222,7 @@ struct radix_tree_node {
     if (is_leaf_)
       return this;
 
-    const node_t* child = first_child(t_width);
+    const node_t *child = first_child(t_width);
     if (child == nullptr) {
       return advance(t_key, t_width, t_depth);
     } else {
@@ -267,7 +267,7 @@ struct radix_tree_node {
     if (is_leaf_)
       return this;
 
-    const node_t* child = last_child(t_width);
+    const node_t *child = last_child(t_width);
 
     if (child == nullptr) {
       return retreat(t_key, t_width, t_depth);
@@ -304,9 +304,9 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   /** The self reflog type */
   typedef rt_reflog_it<reflog> self_type;
   /** The reflog reference */
-  typedef reflog& reference;
+  typedef reflog &reference;
   /** The reflog pointer */
-  typedef reflog* pointer;
+  typedef reflog *pointer;
 
   /**
    * Default constructor.
@@ -327,7 +327,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    * @param key The key
    * @param node The node
    */
-  rt_reflog_it(size_t width, size_t depth, const key_t& key, const node_t* node)
+  rt_reflog_it(size_t width, size_t depth, const key_t &key, const node_t *node)
       : width_(width),
         depth_(depth),
         key_(key),
@@ -360,7 +360,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    * @return Returns true if the iterator does not equal the other iterator,
    * false otherwise.
    */
-  bool operator!=(const self_type& other) const {
+  bool operator!=(const self_type &other) const {
     return node_ != other.node_;
   }
 
@@ -372,7 +372,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    * @return Returns true if the iterator equals the other iterator,
    * false otherwise.
    */
-  bool operator==(const self_type& other) const {
+  bool operator==(const self_type &other) const {
     return node_ == other.node_;
   }
 
@@ -381,7 +381,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    *
    * @return Updated iterator.
    */
-  const self_type& operator++() {
+  const self_type &operator++() {
     if (node_ != nullptr)
       node_ = node_->advance(key_, width_, depth_);
     return *this;
@@ -404,7 +404,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    *
    * @return The iterator key.
    */
-  key_t const& key() const {
+  key_t const &key() const {
     return key_;
   }
 
@@ -413,7 +413,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    *
    * @return The iterator node.
    */
-  const node_t* node() const {
+  const node_t *node() const {
     return node_;
   }
 
@@ -424,7 +424,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
    *
    * @return Updated iterator.
    */
-  self_type& set_node(const node_t* node) {
+  self_type &set_node(const node_t *node) {
     node_ = node;
     return *this;
   }
@@ -433,7 +433,7 @@ class rt_reflog_it : public std::iterator<std::forward_iterator_tag, reflog> {
   size_t width_;
   size_t depth_;
   key_t key_;
-  const node_t* node_;
+  const node_t *node_;
 };
 
 /**
@@ -457,7 +457,7 @@ class rt_reflog_range_result {
    * @param lb The lower bound iterator in the radix tree.
    * @param ub The upper bound iterator in the radix tree.
    */
-  rt_reflog_range_result(const iterator& lb, const iterator& ub)
+  rt_reflog_range_result(const iterator &lb, const iterator &ub)
       : begin_(lb),
         end_(ub) {
   }
@@ -467,7 +467,7 @@ class rt_reflog_range_result {
    *
    * @param other Another radix tree lookup result
    */
-  rt_reflog_range_result(const rt_reflog_range_result<reflog>& other)
+  rt_reflog_range_result(const rt_reflog_range_result<reflog> &other)
       : begin_(other.begin_),
         end_(other.end_) {
   }
@@ -497,7 +497,7 @@ class rt_reflog_range_result {
    */
   size_t count() const {
     return std::accumulate(begin_, end_, static_cast<size_t>(0),
-                           [](size_t count, reflog& refs) {
+                           [](size_t count, reflog &refs) {
                              return count + 1;
                            });
   }
@@ -573,10 +573,10 @@ class radix_tree {
    * @return The reflog corresponding to the given key.
    */
   template<typename ... ARGS>
-  reflog*& get_or_create(const key_t& key, ARGS&& ... args) {
-    node_t* node = root_;
+  reflog *&get_or_create(const key_t &key, ARGS &&... args) {
+    node_t *node = root_;
     for (size_t d = 0; d < depth_ - 1; d++) {
-      node_t* child = nullptr;
+      node_t *child = nullptr;
       if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
         // Try & allocate child node
         void* raw = ALLOCATOR.alloc(sizeof(node_t));
@@ -598,7 +598,7 @@ class radix_tree {
 
     // Reached leaf
     size_t d = depth_ - 1;
-    node_t* child = nullptr;
+    node_t *child = nullptr;
     if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
       // Try & allocate child node
       void* raw = ALLOCATOR.alloc(sizeof(node_t));
@@ -629,8 +629,8 @@ class radix_tree {
    * @return The reflog to which the value was inserted.
    */
   template<typename ... ARGS>
-  reflog*& insert(const key_t& key, const value_t& value, ARGS&& ... args) {
-    reflog*& refs = get_or_create(key, std::forward<ARGS>(args)...);
+  reflog *&insert(const key_t &key, const value_t &value, ARGS &&... args) {
+    reflog *&refs = get_or_create(key, std::forward<ARGS>(args)...);
     refs->push_back(value);
     return refs;
   }
@@ -643,11 +643,11 @@ class radix_tree {
    *
    * @return The reflog corresponding to the key.
    */
-  reflog* get_unsafe(const key_t& key) const {
-    node_t* node = root_;
+  reflog *get_unsafe(const key_t &key) const {
+    node_t *node = root_;
     size_t d;
     for (d = 0; d < depth_; d++) {
-      node_t* child = atomic::load(&(node->children()[key[d]]));
+      node_t *child = atomic::load(&(node->children()[key[d]]));
       if (child == nullptr)
         return nullptr;
       node = child;
@@ -663,11 +663,11 @@ class radix_tree {
    *
    * @return The reflog corresponding to the key.
    */
-  reflog const* get(const key_t& key) const {
-    node_t* node = root_;
+  reflog const *get(const key_t &key) const {
+    node_t *node = root_;
     size_t d;
     for (d = 0; d < depth_; d++) {
-      node_t* child = atomic::load(&(node->children()[key[d]]));
+      node_t *child = atomic::load(&(node->children()[key[d]]));
       if (child == nullptr)
         return nullptr;
       node = child;
@@ -682,11 +682,11 @@ class radix_tree {
    *
    * @return The reflog corresponding to the key.
    */
-  reflog* operator[](const key_t& key) {
-    node_t* node = root_;
+  reflog *operator[](const key_t &key) {
+    node_t *node = root_;
     size_t d;
     for (d = 0; d < depth_; d++) {
-      node_t* child = atomic::load(&(node->children()[key[d]]));
+      node_t *child = atomic::load(&(node->children()[key[d]]));
       if (child == nullptr)
         return nullptr;
       node = child;
@@ -703,7 +703,7 @@ class radix_tree {
    * @return Iterator to reflog corresponding to the smallest key larger than or
    * equal to the given key in the radix tree.
    */
-  iterator upper_bound(const key_t& key) const {
+  iterator upper_bound(const key_t &key) const {
     auto ub = __upper_bound(key);
     return iterator(width_, depth_, ub.first, ub.second);
   }
@@ -717,7 +717,7 @@ class radix_tree {
    * @return Iterator to reflog corresponding to the largest key smaller than or
    * equal to the given key in the radix tree.
    */
-  iterator lower_bound(const key_t& key) const {
+  iterator lower_bound(const key_t &key) const {
     auto lb = __lower_bound(key);
     return iterator(width_, depth_, lb.first, lb.second);
   }
@@ -730,8 +730,8 @@ class radix_tree {
    *
    * @return A container of reflogs corresponding to the range.
    */
-  rt_reflog_result range_lookup_reflogs(const key_t& begin,
-                                        const key_t& end) const {
+  rt_reflog_result range_lookup_reflogs(const key_t &begin,
+                                        const key_t &end) const {
     iterator ibegin = upper_bound(begin);
     iterator iend = lower_bound(end);
     if (ibegin.node() == nullptr) {
@@ -750,7 +750,7 @@ class radix_tree {
    *
    * @return A container of values corresponding to the range.
    */
-  rt_result range_lookup(const key_t& begin, const key_t& end) const {
+  rt_result range_lookup(const key_t &begin, const key_t &end) const {
     return rt_result(range_lookup_reflogs(begin, end));
   }
 
@@ -763,10 +763,10 @@ class radix_tree {
    *
    * @return The approximate count.
    */
-  size_t approx_count(const key_t& begin, const key_t& end) const {
+  size_t approx_count(const key_t &begin, const key_t &end) const {
     return std::accumulate(upper_bound(begin), ++lower_bound(end),
                            static_cast<size_t>(0),
-                           [](size_t count, reflog& val) {
+                           [](size_t count, reflog &val) {
                              return count + val.size();
                            });
   }
@@ -777,7 +777,7 @@ class radix_tree {
    * @return The string corresponding to the radix tree address.
    */
   std::string to_string() const {
-    const void *addr = static_cast<const void*>(this);
+    const void *addr = static_cast<const void *>(this);
     std::stringstream ss;
     ss << addr;
     return ss.str();
@@ -789,11 +789,11 @@ class radix_tree {
    * @param key The given key.
    * @return The node and its corresponding key.
    */
-  std::pair<key_t, const node_t*> __lower_bound(const key_t& key) const {
-    std::pair<key_t, const node_t*> ret(key, root_);
+  std::pair<key_t, const node_t *> __lower_bound(const key_t &key) const {
+    std::pair<key_t, const node_t *> ret(key, root_);
     size_t d;
     for (d = 0; d < depth_; d++) {
-      node_t* child = atomic::load(&(ret.second->children()[key[d]]));
+      node_t *child = atomic::load(&(ret.second->children()[key[d]]));
       if (child == nullptr)
         break;
       ret.second = child;
@@ -804,7 +804,7 @@ class radix_tree {
       // and key[d] is the failed child key
 
       // Obtain the next valid child
-      const node_t* child = ret.second->prev_child(key[d], width_);
+      const node_t *child = ret.second->prev_child(key[d], width_);
       if (child == nullptr) {       // There are no valid children of ret.second
         ret.second = ret.second->retreat(ret.first, width_, depth_);
       } else {  // There is a valid child of ret.second
@@ -821,11 +821,11 @@ class radix_tree {
    * @param key The given key.
    * @return The node and its corresponding key.
    */
-  std::pair<key_t, const node_t*> __upper_bound(const key_t& key) const {
-    std::pair<key_t, const node_t*> ret(key, root_);
+  std::pair<key_t, const node_t *> __upper_bound(const key_t &key) const {
+    std::pair<key_t, const node_t *> ret(key, root_);
     size_t d;
     for (d = 0; d < depth_; d++) {
-      node_t* child = atomic::load(&(ret.second->children()[key[d]]));
+      node_t *child = atomic::load(&(ret.second->children()[key[d]]));
       if (child == nullptr)
         break;
       ret.second = child;
@@ -836,7 +836,7 @@ class radix_tree {
       // and key[d] is the failed child key
 
       // Obtain the next valid child
-      const node_t* child = ret.second->next_child(key[d], width_);
+      const node_t *child = ret.second->next_child(key[d], width_);
       if (child == nullptr)        // There are no valid children of ret.second
         ret.second = ret.second->advance(ret.first, width_, depth_);
       else {  // There is a valid child of ret.second
@@ -850,7 +850,7 @@ class radix_tree {
 
   size_t width_;
   size_t depth_;
-  node_t* root_;
+  node_t *root_;
 };
 
 /** The radix index */

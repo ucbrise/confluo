@@ -48,7 +48,7 @@ class aggregate_info {
    * @param str String to parse from.
    * @return Numeric value with the aggregate's data type.
    */
-  numeric value(const std::string& str);
+  numeric value(const std::string &str);
 
   /**
    * Aggregates the data using the combine operator.
@@ -57,7 +57,7 @@ class aggregate_info {
    * @param data The data
    * @return An aggregate of the data based on the numeric
    */
-  numeric comb_op(const numeric& a, const schema_snapshot& s, void* data);
+  numeric comb_op(const numeric &a, const schema_snapshot &s, void *data);
 
   /**
    * Aggregates the data using the combine operator.
@@ -65,7 +65,7 @@ class aggregate_info {
    * @param b Another numeric
    * @return An aggregate of the two numerics
    */
-  numeric comb_op(const numeric& a, const numeric& b);
+  numeric comb_op(const numeric &a, const numeric &b);
 
   /**
    * Aggregates the data using the combine operator.
@@ -74,7 +74,7 @@ class aggregate_info {
    * @param data The data
    * @return An aggregate of the data based on the numeric
    */
-  numeric seq_op(const numeric& a, const schema_snapshot& s, void* data);
+  numeric seq_op(const numeric &a, const schema_snapshot &s, void *data);
 
   /**
    * Aggregates the data using the combine operator.
@@ -82,7 +82,7 @@ class aggregate_info {
    * @param b Another numeric
    * @return An aggregate of the two numerics
    */
-  numeric seq_op(const numeric& a, const numeric& b);
+  numeric seq_op(const numeric &a, const numeric &b);
 
   /**
    * Returns the zero value for the aggregate
@@ -114,7 +114,7 @@ class aggregate_info {
    * @param t The trigger to be added.
    * @return Trigger ID.
    */
-  size_t add_trigger(trigger* t);
+  size_t add_trigger(trigger *t);
 
   /**
    * Remove a trigger from the aggregate.
@@ -128,7 +128,7 @@ class aggregate_info {
    * @param id The trigger ID.
    * @return The trigger corresponding to the id.
    */
-  trigger* get_trigger(size_t id);
+  trigger *get_trigger(size_t id);
 
   /**
    * Get the number of triggers on this aggregate (includes invalid triggers)
@@ -151,7 +151,7 @@ class aggregate_info {
 /**
  * @brief Log of aggregate_info pointers
  */
-typedef monolog::monolog_exp2<aggregate_info*> aggregate_log;
+typedef monolog::monolog_exp2<aggregate_info *> aggregate_log;
 
 }
 
