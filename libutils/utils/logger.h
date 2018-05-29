@@ -37,7 +37,7 @@ class logger {
 
   virtual ~logger();
 
-  std::ostringstream& get(const log_level level);
+  std::ostringstream &get(const log_level level);
 
  private:
   std::string to_string(const log_level level);

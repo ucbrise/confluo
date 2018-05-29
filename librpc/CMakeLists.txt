@@ -5,13 +5,13 @@ set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 set(CONFLUO_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libconfluo/confluo)
 
 include_directories(${gtest_SOURCE_DIR}/include
-  ${RPC_INCLUDE}
-  ${UTILS_INCLUDE}
-  ${CONFLUO_INCLUDE}
-  ${THRIFT_INCLUDE}
-  ${THRIFT_BUILD_INCLUDE}
-  ${Boost_INCLUDE_DIR})
-  
+        ${RPC_INCLUDE}
+        ${UTILS_INCLUDE}
+        ${CONFLUO_INCLUDE}
+        ${THRIFT_INCLUDE}
+        ${THRIFT_BUILD_INCLUDE}
+        ${Boost_INCLUDE_DIR})
+
 # Build server executable
 add_executable(confluod
         rpc/rpc_type_conversions.h
@@ -89,18 +89,18 @@ if (BUILD_TESTS)
           test/client_write_ops_test.h)
   target_link_libraries(rpctest confluo gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
   add_dependencies(rpctest googletest thrift)
-  
+
   # Register test
   enable_testing()
   add_test(RpcTest rpctest)
-endif()
+endif ()
 
 # install
 install(DIRECTORY rpc/
-  DESTINATION include
-  FILES_MATCHING PATTERN "*")
+        DESTINATION include
+        FILES_MATCHING PATTERN "*")
 
 install(TARGETS confluod rpcclient
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib)
+        RUNTIME DESTINATION bin
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib)

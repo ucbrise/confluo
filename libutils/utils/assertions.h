@@ -20,8 +20,8 @@ namespace assert {
 
 namespace detail {
 
-inline void _assert_fail(const char* expr, const char* file, int line,
-                                const std::string& msg) {
+inline void _assert_fail(const char *expr, const char *file, int line,
+                         const std::string &msg) {
   std::ostringstream out;
   if (!msg.empty())
     out << msg << ": ";
@@ -42,11 +42,11 @@ inline void _assert_fail(const char* expr, const char* file, int line,
 
 class assertion_failure_exception : public std::exception {
  public:
-  assertion_failure_exception(const std::string& msg)
+  assertion_failure_exception(const std::string &msg)
       : msg_(msg) {
   }
 
-  virtual const char* what() const throw () {
+  virtual const char *what() const throw() {
     return msg_.c_str();
   }
 
@@ -56,18 +56,18 @@ class assertion_failure_exception : public std::exception {
 
 class assertion {
  public:
-  assertion(const char* expr, const char* file, int line);
+  assertion(const char *expr, const char *file, int line);
 
   virtual ~assertion() noexcept(false);
 
-  std::ostringstream& get() {
+  std::ostringstream &get() {
     return msg_;
   }
 
  private:
   std::ostringstream msg_;
-  const char* expr_;
-  const char* file_;
+  const char *expr_;
+  const char *file_;
   int line_;
 };
 

@@ -23,9 +23,9 @@ class rpc_record_stream {
    * @param client The thrift client
    * @param handle The r value handle iterator
    */
-  rpc_record_stream(int64_t multilog_id, const schema_t& schema,
+  rpc_record_stream(int64_t multilog_id, const schema_t &schema,
                     std::shared_ptr<thrift_client> client,
-                    rpc_iterator_handle&& handle);
+                    rpc_iterator_handle &&handle);
 
   /**
    * Gets the record data from the schema
@@ -39,7 +39,7 @@ class rpc_record_stream {
    *
    * @return This record stream advanced
    */
-  rpc_record_stream& operator++();
+  rpc_record_stream &operator++();
 
   /**
    * Checks to see if the record stream has any more elements

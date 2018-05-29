@@ -23,21 +23,21 @@ class rpc_alert_stream {
    * @param client The rpc client
    * @param handle The data for the stream
    */
-  rpc_alert_stream(int64_t table_id, std::shared_ptr<rpc_client> client, rpc_iterator_handle&& handle);
+  rpc_alert_stream(int64_t table_id, std::shared_ptr<rpc_client> client, rpc_iterator_handle &&handle);
 
   /**
    * Gets the alert
    *
    * @return String containing the alert
    */
-  const std::string& get() const;
+  const std::string &get() const;
 
   /**
    * Advances the alert stream
    *
    * @return This updated rpc alert stream 
    */
-  rpc_alert_stream& operator++();
+  rpc_alert_stream &operator++();
 
   /**
    * Checks whether there is any more elements in the stream

@@ -7,10 +7,11 @@ const int mmap_utils::PROT_RW;
 const int mmap_utils::FLAGS;
 
 void *mmap_utils::map(int fd, void *addr_hint, size_t offset, size_t size, int prot, int flags) {
-  void* data = mmap(addr_hint, size, prot, flags, fd, static_cast<off_t>(offset));
+  void *data = mmap(addr_hint, size, prot, flags, fd, static_cast<off_t>(offset));
   assert_throw(
       data != MAP_FAILED,
-      "mmap(" << addr_hint << ", " << size << ", " << prot << ", " << flags << ", " << fd << ", " << offset << "): " << strerror(errno));
+      "mmap(" << addr_hint << ", " << size << ", " << prot << ", " << flags << ", " << fd << ", " << offset << "): "
+              << strerror(errno));
   return data;
 }
 
@@ -24,7 +25,7 @@ void mmap_utils::flush(void *addr, size_t size) {
     return;
   static size_t page_size = static_cast<size_t>(sysconf(_SC_PAGESIZE));
   size_t off = (size_t) addr % page_size;
-  int ret = msync(((char*) addr) - off, size + off, MS_SYNC);
+  int ret = msync(((char *) addr) - off, size + off, MS_SYNC);
   assert_throw(ret != -1, "msync(" << addr << ", " << size << "): " << strerror(errno));
 }
 

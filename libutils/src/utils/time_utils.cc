@@ -7,7 +7,7 @@ namespace utils {
 
 std::string time_utils::current_date_time() {
   std::time_t rawtime;
-  std::tm* timeinfo;
+  std::tm *timeinfo;
   char buffer[100];
 
   std::time(&rawtime);

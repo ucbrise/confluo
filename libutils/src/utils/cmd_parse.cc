@@ -79,7 +79,7 @@ cmd_options cmd_options::finalize() {
   if (lopts_.back().name != nullptr) {
     add(cmd_option("help", 'h', true).set_description(
         "Print this help message and exit"));
-    lopts_.push_back( { NULL, 0, NULL, 0 });
+    lopts_.push_back({NULL, 0, NULL, 0});
   }
   return *this;
 }
@@ -127,12 +127,12 @@ std::string cmd_parser::help_msg() {
 
   // Compute formatting widths
   size_t opt_width = 0;
-  for (const cmd_option& opt : copts) {
+  for (const cmd_option &opt : copts) {
     opt_width = std::max(opt.opt_str().length(), opt_width);
   }
   opt_width += 8;
 
-  for (const cmd_option& opt : copts)
+  for (const cmd_option &opt : copts)
     msg += opt.help_line(opt_width);
 
   return msg;
@@ -150,14 +150,14 @@ std::string cmd_parser::parsed_values() {
 
 void cmd_parser::parse() {
   int c;
-  option* lopts = &(opts_.lopts_[0]);
-  const char* sopts = opts_.sopts_.c_str();
+  option *lopts = &(opts_.lopts_[0]);
+  const char *sopts = opts_.sopts_.c_str();
   std::vector<cmd_option> copts = opts_.copts_;
 
   std::vector<bool> parsed(opts_.copts_.size(), false);
 
   // Add default values
-  for (const cmd_option& opt : copts) {
+  for (const cmd_option &opt : copts) {
     if (opt.default_ != "")
       values_[opt.lopt_] = opt.default_;
   }

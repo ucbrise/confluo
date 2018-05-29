@@ -22,29 +22,28 @@ struct function_traits<R(Args...)> {
 
   static constexpr size_t arity = sizeof...(Args);
 
-  template <size_t N>
-  struct argument
-  {
+  template<size_t N>
+  struct argument {
     static_assert(N < arity, "error: invalid parameter index.");
-    using type = typename std::tuple_element<N,std::tuple<Args...>>::type;
+    using type = typename std::tuple_element<N, std::tuple<Args...>>::type;
   };
 };
 
 // member function pointer
 template<class C, class R, class ... Args>
 struct function_traits<R (C::*)(Args...)> : public function_traits<
-    R(C&, Args...)> {
+    R(C &, Args...)> {
 };
 
 // const member function pointer
 template<class C, class R, class ... Args>
 struct function_traits<R (C::*)(Args...) const> : public function_traits<
-    R(C&, Args...)> {
+    R(C &, Args...)> {
 };
 
 // member object pointer
 template<class C, class R>
-struct function_traits<R (C::*)> : public function_traits<R(C&)> {
+struct function_traits<R (C::*)> : public function_traits<R(C &)> {
 };
 
 // functor
@@ -60,16 +59,16 @@ struct function_traits {
   template<size_t N>
   struct argument {
     static_assert(N < arity, "error: invalid parameter index.");
-    using type = typename call_type::template argument<N+1>::type;
+    using type = typename call_type::template argument<N + 1>::type;
   };
 };
 
 template<class F>
-struct function_traits<F&> : public function_traits<F> {
+struct function_traits<F &> : public function_traits<F> {
 };
 
 template<class F>
-struct function_traits<F&&> : public function_traits<F> {
+struct function_traits<F &&> : public function_traits<F> {
 };
 }
 

@@ -3,7 +3,7 @@
 namespace utils {
 
 std::string config_utils::read_from_env(const std::string &env_var, const std::string &default_val) {
-  if (const char* env_p = std::getenv(env_var.c_str())) {
+  if (const char *env_p = std::getenv(env_var.c_str())) {
     return std::string(env_p);
   }
   return default_val;
@@ -22,7 +22,7 @@ configuration_map::configuration_map(const std::string &paths)
   }
 
   if (!found) {
-    LOG_WARN <<"Could not find configuration file in any of "
+    LOG_WARN << "Could not find configuration file in any of "
              << string_utils::mk_string(path_vector, ", ");
   }
 }

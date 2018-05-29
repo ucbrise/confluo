@@ -64,7 +64,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param store The confluo store used to initialize the service
    * handler
    */
-  rpc_service_handler(confluo_store* store)
+  rpc_service_handler(confluo_store *store)
       : handler_id_(-1),
         store_(store),
         iterator_id_(0) {
@@ -82,7 +82,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       ex.msg = "Could not register handler";
       throw ex;
     } else {
-      LOG_INFO<< "Registered handler thread " << std::this_thread::get_id() << " as " << handler_id_;
+      LOG_INFO << "Registered handler thread " << std::this_thread::get_id() << " as " << handler_id_;
     }
   }
 
@@ -97,7 +97,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
       throw ex;
     } else {
       LOG_INFO << "Deregistered handler thread " << std::this_thread::get_id()
-      << " as " << ret;
+               << " as " << ret;
     }
   }
 
@@ -113,15 +113,15 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @return ID associated with the atomic multilog, -1 if it could
    * not be created
    */
-  int64_t create_atomic_multilog(const std::string& name,
-      const rpc_schema& schema,
-      const rpc_storage_mode mode) {
+  int64_t create_atomic_multilog(const std::string &name,
+                                 const rpc_schema &schema,
+                                 const rpc_storage_mode mode) {
     int64_t ret = -1;
     try {
       ret = store_->create_atomic_multilog(name,
-          rpc_type_conversions::convert_schema(schema),
-          rpc_type_conversions::convert_mode(mode));
-    } catch(management_exception& ex) {
+                                           rpc_type_conversions::convert_schema(schema),
+                                           rpc_type_conversions::convert_mode(mode));
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -135,7 +135,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param _return The info about the atomic multilog that is filled up
    * @param name The name of the atomic multilog
    */
-  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) {
+  void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name) {
     _return.id = store_->get_atomic_multilog_id(name);
     auto dschema = store_->get_atomic_multilog(_return.id)->get_schema().columns();
     _return.schema = rpc_type_conversions::convert_schema(dschema);
@@ -151,7 +151,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void remove_atomic_multilog(int64_t id) {
     try {
       store_->remove_atomic_multilog(id);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -166,10 +166,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param bucket_size The size of the bucket
    * @throw managmeent_exception If the index could not be added
    */
-  void add_index(int64_t id, const std::string& field_name, const double bucket_size) {
+  void add_index(int64_t id, const std::string &field_name, const double bucket_size) {
     try {
       store_->get_atomic_multilog(id)->add_index(field_name, bucket_size);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -183,10 +183,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param field_name The name of the field in the atomic multilog
    * @throw management_exception If the index could not be removed
    */
-  void remove_index(int64_t id, const std::string& field_name) {
+  void remove_index(int64_t id, const std::string &field_name) {
     try {
       store_->get_atomic_multilog(id)->remove_index(field_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -203,15 +203,15 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @throw parse_exception If there was an error parsing the filter
    * expression
    */
-  void add_filter(int64_t id, const std::string& filter_name,
-      const std::string& filter_expr) {
+  void add_filter(int64_t id, const std::string &filter_name,
+                  const std::string &filter_expr) {
     try {
       store_->get_atomic_multilog(id)->add_filter(filter_name, filter_expr);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
-    } catch(parse_exception& ex) {
+    } catch (parse_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -225,10 +225,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param filter_name The name of the filter
    * @throw managment_exception If the filter could not be removed
    */
-  void remove_filter(int64_t id, const std::string& filter_name) {
+  void remove_filter(int64_t id, const std::string &filter_name) {
     try {
       store_->get_atomic_multilog(id)->remove_filter(filter_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -245,18 +245,18 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @throw management_exception If the aggregate could not be added
    * @throw parse_exception If the filter expression could not be parsed
    */
-  void add_aggregate(int64_t id, const std::string& aggregate_name,
-      const std::string& filter_name,
-      const std::string& aggregate_expr) {
+  void add_aggregate(int64_t id, const std::string &aggregate_name,
+                     const std::string &filter_name,
+                     const std::string &aggregate_expr) {
     try {
       store_->get_atomic_multilog(id)->add_aggregate(aggregate_name,
-          filter_name,
-          aggregate_expr);
-    } catch(management_exception& ex) {
+                                                     filter_name,
+                                                     aggregate_expr);
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
-    } catch(parse_exception& ex) {
+    } catch (parse_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -270,10 +270,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param aggregate_name The name of the aggregate
    * @throw management_exception If the aggregate could not be removed
    */
-  void remove_aggregate(int64_t id, const std::string& aggregate_name) {
+  void remove_aggregate(int64_t id, const std::string &aggregate_name) {
     try {
       store_->get_atomic_multilog(id)->remove_aggregate(aggregate_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -290,16 +290,16 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @throw parse_exception If the trigger expression could not be
    * parsed
    */
-  void add_trigger(int64_t id, const std::string& trigger_name,
-      const std::string& trigger_expr) {
+  void add_trigger(int64_t id, const std::string &trigger_name,
+                   const std::string &trigger_expr) {
     try {
       store_->get_atomic_multilog(id)->install_trigger(trigger_name,
-          trigger_expr);
-    } catch(management_exception& ex) {
+                                                       trigger_expr);
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
-    } catch(parse_exception& ex) {
+    } catch (parse_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -313,10 +313,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param trigger_name The name of the trigger
    * @throw management_exception If the trigger could not be removed
    */
-  void remove_trigger(int64_t id, const std::string& trigger_name) {
+  void remove_trigger(int64_t id, const std::string &trigger_name) {
     try {
       store_->get_atomic_multilog(id)->remove_trigger(trigger_name);
-    } catch(management_exception& ex) {
+    } catch (management_exception &ex) {
       rpc_management_exception e;
       e.msg = ex.what();
       throw e;
@@ -331,8 +331,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    *
    * @return The offset to where the data is
    */
-  int64_t append(int64_t id, const std::string& data) {
-    void* buf = (char*) &data[0];  // XXX: Fix
+  int64_t append(int64_t id, const std::string &data) {
+    void *buf = (char *) &data[0];  // XXX: Fix
     return store_->get_atomic_multilog(id)->append(buf);
   }
 
@@ -344,7 +344,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    *
    * @return The offset where the batch is located
    */
-  int64_t append_batch(int64_t id, const rpc_record_batch& batch) {
+  int64_t append_batch(int64_t id, const rpc_record_batch &batch) {
     record_batch rbatch = rpc_type_conversions::convert_batch(batch);
     return store_->get_atomic_multilog(id)->append_batch(rbatch);
   }
@@ -357,13 +357,13 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param offset The offset to read from
    * @param nrecords The number of records to read
    */
-    void read(std::string& _return, int64_t id, const int64_t offset, const int64_t nrecords) {
-    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+  void read(std::string &_return, int64_t id, const int64_t offset, const int64_t nrecords) {
+    atomic_multilog *mlog = store_->get_atomic_multilog(id);
     uint64_t limit;
     read_only_data_log_ptr ptr;
     mlog->read(offset, limit, ptr);
     data_ptr dptr = ptr.decode();
-    char* data = reinterpret_cast<char*>(dptr.get());
+    char *data = reinterpret_cast<char *>(dptr.get());
     size_t size = std::min(static_cast<size_t>(limit - offset),
                            static_cast<size_t>(nrecords * mlog->record_size()));
     _return.assign(data, size);
@@ -378,11 +378,11 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param begin_ms The beginning time in milliseconds
    * @param end_ms The end time in milliseconds
    */
-  void query_aggregate(std::string& _return, int64_t id,
-      const std::string& aggregate_name,
-      const int64_t begin_ms,
-      const int64_t end_ms) {
-    atomic_multilog* m = store_->get_atomic_multilog(id);
+  void query_aggregate(std::string &_return, int64_t id,
+                       const std::string &aggregate_name,
+                       const int64_t begin_ms,
+                       const int64_t end_ms) {
+    atomic_multilog *m = store_->get_atomic_multilog(id);
     _return = m->get_aggregate(aggregate_name, begin_ms, end_ms).to_string();
   }
 
@@ -395,10 +395,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param aggregate_expr The aggregate expression 
    * @param filter_expr The filter expression
    */
-  void adhoc_aggregate(std::string& _return, int64_t id,
-      const std::string& aggregate_expr,
-      const std::string& filter_expr) {
-    atomic_multilog* m = store_->get_atomic_multilog(id);
+  void adhoc_aggregate(std::string &_return, int64_t id,
+                       const std::string &aggregate_expr,
+                       const std::string &filter_expr) {
+    atomic_multilog *m = store_->get_atomic_multilog(id);
     _return = m->execute_aggregate(aggregate_expr, filter_expr).to_string();
   }
 
@@ -409,16 +409,16 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param id The identifier of the atomic multilog
    * @param filter_expr The filter expression
    */
-  void adhoc_filter(rpc_iterator_handle& _return,int64_t id,
-      const std::string& filter_expr) {
+  void adhoc_filter(rpc_iterator_handle &_return, int64_t id,
+                    const std::string &filter_expr) {
     bool success = false;
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    atomic_multilog *mlog = store_->get_atomic_multilog(id);
     try {
       adhoc_entry entry(it_id, mlog->execute_filter(filter_expr));
       adhoc_status ret = adhoc_.insert(std::move(entry));
       success = ret.second;
-    } catch (parse_exception& ex) {
+    } catch (parse_exception &ex) {
       rpc_invalid_operation e;
       e.msg = ex.what();
       throw e;
@@ -443,11 +443,11 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param end_ms The end time in milliseconds
    * @throw rpc_invalid_exception If there was a duplicate rpc iterator
    */
-  void predef_filter(rpc_iterator_handle& _return, int64_t id,
-      const std::string& filter_name, const int64_t begin_ms,
-      const int64_t end_ms) {
+  void predef_filter(rpc_iterator_handle &_return, int64_t id,
+                     const std::string &filter_name, const int64_t begin_ms,
+                     const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    atomic_multilog *mlog = store_->get_atomic_multilog(id);
     predef_entry entry(it_id, mlog->query_filter(filter_name, begin_ms, end_ms));
     predef_status ret = predef_.insert(std::move(entry));
     if (!ret.second) {
@@ -470,19 +470,19 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param end_ms The end time in milliseconds
    * @throw rpc_invalid_exception If there was a duplicate rpc iterator
    */
-  void combined_filter(rpc_iterator_handle& _return, int64_t id,
-      const std::string& filter_name,
-      const std::string& filter_expr, const int64_t begin_ms,
-      const int64_t end_ms) {
+  void combined_filter(rpc_iterator_handle &_return, int64_t id,
+                       const std::string &filter_name,
+                       const std::string &filter_expr, const int64_t begin_ms,
+                       const int64_t end_ms) {
     bool success = false;
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    atomic_multilog *mlog = store_->get_atomic_multilog(id);
     try {
       combined_entry entry(it_id, mlog->query_filter(filter_name,
-              begin_ms, end_ms, filter_expr));
+                                                     begin_ms, end_ms, filter_expr));
       combined_status ret = combined_.insert(std::move(entry));
       success = ret.second;
-    } catch (parse_exception& ex) {
+    } catch (parse_exception &ex) {
       rpc_invalid_operation e;
       e.msg = ex.what();
       throw e;
@@ -505,10 +505,10 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param end_ms The end time in milliseconds
    * @throw rpc_invalid_exception If there was a duplicate rpc iterator
    */
-  void alerts_by_time(rpc_iterator_handle& _return, int64_t id,
-      const int64_t begin_ms, const int64_t end_ms) {
+  void alerts_by_time(rpc_iterator_handle &_return, int64_t id,
+                      const int64_t begin_ms, const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    atomic_multilog *mlog = store_->get_atomic_multilog(id);
     alerts_entry entry(it_id, mlog->get_alerts(begin_ms, end_ms));
     alerts_status ret = alerts_.insert(std::move(entry));
     if (!ret.second) {
@@ -530,13 +530,13 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param end_ms The end time in milliseconds
    * @throw rpc_invalid_exception If there was a duplicate rpc iterator
    */
-  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, int64_t id,
-      const std::string& trigger_name, const int64_t begin_ms,
-      const int64_t end_ms) {
+  void alerts_by_trigger_and_time(rpc_iterator_handle &_return, int64_t id,
+                                  const std::string &trigger_name, const int64_t begin_ms,
+                                  const int64_t end_ms) {
     rpc_iterator_id it_id = new_iterator_id();
-    atomic_multilog* mlog = store_->get_atomic_multilog(id);
+    atomic_multilog *mlog = store_->get_atomic_multilog(id);
     alerts_entry entry(it_id, mlog->get_alerts(begin_ms, end_ms,
-            trigger_name));
+                                               trigger_name));
     alerts_status ret = alerts_.insert(std::move(entry));
     if (!ret.second) {
       rpc_invalid_operation e;
@@ -554,8 +554,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param id The identifier
    * @param desc The iterator description
    */
-  void get_more(rpc_iterator_handle& _return, int64_t id,
-      const rpc_iterator_descriptor& desc) {
+  void get_more(rpc_iterator_handle &_return, int64_t id,
+                const rpc_iterator_descriptor &desc) {
     if (desc.handler_id != handler_id_) {
       rpc_invalid_operation ex;
       ex.msg = "handler_id mismatch";
@@ -595,13 +595,13 @@ class rpc_service_handler : virtual public rpc_serviceIf {
     return store_->get_atomic_multilog(id)->num_records();
   }
 
-private:
+ private:
   rpc_iterator_id new_iterator_id() {
     return iterator_id_++;
   }
 
-  void adhoc_more(rpc_iterator_handle& _return, size_t record_size,
-      rpc_iterator_id it_id) {
+  void adhoc_more(rpc_iterator_handle &_return, size_t record_size,
+                  rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_RECORD;
     _return.desc.handler_id = handler_id_;
@@ -610,25 +610,25 @@ private:
 
     // Read data from iterator
     try {
-      auto& res = adhoc_.at(it_id);
+      auto &res = adhoc_.at(it_id);
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
       for (; res->has_more() && i < to_read; ++i, res->advance()) {
         record_t rec = res->get();
-        _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
+        _return.data.append(reinterpret_cast<const char *>(rec.data()), rec.length());
       }
       _return.num_entries = i;
       _return.has_more = res->has_more();
-    } catch (std::out_of_range& ex) {
+    } catch (std::out_of_range &ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
       throw e;
     }
   }
 
-  void predef_more(rpc_iterator_handle& _return, size_t record_size,
-      rpc_iterator_id it_id) {
+  void predef_more(rpc_iterator_handle &_return, size_t record_size,
+                   rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_RECORD;
     _return.desc.handler_id = handler_id_;
@@ -637,25 +637,25 @@ private:
 
     // Read data from iterator
     try {
-      auto& res = predef_.at(it_id);
+      auto &res = predef_.at(it_id);
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
       for (; res->has_more() && i < to_read; ++i, res->advance()) {
         record_t rec = res->get();
-        _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
+        _return.data.append(reinterpret_cast<const char *>(rec.data()), rec.length());
       }
       _return.num_entries = i;
       _return.has_more = res->has_more();
-    } catch (std::out_of_range& ex) {
+    } catch (std::out_of_range &ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
       throw e;
     }
   }
 
-  void combined_more(rpc_iterator_handle& _return, size_t record_size,
-      rpc_iterator_id it_id) {
+  void combined_more(rpc_iterator_handle &_return, size_t record_size,
+                     rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_RECORD;
     _return.desc.handler_id = handler_id_;
@@ -664,24 +664,24 @@ private:
 
     // Read data from iterator
     try {
-      auto& res = combined_.at(it_id);
+      auto &res = combined_.at(it_id);
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       _return.data.reserve(record_size * to_read);
       size_t i = 0;
       for (; res->has_more() && i < to_read; ++i, res->advance()) {
         record_t rec = res->get();
-        _return.data.append(reinterpret_cast<const char*>(rec.data()), rec.length());
+        _return.data.append(reinterpret_cast<const char *>(rec.data()), rec.length());
       }
       _return.num_entries = i;
       _return.has_more = res->has_more();
-    } catch (std::out_of_range& ex) {
+    } catch (std::out_of_range &ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
       throw e;
     }
   }
 
-  void alerts_more(rpc_iterator_handle& _return, rpc_iterator_id it_id) {
+  void alerts_more(rpc_iterator_handle &_return, rpc_iterator_id it_id) {
     // Initialize iterator descriptor
     _return.desc.data_type = rpc_data_type::RPC_ALERT;
     _return.desc.handler_id = handler_id_;
@@ -690,7 +690,7 @@ private:
 
     // Read data from iterator
     try {
-      auto& res = alerts_.at(it_id);
+      auto &res = alerts_.at(it_id);
       size_t to_read = rpc_configuration_params::ITERATOR_BATCH_SIZE;
       size_t i = 0;
       for (; res->has_more() && i < to_read; ++i, res->advance()) {
@@ -700,7 +700,7 @@ private:
       }
       _return.num_entries = i;
       _return.has_more = res->has_more();
-    } catch (std::out_of_range& ex) {
+    } catch (std::out_of_range &ex) {
       rpc_invalid_operation e;
       e.msg = "No such iterator";
       throw e;
@@ -708,7 +708,7 @@ private:
   }
 
   rpc_handler_id handler_id_;
-  confluo_store* store_;
+  confluo_store *store_;
 
   // Iterator management
   rpc_iterator_id iterator_id_;
@@ -728,7 +728,7 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
    *
    * @param store The confluo store for the rpc clone
    */
-  rpc_clone_factory(confluo_store* store)
+  rpc_clone_factory(confluo_store *store)
       : store_(store) {
   }
 
@@ -745,14 +745,14 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
    *
    * @return An rpc service handler for the confluo store
    */
-  virtual rpc_serviceIf* getHandler(const TConnectionInfo& conn_info) {
+  virtual rpc_serviceIf *getHandler(const TConnectionInfo &conn_info) {
     std::shared_ptr<TSocket> sock = std::dynamic_pointer_cast<TSocket>(
         conn_info.transport);
-    LOG_INFO<< "Incoming connection\n"
-    << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
-    << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
-    << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
-    << "\t\t\tPeerPort: " << sock->getPeerPort();
+    LOG_INFO << "Incoming connection\n"
+             << "\t\t\tSocketInfo: " << sock->getSocketInfo() << "\n"
+             << "\t\t\tPeerHost: " << sock->getPeerHost() << "\n"
+             << "\t\t\tPeerAddress: " << sock->getPeerAddress() << "\n"
+             << "\t\t\tPeerPort: " << sock->getPeerPort();
     return new rpc_service_handler(store_);
   }
 
@@ -761,12 +761,12 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
    *
    * @param handler The handler to destruct
    */
-  virtual void releaseHandler(rpc_serviceIf* handler) {
+  virtual void releaseHandler(rpc_serviceIf *handler) {
     delete handler;
   }
 
  private:
-  confluo_store* store_;
+  confluo_store *store_;
 };
 
 /**
@@ -783,8 +783,8 @@ class rpc_server {
    *
    * @return A pointer to the server
    */
-  static std::shared_ptr<TThreadedServer> create(confluo_store* store,
-                                                 const std::string& address,
+  static std::shared_ptr<TThreadedServer> create(confluo_store *store,
+                                                 const std::string &address,
                                                  int port) {
     std::shared_ptr<rpc_clone_factory> clone_factory(
         new rpc_clone_factory(store));

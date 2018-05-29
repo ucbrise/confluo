@@ -29,7 +29,7 @@ class mmap_utils {
   static const int PROT_RW = PROT_READ | PROT_WRITE;
   static const int FLAGS = MAP_SHARED;
 
-  static void* map(int fd, void *addr_hint, size_t offset, size_t size, int prot = PROT_RW, int flags = FLAGS);
+  static void *map(int fd, void *addr_hint, size_t offset, size_t size, int prot = PROT_RW, int flags = FLAGS);
 
   static void unmap(void *addr, size_t size);
 

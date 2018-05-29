@@ -6,7 +6,6 @@
 #include "storage/storage.h"
 #include "rpc_types.h"
 
-
 namespace confluo {
 namespace rpc {
 /**
@@ -19,7 +18,7 @@ class rpc_type_conversions {
    * @param rpc_batch The rpc record batch to convert
    * @return The resultant record batch
    */
-  static record_batch convert_batch(const rpc_record_batch& rpc_batch);
+  static record_batch convert_batch(const rpc_record_batch &rpc_batch);
 
   /**
    * Converts an rpc schema to a schema
@@ -28,7 +27,7 @@ class rpc_type_conversions {
    *
    * @return Vector of columns defining the schema
    */
-  static std::vector<column_t> convert_schema(const rpc_schema& s);
+  static std::vector<column_t> convert_schema(const rpc_schema &s);
 
   /**
    * Converts a vector of columns defining the schema to an rpc schema
@@ -37,7 +36,7 @@ class rpc_type_conversions {
    *
    * @return The resultant rpc schema
    */
-  static rpc_schema convert_schema(const std::vector<column_t>& s);
+  static rpc_schema convert_schema(const std::vector<column_t> &s);
 
   /**
    * Converts an rpc storage mode to a storage mode
@@ -46,7 +45,7 @@ class rpc_type_conversions {
    *
    * @return The resultant storage mode
    */
-  static storage::storage_mode convert_mode(const rpc_storage_mode& mode);
+  static storage::storage_mode convert_mode(const rpc_storage_mode &mode);
 
   /**
    * Converts a storage mode to an rpc storage mode
@@ -55,7 +54,7 @@ class rpc_type_conversions {
    *
    * @return The resultant rpc storage mode
    */
-  static rpc_storage_mode convert_mode(const storage::storage_mode& mode);
+  static rpc_storage_mode convert_mode(const storage::storage_mode &mode);
 };
 }
 }

@@ -26,20 +26,13 @@ std::ostringstream &logger::get(const log_level level) {
 
 std::string logger::to_string(const log_level level) {
   switch (level) {
-    case log_level::TRACE:
-      return "TRACE";
-    case log_level::DEBUG:
-      return "DEBUG";
-    case log_level::INFO:
-      return "INFO";
-    case log_level::WARN:
-      return "WARN";
-    case log_level::ERROR:
-      return "ERROR";
-    case log_level::FATAL:
-      return "FATAL";
-    default:
-      return "";
+    case log_level::TRACE:return "TRACE";
+    case log_level::DEBUG:return "DEBUG";
+    case log_level::INFO:return "INFO";
+    case log_level::WARN:return "WARN";
+    case log_level::ERROR:return "ERROR";
+    case log_level::FATAL:return "FATAL";
+    default:return "";
   }
 }
 

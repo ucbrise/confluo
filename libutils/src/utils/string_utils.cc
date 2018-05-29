@@ -3,7 +3,7 @@
 namespace utils {
 
 template<>
-bool string_utils::lexical_cast<bool>(const std::string& s) {
+bool string_utils::lexical_cast<bool>(const std::string &s) {
   std::stringstream ss(to_lower(s));
 
   bool result;

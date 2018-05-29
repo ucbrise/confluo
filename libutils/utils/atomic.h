@@ -27,7 +27,7 @@ namespace weak {
 
 // Compare and swap
 template<typename T>
-static inline bool cas(type<T>* obj, T* expected, const T& desired) {
+static inline bool cas(type<T> *obj, T *expected, const T &desired) {
 #ifdef CPP11_ATOMICS
   return std::atomic_compare_exchange_weak_explicit(obj, expected, desired,
                                                     std::memory_order_release,
@@ -43,7 +43,7 @@ namespace strong {
 
 // Compare and swap
 template<typename T>
-static inline bool cas(type<T>* obj, T* expected, const T& desired) {
+static inline bool cas(type<T> *obj, T *expected, const T &desired) {
 #ifdef CPP11_ATOMICS
   return std::atomic_compare_exchange_strong_explicit(obj, expected, desired,
                                                       std::memory_order_release,
@@ -57,7 +57,7 @@ static inline bool cas(type<T>* obj, T* expected, const T& desired) {
 
 // Exchange
 template<typename T>
-static inline T exchange(type<T>* obj, const T& desired) {
+static inline T exchange(type<T> *obj, const T &desired) {
 #ifdef CPP11_ATOMICS
   return std::atomic_exchange_explicit(obj, desired, std::memory_order_acquire);
 #else
@@ -68,7 +68,7 @@ static inline T exchange(type<T>* obj, const T& desired) {
 
 // Fetch and add
 template<typename T>
-static inline T faa(type<T>* obj, const T& arg) {
+static inline T faa(type<T> *obj, const T &arg) {
 #ifdef CPP11_ATOMICS
   return std::atomic_fetch_add_explicit(obj, arg, std::memory_order_release);
 #else
@@ -78,7 +78,7 @@ static inline T faa(type<T>* obj, const T& arg) {
 
 // Fetch and subtract
 template<typename T>
-static inline T fas(type<T>* obj, const T& arg) {
+static inline T fas(type<T> *obj, const T &arg) {
 #ifdef CPP11_ATOMICS
   return std::atomic_fetch_sub_explicit(obj, arg, std::memory_order_release);
 #else
@@ -88,7 +88,7 @@ static inline T fas(type<T>* obj, const T& arg) {
 
 // Atomic load
 template<typename T>
-static inline T load(const type<T>* obj) {
+static inline T load(const type<T> *obj) {
 #ifdef CPP11_ATOMICS
   return std::atomic_load_explicit(obj, std::memory_order_acquire);
 #else
@@ -100,7 +100,7 @@ static inline T load(const type<T>* obj) {
 
 // Atomic store
 template<typename T>
-static inline void store(type<T>* obj, const T& arg) {
+static inline void store(type<T> *obj, const T &arg) {
 #ifdef CPP11_ATOMICS
   std::atomic_store_explicit(obj, arg, std::memory_order_release);
 #else
@@ -110,7 +110,7 @@ static inline void store(type<T>* obj, const T& arg) {
 
 // Atomic init
 template<typename T>
-static inline void init(type<T>* obj, const T& arg) {
+static inline void init(type<T> *obj, const T &arg) {
 #ifdef CPP11_ATOMICS
   obj->store(arg, std::memory_order_relaxed);
 #else
@@ -122,7 +122,7 @@ namespace c11 {
 
 namespace weak {
 template<typename T>
-static inline bool cas(T* obj, T* expected, const T& desired) {
+static inline bool cas(T *obj, T *expected, const T &desired) {
   return __atomic_compare_exchange(obj, expected, &desired, true,
                                    __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);
 }
@@ -130,25 +130,25 @@ static inline bool cas(T* obj, T* expected, const T& desired) {
 
 namespace strong {
 template<typename T>
-static inline bool cas(T* obj, T* expected, const T& desired) {
+static inline bool cas(T *obj, T *expected, const T &desired) {
   return __atomic_compare_exchange(obj, expected, &desired, false,
                                    __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);
 }
 }
 
 template<typename T>
-static inline T exchange(T* obj, const T& desired) {
-  T* ret;
+static inline T exchange(T *obj, const T &desired) {
+  T *ret;
   __atomic_exchange(obj, &desired, ret, __ATOMIC_ACQUIRE);
 }
 
 template<typename T>
-static inline T faa(T* obj, const T& arg) {
+static inline T faa(T *obj, const T &arg) {
   return __atomic_fetch_add(obj, arg, __ATOMIC_RELEASE);
 }
 
 template<typename T>
-static inline T load(const T* obj) {
+static inline T load(const T *obj) {
   T ret;
   __atomic_load(obj, &ret, __ATOMIC_ACQUIRE);
   return ret;
@@ -156,13 +156,13 @@ static inline T load(const T* obj) {
 
 // Atomic store
 template<typename T>
-static inline void store(T* obj, const T& arg) {
+static inline void store(T *obj, const T &arg) {
   __atomic_store(obj, &arg, __ATOMIC_RELEASE);
 }
 
 // Atomic init
 template<typename T>
-static inline void init(T* obj, const T& arg) {
+static inline void init(T *obj, const T &arg) {
   *obj = arg;
 }
 

@@ -14,7 +14,7 @@ class thread_utils {
     return set_core_affinity(pthread_self(), core_id);
   }
 
-  static inline int set_core_affinity(std::thread& t, int core_id) {
+  static inline int set_core_affinity(std::thread &t, int core_id) {
     return set_core_affinity(t.native_handle(), core_id);
   }
 

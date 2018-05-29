@@ -16,7 +16,7 @@ uint64_t math_utils::pow(uint64_t base, uint64_t exp) {
 uint32_t math_utils::murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
   uint32_t h = seed;
   if (len > 3) {
-    const uint32_t* key_x4 = (const uint32_t*) key;
+    const uint32_t *key_x4 = (const uint32_t *) key;
     size_t i = len >> 2;
     do {
       uint32_t k = *key_x4++;
@@ -27,7 +27,7 @@ uint32_t math_utils::murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
       h = (h << 13) | (h >> 19);
       h = (h * 5) + 0xe6546b64;
     } while (--i);
-    key = (const uint8_t*) key_x4;
+    key = (const uint8_t *) key_x4;
   }
   if (len & 3) {
     size_t i = len & 3;

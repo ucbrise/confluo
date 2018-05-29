@@ -11,11 +11,12 @@
 #include <thrift/async/TConcurrentClientSyncInfo.h>
 #include "rpc_types.h"
 
-namespace confluo { namespace rpc {
+namespace confluo {
+namespace rpc {
 
 #ifdef _MSC_VER
-  #pragma warning( push )
-  #pragma warning (disable : 4250 ) //inheriting methods via dominance 
+#pragma warning( push )
+#pragma warning (disable : 4250 ) //inheriting methods via dominance
 #endif
 
 class rpc_serviceIf {
@@ -27,17 +28,26 @@ class rpc_serviceIf {
    */
   virtual void register_handler() = 0;
   virtual void deregister_handler() = 0;
-  virtual int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
-  virtual void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) = 0;
+  virtual int64_t create_atomic_multilog(const std::string &name,
+                                         const rpc_schema &schema,
+                                         const rpc_storage_mode mode) = 0;
+  virtual void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name) = 0;
   virtual void remove_atomic_multilog(const int64_t multilog_id) = 0;
-  virtual void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size) = 0;
-  virtual void remove_index(const int64_t multilog_id, const std::string& field_name) = 0;
-  virtual void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr) = 0;
-  virtual void remove_filter(const int64_t multilog_id, const std::string& filter_name) = 0;
-  virtual void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr) = 0;
-  virtual void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name) = 0;
-  virtual void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr) = 0;
-  virtual void remove_trigger(const int64_t multilog_id, const std::string& trigger_name) = 0;
+  virtual void add_index(const int64_t multilog_id, const std::string &field_name, const double bucket_size) = 0;
+  virtual void remove_index(const int64_t multilog_id, const std::string &field_name) = 0;
+  virtual void add_filter(const int64_t multilog_id,
+                          const std::string &filter_name,
+                          const std::string &filter_expr) = 0;
+  virtual void remove_filter(const int64_t multilog_id, const std::string &filter_name) = 0;
+  virtual void add_aggregate(const int64_t mutlilog_id,
+                             const std::string &aggregate_name,
+                             const std::string &filter_name,
+                             const std::string &aggregate_expr) = 0;
+  virtual void remove_aggregate(const int64_t multilog_id, const std::string &aggregate_name) = 0;
+  virtual void add_trigger(const int64_t multilog_id,
+                           const std::string &trigger_name,
+                           const std::string &trigger_expr) = 0;
+  virtual void remove_trigger(const int64_t multilog_id, const std::string &trigger_name) = 0;
 
   /**
    * Query ops *
@@ -45,17 +55,44 @@ class rpc_serviceIf {
    * @param multilog_id
    * @param data
    */
-  virtual int64_t append(const int64_t multilog_id, const std::string& data) = 0;
-  virtual int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch) = 0;
-  virtual void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) = 0;
-  virtual void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void adhoc_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_expr, const std::string& filter_expr) = 0;
-  virtual void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr) = 0;
-  virtual void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) = 0;
-  virtual void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc) = 0;
+  virtual int64_t append(const int64_t multilog_id, const std::string &data) = 0;
+  virtual int64_t append_batch(const int64_t multilog_id, const rpc_record_batch &batch) = 0;
+  virtual void read(std::string &_return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) = 0;
+  virtual void query_aggregate(std::string &_return,
+                               const int64_t multilog_id,
+                               const std::string &aggregate_name,
+                               const int64_t begin_ms,
+                               const int64_t end_ms) = 0;
+  virtual void adhoc_aggregate(std::string &_return,
+                               const int64_t multilog_id,
+                               const std::string &aggregate_expr,
+                               const std::string &filter_expr) = 0;
+  virtual void adhoc_filter(rpc_iterator_handle &_return,
+                            const int64_t multilog_id,
+                            const std::string &filter_expr) = 0;
+  virtual void predef_filter(rpc_iterator_handle &_return,
+                             const int64_t multilog_id,
+                             const std::string &filter_name,
+                             const int64_t begin_ms,
+                             const int64_t end_ms) = 0;
+  virtual void combined_filter(rpc_iterator_handle &_return,
+                               const int64_t multilog_id,
+                               const std::string &filter_name,
+                               const std::string &filter_expr,
+                               const int64_t begin_ms,
+                               const int64_t end_ms) = 0;
+  virtual void alerts_by_time(rpc_iterator_handle &_return,
+                              const int64_t multilog_id,
+                              const int64_t begin_ms,
+                              const int64_t end_ms) = 0;
+  virtual void alerts_by_trigger_and_time(rpc_iterator_handle &_return,
+                                          const int64_t multilog_id,
+                                          const std::string &trigger_name,
+                                          const int64_t begin_ms,
+                                          const int64_t end_ms) = 0;
+  virtual void get_more(rpc_iterator_handle &_return,
+                        const int64_t multilog_id,
+                        const rpc_iterator_descriptor &desc) = 0;
   virtual int64_t num_records(const int64_t multilog_id) = 0;
 };
 
@@ -65,19 +102,19 @@ class rpc_serviceIfFactory {
 
   virtual ~rpc_serviceIfFactory() {}
 
-  virtual rpc_serviceIf* getHandler(const ::apache::thrift::TConnectionInfo& connInfo) = 0;
-  virtual void releaseHandler(rpc_serviceIf* /* handler */) = 0;
+  virtual rpc_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &connInfo) = 0;
+  virtual void releaseHandler(rpc_serviceIf * /* handler */) = 0;
 };
 
 class rpc_serviceIfSingletonFactory : virtual public rpc_serviceIfFactory {
  public:
-  rpc_serviceIfSingletonFactory(const ::apache::thrift::stdcxx::shared_ptr<rpc_serviceIf>& iface) : iface_(iface) {}
+  rpc_serviceIfSingletonFactory(const ::apache::thrift::stdcxx::shared_ptr<rpc_serviceIf> &iface) : iface_(iface) {}
   virtual ~rpc_serviceIfSingletonFactory() {}
 
-  virtual rpc_serviceIf* getHandler(const ::apache::thrift::TConnectionInfo&) {
+  virtual rpc_serviceIf *getHandler(const ::apache::thrift::TConnectionInfo &) {
     return iface_.get();
   }
-  virtual void releaseHandler(rpc_serviceIf* /* handler */) {}
+  virtual void releaseHandler(rpc_serviceIf * /* handler */) {}
 
  protected:
   ::apache::thrift::stdcxx::shared_ptr<rpc_serviceIf> iface_;
@@ -92,73 +129,114 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
   void deregister_handler() {
     return;
   }
-  int64_t create_atomic_multilog(const std::string& /* name */, const rpc_schema& /* schema */, const rpc_storage_mode /* mode */) {
+  int64_t create_atomic_multilog(const std::string & /* name */,
+                                 const rpc_schema & /* schema */,
+                                 const rpc_storage_mode /* mode */) {
     int64_t _return = 0;
     return _return;
   }
-  void get_atomic_multilog_info(rpc_atomic_multilog_info& /* _return */, const std::string& /* name */) {
+  void get_atomic_multilog_info(rpc_atomic_multilog_info & /* _return */, const std::string & /* name */) {
     return;
   }
   void remove_atomic_multilog(const int64_t /* multilog_id */) {
     return;
   }
-  void add_index(const int64_t /* multilog_id */, const std::string& /* field_name */, const double /* bucket_size */) {
+  void add_index(const int64_t /* multilog_id */,
+                 const std::string & /* field_name */,
+                 const double /* bucket_size */) {
     return;
   }
-  void remove_index(const int64_t /* multilog_id */, const std::string& /* field_name */) {
+  void remove_index(const int64_t /* multilog_id */, const std::string & /* field_name */) {
     return;
   }
-  void add_filter(const int64_t /* multilog_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */) {
+  void add_filter(const int64_t /* multilog_id */,
+                  const std::string & /* filter_name */,
+                  const std::string & /* filter_expr */) {
     return;
   }
-  void remove_filter(const int64_t /* multilog_id */, const std::string& /* filter_name */) {
+  void remove_filter(const int64_t /* multilog_id */, const std::string & /* filter_name */) {
     return;
   }
-  void add_aggregate(const int64_t /* mutlilog_id */, const std::string& /* aggregate_name */, const std::string& /* filter_name */, const std::string& /* aggregate_expr */) {
+  void add_aggregate(const int64_t /* mutlilog_id */,
+                     const std::string & /* aggregate_name */,
+                     const std::string & /* filter_name */,
+                     const std::string & /* aggregate_expr */) {
     return;
   }
-  void remove_aggregate(const int64_t /* multilog_id */, const std::string& /* aggregate_name */) {
+  void remove_aggregate(const int64_t /* multilog_id */, const std::string & /* aggregate_name */) {
     return;
   }
-  void add_trigger(const int64_t /* multilog_id */, const std::string& /* trigger_name */, const std::string& /* trigger_expr */) {
+  void add_trigger(const int64_t /* multilog_id */,
+                   const std::string & /* trigger_name */,
+                   const std::string & /* trigger_expr */) {
     return;
   }
-  void remove_trigger(const int64_t /* multilog_id */, const std::string& /* trigger_name */) {
+  void remove_trigger(const int64_t /* multilog_id */, const std::string & /* trigger_name */) {
     return;
   }
-  int64_t append(const int64_t /* multilog_id */, const std::string& /* data */) {
+  int64_t append(const int64_t /* multilog_id */, const std::string & /* data */) {
     int64_t _return = 0;
     return _return;
   }
-  int64_t append_batch(const int64_t /* multilog_id */, const rpc_record_batch& /* batch */) {
+  int64_t append_batch(const int64_t /* multilog_id */, const rpc_record_batch & /* batch */) {
     int64_t _return = 0;
     return _return;
   }
-  void read(std::string& /* _return */, const int64_t /* multilog_id */, const int64_t /* offset */, const int64_t /* nrecords */) {
+  void read(std::string & /* _return */,
+            const int64_t /* multilog_id */,
+            const int64_t /* offset */,
+            const int64_t /* nrecords */) {
     return;
   }
-  void query_aggregate(std::string& /* _return */, const int64_t /* multilog_id */, const std::string& /* aggregate_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void query_aggregate(std::string & /* _return */,
+                       const int64_t /* multilog_id */,
+                       const std::string & /* aggregate_name */,
+                       const int64_t /* begin_ms */,
+                       const int64_t /* end_ms */) {
     return;
   }
-  void adhoc_aggregate(std::string& /* _return */, const int64_t /* multilog_id */, const std::string& /* aggregate_expr */, const std::string& /* filter_expr */) {
+  void adhoc_aggregate(std::string & /* _return */,
+                       const int64_t /* multilog_id */,
+                       const std::string & /* aggregate_expr */,
+                       const std::string & /* filter_expr */) {
     return;
   }
-  void adhoc_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_expr */) {
+  void adhoc_filter(rpc_iterator_handle & /* _return */,
+                    const int64_t /* multilog_id */,
+                    const std::string & /* filter_expr */) {
     return;
   }
-  void predef_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void predef_filter(rpc_iterator_handle & /* _return */,
+                     const int64_t /* multilog_id */,
+                     const std::string & /* filter_name */,
+                     const int64_t /* begin_ms */,
+                     const int64_t /* end_ms */) {
     return;
   }
-  void combined_filter(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* filter_name */, const std::string& /* filter_expr */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void combined_filter(rpc_iterator_handle & /* _return */,
+                       const int64_t /* multilog_id */,
+                       const std::string & /* filter_name */,
+                       const std::string & /* filter_expr */,
+                       const int64_t /* begin_ms */,
+                       const int64_t /* end_ms */) {
     return;
   }
-  void alerts_by_time(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void alerts_by_time(rpc_iterator_handle & /* _return */,
+                      const int64_t /* multilog_id */,
+                      const int64_t /* begin_ms */,
+                      const int64_t /* end_ms */) {
     return;
   }
-  void alerts_by_trigger_and_time(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const std::string& /* trigger_name */, const int64_t /* begin_ms */, const int64_t /* end_ms */) {
+  void alerts_by_trigger_and_time(rpc_iterator_handle & /* _return */,
+                                  const int64_t /* multilog_id */,
+                                  const std::string & /* trigger_name */,
+                                  const int64_t /* begin_ms */,
+                                  const int64_t /* end_ms */) {
     return;
   }
-  void get_more(rpc_iterator_handle& /* _return */, const int64_t /* multilog_id */, const rpc_iterator_descriptor& /* desc */) {
+  void get_more(rpc_iterator_handle & /* _return */,
+                const int64_t /* multilog_id */,
+                const rpc_iterator_descriptor & /* desc */) {
     return;
   }
   int64_t num_records(const int64_t /* multilog_id */) {
@@ -167,43 +245,39 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
   }
 };
 
-
 class rpc_service_register_handler_args {
  public:
 
-  rpc_service_register_handler_args(const rpc_service_register_handler_args&);
-  rpc_service_register_handler_args& operator=(const rpc_service_register_handler_args&);
+  rpc_service_register_handler_args(const rpc_service_register_handler_args &);
+  rpc_service_register_handler_args &operator=(const rpc_service_register_handler_args &);
   rpc_service_register_handler_args() {
   }
 
   virtual ~rpc_service_register_handler_args() throw();
 
-  bool operator == (const rpc_service_register_handler_args & /* rhs */) const
-  {
+  bool operator==(const rpc_service_register_handler_args & /* rhs */) const {
     return true;
   }
-  bool operator != (const rpc_service_register_handler_args &rhs) const {
+  bool operator!=(const rpc_service_register_handler_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_register_handler_args & ) const;
+  bool operator<(const rpc_service_register_handler_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_register_handler_pargs {
  public:
 
-
   virtual ~rpc_service_register_handler_pargs() throw();
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -215,8 +289,8 @@ typedef struct _rpc_service_register_handler_result__isset {
 class rpc_service_register_handler_result {
  public:
 
-  rpc_service_register_handler_result(const rpc_service_register_handler_result&);
-  rpc_service_register_handler_result& operator=(const rpc_service_register_handler_result&);
+  rpc_service_register_handler_result(const rpc_service_register_handler_result &);
+  rpc_service_register_handler_result &operator=(const rpc_service_register_handler_result &);
   rpc_service_register_handler_result() {
   }
 
@@ -225,24 +299,23 @@ class rpc_service_register_handler_result {
 
   _rpc_service_register_handler_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_register_handler_result & rhs) const
-  {
+  bool operator==(const rpc_service_register_handler_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_register_handler_result &rhs) const {
+  bool operator!=(const rpc_service_register_handler_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_register_handler_result & ) const;
+  bool operator<(const rpc_service_register_handler_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -254,54 +327,49 @@ typedef struct _rpc_service_register_handler_presult__isset {
 class rpc_service_register_handler_presult {
  public:
 
-
   virtual ~rpc_service_register_handler_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_register_handler_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
-
 
 class rpc_service_deregister_handler_args {
  public:
 
-  rpc_service_deregister_handler_args(const rpc_service_deregister_handler_args&);
-  rpc_service_deregister_handler_args& operator=(const rpc_service_deregister_handler_args&);
+  rpc_service_deregister_handler_args(const rpc_service_deregister_handler_args &);
+  rpc_service_deregister_handler_args &operator=(const rpc_service_deregister_handler_args &);
   rpc_service_deregister_handler_args() {
   }
 
   virtual ~rpc_service_deregister_handler_args() throw();
 
-  bool operator == (const rpc_service_deregister_handler_args & /* rhs */) const
-  {
+  bool operator==(const rpc_service_deregister_handler_args & /* rhs */) const {
     return true;
   }
-  bool operator != (const rpc_service_deregister_handler_args &rhs) const {
+  bool operator!=(const rpc_service_deregister_handler_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_deregister_handler_args & ) const;
+  bool operator<(const rpc_service_deregister_handler_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_deregister_handler_pargs {
  public:
 
-
   virtual ~rpc_service_deregister_handler_pargs() throw();
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -313,8 +381,8 @@ typedef struct _rpc_service_deregister_handler_result__isset {
 class rpc_service_deregister_handler_result {
  public:
 
-  rpc_service_deregister_handler_result(const rpc_service_deregister_handler_result&);
-  rpc_service_deregister_handler_result& operator=(const rpc_service_deregister_handler_result&);
+  rpc_service_deregister_handler_result(const rpc_service_deregister_handler_result &);
+  rpc_service_deregister_handler_result &operator=(const rpc_service_deregister_handler_result &);
   rpc_service_deregister_handler_result() {
   }
 
@@ -323,24 +391,23 @@ class rpc_service_deregister_handler_result {
 
   _rpc_service_deregister_handler_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_deregister_handler_result & rhs) const
-  {
+  bool operator==(const rpc_service_deregister_handler_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_deregister_handler_result &rhs) const {
+  bool operator!=(const rpc_service_deregister_handler_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_deregister_handler_result & ) const;
+  bool operator<(const rpc_service_deregister_handler_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -352,14 +419,13 @@ typedef struct _rpc_service_deregister_handler_presult__isset {
 class rpc_service_deregister_handler_presult {
  public:
 
-
   virtual ~rpc_service_deregister_handler_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_deregister_handler_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -373,9 +439,9 @@ typedef struct _rpc_service_create_atomic_multilog_args__isset {
 class rpc_service_create_atomic_multilog_args {
  public:
 
-  rpc_service_create_atomic_multilog_args(const rpc_service_create_atomic_multilog_args&);
-  rpc_service_create_atomic_multilog_args& operator=(const rpc_service_create_atomic_multilog_args&);
-  rpc_service_create_atomic_multilog_args() : name(), mode((rpc_storage_mode)0) {
+  rpc_service_create_atomic_multilog_args(const rpc_service_create_atomic_multilog_args &);
+  rpc_service_create_atomic_multilog_args &operator=(const rpc_service_create_atomic_multilog_args &);
+  rpc_service_create_atomic_multilog_args() : name(), mode((rpc_storage_mode) 0) {
   }
 
   virtual ~rpc_service_create_atomic_multilog_args() throw();
@@ -385,14 +451,13 @@ class rpc_service_create_atomic_multilog_args {
 
   _rpc_service_create_atomic_multilog_args__isset __isset;
 
-  void __set_name(const std::string& val);
+  void __set_name(const std::string &val);
 
-  void __set_schema(const rpc_schema& val);
+  void __set_schema(const rpc_schema &val);
 
   void __set_mode(const rpc_storage_mode val);
 
-  bool operator == (const rpc_service_create_atomic_multilog_args & rhs) const
-  {
+  bool operator==(const rpc_service_create_atomic_multilog_args &rhs) const {
     if (!(name == rhs.name))
       return false;
     if (!(schema == rhs.schema))
@@ -401,31 +466,29 @@ class rpc_service_create_atomic_multilog_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_create_atomic_multilog_args &rhs) const {
+  bool operator!=(const rpc_service_create_atomic_multilog_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_create_atomic_multilog_args & ) const;
+  bool operator<(const rpc_service_create_atomic_multilog_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_create_atomic_multilog_pargs {
  public:
 
-
   virtual ~rpc_service_create_atomic_multilog_pargs() throw();
-  const std::string* name;
-  const rpc_schema* schema;
-  const rpc_storage_mode* mode;
+  const std::string *name;
+  const rpc_schema *schema;
+  const rpc_storage_mode *mode;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -438,8 +501,8 @@ typedef struct _rpc_service_create_atomic_multilog_result__isset {
 class rpc_service_create_atomic_multilog_result {
  public:
 
-  rpc_service_create_atomic_multilog_result(const rpc_service_create_atomic_multilog_result&);
-  rpc_service_create_atomic_multilog_result& operator=(const rpc_service_create_atomic_multilog_result&);
+  rpc_service_create_atomic_multilog_result(const rpc_service_create_atomic_multilog_result &);
+  rpc_service_create_atomic_multilog_result &operator=(const rpc_service_create_atomic_multilog_result &);
   rpc_service_create_atomic_multilog_result() : success(0) {
   }
 
@@ -451,26 +514,25 @@ class rpc_service_create_atomic_multilog_result {
 
   void __set_success(const int64_t val);
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_create_atomic_multilog_result & rhs) const
-  {
+  bool operator==(const rpc_service_create_atomic_multilog_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_create_atomic_multilog_result &rhs) const {
+  bool operator!=(const rpc_service_create_atomic_multilog_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_create_atomic_multilog_result & ) const;
+  bool operator<(const rpc_service_create_atomic_multilog_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -483,15 +545,14 @@ typedef struct _rpc_service_create_atomic_multilog_presult__isset {
 class rpc_service_create_atomic_multilog_presult {
  public:
 
-
   virtual ~rpc_service_create_atomic_multilog_presult() throw();
-  int64_t* success;
+  int64_t *success;
   rpc_management_exception ex;
 
   _rpc_service_create_atomic_multilog_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -503,8 +564,8 @@ typedef struct _rpc_service_get_atomic_multilog_info_args__isset {
 class rpc_service_get_atomic_multilog_info_args {
  public:
 
-  rpc_service_get_atomic_multilog_info_args(const rpc_service_get_atomic_multilog_info_args&);
-  rpc_service_get_atomic_multilog_info_args& operator=(const rpc_service_get_atomic_multilog_info_args&);
+  rpc_service_get_atomic_multilog_info_args(const rpc_service_get_atomic_multilog_info_args &);
+  rpc_service_get_atomic_multilog_info_args &operator=(const rpc_service_get_atomic_multilog_info_args &);
   rpc_service_get_atomic_multilog_info_args() : name() {
   }
 
@@ -513,37 +574,34 @@ class rpc_service_get_atomic_multilog_info_args {
 
   _rpc_service_get_atomic_multilog_info_args__isset __isset;
 
-  void __set_name(const std::string& val);
+  void __set_name(const std::string &val);
 
-  bool operator == (const rpc_service_get_atomic_multilog_info_args & rhs) const
-  {
+  bool operator==(const rpc_service_get_atomic_multilog_info_args &rhs) const {
     if (!(name == rhs.name))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_get_atomic_multilog_info_args &rhs) const {
+  bool operator!=(const rpc_service_get_atomic_multilog_info_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_get_atomic_multilog_info_args & ) const;
+  bool operator<(const rpc_service_get_atomic_multilog_info_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_get_atomic_multilog_info_pargs {
  public:
 
-
   virtual ~rpc_service_get_atomic_multilog_info_pargs() throw();
-  const std::string* name;
+  const std::string *name;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -555,8 +613,8 @@ typedef struct _rpc_service_get_atomic_multilog_info_result__isset {
 class rpc_service_get_atomic_multilog_info_result {
  public:
 
-  rpc_service_get_atomic_multilog_info_result(const rpc_service_get_atomic_multilog_info_result&);
-  rpc_service_get_atomic_multilog_info_result& operator=(const rpc_service_get_atomic_multilog_info_result&);
+  rpc_service_get_atomic_multilog_info_result(const rpc_service_get_atomic_multilog_info_result &);
+  rpc_service_get_atomic_multilog_info_result &operator=(const rpc_service_get_atomic_multilog_info_result &);
   rpc_service_get_atomic_multilog_info_result() {
   }
 
@@ -565,24 +623,23 @@ class rpc_service_get_atomic_multilog_info_result {
 
   _rpc_service_get_atomic_multilog_info_result__isset __isset;
 
-  void __set_success(const rpc_atomic_multilog_info& val);
+  void __set_success(const rpc_atomic_multilog_info &val);
 
-  bool operator == (const rpc_service_get_atomic_multilog_info_result & rhs) const
-  {
+  bool operator==(const rpc_service_get_atomic_multilog_info_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_get_atomic_multilog_info_result &rhs) const {
+  bool operator!=(const rpc_service_get_atomic_multilog_info_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_get_atomic_multilog_info_result & ) const;
+  bool operator<(const rpc_service_get_atomic_multilog_info_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -594,14 +651,13 @@ typedef struct _rpc_service_get_atomic_multilog_info_presult__isset {
 class rpc_service_get_atomic_multilog_info_presult {
  public:
 
-
   virtual ~rpc_service_get_atomic_multilog_info_presult() throw();
-  rpc_atomic_multilog_info* success;
+  rpc_atomic_multilog_info *success;
 
   _rpc_service_get_atomic_multilog_info_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -613,8 +669,8 @@ typedef struct _rpc_service_remove_atomic_multilog_args__isset {
 class rpc_service_remove_atomic_multilog_args {
  public:
 
-  rpc_service_remove_atomic_multilog_args(const rpc_service_remove_atomic_multilog_args&);
-  rpc_service_remove_atomic_multilog_args& operator=(const rpc_service_remove_atomic_multilog_args&);
+  rpc_service_remove_atomic_multilog_args(const rpc_service_remove_atomic_multilog_args &);
+  rpc_service_remove_atomic_multilog_args &operator=(const rpc_service_remove_atomic_multilog_args &);
   rpc_service_remove_atomic_multilog_args() : multilog_id(0) {
   }
 
@@ -625,35 +681,32 @@ class rpc_service_remove_atomic_multilog_args {
 
   void __set_multilog_id(const int64_t val);
 
-  bool operator == (const rpc_service_remove_atomic_multilog_args & rhs) const
-  {
+  bool operator==(const rpc_service_remove_atomic_multilog_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_atomic_multilog_args &rhs) const {
+  bool operator!=(const rpc_service_remove_atomic_multilog_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_atomic_multilog_args & ) const;
+  bool operator<(const rpc_service_remove_atomic_multilog_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_atomic_multilog_pargs {
  public:
 
-
   virtual ~rpc_service_remove_atomic_multilog_pargs() throw();
-  const int64_t* multilog_id;
+  const int64_t *multilog_id;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -665,8 +718,8 @@ typedef struct _rpc_service_remove_atomic_multilog_result__isset {
 class rpc_service_remove_atomic_multilog_result {
  public:
 
-  rpc_service_remove_atomic_multilog_result(const rpc_service_remove_atomic_multilog_result&);
-  rpc_service_remove_atomic_multilog_result& operator=(const rpc_service_remove_atomic_multilog_result&);
+  rpc_service_remove_atomic_multilog_result(const rpc_service_remove_atomic_multilog_result &);
+  rpc_service_remove_atomic_multilog_result &operator=(const rpc_service_remove_atomic_multilog_result &);
   rpc_service_remove_atomic_multilog_result() {
   }
 
@@ -675,24 +728,23 @@ class rpc_service_remove_atomic_multilog_result {
 
   _rpc_service_remove_atomic_multilog_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_remove_atomic_multilog_result & rhs) const
-  {
+  bool operator==(const rpc_service_remove_atomic_multilog_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_atomic_multilog_result &rhs) const {
+  bool operator!=(const rpc_service_remove_atomic_multilog_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_atomic_multilog_result & ) const;
+  bool operator<(const rpc_service_remove_atomic_multilog_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -704,14 +756,13 @@ typedef struct _rpc_service_remove_atomic_multilog_presult__isset {
 class rpc_service_remove_atomic_multilog_presult {
  public:
 
-
   virtual ~rpc_service_remove_atomic_multilog_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_remove_atomic_multilog_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -725,8 +776,8 @@ typedef struct _rpc_service_add_index_args__isset {
 class rpc_service_add_index_args {
  public:
 
-  rpc_service_add_index_args(const rpc_service_add_index_args&);
-  rpc_service_add_index_args& operator=(const rpc_service_add_index_args&);
+  rpc_service_add_index_args(const rpc_service_add_index_args &);
+  rpc_service_add_index_args &operator=(const rpc_service_add_index_args &);
   rpc_service_add_index_args() : multilog_id(0), field_name(), bucket_size(0) {
   }
 
@@ -739,12 +790,11 @@ class rpc_service_add_index_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_field_name(const std::string& val);
+  void __set_field_name(const std::string &val);
 
   void __set_bucket_size(const double val);
 
-  bool operator == (const rpc_service_add_index_args & rhs) const
-  {
+  bool operator==(const rpc_service_add_index_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(field_name == rhs.field_name))
@@ -753,31 +803,29 @@ class rpc_service_add_index_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_index_args &rhs) const {
+  bool operator!=(const rpc_service_add_index_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_index_args & ) const;
+  bool operator<(const rpc_service_add_index_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_add_index_pargs {
  public:
 
-
   virtual ~rpc_service_add_index_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* field_name;
-  const double* bucket_size;
+  const int64_t *multilog_id;
+  const std::string *field_name;
+  const double *bucket_size;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -789,8 +837,8 @@ typedef struct _rpc_service_add_index_result__isset {
 class rpc_service_add_index_result {
  public:
 
-  rpc_service_add_index_result(const rpc_service_add_index_result&);
-  rpc_service_add_index_result& operator=(const rpc_service_add_index_result&);
+  rpc_service_add_index_result(const rpc_service_add_index_result &);
+  rpc_service_add_index_result &operator=(const rpc_service_add_index_result &);
   rpc_service_add_index_result() {
   }
 
@@ -799,24 +847,23 @@ class rpc_service_add_index_result {
 
   _rpc_service_add_index_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_add_index_result & rhs) const
-  {
+  bool operator==(const rpc_service_add_index_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_index_result &rhs) const {
+  bool operator!=(const rpc_service_add_index_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_index_result & ) const;
+  bool operator<(const rpc_service_add_index_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -828,14 +875,13 @@ typedef struct _rpc_service_add_index_presult__isset {
 class rpc_service_add_index_presult {
  public:
 
-
   virtual ~rpc_service_add_index_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_add_index_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -848,8 +894,8 @@ typedef struct _rpc_service_remove_index_args__isset {
 class rpc_service_remove_index_args {
  public:
 
-  rpc_service_remove_index_args(const rpc_service_remove_index_args&);
-  rpc_service_remove_index_args& operator=(const rpc_service_remove_index_args&);
+  rpc_service_remove_index_args(const rpc_service_remove_index_args &);
+  rpc_service_remove_index_args &operator=(const rpc_service_remove_index_args &);
   rpc_service_remove_index_args() : multilog_id(0), field_name() {
   }
 
@@ -861,40 +907,37 @@ class rpc_service_remove_index_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_field_name(const std::string& val);
+  void __set_field_name(const std::string &val);
 
-  bool operator == (const rpc_service_remove_index_args & rhs) const
-  {
+  bool operator==(const rpc_service_remove_index_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(field_name == rhs.field_name))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_index_args &rhs) const {
+  bool operator!=(const rpc_service_remove_index_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_index_args & ) const;
+  bool operator<(const rpc_service_remove_index_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_index_pargs {
  public:
 
-
   virtual ~rpc_service_remove_index_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* field_name;
+  const int64_t *multilog_id;
+  const std::string *field_name;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -906,8 +949,8 @@ typedef struct _rpc_service_remove_index_result__isset {
 class rpc_service_remove_index_result {
  public:
 
-  rpc_service_remove_index_result(const rpc_service_remove_index_result&);
-  rpc_service_remove_index_result& operator=(const rpc_service_remove_index_result&);
+  rpc_service_remove_index_result(const rpc_service_remove_index_result &);
+  rpc_service_remove_index_result &operator=(const rpc_service_remove_index_result &);
   rpc_service_remove_index_result() {
   }
 
@@ -916,24 +959,23 @@ class rpc_service_remove_index_result {
 
   _rpc_service_remove_index_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_remove_index_result & rhs) const
-  {
+  bool operator==(const rpc_service_remove_index_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_index_result &rhs) const {
+  bool operator!=(const rpc_service_remove_index_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_index_result & ) const;
+  bool operator<(const rpc_service_remove_index_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -945,14 +987,13 @@ typedef struct _rpc_service_remove_index_presult__isset {
 class rpc_service_remove_index_presult {
  public:
 
-
   virtual ~rpc_service_remove_index_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_remove_index_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -966,8 +1007,8 @@ typedef struct _rpc_service_add_filter_args__isset {
 class rpc_service_add_filter_args {
  public:
 
-  rpc_service_add_filter_args(const rpc_service_add_filter_args&);
-  rpc_service_add_filter_args& operator=(const rpc_service_add_filter_args&);
+  rpc_service_add_filter_args(const rpc_service_add_filter_args &);
+  rpc_service_add_filter_args &operator=(const rpc_service_add_filter_args &);
   rpc_service_add_filter_args() : multilog_id(0), filter_name(), filter_expr() {
   }
 
@@ -980,12 +1021,11 @@ class rpc_service_add_filter_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_filter_name(const std::string& val);
+  void __set_filter_name(const std::string &val);
 
-  void __set_filter_expr(const std::string& val);
+  void __set_filter_expr(const std::string &val);
 
-  bool operator == (const rpc_service_add_filter_args & rhs) const
-  {
+  bool operator==(const rpc_service_add_filter_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
@@ -994,31 +1034,29 @@ class rpc_service_add_filter_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_filter_args &rhs) const {
+  bool operator!=(const rpc_service_add_filter_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_filter_args & ) const;
+  bool operator<(const rpc_service_add_filter_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_add_filter_pargs {
  public:
 
-
   virtual ~rpc_service_add_filter_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* filter_name;
-  const std::string* filter_expr;
+  const int64_t *multilog_id;
+  const std::string *filter_name;
+  const std::string *filter_expr;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1030,8 +1068,8 @@ typedef struct _rpc_service_add_filter_result__isset {
 class rpc_service_add_filter_result {
  public:
 
-  rpc_service_add_filter_result(const rpc_service_add_filter_result&);
-  rpc_service_add_filter_result& operator=(const rpc_service_add_filter_result&);
+  rpc_service_add_filter_result(const rpc_service_add_filter_result &);
+  rpc_service_add_filter_result &operator=(const rpc_service_add_filter_result &);
   rpc_service_add_filter_result() {
   }
 
@@ -1040,24 +1078,23 @@ class rpc_service_add_filter_result {
 
   _rpc_service_add_filter_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_add_filter_result & rhs) const
-  {
+  bool operator==(const rpc_service_add_filter_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_filter_result &rhs) const {
+  bool operator!=(const rpc_service_add_filter_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_filter_result & ) const;
+  bool operator<(const rpc_service_add_filter_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1069,14 +1106,13 @@ typedef struct _rpc_service_add_filter_presult__isset {
 class rpc_service_add_filter_presult {
  public:
 
-
   virtual ~rpc_service_add_filter_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_add_filter_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1089,8 +1125,8 @@ typedef struct _rpc_service_remove_filter_args__isset {
 class rpc_service_remove_filter_args {
  public:
 
-  rpc_service_remove_filter_args(const rpc_service_remove_filter_args&);
-  rpc_service_remove_filter_args& operator=(const rpc_service_remove_filter_args&);
+  rpc_service_remove_filter_args(const rpc_service_remove_filter_args &);
+  rpc_service_remove_filter_args &operator=(const rpc_service_remove_filter_args &);
   rpc_service_remove_filter_args() : multilog_id(0), filter_name() {
   }
 
@@ -1102,40 +1138,37 @@ class rpc_service_remove_filter_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_filter_name(const std::string& val);
+  void __set_filter_name(const std::string &val);
 
-  bool operator == (const rpc_service_remove_filter_args & rhs) const
-  {
+  bool operator==(const rpc_service_remove_filter_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_filter_args &rhs) const {
+  bool operator!=(const rpc_service_remove_filter_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_filter_args & ) const;
+  bool operator<(const rpc_service_remove_filter_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_filter_pargs {
  public:
 
-
   virtual ~rpc_service_remove_filter_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* filter_name;
+  const int64_t *multilog_id;
+  const std::string *filter_name;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1147,8 +1180,8 @@ typedef struct _rpc_service_remove_filter_result__isset {
 class rpc_service_remove_filter_result {
  public:
 
-  rpc_service_remove_filter_result(const rpc_service_remove_filter_result&);
-  rpc_service_remove_filter_result& operator=(const rpc_service_remove_filter_result&);
+  rpc_service_remove_filter_result(const rpc_service_remove_filter_result &);
+  rpc_service_remove_filter_result &operator=(const rpc_service_remove_filter_result &);
   rpc_service_remove_filter_result() {
   }
 
@@ -1157,24 +1190,23 @@ class rpc_service_remove_filter_result {
 
   _rpc_service_remove_filter_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_remove_filter_result & rhs) const
-  {
+  bool operator==(const rpc_service_remove_filter_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_filter_result &rhs) const {
+  bool operator!=(const rpc_service_remove_filter_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_filter_result & ) const;
+  bool operator<(const rpc_service_remove_filter_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1186,19 +1218,19 @@ typedef struct _rpc_service_remove_filter_presult__isset {
 class rpc_service_remove_filter_presult {
  public:
 
-
   virtual ~rpc_service_remove_filter_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_remove_filter_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
 typedef struct _rpc_service_add_aggregate_args__isset {
-  _rpc_service_add_aggregate_args__isset() : mutlilog_id(false), aggregate_name(false), filter_name(false), aggregate_expr(false) {}
+  _rpc_service_add_aggregate_args__isset()
+      : mutlilog_id(false), aggregate_name(false), filter_name(false), aggregate_expr(false) {}
   bool mutlilog_id :1;
   bool aggregate_name :1;
   bool filter_name :1;
@@ -1208,8 +1240,8 @@ typedef struct _rpc_service_add_aggregate_args__isset {
 class rpc_service_add_aggregate_args {
  public:
 
-  rpc_service_add_aggregate_args(const rpc_service_add_aggregate_args&);
-  rpc_service_add_aggregate_args& operator=(const rpc_service_add_aggregate_args&);
+  rpc_service_add_aggregate_args(const rpc_service_add_aggregate_args &);
+  rpc_service_add_aggregate_args &operator=(const rpc_service_add_aggregate_args &);
   rpc_service_add_aggregate_args() : mutlilog_id(0), aggregate_name(), filter_name(), aggregate_expr() {
   }
 
@@ -1223,14 +1255,13 @@ class rpc_service_add_aggregate_args {
 
   void __set_mutlilog_id(const int64_t val);
 
-  void __set_aggregate_name(const std::string& val);
+  void __set_aggregate_name(const std::string &val);
 
-  void __set_filter_name(const std::string& val);
+  void __set_filter_name(const std::string &val);
 
-  void __set_aggregate_expr(const std::string& val);
+  void __set_aggregate_expr(const std::string &val);
 
-  bool operator == (const rpc_service_add_aggregate_args & rhs) const
-  {
+  bool operator==(const rpc_service_add_aggregate_args &rhs) const {
     if (!(mutlilog_id == rhs.mutlilog_id))
       return false;
     if (!(aggregate_name == rhs.aggregate_name))
@@ -1241,32 +1272,30 @@ class rpc_service_add_aggregate_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_aggregate_args &rhs) const {
+  bool operator!=(const rpc_service_add_aggregate_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_aggregate_args & ) const;
+  bool operator<(const rpc_service_add_aggregate_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_add_aggregate_pargs {
  public:
 
-
   virtual ~rpc_service_add_aggregate_pargs() throw();
-  const int64_t* mutlilog_id;
-  const std::string* aggregate_name;
-  const std::string* filter_name;
-  const std::string* aggregate_expr;
+  const int64_t *mutlilog_id;
+  const std::string *aggregate_name;
+  const std::string *filter_name;
+  const std::string *aggregate_expr;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1278,8 +1307,8 @@ typedef struct _rpc_service_add_aggregate_result__isset {
 class rpc_service_add_aggregate_result {
  public:
 
-  rpc_service_add_aggregate_result(const rpc_service_add_aggregate_result&);
-  rpc_service_add_aggregate_result& operator=(const rpc_service_add_aggregate_result&);
+  rpc_service_add_aggregate_result(const rpc_service_add_aggregate_result &);
+  rpc_service_add_aggregate_result &operator=(const rpc_service_add_aggregate_result &);
   rpc_service_add_aggregate_result() {
   }
 
@@ -1288,24 +1317,23 @@ class rpc_service_add_aggregate_result {
 
   _rpc_service_add_aggregate_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_add_aggregate_result & rhs) const
-  {
+  bool operator==(const rpc_service_add_aggregate_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_aggregate_result &rhs) const {
+  bool operator!=(const rpc_service_add_aggregate_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_aggregate_result & ) const;
+  bool operator<(const rpc_service_add_aggregate_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1317,14 +1345,13 @@ typedef struct _rpc_service_add_aggregate_presult__isset {
 class rpc_service_add_aggregate_presult {
  public:
 
-
   virtual ~rpc_service_add_aggregate_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_add_aggregate_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1337,8 +1364,8 @@ typedef struct _rpc_service_remove_aggregate_args__isset {
 class rpc_service_remove_aggregate_args {
  public:
 
-  rpc_service_remove_aggregate_args(const rpc_service_remove_aggregate_args&);
-  rpc_service_remove_aggregate_args& operator=(const rpc_service_remove_aggregate_args&);
+  rpc_service_remove_aggregate_args(const rpc_service_remove_aggregate_args &);
+  rpc_service_remove_aggregate_args &operator=(const rpc_service_remove_aggregate_args &);
   rpc_service_remove_aggregate_args() : multilog_id(0), aggregate_name() {
   }
 
@@ -1350,80 +1377,73 @@ class rpc_service_remove_aggregate_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_aggregate_name(const std::string& val);
+  void __set_aggregate_name(const std::string &val);
 
-  bool operator == (const rpc_service_remove_aggregate_args & rhs) const
-  {
+  bool operator==(const rpc_service_remove_aggregate_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(aggregate_name == rhs.aggregate_name))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_aggregate_args &rhs) const {
+  bool operator!=(const rpc_service_remove_aggregate_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_aggregate_args & ) const;
+  bool operator<(const rpc_service_remove_aggregate_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_aggregate_pargs {
  public:
 
-
   virtual ~rpc_service_remove_aggregate_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* aggregate_name;
+  const int64_t *multilog_id;
+  const std::string *aggregate_name;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_aggregate_result {
  public:
 
-  rpc_service_remove_aggregate_result(const rpc_service_remove_aggregate_result&);
-  rpc_service_remove_aggregate_result& operator=(const rpc_service_remove_aggregate_result&);
+  rpc_service_remove_aggregate_result(const rpc_service_remove_aggregate_result &);
+  rpc_service_remove_aggregate_result &operator=(const rpc_service_remove_aggregate_result &);
   rpc_service_remove_aggregate_result() {
   }
 
   virtual ~rpc_service_remove_aggregate_result() throw();
 
-  bool operator == (const rpc_service_remove_aggregate_result & /* rhs */) const
-  {
+  bool operator==(const rpc_service_remove_aggregate_result & /* rhs */) const {
     return true;
   }
-  bool operator != (const rpc_service_remove_aggregate_result &rhs) const {
+  bool operator!=(const rpc_service_remove_aggregate_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_aggregate_result & ) const;
+  bool operator<(const rpc_service_remove_aggregate_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_aggregate_presult {
  public:
 
-
   virtual ~rpc_service_remove_aggregate_presult() throw();
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1437,8 +1457,8 @@ typedef struct _rpc_service_add_trigger_args__isset {
 class rpc_service_add_trigger_args {
  public:
 
-  rpc_service_add_trigger_args(const rpc_service_add_trigger_args&);
-  rpc_service_add_trigger_args& operator=(const rpc_service_add_trigger_args&);
+  rpc_service_add_trigger_args(const rpc_service_add_trigger_args &);
+  rpc_service_add_trigger_args &operator=(const rpc_service_add_trigger_args &);
   rpc_service_add_trigger_args() : multilog_id(0), trigger_name(), trigger_expr() {
   }
 
@@ -1451,12 +1471,11 @@ class rpc_service_add_trigger_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_trigger_name(const std::string& val);
+  void __set_trigger_name(const std::string &val);
 
-  void __set_trigger_expr(const std::string& val);
+  void __set_trigger_expr(const std::string &val);
 
-  bool operator == (const rpc_service_add_trigger_args & rhs) const
-  {
+  bool operator==(const rpc_service_add_trigger_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(trigger_name == rhs.trigger_name))
@@ -1465,31 +1484,29 @@ class rpc_service_add_trigger_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_trigger_args &rhs) const {
+  bool operator!=(const rpc_service_add_trigger_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_trigger_args & ) const;
+  bool operator<(const rpc_service_add_trigger_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_add_trigger_pargs {
  public:
 
-
   virtual ~rpc_service_add_trigger_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* trigger_name;
-  const std::string* trigger_expr;
+  const int64_t *multilog_id;
+  const std::string *trigger_name;
+  const std::string *trigger_expr;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1501,8 +1518,8 @@ typedef struct _rpc_service_add_trigger_result__isset {
 class rpc_service_add_trigger_result {
  public:
 
-  rpc_service_add_trigger_result(const rpc_service_add_trigger_result&);
-  rpc_service_add_trigger_result& operator=(const rpc_service_add_trigger_result&);
+  rpc_service_add_trigger_result(const rpc_service_add_trigger_result &);
+  rpc_service_add_trigger_result &operator=(const rpc_service_add_trigger_result &);
   rpc_service_add_trigger_result() {
   }
 
@@ -1511,24 +1528,23 @@ class rpc_service_add_trigger_result {
 
   _rpc_service_add_trigger_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_add_trigger_result & rhs) const
-  {
+  bool operator==(const rpc_service_add_trigger_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_add_trigger_result &rhs) const {
+  bool operator!=(const rpc_service_add_trigger_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_add_trigger_result & ) const;
+  bool operator<(const rpc_service_add_trigger_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1540,14 +1556,13 @@ typedef struct _rpc_service_add_trigger_presult__isset {
 class rpc_service_add_trigger_presult {
  public:
 
-
   virtual ~rpc_service_add_trigger_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_add_trigger_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1560,8 +1575,8 @@ typedef struct _rpc_service_remove_trigger_args__isset {
 class rpc_service_remove_trigger_args {
  public:
 
-  rpc_service_remove_trigger_args(const rpc_service_remove_trigger_args&);
-  rpc_service_remove_trigger_args& operator=(const rpc_service_remove_trigger_args&);
+  rpc_service_remove_trigger_args(const rpc_service_remove_trigger_args &);
+  rpc_service_remove_trigger_args &operator=(const rpc_service_remove_trigger_args &);
   rpc_service_remove_trigger_args() : multilog_id(0), trigger_name() {
   }
 
@@ -1573,40 +1588,37 @@ class rpc_service_remove_trigger_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_trigger_name(const std::string& val);
+  void __set_trigger_name(const std::string &val);
 
-  bool operator == (const rpc_service_remove_trigger_args & rhs) const
-  {
+  bool operator==(const rpc_service_remove_trigger_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(trigger_name == rhs.trigger_name))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_trigger_args &rhs) const {
+  bool operator!=(const rpc_service_remove_trigger_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_trigger_args & ) const;
+  bool operator<(const rpc_service_remove_trigger_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_remove_trigger_pargs {
  public:
 
-
   virtual ~rpc_service_remove_trigger_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* trigger_name;
+  const int64_t *multilog_id;
+  const std::string *trigger_name;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1618,8 +1630,8 @@ typedef struct _rpc_service_remove_trigger_result__isset {
 class rpc_service_remove_trigger_result {
  public:
 
-  rpc_service_remove_trigger_result(const rpc_service_remove_trigger_result&);
-  rpc_service_remove_trigger_result& operator=(const rpc_service_remove_trigger_result&);
+  rpc_service_remove_trigger_result(const rpc_service_remove_trigger_result &);
+  rpc_service_remove_trigger_result &operator=(const rpc_service_remove_trigger_result &);
   rpc_service_remove_trigger_result() {
   }
 
@@ -1628,24 +1640,23 @@ class rpc_service_remove_trigger_result {
 
   _rpc_service_remove_trigger_result__isset __isset;
 
-  void __set_ex(const rpc_management_exception& val);
+  void __set_ex(const rpc_management_exception &val);
 
-  bool operator == (const rpc_service_remove_trigger_result & rhs) const
-  {
+  bool operator==(const rpc_service_remove_trigger_result &rhs) const {
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_remove_trigger_result &rhs) const {
+  bool operator!=(const rpc_service_remove_trigger_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_remove_trigger_result & ) const;
+  bool operator<(const rpc_service_remove_trigger_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1657,14 +1668,13 @@ typedef struct _rpc_service_remove_trigger_presult__isset {
 class rpc_service_remove_trigger_presult {
  public:
 
-
   virtual ~rpc_service_remove_trigger_presult() throw();
   rpc_management_exception ex;
 
   _rpc_service_remove_trigger_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1677,8 +1687,8 @@ typedef struct _rpc_service_append_args__isset {
 class rpc_service_append_args {
  public:
 
-  rpc_service_append_args(const rpc_service_append_args&);
-  rpc_service_append_args& operator=(const rpc_service_append_args&);
+  rpc_service_append_args(const rpc_service_append_args &);
+  rpc_service_append_args &operator=(const rpc_service_append_args &);
   rpc_service_append_args() : multilog_id(0), data() {
   }
 
@@ -1690,40 +1700,37 @@ class rpc_service_append_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_data(const std::string& val);
+  void __set_data(const std::string &val);
 
-  bool operator == (const rpc_service_append_args & rhs) const
-  {
+  bool operator==(const rpc_service_append_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(data == rhs.data))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_append_args &rhs) const {
+  bool operator!=(const rpc_service_append_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_append_args & ) const;
+  bool operator<(const rpc_service_append_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_append_pargs {
  public:
 
-
   virtual ~rpc_service_append_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* data;
+  const int64_t *multilog_id;
+  const std::string *data;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1735,8 +1742,8 @@ typedef struct _rpc_service_append_result__isset {
 class rpc_service_append_result {
  public:
 
-  rpc_service_append_result(const rpc_service_append_result&);
-  rpc_service_append_result& operator=(const rpc_service_append_result&);
+  rpc_service_append_result(const rpc_service_append_result &);
+  rpc_service_append_result &operator=(const rpc_service_append_result &);
   rpc_service_append_result() : success(0) {
   }
 
@@ -1747,22 +1754,21 @@ class rpc_service_append_result {
 
   void __set_success(const int64_t val);
 
-  bool operator == (const rpc_service_append_result & rhs) const
-  {
+  bool operator==(const rpc_service_append_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_append_result &rhs) const {
+  bool operator!=(const rpc_service_append_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_append_result & ) const;
+  bool operator<(const rpc_service_append_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1774,14 +1780,13 @@ typedef struct _rpc_service_append_presult__isset {
 class rpc_service_append_presult {
  public:
 
-
   virtual ~rpc_service_append_presult() throw();
-  int64_t* success;
+  int64_t *success;
 
   _rpc_service_append_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1794,8 +1799,8 @@ typedef struct _rpc_service_append_batch_args__isset {
 class rpc_service_append_batch_args {
  public:
 
-  rpc_service_append_batch_args(const rpc_service_append_batch_args&);
-  rpc_service_append_batch_args& operator=(const rpc_service_append_batch_args&);
+  rpc_service_append_batch_args(const rpc_service_append_batch_args &);
+  rpc_service_append_batch_args &operator=(const rpc_service_append_batch_args &);
   rpc_service_append_batch_args() : multilog_id(0) {
   }
 
@@ -1807,40 +1812,37 @@ class rpc_service_append_batch_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_batch(const rpc_record_batch& val);
+  void __set_batch(const rpc_record_batch &val);
 
-  bool operator == (const rpc_service_append_batch_args & rhs) const
-  {
+  bool operator==(const rpc_service_append_batch_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(batch == rhs.batch))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_append_batch_args &rhs) const {
+  bool operator!=(const rpc_service_append_batch_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_append_batch_args & ) const;
+  bool operator<(const rpc_service_append_batch_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_append_batch_pargs {
  public:
 
-
   virtual ~rpc_service_append_batch_pargs() throw();
-  const int64_t* multilog_id;
-  const rpc_record_batch* batch;
+  const int64_t *multilog_id;
+  const rpc_record_batch *batch;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1852,8 +1854,8 @@ typedef struct _rpc_service_append_batch_result__isset {
 class rpc_service_append_batch_result {
  public:
 
-  rpc_service_append_batch_result(const rpc_service_append_batch_result&);
-  rpc_service_append_batch_result& operator=(const rpc_service_append_batch_result&);
+  rpc_service_append_batch_result(const rpc_service_append_batch_result &);
+  rpc_service_append_batch_result &operator=(const rpc_service_append_batch_result &);
   rpc_service_append_batch_result() : success(0) {
   }
 
@@ -1864,22 +1866,21 @@ class rpc_service_append_batch_result {
 
   void __set_success(const int64_t val);
 
-  bool operator == (const rpc_service_append_batch_result & rhs) const
-  {
+  bool operator==(const rpc_service_append_batch_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_append_batch_result &rhs) const {
+  bool operator!=(const rpc_service_append_batch_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_append_batch_result & ) const;
+  bool operator<(const rpc_service_append_batch_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1891,14 +1892,13 @@ typedef struct _rpc_service_append_batch_presult__isset {
 class rpc_service_append_batch_presult {
  public:
 
-
   virtual ~rpc_service_append_batch_presult() throw();
-  int64_t* success;
+  int64_t *success;
 
   _rpc_service_append_batch_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -1912,8 +1912,8 @@ typedef struct _rpc_service_read_args__isset {
 class rpc_service_read_args {
  public:
 
-  rpc_service_read_args(const rpc_service_read_args&);
-  rpc_service_read_args& operator=(const rpc_service_read_args&);
+  rpc_service_read_args(const rpc_service_read_args &);
+  rpc_service_read_args &operator=(const rpc_service_read_args &);
   rpc_service_read_args() : multilog_id(0), offset(0), nrecords(0) {
   }
 
@@ -1930,8 +1930,7 @@ class rpc_service_read_args {
 
   void __set_nrecords(const int64_t val);
 
-  bool operator == (const rpc_service_read_args & rhs) const
-  {
+  bool operator==(const rpc_service_read_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(offset == rhs.offset))
@@ -1940,31 +1939,29 @@ class rpc_service_read_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_read_args &rhs) const {
+  bool operator!=(const rpc_service_read_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_read_args & ) const;
+  bool operator<(const rpc_service_read_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_read_pargs {
  public:
 
-
   virtual ~rpc_service_read_pargs() throw();
-  const int64_t* multilog_id;
-  const int64_t* offset;
-  const int64_t* nrecords;
+  const int64_t *multilog_id;
+  const int64_t *offset;
+  const int64_t *nrecords;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -1976,8 +1973,8 @@ typedef struct _rpc_service_read_result__isset {
 class rpc_service_read_result {
  public:
 
-  rpc_service_read_result(const rpc_service_read_result&);
-  rpc_service_read_result& operator=(const rpc_service_read_result&);
+  rpc_service_read_result(const rpc_service_read_result &);
+  rpc_service_read_result &operator=(const rpc_service_read_result &);
   rpc_service_read_result() : success() {
   }
 
@@ -1986,24 +1983,23 @@ class rpc_service_read_result {
 
   _rpc_service_read_result__isset __isset;
 
-  void __set_success(const std::string& val);
+  void __set_success(const std::string &val);
 
-  bool operator == (const rpc_service_read_result & rhs) const
-  {
+  bool operator==(const rpc_service_read_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_read_result &rhs) const {
+  bool operator!=(const rpc_service_read_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_read_result & ) const;
+  bool operator<(const rpc_service_read_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2015,19 +2011,19 @@ typedef struct _rpc_service_read_presult__isset {
 class rpc_service_read_presult {
  public:
 
-
   virtual ~rpc_service_read_presult() throw();
-  std::string* success;
+  std::string *success;
 
   _rpc_service_read_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
 typedef struct _rpc_service_query_aggregate_args__isset {
-  _rpc_service_query_aggregate_args__isset() : multilog_id(false), aggregate_name(false), begin_ms(false), end_ms(false) {}
+  _rpc_service_query_aggregate_args__isset()
+      : multilog_id(false), aggregate_name(false), begin_ms(false), end_ms(false) {}
   bool multilog_id :1;
   bool aggregate_name :1;
   bool begin_ms :1;
@@ -2037,8 +2033,8 @@ typedef struct _rpc_service_query_aggregate_args__isset {
 class rpc_service_query_aggregate_args {
  public:
 
-  rpc_service_query_aggregate_args(const rpc_service_query_aggregate_args&);
-  rpc_service_query_aggregate_args& operator=(const rpc_service_query_aggregate_args&);
+  rpc_service_query_aggregate_args(const rpc_service_query_aggregate_args &);
+  rpc_service_query_aggregate_args &operator=(const rpc_service_query_aggregate_args &);
   rpc_service_query_aggregate_args() : multilog_id(0), aggregate_name(), begin_ms(0), end_ms(0) {
   }
 
@@ -2052,14 +2048,13 @@ class rpc_service_query_aggregate_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_aggregate_name(const std::string& val);
+  void __set_aggregate_name(const std::string &val);
 
   void __set_begin_ms(const int64_t val);
 
   void __set_end_ms(const int64_t val);
 
-  bool operator == (const rpc_service_query_aggregate_args & rhs) const
-  {
+  bool operator==(const rpc_service_query_aggregate_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(aggregate_name == rhs.aggregate_name))
@@ -2070,32 +2065,30 @@ class rpc_service_query_aggregate_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_query_aggregate_args &rhs) const {
+  bool operator!=(const rpc_service_query_aggregate_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_query_aggregate_args & ) const;
+  bool operator<(const rpc_service_query_aggregate_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_query_aggregate_pargs {
  public:
 
-
   virtual ~rpc_service_query_aggregate_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* aggregate_name;
-  const int64_t* begin_ms;
-  const int64_t* end_ms;
+  const int64_t *multilog_id;
+  const std::string *aggregate_name;
+  const int64_t *begin_ms;
+  const int64_t *end_ms;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2108,8 +2101,8 @@ typedef struct _rpc_service_query_aggregate_result__isset {
 class rpc_service_query_aggregate_result {
  public:
 
-  rpc_service_query_aggregate_result(const rpc_service_query_aggregate_result&);
-  rpc_service_query_aggregate_result& operator=(const rpc_service_query_aggregate_result&);
+  rpc_service_query_aggregate_result(const rpc_service_query_aggregate_result &);
+  rpc_service_query_aggregate_result &operator=(const rpc_service_query_aggregate_result &);
   rpc_service_query_aggregate_result() : success() {
   }
 
@@ -2119,28 +2112,27 @@ class rpc_service_query_aggregate_result {
 
   _rpc_service_query_aggregate_result__isset __isset;
 
-  void __set_success(const std::string& val);
+  void __set_success(const std::string &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_query_aggregate_result & rhs) const
-  {
+  bool operator==(const rpc_service_query_aggregate_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_query_aggregate_result &rhs) const {
+  bool operator!=(const rpc_service_query_aggregate_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_query_aggregate_result & ) const;
+  bool operator<(const rpc_service_query_aggregate_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2153,15 +2145,14 @@ typedef struct _rpc_service_query_aggregate_presult__isset {
 class rpc_service_query_aggregate_presult {
  public:
 
-
   virtual ~rpc_service_query_aggregate_presult() throw();
-  std::string* success;
+  std::string *success;
   rpc_invalid_operation ex;
 
   _rpc_service_query_aggregate_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2175,8 +2166,8 @@ typedef struct _rpc_service_adhoc_aggregate_args__isset {
 class rpc_service_adhoc_aggregate_args {
  public:
 
-  rpc_service_adhoc_aggregate_args(const rpc_service_adhoc_aggregate_args&);
-  rpc_service_adhoc_aggregate_args& operator=(const rpc_service_adhoc_aggregate_args&);
+  rpc_service_adhoc_aggregate_args(const rpc_service_adhoc_aggregate_args &);
+  rpc_service_adhoc_aggregate_args &operator=(const rpc_service_adhoc_aggregate_args &);
   rpc_service_adhoc_aggregate_args() : multilog_id(0), aggregate_expr(), filter_expr() {
   }
 
@@ -2189,12 +2180,11 @@ class rpc_service_adhoc_aggregate_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_aggregate_expr(const std::string& val);
+  void __set_aggregate_expr(const std::string &val);
 
-  void __set_filter_expr(const std::string& val);
+  void __set_filter_expr(const std::string &val);
 
-  bool operator == (const rpc_service_adhoc_aggregate_args & rhs) const
-  {
+  bool operator==(const rpc_service_adhoc_aggregate_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(aggregate_expr == rhs.aggregate_expr))
@@ -2203,31 +2193,29 @@ class rpc_service_adhoc_aggregate_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_adhoc_aggregate_args &rhs) const {
+  bool operator!=(const rpc_service_adhoc_aggregate_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_adhoc_aggregate_args & ) const;
+  bool operator<(const rpc_service_adhoc_aggregate_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_adhoc_aggregate_pargs {
  public:
 
-
   virtual ~rpc_service_adhoc_aggregate_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* aggregate_expr;
-  const std::string* filter_expr;
+  const int64_t *multilog_id;
+  const std::string *aggregate_expr;
+  const std::string *filter_expr;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2240,8 +2228,8 @@ typedef struct _rpc_service_adhoc_aggregate_result__isset {
 class rpc_service_adhoc_aggregate_result {
  public:
 
-  rpc_service_adhoc_aggregate_result(const rpc_service_adhoc_aggregate_result&);
-  rpc_service_adhoc_aggregate_result& operator=(const rpc_service_adhoc_aggregate_result&);
+  rpc_service_adhoc_aggregate_result(const rpc_service_adhoc_aggregate_result &);
+  rpc_service_adhoc_aggregate_result &operator=(const rpc_service_adhoc_aggregate_result &);
   rpc_service_adhoc_aggregate_result() : success() {
   }
 
@@ -2251,28 +2239,27 @@ class rpc_service_adhoc_aggregate_result {
 
   _rpc_service_adhoc_aggregate_result__isset __isset;
 
-  void __set_success(const std::string& val);
+  void __set_success(const std::string &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_adhoc_aggregate_result & rhs) const
-  {
+  bool operator==(const rpc_service_adhoc_aggregate_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_adhoc_aggregate_result &rhs) const {
+  bool operator!=(const rpc_service_adhoc_aggregate_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_adhoc_aggregate_result & ) const;
+  bool operator<(const rpc_service_adhoc_aggregate_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2285,15 +2272,14 @@ typedef struct _rpc_service_adhoc_aggregate_presult__isset {
 class rpc_service_adhoc_aggregate_presult {
  public:
 
-
   virtual ~rpc_service_adhoc_aggregate_presult() throw();
-  std::string* success;
+  std::string *success;
   rpc_invalid_operation ex;
 
   _rpc_service_adhoc_aggregate_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2306,8 +2292,8 @@ typedef struct _rpc_service_adhoc_filter_args__isset {
 class rpc_service_adhoc_filter_args {
  public:
 
-  rpc_service_adhoc_filter_args(const rpc_service_adhoc_filter_args&);
-  rpc_service_adhoc_filter_args& operator=(const rpc_service_adhoc_filter_args&);
+  rpc_service_adhoc_filter_args(const rpc_service_adhoc_filter_args &);
+  rpc_service_adhoc_filter_args &operator=(const rpc_service_adhoc_filter_args &);
   rpc_service_adhoc_filter_args() : multilog_id(0), filter_expr() {
   }
 
@@ -2319,40 +2305,37 @@ class rpc_service_adhoc_filter_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_filter_expr(const std::string& val);
+  void __set_filter_expr(const std::string &val);
 
-  bool operator == (const rpc_service_adhoc_filter_args & rhs) const
-  {
+  bool operator==(const rpc_service_adhoc_filter_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_expr == rhs.filter_expr))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_adhoc_filter_args &rhs) const {
+  bool operator!=(const rpc_service_adhoc_filter_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_adhoc_filter_args & ) const;
+  bool operator<(const rpc_service_adhoc_filter_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_adhoc_filter_pargs {
  public:
 
-
   virtual ~rpc_service_adhoc_filter_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* filter_expr;
+  const int64_t *multilog_id;
+  const std::string *filter_expr;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2365,8 +2348,8 @@ typedef struct _rpc_service_adhoc_filter_result__isset {
 class rpc_service_adhoc_filter_result {
  public:
 
-  rpc_service_adhoc_filter_result(const rpc_service_adhoc_filter_result&);
-  rpc_service_adhoc_filter_result& operator=(const rpc_service_adhoc_filter_result&);
+  rpc_service_adhoc_filter_result(const rpc_service_adhoc_filter_result &);
+  rpc_service_adhoc_filter_result &operator=(const rpc_service_adhoc_filter_result &);
   rpc_service_adhoc_filter_result() {
   }
 
@@ -2376,28 +2359,27 @@ class rpc_service_adhoc_filter_result {
 
   _rpc_service_adhoc_filter_result__isset __isset;
 
-  void __set_success(const rpc_iterator_handle& val);
+  void __set_success(const rpc_iterator_handle &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_adhoc_filter_result & rhs) const
-  {
+  bool operator==(const rpc_service_adhoc_filter_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_adhoc_filter_result &rhs) const {
+  bool operator!=(const rpc_service_adhoc_filter_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_adhoc_filter_result & ) const;
+  bool operator<(const rpc_service_adhoc_filter_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2410,15 +2392,14 @@ typedef struct _rpc_service_adhoc_filter_presult__isset {
 class rpc_service_adhoc_filter_presult {
  public:
 
-
   virtual ~rpc_service_adhoc_filter_presult() throw();
-  rpc_iterator_handle* success;
+  rpc_iterator_handle *success;
   rpc_invalid_operation ex;
 
   _rpc_service_adhoc_filter_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2433,8 +2414,8 @@ typedef struct _rpc_service_predef_filter_args__isset {
 class rpc_service_predef_filter_args {
  public:
 
-  rpc_service_predef_filter_args(const rpc_service_predef_filter_args&);
-  rpc_service_predef_filter_args& operator=(const rpc_service_predef_filter_args&);
+  rpc_service_predef_filter_args(const rpc_service_predef_filter_args &);
+  rpc_service_predef_filter_args &operator=(const rpc_service_predef_filter_args &);
   rpc_service_predef_filter_args() : multilog_id(0), filter_name(), begin_ms(0), end_ms(0) {
   }
 
@@ -2448,14 +2429,13 @@ class rpc_service_predef_filter_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_filter_name(const std::string& val);
+  void __set_filter_name(const std::string &val);
 
   void __set_begin_ms(const int64_t val);
 
   void __set_end_ms(const int64_t val);
 
-  bool operator == (const rpc_service_predef_filter_args & rhs) const
-  {
+  bool operator==(const rpc_service_predef_filter_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
@@ -2466,32 +2446,30 @@ class rpc_service_predef_filter_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_predef_filter_args &rhs) const {
+  bool operator!=(const rpc_service_predef_filter_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_predef_filter_args & ) const;
+  bool operator<(const rpc_service_predef_filter_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_predef_filter_pargs {
  public:
 
-
   virtual ~rpc_service_predef_filter_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* filter_name;
-  const int64_t* begin_ms;
-  const int64_t* end_ms;
+  const int64_t *multilog_id;
+  const std::string *filter_name;
+  const int64_t *begin_ms;
+  const int64_t *end_ms;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2504,8 +2482,8 @@ typedef struct _rpc_service_predef_filter_result__isset {
 class rpc_service_predef_filter_result {
  public:
 
-  rpc_service_predef_filter_result(const rpc_service_predef_filter_result&);
-  rpc_service_predef_filter_result& operator=(const rpc_service_predef_filter_result&);
+  rpc_service_predef_filter_result(const rpc_service_predef_filter_result &);
+  rpc_service_predef_filter_result &operator=(const rpc_service_predef_filter_result &);
   rpc_service_predef_filter_result() {
   }
 
@@ -2515,28 +2493,27 @@ class rpc_service_predef_filter_result {
 
   _rpc_service_predef_filter_result__isset __isset;
 
-  void __set_success(const rpc_iterator_handle& val);
+  void __set_success(const rpc_iterator_handle &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_predef_filter_result & rhs) const
-  {
+  bool operator==(const rpc_service_predef_filter_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_predef_filter_result &rhs) const {
+  bool operator!=(const rpc_service_predef_filter_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_predef_filter_result & ) const;
+  bool operator<(const rpc_service_predef_filter_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2549,20 +2526,20 @@ typedef struct _rpc_service_predef_filter_presult__isset {
 class rpc_service_predef_filter_presult {
  public:
 
-
   virtual ~rpc_service_predef_filter_presult() throw();
-  rpc_iterator_handle* success;
+  rpc_iterator_handle *success;
   rpc_invalid_operation ex;
 
   _rpc_service_predef_filter_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
 typedef struct _rpc_service_combined_filter_args__isset {
-  _rpc_service_combined_filter_args__isset() : multilog_id(false), filter_name(false), filter_expr(false), begin_ms(false), end_ms(false) {}
+  _rpc_service_combined_filter_args__isset()
+      : multilog_id(false), filter_name(false), filter_expr(false), begin_ms(false), end_ms(false) {}
   bool multilog_id :1;
   bool filter_name :1;
   bool filter_expr :1;
@@ -2573,8 +2550,8 @@ typedef struct _rpc_service_combined_filter_args__isset {
 class rpc_service_combined_filter_args {
  public:
 
-  rpc_service_combined_filter_args(const rpc_service_combined_filter_args&);
-  rpc_service_combined_filter_args& operator=(const rpc_service_combined_filter_args&);
+  rpc_service_combined_filter_args(const rpc_service_combined_filter_args &);
+  rpc_service_combined_filter_args &operator=(const rpc_service_combined_filter_args &);
   rpc_service_combined_filter_args() : multilog_id(0), filter_name(), filter_expr(), begin_ms(0), end_ms(0) {
   }
 
@@ -2589,16 +2566,15 @@ class rpc_service_combined_filter_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_filter_name(const std::string& val);
+  void __set_filter_name(const std::string &val);
 
-  void __set_filter_expr(const std::string& val);
+  void __set_filter_expr(const std::string &val);
 
   void __set_begin_ms(const int64_t val);
 
   void __set_end_ms(const int64_t val);
 
-  bool operator == (const rpc_service_combined_filter_args & rhs) const
-  {
+  bool operator==(const rpc_service_combined_filter_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(filter_name == rhs.filter_name))
@@ -2611,33 +2587,31 @@ class rpc_service_combined_filter_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_combined_filter_args &rhs) const {
+  bool operator!=(const rpc_service_combined_filter_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_combined_filter_args & ) const;
+  bool operator<(const rpc_service_combined_filter_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_combined_filter_pargs {
  public:
 
-
   virtual ~rpc_service_combined_filter_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* filter_name;
-  const std::string* filter_expr;
-  const int64_t* begin_ms;
-  const int64_t* end_ms;
+  const int64_t *multilog_id;
+  const std::string *filter_name;
+  const std::string *filter_expr;
+  const int64_t *begin_ms;
+  const int64_t *end_ms;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2650,8 +2624,8 @@ typedef struct _rpc_service_combined_filter_result__isset {
 class rpc_service_combined_filter_result {
  public:
 
-  rpc_service_combined_filter_result(const rpc_service_combined_filter_result&);
-  rpc_service_combined_filter_result& operator=(const rpc_service_combined_filter_result&);
+  rpc_service_combined_filter_result(const rpc_service_combined_filter_result &);
+  rpc_service_combined_filter_result &operator=(const rpc_service_combined_filter_result &);
   rpc_service_combined_filter_result() {
   }
 
@@ -2661,28 +2635,27 @@ class rpc_service_combined_filter_result {
 
   _rpc_service_combined_filter_result__isset __isset;
 
-  void __set_success(const rpc_iterator_handle& val);
+  void __set_success(const rpc_iterator_handle &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_combined_filter_result & rhs) const
-  {
+  bool operator==(const rpc_service_combined_filter_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_combined_filter_result &rhs) const {
+  bool operator!=(const rpc_service_combined_filter_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_combined_filter_result & ) const;
+  bool operator<(const rpc_service_combined_filter_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2695,15 +2668,14 @@ typedef struct _rpc_service_combined_filter_presult__isset {
 class rpc_service_combined_filter_presult {
  public:
 
-
   virtual ~rpc_service_combined_filter_presult() throw();
-  rpc_iterator_handle* success;
+  rpc_iterator_handle *success;
   rpc_invalid_operation ex;
 
   _rpc_service_combined_filter_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2717,8 +2689,8 @@ typedef struct _rpc_service_alerts_by_time_args__isset {
 class rpc_service_alerts_by_time_args {
  public:
 
-  rpc_service_alerts_by_time_args(const rpc_service_alerts_by_time_args&);
-  rpc_service_alerts_by_time_args& operator=(const rpc_service_alerts_by_time_args&);
+  rpc_service_alerts_by_time_args(const rpc_service_alerts_by_time_args &);
+  rpc_service_alerts_by_time_args &operator=(const rpc_service_alerts_by_time_args &);
   rpc_service_alerts_by_time_args() : multilog_id(0), begin_ms(0), end_ms(0) {
   }
 
@@ -2735,8 +2707,7 @@ class rpc_service_alerts_by_time_args {
 
   void __set_end_ms(const int64_t val);
 
-  bool operator == (const rpc_service_alerts_by_time_args & rhs) const
-  {
+  bool operator==(const rpc_service_alerts_by_time_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(begin_ms == rhs.begin_ms))
@@ -2745,31 +2716,29 @@ class rpc_service_alerts_by_time_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_alerts_by_time_args &rhs) const {
+  bool operator!=(const rpc_service_alerts_by_time_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_alerts_by_time_args & ) const;
+  bool operator<(const rpc_service_alerts_by_time_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_alerts_by_time_pargs {
  public:
 
-
   virtual ~rpc_service_alerts_by_time_pargs() throw();
-  const int64_t* multilog_id;
-  const int64_t* begin_ms;
-  const int64_t* end_ms;
+  const int64_t *multilog_id;
+  const int64_t *begin_ms;
+  const int64_t *end_ms;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2782,8 +2751,8 @@ typedef struct _rpc_service_alerts_by_time_result__isset {
 class rpc_service_alerts_by_time_result {
  public:
 
-  rpc_service_alerts_by_time_result(const rpc_service_alerts_by_time_result&);
-  rpc_service_alerts_by_time_result& operator=(const rpc_service_alerts_by_time_result&);
+  rpc_service_alerts_by_time_result(const rpc_service_alerts_by_time_result &);
+  rpc_service_alerts_by_time_result &operator=(const rpc_service_alerts_by_time_result &);
   rpc_service_alerts_by_time_result() {
   }
 
@@ -2793,28 +2762,27 @@ class rpc_service_alerts_by_time_result {
 
   _rpc_service_alerts_by_time_result__isset __isset;
 
-  void __set_success(const rpc_iterator_handle& val);
+  void __set_success(const rpc_iterator_handle &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_alerts_by_time_result & rhs) const
-  {
+  bool operator==(const rpc_service_alerts_by_time_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_alerts_by_time_result &rhs) const {
+  bool operator!=(const rpc_service_alerts_by_time_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_alerts_by_time_result & ) const;
+  bool operator<(const rpc_service_alerts_by_time_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2827,20 +2795,20 @@ typedef struct _rpc_service_alerts_by_time_presult__isset {
 class rpc_service_alerts_by_time_presult {
  public:
 
-
   virtual ~rpc_service_alerts_by_time_presult() throw();
-  rpc_iterator_handle* success;
+  rpc_iterator_handle *success;
   rpc_invalid_operation ex;
 
   _rpc_service_alerts_by_time_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
 typedef struct _rpc_service_alerts_by_trigger_and_time_args__isset {
-  _rpc_service_alerts_by_trigger_and_time_args__isset() : multilog_id(false), trigger_name(false), begin_ms(false), end_ms(false) {}
+  _rpc_service_alerts_by_trigger_and_time_args__isset()
+      : multilog_id(false), trigger_name(false), begin_ms(false), end_ms(false) {}
   bool multilog_id :1;
   bool trigger_name :1;
   bool begin_ms :1;
@@ -2850,8 +2818,8 @@ typedef struct _rpc_service_alerts_by_trigger_and_time_args__isset {
 class rpc_service_alerts_by_trigger_and_time_args {
  public:
 
-  rpc_service_alerts_by_trigger_and_time_args(const rpc_service_alerts_by_trigger_and_time_args&);
-  rpc_service_alerts_by_trigger_and_time_args& operator=(const rpc_service_alerts_by_trigger_and_time_args&);
+  rpc_service_alerts_by_trigger_and_time_args(const rpc_service_alerts_by_trigger_and_time_args &);
+  rpc_service_alerts_by_trigger_and_time_args &operator=(const rpc_service_alerts_by_trigger_and_time_args &);
   rpc_service_alerts_by_trigger_and_time_args() : multilog_id(0), trigger_name(), begin_ms(0), end_ms(0) {
   }
 
@@ -2865,14 +2833,13 @@ class rpc_service_alerts_by_trigger_and_time_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_trigger_name(const std::string& val);
+  void __set_trigger_name(const std::string &val);
 
   void __set_begin_ms(const int64_t val);
 
   void __set_end_ms(const int64_t val);
 
-  bool operator == (const rpc_service_alerts_by_trigger_and_time_args & rhs) const
-  {
+  bool operator==(const rpc_service_alerts_by_trigger_and_time_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(trigger_name == rhs.trigger_name))
@@ -2883,32 +2850,30 @@ class rpc_service_alerts_by_trigger_and_time_args {
       return false;
     return true;
   }
-  bool operator != (const rpc_service_alerts_by_trigger_and_time_args &rhs) const {
+  bool operator!=(const rpc_service_alerts_by_trigger_and_time_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_alerts_by_trigger_and_time_args & ) const;
+  bool operator<(const rpc_service_alerts_by_trigger_and_time_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_alerts_by_trigger_and_time_pargs {
  public:
 
-
   virtual ~rpc_service_alerts_by_trigger_and_time_pargs() throw();
-  const int64_t* multilog_id;
-  const std::string* trigger_name;
-  const int64_t* begin_ms;
-  const int64_t* end_ms;
+  const int64_t *multilog_id;
+  const std::string *trigger_name;
+  const int64_t *begin_ms;
+  const int64_t *end_ms;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2921,8 +2886,8 @@ typedef struct _rpc_service_alerts_by_trigger_and_time_result__isset {
 class rpc_service_alerts_by_trigger_and_time_result {
  public:
 
-  rpc_service_alerts_by_trigger_and_time_result(const rpc_service_alerts_by_trigger_and_time_result&);
-  rpc_service_alerts_by_trigger_and_time_result& operator=(const rpc_service_alerts_by_trigger_and_time_result&);
+  rpc_service_alerts_by_trigger_and_time_result(const rpc_service_alerts_by_trigger_and_time_result &);
+  rpc_service_alerts_by_trigger_and_time_result &operator=(const rpc_service_alerts_by_trigger_and_time_result &);
   rpc_service_alerts_by_trigger_and_time_result() {
   }
 
@@ -2932,28 +2897,27 @@ class rpc_service_alerts_by_trigger_and_time_result {
 
   _rpc_service_alerts_by_trigger_and_time_result__isset __isset;
 
-  void __set_success(const rpc_iterator_handle& val);
+  void __set_success(const rpc_iterator_handle &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_alerts_by_trigger_and_time_result & rhs) const
-  {
+  bool operator==(const rpc_service_alerts_by_trigger_and_time_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_alerts_by_trigger_and_time_result &rhs) const {
+  bool operator!=(const rpc_service_alerts_by_trigger_and_time_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_alerts_by_trigger_and_time_result & ) const;
+  bool operator<(const rpc_service_alerts_by_trigger_and_time_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -2966,15 +2930,14 @@ typedef struct _rpc_service_alerts_by_trigger_and_time_presult__isset {
 class rpc_service_alerts_by_trigger_and_time_presult {
  public:
 
-
   virtual ~rpc_service_alerts_by_trigger_and_time_presult() throw();
-  rpc_iterator_handle* success;
+  rpc_iterator_handle *success;
   rpc_invalid_operation ex;
 
   _rpc_service_alerts_by_trigger_and_time_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -2987,8 +2950,8 @@ typedef struct _rpc_service_get_more_args__isset {
 class rpc_service_get_more_args {
  public:
 
-  rpc_service_get_more_args(const rpc_service_get_more_args&);
-  rpc_service_get_more_args& operator=(const rpc_service_get_more_args&);
+  rpc_service_get_more_args(const rpc_service_get_more_args &);
+  rpc_service_get_more_args &operator=(const rpc_service_get_more_args &);
   rpc_service_get_more_args() : multilog_id(0) {
   }
 
@@ -3000,40 +2963,37 @@ class rpc_service_get_more_args {
 
   void __set_multilog_id(const int64_t val);
 
-  void __set_desc(const rpc_iterator_descriptor& val);
+  void __set_desc(const rpc_iterator_descriptor &val);
 
-  bool operator == (const rpc_service_get_more_args & rhs) const
-  {
+  bool operator==(const rpc_service_get_more_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     if (!(desc == rhs.desc))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_get_more_args &rhs) const {
+  bool operator!=(const rpc_service_get_more_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_get_more_args & ) const;
+  bool operator<(const rpc_service_get_more_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_get_more_pargs {
  public:
 
-
   virtual ~rpc_service_get_more_pargs() throw();
-  const int64_t* multilog_id;
-  const rpc_iterator_descriptor* desc;
+  const int64_t *multilog_id;
+  const rpc_iterator_descriptor *desc;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -3046,8 +3006,8 @@ typedef struct _rpc_service_get_more_result__isset {
 class rpc_service_get_more_result {
  public:
 
-  rpc_service_get_more_result(const rpc_service_get_more_result&);
-  rpc_service_get_more_result& operator=(const rpc_service_get_more_result&);
+  rpc_service_get_more_result(const rpc_service_get_more_result &);
+  rpc_service_get_more_result &operator=(const rpc_service_get_more_result &);
   rpc_service_get_more_result() {
   }
 
@@ -3057,28 +3017,27 @@ class rpc_service_get_more_result {
 
   _rpc_service_get_more_result__isset __isset;
 
-  void __set_success(const rpc_iterator_handle& val);
+  void __set_success(const rpc_iterator_handle &val);
 
-  void __set_ex(const rpc_invalid_operation& val);
+  void __set_ex(const rpc_invalid_operation &val);
 
-  bool operator == (const rpc_service_get_more_result & rhs) const
-  {
+  bool operator==(const rpc_service_get_more_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     if (!(ex == rhs.ex))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_get_more_result &rhs) const {
+  bool operator!=(const rpc_service_get_more_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_get_more_result & ) const;
+  bool operator<(const rpc_service_get_more_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -3091,15 +3050,14 @@ typedef struct _rpc_service_get_more_presult__isset {
 class rpc_service_get_more_presult {
  public:
 
-
   virtual ~rpc_service_get_more_presult() throw();
-  rpc_iterator_handle* success;
+  rpc_iterator_handle *success;
   rpc_invalid_operation ex;
 
   _rpc_service_get_more_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
@@ -3111,8 +3069,8 @@ typedef struct _rpc_service_num_records_args__isset {
 class rpc_service_num_records_args {
  public:
 
-  rpc_service_num_records_args(const rpc_service_num_records_args&);
-  rpc_service_num_records_args& operator=(const rpc_service_num_records_args&);
+  rpc_service_num_records_args(const rpc_service_num_records_args &);
+  rpc_service_num_records_args &operator=(const rpc_service_num_records_args &);
   rpc_service_num_records_args() : multilog_id(0) {
   }
 
@@ -3123,35 +3081,32 @@ class rpc_service_num_records_args {
 
   void __set_multilog_id(const int64_t val);
 
-  bool operator == (const rpc_service_num_records_args & rhs) const
-  {
+  bool operator==(const rpc_service_num_records_args &rhs) const {
     if (!(multilog_id == rhs.multilog_id))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_num_records_args &rhs) const {
+  bool operator!=(const rpc_service_num_records_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_num_records_args & ) const;
+  bool operator<(const rpc_service_num_records_args &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
-
 
 class rpc_service_num_records_pargs {
  public:
 
-
   virtual ~rpc_service_num_records_pargs() throw();
-  const int64_t* multilog_id;
+  const int64_t *multilog_id;
 
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -3163,8 +3118,8 @@ typedef struct _rpc_service_num_records_result__isset {
 class rpc_service_num_records_result {
  public:
 
-  rpc_service_num_records_result(const rpc_service_num_records_result&);
-  rpc_service_num_records_result& operator=(const rpc_service_num_records_result&);
+  rpc_service_num_records_result(const rpc_service_num_records_result &);
+  rpc_service_num_records_result &operator=(const rpc_service_num_records_result &);
   rpc_service_num_records_result() : success(0) {
   }
 
@@ -3175,22 +3130,21 @@ class rpc_service_num_records_result {
 
   void __set_success(const int64_t val);
 
-  bool operator == (const rpc_service_num_records_result & rhs) const
-  {
+  bool operator==(const rpc_service_num_records_result &rhs) const {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const rpc_service_num_records_result &rhs) const {
+  bool operator!=(const rpc_service_num_records_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const rpc_service_num_records_result & ) const;
+  bool operator<(const rpc_service_num_records_result &) const;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t write(Protocol_* oprot) const;
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
+  template<class Protocol_>
+  uint32_t write(Protocol_ *oprot) const;
 
 };
 
@@ -3202,41 +3156,42 @@ typedef struct _rpc_service_num_records_presult__isset {
 class rpc_service_num_records_presult {
  public:
 
-
   virtual ~rpc_service_num_records_presult() throw();
-  int64_t* success;
+  int64_t *success;
 
   _rpc_service_num_records_presult__isset __isset;
 
-  template <class Protocol_>
-  uint32_t read(Protocol_* iprot);
+  template<class Protocol_>
+  uint32_t read(Protocol_ *iprot);
 
 };
 
-template <class Protocol_>
+template<class Protocol_>
 class rpc_serviceClientT : virtual public rpc_serviceIf {
  public:
-  rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
+  rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
     setProtocolT(prot);
   }
-  rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    setProtocolT(iprot,oprot);
+  rpc_serviceClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                     apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    setProtocolT(iprot, oprot);
   }
  private:
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
-  setProtocolT(prot,prot);
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
+    setProtocolT(prot, prot);
   }
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    piprot_=iprot;
-    poprot_=oprot;
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                    apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    piprot_ = iprot;
+    poprot_ = oprot;
     iprot_ = iprot.get();
     oprot_ = oprot.get();
   }
  public:
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getInputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getInputProtocol() {
     return this->piprot_;
   }
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
   void register_handler();
@@ -3245,255 +3200,383 @@ class rpc_serviceClientT : virtual public rpc_serviceIf {
   void deregister_handler();
   void send_deregister_handler();
   void recv_deregister_handler();
-  int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
-  void send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int64_t create_atomic_multilog(const std::string &name, const rpc_schema &schema, const rpc_storage_mode mode);
+  void send_create_atomic_multilog(const std::string &name, const rpc_schema &schema, const rpc_storage_mode mode);
   int64_t recv_create_atomic_multilog();
-  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name);
-  void send_get_atomic_multilog_info(const std::string& name);
-  void recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return);
+  void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name);
+  void send_get_atomic_multilog_info(const std::string &name);
+  void recv_get_atomic_multilog_info(rpc_atomic_multilog_info &_return);
   void remove_atomic_multilog(const int64_t multilog_id);
   void send_remove_atomic_multilog(const int64_t multilog_id);
   void recv_remove_atomic_multilog();
-  void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
-  void send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
+  void add_index(const int64_t multilog_id, const std::string &field_name, const double bucket_size);
+  void send_add_index(const int64_t multilog_id, const std::string &field_name, const double bucket_size);
   void recv_add_index();
-  void remove_index(const int64_t multilog_id, const std::string& field_name);
-  void send_remove_index(const int64_t multilog_id, const std::string& field_name);
+  void remove_index(const int64_t multilog_id, const std::string &field_name);
+  void send_remove_index(const int64_t multilog_id, const std::string &field_name);
   void recv_remove_index();
-  void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
-  void send_add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
+  void add_filter(const int64_t multilog_id, const std::string &filter_name, const std::string &filter_expr);
+  void send_add_filter(const int64_t multilog_id, const std::string &filter_name, const std::string &filter_expr);
   void recv_add_filter();
-  void remove_filter(const int64_t multilog_id, const std::string& filter_name);
-  void send_remove_filter(const int64_t multilog_id, const std::string& filter_name);
+  void remove_filter(const int64_t multilog_id, const std::string &filter_name);
+  void send_remove_filter(const int64_t multilog_id, const std::string &filter_name);
   void recv_remove_filter();
-  void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
-  void send_add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
+  void add_aggregate(const int64_t mutlilog_id,
+                     const std::string &aggregate_name,
+                     const std::string &filter_name,
+                     const std::string &aggregate_expr);
+  void send_add_aggregate(const int64_t mutlilog_id,
+                          const std::string &aggregate_name,
+                          const std::string &filter_name,
+                          const std::string &aggregate_expr);
   void recv_add_aggregate();
-  void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
-  void send_remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
+  void remove_aggregate(const int64_t multilog_id, const std::string &aggregate_name);
+  void send_remove_aggregate(const int64_t multilog_id, const std::string &aggregate_name);
   void recv_remove_aggregate();
-  void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
-  void send_add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
+  void add_trigger(const int64_t multilog_id, const std::string &trigger_name, const std::string &trigger_expr);
+  void send_add_trigger(const int64_t multilog_id, const std::string &trigger_name, const std::string &trigger_expr);
   void recv_add_trigger();
-  void remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
-  void send_remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
+  void remove_trigger(const int64_t multilog_id, const std::string &trigger_name);
+  void send_remove_trigger(const int64_t multilog_id, const std::string &trigger_name);
   void recv_remove_trigger();
-  int64_t append(const int64_t multilog_id, const std::string& data);
-  void send_append(const int64_t multilog_id, const std::string& data);
+  int64_t append(const int64_t multilog_id, const std::string &data);
+  void send_append(const int64_t multilog_id, const std::string &data);
   int64_t recv_append();
-  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
-  void send_append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
+  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch &batch);
+  void send_append_batch(const int64_t multilog_id, const rpc_record_batch &batch);
   int64_t recv_append_batch();
-  void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
+  void read(std::string &_return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   void send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
-  void recv_read(std::string& _return);
-  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
-  void send_query_aggregate(const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
-  void recv_query_aggregate(std::string& _return);
-  void adhoc_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_expr, const std::string& filter_expr);
-  void send_adhoc_aggregate(const int64_t multilog_id, const std::string& aggregate_expr, const std::string& filter_expr);
-  void recv_adhoc_aggregate(std::string& _return);
-  void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr);
-  void send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr);
-  void recv_adhoc_filter(rpc_iterator_handle& _return);
-  void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  void send_predef_filter(const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  void recv_predef_filter(rpc_iterator_handle& _return);
-  void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  void send_combined_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  void recv_combined_filter(rpc_iterator_handle& _return);
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
+  void recv_read(std::string &_return);
+  void query_aggregate(std::string &_return,
+                       const int64_t multilog_id,
+                       const std::string &aggregate_name,
+                       const int64_t begin_ms,
+                       const int64_t end_ms);
+  void send_query_aggregate(const int64_t multilog_id,
+                            const std::string &aggregate_name,
+                            const int64_t begin_ms,
+                            const int64_t end_ms);
+  void recv_query_aggregate(std::string &_return);
+  void adhoc_aggregate(std::string &_return,
+                       const int64_t multilog_id,
+                       const std::string &aggregate_expr,
+                       const std::string &filter_expr);
+  void send_adhoc_aggregate(const int64_t multilog_id,
+                            const std::string &aggregate_expr,
+                            const std::string &filter_expr);
+  void recv_adhoc_aggregate(std::string &_return);
+  void adhoc_filter(rpc_iterator_handle &_return, const int64_t multilog_id, const std::string &filter_expr);
+  void send_adhoc_filter(const int64_t multilog_id, const std::string &filter_expr);
+  void recv_adhoc_filter(rpc_iterator_handle &_return);
+  void predef_filter(rpc_iterator_handle &_return,
+                     const int64_t multilog_id,
+                     const std::string &filter_name,
+                     const int64_t begin_ms,
+                     const int64_t end_ms);
+  void send_predef_filter(const int64_t multilog_id,
+                          const std::string &filter_name,
+                          const int64_t begin_ms,
+                          const int64_t end_ms);
+  void recv_predef_filter(rpc_iterator_handle &_return);
+  void combined_filter(rpc_iterator_handle &_return,
+                       const int64_t multilog_id,
+                       const std::string &filter_name,
+                       const std::string &filter_expr,
+                       const int64_t begin_ms,
+                       const int64_t end_ms);
+  void send_combined_filter(const int64_t multilog_id,
+                            const std::string &filter_name,
+                            const std::string &filter_expr,
+                            const int64_t begin_ms,
+                            const int64_t end_ms);
+  void recv_combined_filter(rpc_iterator_handle &_return);
+  void alerts_by_time(rpc_iterator_handle &_return,
+                      const int64_t multilog_id,
+                      const int64_t begin_ms,
+                      const int64_t end_ms);
   void send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
-  void recv_alerts_by_time(rpc_iterator_handle& _return);
-  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
-  void send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
-  void recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return);
-  void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc);
-  void send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc);
-  void recv_get_more(rpc_iterator_handle& _return);
+  void recv_alerts_by_time(rpc_iterator_handle &_return);
+  void alerts_by_trigger_and_time(rpc_iterator_handle &_return,
+                                  const int64_t multilog_id,
+                                  const std::string &trigger_name,
+                                  const int64_t begin_ms,
+                                  const int64_t end_ms);
+  void send_alerts_by_trigger_and_time(const int64_t multilog_id,
+                                       const std::string &trigger_name,
+                                       const int64_t begin_ms,
+                                       const int64_t end_ms);
+  void recv_alerts_by_trigger_and_time(rpc_iterator_handle &_return);
+  void get_more(rpc_iterator_handle &_return, const int64_t multilog_id, const rpc_iterator_descriptor &desc);
+  void send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor &desc);
+  void recv_get_more(rpc_iterator_handle &_return);
   int64_t num_records(const int64_t multilog_id);
   void send_num_records(const int64_t multilog_id);
   int64_t recv_num_records();
  protected:
-  apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
-  apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
-  Protocol_* iprot_;
-  Protocol_* oprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> piprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> poprot_;
+  Protocol_ *iprot_;
+  Protocol_ *oprot_;
 };
 
-typedef rpc_serviceClientT< ::apache::thrift::protocol::TProtocol> rpc_serviceClient;
+typedef rpc_serviceClientT<::apache::thrift::protocol::TProtocol> rpc_serviceClient;
 
-template <class Protocol_>
+template<class Protocol_>
 class rpc_serviceProcessorT : public ::apache::thrift::TDispatchProcessorT<Protocol_> {
  protected:
   ::apache::thrift::stdcxx::shared_ptr<rpc_serviceIf> iface_;
-  virtual bool dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext);
-  virtual bool dispatchCallTemplated(Protocol_* iprot, Protocol_* oprot, const std::string& fname, int32_t seqid, void* callContext);
+  virtual bool dispatchCall(::apache::thrift::protocol::TProtocol *iprot,
+                            ::apache::thrift::protocol::TProtocol *oprot,
+                            const std::string &fname,
+                            int32_t seqid,
+                            void *callContext);
+  virtual bool dispatchCallTemplated(Protocol_ *iprot,
+                                     Protocol_ *oprot,
+                                     const std::string &fname,
+                                     int32_t seqid,
+                                     void *callContext);
  private:
-  typedef  void (rpc_serviceProcessorT::*ProcessFunction)(int32_t, ::apache::thrift::protocol::TProtocol*, ::apache::thrift::protocol::TProtocol*, void*);
-  typedef void (rpc_serviceProcessorT::*SpecializedProcessFunction)(int32_t, Protocol_*, Protocol_*, void*);
+  typedef void(rpc_serviceProcessorT::*ProcessFunction)
+      (int32_t, ::apache::thrift::protocol::TProtocol *, ::apache::thrift::protocol::TProtocol *, void *);
+  typedef void (rpc_serviceProcessorT::*SpecializedProcessFunction)(int32_t, Protocol_ *, Protocol_ *, void *);
   struct ProcessFunctions {
     ProcessFunction generic;
     SpecializedProcessFunction specialized;
     ProcessFunctions(ProcessFunction g, SpecializedProcessFunction s) :
-      generic(g),
-      specialized(s) {}
+        generic(g),
+        specialized(s) {}
     ProcessFunctions() : generic(NULL), specialized(NULL) {}
   };
   typedef std::map<std::string, ProcessFunctions> ProcessMap;
   ProcessMap processMap_;
-  void process_register_handler(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_register_handler(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_deregister_handler(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_deregister_handler(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_create_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_create_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_get_atomic_multilog_info(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_atomic_multilog_info(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_atomic_multilog(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_atomic_multilog(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_add_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_add_index(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_index(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_index(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_add_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_add_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_add_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_add_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_add_trigger(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_add_trigger(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_remove_trigger(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_remove_trigger(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_append(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_append(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_append_batch(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_append_batch(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_read(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_read(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_query_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_query_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_adhoc_aggregate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_adhoc_aggregate(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_adhoc_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_adhoc_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_predef_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_predef_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_combined_filter(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_combined_filter(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_alerts_by_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_alerts_by_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_alerts_by_trigger_and_time(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_alerts_by_trigger_and_time(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_get_more(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_more(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
-  void process_num_records(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_num_records(int32_t seqid, Protocol_* iprot, Protocol_* oprot, void* callContext);
+  void process_register_handler(int32_t seqid,
+                                ::apache::thrift::protocol::TProtocol *iprot,
+                                ::apache::thrift::protocol::TProtocol *oprot,
+                                void *callContext);
+  void process_register_handler(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_deregister_handler(int32_t seqid,
+                                  ::apache::thrift::protocol::TProtocol *iprot,
+                                  ::apache::thrift::protocol::TProtocol *oprot,
+                                  void *callContext);
+  void process_deregister_handler(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_create_atomic_multilog(int32_t seqid,
+                                      ::apache::thrift::protocol::TProtocol *iprot,
+                                      ::apache::thrift::protocol::TProtocol *oprot,
+                                      void *callContext);
+  void process_create_atomic_multilog(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_get_atomic_multilog_info(int32_t seqid,
+                                        ::apache::thrift::protocol::TProtocol *iprot,
+                                        ::apache::thrift::protocol::TProtocol *oprot,
+                                        void *callContext);
+  void process_get_atomic_multilog_info(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove_atomic_multilog(int32_t seqid,
+                                      ::apache::thrift::protocol::TProtocol *iprot,
+                                      ::apache::thrift::protocol::TProtocol *oprot,
+                                      void *callContext);
+  void process_remove_atomic_multilog(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_add_index(int32_t seqid,
+                         ::apache::thrift::protocol::TProtocol *iprot,
+                         ::apache::thrift::protocol::TProtocol *oprot,
+                         void *callContext);
+  void process_add_index(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove_index(int32_t seqid,
+                            ::apache::thrift::protocol::TProtocol *iprot,
+                            ::apache::thrift::protocol::TProtocol *oprot,
+                            void *callContext);
+  void process_remove_index(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_add_filter(int32_t seqid,
+                          ::apache::thrift::protocol::TProtocol *iprot,
+                          ::apache::thrift::protocol::TProtocol *oprot,
+                          void *callContext);
+  void process_add_filter(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove_filter(int32_t seqid,
+                             ::apache::thrift::protocol::TProtocol *iprot,
+                             ::apache::thrift::protocol::TProtocol *oprot,
+                             void *callContext);
+  void process_remove_filter(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_add_aggregate(int32_t seqid,
+                             ::apache::thrift::protocol::TProtocol *iprot,
+                             ::apache::thrift::protocol::TProtocol *oprot,
+                             void *callContext);
+  void process_add_aggregate(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove_aggregate(int32_t seqid,
+                                ::apache::thrift::protocol::TProtocol *iprot,
+                                ::apache::thrift::protocol::TProtocol *oprot,
+                                void *callContext);
+  void process_remove_aggregate(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_add_trigger(int32_t seqid,
+                           ::apache::thrift::protocol::TProtocol *iprot,
+                           ::apache::thrift::protocol::TProtocol *oprot,
+                           void *callContext);
+  void process_add_trigger(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_remove_trigger(int32_t seqid,
+                              ::apache::thrift::protocol::TProtocol *iprot,
+                              ::apache::thrift::protocol::TProtocol *oprot,
+                              void *callContext);
+  void process_remove_trigger(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_append(int32_t seqid,
+                      ::apache::thrift::protocol::TProtocol *iprot,
+                      ::apache::thrift::protocol::TProtocol *oprot,
+                      void *callContext);
+  void process_append(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_append_batch(int32_t seqid,
+                            ::apache::thrift::protocol::TProtocol *iprot,
+                            ::apache::thrift::protocol::TProtocol *oprot,
+                            void *callContext);
+  void process_append_batch(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_read(int32_t seqid,
+                    ::apache::thrift::protocol::TProtocol *iprot,
+                    ::apache::thrift::protocol::TProtocol *oprot,
+                    void *callContext);
+  void process_read(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_query_aggregate(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_query_aggregate(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_adhoc_aggregate(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_adhoc_aggregate(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_adhoc_filter(int32_t seqid,
+                            ::apache::thrift::protocol::TProtocol *iprot,
+                            ::apache::thrift::protocol::TProtocol *oprot,
+                            void *callContext);
+  void process_adhoc_filter(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_predef_filter(int32_t seqid,
+                             ::apache::thrift::protocol::TProtocol *iprot,
+                             ::apache::thrift::protocol::TProtocol *oprot,
+                             void *callContext);
+  void process_predef_filter(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_combined_filter(int32_t seqid,
+                               ::apache::thrift::protocol::TProtocol *iprot,
+                               ::apache::thrift::protocol::TProtocol *oprot,
+                               void *callContext);
+  void process_combined_filter(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_alerts_by_time(int32_t seqid,
+                              ::apache::thrift::protocol::TProtocol *iprot,
+                              ::apache::thrift::protocol::TProtocol *oprot,
+                              void *callContext);
+  void process_alerts_by_time(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_alerts_by_trigger_and_time(int32_t seqid,
+                                          ::apache::thrift::protocol::TProtocol *iprot,
+                                          ::apache::thrift::protocol::TProtocol *oprot,
+                                          void *callContext);
+  void process_alerts_by_trigger_and_time(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_get_more(int32_t seqid,
+                        ::apache::thrift::protocol::TProtocol *iprot,
+                        ::apache::thrift::protocol::TProtocol *oprot,
+                        void *callContext);
+  void process_get_more(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
+  void process_num_records(int32_t seqid,
+                           ::apache::thrift::protocol::TProtocol *iprot,
+                           ::apache::thrift::protocol::TProtocol *oprot,
+                           void *callContext);
+  void process_num_records(int32_t seqid, Protocol_ *iprot, Protocol_ *oprot, void *callContext);
  public:
   rpc_serviceProcessorT(::apache::thrift::stdcxx::shared_ptr<rpc_serviceIf> iface) :
-    iface_(iface) {
+      iface_(iface) {
     processMap_["register_handler"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_register_handler,
-      &rpc_serviceProcessorT::process_register_handler);
+        &rpc_serviceProcessorT::process_register_handler,
+        &rpc_serviceProcessorT::process_register_handler);
     processMap_["deregister_handler"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_deregister_handler,
-      &rpc_serviceProcessorT::process_deregister_handler);
+        &rpc_serviceProcessorT::process_deregister_handler,
+        &rpc_serviceProcessorT::process_deregister_handler);
     processMap_["create_atomic_multilog"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_create_atomic_multilog,
-      &rpc_serviceProcessorT::process_create_atomic_multilog);
+        &rpc_serviceProcessorT::process_create_atomic_multilog,
+        &rpc_serviceProcessorT::process_create_atomic_multilog);
     processMap_["get_atomic_multilog_info"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_get_atomic_multilog_info,
-      &rpc_serviceProcessorT::process_get_atomic_multilog_info);
+        &rpc_serviceProcessorT::process_get_atomic_multilog_info,
+        &rpc_serviceProcessorT::process_get_atomic_multilog_info);
     processMap_["remove_atomic_multilog"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_remove_atomic_multilog,
-      &rpc_serviceProcessorT::process_remove_atomic_multilog);
+        &rpc_serviceProcessorT::process_remove_atomic_multilog,
+        &rpc_serviceProcessorT::process_remove_atomic_multilog);
     processMap_["add_index"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_add_index,
-      &rpc_serviceProcessorT::process_add_index);
+        &rpc_serviceProcessorT::process_add_index,
+        &rpc_serviceProcessorT::process_add_index);
     processMap_["remove_index"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_remove_index,
-      &rpc_serviceProcessorT::process_remove_index);
+        &rpc_serviceProcessorT::process_remove_index,
+        &rpc_serviceProcessorT::process_remove_index);
     processMap_["add_filter"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_add_filter,
-      &rpc_serviceProcessorT::process_add_filter);
+        &rpc_serviceProcessorT::process_add_filter,
+        &rpc_serviceProcessorT::process_add_filter);
     processMap_["remove_filter"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_remove_filter,
-      &rpc_serviceProcessorT::process_remove_filter);
+        &rpc_serviceProcessorT::process_remove_filter,
+        &rpc_serviceProcessorT::process_remove_filter);
     processMap_["add_aggregate"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_add_aggregate,
-      &rpc_serviceProcessorT::process_add_aggregate);
+        &rpc_serviceProcessorT::process_add_aggregate,
+        &rpc_serviceProcessorT::process_add_aggregate);
     processMap_["remove_aggregate"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_remove_aggregate,
-      &rpc_serviceProcessorT::process_remove_aggregate);
+        &rpc_serviceProcessorT::process_remove_aggregate,
+        &rpc_serviceProcessorT::process_remove_aggregate);
     processMap_["add_trigger"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_add_trigger,
-      &rpc_serviceProcessorT::process_add_trigger);
+        &rpc_serviceProcessorT::process_add_trigger,
+        &rpc_serviceProcessorT::process_add_trigger);
     processMap_["remove_trigger"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_remove_trigger,
-      &rpc_serviceProcessorT::process_remove_trigger);
+        &rpc_serviceProcessorT::process_remove_trigger,
+        &rpc_serviceProcessorT::process_remove_trigger);
     processMap_["append"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_append,
-      &rpc_serviceProcessorT::process_append);
+        &rpc_serviceProcessorT::process_append,
+        &rpc_serviceProcessorT::process_append);
     processMap_["append_batch"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_append_batch,
-      &rpc_serviceProcessorT::process_append_batch);
+        &rpc_serviceProcessorT::process_append_batch,
+        &rpc_serviceProcessorT::process_append_batch);
     processMap_["read"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_read,
-      &rpc_serviceProcessorT::process_read);
+        &rpc_serviceProcessorT::process_read,
+        &rpc_serviceProcessorT::process_read);
     processMap_["query_aggregate"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_query_aggregate,
-      &rpc_serviceProcessorT::process_query_aggregate);
+        &rpc_serviceProcessorT::process_query_aggregate,
+        &rpc_serviceProcessorT::process_query_aggregate);
     processMap_["adhoc_aggregate"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_adhoc_aggregate,
-      &rpc_serviceProcessorT::process_adhoc_aggregate);
+        &rpc_serviceProcessorT::process_adhoc_aggregate,
+        &rpc_serviceProcessorT::process_adhoc_aggregate);
     processMap_["adhoc_filter"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_adhoc_filter,
-      &rpc_serviceProcessorT::process_adhoc_filter);
+        &rpc_serviceProcessorT::process_adhoc_filter,
+        &rpc_serviceProcessorT::process_adhoc_filter);
     processMap_["predef_filter"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_predef_filter,
-      &rpc_serviceProcessorT::process_predef_filter);
+        &rpc_serviceProcessorT::process_predef_filter,
+        &rpc_serviceProcessorT::process_predef_filter);
     processMap_["combined_filter"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_combined_filter,
-      &rpc_serviceProcessorT::process_combined_filter);
+        &rpc_serviceProcessorT::process_combined_filter,
+        &rpc_serviceProcessorT::process_combined_filter);
     processMap_["alerts_by_time"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_alerts_by_time,
-      &rpc_serviceProcessorT::process_alerts_by_time);
+        &rpc_serviceProcessorT::process_alerts_by_time,
+        &rpc_serviceProcessorT::process_alerts_by_time);
     processMap_["alerts_by_trigger_and_time"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_alerts_by_trigger_and_time,
-      &rpc_serviceProcessorT::process_alerts_by_trigger_and_time);
+        &rpc_serviceProcessorT::process_alerts_by_trigger_and_time,
+        &rpc_serviceProcessorT::process_alerts_by_trigger_and_time);
     processMap_["get_more"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_get_more,
-      &rpc_serviceProcessorT::process_get_more);
+        &rpc_serviceProcessorT::process_get_more,
+        &rpc_serviceProcessorT::process_get_more);
     processMap_["num_records"] = ProcessFunctions(
-      &rpc_serviceProcessorT::process_num_records,
-      &rpc_serviceProcessorT::process_num_records);
+        &rpc_serviceProcessorT::process_num_records,
+        &rpc_serviceProcessorT::process_num_records);
   }
 
   virtual ~rpc_serviceProcessorT() {}
 };
 
-typedef rpc_serviceProcessorT< ::apache::thrift::protocol::TDummyProtocol > rpc_serviceProcessor;
+typedef rpc_serviceProcessorT<::apache::thrift::protocol::TDummyProtocol> rpc_serviceProcessor;
 
-template <class Protocol_>
+template<class Protocol_>
 class rpc_serviceProcessorFactoryT : public ::apache::thrift::TProcessorFactory {
  public:
-  rpc_serviceProcessorFactoryT(const ::apache::thrift::stdcxx::shared_ptr< rpc_serviceIfFactory >& handlerFactory) :
+  rpc_serviceProcessorFactoryT(const ::apache::thrift::stdcxx::shared_ptr<rpc_serviceIfFactory> &handlerFactory) :
       handlerFactory_(handlerFactory) {}
 
-  ::apache::thrift::stdcxx::shared_ptr< ::apache::thrift::TProcessor > getProcessor(const ::apache::thrift::TConnectionInfo& connInfo);
+  ::apache::thrift::stdcxx::shared_ptr<::apache::thrift::TProcessor> getProcessor(const ::apache::thrift::TConnectionInfo &connInfo);
 
  protected:
-  ::apache::thrift::stdcxx::shared_ptr< rpc_serviceIfFactory > handlerFactory_;
+  ::apache::thrift::stdcxx::shared_ptr<rpc_serviceIfFactory> handlerFactory_;
 };
 
-typedef rpc_serviceProcessorFactoryT< ::apache::thrift::protocol::TDummyProtocol > rpc_serviceProcessorFactory;
+typedef rpc_serviceProcessorFactoryT<::apache::thrift::protocol::TDummyProtocol> rpc_serviceProcessorFactory;
 
 class rpc_serviceMultiface : virtual public rpc_serviceIf {
  public:
-  rpc_serviceMultiface(std::vector<apache::thrift::stdcxx::shared_ptr<rpc_serviceIf> >& ifaces) : ifaces_(ifaces) {
+  rpc_serviceMultiface(std::vector<apache::thrift::stdcxx::shared_ptr<rpc_serviceIf> > &ifaces) : ifaces_(ifaces) {
   }
   virtual ~rpc_serviceMultiface() {}
  protected:
@@ -3521,7 +3604,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->deregister_handler();
   }
 
-  int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode) {
+  int64_t create_atomic_multilog(const std::string &name, const rpc_schema &schema, const rpc_storage_mode mode) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3530,7 +3613,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return ifaces_[i]->create_atomic_multilog(name, schema, mode);
   }
 
-  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) {
+  void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3549,7 +3632,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->remove_atomic_multilog(multilog_id);
   }
 
-  void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size) {
+  void add_index(const int64_t multilog_id, const std::string &field_name, const double bucket_size) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3558,7 +3641,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->add_index(multilog_id, field_name, bucket_size);
   }
 
-  void remove_index(const int64_t multilog_id, const std::string& field_name) {
+  void remove_index(const int64_t multilog_id, const std::string &field_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3567,7 +3650,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->remove_index(multilog_id, field_name);
   }
 
-  void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr) {
+  void add_filter(const int64_t multilog_id, const std::string &filter_name, const std::string &filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3576,7 +3659,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->add_filter(multilog_id, filter_name, filter_expr);
   }
 
-  void remove_filter(const int64_t multilog_id, const std::string& filter_name) {
+  void remove_filter(const int64_t multilog_id, const std::string &filter_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3585,7 +3668,10 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->remove_filter(multilog_id, filter_name);
   }
 
-  void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr) {
+  void add_aggregate(const int64_t mutlilog_id,
+                     const std::string &aggregate_name,
+                     const std::string &filter_name,
+                     const std::string &aggregate_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3594,7 +3680,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->add_aggregate(mutlilog_id, aggregate_name, filter_name, aggregate_expr);
   }
 
-  void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name) {
+  void remove_aggregate(const int64_t multilog_id, const std::string &aggregate_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3603,7 +3689,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->remove_aggregate(multilog_id, aggregate_name);
   }
 
-  void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr) {
+  void add_trigger(const int64_t multilog_id, const std::string &trigger_name, const std::string &trigger_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3612,7 +3698,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->add_trigger(multilog_id, trigger_name, trigger_expr);
   }
 
-  void remove_trigger(const int64_t multilog_id, const std::string& trigger_name) {
+  void remove_trigger(const int64_t multilog_id, const std::string &trigger_name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3621,7 +3707,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     ifaces_[i]->remove_trigger(multilog_id, trigger_name);
   }
 
-  int64_t append(const int64_t multilog_id, const std::string& data) {
+  int64_t append(const int64_t multilog_id, const std::string &data) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3630,7 +3716,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return ifaces_[i]->append(multilog_id, data);
   }
 
-  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch) {
+  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch &batch) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3639,7 +3725,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return ifaces_[i]->append_batch(multilog_id, batch);
   }
 
-  void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) {
+  void read(std::string &_return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3649,7 +3735,11 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms) {
+  void query_aggregate(std::string &_return,
+                       const int64_t multilog_id,
+                       const std::string &aggregate_name,
+                       const int64_t begin_ms,
+                       const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3659,7 +3749,10 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void adhoc_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_expr, const std::string& filter_expr) {
+  void adhoc_aggregate(std::string &_return,
+                       const int64_t multilog_id,
+                       const std::string &aggregate_expr,
+                       const std::string &filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3669,7 +3762,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr) {
+  void adhoc_filter(rpc_iterator_handle &_return, const int64_t multilog_id, const std::string &filter_expr) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3679,7 +3772,11 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms) {
+  void predef_filter(rpc_iterator_handle &_return,
+                     const int64_t multilog_id,
+                     const std::string &filter_name,
+                     const int64_t begin_ms,
+                     const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3689,7 +3786,12 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms) {
+  void combined_filter(rpc_iterator_handle &_return,
+                       const int64_t multilog_id,
+                       const std::string &filter_name,
+                       const std::string &filter_expr,
+                       const int64_t begin_ms,
+                       const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3699,7 +3801,10 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms) {
+  void alerts_by_time(rpc_iterator_handle &_return,
+                      const int64_t multilog_id,
+                      const int64_t begin_ms,
+                      const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3709,7 +3814,11 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms) {
+  void alerts_by_trigger_and_time(rpc_iterator_handle &_return,
+                                  const int64_t multilog_id,
+                                  const std::string &trigger_name,
+                                  const int64_t begin_ms,
+                                  const int64_t end_ms) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3719,7 +3828,7 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return;
   }
 
-  void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc) {
+  void get_more(rpc_iterator_handle &_return, const int64_t multilog_id, const rpc_iterator_descriptor &desc) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
@@ -3743,30 +3852,32 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
 // The 'concurrent' client is a thread safe client that correctly handles
 // out of order responses.  It is slower than the regular client, so should
 // only be used when you need to share a connection among multiple threads
-template <class Protocol_>
+template<class Protocol_>
 class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
  public:
-  rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
+  rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
     setProtocolT(prot);
   }
-  rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    setProtocolT(iprot,oprot);
+  rpc_serviceConcurrentClientT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                               apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    setProtocolT(iprot, oprot);
   }
  private:
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> prot) {
-  setProtocolT(prot,prot);
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> prot) {
+    setProtocolT(prot, prot);
   }
-  void setProtocolT(apache::thrift::stdcxx::shared_ptr< Protocol_> iprot, apache::thrift::stdcxx::shared_ptr< Protocol_> oprot) {
-    piprot_=iprot;
-    poprot_=oprot;
+  void setProtocolT(apache::thrift::stdcxx::shared_ptr<Protocol_> iprot,
+                    apache::thrift::stdcxx::shared_ptr<Protocol_> oprot) {
+    piprot_ = iprot;
+    poprot_ = oprot;
     iprot_ = iprot.get();
     oprot_ = oprot.get();
   }
  public:
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getInputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getInputProtocol() {
     return this->piprot_;
   }
-  apache::thrift::stdcxx::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
+  apache::thrift::stdcxx::shared_ptr<::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return this->poprot_;
   }
   void register_handler();
@@ -3775,90 +3886,135 @@ class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
   void deregister_handler();
   int32_t send_deregister_handler();
   void recv_deregister_handler(const int32_t seqid);
-  int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
-  int32_t send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
+  int64_t create_atomic_multilog(const std::string &name, const rpc_schema &schema, const rpc_storage_mode mode);
+  int32_t send_create_atomic_multilog(const std::string &name, const rpc_schema &schema, const rpc_storage_mode mode);
   int64_t recv_create_atomic_multilog(const int32_t seqid);
-  void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name);
-  int32_t send_get_atomic_multilog_info(const std::string& name);
-  void recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const int32_t seqid);
+  void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name);
+  int32_t send_get_atomic_multilog_info(const std::string &name);
+  void recv_get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const int32_t seqid);
   void remove_atomic_multilog(const int64_t multilog_id);
   int32_t send_remove_atomic_multilog(const int64_t multilog_id);
   void recv_remove_atomic_multilog(const int32_t seqid);
-  void add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
-  int32_t send_add_index(const int64_t multilog_id, const std::string& field_name, const double bucket_size);
+  void add_index(const int64_t multilog_id, const std::string &field_name, const double bucket_size);
+  int32_t send_add_index(const int64_t multilog_id, const std::string &field_name, const double bucket_size);
   void recv_add_index(const int32_t seqid);
-  void remove_index(const int64_t multilog_id, const std::string& field_name);
-  int32_t send_remove_index(const int64_t multilog_id, const std::string& field_name);
+  void remove_index(const int64_t multilog_id, const std::string &field_name);
+  int32_t send_remove_index(const int64_t multilog_id, const std::string &field_name);
   void recv_remove_index(const int32_t seqid);
-  void add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
-  int32_t send_add_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr);
+  void add_filter(const int64_t multilog_id, const std::string &filter_name, const std::string &filter_expr);
+  int32_t send_add_filter(const int64_t multilog_id, const std::string &filter_name, const std::string &filter_expr);
   void recv_add_filter(const int32_t seqid);
-  void remove_filter(const int64_t multilog_id, const std::string& filter_name);
-  int32_t send_remove_filter(const int64_t multilog_id, const std::string& filter_name);
+  void remove_filter(const int64_t multilog_id, const std::string &filter_name);
+  int32_t send_remove_filter(const int64_t multilog_id, const std::string &filter_name);
   void recv_remove_filter(const int32_t seqid);
-  void add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
-  int32_t send_add_aggregate(const int64_t mutlilog_id, const std::string& aggregate_name, const std::string& filter_name, const std::string& aggregate_expr);
+  void add_aggregate(const int64_t mutlilog_id,
+                     const std::string &aggregate_name,
+                     const std::string &filter_name,
+                     const std::string &aggregate_expr);
+  int32_t send_add_aggregate(const int64_t mutlilog_id,
+                             const std::string &aggregate_name,
+                             const std::string &filter_name,
+                             const std::string &aggregate_expr);
   void recv_add_aggregate(const int32_t seqid);
-  void remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
-  int32_t send_remove_aggregate(const int64_t multilog_id, const std::string& aggregate_name);
+  void remove_aggregate(const int64_t multilog_id, const std::string &aggregate_name);
+  int32_t send_remove_aggregate(const int64_t multilog_id, const std::string &aggregate_name);
   void recv_remove_aggregate(const int32_t seqid);
-  void add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
-  int32_t send_add_trigger(const int64_t multilog_id, const std::string& trigger_name, const std::string& trigger_expr);
+  void add_trigger(const int64_t multilog_id, const std::string &trigger_name, const std::string &trigger_expr);
+  int32_t send_add_trigger(const int64_t multilog_id, const std::string &trigger_name, const std::string &trigger_expr);
   void recv_add_trigger(const int32_t seqid);
-  void remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
-  int32_t send_remove_trigger(const int64_t multilog_id, const std::string& trigger_name);
+  void remove_trigger(const int64_t multilog_id, const std::string &trigger_name);
+  int32_t send_remove_trigger(const int64_t multilog_id, const std::string &trigger_name);
   void recv_remove_trigger(const int32_t seqid);
-  int64_t append(const int64_t multilog_id, const std::string& data);
-  int32_t send_append(const int64_t multilog_id, const std::string& data);
+  int64_t append(const int64_t multilog_id, const std::string &data);
+  int32_t send_append(const int64_t multilog_id, const std::string &data);
   int64_t recv_append(const int32_t seqid);
-  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
-  int32_t send_append_batch(const int64_t multilog_id, const rpc_record_batch& batch);
+  int64_t append_batch(const int64_t multilog_id, const rpc_record_batch &batch);
+  int32_t send_append_batch(const int64_t multilog_id, const rpc_record_batch &batch);
   int64_t recv_append_batch(const int32_t seqid);
-  void read(std::string& _return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
+  void read(std::string &_return, const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
   int32_t send_read(const int64_t multilog_id, const int64_t offset, const int64_t nrecords);
-  void recv_read(std::string& _return, const int32_t seqid);
-  void query_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_query_aggregate(const int64_t multilog_id, const std::string& aggregate_name, const int64_t begin_ms, const int64_t end_ms);
-  void recv_query_aggregate(std::string& _return, const int32_t seqid);
-  void adhoc_aggregate(std::string& _return, const int64_t multilog_id, const std::string& aggregate_expr, const std::string& filter_expr);
-  int32_t send_adhoc_aggregate(const int64_t multilog_id, const std::string& aggregate_expr, const std::string& filter_expr);
-  void recv_adhoc_aggregate(std::string& _return, const int32_t seqid);
-  void adhoc_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_expr);
-  int32_t send_adhoc_filter(const int64_t multilog_id, const std::string& filter_expr);
-  void recv_adhoc_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void predef_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_predef_filter(const int64_t multilog_id, const std::string& filter_name, const int64_t begin_ms, const int64_t end_ms);
-  void recv_predef_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void combined_filter(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_combined_filter(const int64_t multilog_id, const std::string& filter_name, const std::string& filter_expr, const int64_t begin_ms, const int64_t end_ms);
-  void recv_combined_filter(rpc_iterator_handle& _return, const int32_t seqid);
-  void alerts_by_time(rpc_iterator_handle& _return, const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
+  void recv_read(std::string &_return, const int32_t seqid);
+  void query_aggregate(std::string &_return,
+                       const int64_t multilog_id,
+                       const std::string &aggregate_name,
+                       const int64_t begin_ms,
+                       const int64_t end_ms);
+  int32_t send_query_aggregate(const int64_t multilog_id,
+                               const std::string &aggregate_name,
+                               const int64_t begin_ms,
+                               const int64_t end_ms);
+  void recv_query_aggregate(std::string &_return, const int32_t seqid);
+  void adhoc_aggregate(std::string &_return,
+                       const int64_t multilog_id,
+                       const std::string &aggregate_expr,
+                       const std::string &filter_expr);
+  int32_t send_adhoc_aggregate(const int64_t multilog_id,
+                               const std::string &aggregate_expr,
+                               const std::string &filter_expr);
+  void recv_adhoc_aggregate(std::string &_return, const int32_t seqid);
+  void adhoc_filter(rpc_iterator_handle &_return, const int64_t multilog_id, const std::string &filter_expr);
+  int32_t send_adhoc_filter(const int64_t multilog_id, const std::string &filter_expr);
+  void recv_adhoc_filter(rpc_iterator_handle &_return, const int32_t seqid);
+  void predef_filter(rpc_iterator_handle &_return,
+                     const int64_t multilog_id,
+                     const std::string &filter_name,
+                     const int64_t begin_ms,
+                     const int64_t end_ms);
+  int32_t send_predef_filter(const int64_t multilog_id,
+                             const std::string &filter_name,
+                             const int64_t begin_ms,
+                             const int64_t end_ms);
+  void recv_predef_filter(rpc_iterator_handle &_return, const int32_t seqid);
+  void combined_filter(rpc_iterator_handle &_return,
+                       const int64_t multilog_id,
+                       const std::string &filter_name,
+                       const std::string &filter_expr,
+                       const int64_t begin_ms,
+                       const int64_t end_ms);
+  int32_t send_combined_filter(const int64_t multilog_id,
+                               const std::string &filter_name,
+                               const std::string &filter_expr,
+                               const int64_t begin_ms,
+                               const int64_t end_ms);
+  void recv_combined_filter(rpc_iterator_handle &_return, const int32_t seqid);
+  void alerts_by_time(rpc_iterator_handle &_return,
+                      const int64_t multilog_id,
+                      const int64_t begin_ms,
+                      const int64_t end_ms);
   int32_t send_alerts_by_time(const int64_t multilog_id, const int64_t begin_ms, const int64_t end_ms);
-  void recv_alerts_by_time(rpc_iterator_handle& _return, const int32_t seqid);
-  void alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
-  int32_t send_alerts_by_trigger_and_time(const int64_t multilog_id, const std::string& trigger_name, const int64_t begin_ms, const int64_t end_ms);
-  void recv_alerts_by_trigger_and_time(rpc_iterator_handle& _return, const int32_t seqid);
-  void get_more(rpc_iterator_handle& _return, const int64_t multilog_id, const rpc_iterator_descriptor& desc);
-  int32_t send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor& desc);
-  void recv_get_more(rpc_iterator_handle& _return, const int32_t seqid);
+  void recv_alerts_by_time(rpc_iterator_handle &_return, const int32_t seqid);
+  void alerts_by_trigger_and_time(rpc_iterator_handle &_return,
+                                  const int64_t multilog_id,
+                                  const std::string &trigger_name,
+                                  const int64_t begin_ms,
+                                  const int64_t end_ms);
+  int32_t send_alerts_by_trigger_and_time(const int64_t multilog_id,
+                                          const std::string &trigger_name,
+                                          const int64_t begin_ms,
+                                          const int64_t end_ms);
+  void recv_alerts_by_trigger_and_time(rpc_iterator_handle &_return, const int32_t seqid);
+  void get_more(rpc_iterator_handle &_return, const int64_t multilog_id, const rpc_iterator_descriptor &desc);
+  int32_t send_get_more(const int64_t multilog_id, const rpc_iterator_descriptor &desc);
+  void recv_get_more(rpc_iterator_handle &_return, const int32_t seqid);
   int64_t num_records(const int64_t multilog_id);
   int32_t send_num_records(const int64_t multilog_id);
   int64_t recv_num_records(const int32_t seqid);
  protected:
-  apache::thrift::stdcxx::shared_ptr< Protocol_> piprot_;
-  apache::thrift::stdcxx::shared_ptr< Protocol_> poprot_;
-  Protocol_* iprot_;
-  Protocol_* oprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> piprot_;
+  apache::thrift::stdcxx::shared_ptr<Protocol_> poprot_;
+  Protocol_ *iprot_;
+  Protocol_ *oprot_;
   ::apache::thrift::async::TConcurrentClientSyncInfo sync_;
 };
 
-typedef rpc_serviceConcurrentClientT< ::apache::thrift::protocol::TProtocol> rpc_serviceConcurrentClient;
+typedef rpc_serviceConcurrentClientT<::apache::thrift::protocol::TProtocol> rpc_serviceConcurrentClient;
 
 #ifdef _MSC_VER
-  #pragma warning( pop )
+#pragma warning( pop )
 #endif
 
-}} // namespace
+}
+} // namespace
 
 #include "rpc_service.tcc"
 #include "rpc_types.tcc"

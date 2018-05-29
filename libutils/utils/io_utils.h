@@ -9,25 +9,25 @@ namespace utils {
 class io_utils {
  public:
   template<typename T>
-  static void write(std::ostream& out, const T& value) {
-    out.write(reinterpret_cast<const char*>(&value), sizeof(T));
+  static void write(std::ostream &out, const T &value) {
+    out.write(reinterpret_cast<const char *>(&value), sizeof(T));
   }
 
   template<typename T>
-  static void write(std::ostream& out, const T* values, size_t length) {
-    out.write(reinterpret_cast<const char*>(values), length * sizeof(T));
+  static void write(std::ostream &out, const T *values, size_t length) {
+    out.write(reinterpret_cast<const char *>(values), length * sizeof(T));
   }
 
   template<typename T>
-  static T read(std::istream& in) {
+  static T read(std::istream &in) {
     T val;
-    in.read(reinterpret_cast<char*>(&val), sizeof(T));
+    in.read(reinterpret_cast<char *>(&val), sizeof(T));
     return val;
   }
 
-  static std::string read(std::istream& in, size_t length);
+  static std::string read(std::istream &in, size_t length);
 
-  static void flush(std::ostream& out);
+  static void flush(std::ostream &out);
 };
 
 }

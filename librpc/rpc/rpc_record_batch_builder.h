@@ -20,7 +20,7 @@ struct record_data : public std::string {
    * @param data The data to initialize the record data to
    * @param size The size of the data
    */
-  record_data(const void* data, size_t size);
+  record_data(const void *data, size_t size);
 
   /**
    * Constructs an empty record data
@@ -37,21 +37,21 @@ class rpc_record_batch_builder {
    * Constructs a record batch builder from a given schema
    * @param schema The schema to add record batches to
    */
-  rpc_record_batch_builder(const schema_t& schema);
+  rpc_record_batch_builder(const schema_t &schema);
 
   /**
    * Adds a record to the record batch
    *
    * @param rec The record to add
    */
-  void add_record(const record_data& rec);
+  void add_record(const record_data &rec);
 
   /**
    * Adds a vector of string records to the batch
    *
    * @param rec The vector of records to add
    */
-  void add_record(const std::vector<std::string>& rec);
+  void add_record(const std::vector<std::string> &rec);
 
   /**
    * Gets the record batch with all of the records added
@@ -76,7 +76,7 @@ class rpc_record_batch_builder {
   size_t nrecords_;
   std::map<int64_t, size_t> batch_sizes_;
   std::map<int64_t, std::stringstream> batch_;
-  const schema_t& schema_;
+  const schema_t &schema_;
 };
 
 }
