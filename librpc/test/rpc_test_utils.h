@@ -5,13 +5,13 @@
 
 class rpc_test_utils {
  public:
-  static void wait_till_server_ready(const std::string& host, int port) {
+  static void wait_till_server_ready(const std::string &host, int port) {
     bool check = true;
     while (check) {
       try {
         confluo::rpc::rpc_client(host, port);
         check = false;
-      } catch (TTransportException& e) {
+      } catch (TTransportException &e) {
         usleep(100000);
       }
     }

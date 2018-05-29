@@ -6,7 +6,6 @@
  */
 #include "rpc_types.h"
 
-#include <algorithm>
 #include <ostream>
 
 #include <thrift/TToString.h>

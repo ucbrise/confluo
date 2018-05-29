@@ -1,6 +1,5 @@
 #include "rpc_server.h"
 #include "cmd_parse.h"
-#include "error_handling.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -44,21 +43,21 @@ int main(int argc, char **argv) {
     port = parser.get_int("port");
     address = parser.get("address");
     data_path = parser.get("data-path");
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     fprintf(stderr, "could not parse cmdline args: %s\n", e.what());
     fprintf(stderr, "%s\n", parser.help_msg().c_str());
     return 0;
   }
 
-  LOG_INFO<< parser.parsed_values();
+  LOG_INFO << parser.parsed_values();
 
-  confluo_store* store = new confluo_store(data_path);
+  confluo_store *store = new confluo_store(data_path);
 
   try {
     auto server = rpc_server::create(store, address, port);
     server->serve();
-  } catch (std::exception& e) {
-    LOG_ERROR<<"Could not start server listening on " << address << ":" << port << ": " << e.what();
+  } catch (std::exception &e) {
+    LOG_ERROR << "Could not start server listening on " << address << ":" << port << ": " << e.what();
   }
 
   return 0;

@@ -1,6 +1,5 @@
 #include "rpc_configuration_params.h"
 #include "conf/configuration_params.h"
-#include "config_utils.h"
 #include "rpc_defaults.h"
 
 namespace confluo {
