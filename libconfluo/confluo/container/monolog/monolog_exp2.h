@@ -3,7 +3,6 @@
 
 #include <array>
 #include <vector>
-#include <container/reflog.h>
 
 #include "atomic.h"
 #include "bit_utils.h"

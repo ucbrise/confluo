@@ -43,9 +43,8 @@ public:
    */
   aggregated_reflog(const aggregate_log& aggregates)
       : reflog() {
-    storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     size_t alloc_size = sizeof(aggregate) * aggregates.size();
-    aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size, aux));
+    aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size));
     storage::lifecycle_util<aggregate>::construct(aggs);
     for (size_t i = 0; i < aggregates.size(); i++) {
       aggs[i] = aggregates.at(i)->create_aggregate();
