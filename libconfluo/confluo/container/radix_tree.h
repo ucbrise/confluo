@@ -38,11 +38,12 @@ struct radix_tree_node {
   template<typename ... ARGS>
   radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
                   node_t* node_parent, bool, ARGS&& ... args)
-      : key(node_key),
-        depth(node_depth),
-        is_leaf(true),
-        parent(node_parent) {
-    data = new reflog(std::forward<ARGS>(args)...);
+      : key_(node_key),
+        depth_(node_depth),
+        is_leaf_(true),
+        parent_(node_parent) {
+    void* raw = ALLOCATOR.alloc(sizeof(reflog));
+    data_ = new(raw) reflog(std::forward<ARGS>(args)...);
   }
 
   /**
@@ -55,23 +56,28 @@ struct radix_tree_node {
    */
   radix_tree_node(uint8_t node_key, size_t node_width, size_t node_depth,
                   node_t* node_parent)
-      : key(node_key),
-        depth(node_depth),
-        is_leaf(false),
-        parent(node_parent) {
-    data = new child_t[node_width];
-    for (size_t i = 0; i < node_width; i++)
+      : key_(node_key),
+        depth_(node_depth),
+        is_leaf_(false),
+        parent_(node_parent) {
+    size_t alloc_size = sizeof(child_t) * node_width;
+    data_ = ALLOCATOR.alloc(alloc_size);
+
+    for (size_t i = 0; i < node_width; i++) {
       atomic::init(&(children()[i]), static_cast<node_t*>(nullptr));
+    }
   }
 
   /**
    * Deletes the radix tree node
    */
   ~radix_tree_node() {
-    if (is_leaf)
-      delete refs();
-    else
-      delete[] children();
+    if (is_leaf_) {
+      refs()->~reflog();
+      ALLOCATOR.dealloc(refs());
+    } else {
+      ALLOCATOR.dealloc(children());
+    }
   }
 
   /**
@@ -80,7 +86,7 @@ struct radix_tree_node {
    * @return The reflog reference containing the data
    */
   inline reflog*& refs() {
-    return reinterpret_cast<reflog*&>(data);
+    return reinterpret_cast<reflog*&>(data_);
   }
 
   /**
@@ -89,7 +95,7 @@ struct radix_tree_node {
    * @return A constant reference to the reflog containing the data
    */
   inline reflog* const & refs() const {
-    return reinterpret_cast<reflog* const &>(data);
+    return reinterpret_cast<reflog* const &>(data_);
   }
 
   /**
@@ -98,7 +104,7 @@ struct radix_tree_node {
    * @return Reference to the children
    */
   inline child_t*& children() {
-    return reinterpret_cast<child_t*&>(data);
+    return reinterpret_cast<child_t*&>(data_);
   }
 
   /**
@@ -107,7 +113,7 @@ struct radix_tree_node {
    * @return A constant pointer to the children
    */
   inline child_t* const & children() const {
-    return reinterpret_cast<child_t* const &>(data);
+    return reinterpret_cast<child_t* const &>(data_);
   }
 
   /**
@@ -120,8 +126,7 @@ struct radix_tree_node {
   const node_t* first_child(size_t width) const {
     size_t cur_key = 0;
     const node_t* child = nullptr;
-    while (cur_key < width
-        && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
+    while (cur_key < width && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
       ++cur_key;
     }
     return child;
@@ -137,8 +142,7 @@ struct radix_tree_node {
   const node_t* last_child(size_t width) const {
     int16_t cur_key = width - 1;
     const node_t* child = nullptr;
-    while (cur_key >= 0
-        && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
+    while (cur_key >= 0 && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
       --cur_key;
     }
     return child;
@@ -155,8 +159,7 @@ struct radix_tree_node {
   const node_t* next_child(uint8_t key, size_t width) const {
     size_t cur_key = key + 1;
     const node_t* child = nullptr;
-    while (cur_key < width
-        && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
+    while (cur_key < width && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
       ++cur_key;
     }
     return child;
@@ -176,8 +179,7 @@ struct radix_tree_node {
 
     int16_t cur_key = key - 1;
     const node_t* child = nullptr;
-    while (cur_key >= 0
-        && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
+    while (cur_key >= 0 && (child = atomic::load(&(children()[cur_key]))) == nullptr) {
       --cur_key;
     }
     return child;
@@ -193,14 +195,14 @@ struct radix_tree_node {
    * @return Pointer to the advanced node.
    */
   const node_t* advance(key_t& t_key, size_t t_width, size_t t_depth) const {
-    if (parent == nullptr)
+    if (parent_ == nullptr)
       return nullptr;
 
-    const node_t* child = parent->next_child(key, t_width);
+    const node_t* child = parent_->next_child(key_, t_width);
     if (child == nullptr) {
-      return parent->advance(t_key, t_width, t_depth);
+      return parent_->advance(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth - 1] = child->key;
+      t_key[child->depth_ - 1] = child->key_;
       return child->advance_descend(t_key, t_width, t_depth);
     }
   }
@@ -217,14 +219,14 @@ struct radix_tree_node {
    * @return Pointer to the advanced node.
    */
   const node_t* advance_descend(key_t& t_key, size_t t_width, size_t t_depth) const {
-    if (is_leaf)
+    if (is_leaf_)
       return this;
 
     const node_t* child = first_child(t_width);
     if (child == nullptr) {
       return advance(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth - 1] = child->key;
+      t_key[child->depth_ - 1] = child->key_;
       return child->advance_descend(t_key, t_width, t_depth);
     }
   }
@@ -239,14 +241,14 @@ struct radix_tree_node {
    * @return Pointer to the retreated node.
    */
   const node_t* retreat(key_t& t_key, size_t t_width, size_t t_depth) const {
-    if (parent == nullptr)
+    if (parent_ == nullptr)
       return nullptr;
 
-    const node_t* child = parent->prev_child(key, t_width);
+    const node_t* child = parent_->prev_child(key_, t_width);
     if (child == nullptr) {
-      return parent->retreat(t_key, t_width, t_depth);
+      return parent_->retreat(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth - 1] = child->key;
+      t_key[child->depth_ - 1] = child->key_;
       return child->retreat_descend(t_key, t_width, t_depth);
     }
   }
@@ -261,9 +263,8 @@ struct radix_tree_node {
    *
    * @return Pointer to the retreated node.
    */
-  const node_t* retreat_descend(key_t& t_key, size_t t_width,
-                                size_t t_depth) const {
-    if (is_leaf)
+  const node_t* retreat_descend(key_t& t_key, size_t t_width, size_t t_depth) const {
+    if (is_leaf_)
       return this;
 
     const node_t* child = last_child(t_width);
@@ -271,21 +272,21 @@ struct radix_tree_node {
     if (child == nullptr) {
       return retreat(t_key, t_width, t_depth);
     } else {
-      t_key[child->depth - 1] = child->key;
+      t_key[child->depth_ - 1] = child->key_;
       return child->retreat_descend(t_key, t_width, t_depth);
     }
   }
 
   /** Key of the radix tree node */
-  uint8_t key;
+  uint8_t key_;
   /** Depth of the radix tree node */
-  uint8_t depth;
+  uint8_t depth_;
   /** Data that the node contains */
-  void* data;
+  void* data_;
   /** Whether the node is a leaf node */
-  bool is_leaf;
+  bool is_leaf_;
   /** The parent of the radix tree node */
-  node_t* parent;
+  node_t* parent_;
 };
 
 /**
@@ -538,8 +539,9 @@ class radix_tree {
    */
   radix_tree(size_t depth, size_t width)
       : width_(width),
-        depth_(depth),
-        root_(new node_t(0, width, 0, nullptr)) {
+        depth_(depth) {
+    void* raw = ALLOCATOR.alloc(sizeof(node_t));
+    root_ = new(raw) node_t(0, width, 0, nullptr);
   }
 
   /**
@@ -577,15 +579,16 @@ class radix_tree {
       node_t* child = nullptr;
       if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
         // Try & allocate child node
-        child = new node_t(key[d], width_, d + 1, node);
+        void* raw = ALLOCATOR.alloc(sizeof(node_t));
+        child = new(raw) node_t(key[d], width_, d + 1, node);
         node_t* expected = nullptr;
 
         // If thread was not successful in swapping newly allocated memory,
         // then it should de-allocate memory, and accept whatever the
         // successful thread allocated as the de-facto storage for child node.
-        if (!atomic::strong::cas(&(node->children()[key[d]]), &expected,
-                                 child)) {
-          delete child;
+        if (!atomic::strong::cas(&(node->children()[key[d]]), &expected, child)) {
+          child->~node_t();
+          ALLOCATOR.dealloc(child);
           child = expected;
         }
       }
@@ -598,15 +601,16 @@ class radix_tree {
     node_t* child = nullptr;
     if ((child = atomic::load(&(node->children()[key[d]]))) == nullptr) {
       // Try & allocate child node
-      child = new node_t(key[d], width_, d + 1, node, true,
-                         std::forward<ARGS>(args)...);
+      void* raw = ALLOCATOR.alloc(sizeof(node_t));
+      child = new(raw) node_t(key[d], width_, d + 1, node, true, std::forward<ARGS>(args)...);
       node_t* expected = nullptr;
 
       // If thread was not successful in swapping newly allocated memory,
       // then it should de-allocate memory, and accept whatever the
       // successful thread allocated as the de-facto storage for child node.
       if (!atomic::strong::cas(&(node->children()[key[d]]), &expected, child)) {
-        delete child;
+        child->~node_t();
+        ALLOCATOR.dealloc(child);
         child = expected;
       }
     }
@@ -804,7 +808,7 @@ class radix_tree {
       if (child == nullptr) {       // There are no valid children of ret.second
         ret.second = ret.second->retreat(ret.first, width_, depth_);
       } else {  // There is a valid child of ret.second
-        ret.first[d] = child->key;
+        ret.first[d] = child->key_;
         ret.second = child->retreat_descend(ret.first, width_, depth_);
       }
     }
@@ -836,7 +840,7 @@ class radix_tree {
       if (child == nullptr)        // There are no valid children of ret.second
         ret.second = ret.second->advance(ret.first, width_, depth_);
       else {  // There is a valid child of ret.second
-        ret.first[d] = child->key;
+        ret.first[d] = child->key_;
         ret.second = child->advance_descend(ret.first, width_, depth_);
       }
     }

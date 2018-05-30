@@ -162,6 +162,7 @@ class monolog_exp2_base {
     for (auto& x : buckets_) {
       atomic::init(&x, null_ptr);
     }
+
     atomic::init(&buckets_[0], new T[FBS]);
   }
 

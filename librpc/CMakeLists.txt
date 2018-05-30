@@ -1,5 +1,9 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
+if (NOT APPLE AND UNIX)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+endif ()
+
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
@@ -45,6 +49,15 @@ add_library(rpcclient STATIC
         src/rpc_service.cc
         rpc/rpc_types.h
         src/rpc_types.cc)
+target_link_libraries(confluod ${JEMALLOC_LIBRARIES})
+set(SERVER_SOURCES src/rpc_constants.cc
+                   src/rpc_service.cc 
+                   src/rpc_server.cc 
+                   src/rpc_types.cc)
+target_link_libraries(confluod thriftstatic ${JEMALLOC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+add_dependencies(confluod thrift)
+
+add_dependencies(confluod jemalloc)
 target_link_libraries(rpcclient thriftstatic)
 add_dependencies(rpcclient thrift)
 

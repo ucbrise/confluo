@@ -45,7 +45,9 @@ class bitmap {
    * @param num_bits The size of the bitmap
    */
   bitmap(size_type num_bits) {
-    data_ = new data_type[BITS2BLOCKS(num_bits)]();
+    size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(num_bits);
+    data_ = static_cast<data_type*>(ALLOCATOR.alloc(alloc_size));
+    memset(data_, 0, alloc_size);
     size_ = num_bits;
   }
 
@@ -54,7 +56,7 @@ class bitmap {
    */
   virtual ~bitmap() {
     if (data_ != NULL) {
-      delete[] data_;
+      ALLOCATOR.dealloc(data_);
       data_ = NULL;
     }
   }
@@ -175,8 +177,7 @@ class bitmap {
     out.write(reinterpret_cast<const char *>(&size_), sizeof(size_type));
     out_size += sizeof(size_type);
 
-    out.write(reinterpret_cast<const char *>(data_),
-              sizeof(data_type) * BITS2BLOCKS(size_));
+    out.write(reinterpret_cast<const char *>(data_), sizeof(data_type) * BITS2BLOCKS(size_));
     out_size += (BITS2BLOCKS(size_) * sizeof(uint64_t));
 
     return out_size;
@@ -193,9 +194,10 @@ class bitmap {
     in.read(reinterpret_cast<char *>(&size_), sizeof(size_type));
     in_size += sizeof(size_type);
 
-    data_ = new data_type[BITS2BLOCKS(size_)];
-    in.read(reinterpret_cast<char *>(data_),
-    BITS2BLOCKS(size_) * sizeof(data_type));
+    size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(size_);
+    data_ = static_cast<data_type *>(ALLOCATOR.alloc(alloc_size));
+    memset(data_, 0, alloc_size);
+    in.read(reinterpret_cast<char *>(data_), BITS2BLOCKS(size_) * sizeof(data_type));
     in_size += (BITS2BLOCKS(size_) * sizeof(data_type));
 
     return in_size;

@@ -47,6 +47,32 @@ if (BUILD_TESTS)
   add_library(gtest_main STATIC IMPORTED GLOBAL)
   set_target_properties(gtest_main PROPERTIES IMPORTED_LOCATION
     ${GTEST_MAIN_STATIC_LIB})
+
+  set(EXTERNAL_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CMAKE_CXX_FLAGS_${UPPERCASE_BUILD_TYPE}}")
+  set(EXTERNAL_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ${CMAKE_C_FLAGS_${UPPERCASE_BUILD_TYPE}}")
+
+  set(JEMALLOC_CXX_FLAGS "${EXTERNAL_CXX_FLAGS}")
+  set(JEMALLOC_C_FLAGS "${EXTERNAL_C_FLAGS}")
+  set(JEMALLOC_LD_FLAGS "-Wl,--no-as-needed")
+  set(JEMALLOC_PREFIX "${PROJECT_BINARY_DIR}/external/jemalloc")
+  set(JEMALLOC_HOME "${JEMALLOC_PREFIX}")
+  set(JEMALLOC_INCLUDE_DIR "${JEMALLOC_PREFIX}/include")
+  set(JEMALLOC_CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+          "-DCMAKE_CXX_FLAGS=${JEMALLOC_CXX_FLAGS}"
+          "-DCMAKE_INSTALL_PREFIX=${JEMALLOC_PREFIX}")
+  set(JEMALLOC_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}jemalloc")
+  set(JEMALLOC_LIBRARIES "${JEMALLOC_PREFIX}/lib/${JEMALLOC_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  ExternalProject_Add(jemalloc
+          URL https://github.com/jemalloc/jemalloc/releases/download/5.0.1/jemalloc-5.0.1.tar.bz2
+          PREFIX ${JEMALLOC_PREFIX}
+          BUILD_BYPRODUCTS ${JEMALLOC_LIBRARIES}
+          CONFIGURE_COMMAND ${JEMALLOC_PREFIX}/src/jemalloc/configure --prefix=${JEMALLOC_PREFIX} --enable-autogen --enable-prof-libunwind CFLAGS=${JEMALLOC_C_FLAGS} CXXFLAGS=${JEMALLOC_CXX_FLAGS}
+          INSTALL_COMMAND make install_lib install_include
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+          LOG_INSTALL ON)
+  message(STATUS "Jemalloc library: ${JEMALLOC_LIBRARIES}")
+
 endif()
 
 ExternalProject_Add(lz4
