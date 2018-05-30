@@ -22,13 +22,13 @@ TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayTest) {
 
   uint64_t* array = new uint64_t[kArraySize];
   for (uint64_t i = 0; i < kArraySize; i++) {
-    array[i] = i;
+    array[i] = i * 16;
   }
 
   elias_gamma_encoded_array<uint64_t> enc_array(array, kArraySize);
 
   for (uint64_t i = 0; i < kArraySize; i++) {
-    ASSERT_EQ(i, enc_array[i]);
+    ASSERT_EQ(i * 16, enc_array[i]);
   }
 }
 
@@ -37,20 +37,19 @@ TEST_F(DeltaEncodedArrayTest, ToFromByteArrayTest) {
 
   uint64_t* array = new uint64_t[k_array_size];
   for (uint64_t i = 0; i < k_array_size; i++) {
-    array[i] = i;
+    array[i] = i * 16;
   }
 
   elias_gamma_encoded_array<uint64_t> enc_array(array, k_array_size);
   size_t size = enc_array.storage_size();
 
-  uint8_t* buffer = new uint8_t[size + sizeof(size_t)];
-  std::memcpy(buffer, &size, sizeof(size_t));
-  size_t byte_array_size = enc_array.to_byte_array(buffer + sizeof(size_t));
+  uint8_t* buffer = new uint8_t[size];
+  size_t byte_array_size = enc_array.to_byte_array(buffer);
 
   ASSERT_EQ(size, byte_array_size);
 
   elias_gamma_encoded_array<uint64_t> test_array;
-  size_t from_size = test_array.from_byte_array(buffer + sizeof(size_t));
+  size_t from_size = test_array.from_byte_array(buffer);
 
   for (uint64_t i = 0; i < k_array_size; i++) {
     ASSERT_EQ(array[i], test_array[i]);
