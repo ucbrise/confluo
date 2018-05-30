@@ -32,7 +32,7 @@ class delta_encoder {
   template<typename T>
   static unique_byte_array encode(T* source_buffer, size_t source_length) {
     std::sort(source_buffer, source_buffer + source_length);
-    elias_gamma_encoded_array<uint64_t> enc_array(source_buffer, source_length);
+    elias_gamma_encoded_array<T> enc_array(source_buffer, source_length);
     size_t buffer_size = enc_array.storage_size() + sizeof(size_t);
     uint8_t* output_buffer = new uint8_t[buffer_size];
     std::memcpy(output_buffer, &source_length, sizeof(size_t));

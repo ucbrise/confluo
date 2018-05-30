@@ -15,11 +15,11 @@ class DeltaEncodeTest : public testing::Test {
 };
 
 TEST_F(DeltaEncodeTest, DecodeFullTest) {
-  size_t k_array_size = 1000;
+  size_t k_array_size = 1024;
 
-  uint64_t *array = new uint64_t[k_array_size];
+  uint64_t* array = new uint64_t[k_array_size];
   for (uint64_t i = 0; i < k_array_size; i++) {
-    array[i] = i;
+    array[i] = i * 16;
   }
 
   uint64_t* dest_buffer = new uint64_t[k_array_size];
@@ -35,11 +35,11 @@ TEST_F(DeltaEncodeTest, DecodeFullTest) {
 }
 
 TEST_F(DeltaEncodeTest, DecodePartialTest) {
-  size_t k_array_size = 1000;
+  size_t k_array_size = 1024;
 
-  uint64_t *array = new uint64_t[k_array_size];
+  uint64_t* array = new uint64_t[k_array_size];
   for (size_t i = 0; i < k_array_size; i++) {
-    array[i] = i;
+    array[i] = i * 16;
   }
 
   size_t src_index = 250;
@@ -59,11 +59,11 @@ TEST_F(DeltaEncodeTest, DecodePartialTest) {
 }
 
 TEST_F(DeltaEncodeTest, DecodePtrIndexTest) {
-  size_t k_array_size = 1000;
+  size_t k_array_size = 1024;
 
   uint64_t *array = new uint64_t[k_array_size];
   for (size_t i = 0; i < k_array_size; i++) {
-    array[i] = i;
+    array[i] = i * 16;
   }
 
   size_t src_index = 250;
@@ -83,18 +83,18 @@ TEST_F(DeltaEncodeTest, DecodePtrIndexTest) {
 }
 
 TEST_F(DeltaEncodeTest, DecodeIndexTest) {
-  size_t k_array_size = 1000;
+  size_t k_array_size = 1024;
 
-  uint64_t *array = new uint64_t[k_array_size];
+  uint64_t* array = new uint64_t[k_array_size];
   for (size_t i = 0; i < k_array_size; i++) {
-    array[i] = i;
+    array[i] = i * 16;
   }
 
-  size_t src_index = 250;
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
-  uint8_t decoded_val = delta_decoder::decode<uint64_t>(encoded_buffer.get(), src_index);
 
-  ASSERT_EQ(array[src_index], decoded_val);
+  for (size_t i = 0; i < k_array_size; i++) {
+    ASSERT_EQ(array[i], delta_decoder::decode<uint64_t>(encoded_buffer.get(), i));
+  }
 
   delete[] array;
 }
