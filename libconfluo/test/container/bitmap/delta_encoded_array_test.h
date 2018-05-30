@@ -28,7 +28,7 @@ TEST_F(DeltaEncodedArrayTest, EliasGammaEncodedArrayTest) {
   elias_gamma_encoded_array<uint64_t> enc_array(array, kArraySize);
 
   for (uint64_t i = 0; i < kArraySize; i++) {
-    ASSERT_EQ(i, enc_array[i]);
+    ASSERT_EQ(i * 16, enc_array[i]);
   }
 }
 
