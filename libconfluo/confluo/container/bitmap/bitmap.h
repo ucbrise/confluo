@@ -47,6 +47,7 @@ class bitmap {
   bitmap(size_type num_bits) {
     size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(num_bits);
     data_ = static_cast<data_type*>(ALLOCATOR.alloc(alloc_size));
+    memset(data_, 0, alloc_size);
     size_ = num_bits;
   }
 
@@ -196,6 +197,7 @@ class bitmap {
 
     size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(size_);
     data_ = static_cast<data_type *>(ALLOCATOR.alloc(alloc_size));
+    memset(data_, 0, alloc_size);
     in.read(reinterpret_cast<char *>(data_), BITS2BLOCKS(size_) * sizeof(data_type));
     in_size += (BITS2BLOCKS(size_) * sizeof(data_type));
 
