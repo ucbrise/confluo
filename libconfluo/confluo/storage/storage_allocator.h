@@ -43,7 +43,7 @@ class storage_allocator {
    * @param size size in bytes to allocate
    * @return pointer to allocated memory
    */
-  void* alloc(size_t size, ptr_aux_block aux) {
+  void* alloc(size_t size, ptr_aux_block aux = ptr_aux_block()) {
     int retries = 0;
     while (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
       mem_cleanup_callback_();
@@ -76,7 +76,7 @@ class storage_allocator {
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
-  void* mmap(std::string path, size_t size, ptr_aux_block aux) {
+  void* mmap(std::string path, size_t size, ptr_aux_block aux = ptr_aux_block()) {
     size_t alloc_size = sizeof(ptr_metadata) + size;
     mmap_stat_.increment(alloc_size);
 
@@ -103,7 +103,7 @@ class storage_allocator {
    * @param state pointer state (bit field, constrained to storage::state_type)
    * @return pointer to memory
    */
-  void* mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux) {
+  void* mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux = ptr_aux_block()) {
     int mmap_delta = offset % getpagesize();
     off_t page_aligned_offset = offset - mmap_delta;
 

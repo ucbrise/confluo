@@ -86,10 +86,9 @@ class encoded_ptr {
   T decode_at(size_t idx) const {
     auto* metadata = ptr_metadata::get(ptr_);
     auto aux = ptr_aux_block::get(metadata);
-    T* ptr = this->ptr_as<T>();
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        return ptr[idx];
+        return this->ptr_as<T>()[idx];
       }
       case encoding_type::D_ELIAS_GAMMA: {
         T decoded = compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), idx);
