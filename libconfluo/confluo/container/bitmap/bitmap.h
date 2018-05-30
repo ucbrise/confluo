@@ -56,7 +56,6 @@ class bitmap {
    */
   virtual ~bitmap() {
     if (data_ != NULL) {
-      //delete[] data_;
       ALLOCATOR.dealloc(data_);
       data_ = NULL;
     }

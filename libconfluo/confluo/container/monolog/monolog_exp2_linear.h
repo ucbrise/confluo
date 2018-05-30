@@ -282,8 +282,9 @@ class monolog_exp2_linear_base {
       if (container != nullptr) {
         bucket_size += num_buckets * sizeof(__atomic_bucket_ref);
         for (size_t j = 0; j < num_buckets; j++) {
-          __atomic_bucket_copy_ref* bucket = container[j].atomic_copy();
-          if (bucket->get().ptr() != nullptr) {
+          __atomic_bucket_copy_ref bucket;
+          container[j].atomic_copy(bucket);
+          if (bucket.get().ptr() != nullptr) {
             data_size += BUCKET_SIZE * sizeof(T);
           }
         }
@@ -328,12 +329,10 @@ protected:
     __atomic_bucket_ref* new_container = new __atomic_bucket_ref[num_buckets]();
     __atomic_bucket_ref* expected = nullptr;
 
-    // Only one thread will be successful in replacing the nullptr reference with newly
-    // allocated container.
+    // Only one thread will be successful in replacing the nullptr reference with newly allocated container.
     if (!atomic::strong::cas(&bucket_containers_[container_idx], &expected, new_container)) {
       // All other threads will deallocate the newly allocated container.
       delete[] new_container;
-      //ALLOCATOR.dealloc(new_container);
       return expected;
     }
     return new_container;
@@ -346,8 +345,7 @@ protected:
    * @param bucket_idx index into the container to allocate bucket at
    * @param copy copy of pointer to allocated bucket
    */
-  void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx,
-                           __atomic_bucket_copy_ref& copy) {
+  void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx, __atomic_bucket_copy_ref& copy) {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
     void* new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T), aux);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
@@ -383,11 +381,9 @@ protected:
    * @param copy read-only pointer to store in
    * @param bucket_offset bucket offset to offset the copy's internal pointer
    */
-  void load_bucket_copy(size_t container_idx, size_t bucket_idx,
-      __atomic_bucket_copy_ref& copy,
-      size_t bucket_offset = 0) const {
-    atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_copy(
-        copy, bucket_offset);
+  void load_bucket_copy(size_t container_idx, size_t bucket_idx, __atomic_bucket_copy_ref& copy,
+                        size_t bucket_offset = 0) const {
+    atomic::load(&bucket_containers_[container_idx])[bucket_idx].atomic_copy(copy, bucket_offset);
   }
 
  private:
