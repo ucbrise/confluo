@@ -89,7 +89,7 @@ void filter_archiver::archive_reflog_aggregates(byte_string key, aggregated_refl
       numeric collapsed_aggregate = reflog.get_aggregate(i, version);
       aggs_writer_.append<data_type>(collapsed_aggregate.type());
       aggs_writer_.append<uint8_t>(collapsed_aggregate.data(), collapsed_aggregate.type().size);
-      new(archived_aggs + i) aggregate(collapsed_aggregate.type(), sum_aggregator, 1);
+      new(archived_aggs + i) aggregate(collapsed_aggregate.type(), aggregators::sum_aggregator(), 1);
       archived_aggs[i].seq_update(0, collapsed_aggregate, version);
     }
     reflog.aggregates().swap_ptr(archived_aggs);

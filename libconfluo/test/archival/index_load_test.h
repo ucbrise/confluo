@@ -49,7 +49,7 @@ class IndexLoadTest : public testing::Test {
 
   static schema_t schema() {
     schema_builder builder;
-    builder.add_column(UINT_TYPE, "a");
+    builder.add_column(primitive_types::UINT_TYPE(), "a");
     return schema_t(builder.get_columns());
   }
 
@@ -61,7 +61,8 @@ class IndexLoadTest : public testing::Test {
       auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
       ASSERT_EQ(aux.state_, storage::state_type::D_ARCHIVED);
     }
-    for (uint32_t i = reflog_archival_tail; i < reflog->size(); i += reflog_constants::BUCKET_SIZE) {
+    for (uint32_t i = static_cast<uint32_t>(reflog_archival_tail); i < reflog->size();
+         i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
       void *ptr = bucket_ptr.get().ptr();
@@ -89,10 +90,10 @@ TEST_F(IndexLoadTest, IndexLogLoadTest) {
     index_log indexes;
     index_id = indexes.push_back(&index);
     s[s.get_field_index("a")].set_indexing();
-    s[s.get_field_index("a")].set_indexed(index_id, configuration_params::INDEX_BUCKET_SIZE);
+    s[s.get_field_index("a")].set_indexed(static_cast<uint16_t>(index_id), configuration_params::INDEX_BUCKET_SIZE);
 
     archival::index_log_archiver archiver(path, &indexes, &s);
-    archiver.archive(1e6);
+    archiver.archive(static_cast<size_t>(1e6));
     verify(index);
   }
 

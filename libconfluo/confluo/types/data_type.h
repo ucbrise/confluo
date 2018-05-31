@@ -190,13 +190,6 @@ struct data_type {
   bool is_none() const;
 
   /**
-   * Determines whether this data type is primitive
-   *
-   * @return True if this is a primitive data type, false otherwise
-   */
-  bool is_primitive() const;
-
-  /**
    * Determines whether this data type is numeric
    *
    * @return True if this data type is numeric, false otherwise
@@ -209,13 +202,6 @@ struct data_type {
    * @return The name of this data type
    */
   std::string name() const;
-
-  /**
-   * Checks whether this data type is bounded by max and min values
-   *
-   * @return True if this data type is bounded, false otherwise
-   */
-  bool is_bounded() const;
 
   /**
    * Serializes information about this data type into an output stream

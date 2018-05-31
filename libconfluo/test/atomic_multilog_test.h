@@ -31,7 +31,7 @@ class AtomicMultilogTest : public testing::Test {
       read_only_data_log_ptr ptr;
       mlog.read(offsets[i], ptr);
       ASSERT_TRUE(ptr.get().ptr() != nullptr);
-      uint8_t expected = i % 256;
+      uint8_t expected = static_cast<uint8_t>(i % 256);
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(ptr[j], expected);
       }
@@ -90,14 +90,14 @@ class AtomicMultilogTest : public testing::Test {
 
   static std::vector<column_t> schema() {
     schema_builder builder;
-    builder.add_column(BOOL_TYPE, "a");
-    builder.add_column(CHAR_TYPE, "b");
-    builder.add_column(SHORT_TYPE, "c");
-    builder.add_column(INT_TYPE, "d");
-    builder.add_column(LONG_TYPE, "e");
-    builder.add_column(FLOAT_TYPE, "f");
-    builder.add_column(DOUBLE_TYPE, "g");
-    builder.add_column(STRING_TYPE(16), "h");
+    builder.add_column(primitive_types::BOOL_TYPE(), "a");
+    builder.add_column(primitive_types::CHAR_TYPE(), "b");
+    builder.add_column(primitive_types::SHORT_TYPE(), "c");
+    builder.add_column(primitive_types::INT_TYPE(), "d");
+    builder.add_column(primitive_types::LONG_TYPE(), "e");
+    builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+    builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+    builder.add_column(primitive_types::STRING_TYPE(16), "h");
     return builder.get_columns();
   }
 
@@ -107,13 +107,10 @@ class AtomicMultilogTest : public testing::Test {
     builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
     builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
     builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-    builder.add_record(
-        record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
+    builder.add_record(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
     builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    builder.add_record(
-        record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(
-        record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+    builder.add_record(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
@@ -125,10 +122,8 @@ class AtomicMultilogTest : public testing::Test {
     builder.add_record(record(ts, true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
     builder.add_record(record(ts, false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
     builder.add_record(record(ts, true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    builder.add_record(
-        record(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(
-        record(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
+    builder.add_record(record(ts, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
+    builder.add_record(record(ts, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
     return builder.get_batch();
   }
 
@@ -151,7 +146,7 @@ task_pool AtomicMultilogTest::MGMT_POOL;
 TEST_F(AtomicMultilogTest, AppendAndGetInMemoryTest) {
   atomic_multilog mlog(
       "my_table",
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
 }
@@ -159,7 +154,7 @@ TEST_F(AtomicMultilogTest, AppendAndGetInMemoryTest) {
 TEST_F(AtomicMultilogTest, AppendAndGetDurableTest) {
   atomic_multilog mlog(
       "my_table",
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
 }
@@ -167,7 +162,7 @@ TEST_F(AtomicMultilogTest, AppendAndGetDurableTest) {
 TEST_F(AtomicMultilogTest, AppendAndGetDurableRelaxedTest) {
   atomic_multilog mlog(
       "my_table",
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE_RELAXED, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
 }
@@ -271,7 +266,7 @@ TEST_F(AtomicMultilogTest, AppendAndGetRecordTest2) {
 TEST_F(AtomicMultilogTest, ArchiveTest) {
   atomic_multilog mlog(
       "my_table",
-      schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+      schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
   mlog.archive();

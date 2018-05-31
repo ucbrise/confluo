@@ -49,7 +49,7 @@ class size_type {
 
       for (unsigned int i = 0; i < num_order; i++) {
         if (type.compare(sizes[i]) == 0) {
-          byt = value * pow(1024, i);
+          byt = static_cast<uint64_t>(value * pow(1024, i));
           break;
         }
       }
@@ -92,139 +92,114 @@ void serialize<size_type>(std::ostream &out, const immutable_raw_data &value) {
 
 template<>
 void deserialize<size_type>(std::istream &in, mutable_raw_data &out) {
-  uint64_t val;
   in.read(reinterpret_cast<char *>(&out.ptr), sizeof(uint64_t));
 }
 
 template<>
-inline void add<size_type>(void *res, const immutable_raw_data &v1,
-                           const immutable_raw_data &v2) {
+inline void add<size_type>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   (*(reinterpret_cast<size_type *>(res))).set_bytes(
       v1.as<size_type>().get_bytes() + v2.as<size_type>().get_bytes());
 }
 
 template<>
-inline void subtract<size_type>(void *res, const immutable_raw_data &v1,
-                                const immutable_raw_data &v2) {
+inline void subtract<size_type>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   (*(reinterpret_cast<size_type *>(res))).set_bytes(
       v1.as<size_type>().get_bytes() - v2.as<size_type>().get_bytes());
 }
 
 template<>
-inline void multiply<size_type>(void *res, const immutable_raw_data &v1,
-                                const immutable_raw_data &v2) {
+inline void multiply<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 1");
 }
 
 template<>
-inline void divide<size_type>(void *res, const immutable_raw_data &v1,
-                              const immutable_raw_data &v2) {
+inline void divide<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 2");
 }
 
 template<>
-inline void modulo<size_type>(void *res, const immutable_raw_data &v1,
-                              const immutable_raw_data &v2) {
+inline void modulo<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 3");
 }
 
 template<>
-inline void bw_and<size_type>(void *res, const immutable_raw_data &v1,
-                              const immutable_raw_data &v2) {
+inline void bw_and<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 4");
 }
 
 template<>
-inline void bw_or<size_type>(void *res, const immutable_raw_data &v1,
-                             const immutable_raw_data &v2) {
+inline void bw_or<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 5");
 }
 
 template<>
-inline void bw_xor<size_type>(void *res, const immutable_raw_data &v1,
-                              const immutable_raw_data &v2) {
+inline void bw_xor<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 6");
 }
 
 template<>
-inline void bw_lshift<size_type>(void *res, const immutable_raw_data &v1,
-                                 const immutable_raw_data &v2) {
+inline void bw_lshift<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 7");
 }
 
 template<>
-inline void bw_rshift<size_type>(void *res, const immutable_raw_data &v1,
-                                 const immutable_raw_data &v2) {
+inline void bw_rshift<size_type>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 8");
 }
 
 template<>
 inline void assign<size_type>(void *res, const immutable_raw_data &v) {
-  (*(reinterpret_cast<size_type *>(res))).set_bytes(
-      v.as<size_type>().get_bytes());
+  (*(reinterpret_cast<size_type *>(res))).set_bytes(v.as<size_type>().get_bytes());
 }
 
 template<>
 inline void negative<size_type>(void *res, const immutable_raw_data &v) {
-  (*(reinterpret_cast<size_type *>(res))).set_bytes(
-      -v.as<size_type>().get_bytes());
+  (*(reinterpret_cast<size_type *>(res))).set_bytes(static_cast<uint64_t>(-v.as<size_type>().get_bytes()));
 }
 
 template<>
-inline void positive<size_type>(void *res, const immutable_raw_data &v) {
+inline void positive<size_type>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "operation not yet supported 10");
 }
 
 template<>
-inline void bw_not<size_type>(void *res, const immutable_raw_data &v) {
+inline void bw_not<size_type>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "operation not yet supported 11");
 }
 
 template<>
-inline bool less_than<size_type>(const immutable_raw_data &v1,
-                                 const immutable_raw_data &v2) {
+inline bool less_than<size_type>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 12");
 }
 
 template<>
-inline bool less_than_equals<size_type>(const immutable_raw_data &v1,
-                                        const immutable_raw_data &v2) {
+inline bool less_than_equals<size_type>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 13");
 }
 
 template<>
-inline bool greater_than<size_type>(const immutable_raw_data &v1,
-                                    const immutable_raw_data &v2) {
+inline bool greater_than<size_type>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<size_type>().get_bytes() > v2.as<size_type>().get_bytes();
-  //THROW(unsupported_exception, "operation not supported 69");
 }
 
 template<>
-inline bool greater_than_equals<size_type>(const immutable_raw_data &v1,
-                                           const immutable_raw_data &v2) {
+inline bool greater_than_equals<size_type>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 14");
 }
 
 template<>
-inline bool equals<size_type>(const immutable_raw_data &v1,
-                              const immutable_raw_data &v2) {
-  //std::cout << "v1: " << v1.as<size_type>().get_bytes() << std::endl;
-  //std::cout << "v2: " << v2.as<size_type>().get_bytes() << std::endl;
+inline bool equals<size_type>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<size_type>().get_bytes() == v2.as<size_type>().get_bytes();
 }
 
 template<>
-inline bool not_equals<size_type>(const immutable_raw_data &v1,
-                                  const immutable_raw_data &v2) {
+inline bool not_equals<size_type>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "operation not yet supported 16");
 }
 
 template<>
-byte_string key_transform<size_type>(const immutable_raw_data &v,
-                                     double bucket_size) {
-  //THROW(unsupported_exception, "operation not yet supported 17");
-  return byte_string(
-      static_cast<uint64_t>(v.as<size_type>().get_bytes() / bucket_size));
+byte_string key_transform<size_type>(const immutable_raw_data &v, double bucket_size) {
+  return byte_string(static_cast<uint64_t>(v.as<size_type>().get_bytes() / bucket_size));
 }
 
 static binary_ops_t get_binarops() {
@@ -235,13 +210,11 @@ static binary_ops_t get_binarops() {
 }
 
 static unary_ops_t get_unarops() {
-  return {assign<size_type>, negative<size_type>,
-          positive<size_type>, bw_not<size_type>};
+  return {assign<size_type>, negative<size_type>, positive<size_type>, bw_not<size_type>};
 }
 
 static rel_ops_t get_reops() {
-  return {less_than<size_type>, less_than_equals<size_type>,
-          greater_than<size_type>, greater_than_equals<size_type>,
+  return {less_than<size_type>, less_than_equals<size_type>, greater_than<size_type>, greater_than_equals<size_type>,
           equals<size_type>, not_equals<size_type>};
 }
 

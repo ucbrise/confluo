@@ -9,15 +9,12 @@ const uint8_t index_state_t::INDEXED;
 index_state_t::index_state_t()
     : state_(UNINDEXED),
       id_(UINT16_MAX),
-      bucket_size_(1) {
-}
+      bucket_size_(1) {}
 
 index_state_t::index_state_t(const index_state_t &other)
     : state_(atomic::load(&other.state_)),
       id_(other.id_),
-      bucket_size_(other.bucket_size_) {
-
-}
+      bucket_size_(other.bucket_size_) {}
 
 uint16_t index_state_t::id() const {
   return id_;

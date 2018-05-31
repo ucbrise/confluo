@@ -5,56 +5,55 @@ namespace confluo {
 data_type max(const data_type &t1, const data_type &t2) {
   return type_manager::get_type(std::max(t1.id, t2.id));
 }
-
 numeric::numeric()
-    : type_(NONE_TYPE) {
+    : type_(primitive_types::NONE_TYPE()) {
 }
 numeric::numeric(data_type type)
     : type_(type) {
   memcpy(data_, type_.zero(), type_.size);
 }
 numeric::numeric(bool val)
-    : type_(BOOL_TYPE) {
+    : type_(primitive_types::BOOL_TYPE()) {
   as<bool>() = val;
 }
 numeric::numeric(int8_t val)
-    : type_(CHAR_TYPE) {
+    : type_(primitive_types::CHAR_TYPE()) {
   as<int8_t>() = val;
 }
 numeric::numeric(uint8_t val)
-    : type_(UCHAR_TYPE) {
+    : type_(primitive_types::UCHAR_TYPE()) {
   as<uint8_t>() = val;
 }
 numeric::numeric(int16_t val)
-    : type_(SHORT_TYPE) {
+    : type_(primitive_types::SHORT_TYPE()) {
   as<int16_t>() = val;
 }
 numeric::numeric(uint16_t val)
-    : type_(USHORT_TYPE) {
+    : type_(primitive_types::USHORT_TYPE()) {
   as<uint16_t>() = val;
 }
 numeric::numeric(int32_t val)
-    : type_(INT_TYPE) {
+    : type_(primitive_types::INT_TYPE()) {
   as<int32_t>() = val;
 }
 numeric::numeric(uint32_t val)
-    : type_(UINT_TYPE) {
+    : type_(primitive_types::UINT_TYPE()) {
   as<uint32_t>() = val;
 }
 numeric::numeric(int64_t val)
-    : type_(LONG_TYPE) {
+    : type_(primitive_types::LONG_TYPE()) {
   as<int64_t>() = val;
 }
 numeric::numeric(uint64_t val)
-    : type_(ULONG_TYPE) {
+    : type_(primitive_types::ULONG_TYPE()) {
   as<uint64_t>() = val;
 }
 numeric::numeric(float val)
-    : type_(FLOAT_TYPE) {
+    : type_(primitive_types::FLOAT_TYPE()) {
   as<float>() = val;
 }
 numeric::numeric(double val)
-    : type_(DOUBLE_TYPE) {
+    : type_(primitive_types::DOUBLE_TYPE()) {
   as<double>() = val;
 }
 numeric::numeric(const data_type &type, void *data)
@@ -169,57 +168,57 @@ numeric &numeric::operator=(const immutable_value &other) {
   return *this;
 }
 numeric &numeric::operator=(bool value) {
-  type_ = BOOL_TYPE;
+  type_ = primitive_types::BOOL_TYPE();
   as<bool>() = value;
   return *this;
 }
 numeric &numeric::operator=(int8_t value) {
-  type_ = CHAR_TYPE;
+  type_ = primitive_types::CHAR_TYPE();
   as<int8_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(uint8_t value) {
-  type_ = UCHAR_TYPE;
+  type_ = primitive_types::UCHAR_TYPE();
   as<uint8_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(int16_t value) {
-  type_ = SHORT_TYPE;
+  type_ = primitive_types::SHORT_TYPE();
   as<int16_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(uint16_t value) {
-  type_ = USHORT_TYPE;
+  type_ = primitive_types::USHORT_TYPE();
   as<uint16_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(int32_t value) {
-  type_ = INT_TYPE;
+  type_ = primitive_types::INT_TYPE();
   as<int32_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(uint32_t value) {
-  type_ = UINT_TYPE;
+  type_ = primitive_types::UINT_TYPE();
   as<uint32_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(int64_t value) {
-  type_ = LONG_TYPE;
+  type_ = primitive_types::LONG_TYPE();
   as<int64_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(uint64_t value) {
-  type_ = ULONG_TYPE;
+  type_ = primitive_types::ULONG_TYPE();
   as<uint64_t>() = value;
   return *this;
 }
 numeric &numeric::operator=(float value) {
-  type_ = FLOAT_TYPE;
+  type_ = primitive_types::FLOAT_TYPE();
   as<float>() = value;
   return *this;
 }
 numeric &numeric::operator=(double value) {
-  type_ = DOUBLE_TYPE;
+  type_ = primitive_types::DOUBLE_TYPE();
   as<double>() = value;
   return *this;
 }
@@ -232,17 +231,7 @@ data_type numeric::type() {
 uint8_t *numeric::data() {
   return data_;
 }
-
 numeric cast(const numeric &val, const data_type &type) {
-  return CAST_OPS[val.type().id][type.id](val);
+  return cast_ops::instance()[val.type().id][type.id](val);
 }
-
-std::vector<std::vector<cast_fn>> CAST_OPS = {
-    init_type_cast_ops<void>(), init_type_cast_ops<bool>(), init_type_cast_ops<
-        int8_t>(), init_type_cast_ops<uint8_t>(), init_type_cast_ops<int16_t>(),
-    init_type_cast_ops<uint16_t>(), init_type_cast_ops<int32_t>(),
-    init_type_cast_ops<uint32_t>(), init_type_cast_ops<int64_t>(),
-    init_type_cast_ops<uint64_t>(), init_type_cast_ops<float>(),
-    init_type_cast_ops<double>()};
-
 }

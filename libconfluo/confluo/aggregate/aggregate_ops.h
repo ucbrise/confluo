@@ -26,8 +26,6 @@ struct aggregator {
 };
 
 // Standard aggregates: sum, min, max, count
-extern numeric count_one;
-
 /**
  * Sums two numerics
  * @param a First numeric
@@ -67,31 +65,74 @@ numeric count_agg(const numeric &a, const numeric &b);
  */
 numeric invalid_agg(const numeric &a, const numeric &b);
 
-/**
- * The invalid aggregator
- */
-extern aggregator invalid_aggregator;
-/**
- * The sum aggregator
- */
-extern aggregator sum_aggregator;
-/**
- * The min aggregator
- */
-extern aggregator min_aggregator;
-/**
- * The max aggregator
- */
-extern aggregator max_aggregator;
-/**
- * The count aggregator.
- */
-extern aggregator count_aggregator;
+class aggregators {
+ public:
+  static numeric &count_one() {
+    static numeric count_one(UINT64_C(1));
+    return count_one;
+  }
 
-/**
- * A vector containing the aggregators
- */
-extern std::vector<aggregator> AGGREGATORS;
+  static aggregator &invalid_aggregator() {
+    static aggregator agg{"invalid", invalid_agg, invalid_agg, data_type(0, 0), numeric()};
+    return agg;
+  }
+
+  static aggregator &sum_aggregator() {
+    static aggregator agg{"sum", sum_agg, sum_agg, primitive_types::DOUBLE_TYPE(),
+                          numeric(primitive_types::DOUBLE_TYPE(), primitive_types::DOUBLE_TYPE().zero())};
+    return agg;
+  }
+
+  static aggregator &min_aggregator() {
+    static aggregator agg{"min", min_agg, min_agg, primitive_types::DOUBLE_TYPE(),
+                          numeric(primitive_types::DOUBLE_TYPE(), primitive_types::DOUBLE_TYPE().max())};
+    return agg;
+  }
+
+  static aggregator &max_aggregator() {
+    static aggregator agg{"max", max_agg, max_agg, primitive_types::DOUBLE_TYPE(),
+                          numeric(primitive_types::DOUBLE_TYPE(), primitive_types::DOUBLE_TYPE().min())};
+    return agg;
+  }
+
+  static aggregator &count_aggregator() {
+    static aggregator agg{"count", count_agg, sum_agg, primitive_types::ULONG_TYPE(),
+                          numeric(primitive_types::ULONG_TYPE(), primitive_types::ULONG_TYPE().zero())};
+    return agg;
+  }
+
+  static aggregators &instance() {
+    static aggregators instance;
+    return instance;
+  }
+
+  aggregator const &at(size_t i) const {
+    return aggregators_[i];
+  }
+
+  aggregator &operator[](size_t i) {
+    return aggregators_[i];
+  }
+
+  void push_back(const aggregator &agg) {
+    aggregators_.push_back(agg);
+  }
+
+  void push_back(aggregator &&agg) {
+    aggregators_.push_back(std::move(agg));
+  }
+
+  size_t size() const {
+    return aggregators_.size();
+  }
+
+ private:
+  aggregators() : aggregators_{aggregators::invalid_aggregator(), aggregators::sum_aggregator(),
+                               aggregators::min_aggregator(), aggregators::max_aggregator(),
+                               aggregators::count_aggregator()} {}
+
+  std::vector<aggregator> aggregators_;
+};
 
 /** The type of aggregate */
 typedef size_t aggregate_type;

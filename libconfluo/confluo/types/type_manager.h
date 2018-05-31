@@ -38,49 +38,87 @@ class type_manager {
    */
   static data_type get_type(size_t id, size_t size = 0);
 
-  /**
-   * Checks if type is valid
-   *
-   * @param id Id to check.
-   * @return True if id is valid, false otherwise
-   */
-  static bool is_valid_id(size_t id);
-
-  /**
-   * Checks if type is primitive
-   *
-   * @param id Id to check.
-   * @return True if id is primitive, false otherwise
-   */
-  static bool is_primitive(size_t id);
 };
 
-/** The none data type */
-extern data_type NONE_TYPE;
-/** The boolean data type */
-extern data_type BOOL_TYPE;
-/** The character data type */
-extern data_type CHAR_TYPE;
-/** The unsigned character data type */
-extern data_type UCHAR_TYPE;
-/** The short data type */
-extern data_type SHORT_TYPE;
-/** The unsigned short data type */
-extern data_type USHORT_TYPE;
-/** The integer data type */
-extern data_type INT_TYPE;
-/** The unsigned integer data type */
-extern data_type UINT_TYPE;
-/** The long data type */
-extern data_type LONG_TYPE;
-/** The unsigned long data type */
-extern data_type ULONG_TYPE;
-/** The single precision floating point data type */
-extern data_type FLOAT_TYPE;
-/** The double precision floating point data type */
-extern data_type DOUBLE_TYPE;
-/** The string data type */
-data_type STRING_TYPE(size_t size);
+class primitive_types {
+ public:
+  /** The none data type */
+  static data_type &NONE_TYPE() {
+    static data_type none_type(0, 0);
+    return none_type;
+  }
+
+  /** The boolean data type */
+  static data_type &BOOL_TYPE() {
+    static data_type bool_type(primitive_type::D_BOOL, sizeof(bool));
+    return bool_type;
+  }
+
+  /** The character data type */
+  static data_type &CHAR_TYPE() {
+    static data_type char_type(primitive_type::D_CHAR, sizeof(int8_t));
+    return char_type;
+  }
+
+  /** The unsigned character data type */
+  static data_type &UCHAR_TYPE() {
+    static data_type uchar_type(primitive_type::D_UCHAR, sizeof(uint8_t));
+    return uchar_type;
+  }
+
+  /** The short data type */
+  static data_type &SHORT_TYPE() {
+    static data_type short_type(primitive_type::D_SHORT, sizeof(int16_t));
+    return short_type;
+  }
+
+  /** The unsigned short data type */
+  static data_type &USHORT_TYPE() {
+    static data_type ushort_type(primitive_type::D_USHORT, sizeof(uint16_t));
+    return ushort_type;
+  }
+
+  /** The integer data type */
+  static data_type &INT_TYPE() {
+    static data_type int_type(primitive_type::D_INT, sizeof(int32_t));
+    return int_type;
+  }
+
+  /** The unsigned integer data type */
+  static data_type &UINT_TYPE() {
+    static data_type unit_type(primitive_type::D_UINT, sizeof(uint32_t));
+    return unit_type;
+  }
+
+  /** The long data type */
+  static data_type &LONG_TYPE() {
+    static data_type long_type(primitive_type::D_LONG, sizeof(int64_t));
+    return long_type;
+  }
+
+  /** The unsigned long data type */
+  static data_type &ULONG_TYPE() {
+    static data_type ulong_type(primitive_type::D_ULONG, sizeof(uint64_t));
+    return ulong_type;
+  }
+
+  /** The single precision floating point data type */
+  static data_type &FLOAT_TYPE() {
+    static data_type float_type(primitive_type::D_FLOAT, sizeof(float));
+    return float_type;
+  }
+
+  /** The double precision floating point data type */
+  static data_type &DOUBLE_TYPE() {
+    static data_type double_type(primitive_type::D_DOUBLE, sizeof(double));
+    return double_type;
+  }
+
+  /** The string data type */
+  static data_type STRING_TYPE(size_t size) {
+    return data_type(primitive_type::D_STRING, size);
+  }
+};
 
 }
 

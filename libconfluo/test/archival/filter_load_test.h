@@ -17,10 +17,10 @@ class FilterLoadTest : public testing::Test {
  public:
   typedef archival::filter_log_archiver filter_log_archiver_t;
 
-  static const uint64_t kMaxEntries = 1e6;
-  static const uint64_t kTimeBlock = 1e3;
+  static const uint64_t kMaxEntries = static_cast<const uint64_t>(1e6);
+  static const uint64_t kTimeBlock = static_cast<const uint64_t>(1e3);
   static const uint64_t kPerTimeBlock = 10;
-  static const uint64_t kMillisecs = 1e6;
+  static const uint64_t kMillisecs = static_cast<const uint64_t>(1e6);
   static const uint64_t record_size = 16;
 
   struct data_point {
@@ -37,7 +37,7 @@ class FilterLoadTest : public testing::Test {
     schema_t schema = build_schema();
     for (size_t i = start; i < start + kMaxEntries / kPerTimeBlock; i++) {
       for (size_t j = i * kPerTimeBlock; j < (i + 1) * kPerTimeBlock; j++) {
-        data_point p(i * kTimeBlock, j);
+        data_point p(i * kTimeBlock, static_cast<int64_t>(j));
         size_t off = log.append(reinterpret_cast<uint8_t *>(&p), schema.record_size());
         record_t r = schema.apply_unsafe(off, reinterpret_cast<uint8_t *>(&p));
         f.update(r);
@@ -46,7 +46,7 @@ class FilterLoadTest : public testing::Test {
   }
 
   schema_t build_schema() {
-    return schema_t(schema_builder().add_column(LONG_TYPE, "long_field").get_columns());
+    return schema_t(schema_builder().add_column(primitive_types::LONG_TYPE(), "long_field").get_columns());
   }
 
   void verify(filter &f) {
@@ -54,7 +54,7 @@ class FilterLoadTest : public testing::Test {
     for (size_t t = 0; t < 100; t++) {
       reflog const *s = f.lookup(t);
       size_t size = s->size();
-      for (uint32_t i = accum; i < accum + size; i++) {
+      for (uint32_t i = static_cast<uint32_t>(accum); i < accum + size; i++) {
         ASSERT_EQ(i * 16, s->at(i - accum));
       }
       accum += size;

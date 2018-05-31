@@ -31,8 +31,7 @@ type_properties::type_properties(const std::string &_name,
       parse_op(_parse),
       to_string_op(_to_string),
       serialize_op(_serialize),
-      deserialize_op(_deserialize) {
-}
+      deserialize_op(_deserialize) {}
 
 template<typename T>
 type_properties build_properties(const std::string &name,
@@ -42,8 +41,21 @@ type_properties build_properties(const std::string &name,
                                  void *max,
                                  void *one,
                                  void *zero) {
-  return type_properties(name, size, min, max, one, zero, is_numeric, init_relops<T>(), init_unaryops<T>(),
-                         init_binaryops<T>(), key_transform<T>, parse<T>, to_string<T>, serialize<T>, deserialize<T>);
+  return type_properties(name,
+                         size,
+                         min,
+                         max,
+                         one,
+                         zero,
+                         is_numeric,
+                         init_relops<T>(),
+                         init_unaryops<T>(),
+                         init_binaryops<T>(),
+                         key_transform<T>,
+                         parse<T>,
+                         to_string<T>,
+                         serialize<T>,
+                         deserialize<T>);
 }
 
 std::vector<type_properties> detail::init_primitives() {

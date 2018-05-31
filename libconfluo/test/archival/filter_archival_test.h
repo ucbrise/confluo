@@ -15,10 +15,10 @@ using namespace ::confluo::archival;
 class FilterArchivalTest : public testing::Test {
  public:
 
-  static const uint64_t kMaxEntries = 1e6;
-  static const uint64_t kTimeBlock = 1e3;
+  static const uint64_t kMaxEntries = static_cast<const uint64_t>(1e6);
+  static const uint64_t kTimeBlock = static_cast<const uint64_t>(1e3);
   static const uint64_t kPerTimeBlock = 10;
-  static const uint64_t kMillisecs = 1e6;
+  static const uint64_t kMillisecs = static_cast<const uint64_t>(1e6);
 
   struct data_point {
     int64_t ts;
@@ -34,13 +34,15 @@ class FilterArchivalTest : public testing::Test {
     ASSERT_TRUE(thread_manager::register_thread() != -1);
     for (size_t i = 0; i < kMaxEntries / kPerTimeBlock; i++) {
       for (size_t j = i * kPerTimeBlock; j < (i + 1) * kPerTimeBlock; j++) {
-        data_point p(i * kTimeBlock, j);
+        data_point p(i * kTimeBlock, static_cast<int64_t>(j));
         record_t r(j, reinterpret_cast<uint8_t *>(&p), sizeof(data_point));
-        r.push_back(field_t(0, LONG_TYPE, r.data(), false, 0, 0.0));
-        r.push_back(
-            field_t(1, LONG_TYPE,
-                    reinterpret_cast<char *>(r.data()) + sizeof(int64_t), false, 0,
-                    0.0));
+        r.push_back(field_t(0, primitive_types::LONG_TYPE(), r.data(), false, 0, 0.0));
+        r.push_back(field_t(1,
+                            primitive_types::LONG_TYPE(),
+                            reinterpret_cast<char *>(r.data()) + sizeof(int64_t),
+                            false,
+                            0,
+                            0.0));
         f.update(r);
       }
     }
@@ -53,7 +55,7 @@ class FilterArchivalTest : public testing::Test {
       reflog const *s = f.lookup(t);
       size_t size = s->size();
       ASSERT_EQ(static_cast<size_t>(10000), size);
-      for (uint32_t i = accum; i < accum + size; i++) {
+      for (uint32_t i = static_cast<uint32_t>(accum); i < accum + size; i++) {
         ASSERT_EQ(i, s->at(i - accum));
       }
       accum += size;
@@ -68,7 +70,8 @@ class FilterArchivalTest : public testing::Test {
       auto aux = storage::ptr_aux_block::get(storage::ptr_metadata::get(bucket_ptr.get().ptr()));
       ASSERT_EQ(aux.state_, storage::state_type::D_ARCHIVED);
     }
-    for (uint32_t i = reflog_archival_tail; i < reflog->size(); i += reflog_constants::BUCKET_SIZE) {
+    for (uint32_t i = static_cast<uint32_t>(reflog_archival_tail); i < reflog->size();
+         i += reflog_constants::BUCKET_SIZE) {
       storage::read_only_encoded_ptr<uint64_t> bucket_ptr;
       reflog->ptr(i, bucket_ptr);
       void *ptr = bucket_ptr.get().ptr();

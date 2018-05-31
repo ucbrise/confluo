@@ -80,7 +80,7 @@ inline void assign<std::string>(void *res, const immutable_raw_data &v) {
  * @param v The raw immutable data to copy
  */
 template<>
-inline void assign<void>(void *res, const immutable_raw_data &v) {
+inline void assign<void>(void *, const immutable_raw_data &v) {
   return;
 }
 
@@ -106,7 +106,7 @@ inline void negative(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void negative<std::string>(void *res, const immutable_raw_data &v) {
+inline void negative<std::string>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "- not supported for string type");
 }
 
@@ -120,7 +120,7 @@ inline void negative<std::string>(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void negative<void>(void *res, const immutable_raw_data &v) {
+inline void negative<void>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "- not supported for none type");
 }
 
@@ -146,7 +146,7 @@ inline void positive(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void positive<std::string>(void *res, const immutable_raw_data &v) {
+inline void positive<std::string>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "+ not supported for string type");
 }
 
@@ -160,7 +160,7 @@ inline void positive<std::string>(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void positive<void>(void *res, const immutable_raw_data &v) {
+inline void positive<void>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "+ not supported for none type");
 }
 
@@ -187,7 +187,7 @@ inline void add(void *res, const immutable_raw_data &v1, const immutable_raw_dat
  * @param v2 The second operand of the addition expression
  */
 template<>
-inline void add<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void add<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "+ not supported for string type");
 }
 
@@ -201,7 +201,7 @@ inline void add<std::string>(void *res, const immutable_raw_data &v1, const immu
  * @throw unsupported_exception
  */
 template<>
-inline void add<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void add<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "+ not supported for none type");
 }
 
@@ -228,7 +228,7 @@ inline void subtract(void *res, const immutable_raw_data &v1, const immutable_ra
  * @throw unsupported_exception
  */
 template<>
-inline void subtract<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void subtract<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "- not supported for string type");
 }
 
@@ -242,7 +242,7 @@ inline void subtract<std::string>(void *res, const immutable_raw_data &v1, const
  * @throw unsupported_exception
  */
 template<>
-inline void subtract<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void subtract<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "- not supported for none type");
 }
 
@@ -284,7 +284,7 @@ inline void multiply<bool>(void *res, const immutable_raw_data &v1, const immuta
  * @throw unsupported_exception
  */
 template<>
-inline void multiply<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void multiply<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "* not supported for string type");
 }
 
@@ -298,7 +298,7 @@ inline void multiply<std::string>(void *res, const immutable_raw_data &v1, const
  * @throw unsupported_exception
  */
 template<>
-inline void multiply<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void multiply<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "* not supported for none type");
 }
 
@@ -326,7 +326,7 @@ inline void divide(void *res, const immutable_raw_data &v1, const immutable_raw_
  * @throw unsupported_exception
  */
 template<>
-inline void divide<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void divide<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "/ not supported for string type");
 }
 
@@ -340,7 +340,7 @@ inline void divide<std::string>(void *res, const immutable_raw_data &v1, const i
  * @throw unsupported_exception
  */
 template<>
-inline void divide<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void divide<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "/ not supported for none type");
 }
 
@@ -368,7 +368,7 @@ inline void modulo(void *res, const immutable_raw_data &v1, const immutable_raw_
  * @throw unsupported_exception
  */
 template<>
-inline void modulo<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void modulo<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "% not supported for string type");
 }
 
@@ -382,7 +382,7 @@ inline void modulo<std::string>(void *res, const immutable_raw_data &v1, const i
  * @throw unsupported_exception
  */
 template<>
-inline void modulo<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void modulo<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "% not supported for none type");
 }
 
@@ -396,7 +396,7 @@ inline void modulo<void>(void *res, const immutable_raw_data &v1, const immutabl
  * @throw unsupported_exception
  */
 template<>
-inline void modulo<float>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void modulo<float>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "% not supported for float type");
 }
 
@@ -410,7 +410,7 @@ inline void modulo<float>(void *res, const immutable_raw_data &v1, const immutab
  * @throw unsupported_exception
  */
 template<>
-inline void modulo<double>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void modulo<double>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "% not supported for double type");
 }
 
@@ -451,7 +451,7 @@ inline void bw_not<bool>(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void bw_not<std::string>(void *res, const immutable_raw_data &v) {
+inline void bw_not<std::string>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "~ not supported for string type");
 }
 
@@ -464,7 +464,7 @@ inline void bw_not<std::string>(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void bw_not<void>(void *res, const immutable_raw_data &v) {
+inline void bw_not<void>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "~ not supported for none type");
 }
 
@@ -477,7 +477,7 @@ inline void bw_not<void>(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void bw_not<float>(void *res, const immutable_raw_data &v) {
+inline void bw_not<float>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "~ not supported for float type");
 }
 
@@ -490,7 +490,7 @@ inline void bw_not<float>(void *res, const immutable_raw_data &v) {
  * @throw unsupported_exception
  */
 template<>
-inline void bw_not<double>(void *res, const immutable_raw_data &v) {
+inline void bw_not<double>(void *, const immutable_raw_data &v) {
   THROW(unsupported_exception, "~ not supported for double type");
 }
 
@@ -518,7 +518,7 @@ inline void bw_and(void *res, const immutable_raw_data &v1, const immutable_raw_
  * @throw unsupported_exception
  */
 template<>
-inline void bw_and<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_and<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "& not supported for string type");
 }
 
@@ -532,7 +532,7 @@ inline void bw_and<std::string>(void *res, const immutable_raw_data &v1, const i
  * @throw unsupported_exception
  */
 template<>
-inline void bw_and<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_and<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "& not supported for none type");
 }
 
@@ -546,7 +546,7 @@ inline void bw_and<void>(void *res, const immutable_raw_data &v1, const immutabl
  * @throw unsupported_exception
  */
 template<>
-inline void bw_and<float>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_and<float>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "& not supported for float type");
 }
 
@@ -560,7 +560,7 @@ inline void bw_and<float>(void *res, const immutable_raw_data &v1, const immutab
  * @throw unsupported_exception
  */
 template<>
-inline void bw_and<double>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_and<double>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "& not supported for double type");
 }
 
@@ -588,7 +588,7 @@ inline void bw_or(void *res, const immutable_raw_data &v1, const immutable_raw_d
  * @throw unsupported_exception
  */
 template<>
-inline void bw_or<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_or<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "| not supported for string type");
 }
 
@@ -602,7 +602,7 @@ inline void bw_or<std::string>(void *res, const immutable_raw_data &v1, const im
  * @throw unsupported_exception
  */
 template<>
-inline void bw_or<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_or<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "| not supported for none type");
 }
 
@@ -616,7 +616,7 @@ inline void bw_or<void>(void *res, const immutable_raw_data &v1, const immutable
  * @throw unsupported_exception
  */
 template<>
-inline void bw_or<float>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_or<float>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "| not supported for float type");
 }
 
@@ -630,7 +630,7 @@ inline void bw_or<float>(void *res, const immutable_raw_data &v1, const immutabl
  * @throw unsupported_exception
  */
 template<>
-inline void bw_or<double>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_or<double>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "| not supported for double type");
 }
 
@@ -659,7 +659,7 @@ inline void bw_xor(void *res, const immutable_raw_data &v1, const immutable_raw_
  * @throw unsupported_exception
  */
 template<>
-inline void bw_xor<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_xor<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "^ not supported for string type");
 }
 
@@ -673,7 +673,7 @@ inline void bw_xor<std::string>(void *res, const immutable_raw_data &v1, const i
  * @throw unsupported_exception
  */
 template<>
-inline void bw_xor<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_xor<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "^ not supported for none type");
 }
 
@@ -687,7 +687,7 @@ inline void bw_xor<void>(void *res, const immutable_raw_data &v1, const immutabl
  * @throw unsupported_exception
  */
 template<>
-inline void bw_xor<float>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_xor<float>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "^ not supported for float type");
 }
 
@@ -701,7 +701,7 @@ inline void bw_xor<float>(void *res, const immutable_raw_data &v1, const immutab
  * @throw unsupported_exception
  */
 template<>
-inline void bw_xor<double>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_xor<double>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "^ not supported for double type");
 }
 
@@ -729,7 +729,7 @@ inline void bw_lshift(void *res, const immutable_raw_data &v1, const immutable_r
  * @throw unsupported_exception
  */
 template<>
-inline void bw_lshift<bool>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_lshift<bool>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "<< not supported for bool type");
 }
 
@@ -743,7 +743,7 @@ inline void bw_lshift<bool>(void *res, const immutable_raw_data &v1, const immut
  * @throw unsupported_exception
  */
 template<>
-inline void bw_lshift<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_lshift<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "<< not supported for string type");
 }
 
@@ -757,7 +757,7 @@ inline void bw_lshift<std::string>(void *res, const immutable_raw_data &v1, cons
  * @throw unsupported_exception
  */
 template<>
-inline void bw_lshift<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_lshift<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "<< not supported for none type");
 }
 
@@ -771,7 +771,7 @@ inline void bw_lshift<void>(void *res, const immutable_raw_data &v1, const immut
  * @throw unsupported_exception
  */
 template<>
-inline void bw_lshift<float>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_lshift<float>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "<< not supported for float type");
 }
 
@@ -785,7 +785,7 @@ inline void bw_lshift<float>(void *res, const immutable_raw_data &v1, const immu
  * @throw unsupported_exception
  */
 template<>
-inline void bw_lshift<double>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_lshift<double>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "<< not supported for double type");
 }
 
@@ -813,7 +813,7 @@ inline void bw_rshift(void *res, const immutable_raw_data &v1, const immutable_r
  * @throw unsupported_exception
  */
 template<>
-inline void bw_rshift<bool>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_rshift<bool>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, ">> not supported for bool type");
 }
 
@@ -827,7 +827,7 @@ inline void bw_rshift<bool>(void *res, const immutable_raw_data &v1, const immut
  * @throw unsupported_exception
  */
 template<>
-inline void bw_rshift<std::string>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_rshift<std::string>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, ">> not supported for string type");
 }
 
@@ -841,7 +841,7 @@ inline void bw_rshift<std::string>(void *res, const immutable_raw_data &v1, cons
  * @throw unsupported_exception
  */
 template<>
-inline void bw_rshift<void>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_rshift<void>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, ">> not supported for none type");
 }
 
@@ -855,7 +855,7 @@ inline void bw_rshift<void>(void *res, const immutable_raw_data &v1, const immut
  * @throw unsupported_exception
  */
 template<>
-inline void bw_rshift<float>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_rshift<float>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, ">> not supported for float type");
 }
 
@@ -869,7 +869,7 @@ inline void bw_rshift<float>(void *res, const immutable_raw_data &v1, const immu
  * @throw unsupported_exception
  */
 template<>
-inline void bw_rshift<double>(void *res, const immutable_raw_data &v1, const immutable_raw_data &v2) {
+inline void bw_rshift<double>(void *, const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, ">> not supported for double type");
 }
 
@@ -881,7 +881,7 @@ inline void bw_rshift<double>(void *res, const immutable_raw_data &v1, const imm
  * @return A vector containing the unary operator functions
  */
 template<typename T>
-static unary_ops_t init_unaryops() {
+inline unary_ops_t init_unaryops() {
   return {assign<T>, negative<T>, positive<T>, bw_not<T>};
 }
 
@@ -893,9 +893,9 @@ static unary_ops_t init_unaryops() {
  * @return A vector containing the binary operator functions
  */
 template<typename T>
-static binary_ops_t init_binaryops() {
-  return {add<T>, subtract<T>, multiply<T>, divide<T>,
-          modulo<T>, bw_and<T>, bw_or<T>, bw_xor<T>, bw_lshift<T>, bw_rshift<T>};
+inline binary_ops_t init_binaryops() {
+  return {add<T>, subtract<T>, multiply<T>, divide<T>, modulo<T>, bw_and<T>, bw_or<T>, bw_xor<T>, bw_lshift<T>,
+          bw_rshift<T>};
 }
 
 }

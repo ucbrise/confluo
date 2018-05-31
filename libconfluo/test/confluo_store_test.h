@@ -31,7 +31,7 @@ class ConfluoStoreTest : public testing::Test {
       read_only_data_log_ptr ptr;
       dtable.read(offsets[i], ptr);
       ASSERT_TRUE(ptr.get().ptr() != nullptr);
-      uint8_t expected = i % 256;
+      uint8_t expected = static_cast<uint8_t>(i % 256);
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(ptr[j], expected);
       }
@@ -79,14 +79,14 @@ class ConfluoStoreTest : public testing::Test {
 
   static std::vector<column_t> schema() {
     schema_builder builder;
-    builder.add_column(BOOL_TYPE, "a");
-    builder.add_column(CHAR_TYPE, "b");
-    builder.add_column(SHORT_TYPE, "c");
-    builder.add_column(INT_TYPE, "d");
-    builder.add_column(LONG_TYPE, "e");
-    builder.add_column(FLOAT_TYPE, "f");
-    builder.add_column(DOUBLE_TYPE, "g");
-    builder.add_column(STRING_TYPE(16), "h");
+    builder.add_column(primitive_types::BOOL_TYPE(), "a");
+    builder.add_column(primitive_types::CHAR_TYPE(), "b");
+    builder.add_column(primitive_types::SHORT_TYPE(), "c");
+    builder.add_column(primitive_types::INT_TYPE(), "d");
+    builder.add_column(primitive_types::LONG_TYPE(), "e");
+    builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+    builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+    builder.add_column(primitive_types::STRING_TYPE(16), "h");
     return builder.get_columns();
   }
 

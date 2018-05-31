@@ -86,21 +86,21 @@ class ClientWriteOpsTest : public testing::Test {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         atomic_multilog_name,
-        schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+        schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
         mode);
     return store;
   }
 
   static std::vector<column_t> schema() {
     schema_builder builder;
-    builder.add_column(BOOL_TYPE, "a");
-    builder.add_column(CHAR_TYPE, "b");
-    builder.add_column(SHORT_TYPE, "c");
-    builder.add_column(INT_TYPE, "d");
-    builder.add_column(LONG_TYPE, "e");
-    builder.add_column(FLOAT_TYPE, "f");
-    builder.add_column(DOUBLE_TYPE, "g");
-    builder.add_column(STRING_TYPE(16), "h");
+    builder.add_column(primitive_types::BOOL_TYPE(), "a");
+    builder.add_column(primitive_types::CHAR_TYPE(), "b");
+    builder.add_column(primitive_types::SHORT_TYPE(), "c");
+    builder.add_column(primitive_types::INT_TYPE(), "d");
+    builder.add_column(primitive_types::LONG_TYPE(), "e");
+    builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+    builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+    builder.add_column(primitive_types::STRING_TYPE(16), "h");
     return builder.get_columns();
   }
 
@@ -135,8 +135,7 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
 
   client.create_atomic_multilog(
       atomic_multilog_name,
-      schema_t(
-          schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns()),
+      schema_t(schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns()),
       storage::IN_MEMORY);
 
   client.disconnect();
@@ -665,14 +664,14 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   }
 
   size_t first_count = 0;
-  for (auto a = mlog->get_alerts(beg, end); a->has_more(); a->advance()) {
+  for (auto a = mlog->get_alerts(static_cast<uint64_t>(beg), static_cast<uint64_t>(end)); a->has_more(); a->advance()) {
     first_count++;
   }
 
   client.remove_trigger("trigger2");
   sleep(1);
   size_t second_count = 0;
-  for (auto a = mlog->get_alerts(beg, end); a->has_more(); a->advance()) {
+  for (auto a = mlog->get_alerts(static_cast<uint64_t>(beg), static_cast<uint64_t>(end)); a->has_more(); a->advance()) {
     second_count++;
   }
 

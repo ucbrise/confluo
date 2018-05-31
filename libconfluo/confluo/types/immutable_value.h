@@ -20,7 +20,7 @@ class immutable_value {
    *
    * @param type The data type to create an immutable value from
    */
-  immutable_value(const data_type &type = NONE_TYPE);
+  immutable_value(const data_type &type = primitive_types::NONE_TYPE());
 
   /**
    * Constructs an immutable value from a given data type and pointer to

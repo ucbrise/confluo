@@ -16,35 +16,35 @@ mutable_value::mutable_value(const data_type &type, const void *value)
   }
 }
 mutable_value::mutable_value(bool value)
-    : immutable_value(BOOL_TYPE, new uint8_t[BOOL_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, BOOL_TYPE.size));
+    : immutable_value(primitive_types::BOOL_TYPE(), new uint8_t[primitive_types::BOOL_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::BOOL_TYPE().size));
 }
 mutable_value::mutable_value(int8_t value)
-    : immutable_value(CHAR_TYPE, new uint8_t[CHAR_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, CHAR_TYPE.size));
+    : immutable_value(primitive_types::CHAR_TYPE(), new uint8_t[primitive_types::CHAR_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::CHAR_TYPE().size));
 }
 mutable_value::mutable_value(int16_t value)
-    : immutable_value(SHORT_TYPE, new uint8_t[SHORT_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, SHORT_TYPE.size));
+    : immutable_value(primitive_types::SHORT_TYPE(), new uint8_t[primitive_types::SHORT_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::SHORT_TYPE().size));
 }
 mutable_value::mutable_value(int32_t value)
-    : immutable_value(INT_TYPE, new uint8_t[INT_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, INT_TYPE.size));
+    : immutable_value(primitive_types::INT_TYPE(), new uint8_t[primitive_types::INT_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::INT_TYPE().size));
 }
 mutable_value::mutable_value(int64_t value)
-    : immutable_value(LONG_TYPE, new uint8_t[LONG_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, LONG_TYPE.size));
+    : immutable_value(primitive_types::LONG_TYPE(), new uint8_t[primitive_types::LONG_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::LONG_TYPE().size));
 }
 mutable_value::mutable_value(float value)
-    : immutable_value(FLOAT_TYPE, new uint8_t[FLOAT_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, FLOAT_TYPE.size));
+    : immutable_value(primitive_types::FLOAT_TYPE(), new uint8_t[primitive_types::FLOAT_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::FLOAT_TYPE().size));
 }
 mutable_value::mutable_value(double value)
-    : immutable_value(DOUBLE_TYPE, new uint8_t[DOUBLE_TYPE.size]()) {
-  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, DOUBLE_TYPE.size));
+    : immutable_value(primitive_types::DOUBLE_TYPE(), new uint8_t[primitive_types::DOUBLE_TYPE().size]()) {
+  type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(&value, primitive_types::DOUBLE_TYPE().size));
 }
 mutable_value::mutable_value(const std::string &str)
-    : immutable_value(STRING_TYPE(str.length()), new char[str.length()]()) {
+    : immutable_value(primitive_types::STRING_TYPE(str.length()), new char[str.length()]()) {
   type_.unaryop(unary_op_id::ASSIGN)(ptr_, immutable_raw_data(str.c_str(), str.length()));
 }
 mutable_value::mutable_value(const immutable_value &other)
@@ -61,7 +61,7 @@ mutable_value::mutable_value(const mutable_value &other)
 }
 mutable_value::mutable_value(mutable_value &&other)
     : immutable_value(other.type_, other.ptr_) {
-  other.type_ = NONE_TYPE;
+  other.type_ = primitive_types::NONE_TYPE();
   other.ptr_ = nullptr;
 }
 mutable_value::~mutable_value() {
@@ -156,7 +156,7 @@ mutable_value &mutable_value::operator=(mutable_value &&other) {
     ptr_ = other.ptr_;
 
     other.ptr_ = nullptr;
-    other.type_ = NONE_TYPE;
+    other.type_ = primitive_types::NONE_TYPE();
   }
 
   return *this;

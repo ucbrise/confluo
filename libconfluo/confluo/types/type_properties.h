@@ -125,8 +125,57 @@ std::vector<type_properties> init_primitives();
 
 }
 
-/** The vector of data types */
-extern std::vector<type_properties> DATA_TYPES;
+class data_type_properties {
+ public:
+  typedef std::vector<type_properties>::iterator iterator;
+  typedef std::vector<type_properties>::const_iterator const_iterator;
+
+  static data_type_properties& instance() {
+    static data_type_properties properties;
+    return properties;
+  }
+
+  type_properties const &at(size_t i) const {
+    return type_properties_.at(i);
+  }
+
+  type_properties &operator[](size_t i) {
+    return type_properties_[i];
+  }
+
+  void push_back(type_properties &&properties) {
+    type_properties_.push_back(std::move(properties));
+  }
+
+  void push_back(const type_properties &properties) {
+    type_properties_.push_back(properties);
+  }
+
+  size_t size() const {
+    return type_properties_.size();
+  }
+
+  iterator begin() {
+    return type_properties_.begin();
+  }
+
+  iterator end() {
+    return type_properties_.end();
+  }
+
+  const_iterator begin() const {
+    return type_properties_.begin();
+  }
+
+  const_iterator end() const {
+    return type_properties_.end();
+  }
+
+ private:
+  data_type_properties() : type_properties_(detail::init_primitives()) {}
+
+  std::vector<type_properties> type_properties_;
+};
 
 /**
  * Finds the type properties for the type specified by name

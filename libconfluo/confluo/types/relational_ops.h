@@ -235,7 +235,7 @@ inline bool not_equals<void>(const immutable_raw_data &v1, const immutable_raw_d
  * @return A vector of relation operator function pointers
  */
 template<typename T>
-static rel_ops_t init_relops() {
+inline rel_ops_t init_relops() {
   return {less_than<T>, less_than_equals<T>, greater_than<T>,
           greater_than_equals<T>, equals<T>, not_equals<T>};
 }

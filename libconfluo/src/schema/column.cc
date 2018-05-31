@@ -5,7 +5,7 @@ namespace confluo {
 
 column_t::column_t()
     : idx_(UINT16_MAX),
-      type_(NONE_TYPE),
+      type_(primitive_types::NONE_TYPE()),
       offset_(UINT16_MAX) {
 }
 

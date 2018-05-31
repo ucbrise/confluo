@@ -32,7 +32,7 @@ class TimeseriesDBTest : public testing::Test {
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       mlog.read(offsets[i], ptr);
       ASSERT_TRUE(ptr.get().ptr() != nullptr);
-      uint8_t expected = i % 256;
+      uint8_t expected = static_cast<uint8_t>(i % 256);
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(ptr[j], expected);
       }
@@ -81,14 +81,14 @@ class TimeseriesDBTest : public testing::Test {
 
   static std::vector<column_t> schema() {
     schema_builder builder;
-    builder.add_column(BOOL_TYPE, "a");
-    builder.add_column(CHAR_TYPE, "b");
-    builder.add_column(SHORT_TYPE, "c");
-    builder.add_column(INT_TYPE, "d");
-    builder.add_column(LONG_TYPE, "e");
-    builder.add_column(FLOAT_TYPE, "f");
-    builder.add_column(DOUBLE_TYPE, "g");
-    builder.add_column(STRING_TYPE(16), "h");
+    builder.add_column(primitive_types::BOOL_TYPE(), "a");
+    builder.add_column(primitive_types::CHAR_TYPE(), "b");
+    builder.add_column(primitive_types::SHORT_TYPE(), "c");
+    builder.add_column(primitive_types::INT_TYPE(), "d");
+    builder.add_column(primitive_types::LONG_TYPE(), "e");
+    builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+    builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+    builder.add_column(primitive_types::STRING_TYPE(16), "h");
     return builder.get_columns();
   }
 
@@ -224,7 +224,6 @@ TEST_F(TimeseriesDBTest, GetNearestTest) {
 }
 
 TEST_F(TimeseriesDBTest, ComputeDiffTest) {
-
   std::vector<record_t> records;
   std::vector<uint64_t> offsets;
 
@@ -247,7 +246,7 @@ TEST_F(TimeseriesDBTest, ComputeDiffTest) {
 
   int64_t to_version = ts1.get_version();
   size_t expected_size = 7;
-  ts1.compute_diff(records, from_version, to_version);
+  ts1.compute_diff(records, static_cast<uint64_t>(from_version), static_cast<uint64_t>(to_version));
   ASSERT_EQ(expected_size, records.size());
 }
 

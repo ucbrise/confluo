@@ -10,19 +10,27 @@ class ColumnTest : public testing::Test {
 };
 
 TEST_F(ColumnTest, GetterTest) {
-  column_t col(0, 0, INT_TYPE, "test", mutable_value(INT_TYPE, INT_TYPE.min()),
-               mutable_value(INT_TYPE, INT_TYPE.max()));
+  column_t col(0,
+               0,
+               primitive_types::INT_TYPE(),
+               "test",
+               mutable_value(primitive_types::INT_TYPE(), primitive_types::INT_TYPE().min()),
+               mutable_value(primitive_types::INT_TYPE(), primitive_types::INT_TYPE().max()));
 
   ASSERT_EQ(0, col.idx());
   ASSERT_EQ(0, col.offset());
   ASSERT_EQ("TEST", col.name());
-  ASSERT_TRUE(INT_TYPE == col.type());
+  ASSERT_TRUE(primitive_types::INT_TYPE() == col.type());
   ASSERT_FALSE(col.is_indexed());
 }
 
 TEST_F(ColumnTest, IndexStateTest) {
-  column_t col(0, 0, INT_TYPE, "test", mutable_value(INT_TYPE, INT_TYPE.min()),
-               mutable_value(INT_TYPE, INT_TYPE.max()));
+  column_t col(0,
+               0,
+               primitive_types::INT_TYPE(),
+               "test",
+               mutable_value(primitive_types::INT_TYPE(), primitive_types::INT_TYPE().min()),
+               mutable_value(primitive_types::INT_TYPE(), primitive_types::INT_TYPE().max()));
   ASSERT_FALSE(col.is_indexed());
 
   bool success = col.set_indexing();

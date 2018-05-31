@@ -3,7 +3,7 @@
 namespace confluo {
 
 aggregate_node::aggregate_node()
-    : aggregate_node(NONE_TYPE, 0, nullptr) {
+    : aggregate_node(primitive_types::NONE_TYPE(), 0, nullptr) {
 }
 
 aggregate_node::aggregate_node(numeric agg, uint64_t version, aggregate_node *next)
@@ -26,8 +26,8 @@ aggregate_node *aggregate_node::next() {
 
 aggregate_list::aggregate_list()
     : head_(nullptr),
-      agg_(invalid_aggregator),
-      type_(NONE_TYPE) {
+      agg_(aggregators::invalid_aggregator()),
+      type_(primitive_types::NONE_TYPE()) {
 }
 
 aggregate_list::aggregate_list(data_type type, aggregator agg)
@@ -123,8 +123,8 @@ aggregate_node *aggregate_list::get_node(aggregate_node *head, uint64_t version)
 }
 
 aggregate::aggregate()
-    : type_(NONE_TYPE),
-      agg_(invalid_aggregator),
+    : type_(primitive_types::NONE_TYPE()),
+      agg_(aggregators::invalid_aggregator()),
       aggs_(nullptr),
       concurrency_(0) {
 }

@@ -53,7 +53,7 @@ class rpc_client {
    */
   ~rpc_client();
 
-  /**
+  virtual /**
    * Disconnects the rpc client
    */
   void disconnect();

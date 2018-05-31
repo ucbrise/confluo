@@ -20,7 +20,7 @@ class mutable_value : public immutable_value {
    *
    * @param type The data type of the specified value
    */
-  mutable_value(data_type type = NONE_TYPE);
+  mutable_value(data_type type = primitive_types::NONE_TYPE());
 
   /**
    * Constructs a mutable value from a specified data type and raw data

@@ -112,7 +112,7 @@ class filter_load_utils {
         for (size_t i = 0; i < num_aggs; i++) {
           data_type type = reader.read<data_type>();
           std::string data = reader.read(type.size);
-          archived_aggs[i] = aggregate(type, sum_aggregator, 1);
+          archived_aggs[i] = aggregate(type, aggregators::sum_aggregator(), 1);
           archived_aggs[i].seq_update(0, numeric(type, &data[0]), archival_metadata.version());
         }
         tree.get_unsafe(cur_key)->init_aggregates(num_aggs, archived_aggs);

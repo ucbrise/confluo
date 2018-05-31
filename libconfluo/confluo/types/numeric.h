@@ -693,10 +693,33 @@ std::vector<cast_fn> init_type_cast_ops() {
           type_cast<IN, float>, type_cast<IN, double>};
 }
 
-/**
- * A vector containing the cast operators for all the types
- */
-extern std::vector<std::vector<cast_fn>> CAST_OPS;
+class cast_ops {
+ public:
+  static cast_ops &instance() {
+    static cast_ops ops;
+    return ops;
+  }
+
+  std::vector<cast_fn> const &at(size_t i) const {
+    return cast_ops_.at(i);
+  }
+
+  std::vector<cast_fn> &operator[](size_t i) {
+    return cast_ops_[i];
+  }
+
+  size_t size() const {
+    return cast_ops_.size();
+  }
+
+ private:
+  cast_ops() : cast_ops_{init_type_cast_ops<void>(), init_type_cast_ops<bool>(), init_type_cast_ops<int8_t>(),
+                         init_type_cast_ops<uint8_t>(), init_type_cast_ops<int16_t>(), init_type_cast_ops<uint16_t>(),
+                         init_type_cast_ops<int32_t>(), init_type_cast_ops<uint32_t>(), init_type_cast_ops<int64_t>(),
+                         init_type_cast_ops<uint64_t>(), init_type_cast_ops<float>(), init_type_cast_ops<double>()} {}
+
+  std::vector<std::vector<cast_fn>> cast_ops_;
+};
 
 }
 

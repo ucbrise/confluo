@@ -153,10 +153,10 @@ schema_builder::schema_builder()
       offset_(0) {
   // Every schema must have timestamp
   // TODO: Replace this with a new timestamp type
-  mutable_value min(ULONG_TYPE, ULONG_TYPE.min());
-  mutable_value max(ULONG_TYPE, ULONG_TYPE.max());
-  columns_.push_back(column_t(0, 0, ULONG_TYPE, "TIMESTAMP", min, max));
-  offset_ += ULONG_TYPE.size;
+  mutable_value min(primitive_types::ULONG_TYPE(), primitive_types::ULONG_TYPE().min());
+  mutable_value max(primitive_types::ULONG_TYPE(), primitive_types::ULONG_TYPE().max());
+  columns_.push_back(column_t(0, 0, primitive_types::ULONG_TYPE(), "TIMESTAMP", min, max));
+  offset_ += primitive_types::ULONG_TYPE().size;
 }
 
 schema_builder &schema_builder::add_column(const data_type &type,
@@ -165,14 +165,13 @@ schema_builder &schema_builder::add_column(const data_type &type,
                                            const mutable_value &max) {
   if (utils::string_utils::to_upper(name) == "TIMESTAMP") {
     user_provided_ts_ = true;
-    if (type != ULONG_TYPE) {
+    if (type != primitive_types::ULONG_TYPE()) {
       THROW(invalid_operation_exception, "TIMESTAMP must be of ULONG_TYPE");
     }
     return *this;
   }
 
-  columns_.push_back(
-      column_t(columns_.size(), offset_, type, name, min, max));
+  columns_.push_back(column_t(static_cast<uint16_t>(columns_.size()), offset_, type, name, min, max));
   offset_ += type.size;
   return *this;
 }

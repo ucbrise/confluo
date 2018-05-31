@@ -15,7 +15,8 @@ immutable_value schema_snapshot::get(void *data, uint32_t i) const {
 }
 
 byte_string schema_snapshot::time_key(int64_t time_block) const {
-  return LONG_TYPE.key_transform()(immutable_raw_data(reinterpret_cast<uint8_t *>(&time_block), LONG_TYPE.size), 1.0);
+  return primitive_types::LONG_TYPE().key_transform()(immutable_raw_data(reinterpret_cast<uint8_t *>(&time_block),
+                                                                         primitive_types::LONG_TYPE().size), 1.0);
 }
 
 byte_string schema_snapshot::get_key(void *ptr, uint32_t i) const {

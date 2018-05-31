@@ -163,8 +163,7 @@ class aggregate {
    * @param agg The aggregate to initialize
    * @param concurrency Max number of threads to run
    */
-  aggregate(const data_type &type, aggregator agg,
-            int concurrency = thread_manager::get_max_concurrency());
+  aggregate(const data_type &type, aggregator agg, int concurrency = thread_manager::get_max_concurrency());
 
   /**
    * Initializes an aggregate from another aggregate
