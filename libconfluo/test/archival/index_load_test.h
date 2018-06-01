@@ -90,7 +90,7 @@ TEST_F(IndexLoadTest, IndexLogLoadTest) {
     index_log indexes;
     index_id = indexes.push_back(&index);
     s[s.get_field_index("a")].set_indexing();
-    s[s.get_field_index("a")].set_indexed(static_cast<uint16_t>(index_id), configuration_params::INDEX_BUCKET_SIZE);
+    s[s.get_field_index("a")].set_indexed(static_cast<uint16_t>(index_id), configuration_params::INDEX_BUCKET_SIZE());
 
     archival::index_log_archiver archiver(path, &indexes, &s);
     archiver.archive(static_cast<size_t>(1e6));

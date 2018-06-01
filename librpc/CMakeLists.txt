@@ -33,17 +33,18 @@ add_executable(confluod
         src/rpc_types.cc
         src/rpc_alert_stream.cc
         src/rpc_client.cc
-        src/rpc_configuration_params.cc
-        src/rpc_defaults.cc
         src/rpc_record_batch_builder.cc
         src/rpc_record_stream.cc
-        src/rpc_type_conversions.cc)
+        src/rpc_type_conversions.cc
+        src/confluo_server.cc)
 target_link_libraries(confluod confluo ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB} ${JEMALLOC_LIBRARIES})
 add_dependencies(confluod thrift lz4 jemalloc)
 
 add_library(rpcclient STATIC
         rpc/rpc_constants.h
         src/rpc_constants.cc
+        rpc/rpc_server.h
+        src/rpc_server.cc
         rpc/rpc_service.h
         rpc/rpc_service.tcc
         src/rpc_service.cc
@@ -60,9 +61,7 @@ add_library(rpcclient STATIC
         rpc/rpc_record_stream.h
         src/rpc_record_stream.cc
         rpc/rpc_configuration_params.h
-        src/rpc_configuration_params.cc
-        rpc/rpc_defaults.h
-        src/rpc_defaults.cc)
+        rpc/rpc_defaults.h)
 target_link_libraries(rpcclient thriftstatic)
 add_dependencies(rpcclient thrift)
 

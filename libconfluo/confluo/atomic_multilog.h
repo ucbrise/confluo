@@ -157,7 +157,7 @@ class atomic_multilog {
    * @param bucket_size The size of the bucket
    * @throw ex Management exception
    */
-  void add_index(const std::string &field_name, double bucket_size = configuration_params::INDEX_BUCKET_SIZE);
+  void add_index(const std::string &field_name, double bucket_size = configuration_params::INDEX_BUCKET_SIZE());
 
   /**
    * Removes index from the atomic multilog
@@ -215,7 +215,7 @@ class atomic_multilog {
    */
   void install_trigger(const std::string &name,
                        const std::string &expr,
-                       const uint64_t periodicity_ms = configuration_params::MONITOR_PERIODICITY_MS);
+                       const uint64_t periodicity_ms = configuration_params::MONITOR_PERIODICITY_MS());
 
   /**
    * Removes trigger from the atomic multilog

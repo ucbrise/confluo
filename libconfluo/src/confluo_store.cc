@@ -84,7 +84,7 @@ int64_t confluo_store::remove_atomic_multilog(int64_t id) {
 }
 
 void confluo_store::memory_management_task() {
-  if (ALLOCATOR.memory_utilization() >= configuration_params::MAX_MEMORY) {
+  if (ALLOCATOR.memory_utilization() >= configuration_params::MAX_MEMORY()) {
     for (size_t id = 0; id < atomic_multilogs_.size(); id++) {
       // TODO how aggressively to archive and should multilogs with archival OFF be archived?
       atomic_multilogs_.get(id)->archive();

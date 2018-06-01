@@ -64,8 +64,7 @@ class ClientReadOpsTest : public testing::Test {
 
   static rec r;
 
-  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-                      float f, double g, const char *h) {
+  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const char *h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
@@ -76,8 +75,7 @@ class ClientReadOpsTest : public testing::Test {
     return reinterpret_cast<void *>(&r);
   }
 
-  static void *record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
-                      int64_t e, float f, double g, const char *h) {
+  static void *record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const char *h) {
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
     memcpy(r.h, h, len);
@@ -388,7 +386,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   mlog->install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   mlog->append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog->append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -718,7 +716,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   mlog->install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   record_batch batch = build_batch(*mlog, now_ns);
   mlog->append_batch(batch);

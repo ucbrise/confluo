@@ -25,7 +25,7 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
   });
 
   rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
-  std::vector<rpc_client> clients(static_cast<unsigned long>(configuration_params::MAX_CONCURRENCY));
+  std::vector<rpc_client> clients(static_cast<unsigned long>(configuration_params::MAX_CONCURRENCY()));
   for (auto &client : clients) {
     client.connect(SERVER_ADDRESS, SERVER_PORT);
   }

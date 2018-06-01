@@ -17,7 +17,7 @@ void storage_allocator::register_cleanup_callback(storage_allocator::callback_fn
 
 void *storage_allocator::alloc(size_t size, ptr_aux_block aux) {
   int retries = 0;
-  while (mem_stat_.get() >= configuration_params::MAX_MEMORY) {
+  while (mem_stat_.get() >= configuration_params::MAX_MEMORY()) {
     mem_cleanup_callback_();
     if (retries > MAX_CLEANUP_RETRIES)
       THROW(memory_exception, "Max memory reached!");

@@ -223,17 +223,20 @@ struct durable {
   }
 };
 
-/** Storage functionality for in memory mode */
-extern storage_functions IN_MEMORY_FNS;
+class storage_mode_functions {
+ public:
+  /** Storage functionality for in memory mode */
+  static storage_functions &IN_MEMORY_FNS();
 
-/** Storage functionality for durable relaxed mode */
-extern storage_functions DURABLE_RELAXED_FNS;
+  /** Storage functionality for durable relaxed mode */
+  static storage_functions &DURABLE_RELAXED_FNS();
 
-/** Storage functionality for durable mode */
-extern storage_functions DURABLE_FNS;
+  /** Storage functionality for durable mode */
+  static storage_functions &DURABLE_FNS();
 
-/** Contains the storage functions for all storage modes */
-extern storage_functions STORAGE_FNS[3];
+  /** Contains the storage functions for all storage modes */
+  static storage_functions *STORAGE_FNS();
+};
 
 }
 }

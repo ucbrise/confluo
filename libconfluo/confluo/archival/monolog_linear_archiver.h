@@ -36,7 +36,7 @@ class monolog_linear_archiver : public archiver {
    * @param log monolog to archive
    */
   monolog_linear_archiver(const std::string &path, monolog *log)
-      : writer_(path, "monolog_linear", archival_configuration_params::MAX_FILE_SIZE),
+      : writer_(path, "monolog_linear", archival_configuration_params::MAX_FILE_SIZE()),
         archival_tail_(0),
         log_(log) {
     writer_.close();
@@ -80,15 +80,15 @@ class monolog_linear_archiver : public archiver {
   void archive_bucket(T *bucket) {
     auto metadata = ptr_metadata::get(bucket);
     auto encoded_bucket = confluo_encoder::encode(bucket, metadata->data_size_,
-                                                  archival_configuration_params::DATA_LOG_ENCODING_TYPE);
+                                                  archival_configuration_params::DATA_LOG_ENCODING_TYPE());
     size_t enc_size = encoded_bucket.size();
     auto off = writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
 
     auto action = monolog_linear_archival_action(archival_tail_ + BUCKET_SIZE);
     writer_.commit<monolog_linear_archival_action>(action);
 
-    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE);
-    void *archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
+    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE());
+    void *archived_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
     log_->data()[archival_tail_ / BUCKET_SIZE].swap_ptr(encoded_ptr<T>(archived_bucket));
   }
 
@@ -116,8 +116,8 @@ class monolog_linear_load_utils {
       incremental_file_offset off = reader.tell();
       size_t size = reader.read<ptr_metadata>().data_size_;
 
-      ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE);
-      void *encoded_bucket = ALLOCATOR.mmap(off.path(), off.offset(), size, aux);
+      ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE());
+      void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), size, aux);
       buckets[load_offset / BUCKET_SIZE].init_ptr(encoded_ptr<T>(encoded_bucket));
 
       log.reserve(BUCKET_SIZE);

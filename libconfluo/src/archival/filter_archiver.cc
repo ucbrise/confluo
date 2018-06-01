@@ -5,8 +5,8 @@ namespace archival {
 
 filter_archiver::filter_archiver(const std::string &path, monitor::filter *filter)
     : filter_(filter),
-      refs_writer_(path, "filter_data", archival_configuration_params::MAX_FILE_SIZE),
-      aggs_writer_(path, "filter_aggs", archival_configuration_params::MAX_FILE_SIZE),
+      refs_writer_(path, "filter_data", archival_configuration_params::MAX_FILE_SIZE()),
+      aggs_writer_(path, "filter_aggs", archival_configuration_params::MAX_FILE_SIZE()),
       refs_tail_(0),
       ts_tail_(0) {
   refs_writer_.close();
@@ -21,8 +21,8 @@ void filter_archiver::archive(size_t offset) {
     auto &refs = *it;
     byte_string key = it.key();
     ts_tail_ = key.template as<uint64_t>();
-    auto ts_tail_ns = ts_tail_ * configuration_params::TIME_RESOLUTION_NS;
-    if (time_utils::cur_ns() - ts_tail_ns < archival_configuration_params::IN_MEMORY_FILTER_WINDOW_NS) {
+    auto ts_tail_ns = ts_tail_ * configuration_params::TIME_RESOLUTION_NS();
+    if (time_utils::cur_ns() - ts_tail_ns < archival_configuration_params::IN_MEMORY_FILTER_WINDOW_NS()) {
       break;
     }
     size_t data_log_archival_tail = archive_reflog(key, refs, offset);
@@ -61,7 +61,7 @@ void filter_archiver::archive_bucket(byte_string key, reflog &refs, uint64_t *bu
   auto* metadata = ptr_metadata::get(bucket);
   size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - refs_tail_);
   auto encoded_bucket = confluo_encoder::encode(bucket, bucket_size * sizeof(uint64_t),
-                                                archival_configuration_params::REFLOG_ENCODING_TYPE);
+                                                archival_configuration_params::REFLOG_ENCODING_TYPE());
   size_t enc_size = encoded_bucket.size();
 
   auto archival_metadata = radix_tree_archival_metadata(key, refs_tail_, bucket_size);
@@ -71,8 +71,8 @@ void filter_archiver::archive_bucket(byte_string key, reflog &refs, uint64_t *bu
   auto off = refs_writer_.append<ptr_metadata, uint8_t>(metadata, 1, encoded_bucket.get(), enc_size);
   refs_writer_.commit(action.to_string());
 
-  ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
-  void* archived_bucket = ALLOCATOR.mmap(off.path(), off.offset(), enc_size, aux);
+  ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
+  void *archived_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
   archival_utils::swap_bucket_ptr(refs, refs_tail_, encoded_reflog_ptr(archived_bucket));
 }
 
@@ -113,7 +113,7 @@ size_t filter_load_utils::load_reflogs(const std::string &path, filter::idx_t &f
     size_t bucket_size = metadata.data_size_;
 
     auto *&refs = filter.get_or_create(cur_key);
-    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
+    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
     void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
     init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
     refs->reserve(archival_metadata.bucket_size());

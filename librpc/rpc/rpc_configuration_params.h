@@ -2,6 +2,8 @@
 #define RPC_RPC_CONFIGURATION_PARAMS_H_
 
 #include <cstddef>
+#include <conf/configuration_params.h>
+#include "rpc_defaults.h"
 
 namespace confluo {
 namespace rpc {
@@ -12,7 +14,9 @@ namespace rpc {
 class rpc_configuration_params {
  public:
   /** Iterator for the batches */
-  static size_t ITERATOR_BATCH_SIZE;
+  static size_t ITERATOR_BATCH_SIZE() {
+    return conf::instance().get<size_t>("iterator_batch_size", rpc_defaults::DEFAULT_ITERATOR_BATCH_SIZE());
+  }
 };
 
 }

@@ -135,8 +135,6 @@ add_library(confluo STATIC
         src/aggregate/aggregate_manager.cc
         src/aggregate/aggregate_ops.cc
         src/compression/confluo_encoder.cc
-        src/conf/configuration_params.cc
-        src/conf/defaults.cc
         src/container/data_log.cc
         src/container/reflog.cc
         src/parser/aggregate_parser.cc
@@ -188,7 +186,7 @@ add_library(confluo STATIC
         src/container/cursor/alert_cursor.cc
         src/container/cursor/offset_cursors.cc
         src/container/cursor/record_cursors.cc
-        src/conf/configuration_parser.cc)
+        )
 target_link_libraries(confluo confluoutils)
 
 if (BUILD_TESTS)

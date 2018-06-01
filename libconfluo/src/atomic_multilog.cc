@@ -24,10 +24,10 @@ atomic_multilog::atomic_multilog(const std::string &name,
   metadata_.write_storage_mode(s_mode);
   metadata_.write_archival_mode(a_mode);
   monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
-                      configuration_params::MONITOR_PERIODICITY_MS);
+                      configuration_params::MONITOR_PERIODICITY_MS());
   if (a_mode == archival_mode::ON) {
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
-                         archival_configuration_params::PERIODICITY_MS);
+                         archival_configuration_params::PERIODICITY_MS());
   }
 }
 
@@ -57,10 +57,10 @@ atomic_multilog::atomic_multilog(const std::string &name, const std::string &pat
   rt_ = read_tail_type(path, s_mode);
   load(s_mode);
   monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
-                      configuration_params::MONITOR_PERIODICITY_MS);
+                      configuration_params::MONITOR_PERIODICITY_MS());
   if (a_mode == archival_mode::ON) {
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
-                         archival_configuration_params::PERIODICITY_MS);
+                         archival_configuration_params::PERIODICITY_MS());
   }
 }
 
@@ -153,19 +153,19 @@ void atomic_multilog::remove_aggregate(const std::string &name) {
 }
 
 void atomic_multilog::install_trigger(const std::string &name, const std::string &expr, const uint64_t periodicity_ms) {
-  if (periodicity_ms < configuration_params::MONITOR_PERIODICITY_MS) {
+  if (periodicity_ms < configuration_params::MONITOR_PERIODICITY_MS()) {
     throw management_exception(
         "Trigger periodicity (" + std::to_string(periodicity_ms)
             + "ms) cannot be less than monitor periodicity ("
-            + std::to_string(configuration_params::MONITOR_PERIODICITY_MS)
+            + std::to_string(configuration_params::MONITOR_PERIODICITY_MS())
             + "ms)");
   }
 
-  if (periodicity_ms % configuration_params::MONITOR_PERIODICITY_MS != 0) {
+  if (periodicity_ms % configuration_params::MONITOR_PERIODICITY_MS() != 0) {
     throw management_exception(
         "Trigger periodicity (" + std::to_string(periodicity_ms)
             + "ms) must be a multiple of monitor periodicity ("
-            + std::to_string(configuration_params::MONITOR_PERIODICITY_MS)
+            + std::to_string(configuration_params::MONITOR_PERIODICITY_MS())
             + "ms)");
   }
 
@@ -627,8 +627,8 @@ void atomic_multilog::remove_trigger_task(const std::string &name, optional<mana
 void atomic_multilog::archival_task() {
   optional<management_exception> ex;
   std::future<void> ret = archival_pool_.submit([this] {
-    if (rt_.get() > archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES)
-      archiver_.archive(rt_.get() - archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES);
+    if (rt_.get() > archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES())
+      archiver_.archive(rt_.get() - archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES());
   });
   ret.wait();
   if (ex.has_value())
@@ -650,7 +650,7 @@ void atomic_multilog::monitor_task() {
           for (size_t tid = 0; tid < ntriggers; tid++) {
             trigger *t = a->get_trigger(tid);
             if (t->is_valid() && cur_ms % t->periodicity_ms() == 0) {
-              for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS; ms <= cur_ms; ms++) {
+              for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS(); ms <= cur_ms; ms++) {
                 if (ms % t->periodicity_ms() == 0) {
                   check_time_bucket(f, t, tid, cur_ms, version);
                 }

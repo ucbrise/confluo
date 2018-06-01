@@ -52,12 +52,6 @@ class thread_manager {
    */
   static int get_max_concurrency();
 
-  /**
-   * Sets the maximum number of threads to a new value
-   * @param max_concurrency The new maximum concurrency
-   */
-  static void set_max_concurrency(int max_concurrency);
-
  private:
   /**
    * Initializes info for each thread
@@ -88,9 +82,10 @@ class thread_manager {
   static void unset(int i);
 
   /** The maximum amount of threads Confluo supports */
-  static int MAX_CONCURRENCY;
+  static int MAX_CONCURRENCY();
+
   /** The thread info */
-  static thread_info *THREAD_INFO;
+  static thread_info *THREAD_INFO();
 };
 
 }

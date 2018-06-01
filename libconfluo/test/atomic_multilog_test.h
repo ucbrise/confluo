@@ -427,7 +427,7 @@ TEST_F(AtomicMultilogTest, RemoveFilterTriggerTest) {
   mlog.install_trigger("trigger2", "agg2 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   mlog.append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog.append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -514,7 +514,7 @@ TEST_F(AtomicMultilogTest, FilterAggregateTriggerTest) {
   sleep(1);
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   mlog.append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog.append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -847,7 +847,7 @@ TEST_F(AtomicMultilogTest, BatchFilterAggregateTriggerTest) {
   mlog.install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   record_batch batch = build_batch(mlog, now_ns);
 

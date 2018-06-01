@@ -19,10 +19,7 @@ class reflog_constants {
  * typedef for RefLog type -- a MonoLog of type uint64_t,
  * 18 bucket containers and bucket size of 1024.
  */
-typedef monolog_exp2_linear<uint64_t,
-                            reflog_constants::NCONTAINERS,
-                            reflog_constants::BUCKET_SIZE> reflog;
-
+typedef monolog_exp2_linear<uint64_t, reflog_constants::NCONTAINERS, reflog_constants::BUCKET_SIZE> reflog;
 typedef storage::read_only_encoded_ptr<uint64_t> read_only_reflog_ptr;
 typedef storage::encoded_ptr<uint64_t> encoded_reflog_ptr;
 typedef storage::decoded_ptr<uint64_t> decoded_reflog_ptr;

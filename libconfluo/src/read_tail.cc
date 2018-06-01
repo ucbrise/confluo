@@ -13,7 +13,7 @@ read_tail::read_tail(const std::string &data_path, const storage::storage_mode &
 
 void read_tail::init(const std::string &data_path, const storage::storage_mode &mode) {
   mode_ = mode;
-  read_tail_ = (atomic::type<uint64_t> *) storage::STORAGE_FNS[mode_].allocate(
+  read_tail_ = (atomic::type<uint64_t> *) storage::storage_mode_functions::STORAGE_FNS()[mode_].allocate(
       data_path + "/read_tail", sizeof(uint64_t));
   atomic::store(read_tail_, UINT64_C(0));
 }
@@ -28,7 +28,7 @@ void read_tail::advance(uint64_t old_tail, uint32_t bytes) {
     expected = old_tail;
     std::this_thread::yield();
   }
-  storage::STORAGE_FNS[mode_].flush(read_tail_, sizeof(uint64_t));
+  storage::storage_mode_functions::STORAGE_FNS()[mode_].flush(read_tail_, sizeof(uint64_t));
 }
 
 }

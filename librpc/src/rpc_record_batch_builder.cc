@@ -15,7 +15,7 @@ rpc_record_batch_builder::rpc_record_batch_builder(const schema_t &schema)
 }
 void rpc_record_batch_builder::add_record(const record_data &rec) {
   int64_t ts = *reinterpret_cast<const int64_t *>(rec.data());
-  int64_t time_block = ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t time_block = ts / configuration_params::TIME_RESOLUTION_NS();
   batch_sizes_[time_block] += schema_.record_size();
   batch_[time_block].write(rec.data(), schema_.record_size());
   nrecords_++;

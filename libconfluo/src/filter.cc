@@ -35,7 +35,7 @@ size_t filter::num_aggregates() const {
 void filter::update(const record_t &r) {
   if (exp_.test(r) && fn_(r)) {
     aggregated_reflog *refs = idx_.insert(
-        byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS),
+        byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS()),
         r.log_offset(), aggregates_);
     int tid = thread_manager::get_id();
     for (size_t i = 0; i < refs->num_aggregates(); i++) {

@@ -7,7 +7,7 @@ index_archiver::index_archiver(const std::string &path, index::radix_index *inde
     : index_(index),
       reflog_tails_(),
       column_(column),
-      writer_(path, "index_data", archival_configuration_params::MAX_FILE_SIZE) {
+      writer_(path, "index_data", archival_configuration_params::MAX_FILE_SIZE()) {
   writer_.close();
 }
 
@@ -48,7 +48,7 @@ size_t index_archiver::archive_bucket(byte_string key, reflog &refs, size_t idx,
   auto metadata_copy = *(ptr_metadata::get(bucket));
   size_t bucket_size = std::min(reflog_constants::BUCKET_SIZE, refs.size() - idx);
   auto raw_encoded_bucket = confluo_encoder::encode(bucket, bucket_size * sizeof(uint64_t),
-                                                    archival_configuration_params::REFLOG_ENCODING_TYPE);
+                                                    archival_configuration_params::REFLOG_ENCODING_TYPE());
   size_t enc_size = raw_encoded_bucket.size();
   metadata_copy.data_size_ = static_cast<uint32_t>(enc_size);
 
@@ -61,7 +61,7 @@ size_t index_archiver::archive_bucket(byte_string key, reflog &refs, size_t idx,
 
   // Only swap pointer for full buckets.
   if (bucket_size == reflog_constants::BUCKET_SIZE) {
-    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
+    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
     void *enc_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
     archival_utils::swap_bucket_ptr(refs, idx, encoded_reflog_ptr(enc_bucket));
   }
@@ -85,7 +85,7 @@ size_t index_load_utils::load(const std::string &path, index::radix_index *index
     size_t bucket_size = metadata.data_size_;
 
     auto *&refs = index->get_or_create(cur_key);
-    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE);
+    ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
     void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
     init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
     reader.advance<uint8_t>(bucket_size);

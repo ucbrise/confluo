@@ -41,8 +41,7 @@ class ClientWriteOpsTest : public testing::Test {
 
   static rec r;
 
-  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-                      float f, double g, const char *h) {
+  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const char *h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
@@ -53,8 +52,7 @@ class ClientWriteOpsTest : public testing::Test {
     return reinterpret_cast<void *>(&r);
   }
 
-  static void *record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
-                      int64_t e, float f, double g, const char *h) {
+  static void *record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const char *h) {
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
     memcpy(r.h, h, len);
@@ -350,7 +348,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   client.install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   mlog->append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog->append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -627,7 +625,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   client.install_trigger("trigger1", "agg1 >= 10");
   client.install_trigger("trigger2", "agg2 >= 10");
 
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS();
   mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
   mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
@@ -637,7 +635,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS;
+  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS();
 
   size_t i = 0;
   for (auto r = mlog->query_filter("filter1", beg, end); r->has_more();

@@ -87,7 +87,7 @@ class monolog_linear_bucket {
    * @return The storage size in bytes
    */
   size_t storage_size() const {
-    if (data_.atomic_load() != nullptr)
+    if (data_.atomic_load().ptr() != nullptr)
       return (size_ + BUFFER_SIZE) * sizeof(T);
     return 0;
   }
@@ -99,7 +99,8 @@ class monolog_linear_bucket {
    */
   void flush(size_t offset, size_t len) {
     storage::encoded_ptr<T> enc_ptr = data_.atomic_load();
-    storage::STORAGE_FNS[mode_].flush(static_cast<T *>(enc_ptr.ptr()) + offset, len * sizeof(T));
+    storage::storage_mode_functions::STORAGE_FNS()[mode_].flush(static_cast<T *>(enc_ptr.ptr()) + offset,
+                                                                len * sizeof(T));
   }
 
   /**
@@ -251,7 +252,7 @@ class monolog_linear_bucket {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      void *data_ptr = storage::STORAGE_FNS[mode_].allocate_bucket(path_, file_size);
+      void *data_ptr = storage::storage_mode_functions::STORAGE_FNS()[mode_].allocate_bucket(path_, file_size);
       memset(data_ptr, '\0', sizeof(T) * file_size);
       storage::encoded_ptr<T> enc_ptr(data_ptr);
       data_.atomic_init(enc_ptr);
@@ -273,7 +274,7 @@ class monolog_linear_bucket {
     block_state state = UNINIT;
     if (atomic::strong::cas(&state_, &state, INIT)) {
       size_t file_size = (size_ + BUFFER_SIZE) * sizeof(T);
-      void *data_ptr = storage::STORAGE_FNS[mode_].allocate_bucket(path_, file_size);
+      void *data_ptr = storage::storage_mode_functions::STORAGE_FNS()[mode_].allocate_bucket(path_, file_size);
       memset(data_ptr, '\0', sizeof(T) * file_size);
       storage::encoded_ptr<T> enc_ptr(data_ptr);
       data_.atomic_init(enc_ptr);
