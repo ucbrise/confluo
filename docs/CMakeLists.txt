@@ -80,7 +80,7 @@ set(JAVA_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../javaclient/src/main/java)
 file(GLOB JAVA_SOURCES ${JAVA_SRC_DIR}/*.java)
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/javaclient.stamp
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${JAVA_SOURCES}
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${JAVA_SOURCES} javaclient
   COMMAND javadoc -sourcepath ${JAVA_SRC_DIR} -d ${JAVA_DOC_DIR} -subpackages confluo.rpc:org.apache.thrift -classpath ${CMAKE_CURRENT_BINARY_DIR}/../javaclient/target/confluo-client-0.1.0.jar
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/javaclient.stamp
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
