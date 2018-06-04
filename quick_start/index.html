@@ -446,7 +446,7 @@
     <label class="md-nav__link" for="nav-5-4">
       Data Storage
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-5-4">
         Data Storage
       </label>
@@ -494,7 +494,7 @@
     <label class="md-nav__link" for="nav-5-5">
       Querying Data
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="6">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-5-5">
         Querying Data
       </label>
@@ -602,7 +602,7 @@
     <label class="md-nav__link" for="nav-6-2">
       Client APIs
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="3">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-6-2">
         Client APIs
       </label>
@@ -767,13 +767,12 @@ load some sample data, and query it.</p>
 </ul>
 <h2 id="download-and-install">Download and Install<a class="headerlink" href="#download-and-install" title="Permanent link">&para;</a></h2>
 <p>To download and install Confluo, use the following commands:</p>
-<div class="codehilite"><pre><span></span>git clone https://github.com/ucbrise/confluo.git
-<span class="nb">cd</span> confluo
+<pre class="codehilite"><code class="language-bash">git clone https://github.com/ucbrise/confluo.git
+cd confluo
 mkdir build
-<span class="nb">cd</span> build
+cd build
 cmake ..
-make -j <span class="o">&amp;&amp;</span> make <span class="nb">test</span> <span class="o">&amp;&amp;</span> make install
-</pre></div>
+make -j &amp;&amp; make test &amp;&amp; make install</code></pre>
 
 
 <h2 id="using-confluo">Using Confluo<a class="headerlink" href="#using-confluo" title="Permanent link">&para;</a></h2>
@@ -789,22 +788,20 @@ a C++ application, and compile using a modern C++ compiler. The entry point
 header file to include is <code>confluo_store.h</code>. </p>
 <p>We will first create a new Confluo Store with the data path for it to use 
 as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">confluo_store</span> <span class="n">store</span><span class="p">(</span><span class="s">&quot;/path/to/data&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">confluo::confluo_store store(&quot;/path/to/data&quot;);</code></pre>
 
 
 <p>We then create a new Atomic MultiLog within the Store (synonymous to a database
 table); this requires three parameters: name, schema, and the storage mode:</p>
-<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">schema</span> <span class="o">=</span> <span class="s">&quot;{</span>
-  <span class="nl">timestamp</span><span class="p">:</span> <span class="n">LONG</span><span class="p">,</span>
-  <span class="nl">op_latency_ms</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">cpu_util</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">mem_avail</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">log_msg</span><span class="p">:</span> <span class="n">STRING</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="p">}</span><span class="s">&quot;;</span>
-<span class="k">auto</span> <span class="n">storage_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">;</span>
-<span class="n">store</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">std::string schema = &quot;{
+  timestamp: LONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}&quot;;
+auto storage_mode = confluo::storage::IN_MEMORY;
+store.create_atomic_multilog(&quot;perf_log&quot;, schema, storage_mode);</code></pre>
 
 
 <p>Our schema contains 5 attributes: a signed 8-byte integer timestamp,
@@ -812,25 +809,21 @@ double floating-point precision operation latency (in ms), CPU utilization
 and available memory, and a string log message field (upper bounded to 100 
 characters). </p>
 <p>We then obtain a reference to our newly created Atomic MultiLog:</p>
-<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">atomic_multilog</span><span class="o">*</span> <span class="n">mlog</span> <span class="o">=</span> <span class="n">store</span><span class="p">.</span><span class="n">get_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">confluo::atomic_multilog* mlog = store.get_atomic_multilog(&quot;perf_log&quot;);</code></pre>
 
 
 <p>We can define indexes on the Atomic MultiLog as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_index</span><span class="p">(</span><span class="s">&quot;op_latency_ms&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;add_index(&quot;op_latency_ms&quot;);</code></pre>
 
 
 <p>to add an index on <code>op_latency_ms</code> attribute. We can also install filters as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;add_filter(&quot;low_resources&quot;, &quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;);</code></pre>
 
 
 <p>to explicitly filter out records that indicate low system resources (CPU 
 utilization &gt; 80%, Available Memory &lt; 10%), using a filter named <code>low_resources</code>.</p>
 <p>Additionally, we can add aggregates on filters as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;MAX(op_latency_ms)&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;add_aggregate(&quot;max_latency_ms&quot;, &quot;low_resources&quot;, &quot;MAX(op_latency_ms)&quot;);</code></pre>
 
 
 <p>This adds a new stored aggregate <code>max_latency_ms</code> on the filter 
@@ -838,8 +831,7 @@ utilization &gt; 80%, Available Memory &lt; 10%), using a filter named <code>low
 operation latency reported in any record that also indicated low 
 available resources.</p>
 <p>Finally, we can install a trigger on aggregates as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">install_trigger</span><span class="p">(</span><span class="s">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s">&quot;max_latency &gt; 1000&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;install_trigger(&quot;high_latency_trigger&quot;, &quot;max_latency &gt; 1000&quot;);</code></pre>
 
 
 <p>This installs a trigger <code>high_latency_trigger</code> on the aggregate 
@@ -848,10 +840,9 @@ condition <code>max_latency_ms &gt; 1000</code> is satisfied, i.e.,
 whenever the maximum latency for an operation exceeds 1s and
 the available resources are low.</p>
 <p>We are now ready to load some data into this multilog:</p>
-<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.5&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span>  <span class="s">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;500&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.05&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off3</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;1001&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.03&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">});</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">size_t off1 = mlog-&gt;append({&quot;100&quot;, &quot;0.5&quot;, &quot;0.9&quot;,  &quot;INFO: Launched 1 tasks&quot;});
+size_t off2 = mlog-&gt;append({&quot;500&quot;, &quot;0.9&quot;, &quot;0.05&quot;, &quot;WARN: Server {2} down&quot;});
+size_t off3 = mlog-&gt;append({&quot;1001&quot;, &quot;0.9&quot;, &quot;0.03&quot;, &quot;WARN: Server {2, 4, 5} down&quot;});</code></pre>
 
 
 <p>Note that the <code>append</code> method takes a vector of strings as its input, where
@@ -864,19 +855,17 @@ operation. This forms the "key" for records stored in the Atomic MultiLog -- rec
 can be retrieved by specifying their corresponding offsets.</p>
 <p>Now we take a look at how we can query the data in the Atomic MultiLog. First,
 it is straightforward to retrieve records given their offsets:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off1</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off2</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record3</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off3</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record1 = mlog-&gt;read(off1);
+auto record2 = mlog-&gt;read(off2);
+auto record3 = mlog-&gt;read(off3);</code></pre>
 
 
 <p>Each of <code>record1</code>, <code>record2</code>, and <code>record3</code> are vectors of strings.</p>
 <p>We can query indexed attributes as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">execute_filter</span><span class="p">(</span><span class="s">&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream1</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record_stream1 = mlog-&gt;execute_filter(&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;);
+for (auto s = record_stream1; !s.empty(); s = s.tail()) {
+  std::cout &lt;&lt; s.head().to_string();
+}</code></pre>
 
 
 <p>Note that the operation returns a lazily evaluated stream, which supports
@@ -884,11 +873,10 @@ functional style operations like map, filter, etc. See
 <a href="https://github.com/ucbrise/confluo/blob/single-machine/libconfluo/confluo/container/lazy/stream.h">stream.h</a>
 for more details.</p>
 <p>We can also query the defined filter as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream2</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record_stream2 = mlog-&gt;query_filter(&quot;low_resources&quot;, 0, UINT64_MAX);
+for (auto s = record_stream2; !s.empty(); s = s.tail()) {
+  std::cout &lt;&lt; s.head().to_string();
+}</code></pre>
 
 
 <p>The first parameter corresponds to the name of the filter to be queried, while 
@@ -897,9 +885,8 @@ timestamp to consider for records in the filter. We've specified them to capture
 all possible values of timestamp. Similar to the <code>execute_filter</code> query, this
 operation also returns a lazily evaluated record stream.</p>
 <p>We query aggregates as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">value</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">value</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto value = mlog-&gt;get_aggregate(&quot;max_latency_ms&quot;, 0, UINT64_MAX);
+std::cout &lt;&lt; value.to_string();</code></pre>
 
 
 <p>The query takes the name of the aggregate as its first parameter, while the 
@@ -908,11 +895,10 @@ The query returns a <a href="https://github.com/ucbrise/confluo/blob/single-mach
 object, which is a wrapper around numeric values.</p>
 <p>Finally, we can query the generated alerts by triggers we have installed as
 follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">alert_stream</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">alert_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto alert_stream = mlog-&gt;get_alerts(0, UINT64_MAX, &quot;high_latency_trigger&quot;);
+for (auto s = alert_stream; !s.empty(); s = s.tail()) {
+  std::cout &lt;&lt; s.head().to_string();
+}</code></pre>
 
 
 <p>The query takes and begin and end timestamps as its first and second arguments,
@@ -923,8 +909,7 @@ and <a href="../queries/">Conflo Queries</a> for details on Confluo's supported 
 <h3 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h3>
 <p>In the stand-alone mode, Confluo runs as a daemon server, serving client requests
 using Apache Thrift protocol. To start the server, run:</p>
-<div class="codehilite"><pre><span></span>confuod --address<span class="o">=</span><span class="m">127</span>.0.0.1 --port<span class="o">=</span><span class="m">9090</span>
-</pre></div>
+<pre class="codehilite"><code class="language-bash">confuod --address=127.0.0.1 --port=9090</code></pre>
 
 
 <p>Once the server daemon is running, you can query it using the C++, Python or Java 
@@ -932,8 +917,7 @@ client APIs. The client APIs closely resemble the embedded API. In this guide,
 we will focus on the C++ client API, although client APIs for Python and Java are
 almost identical.</p>
 <p>We first create a new client connection to the Confluo daemon:</p>
-<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">rpc</span><span class="o">::</span><span class="n">rpc_client</span> <span class="n">client</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">9090</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">confluo::rpc::rpc_client client(&quot;127.0.0.1&quot;, 9090);</code></pre>
 
 
 <p>The first argument to the <code>rpc_client</code> constructor corresponds to the server
@@ -941,84 +925,73 @@ hostname, while the second argument corresponds to the server port.</p>
 <p>We then create a new Atomic MultiLog within the Store (synonymous to a database
 table); as before, this requires three parameters: a name for the Atomic 
 MultiLog, a fixed schema, and a storage mode:</p>
-<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">schema</span> <span class="o">=</span> <span class="s">&quot;{</span>
-  <span class="nl">timestamp</span><span class="p">:</span> <span class="n">LONG</span><span class="p">,</span>
-  <span class="nl">op_latency_ms</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">cpu_util</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">mem_avail</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">log_msg</span><span class="p">:</span> <span class="n">STRING</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="p">}</span><span class="s">&quot;;</span>
-<span class="k">auto</span> <span class="n">storage_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">;</span>
-<span class="n">client</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">std::string schema = &quot;{
+  timestamp: LONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}&quot;;
+auto storage_mode = confluo::storage::IN_MEMORY;
+client.create_atomic_multilog(&quot;perf_log&quot;, schema, storage_mode);</code></pre>
 
 
 <p>This operation also internally sets the current Atomic MultiLog 
 for the client to the one we just created (i.e., <code>perf_log</code>).</p>
 <p>We can define indexes as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_index</span><span class="p">(</span><span class="s">&quot;op_latency_ms&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">client.add_index(&quot;op_latency_ms&quot;);</code></pre>
 
 
 <p>We can also install filters as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">client.add_filter(&quot;low_resources&quot;, &quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;);</code></pre>
 
 
 <p>Additionally, we can add aggregates on filters as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;MAX(op_latency_ms)&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">client.add_aggregate(&quot;max_latency_ms&quot;, &quot;low_resources&quot;, &quot;MAX(op_latency_ms)&quot;);</code></pre>
 
 
 <p>Finally, we can install a trigger on an aggregate as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">install_trigger</span><span class="p">(</span><span class="s">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s">&quot;max_latency &gt; 1000&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">client.install_trigger(&quot;high_latency_trigger&quot;, &quot;max_latency &gt; 1000&quot;);</code></pre>
 
 
 <p>To load data into the Atomic MultiLog:</p>
-<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off1</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.5&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span>  <span class="s">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off2</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;500&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.05&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off3</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;1001&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.03&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">});</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">size_t off1 = client.append({&quot;100&quot;, &quot;0.5&quot;, &quot;0.9&quot;,  &quot;INFO: Launched 1 tasks&quot;});
+size_t off2 = client.append({&quot;500&quot;, &quot;0.9&quot;, &quot;0.05&quot;, &quot;WARN: Server {2} down&quot;});
+size_t off3 = client.append({&quot;1001&quot;, &quot;0.9&quot;, &quot;0.03&quot;, &quot;WARN: Server {2, 4, 5} down&quot;});</code></pre>
 
 
 <p>Querying data in the Atomic MultiLog is also similar to the Embedded mode API.</p>
 <p>It is straightforward to retrieve records given their offsets:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record1</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">off1</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record2</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">off2</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record3</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">off3</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record1 = client.read(off1);
+auto record2 = client.read(off2);
+auto record3 = client.read(off3);</code></pre>
 
 
 <p>We can query indexed attributes as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">execute_filter</span><span class="p">(</span><span class="s">&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record_stream = client.execute_filter(&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;);
+for (auto s = record_stream; !s.empty(); ++s) {
+  std::cout &lt;&lt; s.get().to_string();
+}</code></pre>
 
 
 <p>We can query a pre-defined filter as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record_stream = client.query_filter(&quot;low_resources&quot;, 0, UINT64_MAX);
+for (auto s = record_stream; !s.empty(); ++s) {
+  std::cout &lt;&lt; s.get().to_string();
+}</code></pre>
 
 
 <p>We can obtian the value of a pre-defined aggregate as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">value</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">value</span><span class="p">;</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">std::string value = client.get_aggregate(&quot;max_latency_ms&quot;, 0, UINT64_MAX);
+std::cout &lt;&lt; value;</code></pre>
 
 
 <p>Finally, we can obtain alerts generated by triggers installed on an Atomic 
 MultiLog as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">alert_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">alert_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto alert_stream = client.get_alerts(0, UINT64_MAX, &quot;high_latency_trigger&quot;);
+for (auto s = alert_stream; !s.empty(); ++s) {
+  std::cout &lt;&lt; s.get();
+}</code></pre>
                 
                   
                 

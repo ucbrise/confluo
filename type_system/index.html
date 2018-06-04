@@ -378,7 +378,7 @@
     <label class="md-nav__link" for="nav-5-4">
       Data Storage
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-5-4">
         Data Storage
       </label>
@@ -411,9 +411,57 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Type System
+      </label>
+    
     <a href="./" title="Type System" class="md-nav__link md-nav__link--active">
       Type System
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#registering-types" title="Registering Types" class="md-nav__link">
+    Registering Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-a-schema" title="Building a Schema" class="md-nav__link">
+    Building a Schema
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-records" title="Adding Records" class="md-nav__link">
+    Adding Records
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performing-filter-operations" title="Performing Filter Operations" class="md-nav__link">
+    Performing Filter Operations
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -435,7 +483,7 @@
     <label class="md-nav__link" for="nav-5-5">
       Querying Data
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="6">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-5-5">
         Querying Data
       </label>
@@ -543,7 +591,7 @@
     <label class="md-nav__link" for="nav-6-2">
       Client APIs
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="3">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-6-2">
         Client APIs
       </label>
@@ -625,6 +673,41 @@
     
   
   
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#registering-types" title="Registering Types" class="md-nav__link">
+    Registering Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-a-schema" title="Building a Schema" class="md-nav__link">
+    Building a Schema
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-records" title="Adding Records" class="md-nav__link">
+    Adding Records
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performing-filter-operations" title="Performing Filter Operations" class="md-nav__link">
+    Performing Filter Operations
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -645,6 +728,7 @@ are supported by default in Confluo, it is possible to add custom
 user-defined data types. This requires defining a few operations that would
 allow operations like applying filters and triggers on attributes of
 the custom data type.</p>
+<h2 id="registering-types">Registering Types<a class="headerlink" href="#registering-types" title="Permanent link">&para;</a></h2>
 <p>To create a new type, we need to define the following properties so that
 native operations can be supported; these properties are summarised in the
 <a href="../../libconfluo/confluo/types/type_properties.h"><code>type_properties</code></a> 
@@ -698,16 +782,81 @@ see <a href="../../libconfluo/confluo/types/serde_ops.h">serde_ops.h</a> for exa
 <a href="../../libconfluo/test/size_type.h">size_type.h</a>.</p>
 <p>Once the properties for custom type is defined in the <code>type_properties</code> struct, 
 it needs to be registered with Confluo's <a href="../../libconfluo/confluo/types/type_manager.h">type manager</a> 
-via the <code>type_manager::register_type</code> interface. Once registered, a useful symbolic
+via the <code>type_manager::register_type</code> interface. We can register a type as 
+follows:</p>
+<pre class="codehilite"><code class="language-cpp">type_properties test_properties(&quot;test&quot;, sizeof(int), &amp;limits::int_min,
+                                &amp;limits::int_max, &amp;limits::int_one, 
+                                &amp;limits::int_one, &amp;limits::int_zero, false,
+                                get_relops(), get_unaryops(), 
+                                get_binaryops(),
+                                get_keyops(), &amp;test_type::parse_test,
+                                &amp;test_type::test_to_string,
+                                &amp;confluo::serialize&lt;test&gt;,
+                                &amp;confluo::deserialize&lt;test&gt;);
+type_manager::register_type(test_properties);</code></pre>
+
+
+<p>Once registered, a useful symbolic
 reference to the data type, wrapped in a <code>data_type</code> object, can be obtained via
 the <code>type_manager::get_type</code> interface.</p>
 <p>With this object, it is possible to add new columns of this type in any 
 Atomic MultiLog. From here on out, appending records to the
 Atomic MultiLog, along with operations like filters and triggers, will work out
 of the box.</p>
+<h2 id="building-a-schema">Building a Schema<a class="headerlink" href="#building-a-schema" title="Permanent link">&para;</a></h2>
+<p>We can create columns of a custom user-defined type for an Atomic MultiLog
+as follows:</p>
+<pre class="codehilite"><code class="language-cpp">data_type test_type = type_manager::get_type(&quot;test&quot;);
+schema_builder builder;
+builder.add_column(test_type, &quot;a&quot;);
+std::vector&lt;column_t&gt; s = builder.get_columns();
+
+task_pool MGMT_POOL;
+atomic_multilog dtable(&quot;table&quot;, s, &quot;/tmp&quot;, storage::IN_MEMORY, MGMT_POOL);</code></pre>
+
+
+<p>We use the <code>type_manager::get_type</code> interface to get the <code>data_type</code> object
+associated with the new user-defined type. This object can then be passed
+into the <code>add_column</code> interface of the <code>schema_builder</code> along with the name
+of the column. Finally, the vector of columns can be passed into the Atomic
+Multilog and thus operations like filters and triggers can be performed on
+data of the user-defined type.</p>
+<h2 id="adding-records">Adding Records<a class="headerlink" href="#adding-records" title="Permanent link">&para;</a></h2>
+<p>First create a packed struct containing all of the member data_types 
+in a row of the schema. Be sure to include the timestamp as one of 
+the columns. An example is as follows: </p>
+<pre class="codehilite"><code class="language-cpp">struct rec {
+    int64_t ts;
+    test_type a;
+}__attribute__((packed));</code></pre>
+
+
+<p>Then get a pointer to an instance of the struct, which is passed into the
+<code>append</code> method of the Atomic MultiLog. The following is an exmaple:</p>
+<pre class="codehilite"><code class="language-cpp">rec r = {utils::time_utils::cur_ns(), test_type()};
+void* data = reinterpret_cast&lt;void*&gt;(&amp;r);
+dtable.append(r);</code></pre>
+
+
+<p>Here we initialize a record with the current timestamp and an instance of
+the test type. Then we pass a pointer to that data to the append method
+of the Atomic MultiLog instance.</p>
+<h2 id="performing-filter-operations">Performing Filter Operations<a class="headerlink" href="#performing-filter-operations" title="Permanent link">&para;</a></h2>
+<p>After adding records containing data of the user-defined type, we can 
+perform filter operations to select specific records. We can do so as 
+follows:</p>
+<pre class="codehilite"><code class="language-cpp">for (auto r = dtable.execute_filter(&quot;a &gt; 4&quot;); !r.empty(); r = r.tail()) {
+    std::cout &lt;&lt; &quot;A value: &quot; &lt;&lt; r.head().at(1).as&lt;test_type&gt;().get_test()
+                                            &lt;&lt; std::endl;
+}</code></pre>
+
+
+<p>We assume here that <code>4</code> can be parsed as a <code>test_type</code> using the 
+parse_test method. The <code>execute_filter</code> function is then called with an
+expression that selects records that satisfy the condition. This returns
+a stream of records which can then be read and processed.</p>
 <p>See <a href="../../libconfluo/test/types/type_manager_test.h">type_manager_test.h</a> for
-examples of how to build a schema and add records with user-defined
-types.</p>
+examples of building user-defined types including ip address and size types.</p>
                 
                   
                 

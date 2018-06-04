@@ -376,7 +376,7 @@
     <label class="md-nav__link" for="nav-5-4">
       Data Storage
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="5">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-5-4">
         Data Storage
       </label>
@@ -424,7 +424,7 @@
     <label class="md-nav__link" for="nav-5-5">
       Querying Data
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="6">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-5-5">
         Querying Data
       </label>
@@ -486,9 +486,63 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Archiving Data
+      </label>
+    
     <a href="./" title="Archiving Data" class="md-nav__link md-nav__link--active">
       Archiving Data
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" title="Usage" class="md-nav__link">
+    Usage
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#periodic-archival" title="Periodic Archival" class="md-nav__link">
+    Periodic Archival
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forced-archival" title="Forced Archival" class="md-nav__link">
+    Forced Archival
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allocator-triggered-archival" title="Allocator-triggered Archival" class="md-nav__link">
+    Allocator-triggered Archival
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -541,7 +595,7 @@
     <label class="md-nav__link" for="nav-6-2">
       Client APIs
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="3">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
       <label class="md-nav__title" for="nav-6-2">
         Client APIs
       </label>
@@ -623,6 +677,47 @@
     
   
   
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" title="Usage" class="md-nav__link">
+    Usage
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#periodic-archival" title="Periodic Archival" class="md-nav__link">
+    Periodic Archival
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forced-archival" title="Forced Archival" class="md-nav__link">
+    Forced Archival
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allocator-triggered-archival" title="Allocator-triggered Archival" class="md-nav__link">
+    Allocator-triggered Archival
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -637,11 +732,35 @@
                 
                 
                 <h1 id="archiving-data">Archiving Data<a class="headerlink" href="#archiving-data" title="Permanent link">&para;</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is work in progress.</p>
-</div>
-<p>Documentation for Data Archival will be added soon.</p>
+<p>Confluo can limit the amount of data resident in memory by archiving old data. It does this by periodically archiving records in the data log, as well as all corresponding filter and index data, up to a data log offset. Archived data is accessed in the same way as data in memory since it is memory-mapped after it is persisted. </p>
+<p>This data is written to disk either in its existing format, or in a compressed representation, depending on configuration parameters. By default, the data log is compressed using LZ4. Filter and index data are delta compressed. During reads, all decompression is done under the hood. </p>
+<p>The archiver does not affect any readers that are concurrently accessing data since pointers to Confluo's data structures have associated reference counts that prevent premature deallocation. Readers obtain these pointers atomically.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<h3 id="periodic-archival">Periodic Archival<a class="headerlink" href="#periodic-archival" title="Permanent link">&para;</a></h3>
+<p>To initialize a multilog with periodic archiving capabilities:</p>
+<pre class="codehilite"><code class="language-cpp">auto archival_mode = confluo::archival::periodic_archival_mode::ON;
+store.create_atomic_multilog(&quot;my_log&quot;, schema, storage::IN_MEMORY, archival_mode);</code></pre>
+
+
+<p>Alternatively, for an existing multilog, we can toggle periodic archival:</p>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;set_periodic_archival(confluo::archival::periodic_archival_mode::ON);
+mlog-&gt;set_periodic_archival(confluo::archival::periodic_archival_mode::OFF);</code></pre>
+
+
+<p>By default, if archival is on, the archiver will run periodically every 5 minutes. This can be changed through configuration parameters. The maximum amount of data log data in memory can also be configured.</p>
+<pre class="codehilite"><code>archival_periodicity_ms 
+archival_in_memory_datalog_window_bytes *TODO better name for above param*</code></pre>
+
+
+<h3 id="forced-archival">Forced Archival<a class="headerlink" href="#forced-archival" title="Permanent link">&para;</a></h3>
+<p>Regardless of whether archival is turned on for a particular multilog, the user can force archival up to a data log offset by calling:</p>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;archive(); // Archive up to the read tail
+mlog-&gt;archive(offset); // Archive up to any offset before the read tail</code></pre>
+
+
+<h3 id="allocator-triggered-archival">Allocator-triggered Archival<a class="headerlink" href="#allocator-triggered-archival" title="Permanent link">&para;</a></h3>
+<p>In cases where the periodic archiver cannot keep up with write pressure and the maximum memory of the system is reached, the allocator will block until Confluo makes more memory available, which is done by archiving the multilogs aggressively. All multilogs are archived in their entirety to make space for newer data. This can be configured by changing:</p>
+<pre class="codehilite"><code>max_memory</code></pre>
                 
                   
                 
