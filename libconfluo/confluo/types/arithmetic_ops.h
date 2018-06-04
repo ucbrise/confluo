@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <cstdint>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 #include "exceptions.h"
 #include "raw_data.h"

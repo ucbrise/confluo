@@ -1,5 +1,8 @@
 #include "types/raw_data.h"
 
+#include <cstdio>
+#include <cstring>
+
 namespace confluo {
 
 immutable_raw_data::immutable_raw_data(const void *_ptr, size_t _size)

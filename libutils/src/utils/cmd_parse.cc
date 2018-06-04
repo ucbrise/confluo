@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "cmd_parse.h"
 
 cmd_option::cmd_option(const std::string &lopt, char sopt, bool flag) {

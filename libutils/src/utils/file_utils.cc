@@ -1,4 +1,5 @@
 #include "file_utils.h"
+#include <cstring>
 
 namespace utils {
 
