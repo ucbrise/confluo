@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-class PeriodicTaskTest: public testing::Test {
+class PeriodicTaskTest : public testing::Test {
 
 };
 

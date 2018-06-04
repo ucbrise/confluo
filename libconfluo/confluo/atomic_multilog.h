@@ -1,7 +1,7 @@
 #ifndef CONFLUO_ATOMIC_MULTILOG_H_
 #define CONFLUO_ATOMIC_MULTILOG_H_
 
-#include <math.h>
+#include <cmath>
 
 #include <functional>
 #include <numeric>
@@ -117,29 +117,7 @@ class atomic_multilog {
    * @param pool The pool of tasks
    */
   atomic_multilog(const std::string &name, const std::vector<column_t> &schema, const std::string &path,
-                  const storage::storage_mode &s_mode, const archival_mode &a_mode, task_pool &pool)
-      : name_(name),
-        schema_(schema),
-        data_log_("data_log", path, s_mode),
-        rt_(path, s_mode),
-        metadata_(path),
-        planner_(&data_log_, &indexes_, &schema_),
-        archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_),
-        archival_task_("archival"),
-        archival_pool_(),
-        mgmt_pool_(pool),
-        monitor_task_("monitor") {
-    data_log_.pre_alloc();
-    metadata_.write_schema(schema_);
-    metadata_.write_storage_mode(s_mode);
-    metadata_.write_archival_mode(a_mode);
-    monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
-                        configuration_params::MONITOR_PERIODICITY_MS);
-    if (a_mode == archival_mode::ON) {
-      archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
-                           archival_configuration_params::PERIODICITY_MS);
-    }
-  }
+                  const storage::storage_mode &s_mode, const archival_mode &a_mode, task_pool &pool);
 
   /**
    * Initializes an atomic multilog from the given parameters
@@ -151,9 +129,7 @@ class atomic_multilog {
    * @param pool The pool of tasks for the multilog
    */
   atomic_multilog(const std::string &name, const std::string &schema, const std::string &path,
-                  const storage::storage_mode &storage_mode, const archival_mode &a_mode, task_pool &pool)
-      : atomic_multilog(name, parser::parse_schema(schema), path, storage_mode, a_mode, pool) {
-  }
+                  const storage::storage_mode &storage_mode, const archival_mode &a_mode, task_pool &pool);
 
   /**
    * Constructor that initializes atomic multilog from existing archives.
@@ -161,50 +137,18 @@ class atomic_multilog {
    * @param path The path of the atomic multilog
    * @param pool The pool of tasks
    */
-  atomic_multilog(const std::string &name, const std::string &path, task_pool &pool)
-      : name_(name),
-        schema_(),
-        metadata_(path),
-        planner_(&data_log_, &indexes_, &schema_),
-        archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
-        archival_task_("archival"),
-        archival_pool_(),
-        mgmt_pool_(pool),
-        monitor_task_("monitor") {
-    storage_mode s_mode;
-    archival_mode a_mode;
-    load_metadata(path, s_mode, a_mode);
-    data_log_ = data_log_type("data_log", path, s_mode);
-    rt_ = read_tail_type(path, s_mode);
-    load(s_mode);
-    monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
-                        configuration_params::MONITOR_PERIODICITY_MS);
-    if (a_mode == archival_mode::ON) {
-      archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
-                           archival_configuration_params::PERIODICITY_MS);
-    }
-  }
+  atomic_multilog(const std::string &name, const std::string &path, task_pool &pool);
 
   /**
    * Force archival of multilog up to the read tail.
    */
-  void archive() {
-    archive(rt_.get());
-  }
+  void archive();
 
   /**
    * Force archival of multilog up to an offset.
    * @param offset The offset into the data log at which the data is stored
    */
-  void archive(size_t offset) {
-    optional<management_exception> ex;
-    std::future<void> ret = archival_pool_.submit([this, offset] {
-      archiver_.archive(offset);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void archive(size_t offset);
 
   // Management ops
   /**
@@ -213,31 +157,14 @@ class atomic_multilog {
    * @param bucket_size The size of the bucket
    * @throw ex Management exception
    */
-  void add_index(const std::string &field_name, double bucket_size = configuration_params::INDEX_BUCKET_SIZE) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit(
-        [field_name, bucket_size, &ex, this] {
-          add_index_task(field_name, bucket_size, ex);
-        });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void add_index(const std::string &field_name, double bucket_size = configuration_params::INDEX_BUCKET_SIZE());
 
   /**
    * Removes index from the atomic multilog
    * @param field_name The name of the field in the atomic multilog
    * @throw ex Management exception
    */
-  void remove_index(const std::string &field_name) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit([field_name, &ex, this] {
-      remove_index_task(field_name, ex);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void remove_index(const std::string &field_name);
 
   /**
    * Checks whether column of atomic multilog is indexed
@@ -245,17 +172,7 @@ class atomic_multilog {
    * @return True if column is indexed, false otherwise
    * @throw ex Management exception
    */
-  bool is_indexed(const std::string &field_name) {
-    optional<management_exception> ex;
-    uint16_t idx;
-    try {
-      idx = schema_.get_field_index(field_name);
-    } catch (std::exception &e) {
-      THROW(management_exception, "Field name does not exist");
-    }
-    column_t &col = schema_[idx];
-    return col.is_indexed();
-  }
+  bool is_indexed(const std::string &field_name);
 
   /**
    * Adds filter to the atomic multilog
@@ -263,30 +180,14 @@ class atomic_multilog {
    * @param expr The expression to filter out elements in the atomic multilog
    * @throw ex Management exception
    */
-  void add_filter(const std::string &name, const std::string &expr) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit([name, expr, &ex, this] {
-      add_filter_task(name, expr, ex);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void add_filter(const std::string &name, const std::string &expr);
 
   /**
    * Removes filter from the atomic multilog
    * @param name The name of the filter
    * @throw ex Management exception
    */
-  void remove_filter(const std::string &name) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
-      remove_filter_task(name, ex);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void remove_filter(const std::string &name);
 
   /**
    * Adds aggregate to the atomic multilog
@@ -295,16 +196,7 @@ class atomic_multilog {
    * @param filter_name Name of filter to add aggregate to.
    * @param expr Aggregate expression (e.g., min(temp))
    */
-  void add_aggregate(const std::string &name, const std::string &filter_name, const std::string &expr) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit(
-        [name, filter_name, expr, &ex, this] {
-          add_aggregate_task(name, filter_name, expr, ex);
-        });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void add_aggregate(const std::string &name, const std::string &filter_name, const std::string &expr);
 
   /**
    * Removes aggregate from the atomic multilog
@@ -312,15 +204,7 @@ class atomic_multilog {
    * @param name The name of the aggregate
    * @throw Management exception
    */
-  void remove_aggregate(const std::string &name) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
-      remove_aggregate_task(name, ex);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void remove_aggregate(const std::string &name);
 
   /**
    * Adds trigger to the atomic multilog
@@ -331,103 +215,35 @@ class atomic_multilog {
    */
   void install_trigger(const std::string &name,
                        const std::string &expr,
-                       const uint64_t periodicity_ms = configuration_params::MONITOR_PERIODICITY_MS) {
-    if (periodicity_ms < configuration_params::MONITOR_PERIODICITY_MS) {
-      throw management_exception(
-          "Trigger periodicity (" + std::to_string(periodicity_ms)
-              + "ms) cannot be less than monitor periodicity ("
-              + std::to_string(configuration_params::MONITOR_PERIODICITY_MS)
-              + "ms)");
-    }
-
-    if (periodicity_ms % configuration_params::MONITOR_PERIODICITY_MS != 0) {
-      throw management_exception(
-          "Trigger periodicity (" + std::to_string(periodicity_ms)
-              + "ms) must be a multiple of monitor periodicity ("
-              + std::to_string(configuration_params::MONITOR_PERIODICITY_MS)
-              + "ms)");
-    }
-
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit(
-        [name, expr, periodicity_ms, &ex, this] {
-          add_trigger_task(name, expr, periodicity_ms, ex);
-        });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+                       const uint64_t periodicity_ms = configuration_params::MONITOR_PERIODICITY_MS());
 
   /**
    * Removes trigger from the atomic multilog
    * @param name The name of the trigger
    * @throw Management exception
    */
-  void remove_trigger(const std::string &name) {
-    optional<management_exception> ex;
-    std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
-      remove_trigger_task(name, ex);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void remove_trigger(const std::string &name);
 
   // Query ops
   /**
    * Get a record batch builder.
    * @return The record batch builder
    */
-  record_batch_builder get_batch_builder() const {
-    return record_batch_builder(schema_);
-  }
+  record_batch_builder get_batch_builder() const;
 
   /**
    * Appends a batch of records to the atomic multilog
    * @param batch The record batch to be added
    * @return The offset where the batch is located
    */
-  size_t append_batch(record_batch &batch) {
-    size_t record_size = schema_.record_size();
-    size_t batch_bytes = batch.nrecords * record_size;
-    size_t log_offset = data_log_.reserve(batch_bytes);
-    size_t cur_offset = log_offset;
-    for (record_block &block : batch.blocks) {
-      data_log_.write(cur_offset,
-                      reinterpret_cast<const uint8_t *>(block.data.data()),
-                      block.data.length());
-      update_aux_record_block(cur_offset, block, record_size);
-      cur_offset += block.data.length();
-    }
-
-    data_log_.flush(log_offset, batch_bytes);
-    rt_.advance(log_offset, batch_bytes);
-    return log_offset;
-  }
+  size_t append_batch(record_batch &batch);
 
   /**
    * Appends data to the atomic multilog
    * @param data The data to be stored
    * @return The offset of where the data is located
    */
-  size_t append(void *data) {
-    size_t record_size = schema_.record_size();
-    size_t offset = data_log_.append((const uint8_t *) data, record_size);
-    record_t r = schema_.apply_unsafe(offset, data);
-
-    size_t nfilters = filters_.size();
-    for (size_t i = 0; i < nfilters; i++)
-      if (filters_.at(i)->is_valid())
-        filters_.at(i)->update(r);
-
-    for (const field_t &f : r)
-      if (f.is_indexed())
-        indexes_.at(f.index_id())->insert(f.get_key(), offset);
-
-    data_log_.flush(offset, record_size);
-    rt_.advance(offset, record_size);
-    return offset;
-  }
+  size_t append(void *data);
 
   // TODO: Add a std::tuple based variant
   // TODO: Add a JSON based variant
@@ -436,12 +252,7 @@ class atomic_multilog {
    * @param record The record to be stored
    * @return The offset in data log where the record is written
    */
-  size_t append(const std::vector<std::string>& record) {
-    void *buf = schema_.record_vector_to_data(record);
-    size_t off = append(buf);
-    delete[] reinterpret_cast<uint8_t *>(buf);
-    return off;
-  }
+  size_t append(const std::vector<std::string> &record);
 
   /**
    * Reads data from the atomic multilog at the specified offset into a pointer.
@@ -450,14 +261,7 @@ class atomic_multilog {
    * @param version The current version
    * @param ptr The pointer to populate
    */
-  void read(uint64_t offset, uint64_t& version, read_only_data_log_ptr& ptr) const {
-    version = rt_.get();
-    if (offset < version) {
-      data_log_.cptr(offset, ptr);
-    } else {
-      ptr.init(nullptr);
-    }
-  }
+  void read(uint64_t offset, uint64_t &version, read_only_data_log_ptr &ptr) const;
 
   /**
    * Reads data from the atomic multilog at the specified offset into a pointer.
@@ -465,10 +269,7 @@ class atomic_multilog {
    * @param offset The offset into the data log at which the data is stored
    * @param ptr The pointer to populate
    */
-  void read(uint64_t offset, read_only_data_log_ptr& ptr) const {
-    uint64_t version;
-    read(offset, version, ptr);
-  }
+  void read(uint64_t offset, read_only_data_log_ptr &ptr) const;
 
   /**
    * Reads a record given an offset into the data log
@@ -476,22 +277,14 @@ class atomic_multilog {
    * @param version The current version
    * @return The corresponding record as a vector of strings.
    */
-  std::vector<std::string> read(uint64_t offset, uint64_t& version) const {
-    read_only_data_log_ptr rptr;
-    read(offset, version, rptr);
-    data_ptr dptr = rptr.decode();
-    return schema_.data_to_record_vector(dptr.get());
-  }
+  std::vector<std::string> read(uint64_t offset, uint64_t &version) const;
 
   /**
    * Reads a record given an offset into the data log
    * @param offset The offset into the data log of the record
    * @return The corresponding record
    */
-  std::vector<std::string> read(uint64_t offset) const {
-    uint64_t version;
-    return read(offset, version);
-  }
+  std::vector<std::string> read(uint64_t offset) const;
 
   /**
    * Reads a record given an offset into the data log
@@ -499,11 +292,7 @@ class atomic_multilog {
    * @param version The current version
    * @return Pointer to the corresponding raw record bytes
    */
-  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t& version) const {
-    read_only_data_log_ptr rptr;
-    read(offset, version, rptr);
-    return rptr.decode(0, schema_.record_size());
-  }
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t &version) const;
 
   /**
    * Reads a record given an offset into the data log
@@ -511,23 +300,14 @@ class atomic_multilog {
    * @param version The current version
    * @return Pointer to the corresponding raw record bytes
    */
-  std::unique_ptr<uint8_t> read_raw(uint64_t offset) const {
-    uint64_t version;
-    return read_raw(offset, version);
-  }
+  std::unique_ptr<uint8_t> read_raw(uint64_t offset) const;
 
   /**
    * Executes the filter expression
    * @param expr The filter expression
    * @return The result of applying the filter to the atomic multilog
    */
-  std::unique_ptr<record_cursor> execute_filter(const std::string &expr) const {
-    uint64_t version = rt_.get();
-    auto t = parser::parse_expression(expr);
-    auto cexpr = parser::compile_expression(t, schema_);
-    query_plan plan = planner_.plan(cexpr);
-    return plan.execute(version);
-  }
+  std::unique_ptr<record_cursor> execute_filter(const std::string &expr) const;
 
   // TODO: Add tests
   /**
@@ -538,16 +318,7 @@ class atomic_multilog {
    *
    * @return A numeric containing the result of the aggregate
    */
-  numeric execute_aggregate(const std::string &aggregate_expr, const std::string &filter_expr) {
-    auto pa = parser::parse_aggregate(aggregate_expr);
-    aggregator agg = aggregate_manager::get_aggregator(pa.agg);
-    uint16_t field_idx = schema_[pa.field_name].idx();
-    uint64_t version = rt_.get();
-    auto t = parser::parse_expression(filter_expr);
-    auto cexpr = parser::compile_expression(t, schema_);
-    query_plan plan = planner_.plan(cexpr);
-    return plan.aggregate(version, field_idx, agg);
-  }
+  numeric execute_aggregate(const std::string &aggregate_expr, const std::string &filter_expr);
 
   /**
    * Queries an existing filter
@@ -558,24 +329,7 @@ class atomic_multilog {
    */
   std::unique_ptr<record_cursor> query_filter(const std::string &filter_name,
                                               uint64_t begin_ms,
-                                              uint64_t end_ms) const {
-    filter_id_t filter_id;
-    if (filter_map_.get(filter_name, filter_id) == -1) {
-      throw invalid_operation_exception(
-          "Filter " + filter_name + " does not exist.");
-    }
-
-    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
-                                                                    end_ms);
-    uint64_t version = rt_.get();
-    std::unique_ptr<offset_cursor> o_cursor(
-        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
-                                                                   res.end(),
-                                                                   version));
-    return std::unique_ptr<record_cursor>(
-        new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_,
-                                 parser::compiled_expression()));
-  }
+                                              uint64_t end_ms) const;
 
   /**
    * Queries an existing filter
@@ -586,21 +340,7 @@ class atomic_multilog {
    * @return A stream containing the results of the filter
    */
   std::unique_ptr<record_cursor> query_filter(const std::string &filter_name, uint64_t begin_ms, uint64_t end_ms,
-                                              const std::string &additional_filter_expr) const {
-    auto t = parser::parse_expression(additional_filter_expr);
-    auto e = parser::compile_expression(t, schema_);
-    filter_id_t filter_id;
-    if (filter_map_.get(filter_name, filter_id) == -1) {
-      throw invalid_operation_exception(
-          "Filter " + filter_name + " does not exist.");
-    }
-
-    filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
-    uint64_t version = rt_.get();
-    std::unique_ptr<offset_cursor> o_cursor(
-        new offset_iterator_cursor<filter::range_result::iterator>(res.begin(), res.end(), version));
-    return std::unique_ptr<record_cursor>(new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_, e));
-  }
+                                              const std::string &additional_filter_expr) const;
 
   /**
    * Query a stored aggregate.
@@ -609,25 +349,7 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return The aggregate value for the given time range.
    */
-  numeric get_aggregate(const std::string &aggregate_name, uint64_t begin_ms, uint64_t end_ms) {
-    aggregate_id_t aggregate_id;
-    if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
-      throw invalid_operation_exception("Aggregate " + aggregate_name + " does not exist.");
-    }
-    uint64_t version = rt_.get();
-    size_t fid = aggregate_id.filter_idx;
-    size_t aid = aggregate_id.aggregate_idx;
-    aggregate_info *a = filters_.at(fid)->get_aggregate_info(aid);
-    numeric agg = a->zero();
-    for (uint64_t t = begin_ms; t <= end_ms; t++) {
-      aggregated_reflog const *refs;
-      if ((refs = filters_.at(fid)->lookup(t)) == nullptr)
-        continue;
-      numeric t_agg = refs->get_aggregate(aid, version);
-      agg = a->comb_op(agg, t_agg);
-    }
-    return agg;
-  }
+  numeric get_aggregate(const std::string &aggregate_name, uint64_t begin_ms, uint64_t end_ms);
 
   /**
    * Obtain a cursor over alerts in a time-range
@@ -635,10 +357,7 @@ class atomic_multilog {
    * @param end_ms End of time-range in ms
    * @return Cursor over alerts in the time range
    */
-  std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms, uint64_t end_ms) const {
-    return get_alerts(begin_ms, end_ms, "");
-
-  }
+  std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms, uint64_t end_ms) const;
 
   /**
    * Obtain a cursor over alerts on a given trigger in a time-range
@@ -647,41 +366,31 @@ class atomic_multilog {
    * @param trigger_name Name of the trigger.
    * @return Cursor over alerts in the time range
    */
-  std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms, uint64_t end_ms, const std::string &trigger_name) const {
-    return std::unique_ptr<alert_cursor>(new trigger_alert_cursor(alerts_.get_alerts(begin_ms, end_ms), trigger_name));
-  }
+  std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms, uint64_t end_ms, const std::string &trigger_name) const;
 
   /**
    * Gets the name of the atomic multilog
    * @return The atomic multilog name
    */
-  const std::string &get_name() const {
-    return name_;
-  }
+  const std::string &get_name() const;
 
   /**
    * Gets the atomic multilog schema
    * @return The schema of the atomic multilog
    */
-  const schema_t &get_schema() const {
-    return schema_;
-  }
+  const schema_t &get_schema() const;
 
   /**
    * Gets the number of records in the atomic multilog
    * @return The number of records
    */
-  size_t num_records() const {
-    return rt_.get() / schema_.record_size();
-  }
+  size_t num_records() const;
 
   /**
    * Gets the record size
    * @return The record size of the schema
    */
-  size_t record_size() const {
-    return schema_.record_size();
-  }
+  size_t record_size() const;
 
  protected:
   /**
@@ -690,57 +399,15 @@ class atomic_multilog {
    * Note: no reads/writes should occur during this period, since the data log is being initialized.
    * @param mode The storage mode used in the previous life-cycle of this multilog
    */
-  void load(const storage::storage_mode &mode) {
-    load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
-    load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
-    load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
-    rt_.advance(0, data_log_.size());
-  }
+  void load(const storage::storage_mode &mode);
 
-  void load_metadata(const std::string &path, storage_mode &s_mode, archival_mode &a_mode) {
-    metadata_reader reader(path);
-    metadata_writer temp = metadata_;
-    metadata_ = metadata_writer(); // metadata shouldn't be written while loading
-    while (reader.has_next()) {
-      switch (reader.next_type()) {
-        case D_SCHEMA_METADATA: {
-          schema_ = reader.next_schema();
-          break;
-        }
-        case D_FILTER_METADATA: {
-          auto filter_metadata = reader.next_filter_metadata();
-          add_filter(filter_metadata.filter_name(), filter_metadata.expr());
-          break;
-        }
-        case D_INDEX_METADATA: {
-          auto index_metadata = reader.next_index_metadata();
-          add_index(index_metadata.field_name(), index_metadata.bucket_size());
-          break;
-        }
-        case D_AGGREGATE_METADATA: {
-          auto agg_metadata = reader.next_aggregate_metadata();
-          add_aggregate(agg_metadata.aggregate_name(), agg_metadata.filter_name(), agg_metadata.aggregate_expression());
-          break;
-        }
-        case D_TRIGGER_METADATA: {
-          auto trigger_metadata = reader.next_trigger_metadata();
-          optional<management_exception> ex;
-          add_trigger_task(trigger_metadata.trigger_name(), trigger_metadata.trigger_expression(),
-                           trigger_metadata.periodicity_ms(), ex);
-          break;
-        }
-        case D_STORAGE_MODE_METADATA: {
-          s_mode = reader.next_storage_mode();
-          break;
-        }
-        case D_ARCHIVAL_MODE_METADATA: {
-          a_mode = reader.next_archival_mode();
-          break;
-        }
-      }
-    }
-    metadata_ = temp;
-  }
+  /**
+   * Lead multilog metadata from path
+   * @param path Path to load metadata from
+   * @param s_mode Storage mode
+   * @param a_mode Archival mode
+   */
+  void load_metadata(const std::string &path, storage_mode &s_mode, archival_mode &a_mode);
 
   /**
    * Updates the record block
@@ -748,37 +415,7 @@ class atomic_multilog {
    * @param block The record block
    * @param record_size The size of each record
    */
-  void update_aux_record_block(uint64_t log_offset, record_block &block, size_t record_size) {
-    schema_snapshot snap = schema_.snapshot();
-    for (size_t i = 0; i < filters_.size(); i++) {
-      if (filters_.at(i)->is_valid()) {
-        filters_.at(i)->update(log_offset, snap, block, record_size);
-      }
-    }
-
-    for (size_t i = 0; i < schema_.size(); i++) {
-      if (snap.is_indexed(i)) {
-        radix_index *idx = indexes_.at(snap.index_id(i));
-        // Handle timestamp differently
-        // TODO: What if indexing requested for finer granularity?
-        if (i == 0) {  // Timestamp
-          auto &refs = idx->get_or_create(snap.time_key(block.time_block));
-          size_t idx = refs->reserve(block.nrecords);
-          for (size_t j = 0; j < block.nrecords; j++) {
-            refs->set(idx + j, log_offset + j * record_size);
-          }
-        } else {
-          for (size_t j = 0; j < block.nrecords; j++) {
-            size_t block_offset = j * record_size;
-            size_t record_offset = log_offset + block_offset;
-            void *rec_ptr = reinterpret_cast<uint8_t *>(&block.data[0])
-                + block_offset;
-            idx->insert(snap.get_key(rec_ptr, i), record_offset);
-          }
-        }
-      }
-    }
-  }
+  void update_aux_record_block(uint64_t log_offset, record_block &block, size_t record_size);
 
   /**
    * Adds an index to the schema for a given field
@@ -787,31 +424,7 @@ class atomic_multilog {
    * @param bucket_size The bucket_size used for indexing
    * @param ex The exception when the index could not be added
    */
-  void add_index_task(const std::string &field_name, double bucket_size, optional<management_exception> &ex) {
-    uint16_t idx;
-    try {
-      idx = schema_.get_field_index(field_name);
-    } catch (std::exception &e) {
-      ex = management_exception("Could not add index for " + field_name + ": " + e.what());
-      return;
-    }
-
-    column_t &col = schema_[idx];
-    bool success = col.set_indexing();
-    if (success) {
-      uint16_t index_id = UINT16_MAX;
-      if (col.type().is_valid()) {
-        index_id = indexes_.push_back(new radix_index(col.type().size, 256));
-      } else {
-        ex = management_exception("Index not supported for field type");
-      }
-      col.set_indexed(index_id, bucket_size);
-      metadata_.write_index_metadata(field_name, bucket_size);
-    } else {
-      ex = management_exception("Could not index " + field_name + ": already indexed/indexing");
-      return;
-    }
-  }
+  void add_index_task(const std::string &field_name, double bucket_size, optional<management_exception> &ex);
 
   /**
    * Removes an index for a given field in the schema
@@ -819,20 +432,7 @@ class atomic_multilog {
    * @param field_name The name of the field to index
    * @param ex The exception when the index could not be removed
    */
-  void remove_index_task(const std::string &field_name, optional<management_exception> &ex) {
-    uint16_t idx;
-    try {
-      idx = schema_.get_field_index(field_name);
-    } catch (std::exception &e) {
-      ex = management_exception("Could not remove index for " + field_name + " : " + e.what());
-      return;
-    }
-
-    if (!schema_[idx].disable_indexing()) {
-      ex = management_exception("Could not remove index for " + field_name + ": No index exists");
-      return;
-    }
-  }
+  void remove_index_task(const std::string &field_name, optional<management_exception> &ex);
 
   /**
    * Adds a filter to be executed on the data
@@ -841,21 +441,7 @@ class atomic_multilog {
    * @param expr The filter expression to execute
    * @param ex The exception when the filter could not be added
    */
-  void add_filter_task(const std::string &name, const std::string &expr, optional<management_exception> &ex) {
-    filter_id_t filter_id;
-    if (filter_map_.get(name, filter_id) != -1) {
-      ex = management_exception("Filter " + name + " already exists.");
-      return;
-    }
-    auto t = parser::parse_expression(expr);
-    auto cexpr = parser::compile_expression(t, schema_);
-    filter_id = filters_.push_back(new filter(cexpr, default_filter));
-    metadata_.write_filter_metadata(name, expr);
-    if (filter_map_.put(name, filter_id) == -1) {
-      ex = management_exception("Could not add filter " + name + " to filter map.");
-      return;
-    }
-  }
+  void add_filter_task(const std::string &name, const std::string &expr, optional<management_exception> &ex);
 
   /**
    * Removes a filter that was created
@@ -863,19 +449,7 @@ class atomic_multilog {
    * @param name The name of the filter
    * @param ex The exception when the filter could not be removed
    */
-  void remove_filter_task(const std::string &name, optional<management_exception> &ex) {
-    filter_id_t filter_id;
-    if (filter_map_.get(name, filter_id) == -1) {
-      ex = management_exception("Filter " + name + " does not exist.");
-      return;
-    }
-    bool success = filters_.at(filter_id)->invalidate();
-    if (!success) {
-      ex = management_exception("Filter already invalidated.");
-      return;
-    }
-    filter_map_.remove(name, filter_id);
-  }
+  void remove_filter_task(const std::string &name, optional<management_exception> &ex);
 
   /**
    * Adds an aggregate 
@@ -888,28 +462,7 @@ class atomic_multilog {
   void add_aggregate_task(const std::string &name,
                           const std::string &filter_name,
                           const std::string &expr,
-                          optional<management_exception> &ex) {
-    aggregate_id_t aggregate_id;
-    if (aggregate_map_.get(name, aggregate_id) != -1) {
-      ex = management_exception("Aggregate " + name + " already exists.");
-      return;
-    }
-    filter_id_t filter_id;
-    if (filter_map_.get(filter_name, filter_id) == -1) {
-      ex = management_exception("Filter " + filter_name + " does not exist.");
-      return;
-    }
-    aggregate_id.filter_idx = filter_id;
-    auto pa = parser::parse_aggregate(expr);
-    const column_t &col = schema_[pa.field_name];
-    aggregate_info *a = new aggregate_info(name, aggregate_manager::get_aggregator(pa.agg), col.idx());
-    aggregate_id.aggregate_idx = filters_.at(filter_id)->add_aggregate(a);
-    if (aggregate_map_.put(name, aggregate_id) == -1) {
-      ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
-      return;
-    }
-    metadata_.write_aggregate_metadata(name, filter_name, expr);
-  }
+                          optional<management_exception> &ex);
 
   /**
    * Removes an aggregate
@@ -918,19 +471,7 @@ class atomic_multilog {
    * @param ex The exception if the aggregate cannot be removed
    */
   void remove_aggregate_task(const std::string &name,
-                             optional<management_exception> &ex) {
-    aggregate_id_t aggregate_id;
-    if (aggregate_map_.get(name, aggregate_id) == -1) {
-      ex = management_exception("Aggregate " + name + " does not exist.");
-      return;
-    }
-    bool success = filters_.at(aggregate_id.filter_idx)->remove_aggregate(aggregate_id.aggregate_idx);
-    if (!success) {
-      ex = management_exception("Aggregate already invalidated.");
-      return;
-    }
-    aggregate_map_.remove(name, aggregate_id);
-  }
+                             optional<management_exception> &ex);
 
   /**
    * Adds a trigger to the atomic multilog
@@ -944,31 +485,7 @@ class atomic_multilog {
   void add_trigger_task(const std::string &name,
                         const std::string &expr,
                         uint64_t periodicity_ms,
-                        optional<management_exception> &ex) {
-    trigger_id_t trigger_id;
-    if (trigger_map_.get(name, trigger_id) != -1) {
-      ex = management_exception("Trigger " + name + " already exists.");
-      return;
-    }
-    auto pt = parser::parse_trigger(expr);
-    std::string aggregate_name = pt.aggregate_name;
-    aggregate_id_t aggregate_id;
-    if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
-      ex = management_exception(
-          "Aggregate " + aggregate_name + " does not exist.");
-      return;
-    }
-    trigger_id.aggregate_id = aggregate_id;
-    aggregate_info *a = filters_.at(aggregate_id.filter_idx)->get_aggregate_info(aggregate_id.aggregate_idx);
-    trigger *t =
-        new trigger(name, aggregate_name, relop_utils::str_to_op(pt.relop), a->value(pt.threshold), periodicity_ms);
-    trigger_id.trigger_idx = a->add_trigger(t);
-    if (trigger_map_.put(name, trigger_id) == -1) {
-      ex = management_exception("Could not add trigger " + name + " to trigger map.");
-      return;
-    }
-    metadata_.write_trigger_metadata(name, expr, periodicity_ms);
-  }
+                        optional<management_exception> &ex);
 
   /**
    * Removes a trigger from the atomic multilog
@@ -976,68 +493,18 @@ class atomic_multilog {
    * @param name The name of the trigger
    * @param ex The exception when the trigger could not be removed
    */
-  void remove_trigger_task(const std::string &name, optional<management_exception> &ex) {
-    trigger_id_t trigger_id;
-    if (trigger_map_.get(name, trigger_id) == -1) {
-      ex = management_exception("Trigger " + name + " does not exist.");
-      return;
-    }
-    size_t fid = trigger_id.aggregate_id.filter_idx;
-    size_t aid = trigger_id.aggregate_id.aggregate_idx;
-    size_t tid = trigger_id.trigger_idx;
-    bool success = filters_.at(fid)->get_aggregate_info(aid)->remove_trigger(tid);
-    if (!success) {
-      ex = management_exception("Trigger already invalidated.");
-      return;
-    }
-    trigger_map_.remove(name, trigger_id);
-  }
+  void remove_trigger_task(const std::string &name, optional<management_exception> &ex);
 
   /**
    * Archives until only a configured number of bytes
    * of the data log are resident in memory.
    */
-  void archival_task() {
-    optional<management_exception> ex;
-    std::future<void> ret = archival_pool_.submit([this] {
-      if (rt_.get() > archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES)
-        archiver_.archive(rt_.get() - archival_configuration_params::IN_MEMORY_DATALOG_WINDOW_BYTES);
-    });
-    ret.wait();
-    if (ex.has_value())
-      throw ex.value();
-  }
+  void archival_task();
 
   /**
    * Monitors the task executed on the atomic multilog
    */
-  void monitor_task() {
-    uint64_t cur_ms = time_utils::cur_ms();
-    uint64_t version = rt_.get();
-    size_t nfilters = filters_.size();
-    for (size_t i = 0; i < nfilters; i++) {
-      filter *f = filters_.at(i);
-      if (f->is_valid()) {
-        size_t naggs = f->num_aggregates();
-        for (size_t aid = 0; aid < naggs; aid++) {
-          aggregate_info *a = f->get_aggregate_info(aid);
-          if (a->is_valid()) {
-            size_t ntriggers = a->num_triggers();
-            for (size_t tid = 0; tid < ntriggers; tid++) {
-              trigger *t = a->get_trigger(tid);
-              if (t->is_valid() && cur_ms % t->periodicity_ms() == 0) {
-                for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS; ms <= cur_ms; ms++) {
-                  if (ms % t->periodicity_ms() == 0) {
-                    check_time_bucket(f, t, tid, cur_ms, version);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  void monitor_task();
 
   /**
    * Checks the time bucket and adds alerts when necessary
@@ -1048,18 +515,7 @@ class atomic_multilog {
    * @param time_bucket The time_bucket to check
    * @param version The version to check
    */
-  void check_time_bucket(filter *f, trigger *t, size_t tid, uint64_t time_bucket, uint64_t version) {
-    size_t window_size = t->periodicity_ms();
-    for (uint64_t ms = time_bucket - window_size; ms <= time_bucket; ms++) {
-      const aggregated_reflog *ar = f->lookup(ms);
-      if (ar != nullptr) {
-        numeric agg = ar->get_aggregate(tid, version);
-        if (numeric::relop(t->op(), agg, t->threshold())) {
-          alerts_.add_alert(ms, t->name(), t->expr(), agg, version);
-        }
-      }
-    }
-  }
+  void check_time_bucket(filter *f, trigger *t, size_t tid, uint64_t time_bucket, uint64_t version);
 
   /** The name of the multilog */
   std::string name_;

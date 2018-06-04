@@ -8,22 +8,32 @@
 namespace confluo {
 namespace storage {
 
+namespace detail {
+
+template<typename T>
+static void no_op_delete(T *) {}
+
+template<typename U>
+static void array_delete(U *ptr) { std::default_delete<U[]>()(ptr); }
+
+}
+
 // TODO may need to inherit from unique_ptr so we can provide a default
 //  constructor in order to make things cleaner for the caller.
-template <typename T>
-using decoded_ptr = typename std::unique_ptr<T, void (*)(T*)>;
+template<typename T>
+using decoded_ptr = typename std::unique_ptr<T, void (*)(T *)>;
 
 template<typename T>
 class encoded_ptr {
  public:
-  encoded_ptr(void* ptr = nullptr)
+  encoded_ptr(void *ptr = nullptr)
       : ptr_(ptr) {
   }
 
   /**
    * @return encoded pointer
    */
-  void* ptr() const {
+  void *ptr() const {
     return ptr_;
   }
 
@@ -31,8 +41,8 @@ class encoded_ptr {
    * @return encoded pointer
    */
   template<typename U>
-  U* ptr_as() const {
-    return static_cast<U*>(ptr_);
+  U *ptr_as() const {
+    return static_cast<U *>(ptr_);
   }
 
   //
@@ -65,7 +75,7 @@ class encoded_ptr {
    * @param data buffer of decoded data to encode and store
    * @param len number of elements of T
    */
-  void encode(size_t idx, const T* data, size_t len) {
+  void encode(size_t idx, const T *data, size_t len) {
     ptr_aux_block aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
@@ -84,7 +94,7 @@ class encoded_ptr {
    * @return deocoded element
    */
   T decode_at(size_t idx) const {
-    auto* metadata = ptr_metadata::get(ptr_);
+    auto *metadata = ptr_metadata::get(ptr_);
     auto aux = ptr_aux_block::get(metadata);
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
@@ -110,7 +120,7 @@ class encoded_ptr {
    * @param start_idx index to start at
    * @param len number of elements
    */
-  void decode(T* buffer, size_t start_idx, size_t len) const {
+  void decode(T *buffer, size_t start_idx, size_t len) const {
     auto aux = ptr_aux_block::get(ptr_metadata::get(ptr_));
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
@@ -123,7 +133,7 @@ class encoded_ptr {
       }
       case encoding_type::D_LZ4: {
         compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(),
-                                           reinterpret_cast<uint8_t*>(buffer), start_idx, len);
+                                           reinterpret_cast<uint8_t *>(buffer), start_idx, len);
         break;
       }
       default: {
@@ -140,7 +150,7 @@ class encoded_ptr {
    * @return pointer to decoded buffer
    */
   std::unique_ptr<T> decode(size_t start_idx, size_t len) const {
-    T* decoded = new T[len];
+    T *decoded = new T[len];
     decode(decoded, start_idx, len);
     return std::unique_ptr<T>(decoded);
   }
@@ -151,24 +161,24 @@ class encoded_ptr {
    * @return decoded pointer
    */
   decoded_ptr<T> decode(size_t start_idx) const {
-    auto* metadata = ptr_metadata::get(ptr_);
+    auto *metadata = ptr_metadata::get(ptr_);
     auto aux = ptr_aux_block::get(metadata);
     switch (aux.encoding_) {
       case encoding_type::D_UNENCODED: {
-        return decoded_ptr<T>(this->ptr_as<T>() + start_idx, no_op_delete);
+        return decoded_ptr<T>(this->ptr_as<T>() + start_idx, detail::no_op_delete<T>);
       }
       case encoding_type::D_ELIAS_GAMMA: {
         size_t encoded_size = metadata->data_size_;
         size_t decoded_size = compression::delta_decoder::decoded_size(this->ptr_as<uint8_t>());
-        T* decoded = new T[decoded_size];
+        T *decoded = new T[decoded_size];
         compression::delta_decoder::decode<T>(this->ptr_as<uint8_t>(), decoded, start_idx);
-        return decoded_ptr<T>(decoded, array_delete<T>);
+        return decoded_ptr<T>(decoded, detail::array_delete<T>);
       }
       case encoding_type::D_LZ4: {
         size_t decoded_size = compression::lz4_decoder<>::decoded_size(this->ptr_as<uint8_t>());
-        uint8_t* decoded = new uint8_t[decoded_size];
+        uint8_t *decoded = new uint8_t[decoded_size];
         compression::lz4_decoder<>::decode(this->ptr_as<uint8_t>(), decoded, start_idx);
-        return decoded_ptr<T>(reinterpret_cast<T*>(decoded), array_delete<T>);
+        return decoded_ptr<T>(reinterpret_cast<T *>(decoded), detail::array_delete<T>);
       }
       default: {
         THROW(illegal_state_exception, "Invalid encoding type!");
@@ -177,10 +187,7 @@ class encoded_ptr {
   }
 
  private:
-  static void no_op_delete(T* ptr) { }
-  template<typename U> static void array_delete(U* ptr) { std::default_delete<U[]>()(ptr); }
-
-  void* ptr_; // encoded data stored at this pointer
+  void *ptr_; // encoded data stored at this pointer
 
 };
 

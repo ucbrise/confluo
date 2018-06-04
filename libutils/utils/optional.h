@@ -10,7 +10,7 @@ class optional {
       : has_value_(false) {
   }
 
-  optional(const T& value)
+  optional(const T &value)
       : value_(value),
         has_value_(true) {
   }
@@ -25,13 +25,13 @@ class optional {
     throw -1;
   }
 
-  optional<T>& operator=(const optional& other) {
+  optional<T> &operator=(const optional &other) {
     has_value_ = other.has_value_;
     value_ = other.value_;
     return *this;
   }
 
-  optional<T>& operator=(const T& value) {
+  optional<T> &operator=(const T &value) {
     has_value_ = true;
     value_ = value;
     return *this;

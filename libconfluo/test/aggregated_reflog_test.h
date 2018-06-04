@@ -45,15 +45,10 @@ int64_t AggregatedReflogTest::cnt[11];
 
 TEST_F(AggregatedReflogTest, GetSetTest) {
   aggregate_log log;
-  log.push_back(
-      new aggregate_info("agg1", aggregate_manager::get_aggregator("sum"), 0));
-  log.push_back(
-      new aggregate_info("agg2", aggregate_manager::get_aggregator("min"), 0));
-  log.push_back(
-      new aggregate_info("agg3", aggregate_manager::get_aggregator("max"), 0));
-  log.push_back(
-      new aggregate_info("agg4", aggregate_manager::get_aggregator("count"),
-                         0));
+  log.push_back(new aggregate_info("agg1", aggregate_manager::get_aggregator("sum"), 0));
+  log.push_back(new aggregate_info("agg2", aggregate_manager::get_aggregator("min"), 0));
+  log.push_back(new aggregate_info("agg3", aggregate_manager::get_aggregator("max"), 0));
+  log.push_back(new aggregate_info("agg4", aggregate_manager::get_aggregator("count"), 0));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::double_zero) == ar.get_aggregate(0, 0));
@@ -63,27 +58,27 @@ TEST_F(AggregatedReflogTest, GetSetTest) {
 
   for (int i = 1; i <= 10; i++) {
     numeric value(i);
-    ar.seq_update_aggregate(0, 0, value, i * 2);
+    ar.seq_update_aggregate(0, 0, value, static_cast<uint64_t>(i * 2));
     for (int j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(sum[j]) == ar.get_aggregate(0, j * 2));
   }
 
   for (int i = 1; i <= 10; i++) {
     numeric value(10 - i);
-    ar.seq_update_aggregate(0, 1, value, i * 2);
+    ar.seq_update_aggregate(0, 1, value, static_cast<uint64_t>(i * 2));
     for (int j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(min[j]) == ar.get_aggregate(1, j * 2));
   }
 
   for (int i = 1; i <= 10; i++) {
     numeric value(i);
-    ar.seq_update_aggregate(0, 2, value, i * 2);
+    ar.seq_update_aggregate(0, 2, value, static_cast<uint64_t>(i * 2));
     for (int j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(max[j]) == ar.get_aggregate(2, j * 2));
   }
 
   for (int i = 1; i <= 10; i++) {
-    ar.seq_update_aggregate(0, 3, numeric(INT64_C(1)), i * 2);
+    ar.seq_update_aggregate(0, 3, numeric(INT64_C(1)), static_cast<uint64_t>(i * 2));
     for (int j = 0; j <= i; j++)
       ASSERT_TRUE(numeric(cnt[j]) == ar.get_aggregate(3, j * 2));
   }
@@ -107,15 +102,10 @@ TEST_F(AggregatedReflogTest, GetSetTest) {
 
 TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
   aggregate_log log;
-  log.push_back(
-      new aggregate_info("agg1", aggregate_manager::get_aggregator("sum"), 0));
-  log.push_back(
-      new aggregate_info("agg2", aggregate_manager::get_aggregator("min"), 0));
-  log.push_back(
-      new aggregate_info("agg3", aggregate_manager::get_aggregator("max"), 0));
-  log.push_back(
-      new aggregate_info("agg4", aggregate_manager::get_aggregator("count"),
-                         0));
+  log.push_back(new aggregate_info("agg1", aggregate_manager::get_aggregator("sum"), 0));
+  log.push_back(new aggregate_info("agg2", aggregate_manager::get_aggregator("min"), 0));
+  log.push_back(new aggregate_info("agg3", aggregate_manager::get_aggregator("max"), 0));
+  log.push_back(new aggregate_info("agg4", aggregate_manager::get_aggregator("count"), 0));
   aggregated_reflog ar(log);
 
   ASSERT_TRUE(numeric(limits::double_zero) == ar.get_aggregate(0, 0));
@@ -124,33 +114,33 @@ TEST_F(AggregatedReflogTest, MultiThreadedGetSetTest) {
   ASSERT_TRUE(numeric(limits::ulong_zero) == ar.get_aggregate(3, 0));
 
   std::vector<std::thread> workers;
-  int max_i = std::min(10, defaults::HARDWARE_CONCURRENCY);
+  int max_i = std::min(10, defaults::HARDWARE_CONCURRENCY());
   int max_j = max_i * 2;
   for (int i = 1; i <= max_i; i++) {
     workers.push_back(std::thread([i, &ar] {
-      ar.seq_update_aggregate(i - 1, 0, numeric(i), i * 2);
+      ar.seq_update_aggregate(i - 1, 0, numeric(i), static_cast<uint64_t>(i * 2));
     }));
   }
 
   for (int i = 1; i <= max_i; i++) {
     workers.push_back(std::thread([i, &ar] {
-      ar.seq_update_aggregate(i - 1, 1, numeric(10 - i), i * 2);
+      ar.seq_update_aggregate(i - 1, 1, numeric(10 - i), static_cast<uint64_t>(i * 2));
     }));
   }
 
   for (int i = 1; i <= max_i; i++) {
     workers.push_back(std::thread([i, &ar] {
-      ar.seq_update_aggregate(i - 1, 2, numeric(i), i * 2);
+      ar.seq_update_aggregate(i - 1, 2, numeric(i), static_cast<uint64_t>(i * 2));
     }));
   }
 
   for (int i = 1; i <= max_i; i++) {
     workers.push_back(std::thread([i, &ar] {
-      ar.seq_update_aggregate(i - 1, 3, numeric(INT64_C(1)), i * 2);
+      ar.seq_update_aggregate(i - 1, 3, numeric(INT64_C(1)), static_cast<uint64_t>(i * 2));
     }));
   }
 
-  for (auto& w : workers) {
+  for (auto &w : workers) {
     if (w.joinable())
       w.join();
   }

@@ -1,6 +1,8 @@
 #ifndef CONFLUO_ARCHIVAL_INCR_FILE_READER_H_
 #define CONFLUO_ARCHIVAL_INCR_FILE_READER_H_
 
+#include <iostream>
+#include <fstream>
 #include "exceptions.h"
 #include "file_utils.h"
 #include "incremental_file_offset.h"
@@ -15,24 +17,15 @@ namespace archival {
 class incremental_file_reader : public incremental_file_stream {
 
  public:
-  incremental_file_reader(const std::string& path, const std::string& file_prefix)
-      : incremental_file_stream(path, file_prefix) {
-    cur_ifs_ = new std::ifstream(cur_path());
-    transaction_log_ifs_.open(transaction_log_path());
-  }
+  incremental_file_reader(const std::string &path, const std::string &file_prefix);
 
-  ~incremental_file_reader() {
-    if (cur_ifs_) {
-      cur_ifs_->close();
-      delete cur_ifs_;
-    }
-  }
+  ~incremental_file_reader();
 
   template<typename T>
   incremental_file_offset advance(size_t len) {
     if (eof())
       open_next();
-    else if (tell().offset() + len * sizeof(T)  > eof_offset())
+    else if (tell().offset() + len * sizeof(T) > eof_offset())
       THROW(illegal_state_exception, "Stream processed incorrectly!");
     cur_ifs_->seekg(len * sizeof(T), std::ios::cur);
     return tell();
@@ -47,69 +40,34 @@ class incremental_file_reader : public incremental_file_stream {
     return io_utils::read<T>(*cur_ifs_);
   }
 
-  std::string read(size_t len) {
-    if (eof())
-      open_next();
-    else if (tell().offset() + len > eof_offset())
-      THROW(illegal_state_exception, "Stream processed incorrectly!");
-    return io_utils::read(*cur_ifs_, len);
-  }
+  std::string read(size_t len);
 
   template<typename T>
   T read_action() {
     return io_utils::read<T>(transaction_log_ifs_);
   }
 
-  incremental_file_offset tell() {
-    return incremental_file_offset(cur_path(), cur_ifs_->tellg());
-  }
+  incremental_file_offset tell();
 
   size_t tell_transaction_log() {
-    return transaction_log_ifs_.tellg();
+    return static_cast<size_t>(transaction_log_ifs_.tellg());
   }
 
-  bool has_more() {
-    size_t off = transaction_log_ifs_.tellg();
-    transaction_log_ifs_.seekg(0, std::ios::end);
-    size_t end_off = transaction_log_ifs_.tellg();
-    transaction_log_ifs_.seekg(off);
-    return off < end_off;
-  }
+  bool has_more();
 
-  bool is_open() {
-    return cur_ifs_ && cur_ifs_->is_open();
-  }
+  bool is_open();
 
  private:
-  size_t eof_offset() {
-    size_t cur_off = cur_ifs_->tellg();
-    cur_ifs_->seekg(0, std::ios::end);
-    size_t end_off = cur_ifs_->tellg();
-    cur_ifs_->seekg(cur_off);
-    return end_off;
-  }
+  size_t eof_offset();
 
   // Note: std::ios::eof depends on last op
-  bool eof() {
-    size_t off = cur_ifs_->tellg();
-    cur_ifs_->seekg(0, std::ios::end);
-    size_t end_off = cur_ifs_->tellg();
-    cur_ifs_->seekg(off);
-    return off == end_off;
-  }
+  bool eof();
 
-  void open_next() {
-    cur_ifs_->close();
-    delete cur_ifs_;
-    file_num_++;
-    cur_ifs_ = open(cur_path());
-  }
+  void open_next();
 
-  static std::ifstream* open(const std::string& path) {
-    return new std::ifstream(path);
-  }
+  static std::ifstream *open(const std::string &path);
 
-  std::ifstream* cur_ifs_;
+  std::ifstream *cur_ifs_;
   std::ifstream transaction_log_ifs_;
 
 };

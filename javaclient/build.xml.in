@@ -229,7 +229,7 @@
           description="Run the test cases">
     <mkdir dir="${maven.test.reports}"/>
     <junit printSummary="yes" haltonerror="true" haltonfailure="true" fork="true" dir=".">
-      <env key="CONFLUO_SERVER_EXEC" value="@PROJECT_BINARY_DIR@/bin/confluod"/>
+      <env key="CONFLUO_SERVER_EXEC" value="@SERVER_EXEC@"/>
       <sysproperty key="basedir" value="@CMAKE_CURRENT_SOURCE_DIR@"/>
       <formatter type="xml"/>
       <formatter type="plain" usefile="false"/>

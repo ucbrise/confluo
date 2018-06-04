@@ -20,17 +20,17 @@ class ClientReadOpsTest : public testing::Test {
   const std::string SERVER_ADDRESS = "127.0.0.1";
   const int SERVER_PORT = 9090;
 
-  static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
+  static void generate_bytes(uint8_t *buf, size_t len, uint64_t val) {
     uint8_t val_uint8 = (uint8_t) (val % 256);
     for (uint32_t i = 0; i < len; i++)
       buf[i] = val_uint8;
   }
 
-  void test_read(atomic_multilog* mlog, rpc_client& client) {
+  void test_read(atomic_multilog *mlog, rpc_client &client) {
     std::vector<int64_t> offsets;
     for (int64_t i = 0; i < MAX_RECORDS; i++) {
-      generate_bytes(data_, DATA_SIZE, i);
-      int64_t offset = mlog->append(data_);
+      generate_bytes(data_, DATA_SIZE, static_cast<uint64_t>(i));
+      int64_t offset = static_cast<int64_t>(mlog->append(data_));
       offsets.push_back(offset);
     }
 
@@ -38,9 +38,9 @@ class ClientReadOpsTest : public testing::Test {
     for (uint64_t i = 0; i < MAX_RECORDS; i++) {
       client.read(buf, offsets[i]);
       ASSERT_EQ(mlog->record_size(), buf.size());
-      uint8_t* data = reinterpret_cast<uint8_t*>(&buf[0]);
+      uint8_t *data = reinterpret_cast<uint8_t *>(&buf[0]);
       ASSERT_TRUE(data != nullptr);
-      uint8_t expected = i % 256;
+      uint8_t expected = static_cast<uint8_t>(i % 256);
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(expected, data[j]);
       }
@@ -63,10 +63,8 @@ class ClientReadOpsTest : public testing::Test {
   }__attribute__((packed));
 
   static rec r;
-  static char test_str[16];
 
-  static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-                      float f, double g, const char* h) {
+  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const char *h) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
@@ -74,44 +72,43 @@ class ClientReadOpsTest : public testing::Test {
     for (size_t i = len; i < 16; i++) {
       r.h[i] = '\0';
     }
-    return reinterpret_cast<void*>(&r);
+    return reinterpret_cast<void *>(&r);
   }
 
-  static void* record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d,
-                      int64_t e, float f, double g, const char* h) {
+  static void *record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const char *h) {
     r = {ts, a, b, c, d, e, f, g, {}};
     size_t len = std::min(static_cast<size_t>(16), strlen(h));
     memcpy(r.h, h, len);
     for (size_t i = len; i < 16; i++) {
       r.h[i] = '\0';
     }
-    return reinterpret_cast<void*>(&r);
+    return reinterpret_cast<void *>(&r);
   }
 
-  static confluo_store* simple_table_store(const std::string& multilog_name,
-      storage::storage_mode id) {
+  static confluo_store *simple_table_store(const std::string &multilog_name,
+                                           storage::storage_mode id) {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         multilog_name,
-        schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+        schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
         id);
     return store;
   }
 
   static std::vector<column_t> schema() {
     schema_builder builder;
-    builder.add_column(BOOL_TYPE, "a");
-    builder.add_column(CHAR_TYPE, "b");
-    builder.add_column(SHORT_TYPE, "c");
-    builder.add_column(INT_TYPE, "d");
-    builder.add_column(LONG_TYPE, "e");
-    builder.add_column(FLOAT_TYPE, "f");
-    builder.add_column(DOUBLE_TYPE, "g");
-    builder.add_column(STRING_TYPE(16), "h");
+    builder.add_column(primitive_types::BOOL_TYPE(), "a");
+    builder.add_column(primitive_types::CHAR_TYPE(), "b");
+    builder.add_column(primitive_types::SHORT_TYPE(), "c");
+    builder.add_column(primitive_types::INT_TYPE(), "d");
+    builder.add_column(primitive_types::LONG_TYPE(), "e");
+    builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+    builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+    builder.add_column(primitive_types::STRING_TYPE(16), "h");
     return builder.get_columns();
   }
 
-  static record_batch build_batch(const atomic_multilog& mlog) {
+  static record_batch build_batch(const atomic_multilog &mlog) {
     record_batch_builder builder = mlog.get_batch_builder();
     builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
     builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -127,7 +124,7 @@ class ClientReadOpsTest : public testing::Test {
     return builder.get_batch();
   }
 
-  static record_batch build_batch(const atomic_multilog& mlog, int64_t ts) {
+  static record_batch build_batch(const atomic_multilog &mlog, int64_t ts) {
     record_batch_builder builder = mlog.get_batch_builder();
     builder.add_record(record(ts, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
     builder.add_record(record(ts, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -143,7 +140,7 @@ class ClientReadOpsTest : public testing::Test {
     return builder.get_batch();
   }
 
-protected:
+ protected:
   uint8_t data_[DATA_SIZE];
 
   virtual void SetUp() override {
@@ -321,7 +318,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
 
   i = 0;
   for (auto r = client.execute_filter("a == true && b > 4"); r.has_more();
-      ++r) {
+       ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -330,7 +327,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
 
   i = 0;
   for (auto r = client.execute_filter("a == true && (b > 4 || c <= 30)");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -341,7 +338,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
 
   i = 0;
   for (auto r = client.execute_filter("a == true && (b > 4 || f > 0.1)");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -389,7 +386,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   mlog->install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   mlog->append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog->append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
@@ -471,7 +468,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   i = 0;
   for (auto r = client.query_filter("filter1", beg, end, "b > 4"); r.has_more();
-      ++r) {
+       ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -480,7 +477,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   i = 0;
   for (auto r = client.query_filter("filter1", beg, end, "b > 4 || c <= 30");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -491,7 +488,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   i = 0;
   for (auto r = client.query_filter("filter1", beg, end, "b > 4 || f > 0.1");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -524,7 +521,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   size_t alert_count = 0;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
-    LOG_INFO<< "Alert: " << alerts.get();
+    LOG_INFO << "Alert: " << alerts.get();
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);
@@ -650,7 +647,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
 
   i = 0;
   for (auto r = client.execute_filter("a == true && b > 4"); r.has_more();
-      ++r) {
+       ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -659,7 +656,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
 
   i = 0;
   for (auto r = client.execute_filter("a == true && (b > 4 || c <= 30)");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -670,7 +667,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
 
   i = 0;
   for (auto r = client.execute_filter("a == true && (b > 4 || f > 0.1)");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -719,7 +716,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   mlog->install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS;
+  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
   int64_t end = beg;
   record_batch batch = build_batch(*mlog, now_ns);
   mlog->append_batch(batch);
@@ -795,7 +792,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   i = 0;
   for (auto r = client.query_filter("filter1", beg, end, "b > 4"); r.has_more();
-      ++r) {
+       ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r.get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -804,7 +801,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   i = 0;
   for (auto r = client.query_filter("filter1", beg, end, "b > 4 || c <= 30");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -815,7 +812,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   i = 0;
   for (auto r = client.query_filter("filter1", beg, end, "b > 4 || f > 0.1");
-      r.has_more(); ++r) {
+       r.has_more(); ++r) {
     ASSERT_EQ(true, r.get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
         r.get().at(2).value().to_data().as<int8_t>() > '4'
@@ -847,7 +844,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
 
   size_t alert_count = 0;
   for (auto alerts = client.get_alerts(beg, end); alerts.has_more(); ++alerts) {
-    LOG_INFO<< "Alert: " << alerts.get();
+    LOG_INFO << "Alert: " << alerts.get();
     alert_count++;
   }
   ASSERT_EQ(size_t(7), alert_count);

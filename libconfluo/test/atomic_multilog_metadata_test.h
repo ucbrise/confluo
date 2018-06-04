@@ -12,14 +12,14 @@ class AtomicMultilogMetadataTest : public testing::Test {
 TEST_F(AtomicMultilogMetadataTest, ReadWriteTest) {
   metadata_writer w("/tmp");
   schema_builder builder;
-  builder.add_column(BOOL_TYPE, "a");
-  builder.add_column(CHAR_TYPE, "b");
-  builder.add_column(SHORT_TYPE, "c");
-  builder.add_column(INT_TYPE, "d");
-  builder.add_column(LONG_TYPE, "e");
-  builder.add_column(FLOAT_TYPE, "f");
-  builder.add_column(DOUBLE_TYPE, "g");
-  builder.add_column(STRING_TYPE(16), "h");
+  builder.add_column(primitive_types::BOOL_TYPE(), "a");
+  builder.add_column(primitive_types::CHAR_TYPE(), "b");
+  builder.add_column(primitive_types::SHORT_TYPE(), "c");
+  builder.add_column(primitive_types::INT_TYPE(), "d");
+  builder.add_column(primitive_types::LONG_TYPE(), "e");
+  builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+  builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+  builder.add_column(primitive_types::STRING_TYPE(16), "h");
   schema_t s(builder.get_columns());
 
   w.write_schema(s);

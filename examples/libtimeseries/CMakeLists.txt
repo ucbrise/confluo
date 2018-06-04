@@ -20,8 +20,8 @@ if (BUILD_TESTS)
           timeseries/timeseries_db.h
           test/test_main.cc
           test/timeseries_db_test.h)
-  target_link_libraries(tstest gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
-  add_dependencies(tstest googletest lz4)
+  target_link_libraries(tstest confluo gtest gtest_main)
+  add_dependencies(tstest googletest)
 
   # Register test
   enable_testing()

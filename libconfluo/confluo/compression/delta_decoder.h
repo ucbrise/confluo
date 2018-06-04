@@ -29,7 +29,7 @@ class delta_decoder {
    * @return The decoded element
    */
   template<typename T>
-  static T decode(uint8_t* input_buffer, size_t src_index) {
+  static T decode(uint8_t *input_buffer, size_t src_index) {
     elias_gamma_encoded_array<T> enc_array;
     enc_array.from_byte_array(input_buffer + sizeof(size_t));
     return enc_array.get(src_index);
@@ -44,14 +44,14 @@ class delta_decoder {
    * @param length The number of elements to decode
    */
   template<typename T>
-  static void decode(uint8_t* input_buffer, T* dest_buffer, size_t src_index, size_t length) {
+  static void decode(uint8_t *input_buffer, T *dest_buffer, size_t src_index, size_t length) {
     elias_gamma_encoded_array<T> enc_array;
     enc_array.from_byte_array(input_buffer + sizeof(size_t));
     for (size_t i = 0; i < length; i++) {
       dest_buffer[i] = enc_array.get(src_index + i);
     }
   }
-      
+
   /**
    * Decodes the whole pointer starting from the specified index
    *
@@ -60,13 +60,13 @@ class delta_decoder {
    * @param src_index The index to start decoding from
    */
   template<typename T>
-  static void decode(uint8_t* input_buffer, T* dest_buffer, size_t src_index = 0) {
+  static void decode(uint8_t *input_buffer, T *dest_buffer, size_t src_index = 0) {
     size_t source_size = decoded_size(input_buffer);
     decode<T>(input_buffer, dest_buffer, src_index, source_size - src_index);
   }
 
-  static size_t decoded_size(uint8_t* input_buffer) {
-    return *reinterpret_cast<size_t*>(input_buffer);
+  static size_t decoded_size(uint8_t *input_buffer) {
+    return *reinterpret_cast<size_t *>(input_buffer);
   }
 
 };

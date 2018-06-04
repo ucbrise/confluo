@@ -1,6 +1,8 @@
 #ifndef CONFLUO_ARCHIVAL_IO_INCR_FILE_OFFSET_H_
 #define CONFLUO_ARCHIVAL_IO_INCR_FILE_OFFSET_H_
 
+#include <string>
+
 namespace confluo {
 namespace archival {
 
@@ -10,23 +12,13 @@ namespace archival {
  */
 class incremental_file_offset {
  public:
-  incremental_file_offset()
-      : path_(""),
-        off_(0) {
-  }
+  incremental_file_offset();
 
-  incremental_file_offset(std::string path, size_t offset)
-      : path_(path),
-        off_(offset) {
-  }
+  incremental_file_offset(std::string path, size_t offset);
 
-  std::string path() const {
-    return path_;
-  }
+  std::string path() const;
 
-  size_t offset() const {
-    return off_;
-  }
+  size_t offset() const;
 
  private:
   std::string path_;

@@ -4,8 +4,6 @@
 #include "monolog/monolog.h"
 #include "archival/monolog_linear_archiver.h"
 
-using namespace ::confluo::monolog;
-
 namespace confluo {
 
 /**
@@ -21,14 +19,10 @@ class data_log_constants {
   static const size_t BUFFER_SIZE = 1048576;
 };
 
-const size_t data_log_constants::MAX_BUCKETS;
-const size_t data_log_constants::BUCKET_SIZE;
-const size_t data_log_constants::BUFFER_SIZE;
-
-typedef monolog_linear<uint8_t,
-                       data_log_constants::MAX_BUCKETS,
-                       data_log_constants::BUCKET_SIZE,
-                       data_log_constants::BUFFER_SIZE> data_log;
+typedef monolog::monolog_linear<uint8_t,
+                                data_log_constants::MAX_BUCKETS,
+                                data_log_constants::BUCKET_SIZE,
+                                data_log_constants::BUFFER_SIZE> data_log;
 
 typedef archival::monolog_linear_archiver<uint8_t,
                                           data_log_constants::MAX_BUCKETS,

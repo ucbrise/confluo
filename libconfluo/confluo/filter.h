@@ -24,7 +24,7 @@ namespace monitor {
  * @param r The record
  * @return True if the record passes the filter, false otherwise.
  */
-typedef bool (*filter_fn)(const record_t& r);
+typedef bool (*filter_fn)(const record_t &r);
 
 /**
  * Default filter function that allows all records to pass.
@@ -32,7 +32,7 @@ typedef bool (*filter_fn)(const record_t& r);
  * @param r The record
  * @return True if the record passes the filter, false otherwise.
  */
-inline bool default_filter(const record_t& r) {
+inline bool default_filter(const record_t &r) {
   return true;
 }
 
@@ -56,24 +56,14 @@ class filter {
    * @param exp Compiled expression.
    * @param fn Filter function.
    */
-  filter(const compiled_expression& exp, filter_fn fn = default_filter)
-      : exp_(exp),
-        fn_(fn),
-        idx_(8, 256),
-        is_valid_(true) {
-  }
+  explicit filter(const compiled_expression &exp, filter_fn fn = default_filter);
 
   /**
    * Constructor that initializes the filter function with the provided one.
    *
    * @param fn Provided filter function.
    */
-  filter(filter_fn fn = default_filter)
-      : exp_(),
-        fn_(fn),
-        idx_(8, 256),
-        is_valid_(true) {
-  }
+  explicit filter(filter_fn fn = default_filter);
 
   /**
    * Add an aggregate to the filter.
@@ -81,9 +71,7 @@ class filter {
    * @param a Reference to the aggregate.
    * @return Aggregate id.
    */
-  size_t add_aggregate(aggregate_info* a) {
-    return aggregates_.push_back(a);
-  }
+  size_t add_aggregate(aggregate_info *a);
 
   /**
    * Invalidate aggregate identified by id.
@@ -91,9 +79,7 @@ class filter {
    * @param id for the aggregate.
    * @return True if invalidation was successful, false otherwise.
    */
-  bool remove_aggregate(size_t id) {
-    return aggregates_.at(id)->invalidate();
-  }
+  bool remove_aggregate(size_t id);
 
   /**
    * Get the aggregate corresponding to id.
@@ -101,18 +87,14 @@ class filter {
    * @param id for the aggregate.
    * @return Reference to aggregate corresponding to id.
    */
-  aggregate_info* get_aggregate_info(size_t id) {
-    return aggregates_.at(id);
-  }
+  aggregate_info *get_aggregate_info(size_t id);
 
   /**
    * Get the number of aggregates associated with this filter.
    *
    * @return The number of aggregates associated with this filter.
    */
-  size_t num_aggregates() const {
-    return aggregates_.size();
-  }
+  size_t num_aggregates() const;
 
   /**
    * Updates the filter index with a new data point. If the new data point
@@ -120,21 +102,7 @@ class filter {
    *
    * @param r Record being tested.
    */
-  void update(const record_t& r) {
-    if (exp_.test(r) && fn_(r)) {
-      aggregated_reflog* refs = idx_.insert(
-          byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS),
-          r.log_offset(), aggregates_);
-      int tid = thread_manager::get_id();
-      for (size_t i = 0; i < refs->num_aggregates(); i++) {
-        if (aggregates_.at(i)->is_valid()) {
-          size_t field_idx = aggregates_.at(i)->field_idx();
-          numeric val(r[field_idx].value());
-          refs->seq_update_aggregate(tid, i, val, r.version());
-        }
-      }
-    }
-  }
+  void update(const record_t &r);
 
   /**
    * Updates the filter index with new data points. If data points
@@ -144,35 +112,7 @@ class filter {
    * @param block The record block
    * @param record_size The size of the record
    */
-  void update(size_t log_offset, const schema_snapshot& snap,
-              record_block& block, size_t record_size) {
-    int tid = thread_manager::get_id();
-    aggregated_reflog* refs = nullptr;
-    std::vector<numeric> local_aggs;
-
-    for (size_t i = 0; i < block.nrecords; i++) {
-      void* cur_rec = reinterpret_cast<uint8_t*>(&block.data[i * record_size]);
-      uint64_t rec_off = log_offset + i * record_size;
-      if (exp_.test(snap, cur_rec)) {
-        if (refs == nullptr) {
-          refs = idx_.get_or_create(
-              byte_string(static_cast<uint64_t>(block.time_block)),
-              aggregates_);
-          local_aggs.resize(refs->num_aggregates());
-        }
-        refs->push_back(rec_off);
-        for (size_t j = 0; j < local_aggs.size(); j++)
-          if (aggregates_.at(j)->is_valid())
-            local_aggs[j] = aggregates_.at(j)->seq_op(local_aggs[j], snap,
-                                                      cur_rec);
-      }
-    }
-
-    size_t version = log_offset + block.nrecords * record_size;
-    for (size_t j = 0; j < local_aggs.size(); j++)
-      if (aggregates_.at(j)->is_valid() && !local_aggs[j].type().is_none())
-        refs->comb_update_aggregate(tid, j, local_aggs[j], version);
-  }
+  void update(size_t log_offset, const schema_snapshot &snap, record_block &block, size_t record_size);
 
   // TODO rename later
   /**
@@ -181,9 +121,7 @@ class filter {
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
-  aggregated_reflog* lookup_unsafe(uint64_t ts_block) const {
-    return idx_.get_unsafe(byte_string(ts_block));
-  }
+  aggregated_reflog *lookup_unsafe(uint64_t ts_block) const;
 
   /**
    * Get the RefLog corresponding to given time-block.
@@ -191,9 +129,7 @@ class filter {
    * @param ts_block Given time-block.
    * @return Corresponding RefLog.
    */
-  aggregated_reflog const* lookup(uint64_t ts_block) const {
-    return idx_.get(byte_string(ts_block));
-  }
+  aggregated_reflog const *lookup(uint64_t ts_block) const;
 
   /**
    * Get the range of offsets that lie in a given time-block.
@@ -202,11 +138,7 @@ class filter {
    * @param ts_block_end End time-block.
    * @return An iterator over log offsets in the time range.
    */
-  range_result lookup_range(uint64_t ts_block_begin,
-                            uint64_t ts_block_end) const {
-    return idx_.range_lookup(byte_string(ts_block_begin),
-                             byte_string(ts_block_end));
-  }
+  range_result lookup_range(uint64_t ts_block_begin, uint64_t ts_block_end) const;
 
   /**
    * Get the range of reflogs that lie between time-blocks.
@@ -214,41 +146,27 @@ class filter {
    * @param ts_block_end end time-block
    * @return an iterator over reflogs in the time range
    */
-  reflog_result lookup_range_reflogs(uint64_t ts_block_begin,
-                                     uint64_t ts_block_end) const {
-    return idx_.range_lookup_reflogs(byte_string(ts_block_begin),
-                                     byte_string(ts_block_end));
-  }
+  reflog_result lookup_range_reflogs(uint64_t ts_block_begin, uint64_t ts_block_end) const;
 
   /**
    * Invalidates the filter expression
    *
    * @return True if the filter was succesfully validated, false otherwise
    */
-  bool invalidate() {
-    bool expected = true;
-    if (atomic::strong::cas(&is_valid_, &expected, false)) {
-      return true;
-    }
-    return false;
-  }
+  bool invalidate();
 
   /**
    * Gets whether the filter is valid
    *
    * @return True if the filter is valid, false otherwise
    */
-  bool is_valid() {
-    return atomic::load(&is_valid_);
-  }
+  bool is_valid();
 
   /**
    * Note: It is dangerous to modify this data structure.
    * @return underlying radix tree
    */
-  idx_t& data() {
-    return idx_;
-  }
+  idx_t &data();
 
  private:
   compiled_expression exp_;         // The compiled filter expression

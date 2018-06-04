@@ -35,7 +35,7 @@ class flattened_iterator {
    *
    * @param it The outer iterator to initialize this flattened iterator
    */
-  flattened_iterator(const outer_iterator& it)
+  flattened_iterator(const outer_iterator &it)
       : outer_(it),
         outer_end_(it) {
   }
@@ -47,7 +47,7 @@ class flattened_iterator {
    * @param it The outer iterator
    * @param end The end of the outer iterator
    */
-  flattened_iterator(const outer_iterator& it, const outer_iterator& end)
+  flattened_iterator(const outer_iterator &it, const outer_iterator &end)
       : outer_(it),
         outer_end_(end) {
     if (outer_ == outer_end_)
@@ -80,7 +80,7 @@ class flattened_iterator {
    *
    * @return The new flattened iterator at the advanced position
    */
-  flattened_iterator& operator++() {
+  flattened_iterator &operator++() {
     ++inner_;
     if (inner_ == outer_->end())
       skip_invalid();
@@ -89,8 +89,6 @@ class flattened_iterator {
 
   /**
    * Advances the flattened iterator by a specified amount
-   *
-   * 
    *
    * @return The advanced flattened iterator
    */
@@ -109,16 +107,12 @@ class flattened_iterator {
    * @return True if the first flattened iterator is equal to the other
    * flattened iterator, false otherwise
    */
-  friend bool operator==(const flattened_iterator& a,
-                         const flattened_iterator& b) {
+  friend bool operator==(const flattened_iterator &a,
+                         const flattened_iterator &b) {
     if (a.outer_ != b.outer_)
       return false;
 
-    if (a.outer_ != a.outer_end_ && b.outer_ != b.outer_end_
-        && a.inner_ != b.inner_)
-      return false;
-
-    return true;
+    return !(a.outer_ != a.outer_end_ && b.outer_ != b.outer_end_ && a.inner_ != b.inner_);
   }
 
   /**
@@ -130,8 +124,8 @@ class flattened_iterator {
    * @return True if the first flattened iterator is not equal to the 
    * second, false otherwise
    */
-  friend bool operator!=(const flattened_iterator& a,
-                         const flattened_iterator& b) {
+  friend bool operator!=(const flattened_iterator &a,
+                         const flattened_iterator &b) {
     return !(a == b);
   }
 
@@ -170,7 +164,7 @@ class flattened_container {
    * @param container The container used to intialize this flattend
    * container
    */
-  flattened_container(const container_t& container)
+  flattened_container(const container_t &container)
       : begin_(container.begin()),
         end_(container.end()) {
   }

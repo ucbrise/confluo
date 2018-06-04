@@ -22,7 +22,7 @@ TEST_F(DeltaEncodeTest, DecodeFullTest) {
     array[i] = i * 16;
   }
 
-  uint64_t* dest_buffer = new uint64_t[k_array_size];
+  uint64_t *dest_buffer = new uint64_t[k_array_size];
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
   delta_decoder::decode<uint64_t>(encoded_buffer.get(), dest_buffer);
 
@@ -45,7 +45,7 @@ TEST_F(DeltaEncodeTest, DecodePartialTest) {
   size_t src_index = 250;
   size_t buffer_size = 600;
 
-  uint64_t* dest_buffer = new uint64_t[buffer_size];
+  uint64_t *dest_buffer = new uint64_t[buffer_size];
 
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
   delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index, buffer_size);
@@ -69,7 +69,7 @@ TEST_F(DeltaEncodeTest, DecodePtrIndexTest) {
   size_t src_index = 250;
   size_t buffer_size = k_array_size - src_index;
 
-  uint64_t* dest_buffer = new uint64_t[buffer_size];
+  uint64_t *dest_buffer = new uint64_t[buffer_size];
   auto encoded_buffer = delta_encoder::encode(array, k_array_size);
 
   delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index);

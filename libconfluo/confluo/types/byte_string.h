@@ -4,10 +4,11 @@
 #include <cstring>
 #include <cstdio>
 #include <type_traits>
+#include <cstdint>
+#include <algorithm>
+#include <string>
 
 #include "byte_utils.h"
-
-using namespace utils;
 
 namespace confluo {
 
@@ -24,10 +25,7 @@ class immutable_byte_string {
    * @param data The sequence of bytes
    * @param size The number of bytes the data contains
    */
-  immutable_byte_string(uint8_t* data, size_t size)
-      : data_(data),
-        size_(size) {
-  }
+  immutable_byte_string(uint8_t *data, size_t size);
 
   /**
    * Selects a particular byte of the string
@@ -35,9 +33,7 @@ class immutable_byte_string {
    * located
    * @return The byte at the desired index
    */
-  inline uint8_t operator[](size_t idx) const {
-    return data_[idx];
-  }
+  uint8_t operator[](size_t idx) const;
 
   /**
    * Performs a less than comparison of two immutable_byte_strings 
@@ -47,9 +43,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte string is less than the other
    * immutable_byte_string, false otherwise
    */
-  inline bool operator<(const immutable_byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) < 0;
-  }
+  bool operator<(const immutable_byte_string &other) const;
 
   /**
    * Performs a less than or equal to comparison of two 
@@ -59,10 +53,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is less than or equal
    * to the other immutable_byte_string, false otherwise
    */
-  inline bool operator<=(const immutable_byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) <= 0;
-  }
-
+  bool operator<=(const immutable_byte_string &other) const;
 
   /**
    * Performs a greater than comparison of two 
@@ -72,9 +63,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is greater than the other 
    * immutable_byte_string, false otherwise
    */
-  inline bool operator>(const immutable_byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) > 0;
-  }
+  bool operator>(const immutable_byte_string &other) const;
 
   /**
    * Performs a greater than or equal to comparison of two 
@@ -84,10 +73,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is greater than or equal
    * to the other immutable_byte_string, false otherwise
    */
-  inline bool operator>=(const immutable_byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) >= 0;
-  }
-
+  bool operator>=(const immutable_byte_string &other) const;
 
   /**
    * Performs an equality comparison of two 
@@ -97,10 +83,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is equal
    * to the other immutable_byte_string, false otherwise
    */
-  inline bool operator==(const immutable_byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) == 0;
-  }
-
+  bool operator==(const immutable_byte_string &other) const;
 
   /**
    * Performs a not equal to comparison of two 
@@ -110,9 +93,7 @@ class immutable_byte_string {
    * @return True if this immutable_byte_string is not equal
    * to the other immutable_byte_string, false otherwise
    */
-  inline bool operator!=(const immutable_byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) != 0;
-  }
+  bool operator!=(const immutable_byte_string &other) const;
 
   /**
    * Assigns the contents of another immutable_byte_string to this
@@ -120,29 +101,17 @@ class immutable_byte_string {
    * @param other A reference to the other immutable_byte_string
    * @return A pointer to this immutable_byte_string
    */
-  immutable_byte_string& operator=(const immutable_byte_string& other) {
-    data_ = other.data_;
-    size_ = other.size_;
-    return *this;
-  }
+  immutable_byte_string &operator=(const immutable_byte_string &other);
 
   /**
    * Constructs a string representation of the immutable_byte_string
    * @return A formatted string containing the contents of the 
    * immutable_byte_string
    */
-  std::string to_string() const {
-    std::string str = "{";
-    size_t i;
-    for (i = 0; i < size_ - 1; i++) {
-      str += std::to_string((*this)[i]) + ", ";
-    }
-    str += std::to_string((*this)[i]) + "}";
-    return str;
-  }
+  std::string to_string() const;
 
  private:
-  uint8_t* data_;
+  uint8_t *data_;
   size_t size_;
 
   /** The byte string class */
@@ -207,7 +176,7 @@ class immutable_byte_string {
 //      : parent_t(std::move(other)) {
 //  }
 //
-//  inline byte_string& operator++() {
+//  byte_string& operator++() {
 //    int64_t idx = length() - 1;
 //    while ((*this)[idx] == UINT8_MAX) {
 //      (*this)[idx] = 0;
@@ -218,7 +187,7 @@ class immutable_byte_string {
 //    return *this;
 //  }
 //
-//  inline byte_string& operator--() {
+//  byte_string& operator--() {
 //    int64_t idx = length() - 1;
 //    while ((*this)[idx] == 0) {
 //      (*this)[idx] = UINT8_MAX;
@@ -258,20 +227,13 @@ class byte_string {
   /**
    * Constructs an empty byte_string
    */
-  byte_string()
-      : size_(0),
-        data_(new uint8_t[size_]) {
-  }
+  byte_string();
 
   /**
    * Constructs a one character byte_string from the provided value
    * @param val The value to be encoded by the byte_string
    */
-  byte_string(bool val)
-      : size_(sizeof(bool)),
-        data_(new uint8_t[size_]) {
-    memcpy(data_, &val, size_);
-  }
+  byte_string(bool val);
 
   /**
    * Constructs a byte_string from a generic type
@@ -280,17 +242,17 @@ class byte_string {
    */
   template<typename T, typename std::enable_if<
       std::is_integral<T>::value && !std::is_same<T, bool>::value
-          && std::is_signed<T>::value, T>::type* = nullptr>
+          && std::is_signed<T>::value, T>::type * = nullptr>
   byte_string(T val)
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
     typedef typename std::make_unsigned<T>::type UT;
-    UT uval = val ^ (UT(1) << (sizeof(UT) * 8 - 1));
+    UT uval = val ^(UT(1) << (sizeof(UT) * 8 - 1));
 #if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
-    uval = byte_utils::byte_swap(uval);
+    uval = utils::byte_utils::byte_swap(uval);
 #else
-    uval = byte_utils::is_big_endian() ? uval : byte_utils::byte_swap(uval);
+    uval = utils::byte_utils::is_big_endian() ? uval : byte_utils::byte_swap(uval);
 #endif
     memcpy(data_, &uval, size_);
   }
@@ -302,13 +264,13 @@ class byte_string {
    */
   template<typename T, typename std::enable_if<
       std::is_integral<T>::value && !std::is_same<T, bool>::value
-          && !std::is_signed<T>::value, T>::type* = nullptr>
+          && !std::is_signed<T>::value, T>::type * = nullptr>
   byte_string(T val)
       : size_(sizeof(T)),
         data_(new uint8_t[size_]) {
 #if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
-    val = byte_utils::byte_swap(val);
+    val = utils::byte_utils::byte_swap(val);
 #else
     val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);
 #endif
@@ -319,11 +281,7 @@ class byte_string {
    * Constructs a byte_string from another byte_string
    * @param str Reference to the string to copy from
    */
-  byte_string(const std::string& str)
-      : size_(str.length()),
-        data_(new uint8_t[size_]) {
-    memcpy(data_, str.c_str(), str.length());
-  }
+  byte_string(const std::string &str);
 
   /**
    * Constructs a byte_string from copying a certain number of characters
@@ -331,70 +289,45 @@ class byte_string {
    * @param str The reference string to copy from
    * @param length The number of characters to copy
    */
-  byte_string(const std::string& str, size_t length)
-      : size_(length),
-        data_(new uint8_t[size_]) {
-    memcpy(data_, str.c_str(), length);
-  }
+  byte_string(const std::string &str, size_t length);
 
   /**
    * Constructs a byte_string from an immutable_byte_string
    * @param other A reference to the immutable_byte_string that is
    * copied from
    */
-  byte_string(const immutable_byte_string& other)
-      : size_(other.size_),
-        data_(new uint8_t[size_]) {
-    memcpy(data_, other.data_, size_);
-  }
+  byte_string(const immutable_byte_string &other);
 
   /**
    * Constructs a byte_string from another byte_string
    * @param other A reference to the other byte_string to copy from
    */
-  byte_string(const byte_string& other)
-      : size_(other.size_),
-        data_(new uint8_t[size_]) {
-    memcpy(data_, other.data_, size_);
-  }
+  byte_string(const byte_string &other);
 
   /**
    * Initializes a given byte_string
    * @param other A double referenced byte_string to be initialized
    */
-  byte_string(byte_string&& other)
-      : size_(other.size_),
-        data_(other.data_) {
-    other.size_ = 0;
-    other.data_ = nullptr;
-  }
+  byte_string(byte_string &&other);
 
   /**
    * Deallocates the data for the byte_string
    */
-  ~byte_string() {
-    if (data_ != nullptr) {
-      delete[] data_;
-    }
-  }
+  ~byte_string();
 
   /**
    * Accesses the byte at the specified index
    * @param idx The index of the desired byte in the byte_string
    * @return A reference to the byte at the desired index
    */
-  inline uint8_t& operator[](size_t idx) {
-    return data_[idx];
-  }
+  uint8_t &operator[](size_t idx);
 
   /**
    * Access the byte at the specified index
    * @param idx The index of the desired byte in the byte_string
    * @return The byte at the desired index
    */
-  inline uint8_t operator[](size_t idx) const {
-    return data_[idx];
-  }
+  uint8_t operator[](size_t idx) const;
 
   /**
    * Performs a less than comparison of two byte_strings 
@@ -404,9 +337,7 @@ class byte_string {
    * @return True if this byte_string is less than the other
    * byte_string, false otherwise
    */
-  inline bool operator<(const byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) < 0;
-  }
+  bool operator<(const byte_string &other) const;
 
   /**
    * Performs a less than or equal to comparison of two byte_strings 
@@ -416,9 +347,7 @@ class byte_string {
    * @return True if this byte_string is less than or equal to the other
    * byte_string, false otherwise
    */
-  inline bool operator<=(const byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) <= 0;
-  }
+  bool operator<=(const byte_string &other) const;
 
   /**
    * Performs a greater than comparison of two byte_strings 
@@ -428,9 +357,7 @@ class byte_string {
    * @return True if this byte_string is greater than the other
    * byte_string, false otherwise
    */
-  inline bool operator>(const byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) > 0;
-  }
+  bool operator>(const byte_string &other) const;
 
   /**
    * Performs a greater than or equal to comparison of two byte_strings 
@@ -440,9 +367,7 @@ class byte_string {
    * @return True if this byte_string is greater than or equal to the other
    * byte_string, false otherwise
    */
-  inline bool operator>=(const byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) >= 0;
-  }
+  bool operator>=(const byte_string &other) const;
 
   /**
    * Performs an equality comparison of two byte_strings 
@@ -452,9 +377,7 @@ class byte_string {
    * @return True if this byte_string is equal to the other
    * byte_string, false otherwise
    */
-  inline bool operator==(const byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) == 0;
-  }
+  bool operator==(const byte_string &other) const;
 
   /**
    * Performs a not equal comparison of two byte_strings 
@@ -464,39 +387,19 @@ class byte_string {
    * @return True if this byte_string is not equal to the other
    * byte_string, false otherwise
    */
-  inline bool operator!=(const byte_string& other) const {
-    return memcmp(data_, other.data_, std::min(size_, other.size_)) != 0;
-  }
+  bool operator!=(const byte_string &other) const;
 
   /**
    * Increments the value of the byte_string
    * @return A reference to the incremented byte_string
    */
-  inline byte_string& operator++() {
-    int64_t idx = size_ - 1;
-    while (data_[idx] == UINT8_MAX) {
-      data_[idx] = 0;
-      idx--;
-    }
-    if (idx >= 0)
-      data_[idx]++;
-    return *this;
-  }
+  byte_string &operator++();
 
   /**
    * Decrements the value of the byte_string
    * @return A reference to the decremented byte_string
    */
-  inline byte_string& operator--() {
-    int64_t idx = size_ - 1;
-    while (data_[idx] == 0) {
-      data_[idx] = UINT8_MAX;
-      idx--;
-    }
-    if (idx >= 0)
-      data_[idx]--;
-    return *this;
-  }
+  byte_string &operator--();
 
   /**
    * Assigns the value of an immutable_byte_string to a byte_string
@@ -504,24 +407,14 @@ class byte_string {
    * for assignment
    * @return A byte_string with the copied data
    */
-  inline byte_string& operator=(const immutable_byte_string& other) {
-    size_ = other.size_;
-    data_ = new uint8_t[size_];
-    memcpy(data_, other.data_, size_);
-    return *this;
-  }
+  byte_string &operator=(const immutable_byte_string &other);
 
   /**
    * Assigns the contents of another byte_string to this byte_string
    * @param other Reference to the byte_string to copy from
    * @return The byte_string with the copied data
    */
-  inline byte_string& operator=(const byte_string& other) {
-    size_ = other.size_;
-    data_ = new uint8_t[size_];
-    memcpy(data_, other.data_, size_);
-    return *this;
-  }
+  byte_string &operator=(const byte_string &other);
 
   /**
    * Assigns a double referenced byte_string to this byte_string
@@ -530,15 +423,7 @@ class byte_string {
    * @return A byte string reference with the data of the other
    * byte_string
    */
-  inline byte_string& operator=(byte_string&& other) {
-    size_ = std::move(other.size_);
-    data_ = std::move(other.data_);
-
-    other.size_ = 0;
-    other.data_ = nullptr;
-
-    return *this;
-  }
+  byte_string &operator=(byte_string &&other);
 
   template<typename T>
   inline T as() const {
@@ -546,12 +431,12 @@ class byte_string {
 #if CONFLUO_ENDIANNESS == CONFLUO_BIG_ENDIAN
     val = *reinterpret_cast<T*>(data_);
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
-    val = byte_utils::reverse_as<T>(data_, size_);
+    val = utils::byte_utils::reverse_as<T>(data_, size_);
 #else
-    if (byte_utils::is_big_endian()) {
+    if (utils::byte_utils::is_big_endian()) {
       val = *reinterpret_cast<T*>(data_);
     } else {
-      val = byte_utils::reverse(data_, size_);
+      val = utils::byte_utils::reverse(data_, size_);
     }
 #endif
     return val;
@@ -561,35 +446,21 @@ class byte_string {
    * Copies the byte_string data into an immutable form
    * @return An immutable_byte_string with the same data
    */
-  immutable_byte_string copy() const {
-    return immutable_byte_string(data_, size_);
-  }
+  immutable_byte_string copy() const;
 
-  uint8_t* data() {
-    return data_;
-  }
+  uint8_t *data();
 
-  size_t size() {
-    return size_;
-  }
+  size_t size();
 
   /**
    * Formats the data into a readable form
    * @return A string representation of the data
    */
-  std::string to_string() const {
-    std::string str = "{";
-    size_t i;
-    for (i = 0; i < size_ - 1; i++) {
-      str += std::to_string(data_[i]) + ", ";
-    }
-    str += std::to_string(data_[i]) + "}";
-    return str;
-  }
+  std::string to_string() const;
 
  private:
   size_t size_;
-  uint8_t* data_;
+  uint8_t *data_;
 };
 
 }

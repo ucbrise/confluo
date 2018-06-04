@@ -33,8 +33,8 @@ class StreamTest : public testing::Test {
   void test_read(atomic_multilog* dtable, rpc_client& client) {
     std::vector<int64_t> offsets;
     for (int64_t i = 0; i < MAX_RECORDS; i++) {
-      generate_bytes(data_, DATA_SIZE, i);
-      int64_t offset = dtable->append(data_);
+      generate_bytes(data_, DATA_SIZE, static_cast<uint64_t>(i));
+      int64_t offset = static_cast<int64_t>(dtable->append(data_));
       offsets.push_back(offset);
     }
 
@@ -44,7 +44,7 @@ class StreamTest : public testing::Test {
       ASSERT_EQ(dtable->record_size(), buf.size());
       uint8_t* data = reinterpret_cast<uint8_t*>(&buf[0]);
       ASSERT_TRUE(data != nullptr);
-      uint8_t expected = i % 256;
+      uint8_t expected = static_cast<uint8_t>(i % 256);
       for (uint32_t j = 0; j < DATA_SIZE; j++) {
         ASSERT_EQ(expected, data[j]);
       }
@@ -67,7 +67,6 @@ class StreamTest : public testing::Test {
   }__attribute__((packed));
 
   static rec r;
-  static char test_str[16];
 
   static void* record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
                       float f, double g, const char* h) {
@@ -91,7 +90,7 @@ class StreamTest : public testing::Test {
     auto store = new confluo_store("/tmp");
     store->create_atomic_multilog(
         multilog_name,
-        schema_builder().add_column(STRING_TYPE(DATA_SIZE), "msg").get_columns(),
+        schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
         id);
     return store;
   }
@@ -109,14 +108,14 @@ class StreamTest : public testing::Test {
 
   static std::vector<column_t> schema() {
     schema_builder builder;
-    builder.add_column(BOOL_TYPE, "a");
-    builder.add_column(CHAR_TYPE, "b");
-    builder.add_column(SHORT_TYPE, "c");
-    builder.add_column(INT_TYPE, "d");
-    builder.add_column(LONG_TYPE, "e");
-    builder.add_column(FLOAT_TYPE, "f");
-    builder.add_column(DOUBLE_TYPE, "g");
-    builder.add_column(STRING_TYPE(16), "h");
+    builder.add_column(primitive_types::BOOL_TYPE(), "a");
+    builder.add_column(primitive_types::CHAR_TYPE(), "b");
+    builder.add_column(primitive_types::SHORT_TYPE(), "c");
+    builder.add_column(primitive_types::INT_TYPE(), "d");
+    builder.add_column(primitive_types::LONG_TYPE(), "e");
+    builder.add_column(primitive_types::FLOAT_TYPE(), "f");
+    builder.add_column(primitive_types::DOUBLE_TYPE(), "g");
+    builder.add_column(primitive_types::STRING_TYPE(16), "h");
     return builder.get_columns();
   }
 
@@ -176,7 +175,7 @@ TEST_F(StreamTest, WriteTest) {
   std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
   for (uint64_t i = 0; i < k_max; i++) {
-    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
+    record_data rdata = record_buf(true, '7', static_cast<int16_t>(i), 14, 1000, 0.7, 0.02, "stream");
     sp.buffer(rdata);
     expected_records.push_back(rdata);
   }
@@ -264,7 +263,7 @@ TEST_F(StreamTest, ReadTest) {
   std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
   for (uint64_t i = 0; i < k_max; i++) {
-    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
+    record_data rdata = record_buf(true, '7', static_cast<int16_t>(i), 14, 1000, 0.7, 0.02, "stream");
     sc.append(rdata);
     expected_records.push_back(rdata);
   }
@@ -313,7 +312,7 @@ TEST_F(StreamTest, ReadWriteTest) {
   std::vector<record_data> expected_records;
   uint64_t k_max = 10000;
   for (uint64_t i = 0; i < k_max; i++) {
-    record_data rdata = record_buf(true, '7', i, 14, 1000, 0.7, 0.02, "stream");
+    record_data rdata = record_buf(true, '7', static_cast<int16_t>(i), 14, 1000, 0.7, 0.02, "stream");
     sp.buffer(rdata);
     expected_records.push_back(rdata);
   }

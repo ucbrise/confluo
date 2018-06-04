@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 
+#include "monolog_iterator.h"
 #include "storage/swappable_encoded_ptr.h"
 #include "atomic.h"
 #include "monolog_linear_bucket.h"
@@ -29,8 +30,8 @@ class monolog_linear_base {
    * @param data_path The data path where the monolog is stored.
    * @param storage The storage mode for the monolog.
    */
-  monolog_linear_base(const std::string& name, const std::string& data_path,
-                      const storage::storage_mode& storage) {
+  monolog_linear_base(const std::string &name, const std::string &data_path,
+                      const storage::storage_mode &storage) {
     init(name, data_path, storage);
   }
 
@@ -40,7 +41,7 @@ class monolog_linear_base {
    * copying should be done by the super class.
    * @param other other monolog_linear
    */
-  monolog_linear_base(const monolog_linear_base& other) {
+  monolog_linear_base(const monolog_linear_base &other) {
     init(other.name_, other.data_path_, other.buckets_[0].mode());
   }
 
@@ -51,8 +52,8 @@ class monolog_linear_base {
    * @param other
    * @return this
    */
-  monolog_linear_base& operator=(const monolog_linear_base& other) {
-    if(&other == this)
+  monolog_linear_base &operator=(const monolog_linear_base &other) {
+    if (&other == this)
       return *this;
     init(other.name_, other.data_path_, other.buckets_[0].mode());
     return *this;
@@ -65,8 +66,8 @@ class monolog_linear_base {
    * @param data_path The data path where the monolog is stored.
    * @param storage The storage mode for the monolog.
    */
-  void init(const std::string& name, const std::string& data_path,
-            const storage::storage_mode& storage) {
+  void init(const std::string &name, const std::string &data_path,
+            const storage::storage_mode &storage) {
     name_ = name;
     data_path_ = data_path;
     for (size_t i = 0; i < MAX_BUCKETS; i++) {
@@ -74,10 +75,12 @@ class monolog_linear_base {
     }
   }
 
+  /**
+   * Pre-allocates the first bucket.
+   */
   void pre_alloc() {
     buckets_[0].ensure_alloc();
   }
-
 
   /**
    * Get the name of the monolog.
@@ -88,10 +91,19 @@ class monolog_linear_base {
     return name_;
   }
 
+  /**
+   * Get the bucket size.
+   * @return The bucket size.
+   */
   size_t bucket_size() {
     return BUCKET_SIZE + BUFFER_SIZE;
   }
 
+  /**
+   * Get the bucket data path for a bucket index.
+   * @param bucket_idx The bucket index.
+   * @return The bucket data path.
+   */
   std::string bucket_data_path(size_t bucket_idx) const {
     return data_path() + "/" + name() + "_" + std::to_string(bucket_idx) + ".dat";
   }
@@ -123,7 +135,7 @@ class monolog_linear_base {
    * @param idx index to set at
    * @param val value to set
    */
-  void set(size_t idx, const T& val) {
+  void set(size_t idx, const T &val) {
     buckets_[idx / BUCKET_SIZE].set(idx % BUCKET_SIZE, val);
   }
 
@@ -143,7 +155,7 @@ class monolog_linear_base {
    * @param data data to write
    * @param len length of data
    */
-  void write(size_t idx, const T* data, size_t len) {
+  void write(size_t idx, const T *data, size_t len) {
     size_t remaining = len;
     while (remaining) {
       size_t bucket_idx = idx / BUCKET_SIZE;
@@ -162,7 +174,7 @@ class monolog_linear_base {
    * @param data data to write
    * @param len length of data
    */
-  void write_unsafe(size_t idx, const T* data, size_t len) {
+  void write_unsafe(size_t idx, const T *data, size_t len) {
     size_t remaining = len;
     while (remaining) {
       size_t bucket_idx = idx / BUCKET_SIZE;
@@ -198,7 +210,7 @@ class monolog_linear_base {
    * @param data The buffer that the data will be read into.
    * @param len The number of bytes to read.
    */
-  void read(size_t offset, T* data, size_t len) const {
+  void read(size_t offset, T *data, size_t len) const {
     size_t remaining = len;
     while (remaining) {
       size_t bucket_idx = offset / BUCKET_SIZE;
@@ -215,7 +227,7 @@ class monolog_linear_base {
    * @param idx monolog index
    * @param data_ptr read-only pointer to store in
    */
-  void ptr(size_t idx, storage::read_only_encoded_ptr<T>& data_ptr) {
+  void ptr(size_t idx, storage::read_only_encoded_ptr<T> &data_ptr) {
     buckets_[idx / BUCKET_SIZE].ptr(idx % BUCKET_SIZE, data_ptr);
   }
 
@@ -224,7 +236,7 @@ class monolog_linear_base {
    * @param idx monolog index
    * @param data_ptr read-only pointer to store in
    */
-  void cptr(size_t idx, storage::read_only_encoded_ptr<T>& data_ptr) const {
+  void cptr(size_t idx, storage::read_only_encoded_ptr<T> &data_ptr) const {
     buckets_[idx / BUCKET_SIZE].cptr(idx % BUCKET_SIZE, data_ptr);
   }
 
@@ -233,7 +245,7 @@ class monolog_linear_base {
    * @param idx Index of reference to get.
    * @return Reference to requested data.
    */
-  T& operator[](size_t idx) {
+  T &operator[](size_t idx) {
     return buckets_[idx / BUCKET_SIZE][idx % BUCKET_SIZE];
   }
 
@@ -242,19 +254,13 @@ class monolog_linear_base {
    *
    * @return storage size of the monolog
    */
-  size_t storage_size() const {
-    size_t bucket_size = buckets_.size() * sizeof(monolog_linear_bucket<T, BUCKET_SIZE>);
-    size_t data_size = 0;
-    for (size_t i = 0; i < buckets_.size(); i++)
-      data_size += buckets_[i].storage_size();
-    return bucket_size + data_size;
-  }
+  size_t storage_size() const;
 
   /**
    * Note: it's dangerous to modify this data structure.
    * @return pointer to underlying array
    */
-  std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS>& data() {
+  std::array<monolog_linear_bucket<T, BUFFER_SIZE>, MAX_BUCKETS> &data() {
     return buckets_;
   }
 
@@ -285,7 +291,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
   /** The difference type */
   typedef T difference_type;
   /** The pointer type */
-  typedef T* pointer;
+  typedef T *pointer;
   /** The reference type */
   typedef T reference;
   /** This type */
@@ -315,8 +321,8 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
    * @param data_path The data path for the monolog.
    * @param storage The storage mode for the monolog.
    */
-  monolog_linear(const std::string& name, const std::string& data_path,
-                 const storage::storage_mode& storage = storage::IN_MEMORY)
+  monolog_linear(const std::string &name, const std::string &data_path,
+                 const storage::storage_mode &storage = storage::IN_MEMORY)
       : monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>(name, data_path, storage),
         tail_(0UL) {
   }
@@ -325,7 +331,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
    * Copy assignment. Copies all data in the other monolog.
    * @param other other monolog_linear
    */
-  monolog_linear(const monolog_linear& other)
+  monolog_linear(const monolog_linear &other)
       : monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, BUFFER_SIZE>(other) {
     atomic::init(&tail_, 0UL);
     for (size_t i = 0; i < other.size(); i++)
@@ -337,8 +343,8 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
    * @param other other monolog_linear
    * @return this copied monolog_linear
    */
-  monolog_linear& operator=(const monolog_linear& other) {
-    if(&other == this)
+  monolog_linear &operator=(const monolog_linear &other) {
+    if (&other == this)
       return *this;
     monolog_linear::operator=(other);
     atomic::init(&tail_, 0UL);
@@ -347,15 +353,15 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
     return *this;
   }
 
- /**
-  * Add a new element to end of monolog, adding more space if necessary.
-  *
-  * @param val The value to add at the end of monolog.
-  *
-  * @return The offset that the value was added at.
-  *
-  */
-  size_t push_back(const T& val) {
+  /**
+   * Add a new element to end of monolog, adding more space if necessary.
+   *
+   * @param val The value to add at the end of monolog.
+   *
+   * @return The offset that the value was added at.
+   *
+   */
+  size_t push_back(const T &val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
@@ -370,7 +376,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
    *
    * @return The start offset in the monolog where the range was written.
    */
-  size_t push_back_range(const T& start, const T& end) {
+  size_t push_back_range(const T &start, const T &end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
     for (size_t i = 0; i < cnt; i++)
@@ -386,7 +392,7 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
    *
    * @return The start offset in the monolog where the data was written.
    */
-  size_t append(const T* data, size_t len) {
+  size_t append(const T *data, size_t len) {
     size_t offset = atomic::faa(&tail_, len);
     this->write(offset, data, len);
     return offset;
@@ -441,11 +447,19 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
     return iterator(this, size());
   }
 
-  iterator begin_bucket() const {
+  /**
+   * Get an iterator over the first bucket
+   * @return Iterator over the first bucket
+   */
+  bucket_iterator begin_bucket() const {
     return bucket_iterator(this, 0);
   }
 
-  iterator end_bucket() const {
+  /**
+   * Get an iterator over the last bucket
+   * @return Iterator over the last bucket
+   */
+  bucket_iterator end_bucket() const {
     return bucket_iterator(this, size() + BUCKET_SIZE - (size() % BUCKET_SIZE));
   }
 

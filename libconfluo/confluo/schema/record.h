@@ -5,6 +5,7 @@
 #include <cstdint>
 
 #include "storage/swappable_encoded_ptr.h"
+#include "field.h"
 
 namespace confluo {
 
@@ -22,14 +23,7 @@ struct record_t {
   /**
    * Constructs an empty record
    */
-  record_t()
-      : timestamp_(0),
-        log_offset_(0),
-        data_(nullptr),
-        ptr_(),
-        size_(0),
-        version_(0) {
-  }
+  record_t();
 
   /**
    * Constructor using a raw pointer
@@ -37,14 +31,7 @@ struct record_t {
    * @param data raw pointer to data
    * @param size size of data
    */
-  record_t(size_t log_offset, uint8_t* data, size_t size)
-      : timestamp_(*reinterpret_cast<int64_t*>(data)),
-        log_offset_(log_offset),
-        data_(data),
-        ptr_(),
-        size_(size),
-        version_(log_offset + size) {
-  }
+  record_t(size_t log_offset, uint8_t *data, size_t size);
 
   /**
    * Constructor using a raw pointer
@@ -52,44 +39,28 @@ struct record_t {
    * @param data raw pointer to data
    * @param size size of data
    */
-  record_t(size_t log_offset, storage::read_only_encoded_ptr<uint8_t> data, size_t size)
-      : timestamp_(0),
-        log_offset_(log_offset),
-        data_(nullptr),
-        ptr_(data),
-        size_(size),
-        version_(log_offset + size) {
-    storage::decoded_ptr<uint8_t> ptr = data.decode();
-    timestamp_ = *reinterpret_cast<int64_t*>(ptr.get());
-    data_ = ptr.get();
-  }
+  record_t(size_t log_offset, storage::read_only_encoded_ptr<uint8_t> data, size_t size);
 
   /**
    * Reserves n bytes for the record
    *
    * @param n The number of bytes to reserve
    */
-  void reserve(size_t n) {
-    fields_.reserve(n);
-  }
+  void reserve(size_t n);
 
   /**
    * Adds a value to the record
    *
    * @param val The value to add
    */
-  void push_back(const field_t& val) {
-    fields_.push_back(val);
-  }
+  void push_back(const field_t &val);
 
   /**
    * Adds an r value reference to the record
    *
    * @param val The r value reference to add
    */
-  void push_back(field_t&& val) {
-    fields_.push_back(val);
-  }
+  void push_back(field_t &&val);
 
   /**
    * Gets the field at a particular index
@@ -98,9 +69,7 @@ struct record_t {
    *
    * @return The field at that index
    */
-  const field_t& operator[](uint16_t idx) const {
-    return fields_.at(idx);
-  }
+  const field_t &operator[](uint16_t idx) const;
 
   /**
    * Gets the field at a particular index
@@ -109,105 +78,77 @@ struct record_t {
    *
    * @return The field at that index
    */
-  const field_t& at(uint16_t idx) const {
-    return fields_.at(idx);
-  }
+  const field_t &at(uint16_t idx) const;
 
   /**
    * Gets the timestamp of this record
    *
    * @return The timestamp of this record
    */
-  uint64_t timestamp() const {
-    return timestamp_;
-  }
+  uint64_t timestamp() const;
 
   /**
    * Gets the offset from the log for this record
    *
    * @return The log offset
    */
-  size_t log_offset() const {
-    return log_offset_;
-  }
+  size_t log_offset() const;
 
   /**
    * Gets the data that this record holds
    *
    * @return The data that's held in this record
    */
-  uint8_t* data() const {
-    return data_;
-  }
+  uint8_t *data() const;
 
   /**
    * The version of the log the record is in
    *
    * @return The log version
    */
-  uint64_t version() const {
-    return version_;
-  }
+  uint64_t version() const;
 
   /**
    * Gets an iterator for the record fields
    *
    * @return The beginning of the iterator
    */
-  iterator begin() {
-    return fields_.begin();
-  }
+  iterator begin();
 
   /**
    * Gets an iterator for the record fields
    *
    * @return The end of the iterator
    */
-  iterator end() {
-    return fields_.end();
-  }
+  iterator end();
 
   /**
    * Gets a constant iterator for the record fields
    *
    * @return The beginning of the constant iterator
    */
-  const_iterator begin() const {
-    return fields_.begin();
-  }
+  const_iterator begin() const;
 
   /**
    * Gets the constant iterator for the record fields
    *
    * @return The end of the constant iterator
    */
-  const_iterator end() const {
-    return fields_.end();
-  }
+  const_iterator end() const;
 
   /**
    * Gets the size of the record
    *
    * @return The size of the record in bytes
    */
-  size_t length() const {
-    return size_;
-  }
+  size_t length() const;
 
   /**
    * Gets a string representation of the record
    *
    * @return A string containing the contents of the record
    */
-  std::string to_string() const {
-    std::string str = "(";
-    for (auto& f : *this) {
-      str += f.to_string() + ", ";
-    }
-    str.pop_back();
-    str += ")";
-    return str;
-  }
+  std::string to_string() const;
 
   /**
    * Checks whether this record is equal to the other record
@@ -217,14 +158,12 @@ struct record_t {
    * @return True if this record is equal to the other record, false
    * otherwise
    */
-  bool operator==(const record_t& other) const {
-    return log_offset_ == other.log_offset_;
-  }
+  bool operator==(const record_t &other) const;
 
  private:
   int64_t timestamp_;
   size_t log_offset_;
-  uint8_t* data_;
+  uint8_t *data_;
   storage::read_only_encoded_ptr<uint8_t> ptr_;
   size_t size_;
   uint64_t version_;
@@ -235,10 +174,10 @@ struct record_t {
 
 namespace std {
 
-template<>
 /**
  * Record hash
  */
+template<>
 struct hash<confluo::record_t> {
   /**
    * Computes a hash on the record
@@ -246,7 +185,7 @@ struct hash<confluo::record_t> {
    * @return The hash of the record, which in this case is just the
    * log offset
    */
-  size_t operator()(const confluo::record_t& k) const {
+  size_t operator()(const confluo::record_t &k) const {
     return k.log_offset();
   }
 };

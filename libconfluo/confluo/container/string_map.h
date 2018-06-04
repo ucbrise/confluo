@@ -28,9 +28,9 @@ class string_map {
      * @param str The string to compute the hash on
      * @return The hashed value
      */
-    static uint32_t hash(const std::string& str) {
+    static uint32_t hash(const std::string &str) {
       uint32_t h = FIRSTH;
-      const char* s = str.c_str();
+      const char *s = str.c_str();
       while (*s) {
         h = (h * A) ^ (s[0] * B);
         s++;
@@ -62,7 +62,7 @@ class string_map {
      * @param k The key of the entry
      * @param v The value of the entry
      */
-    map_entry(const std::string& k, const V& v)
+    map_entry(const std::string &k, const V &v)
         : key(k),
           value(v),
           valid(true) {
@@ -80,7 +80,7 @@ class string_map {
    * Constructs a default string map to have the maximum number of buckets
    */
   string_map()
-      : buckets_(new reflog*[MAX_BUCKETS]()) {
+      : buckets_(new reflog *[MAX_BUCKETS]()) {
   }
 
   /**
@@ -104,11 +104,11 @@ class string_map {
    *
    * @return The index of the key value pair
    */
-  int64_t put(const std::string& key, const V& value) {
+  int64_t put(const std::string &key, const V &value) {
     uint32_t hash_key = string_hash::hash(key);
     map_entry entry(key, value);
 
-    reflog* refs;
+    reflog *refs;
     if ((refs = buckets_[hash_key]) == nullptr)
       refs = buckets_[hash_key] = new reflog;
 
@@ -141,9 +141,9 @@ class string_map {
    *
    * @return The index of the key value pair
    */
-  int64_t get(const std::string& key, V& value) const {
+  int64_t get(const std::string &key, V &value) const {
     uint32_t hash_key = string_hash::hash(key);
-    reflog* refs;
+    reflog *refs;
     if ((refs = buckets_[hash_key]) == nullptr) {
       return -1;
     }
@@ -152,7 +152,7 @@ class string_map {
     size_t size = refs->size();
     for (size_t i = 0; i < size; i++) {
       int64_t idx = refs->at(i);
-      const map_entry& entry = entries_.at(idx);
+      const map_entry &entry = entries_.at(idx);
       if (entry.key == key && entry.valid) {
         value = entry.value;
         return idx;
@@ -169,9 +169,9 @@ class string_map {
    *
    * @return The index, or -1 if it doesn't exist
    */
-  int64_t get(int64_t idx, V& value) const {
+  int64_t get(int64_t idx, V &value) const {
     if (idx < entries_.size()) {
-      const map_entry& entry = entries_.at(idx);
+      const map_entry &entry = entries_.at(idx);
       if (entry.valid) {
         value = entry.value;
         return idx;
@@ -191,9 +191,9 @@ class string_map {
    * @return The index of the removed key value pair or -1 if it doesn't
    * exist
    */
-  int64_t remove(const std::string& key, V& value) {
+  int64_t remove(const std::string &key, V &value) {
     uint32_t hash_key = string_hash::hash(key);
-    reflog* refs;
+    reflog *refs;
     if ((refs = buckets_[hash_key]) == nullptr)
       return -1;
 
@@ -201,7 +201,7 @@ class string_map {
     size_t size = refs->size();
     for (size_t i = 0; i < size; i++) {
       uint64_t idx = refs->at(i);
-      map_entry& entry = entries_[idx];
+      map_entry &entry = entries_[idx];
       if (entry.key == key && entry.valid) {
         entry.valid = false;
         value = entry.value;
@@ -212,13 +212,12 @@ class string_map {
   }
 
  private:
-  reflog** buckets_;
+  reflog **buckets_;
   monolog::monolog_exp2<map_entry> entries_;
 };
 
 template<typename V>
-const uint32_t string_map<V>::MAX_BUCKETS = sysconf(_SC_PAGESIZE)
-    / sizeof(reflog*);
+const uint32_t string_map<V>::MAX_BUCKETS = sysconf(_SC_PAGESIZE) / sizeof(reflog *);
 
 }
 

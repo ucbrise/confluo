@@ -10,7 +10,15 @@ namespace confluo {
 class numeric;
 
 /** Helpers for casting numerics **/
-static numeric cast(const numeric& val, const data_type& type);
+
+/**
+ * Cast the numeric value to data type
+ *
+ * @param val The value
+ * @param type The data type
+ * @return The cast value
+ */
+numeric cast(const numeric &val, const data_type &type);
 
 /**
  * Gets the greater data type 
@@ -20,21 +28,14 @@ static numeric cast(const numeric& val, const data_type& type);
  *
  * @return The greater data type based on id
  */
-static data_type max(const data_type& t1, const data_type& t2) {
-  return type_manager::get_type(std::max(t1.id, t2.id));
-}
+data_type max(const data_type &t1, const data_type &t2);
 
 class numeric {
  public:
-  /** The maximum size of data a numeric can hold in bytes */
-  static const size_t MAX_SIZE = sizeof(uint64_t);
-
   /**
    * Constructs a numeric of the none type
    */
-  numeric()
-      : type_(NONE_TYPE) {
-  }
+  numeric();
 
   /**
    * Constructs a numeric that contains the given data type and the zero
@@ -42,120 +43,84 @@ class numeric {
    *
    * @param type The data type of the numeric
    */
-  numeric(data_type type)
-      : type_(type) {
-    memcpy(data_, type_.zero(), type_.size);
-  }
+  numeric(data_type type);
 
   /**
    * Constructs a numeric from a boolean value
    *
    * @param val The boolean value used to create this numeric
    */
-  numeric(bool val)
-      : type_(BOOL_TYPE) {
-    as<bool>() = val;
-  }
+  numeric(bool val);
 
   /**
    * Constructs a numeric from a character value
    *
    * @param val The character value used to create this numeric
    */
-  numeric(int8_t val)
-      : type_(CHAR_TYPE) {
-    as<int8_t>() = val;
-  }
+  numeric(int8_t val);
 
   /**
    * Constructs a numeric from an unsigned character value
    *
    * @param val The unsigned character value to create this numeric
    */
-  numeric(uint8_t val)
-      : type_(UCHAR_TYPE) {
-    as<uint8_t>() = val;
-  }
+  numeric(uint8_t val);
 
   /**
    * Constructs a numeric from the signed short value
    *
    * @param val The signed short value to create this numeric from
    */
-  numeric(int16_t val)
-      : type_(SHORT_TYPE) {
-    as<int16_t>() = val;
-  }
+  numeric(int16_t val);
 
   /**
    * Constructs a numeric from the unsigned short value
    *
    * @param val The unsigned short value used to create this numeric
    */
-  numeric(uint16_t val)
-      : type_(USHORT_TYPE) {
-    as<uint16_t>() = val;
-  }
+  numeric(uint16_t val);
 
   /**
    * Constructs a numeric from the integer value
    *
    * @param val The integer value used to construct this numeric
    */
-  numeric(int32_t val)
-      : type_(INT_TYPE) {
-    as<int32_t>() = val;
-  }
+  numeric(int32_t val);
 
   /**
    * Constructs a numeric from an unsigned integer value
    *
    * @param val The unsigned integer value used to construct the numeric
    */
-  numeric(uint32_t val)
-      : type_(UINT_TYPE) {
-    as<uint32_t>() = val;
-  }
+  numeric(uint32_t val);
 
   /**
    * Constructs a numeric from a signed long value
    *
    * @param val The signed long value used to construct this numeric
    */
-  numeric(int64_t val)
-      : type_(LONG_TYPE) {
-    as<int64_t>() = val;
-  }
+  numeric(int64_t val);
 
   /**
    * Constructs a numeric from an unsigned long value
    *
    * @param val The unsigned long value used to construct this numeric
    */
-  numeric(uint64_t val)
-      : type_(ULONG_TYPE) {
-    as<uint64_t>() = val;
-  }
+  numeric(uint64_t val);
 
   /**
    * Constructs a numeric from a float value
    *
    * @param val The float value used to construct this numeric
    */
-  numeric(float val)
-      : type_(FLOAT_TYPE) {
-    as<float>() = val;
-  }
- 
+  numeric(float val);
+
   /**
    * Constructs a numeric from a double precision floating point value
    *
    * @param val The double value used to create this numeric
-   */  
-  numeric(double val)
-      : type_(DOUBLE_TYPE) {
-    as<double>() = val;
-  }
+   */
+  numeric(double val);
 
   /**
    * Constructs a numeric from the given data type and data
@@ -164,12 +129,7 @@ class numeric {
    * @param data The data that the numeric contains
    * @throw invalid_cast_exception
    */
-  numeric(const data_type& type, void* data)
-      : type_(type) {
-    if (!type_.is_numeric())
-      THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
-    memcpy(data_, data, type_.size);
-  }
+  numeric(const data_type &type, void *data);
 
   /**
    * Constructs a numeric from the given immutable value
@@ -178,21 +138,14 @@ class numeric {
    * this numeric
    * @throw invalid_cast_exception
    */
-  numeric(const immutable_value& val)
-      : type_(val.type()) {
-    if (!type_.is_numeric())
-      THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
-    memcpy(data_, val.ptr(), type_.size);
-  }
+  numeric(const immutable_value &val);
 
   /**
    * Gets whether this numeric is valid
    *
    * @return True if this numeric is valid, false otherwise
    */
-  bool is_valid() const {
-    return !type_.is_none();
-  }
+  bool is_valid() const;
 
   /**
    * Parses the numeric from a string
@@ -202,29 +155,21 @@ class numeric {
    *
    * @return A numeric generated from the contents of the string
    */
-  static numeric parse(const std::string& str, const data_type& type) {
-    numeric value(type);
-    type.parse_op()(str, value.data_);
-    return value;
-  }
+  static numeric parse(const std::string &str, const data_type &type);
 
   /**
    * Converts this numeric to raw immutable data
    *
    * @return Immutable raw data containing the data and type of this numeric
    */
-  inline immutable_raw_data to_data() const {
-    return immutable_raw_data(data_, type_.size);
-  }
+  immutable_raw_data to_data() const;
 
   /**
    * Gets the data type of this numeric
    *
    * @return The data type of this numeric
    */
-  data_type const& type() const {
-    return type_;
-  }
+  data_type const &type() const;
 
   // Relational operators
   /**
@@ -236,14 +181,7 @@ class numeric {
    * @throw invalid_operation_exception
    * @return True if the relational comparison is true, false otherwise
    */
-  static bool relop(reational_op_id id, const numeric& first,
-                    const numeric& second) {
-    // Promote to the larger type
-    data_type m = max(first.type_, second.type_);
-    numeric v1 = cast(first, m);
-    numeric v2 = cast(second, m);
-    return m.relop(id)(v1.to_data(), v2.to_data());
-  }
+  static bool relop(reational_op_id id, const numeric &first, const numeric &second);
 
   /**
    * Less than operator
@@ -254,9 +192,7 @@ class numeric {
    * @return True if the data in the first numeric is less than the data in
    * the second numeric, false otherwise
    */
-  friend inline bool operator <(const numeric& first, const numeric& second) {
-    return relop(reational_op_id::LT, first, second);
-  }
+  friend bool operator<(const numeric &first, const numeric &second);
 
   /**
    * Less than or equal to operator
@@ -267,9 +203,7 @@ class numeric {
    * @return True if the data in the first numeric is less than or equal to
    * the data in the second numeric
    */
-  friend inline bool operator <=(const numeric& first, const numeric& second) {
-    return relop(reational_op_id::LE, first, second);
-  }
+  friend bool operator<=(const numeric &first, const numeric &second);
 
   /**
    * Greater than operator
@@ -280,9 +214,7 @@ class numeric {
    * @return True if the data in the first numeric is greater than the 
    * data in the second numeric
    */
-  friend inline bool operator >(const numeric& first, const numeric& second) {
-    return relop(reational_op_id::GT, first, second);
-  }
+  friend bool operator>(const numeric &first, const numeric &second);
 
   /**
    * Greater than or equal to operator
@@ -293,9 +225,7 @@ class numeric {
    * @return True if the data in the first numeric is greater than or equal
    * to the data in the second numeric
    */
-  friend inline bool operator >=(const numeric& first, const numeric& second) {
-    return relop(reational_op_id::GE, first, second);
-  }
+  friend bool operator>=(const numeric &first, const numeric &second);
 
   /**
    * Equality operator
@@ -306,9 +236,7 @@ class numeric {
    * @return True if the data in the first numeric is equal
    * to the data in the second numeric
    */
-  friend inline bool operator ==(const numeric& first, const numeric& second) {
-    return relop(reational_op_id::EQ, first, second);
-  }
+  friend bool operator==(const numeric &first, const numeric &second);
 
   /**
    * Not equal operator
@@ -319,9 +247,7 @@ class numeric {
    * @return True if the data in the first numeric is not equal
    * to the data in the second numeric
    */
-  friend inline bool operator !=(const numeric& first, const numeric& second) {
-    return relop(reational_op_id::NEQ, first, second);
-  }
+  friend bool operator!=(const numeric &first, const numeric &second);
 
   // Arithmetic operations
   /**
@@ -332,11 +258,7 @@ class numeric {
    *
    * @return The numeric containing the result of the unary operation
    */
-  static inline numeric unaryop(unary_op_id id, const numeric& n) {
-    numeric result(n.type());
-    result.type_.unaryop(id)(result.data_, n.to_data());
-    return result;
-  }
+  static numeric unaryop(unary_op_id id, const numeric &n);
 
   /**
    * Unary negation operator
@@ -345,9 +267,7 @@ class numeric {
    *
    * @return A numeric containing the negated numeric
    */
-  friend inline numeric operator-(const numeric& n) {
-    return unaryop(unary_op_id::NEGATIVE, n);
-  }
+  friend numeric operator-(const numeric &n);
 
   /**
    * Unary positive operator
@@ -356,9 +276,7 @@ class numeric {
    *
    * @return A numeric containing the value of the given numeric
    */
-  friend inline numeric operator+(const numeric& n) {
-    return unaryop(unary_op_id::POSITIVE, n);
-  }
+  friend numeric operator+(const numeric &n);
 
   /**
    * Bitwise not unary operator
@@ -368,9 +286,7 @@ class numeric {
    * @return A numeric containing the flipped bits of the given numeric
    * value
    */
-  friend inline numeric operator~(const numeric& n) {
-    return unaryop(unary_op_id::BW_NOT, n);
-  }
+  friend numeric operator~(const numeric &n);
 
   /**
    * Performs the binary operation on the expression containing two
@@ -382,16 +298,7 @@ class numeric {
    *
    * @return A numeric containing the result of the binary expression
    */
-  static numeric binaryop(binary_op_id id, const numeric& first,
-                          const numeric& second) {
-    // Promote to the larger type
-    data_type m = max(first.type_, second.type_);
-    numeric v1 = cast(first, m);
-    numeric v2 = cast(second, m);
-    numeric result(m);
-    m.binaryop(id)(result.data_, v1.to_data(), v2.to_data());
-    return result;
-  }
+  static numeric binaryop(binary_op_id id, const numeric &first, const numeric &second);
 
   /**
    * The addition operator
@@ -401,9 +308,7 @@ class numeric {
    *
    * @return A numeric containing the sum of the values of the numerics
    */
-  friend inline numeric operator+(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::ADD, first, second);
-  }
+  friend numeric operator+(const numeric &first, const numeric &second);
 
   /**
    * The subtraction operator
@@ -414,9 +319,7 @@ class numeric {
    * @return A numeric containing the difference of the values 
    * of the numerics
    */
-  friend inline numeric operator-(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::SUBTRACT, first, second);
-  }
+  friend numeric operator-(const numeric &first, const numeric &second);
 
   /**
    * The multiplication operator
@@ -427,9 +330,7 @@ class numeric {
    * @return A numeric containing the product of the values 
    * of the numerics
    */
-  friend inline numeric operator*(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::MULTIPLY, first, second);
-  }
+  friend numeric operator*(const numeric &first, const numeric &second);
 
   /**
    * The division operator
@@ -439,9 +340,7 @@ class numeric {
    *
    * @return A numeric containing the quotient of the expression
    */
-  friend inline numeric operator/(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::DIVIDE, first, second);
-  }
+  friend numeric operator/(const numeric &first, const numeric &second);
 
   /**
    * The modulo operator
@@ -451,9 +350,7 @@ class numeric {
    *
    * @return A numeric containing the remainder of the expression
    */
-  friend inline numeric operator%(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::MODULO, first, second);
-  }
+  friend numeric operator%(const numeric &first, const numeric &second);
 
   /**
    * The bitwise and operator
@@ -463,9 +360,7 @@ class numeric {
    *
    * @return A numeric containing the result of the and expression
    */
-  friend inline numeric operator&(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::BW_AND, first, second);
-  }
+  friend numeric operator&(const numeric &first, const numeric &second);
 
   /**
    * The bitwise or operator
@@ -475,9 +370,7 @@ class numeric {
    *
    * @return A numeric containing the result of the or expression
    */
-  friend inline numeric operator|(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::BW_OR, first, second);
-  }
+  friend numeric operator|(const numeric &first, const numeric &second);
 
   /**
    * The bitwise xor operator
@@ -487,9 +380,7 @@ class numeric {
    *
    * @return A numeric containing the result of the xor expression
    */
-  friend inline numeric operator^(const numeric& first, const numeric& second) {
-    return binaryop(binary_op_id::BW_XOR, first, second);
-  }
+  friend numeric operator^(const numeric &first, const numeric &second);
 
   /**
    * The bitwise left logical shift operator
@@ -499,10 +390,7 @@ class numeric {
    *
    * @return A numeric containing the result of the left shift expression
    */
-  friend inline numeric operator<<(const numeric& first,
-                                   const numeric& second) {
-    return binaryop(binary_op_id::BW_LSHIFT, first, second);
-  }
+  friend numeric operator<<(const numeric &first, const numeric &second);
 
   /**
    * The bitwise right logical shift operator
@@ -512,10 +400,7 @@ class numeric {
    *
    * @return A numeric containing the result of the right shift expression
    */
-  friend inline numeric operator>>(const numeric& first,
-                                   const numeric& second) {
-    return binaryop(binary_op_id::BW_RSHIFT, first, second);
-  }
+  friend numeric operator>>(const numeric &first, const numeric &second);
 
   /**
    * Constructs this numeric from the given immutable value
@@ -525,13 +410,7 @@ class numeric {
    *
    * @return This updated numeric
    */
-  numeric& operator=(const immutable_value& other) {
-    type_ = other.type();
-    if (!type_.is_numeric())
-      THROW(invalid_cast_exception, "Casting non-numeric to numeric.");
-    type_.unaryop(unary_op_id::ASSIGN)(data_, other.to_data());
-    return *this;
-  }
+  numeric &operator=(const immutable_value &other);
 
   /**
    * Assigns the boolean value to this numeric
@@ -540,11 +419,7 @@ class numeric {
    *
    * @return This updated numeric
    */
-  numeric& operator=(bool value) {
-    type_ = BOOL_TYPE;
-    as<bool>() = value;
-    return *this;
-  }
+  numeric &operator=(bool value);
 
   /**
    * Assigns the character value to this numeric
@@ -553,11 +428,7 @@ class numeric {
    *
    * @return This updated numeric
    */
-  numeric& operator=(int8_t value) {
-    type_ = CHAR_TYPE;
-    as<int8_t>() = value;
-    return *this;
-  }
+  numeric &operator=(int8_t value);
 
   /**
    * Assigns the unsigned character value to this numeric
@@ -567,11 +438,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(uint8_t value) {
-    type_ = UCHAR_TYPE;
-    as<uint8_t>() = value;
-    return *this;
-  }
+  numeric &operator=(uint8_t value);
 
   /**
    * Assigns the short value to this numeric
@@ -580,11 +447,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(int16_t value) {
-    type_ = SHORT_TYPE;
-    as<int16_t>() = value;
-    return *this;
-  }
+  numeric &operator=(int16_t value);
 
   /**
    * Assigns the unsigned short value to this numeric
@@ -593,11 +456,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(uint16_t value) {
-    type_ = USHORT_TYPE;
-    as<uint16_t>() = value;
-    return *this;
-  }
+  numeric &operator=(uint16_t value);
 
   /**
    * Assigns the integer value to this numeric
@@ -606,11 +465,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(int32_t value) {
-    type_ = INT_TYPE;
-    as<int32_t>() = value;
-    return *this;
-  }
+  numeric &operator=(int32_t value);
 
   /**
    * Assigns the unsigned integer value to this numeric
@@ -619,11 +474,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(uint32_t value) {
-    type_ = UINT_TYPE;
-    as<uint32_t>() = value;
-    return *this;
-  }
+  numeric &operator=(uint32_t value);
 
   /**
    * Assigns the long value to this numeric
@@ -632,11 +483,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(int64_t value) {
-    type_ = LONG_TYPE;
-    as<int64_t>() = value;
-    return *this;
-  }
+  numeric &operator=(int64_t value);
 
   /**
    * Assigns the unsigned long value to this numeric
@@ -645,11 +492,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(uint64_t value) {
-    type_ = ULONG_TYPE;
-    as<uint64_t>() = value;
-    return *this;
-  }
+  numeric &operator=(uint64_t value);
 
   /**
    * Assigns the float value to this numeric
@@ -658,11 +501,7 @@ class numeric {
    *
    * @return The updated numeric
    */
-  numeric& operator=(float value) {
-    type_ = FLOAT_TYPE;
-    as<float>() = value;
-    return *this;
-  }
+  numeric &operator=(float value);
 
   /**
    * Assigns the double value to this numeric
@@ -671,11 +510,7 @@ class numeric {
    *
    * @return This updated numeric
    */
-  numeric& operator=(double value) {
-    type_ = DOUBLE_TYPE;
-    as<double>() = value;
-    return *this;
-  }
+  numeric &operator=(double value);
 
   /**
    * Casts the numeric's data to type T
@@ -684,12 +519,10 @@ class numeric {
    *
    * @return The value of type T
    */
-  template<typename T,
-      typename std::enable_if<
-          std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type* =
-          nullptr>
-  T& as() {
-    return *reinterpret_cast<T*>(data_);
+  template<typename T, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                               T>::type * = nullptr>
+  T &as() {
+    return *reinterpret_cast<T *>(data_);
   }
 
   /**
@@ -699,12 +532,10 @@ class numeric {
    *
    * @return The value of type T that is not modifiable
    */
-  template<typename T,
-      typename std::enable_if<
-          std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type* =
-          nullptr>
-  const T& as() const {
-    return *reinterpret_cast<const T*>(data_);
+  template<typename T, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                               T>::type * = nullptr>
+  const T &as() const {
+    return *reinterpret_cast<const T *>(data_);
   }
 
   /**
@@ -712,25 +543,29 @@ class numeric {
    *
    * @return A formatted string containing the type and data of the numeric
    */
-  std::string to_string() const {
-    return type_.name() + "(" + type_.to_string_op()(to_data()) + ")";
-  }
+  std::string to_string() const;
 
-  data_type type() {
-    return type_;
-  }
+  /**
+   * Get the type for the numeric
+   *
+   * @return The numeric type
+   */
+  data_type type();
 
-  uint8_t* data() {
-    return data_;
-  }
+  /**
+   * Get raw data for the numeric
+   *
+   * @return Raw data for the numeric
+   */
+  uint8_t *data();
 
  private:
   data_type type_;
-  uint8_t data_[MAX_SIZE];
+  uint8_t data_[sizeof(uint64_t)];
 };
 
 // Cast functions for primitive types
-using cast_fn = numeric (*)(const numeric& v);
+using cast_fn = numeric (*)(const numeric &v);
 
 namespace detail {
 
@@ -749,7 +584,7 @@ struct cast_helper {
    *
    * @return The casted numeric
    */
-  static numeric cast(const numeric& v) {
+  static numeric cast(const numeric &v) {
     return numeric(static_cast<OUT>(v.as<IN>()));
   }
 };
@@ -768,7 +603,7 @@ struct cast_helper<T, T> {
    *
    * @return The casted numeric
    */
-  static numeric cast(const numeric& v) {
+  static numeric cast(const numeric &v) {
     return v;
   }
 };
@@ -787,7 +622,7 @@ struct cast_helper<void, OUT> {
    * @throw invalid_cast_exception Cannot cast from void type
    * @return The casted numeric
    */
-  static numeric cast(const numeric& v) {
+  static numeric cast(const numeric &v) {
     throw invalid_cast_exception("Cannot cast none type to any other type");
   }
 };
@@ -806,7 +641,7 @@ struct cast_helper<IN, void> {
    * @throw invalid_cast_exception Cannot cast to void type
    * @return The casted numeric
    */
-  static numeric cast(const numeric& v) {
+  static numeric cast(const numeric &v) {
     throw invalid_cast_exception("Cannot cast any type to none type");
   }
 };
@@ -823,7 +658,7 @@ struct cast_helper<void, void> {
    * @throw invalid_cast_exception Cannot cast to void type
    * @return The casted numeric
    */
-  static numeric cast(const numeric& v) {
+  static numeric cast(const numeric &v) {
     throw invalid_cast_exception("Cannot cast none type to none type");
   }
 };
@@ -840,7 +675,7 @@ struct cast_helper<void, void> {
  * @return The casted numeric
  */
 template<typename IN, typename OUT>
-numeric type_cast(const numeric& v) {
+numeric type_cast(const numeric &v) {
   return detail::cast_helper<IN, OUT>::cast(v);
 }
 
@@ -852,36 +687,40 @@ numeric type_cast(const numeric& v) {
  * @return A vector containing all of the casting operators
  */
 template<typename IN>
-static std::vector<cast_fn> init_type_cast_ops() {
+std::vector<cast_fn> init_type_cast_ops() {
   return {type_cast<IN, void>, type_cast<IN, bool>, type_cast<IN, int8_t>, type_cast<IN, uint8_t>,
-    type_cast<IN, int16_t>, type_cast<IN, uint16_t>, type_cast<IN, int32_t>,
-    type_cast<IN, uint32_t>, type_cast<IN, int64_t>, type_cast<IN, uint64_t>,
-    type_cast<IN, float>, type_cast<IN, double>};
+          type_cast<IN, int16_t>, type_cast<IN, uint16_t>, type_cast<IN, int32_t>,
+          type_cast<IN, uint32_t>, type_cast<IN, int64_t>, type_cast<IN, uint64_t>,
+          type_cast<IN, float>, type_cast<IN, double>};
 }
 
-/**
- * A vector containing the cast operators for all the types
- */
-static std::vector<std::vector<cast_fn>> CAST_OPS = {
-    init_type_cast_ops<void>(), init_type_cast_ops<bool>(), init_type_cast_ops<
-        int8_t>(), init_type_cast_ops<uint8_t>(), init_type_cast_ops<int16_t>(),
-    init_type_cast_ops<uint16_t>(), init_type_cast_ops<int32_t>(),
-    init_type_cast_ops<uint32_t>(), init_type_cast_ops<int64_t>(),
-    init_type_cast_ops<uint64_t>(), init_type_cast_ops<float>(),
-    init_type_cast_ops<double>() };
+class cast_ops {
+ public:
+  static cast_ops &instance() {
+    static cast_ops ops;
+    return ops;
+  }
 
-/**
- * Indexes into the cast operators vector to call the appropriate cast
- * function
- *
- * @param val The numeric to cast
- * @param type The type to cast the numeric to
- *
- * @return The casted numeric
- */
-static numeric cast(const numeric& val, const data_type& type) {
-  return CAST_OPS[val.type().id][type.id](val);
-}
+  std::vector<cast_fn> const &at(size_t i) const {
+    return cast_ops_.at(i);
+  }
+
+  std::vector<cast_fn> &operator[](size_t i) {
+    return cast_ops_[i];
+  }
+
+  size_t size() const {
+    return cast_ops_.size();
+  }
+
+ private:
+  cast_ops() : cast_ops_{init_type_cast_ops<void>(), init_type_cast_ops<bool>(), init_type_cast_ops<int8_t>(),
+                         init_type_cast_ops<uint8_t>(), init_type_cast_ops<int16_t>(), init_type_cast_ops<uint16_t>(),
+                         init_type_cast_ops<int32_t>(), init_type_cast_ops<uint32_t>(), init_type_cast_ops<int64_t>(),
+                         init_type_cast_ops<uint64_t>(), init_type_cast_ops<float>(), init_type_cast_ops<double>()} {}
+
+  std::vector<std::vector<cast_fn>> cast_ops_;
+};
 
 }
 

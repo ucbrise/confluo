@@ -14,8 +14,8 @@ namespace confluo {
 #define DEFINE_EXCEPTION(name)\
 class name : public std::exception {\
  public:\
-  name(const std::string& msg)\
-      : msg_(msg) {\
+  explicit name(std::string msg)\
+      : msg_(std::move(msg)) {\
   }\
   name()\
       : msg_("") {\

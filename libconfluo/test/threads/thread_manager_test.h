@@ -23,13 +23,13 @@ TEST_F(ThreadManagerTest, MultiThreadedRegisterDeregisterTest) {
     threads.push_back(std::thread([] {
       int id = thread_manager::register_thread();
       ASSERT_TRUE(-1 != id);
-      ASSERT_TRUE(id < defaults::HARDWARE_CONCURRENCY);
+      ASSERT_TRUE(id < defaults::HARDWARE_CONCURRENCY());
       ASSERT_EQ(id, thread_manager::get_id());
       ASSERT_EQ(id, thread_manager::deregister_thread());
     }));
   }
 
-  for (auto& t : threads) {
+  for (auto &t : threads) {
     if (t.joinable())
       t.join();
   }

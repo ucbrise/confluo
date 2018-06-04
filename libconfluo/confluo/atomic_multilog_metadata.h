@@ -20,21 +20,21 @@ namespace confluo {
  * Different types of metadata
  */
 enum metadata_type
-  : uint32_t {
+    : uint32_t {
   /** Metadata for the schema */
-  D_SCHEMA_METADATA = 0,
+      D_SCHEMA_METADATA = 0,
   /** Metadata for the index */
-  D_INDEX_METADATA = 1,
+      D_INDEX_METADATA = 1,
   /** Metadata for filters */
-  D_FILTER_METADATA = 2,
+      D_FILTER_METADATA = 2,
   /** Metadata for aggregates */
-  D_AGGREGATE_METADATA = 3,
+      D_AGGREGATE_METADATA = 3,
   /** Metadata for triggers */
-  D_TRIGGER_METADATA = 4,
+      D_TRIGGER_METADATA = 4,
   /** Metadata for storage mode */
-  D_STORAGE_MODE_METADATA = 5,
+      D_STORAGE_MODE_METADATA = 5,
   /** Metadata for archival mode */
-  D_ARCHIVAL_MODE_METADATA = 6
+      D_ARCHIVAL_MODE_METADATA = 6
 };
 
 /**
@@ -48,28 +48,21 @@ struct index_metadata {
    * @param field_name The field_name to create an index for
    * @param bucket_size The bucket_size for lookup
    */
-  index_metadata(const std::string& field_name, double bucket_size)
-      : field_name_(field_name),
-        bucket_size_(bucket_size) {
-  }
+  index_metadata(const std::string &field_name, double bucket_size);
 
   /**
    * Gets the field name
    *
    * @return The field name for the metadata
    */
-  std::string field_name() const {
-    return field_name_;
-  }
+  std::string field_name() const;
 
   /**
    * Gets the bucket size
    *
    * @return The bucket size used for lookup
    */
-  double bucket_size() const {
-    return bucket_size_;
-  }
+  double bucket_size() const;
 
  private:
   std::string field_name_;
@@ -87,28 +80,21 @@ struct filter_metadata {
    * @param filter_name The name of the filter
    * @param expr The filter expression
    */
-  filter_metadata(const std::string& filter_name, const std::string& expr)
-      : filter_name_(filter_name),
-        expr_(expr) {
-  }
+  filter_metadata(const std::string &filter_name, const std::string &expr);
 
   /**
    * Gets the filter name
    *
    * @return The name of the filter
    */
-  const std::string& filter_name() const {
-    return filter_name_;
-  }
+  const std::string &filter_name() const;
 
   /**
    * Gets the filter expression
    *
    * @return The filter expression
    */
-  const std::string& expr() const {
-    return expr_;
-  }
+  const std::string &expr() const;
 
  private:
   std::string filter_name_;
@@ -127,39 +113,29 @@ struct aggregate_metadata {
    * @param filter_name The name of the associated filter
    * @param expr The expression of the associated filter
    */
-  aggregate_metadata(const std::string& name, const std::string& filter_name,
-                     const std::string& expr)
-      : name_(name),
-        filter_name_(filter_name),
-        expr_(expr) {
-  }
+  aggregate_metadata(const std::string &name, const std::string &filter_name,
+                     const std::string &expr);
 
   /**
    * Gets the name of the aggregate
    *
    * @return The string containing the name of the aggregate
    */
-  const std::string& aggregate_name() const {
-    return name_;
-  }
+  const std::string &aggregate_name() const;
 
   /**
    * Gets the name of the filter
    *
    * @return The filter name
    */
-  const std::string& filter_name() const {
-    return filter_name_;
-  }
+  const std::string &filter_name() const;
 
   /**
    * Gets the aggregate expression
    *
    * @return A string containing the expression for the aggregate
    */
-  const std::string& aggregate_expression() const {
-    return expr_;
-  }
+  const std::string &aggregate_expression() const;
 
  private:
   std::string name_;
@@ -172,47 +148,37 @@ struct aggregate_metadata {
  */
 struct trigger_metadata {
  public:
-     /**
-      * Constructs metadata for the trigger
-      *
-      * @param name The name of the trigger
-      * @param expr The epxression
-      * @param periodicity_ms The periodicity of the trigger measured in
-      * milliseconds
-      */
-  trigger_metadata(const std::string& name, const std::string& expr,
-                   uint64_t periodicity_ms)
-      : name_(name),
-        expr_(expr),
-        periodicity_ms_(periodicity_ms) {
-  }
+  /**
+   * Constructs metadata for the trigger
+   *
+   * @param name The name of the trigger
+   * @param expr The epxression
+   * @param periodicity_ms The periodicity of the trigger measured in
+   * milliseconds
+   */
+  trigger_metadata(const std::string &name, const std::string &expr,
+                   uint64_t periodicity_ms);
 
   /**
    * Gets the name of the trigger
    *
    * @return The trigger name
    */
-  const std::string& trigger_name() const {
-    return name_;
-  }
+  const std::string &trigger_name() const;
 
   /**
    * Gets the expression for the trigger
    *
    * @return The trigger expression
    */
-  const std::string& trigger_expression() const {
-    return expr_;
-  }
+  const std::string &trigger_expression() const;
 
   /**
    * Gets the periodicity of the trigger
    *
    * @return The trigger periodicity in milliseconds
    */
-  uint64_t periodicity_ms() const {
-    return periodicity_ms_;
-  }
+  uint64_t periodicity_ms() const;
 
  private:
   std::string name_;
@@ -224,82 +190,63 @@ struct trigger_metadata {
  * Writer for metadata
  */
 class metadata_writer {
-
  public:
   typedef bool metadata_writer_state;
   static const metadata_writer_state UNINIT = false;
   static const metadata_writer_state INIT = true;
 
-  metadata_writer()
-      : metadata_writer("") {
-    state_ = UNINIT;
-  }
+  /**
+   * Default constructor
+   */
+  metadata_writer();
 
   /**
    * Constructor that initializes metadata writer
    * @param path The path of where the metadata is
    * @param id The id of the storage type 
    */
-  metadata_writer(const std::string& path)
-      : filename_(path + "/metadata"),
-        state_(INIT) {
-    out_.open(filename_);
-  }
+  explicit metadata_writer(const std::string &path);
 
   /**
    * Initializes the schema metadata writer
    *
    * @param schema The schema
    */
-  metadata_writer(const metadata_writer& other)
-      : filename_(other.filename_),
-        state_(other.state_) {
-    out_.close();
-    out_.open(filename_);
-  }
+  metadata_writer(const metadata_writer &other);
 
-  ~metadata_writer() {
-    out_.close();
-  }
+  /**
+   * Destructor
+   */
+  ~metadata_writer();
 
-  metadata_writer& operator=(const metadata_writer& other) {
-    out_.close();
-    filename_ = other.filename_;
-    out_.open(filename_);
-    state_ = other.state_;
-    return *this;
-  }
+  /**
+   * Assignment operator
+   *
+   * @param other A metadata writer instance
+   * @return Updated metadata writer instance
+   */
+  metadata_writer &operator=(const metadata_writer &other);
 
-  void write_storage_mode(const storage::storage_mode mode) {
-    if (state_) {
-      metadata_type type = metadata_type::D_STORAGE_MODE_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, mode);
-      io_utils::flush(out_);
-    }
-  }
+  /**
+   * Write the storage mode
+   *
+   * @param mode Storage mode to write
+   */
+  void write_storage_mode(storage::storage_mode mode);
 
-  void write_archival_mode(const archival::archival_mode mode) {
-    if (state_) {
-      metadata_type type = metadata_type::D_ARCHIVAL_MODE_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, mode);
-      io_utils::flush(out_);
-    }
-  }
+  /**
+   * Write the archival mode
+   *
+   * @param mode Archival mode to write
+   */
+  void write_archival_mode(archival::archival_mode mode);
 
-  void write_schema(const schema_t& schema) {
-    if (state_) {
-      metadata_type type = metadata_type::D_SCHEMA_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, schema.columns().size());
-      for (auto& col : schema.columns()) {
-        io_utils::write(out_, col.name());
-        col.type().serialize(out_);
-      }
-      io_utils::flush(out_);
-    }
-  }
+  /**
+   * Write the schema
+   *
+   * @param schema The schema to write
+   */
+  void write_schema(const schema_t &schema);
 
   /**
    * Writes metadata about an index
@@ -307,15 +254,7 @@ class metadata_writer {
    * @param name The name of the index
    * @param bucket_size The bucket_size used for lookup
    */
-  void write_index_metadata(const std::string& name, double bucket_size) {
-    if (state_) {
-      metadata_type type = metadata_type::D_INDEX_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, name);
-      io_utils::write(out_, bucket_size);
-      io_utils::flush(out_);
-    }
-  }
+  void write_index_metadata(const std::string &name, double bucket_size);
 
   /**
    * Writes the metadata for a specified filter
@@ -323,15 +262,7 @@ class metadata_writer {
    * @param name The name of the filter
    * @param expr The filter expression
    */
-  void write_filter_metadata(const std::string& name, const std::string& expr) {
-    if (state_) {
-      metadata_type type = metadata_type::D_FILTER_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, name);
-      io_utils::write(out_, expr);
-      io_utils::flush(out_);
-    }
-  }
+  void write_filter_metadata(const std::string &name, const std::string &expr);
 
   /**
    * Writes the metadata for aggregates
@@ -340,18 +271,7 @@ class metadata_writer {
    * @param filter_name The name of the filter
    * @param expr The filter expression
    */
-  void write_aggregate_metadata(const std::string& name,
-                                const std::string& filter_name,
-                                const std::string& expr) {
-    if (state_) {
-      metadata_type type = metadata_type::D_AGGREGATE_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, name);
-      io_utils::write(out_, filter_name);
-      io_utils::write(out_, expr);
-      io_utils::flush(out_);
-    }
-  }
+  void write_aggregate_metadata(const std::string &name, const std::string &filter_name, const std::string &expr);
 
   /**
    * Writes metadata for triggers
@@ -361,19 +281,9 @@ class metadata_writer {
    * @param periodicity_ms The periodicity of the trigger measured in
    * milliseconds
    */
-  void write_trigger_metadata(const std::string& trigger_name,
-                              const std::string& trigger_expr,
-                              const uint64_t periodicity_ms) {
-    if (filename_ != "/metadata") {
-      metadata_type type = metadata_type::D_TRIGGER_METADATA;
-      io_utils::write(out_, type);
-      io_utils::write(out_, trigger_name);
-      io_utils::write(out_, trigger_expr);
-      io_utils::write(out_, periodicity_ms);
-      io_utils::flush(out_);
-    }
-  }
-
+  void write_trigger_metadata(const std::string &trigger_name,
+                              const std::string &trigger_expr,
+                              uint64_t periodicity_ms);
  private:
   std::string filename_;
   std::ofstream out_;
@@ -390,93 +300,70 @@ class metadata_reader {
    *
    * @param path The path of the file to read the metadata from
    */
-  metadata_reader(const std::string& path)
-      : filename_(path + "/metadata"),
-        in_(filename_) {
-  }
+  explicit metadata_reader(const std::string &path);
 
-  bool has_next() {
-    return !in_.eof();
-  }
+  /**
+   * Checks if the reader has another element to read
+   *
+   * @return True if the reader has another element, otherwise false.
+   */
+  bool has_next();
 
   /**
    * Reads the next metadata type
    *
    * @return The metadata type that was read
    */
-  metadata_type next_type() {
-    return io_utils::read<metadata_type>(in_);
-  }
+  metadata_type next_type();
 
   /**
    * Reads the next schema
    *
    * @return The schema that was read
    */
-  schema_t next_schema() {
-    size_t ncolumns = io_utils::read<size_t>(in_);
-    schema_builder builder;
-    for (size_t i = 0; i < ncolumns; i++) {
-      std::string name = io_utils::read<std::string>(in_);
-      data_type type = data_type::deserialize(in_);
-      builder.add_column(type, name);
-    }
-    return schema_t(builder.get_columns());
-  }
+  schema_t next_schema();
 
   /**
    * Reads the next metadata for an index
    *
    * @return The index metadata that was read
    */
-  index_metadata next_index_metadata() {
-    std::string field_name = io_utils::read<std::string>(in_);
-    double bucket_size = io_utils::read<double>(in_);
-    return index_metadata(field_name, bucket_size);
-  }
+  index_metadata next_index_metadata();
 
   /**
    * Reads the next metadata for a filter
    *
    * @return The filter metadata that was read
    */
-  filter_metadata next_filter_metadata() {
-    std::string filter_name = io_utils::read<std::string>(in_);
-    std::string expr = io_utils::read<std::string>(in_);
-    return filter_metadata(filter_name, expr);
-  }
+  filter_metadata next_filter_metadata();
 
   /**
    * Reads the next metadata for an aggregate
    *
    * @return The aggregate metadata that was read
    */
-  aggregate_metadata next_aggregate_metadata() {
-    std::string name = io_utils::read<std::string>(in_);
-    std::string filter_name = io_utils::read<std::string>(in_);
-    std::string expr = io_utils::read<std::string>(in_);
-    return aggregate_metadata(name, filter_name, expr);
-  }
+  aggregate_metadata next_aggregate_metadata();
 
   /**
    * Reads the next metadata for a trigger
    *
    * @return The trigger metadata that was read
    */
-  trigger_metadata next_trigger_metadata() {
-    std::string trigger_name = io_utils::read<std::string>(in_);
-    std::string trigger_expr = io_utils::read<std::string>(in_);
-    uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
-    return trigger_metadata(trigger_name, trigger_expr, periodicity_ms);
-  }
+  trigger_metadata next_trigger_metadata();
 
-  storage::storage_mode next_storage_mode() {
-    return io_utils::read<storage::storage_mode>(in_);
-  }
+  /**
+   * Reads the next storage mode
+   *
+   * @return The next storage mode
+   */
+  storage::storage_mode next_storage_mode();
 
-  archival::archival_mode next_archival_mode() {
-    return io_utils::read<archival::archival_mode>(in_);
-  }
+  /**
+   * Reads the next archival mode
+   *
+   * @return The next archival mode
+   */
+  archival::archival_mode next_archival_mode();
 
  private:
   std::string filename_;

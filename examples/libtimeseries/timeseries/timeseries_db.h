@@ -8,17 +8,18 @@ namespace confluo {
 
 class timeseries_db : public atomic_multilog {
  public:
-  timeseries_db(const std::string& name, const std::vector<column_t>& schema,
-                const std::string& path, const storage::storage_mode& storage,
-                task_pool& task_pool)
+  timeseries_db(const std::string &name,
+                const std::vector<column_t> &schema,
+                const std::string &path,
+                const storage::storage_mode &storage,
+                task_pool &task_pool)
       : atomic_multilog(name, schema, path, storage, archival_mode::OFF, task_pool) {
     // Index the timestamp column by calling add_index
     add_index("TIMESTAMP");
   }
 
-  void get_range(std::vector<record_t>& out, int64_t ts1, int64_t ts2) {
-    std::string expr = "TIMESTAMP >= " + std::to_string(ts1)
-        + " && TIMESTAMP <= " + std::to_string(ts2);
+  void get_range(std::vector<record_t> &out, int64_t ts1, int64_t ts2) {
+    std::string expr = "TIMESTAMP >= " + std::to_string(ts1) + " && TIMESTAMP <= " + std::to_string(ts2);
     for (auto r = execute_filter(expr); r->has_more(); r->advance()) {
       out.push_back(r->get());
     }
@@ -42,8 +43,7 @@ class timeseries_db : public atomic_multilog {
     }
   }
 
-  void compute_diff(std::vector<record_t>& pts, uint64_t from_version,
-                    uint64_t to_version) {
+  void compute_diff(std::vector<record_t> &pts, uint64_t from_version, uint64_t to_version) {
     for (uint64_t v = from_version; v < to_version; v += record_size()) {
       read_only_data_log_ptr ptr;
       read(v, ptr);

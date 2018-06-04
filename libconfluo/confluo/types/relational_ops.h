@@ -12,8 +12,8 @@ namespace confluo {
  * Relational operators
  */
 enum reational_op_id
-  : uint8_t {
-    LT = 0,  //!< LT
+    : uint8_t {
+  LT = 0,  //!< LT
   LE = 1,  //!< LE
   GT = 2,  //!< GT
   GE = 3,  //!< GE
@@ -22,7 +22,7 @@ enum reational_op_id
 };
 
 /** A relational comparison between two immutable values */
-typedef bool (*relational_op_t)(const immutable_raw_data& v1, const immutable_raw_data& v2);
+typedef bool (*relational_op_t)(const immutable_raw_data &v1, const immutable_raw_data &v2);
 
 /** A vector of relational comparison functions */
 typedef std::vector<relational_op_t> rel_ops_t;
@@ -38,7 +38,7 @@ typedef std::vector<relational_op_t> rel_ops_t;
  * false otherwise
  */
 template<typename T>
-inline bool less_than(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool less_than(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<T>() < v2.as<T>();
 }
 
@@ -56,7 +56,7 @@ inline bool less_than(const immutable_raw_data& v1, const immutable_raw_data& v2
  * false otherwise
  */
 template<>
-inline bool less_than<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool less_than<void>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "< not supported for none type");
 }
 
@@ -74,7 +74,7 @@ inline bool less_than<void>(const immutable_raw_data& v1, const immutable_raw_da
  * false otherwise
  */
 template<typename T>
-inline bool less_than_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool less_than_equals(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<T>() <= v2.as<T>();
 }
 
@@ -91,7 +91,7 @@ inline bool less_than_equals(const immutable_raw_data& v1, const immutable_raw_d
  * @throw unsupported_exception This operation is not defined for void types
  */
 template<>
-inline bool less_than_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool less_than_equals<void>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "<= not supported for none type");
 }
 
@@ -106,7 +106,7 @@ inline bool less_than_equals<void>(const immutable_raw_data& v1, const immutable
  * second, false otherwise
  */
 template<typename T>
-inline bool greater_than(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool greater_than(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<T>() > v2.as<T>();
 }
 
@@ -124,7 +124,7 @@ inline bool greater_than(const immutable_raw_data& v1, const immutable_raw_data&
  * void type
  */
 template<>
-inline bool greater_than<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool greater_than<void>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "> not supported for none type");
 }
 
@@ -139,7 +139,7 @@ inline bool greater_than<void>(const immutable_raw_data& v1, const immutable_raw
  * equal to the second, false otherwise
  */
 template<typename T>
-inline bool greater_than_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool greater_than_equals(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<T>() >= v2.as<T>();
 }
 
@@ -157,7 +157,7 @@ inline bool greater_than_equals(const immutable_raw_data& v1, const immutable_ra
  * void type
  */
 template<>
-inline bool greater_than_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool greater_than_equals<void>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, ">= not supported for none type");
 }
 
@@ -172,7 +172,7 @@ inline bool greater_than_equals<void>(const immutable_raw_data& v1, const immuta
  * second, false otherwise
  */
 template<typename T>
-inline bool equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool equals(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<T>() == v2.as<T>();
 }
 
@@ -190,7 +190,7 @@ inline bool equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
  * second, false otherwise
  */
 template<>
-inline bool equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool equals<void>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "== not supported for none type");
 }
 
@@ -205,7 +205,7 @@ inline bool equals<void>(const immutable_raw_data& v1, const immutable_raw_data&
  * second, false otherwise
  */
 template<typename T>
-inline bool not_equals(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool not_equals(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   return v1.as<T>() != v2.as<T>();
 }
 
@@ -223,7 +223,7 @@ inline bool not_equals(const immutable_raw_data& v1, const immutable_raw_data& v
  * second, false otherwise
  */
 template<>
-inline bool not_equals<void>(const immutable_raw_data& v1, const immutable_raw_data& v2) {
+inline bool not_equals<void>(const immutable_raw_data &v1, const immutable_raw_data &v2) {
   THROW(unsupported_exception, "!= not supported for none type");
 }
 
@@ -235,9 +235,9 @@ inline bool not_equals<void>(const immutable_raw_data& v1, const immutable_raw_d
  * @return A vector of relation operator function pointers
  */
 template<typename T>
-static rel_ops_t init_relops() {
+inline rel_ops_t init_relops() {
   return {less_than<T>, less_than_equals<T>, greater_than<T>,
-    greater_than_equals<T>, equals<T>, not_equals<T>};
+          greater_than_equals<T>, equals<T>, not_equals<T>};
 }
 
 /**
@@ -251,7 +251,7 @@ class relop_utils {
    * @param op String operator
    * @return relop_id enum
    */
-  static reational_op_id str_to_op(const std::string& op) {
+  static reational_op_id str_to_op(const std::string &op) {
     if (op == "==") {
       return reational_op_id::EQ;
     } else if (op == "!=") {
@@ -275,20 +275,14 @@ class relop_utils {
    * @param op relop_id enum
    * @return String representation of operator
    */
-  static std::string op_to_str(const reational_op_id& op) {
+  static std::string op_to_str(const reational_op_id &op) {
     switch (op) {
-      case reational_op_id::EQ:
-        return "==";
-      case reational_op_id::NEQ:
-        return "!=";
-      case reational_op_id::LT:
-        return "<";
-      case reational_op_id::GT:
-        return ">";
-      case reational_op_id::LE:
-        return "<=";
-      case reational_op_id::GE:
-        return ">=";
+      case reational_op_id::EQ:return "==";
+      case reational_op_id::NEQ:return "!=";
+      case reational_op_id::LT:return "<";
+      case reational_op_id::GT:return ">";
+      case reational_op_id::LE:return "<=";
+      case reational_op_id::GE:return ">=";
     }
     return "INVALID";
   }

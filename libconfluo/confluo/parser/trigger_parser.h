@@ -8,6 +8,8 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 
+#include "exceptions.h"
+
 namespace confluo {
 namespace parser {
 
@@ -29,8 +31,8 @@ struct parsed_trigger {
 BOOST_FUSION_ADAPT_STRUCT(
     confluo::parser::parsed_trigger,
     (std::string, aggregate_name)
-    (std::string, relop)
-    (std::string, threshold))
+        (std::string, relop)
+        (std::string, threshold))
 
 namespace confluo {
 namespace parser {
@@ -80,21 +82,7 @@ class trigger_parser : public qi::grammar<I, ascii::space_type, parsed_trigger()
  *
  * @return A parsed trigger
  */
-parsed_trigger parse_trigger(const std::string& t) {
-  using boost::spirit::ascii::space;
-  typedef std::string::const_iterator iterator_type;
-  typedef trigger_parser<iterator_type> grammar;
-  grammar g;
-  std::string::const_iterator iter = t.begin();
-  std::string::const_iterator end = t.end();
-  parsed_trigger pt;
-  bool r = phrase_parse(iter, end, g, space, pt);
-  if (iter != end || !r) {
-    std::string rest(iter, end);
-    throw parse_exception(std::string("Parse failed at ") + rest);
-  }
-  return pt;
-}
+parsed_trigger parse_trigger(const std::string &t);
 
 }
 }

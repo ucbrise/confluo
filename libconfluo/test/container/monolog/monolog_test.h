@@ -15,7 +15,7 @@ class MonoLogTest : public testing::Test {
   const uint64_t kArraySize = (1024ULL * 1024ULL);  // 1 KBytes
 
   template<typename DS>
-  void monolog_test(DS& ds) {
+  void monolog_test(DS &ds) {
     for (uint64_t i = 0; i < kArraySize; i++) {
       ds.set(i, i % 256);
     }
@@ -26,7 +26,7 @@ class MonoLogTest : public testing::Test {
   }
 
   template<typename DS>
-  void monolog_test_mt(DS& ds, uint32_t num_threads) {
+  void monolog_test_mt(DS &ds, uint32_t num_threads) {
     std::vector<std::thread> workers;
     for (uint32_t i = 1; i <= num_threads; i++) {
       workers.push_back(std::thread([i, &ds, this] {
@@ -36,7 +36,7 @@ class MonoLogTest : public testing::Test {
       }));
     }
 
-    for (std::thread& worker : workers) {
+    for (std::thread &worker : workers) {
       worker.join();
     }
 
@@ -72,7 +72,7 @@ TEST_F(MonoLogTest, MonoLogExp2BaseReadWriteTest) {
   array.set(0, data, 3);
 
   int buffer[3];
-  const int* result = array.ptr(0);
+  const int *result = array.ptr(0);
   for (size_t i = 0; i < 3; i++) {
     ASSERT_EQ(data[i], *(result + i));
   }

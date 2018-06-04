@@ -7,7 +7,7 @@
 namespace confluo {
 
 /** Function pointer for the aggregation function */
-using aggregate_fn = numeric (*)(const numeric& v1, const numeric& v2);
+using aggregate_fn = numeric (*)(const numeric &v1, const numeric &v2);
 
 /**
  * Encapsulation of an aggregate and zero function
@@ -26,17 +26,13 @@ struct aggregator {
 };
 
 // Standard aggregates: sum, min, max, count
-static numeric count_one(UINT64_C(1));
-
 /**
  * Sums two numerics
  * @param a First numeric
  * @param b Second numeric
  * @return The sum of the two numerics
  */
-inline numeric sum_agg(const numeric& a, const numeric& b) {
-  return a + b;
-}
+numeric sum_agg(const numeric &a, const numeric &b);
 
 /**
  * Finds the min of two numerics
@@ -44,9 +40,7 @@ inline numeric sum_agg(const numeric& a, const numeric& b) {
  * @param b Second numeric
  * @return The minimum of the two numerics
  */
-inline numeric min_agg(const numeric& a, const numeric& b) {
-  return a < b ? a : b;
-}
+numeric min_agg(const numeric &a, const numeric &b);
 
 /**
  * Finds the max of two numerics
@@ -54,57 +48,91 @@ inline numeric min_agg(const numeric& a, const numeric& b) {
  * @param b Second numeric
  * @return The maximum of the two numerics
  */
-inline numeric max_agg(const numeric& a, const numeric& b) {
-  return a < b ? b : a;
-}
+numeric max_agg(const numeric &a, const numeric &b);
 
 /**
  * Counts the numerics (equivalent to sum)
- * @param a First numeric 
+ * @param a First numeric
  * @param b Second numeric
  * @return The sum of the two numerics
  */
-inline numeric count_agg(const numeric& a, const numeric& b) {
-  return a + count_one;
-}
+numeric count_agg(const numeric &a, const numeric &b);
 
 /**
  * Throws an exception for an invalid aggregate operation
- * @param a First numeric 
+ * @param a First numeric
  * @param b Second numeric
  */
-inline numeric invalid_agg(const numeric& a, const numeric& b) {
-  throw invalid_operation_exception("Invalid aggregation performed.");
-}
+numeric invalid_agg(const numeric &a, const numeric &b);
 
-/**
- * The invalid aggregator
- */
-static aggregator invalid_aggregator = { "invalid", invalid_agg, invalid_agg,
-    NONE_TYPE, numeric() };
-/**
- * The sum aggregator
- */
-static aggregator sum_aggregator = { "sum", sum_agg, sum_agg, DOUBLE_TYPE,
-    numeric(DOUBLE_TYPE, DOUBLE_TYPE.zero()) };
-/**
- * The min aggregator
- */
-static aggregator min_aggregator = { "min", min_agg, min_agg, DOUBLE_TYPE,
-    numeric(DOUBLE_TYPE, DOUBLE_TYPE.max()) };
-/**
- * The max aggregator
- */
-static aggregator max_aggregator = { "max", max_agg, max_agg, DOUBLE_TYPE,
-    numeric(DOUBLE_TYPE, DOUBLE_TYPE.min()) };
-static aggregator count_aggregator = { "count", count_agg, sum_agg, ULONG_TYPE,
-    numeric(ULONG_TYPE, ULONG_TYPE.zero()) };
+class aggregators {
+ public:
+  static numeric &count_one() {
+    static numeric count_one(UINT64_C(1));
+    return count_one;
+  }
 
-/**
- * A vector containing the aggregators
- */
-static std::vector<aggregator> AGGREGATORS { invalid_aggregator, sum_aggregator,
-    min_aggregator, max_aggregator, count_aggregator };
+  static aggregator &invalid_aggregator() {
+    static aggregator agg{"invalid", invalid_agg, invalid_agg, data_type(0, 0), numeric()};
+    return agg;
+  }
+
+  static aggregator &sum_aggregator() {
+    static aggregator agg{"sum", sum_agg, sum_agg, primitive_types::DOUBLE_TYPE(),
+                          numeric(primitive_types::DOUBLE_TYPE(), primitive_types::DOUBLE_TYPE().zero())};
+    return agg;
+  }
+
+  static aggregator &min_aggregator() {
+    static aggregator agg{"min", min_agg, min_agg, primitive_types::DOUBLE_TYPE(),
+                          numeric(primitive_types::DOUBLE_TYPE(), primitive_types::DOUBLE_TYPE().max())};
+    return agg;
+  }
+
+  static aggregator &max_aggregator() {
+    static aggregator agg{"max", max_agg, max_agg, primitive_types::DOUBLE_TYPE(),
+                          numeric(primitive_types::DOUBLE_TYPE(), primitive_types::DOUBLE_TYPE().min())};
+    return agg;
+  }
+
+  static aggregator &count_aggregator() {
+    static aggregator agg{"count", count_agg, sum_agg, primitive_types::ULONG_TYPE(),
+                          numeric(primitive_types::ULONG_TYPE(), primitive_types::ULONG_TYPE().zero())};
+    return agg;
+  }
+
+  static aggregators &instance() {
+    static aggregators instance;
+    return instance;
+  }
+
+  aggregator const &at(size_t i) const {
+    return aggregators_[i];
+  }
+
+  aggregator &operator[](size_t i) {
+    return aggregators_[i];
+  }
+
+  void push_back(const aggregator &agg) {
+    aggregators_.push_back(agg);
+  }
+
+  void push_back(aggregator &&agg) {
+    aggregators_.push_back(std::move(agg));
+  }
+
+  size_t size() const {
+    return aggregators_.size();
+  }
+
+ private:
+  aggregators() : aggregators_{aggregators::invalid_aggregator(), aggregators::sum_aggregator(),
+                               aggregators::min_aggregator(), aggregators::max_aggregator(),
+                               aggregators::count_aggregator()} {}
+
+  std::vector<aggregator> aggregators_;
+};
 
 /** The type of aggregate */
 typedef size_t aggregate_type;
@@ -116,16 +144,7 @@ typedef size_t aggregate_type;
  *
  * @return The matching aggregator
  */
-aggregate_type find_aggregator_id(const std::string& name) {
-  std::string uname = utils::string_utils::to_upper(name);
-  for (unsigned int i = 0; i < AGGREGATORS.size(); i++) {
-    std::string aname = utils::string_utils::to_upper(AGGREGATORS[i].name);
-    if (uname.compare(aname) == 0) {
-      return i;
-    }
-  }
-  return 0;
-}
+aggregate_type find_aggregator_id(const std::string &name);
 
 }
 

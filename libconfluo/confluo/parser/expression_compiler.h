@@ -15,57 +15,43 @@ namespace spirit = boost::spirit;
  * from the expression.
  */
 struct compiled_predicate {
-   /**
-     * Constructs a predicate from the specified fields
-     *
-     * @param attr The field of the predicate
-     * @param op The operator of the predicate
-     * @param value The value of the predicate
-     * @param s The schema which contains the attribute
-     */
-  compiled_predicate(const std::string& attr, int op, const std::string& value,
-                     const schema_t& s)
-      : field_name_(s[attr].name()),
-        field_idx_(s[attr].idx()),
-        op_(static_cast<reational_op_id>(op)),
-        val_(mutable_value::parse(value, s[attr].type())) {
-  }
+  /**
+    * Constructs a predicate from the specified fields
+    *
+    * @param attr The field of the predicate
+    * @param op The operator of the predicate
+    * @param value The value of the predicate
+    * @param s The schema which contains the attribute
+    */
+  compiled_predicate(const std::string &attr, int op, const std::string &value, const schema_t &s);
 
   /**
    * Gets the field name
    *
    * @return A string containing the field name
    */
-  inline std::string const& field_name() const {
-    return field_name_;
-  }
+  std::string const &field_name() const;
 
   /**
    * Gets the index of the field
    *
    * @return The index of the field
    */
-  inline uint32_t field_idx() const {
-    return field_idx_;
-  }
+  uint32_t field_idx() const;
 
   /**
    * Gets the relational operator
    *
    * @return The identifier for the relational operator
    */
-  inline reational_op_id op() const {
-    return op_;
-  }
+  reational_op_id op() const;
 
   /**
    * Gets the immutable value for the predicate
    *
    * @return The immutable value in the compiled predicate
    */
-  inline immutable_value const& value() const {
-    return val_;
-  }
+  immutable_value const &value() const;
 
   /**
    * Performs the relational operation on the value and the specified
@@ -75,9 +61,7 @@ struct compiled_predicate {
    *
    * @return True if the relational operation is true, false otherwise
    */
-  inline bool test(const record_t& r) const {
-    return immutable_value::relop(op_, r[field_idx_].value(), val_);
-  }
+  bool test(const record_t &r) const;
 
   /**
    * Performs the relational operation on the value and the specified
@@ -88,18 +72,14 @@ struct compiled_predicate {
    *
    * @return True if the relational operation is true, false otherwise
    */
-  inline bool test(const schema_snapshot& snap, void* data) const {
-    return immutable_value::relop(op_, snap.get(data, field_idx_), val_);
-  }
+  bool test(const schema_snapshot &snap, void *data) const;
 
   /**
    * Gets a string representation of the compiled predicate
    *
    * @return A string containing the contents of the predicate
    */
-  inline std::string to_string() const {
-    return field_name_ + relop_utils::op_to_str(op_) + val_.to_string();
-  }
+  std::string to_string() const;
 
   /**
    * The less than operator that compares this compiled predicate to
@@ -110,9 +90,7 @@ struct compiled_predicate {
    * @return True if this compiled predicate is less than the other
    * compiled predicate, false otherwise
    */
-  inline bool operator<(const compiled_predicate& other) const {
-    return to_string() < other.to_string();
-  }
+  bool operator<(const compiled_predicate &other) const;
 
  private:
   std::string field_name_;
@@ -130,18 +108,14 @@ struct compiled_minterm : public std::set<compiled_predicate> {
    *
    * @param p The predicate to add
    */
-  inline void add(const compiled_predicate& p) {
-    insert(p);
-  }
+  void add(const compiled_predicate &p);
 
   /**
    * Adds a r value compiled predicate to the compiled minterm
    *
    * @param p The r value predicate to add to the minterm
    */
-  inline void add(compiled_predicate&& p) {
-    insert(std::move(p));
-  }
+  void add(compiled_predicate &&p);
 
   /**
    * Tests every predicate in the set against the record
@@ -150,12 +124,7 @@ struct compiled_minterm : public std::set<compiled_predicate> {
    *
    * @return True if all of the predicates tests are true, false otherwise
    */
-  inline bool test(const record_t& r) const {
-    for (auto& p : *this)
-      if (!p.test(r))
-        return false;
-    return true;
-  }
+  bool test(const record_t &r) const;
 
   /**
    * Tests every predicate against the data in the schema snapshot
@@ -165,28 +134,14 @@ struct compiled_minterm : public std::set<compiled_predicate> {
    *
    * @return True if all of the predicates tests are true, false otherwise
    */
-  inline bool test(const schema_snapshot& snap, void* data) const {
-    for (auto& p : *this)
-      if (!p.test(snap, data))
-        return false;
-    return true;
-  }
+  bool test(const schema_snapshot &snap, void *data) const;
 
   /**
    * Gets a string representation of the compiled minterm
    *
    * @return A string with the contents of the compiled minterm
    */
-  std::string to_string() const {
-    std::string s = "";
-    size_t i = 0;
-    for (auto& p : *this) {
-      s += p.to_string();
-      if (++i < size())
-        s += " and ";
-    }
-    return s;
-  }
+  std::string to_string() const;
 
   /**
    * Performs a less than comparison with another compiled minterm
@@ -196,32 +151,21 @@ struct compiled_minterm : public std::set<compiled_predicate> {
    * @return True if this compiled minterm is less than the other compiled
    * minterm, false otherwise
    */
-  inline bool operator<(const compiled_minterm& other) const {
-    return to_string() < other.to_string();
-  }
+  bool operator<(const compiled_minterm &other) const;
 };
 
 /**
  * A set of compiled minterms. Manages a grouping of minterms
  */
 struct compiled_expression : public std::set<compiled_minterm> {
-    /**
-     * Tests every compiled minterm in the set against a record
-     *
-     * @param r The record to test against
-     *
-     * @return True if every compiled minterm test is true, false otherwise
-     */
-  inline bool test(const record_t& r) const {
-    if (empty())
-      return true;
-
-    for (auto& p : *this)
-      if (p.test(r))
-        return true;
-
-    return false;
-  }
+  /**
+   * Tests every compiled minterm in the set against a record
+   *
+   * @param r The record to test against
+   *
+   * @return True if every compiled minterm test is true, false otherwise
+   */
+  bool test(const record_t &r) const;
 
   /**
    * Tests every compiled minterm against the data from the schema snapshot
@@ -232,33 +176,14 @@ struct compiled_expression : public std::set<compiled_minterm> {
    * @return True if the all of the compiled minterm tests are true, false
    * otherwise
    */
-  inline bool test(const schema_snapshot& snap, void* data) const {
-    if (empty())
-      return true;
-
-    for (auto& p : *this)
-      if (p.test(snap, data))
-        return true;
-
-    return false;
-  }
+  bool test(const schema_snapshot &snap, void *data) const;
 
   /**
    * Gets a string representation of the compiled expression
    *
    * @return The contents of the compiled expression in string form
    */
-  std::string to_string() const {
-    std::string ret = "";
-    size_t s = size();
-    size_t i = 0;
-    for (auto& p : *this) {
-      ret += p.to_string();
-      if (++i < s - 1)
-        ret += " or ";
-    }
-    return ret;
-  }
+  std::string to_string() const;
 };
 
 /**
@@ -275,10 +200,7 @@ class utree_expand_conjunction {
    * @param m The compiled minterm
    * @param schema The schema for the monolog
    */
-  utree_expand_conjunction(const compiled_minterm& m, const schema_t& schema)
-      : m_(m),
-        schema_(schema) {
-  }
+  utree_expand_conjunction(const compiled_minterm &m, const schema_t &schema);
 
   /**
    * Operation for all types exception functions
@@ -296,9 +218,7 @@ class utree_expand_conjunction {
    * @throw parse_exception Functions are not supported
    * @return The result
    */
-  result_type operator()(spirit::function_base const&) const {
-    throw parse_exception("Functions not supported");
-  }
+  result_type operator()(spirit::function_base const &) const;
 
   /**
    * Operation for an iterator range
@@ -309,7 +229,7 @@ class utree_expand_conjunction {
    * @return The result
    */
   template<typename Iterator>
-  result_type operator()(boost::iterator_range<Iterator> const& range) const {
+  result_type operator()(boost::iterator_range<Iterator> const &range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
     result_type e;
     iterator i = range.begin();
@@ -338,7 +258,7 @@ class utree_expand_conjunction {
       case and_or::AND: {
         compiled_expression lor = spirit::utree::visit(*(++i), *this);
         auto r = *(++i);
-        for (auto& lor_m : lor) {
+        for (auto &lor_m : lor) {
           result_type tmp = spirit::utree::visit(
               r, utree_expand_conjunction(lor_m, schema_));
           std::set_union(e.begin(), e.end(), tmp.begin(), tmp.end(),
@@ -354,8 +274,8 @@ class utree_expand_conjunction {
   }
 
  private:
-  const compiled_minterm& m_;
-  const schema_t& schema_;
+  const compiled_minterm &m_;
+  const schema_t &schema_;
 };
 
 /**
@@ -372,9 +292,7 @@ class utree_compile_expression {
    *
    * @param schema The schema used to initialize the compiled expression
    */
-  utree_compile_expression(const schema_t& schema)
-      : schema_(schema) {
-  }
+  utree_compile_expression(const schema_t &schema);
 
   /**
    * () operator that evaluates the compiled expression
@@ -392,9 +310,7 @@ class utree_compile_expression {
    * @throw parse_exception
    * @return The result of the operator
    */
-  result_type operator()(spirit::function_base const&) const {
-    throw parse_exception("Functions not supported");
-  }
+  result_type operator()(spirit::function_base const &) const;
 
   /**
    * () operator that evaluates the compiled expression
@@ -405,7 +321,7 @@ class utree_compile_expression {
    * @return The result of evaluating the expression
    */
   template<typename Iterator>
-  result_type operator()(boost::iterator_range<Iterator> const& range) const {
+  result_type operator()(boost::iterator_range<Iterator> const &range) const {
     typedef typename boost::iterator_range<Iterator>::const_iterator iterator;
     result_type e;
     iterator i = range.begin();
@@ -434,7 +350,7 @@ class utree_compile_expression {
       case and_or::AND: {
         result_type left = spirit::utree::visit(*(++i), *this);
         auto r = *(++i);
-        for (auto& m : left) {
+        for (auto &m : left) {
           result_type tmp = spirit::utree::visit(
               r, utree_expand_conjunction(m, schema_));
           std::set_union(e.begin(), e.end(), tmp.begin(), tmp.end(),
@@ -450,7 +366,7 @@ class utree_compile_expression {
   }
 
  private:
-  const schema_t& schema_;
+  const schema_t &schema_;
 };
 
 /**
@@ -461,10 +377,7 @@ class utree_compile_expression {
  *
  * @return Compiled expression containing the result of evaluation
  */
-static compiled_expression compile_expression(const spirit::utree& e,
-                                              const schema_t& schema) {
-  return spirit::utree::visit(e, utree_compile_expression(schema));
-}
+compiled_expression compile_expression(const spirit::utree &e, const schema_t &schema);
 
 }
 }

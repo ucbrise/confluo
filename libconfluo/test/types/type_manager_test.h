@@ -59,13 +59,6 @@ class TypeManagerTest : public testing::Test {
   static data_type addr_type;
   static data_type sz_type;
 
-  static void generate_bytes(uint8_t* buf, size_t len, uint64_t val) {
-    uint8_t val_uint8 = (uint8_t) (val % 256);
-    for (uint32_t i = 0; i < len; i++) {
-      buf[i] = val_uint8;
-    }
-  }
-
   struct rec {
     int64_t ts;
     ip_address a;
@@ -75,21 +68,18 @@ class TypeManagerTest : public testing::Test {
 
   static rec r;
 
-  static void* record(ip_address a, ip_address b, size_type c) {
+  static void *record(ip_address a, ip_address b, size_type c) {
     int64_t ts = utils::time_utils::cur_ns();
     r = {ts, a, b, c};
-    return reinterpret_cast<void*>(&r);
+    return reinterpret_cast<void *>(&r);
   }
 
-  static void compile(compiled_expression& cexp, const std::string& exp,
-                      const schema_t& schema) {
+  static void compile(compiled_expression &cexp, const std::string &exp, const schema_t &schema) {
     auto t = parse_expression(exp);
     cexp = compile_expression(t, schema);
   }
 
-  static compiled_predicate predicate(const std::string& attr,
-                                      reational_op_id id,
-                                      const std::string& value) {
+  static compiled_predicate predicate(const std::string &attr, reational_op_id id, const std::string &value) {
     return compiled_predicate(attr, id, value, schema());
   }
 
@@ -112,10 +102,10 @@ std::vector<column_t> TypeManagerTest::s = schema();
 task_pool TypeManagerTest::MGMT_POOL;
 
 TEST_F(TypeManagerTest, RegisterTest) {
-  ASSERT_EQ(limits::int_one, *reinterpret_cast<int*>(addr_type.one()));
-  ASSERT_EQ(limits::int_min, *reinterpret_cast<int*>(addr_type.min()));
-  ASSERT_EQ(limits::int_max, *reinterpret_cast<int*>(addr_type.max()));
-  ASSERT_EQ(limits::int_zero, *reinterpret_cast<int*>(addr_type.zero()));
+  ASSERT_EQ(limits::int_one, *reinterpret_cast<int *>(addr_type.one()));
+  ASSERT_EQ(limits::int_min, *reinterpret_cast<int *>(addr_type.min()));
+  ASSERT_EQ(limits::int_max, *reinterpret_cast<int *>(addr_type.max()));
+  ASSERT_EQ(limits::int_zero, *reinterpret_cast<int *>(addr_type.zero()));
   ASSERT_STREQ("ip_address", addr_type.name().c_str());
   ASSERT_EQ(13, confluo::type_manager::get_type("ip_address").id);
   ASSERT_STREQ("ip_address", s[1].type().name().c_str());
@@ -132,25 +122,19 @@ TEST_F(TypeManagerTest, FilterTest) {
   dtable.add_index("b");
   dtable.add_index("c");
 
-  dtable.append(
-      record(ip_address(52), ip_address(42), size_type::from_string("1024b")));
-  dtable.append(
-      record(ip_address(50), ip_address(300), size_type::from_string("1kb")));
+  dtable.append(record(ip_address(52), ip_address(42), size_type::from_string("1024b")));
+  dtable.append(record(ip_address(50), ip_address(300), size_type::from_string("1kb")));
 
   size_t i = 0;
-  for (auto r = dtable.execute_filter("a > 0.0.0.3"); r->has_more();
-      r->advance()) {
+  for (auto r = dtable.execute_filter("a > 0.0.0.3"); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(1).value().as<ip_address>().get_address() > 33);
     i++;
   }
   ASSERT_EQ(2, i);
 
   i = 0;
-  for (auto r = dtable.execute_filter("c == 1kb"); r->has_more();
-      r->advance()) {
-    ASSERT_TRUE(
-        r->get().at(3).value().as<size_type>().get_bytes()
-            == static_cast<uint64_t>(1024));
+  for (auto r = dtable.execute_filter("c == 1kb"); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(3).value().as<size_type>().get_bytes() == static_cast<uint64_t>(1024));
     i++;
   }
 
@@ -271,9 +255,7 @@ TEST_F(TypeManagerTest, CompilerTest) {
   cexp.insert(m5);
   cexp.insert(m6);
 
-  ASSERT_STREQ(
-      "A==ip_address(4.4.4.4) or B>ip_address(0.0.0.7)C==size_type(4096b)",
-      cexp.to_string().c_str());
+  ASSERT_STREQ("A==ip_address(4.4.4.4) or B>ip_address(0.0.0.7)C==size_type(4096b)", cexp.to_string().c_str());
 
 }
 
@@ -290,7 +272,7 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(0, schema_vec[0].idx());
   ASSERT_EQ(0, schema_vec[0].offset());
   ASSERT_EQ("TIMESTAMP", schema_vec[0].name());
-  ASSERT_TRUE(ULONG_TYPE == schema_vec[0].type());
+  ASSERT_TRUE(primitive_types::ULONG_TYPE() == schema_vec[0].type());
   ASSERT_FALSE(schema_vec[0].is_indexed());
 
   ASSERT_EQ(1, schema_vec[1].idx());
@@ -322,7 +304,7 @@ TEST_F(TypeManagerTest, SchemaTest) {
   ASSERT_EQ(0, s[0].idx());
   ASSERT_EQ(0, s[0].offset());
   ASSERT_EQ("TIMESTAMP", s[0].name());
-  ASSERT_TRUE(ULONG_TYPE == s[0].type());
+  ASSERT_TRUE(primitive_types::ULONG_TYPE() == s[0].type());
   ASSERT_FALSE(s[0].is_indexed());
 
   ASSERT_EQ(1, s[1].idx());
@@ -362,23 +344,22 @@ TEST_F(TypeManagerTest, DataTypesGetterTest) {
 TEST_F(TypeManagerTest, SerializeTest) {
   std::ofstream outfile("/tmp/test.txt", std::ofstream::binary);
   int32_t val = 390;
-  immutable_raw_data d1(&val, INT_TYPE.size);
+  immutable_raw_data d1(&val, primitive_types::INT_TYPE().size);
   ip_address ip;
   ip_address::parse_ip("69.89.31.226", &ip);
 
   ASSERT_EQ(390, d1.as<int>());
-  INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile,
-                           immutable_raw_data(&ip, sizeof(ip_address)));
+  primitive_types::INT_TYPE().serialize_op()(outfile, d1);
+  addr_type.serialize_op()(outfile, immutable_raw_data(&ip, sizeof(ip_address)));
   outfile.close();
 
   std::ifstream infile("/tmp/test.txt", std::ifstream::binary);
   int32_t val_read;
-  infile.read(reinterpret_cast<char*>(&val_read), INT_TYPE.size);
+  infile.read(reinterpret_cast<char *>(&val_read), primitive_types::INT_TYPE().size);
   ASSERT_EQ(390, val_read);
 
   ip_address addr_read;
-  infile.read(reinterpret_cast<char*>(&addr_read), addr_type.size);
+  infile.read(reinterpret_cast<char *>(&addr_read), addr_type.size);
   ASSERT_EQ(1163468770, addr_read.get_address());
 
   infile.close();
@@ -388,20 +369,19 @@ TEST_F(TypeManagerTest, DeserializeTest) {
   std::ofstream outfile("/tmp/test1.txt", std::ofstream::binary);
 
   int val = -490;
-  immutable_raw_data d1 = immutable_raw_data(&val, INT_TYPE.size);
+  immutable_raw_data d1 = immutable_raw_data(&val, primitive_types::INT_TYPE().size);
   ip_address ip;
   ip_address::parse_ip("69.89.31.226", &ip);
 
   ASSERT_EQ(-490, d1.as<int>());
 
-  INT_TYPE.serialize_op()(outfile, d1);
-  addr_type.serialize_op()(outfile,
-                           immutable_raw_data(&ip, sizeof(ip_address)));
+  primitive_types::INT_TYPE().serialize_op()(outfile, d1);
+  addr_type.serialize_op()(outfile, immutable_raw_data(&ip, sizeof(ip_address)));
   outfile.close();
 
   std::ifstream infile("/tmp/test1.txt", std::ifstream::binary);
-  mutable_raw_data d3(INT_TYPE.size);
-  INT_TYPE.deserialize_op()(infile, d3);
+  mutable_raw_data d3(primitive_types::INT_TYPE().size);
+  primitive_types::INT_TYPE().deserialize_op()(infile, d3);
   ASSERT_EQ(-490, d3.as<int32_t>());
 
   mutable_raw_data d13(addr_type.size);

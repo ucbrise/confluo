@@ -20,41 +20,28 @@ struct index_state_t {
   /**
    * Constructs a default index state, which is to be unindexed
    */
-  index_state_t()
-      : state_(UNINDEXED),
-        id_(UINT16_MAX),
-        bucket_size_(1) {
-  }
+  index_state_t();
 
   /**
    * Constructs an index state from another index state
    *
    * @param other The other index state to construct this index state from
    */
-  index_state_t(const index_state_t& other)
-      : state_(atomic::load(&other.state_)),
-        id_(other.id_),
-        bucket_size_(other.bucket_size_) {
-
-  }
+  index_state_t(const index_state_t &other);
 
   /**
    * Gets the id of this index state
    *
    * @return The identifier of this index state
    */
-  uint16_t id() const {
-    return id_;
-  }
+  uint16_t id() const;
 
   /**
    * Gets the bucket size of this index state
    *
    * @return The bucket size of this index state
    */
-  double bucket_size() const {
-    return bucket_size_;
-  }
+  double bucket_size() const;
 
   /**
    * Assigns the other index state to this index state
@@ -64,30 +51,21 @@ struct index_state_t {
    * @return This index state which has the contents of the other index
    * state
    */
-  index_state_t& operator=(const index_state_t& other) {
-    atomic::init(&state_, atomic::load(&other.state_));
-    id_ = other.id_;
-    return *this;
-  }
+  index_state_t &operator=(const index_state_t &other);
 
   /**
    * Checks whether this index state is in the indexed stage
    *
    * @return True if this index state is indexed, false otherwise
    */
-  bool is_indexed() const {
-    return atomic::load(&state_) == INDEXED;
-  }
+  bool is_indexed() const;
 
   /**
    * Sets this index stage to be indexing
    *
    * @return True if this index stage is indexing, false otherwise
    */
-  bool set_indexing() {
-    uint8_t expected = UNINDEXED;
-    return atomic::strong::cas(&state_, &expected, INDEXING);
-  }
+  bool set_indexing();
 
   /**
    * Sets the index stage to be indexed
@@ -95,38 +73,25 @@ struct index_state_t {
    * @param index_id The identifier for the index
    * @param bucket_size The bucket size for lookup
    */
-  void set_indexed(uint16_t index_id, double bucket_size) {
-    id_ = index_id;
-    bucket_size_ = bucket_size;
-    atomic::store(&state_, INDEXED);
-  }
+  void set_indexed(uint16_t index_id, double bucket_size);
 
   /**
    * Sets the index stage to be not indexed
    */
-  void set_unindexed() {
-    atomic::store(&state_, UNINDEXED);
-  }
+  void set_unindexed();
 
   /**
    * If the index stage is indexed, sets the stage to be not indexed
    *
    * @return True if this index stage is unindexed, false otherwise
    */
-  bool disable_indexing() {
-    uint8_t expected = INDEXED;
-    return atomic::strong::cas(&state_, &expected, UNINDEXED);
-  }
+  bool disable_indexing();
 
  private:
   atomic::type<uint8_t> state_;
   uint16_t id_;
   double bucket_size_;
 };
-
-const uint8_t index_state_t::UNINDEXED;
-const uint8_t index_state_t::INDEXING;
-const uint8_t index_state_t::INDEXED;
 
 }
 

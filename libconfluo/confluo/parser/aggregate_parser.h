@@ -8,6 +8,8 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 
+#include "exceptions.h"
+
 namespace confluo {
 namespace parser {
 
@@ -25,7 +27,7 @@ struct parsed_aggregate {
 }
 
 BOOST_FUSION_ADAPT_STRUCT(confluo::parser::parsed_aggregate,
-                          (std::string, agg) (std::string, field_name))
+                          (std::string, agg)(std::string, field_name))
 
 namespace confluo {
 namespace parser {
@@ -42,8 +44,7 @@ namespace phx = boost::phoenix;
  * @tparam I The type of aggregate
  */
 template<typename I>
-class aggregate_parser : public qi::grammar<I, ascii::space_type,
-    parsed_aggregate()> {
+class aggregate_parser : public qi::grammar<I, ascii::space_type, parsed_aggregate()> {
  public:
   /**
    * Initializes rules and grammar for aggregate parser
@@ -74,21 +75,7 @@ class aggregate_parser : public qi::grammar<I, ascii::space_type,
  *
  * @return The parsed aggregate from the string
  */
-parsed_aggregate parse_aggregate(const std::string& t) {
-  using boost::spirit::ascii::space;
-  typedef std::string::const_iterator iterator_type;
-  typedef aggregate_parser<iterator_type> grammar;
-  grammar g;
-  std::string::const_iterator iter = t.begin();
-  std::string::const_iterator end = t.end();
-  parsed_aggregate pt;
-  bool r = phrase_parse(iter, end, g, space, pt);
-  if (iter != end || !r) {
-    std::string rest(iter, end);
-    throw parse_exception(std::string("Parse failed at ") + rest);
-  }
-  return pt;
-}
+parsed_aggregate parse_aggregate(const std::string &t);
 
 }
 }

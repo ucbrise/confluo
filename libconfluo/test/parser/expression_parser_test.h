@@ -10,30 +10,30 @@ using namespace ::confluo::parser;
 
 class ExpressionParserTest : public testing::Test {
  public:
-  static void test_predicate(const spirit::utree& t, const std::string& op1,
-                             int op, const std::string& op2) {
+  static void test_predicate(const spirit::utree &t, const std::string &op1,
+                             int op, const std::string &op2) {
     auto it = t.begin();
     ASSERT_EQ(op, spirit::utree::visit(*it, utree_to_op()));
     ASSERT_EQ(op1, spirit::utree::visit(*(++it), utree_to_string()));
     ASSERT_EQ(op2, spirit::utree::visit(*(++it), utree_to_string()));
   }
 
-  static void test_or(const spirit::utree& t) {
+  static void test_or(const spirit::utree &t) {
     auto it = t.begin();
     ASSERT_EQ(and_or::OR, spirit::utree::visit(*it, utree_to_op()));
   }
 
-  static void test_and(const spirit::utree& t) {
+  static void test_and(const spirit::utree &t) {
     auto it = t.begin();
     ASSERT_EQ(and_or::AND, spirit::utree::visit(*it, utree_to_op()));
   }
 
-  static spirit::utree left(const spirit::utree& t) {
+  static spirit::utree left(const spirit::utree &t) {
     auto it = t.begin();
     return *(++it);
   }
 
-  static spirit::utree right(const spirit::utree& t) {
+  static spirit::utree right(const spirit::utree &t) {
     auto it = t.begin();
     ++it;
     return *(++it);

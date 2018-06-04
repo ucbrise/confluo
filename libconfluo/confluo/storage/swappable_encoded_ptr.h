@@ -30,7 +30,7 @@ class read_only_encoded_ptr {
    * @param offset offset into data
    * @param ref_counts reference counts of both pointer states
    */
-  read_only_encoded_ptr(encoded_ptr<T> enc_ptr, size_t offset, reference_counts* ref_counts)
+  read_only_encoded_ptr(encoded_ptr<T> enc_ptr, size_t offset, reference_counts *ref_counts)
       : enc_ptr_(enc_ptr),
         offset_(offset),
         ref_counts_(ref_counts) {
@@ -40,12 +40,12 @@ class read_only_encoded_ptr {
    * Copy constructor. Increments reference count.
    * @param other other pointer
    */
-  read_only_encoded_ptr(const read_only_encoded_ptr<T>& other)
+  read_only_encoded_ptr(const read_only_encoded_ptr<T> &other)
       : enc_ptr_(other.enc_ptr_),
         offset_(other.offset_),
         ref_counts_(other.ref_counts_) {
     if (ref_counts_ != nullptr) {
-      auto* metadata = ptr_metadata::get(enc_ptr_.ptr());
+      auto *metadata = ptr_metadata::get(enc_ptr_.ptr());
       bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       uses_first_count ? ref_counts_->increment_first() : ref_counts_->increment_second();
     }
@@ -56,11 +56,11 @@ class read_only_encoded_ptr {
    * @param other other pointer
    * @return this read only pointer
    */
-  read_only_encoded_ptr& operator=(const read_only_encoded_ptr<T>& other) {
+  read_only_encoded_ptr &operator=(const read_only_encoded_ptr<T> &other) {
     // TODO potential infinite loop bug here
     init(other.enc_ptr_, other.offset_, other.ref_counts_);
     if (ref_counts_ != nullptr) {
-      auto* metadata = ptr_metadata::get(enc_ptr_.ptr());
+      auto *metadata = ptr_metadata::get(enc_ptr_.ptr());
       bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       uses_first_count ? ref_counts_->increment_first() : ref_counts_->increment_second();
     }
@@ -78,7 +78,7 @@ class read_only_encoded_ptr {
    * @param offset logical offset into data
    * @param ref_counts
    */
-  void init(encoded_ptr<T> enc_ptr, size_t offset = 0, reference_counts* ref_counts = nullptr) {
+  void init(encoded_ptr<T> enc_ptr, size_t offset = 0, reference_counts *ref_counts = nullptr) {
     decrement_compare_dealloc();
     enc_ptr_ = enc_ptr;
     offset_ = offset;
@@ -120,8 +120,8 @@ class read_only_encoded_ptr {
    * @param len length of decoded data
    * @param data decoded data buffer
    */
-  void encode(size_t idx, size_t len, const T* data) {
-    enc_ptr_.encode(idx + offset_, len, data);
+  void encode(size_t idx, size_t len, const T *data) {
+    enc_ptr_.encode(idx + offset_, data, len);
   }
 
   /**
@@ -149,7 +149,7 @@ class read_only_encoded_ptr {
    * @param idx start index
    * @param len length of decoded data
    */
-  void decode(T* buffer, size_t idx, size_t len) const {
+  void decode(T *buffer, size_t idx, size_t len) const {
     enc_ptr_.decode(buffer, idx + offset_, len);
   }
 
@@ -173,23 +173,23 @@ class read_only_encoded_ptr {
    * not null. Destroys and deallocates the pointer if reference count reaches 0.
    */
   void decrement_compare_dealloc() {
-    void* internal_ptr = enc_ptr_.ptr();
+    void *internal_ptr = enc_ptr_.ptr();
     if (internal_ptr != nullptr && ref_counts_ != nullptr) {
-      auto* metadata = ptr_metadata::get(internal_ptr);
+      auto *metadata = ptr_metadata::get(internal_ptr);
       bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       if (uses_first_count && ref_counts_->decrement_first_and_compare()) {
         lifecycle_util<T>::destroy(internal_ptr);
-        ALLOCATOR.dealloc(internal_ptr);
+        allocator::instance().dealloc(internal_ptr);
       } else if (!uses_first_count && ref_counts_->decrement_second_and_compare()) {
         lifecycle_util<T>::destroy(internal_ptr);
-        ALLOCATOR.dealloc(internal_ptr);
+        allocator::instance().dealloc(internal_ptr);
       }
     }
   }
 
   encoded_ptr<T> enc_ptr_; // encoded pointer to data
   size_t offset_; // logical offset into decoded data
-  reference_counts* ref_counts_; // pointer to reference counts stored in the swappable_ptr ancestor
+  reference_counts *ref_counts_; // pointer to reference counts stored in the swappable_ptr ancestor
 
 };
 
@@ -207,15 +207,15 @@ class swappable_encoded_ptr {
 
  public:
   swappable_encoded_ptr()
-     : ref_counts_(),
-       enc_ptr_(encoded_ptr<T>()) {
+      : ref_counts_(),
+        enc_ptr_(encoded_ptr<T>()) {
   }
 
   /**
    * Move constructor. Not thread-safe.
    * @param other other swappable_ptr
    */
-  swappable_encoded_ptr(swappable_encoded_ptr&& other) {
+  swappable_encoded_ptr(swappable_encoded_ptr &&other) {
     ref_counts_ = other.ref_counts_;
     enc_ptr_ = atomic::load(&other.enc_ptr_);
     atomic::store(&other.enc_ptr_, nullptr);
@@ -225,7 +225,7 @@ class swappable_encoded_ptr {
    * Move assignment operator. Not thread-safe.
    * @param other other swappable_ptr
    */
-  swappable_encoded_ptr& operator=(swappable_encoded_ptr&& other) {
+  swappable_encoded_ptr &operator=(swappable_encoded_ptr &&other) {
     ref_counts_ = other.ref_counts_;
     enc_ptr_ = atomic::load(&other.enc_ptr_);
     atomic::store(&other.enc_ptr_, encoded_ptr<T>());
@@ -322,7 +322,7 @@ class swappable_encoded_ptr {
    * @param copy A reference to pointer to store in
    * @param offset The offset into pointer
    */
-  void atomic_copy(read_only_encoded_ptr<T>& copy, size_t offset = 0) const {
+  void atomic_copy(read_only_encoded_ptr<T> &copy, size_t offset = 0) const {
     // Increment both counters to guarantee that the loaded
     // pointer can't be deallocated if there are no copies.
     // Protects against loading before a swap begins and
@@ -358,9 +358,9 @@ class swappable_encoded_ptr {
    * Decrements the first ref count, and destroys & deallocates the pointer if it reaches 0.
    */
   static void destroy_dealloc(encoded_ptr<T> encoded_ptr) {
-    void* internal_ptr = encoded_ptr.ptr();
+    void *internal_ptr = encoded_ptr.ptr();
     lifecycle_util<T>::destroy(internal_ptr);
-    ALLOCATOR.dealloc(internal_ptr);
+    allocator::instance().dealloc(internal_ptr);
   }
 
   mutable reference_counts ref_counts_; // mutable reference counts for logically const functions

@@ -1,6 +1,8 @@
 #ifndef CONFLUO_STORAGE_REFERENCE_COUNTS_H_
 #define CONFLUO_STORAGE_REFERENCE_COUNTS_H_
 
+#include <atomic.h>
+
 namespace confluo {
 namespace storage {
 
@@ -9,59 +11,31 @@ namespace storage {
  */
 class reference_counts {
  public:
-  reference_counts()
-      : ref_counts_(BOTH_DELTA) {
-  }
+  reference_counts();
 
-  reference_counts(reference_counts& other)
-      : ref_counts_(atomic::load(&other.ref_counts_)) {
-  }
+  reference_counts(reference_counts &other);
 
-  reference_counts operator=(reference_counts& other) {
-    atomic::store(&ref_counts_, atomic::load(&other.ref_counts_));
-    return *this;
-  }
+  reference_counts operator=(reference_counts &other);
 
-  inline void increment_first() {
-    atomic::faa(&ref_counts_, FIRST_DELTA);
+  void increment_first();
 
-  }
+  void increment_second();
 
-  inline void increment_second() {
-    atomic::faa(&ref_counts_, SECOND_DELTA);
-  }
+  void increment_both();
 
-  inline void increment_both() {
-    atomic::faa(&ref_counts_, BOTH_DELTA);
-  }
+  void decrement_first();
 
-  inline void decrement_first() {
-    atomic::fas(&ref_counts_, FIRST_DELTA);
-  }
+  void decrement_second();
 
-  inline void decrement_second() {
-    atomic::fas(&ref_counts_, SECOND_DELTA);
-  }
+  void decrement_both();
 
-  inline void decrement_both() {
-    atomic::fas(&ref_counts_, BOTH_DELTA);
-  }
+  bool decrement_first_and_compare();
 
-  inline bool decrement_first_and_compare() {
-    return (atomic::fas(&ref_counts_, 1U) & FIRST_MASK) == 1;
-  }
+  bool decrement_second_and_compare();
 
-  inline bool decrement_second_and_compare() {
-    return (atomic::fas(&ref_counts_, SECOND_DELTA) >> SECOND_SHIFT) == 1;
-  }
+  uint32_t get_first();
 
-  uint32_t get_first() {
-    return atomic::load(&ref_counts_) & FIRST_MASK;
-  }
-
-  uint32_t get_second() {
-    return atomic::load(&ref_counts_) >> SECOND_SHIFT;
-  }
+  uint32_t get_second();
 
  private:
   atomic::type<uint32_t> ref_counts_;
@@ -73,12 +47,6 @@ class reference_counts {
   static const uint32_t SECOND_SHIFT = 16;
 
 };
-
-const uint32_t reference_counts::FIRST_DELTA;
-const uint32_t reference_counts::SECOND_DELTA;
-const uint32_t reference_counts::BOTH_DELTA;
-const uint32_t reference_counts::FIRST_MASK;
-const uint32_t reference_counts::SECOND_SHIFT;
 
 }
 }

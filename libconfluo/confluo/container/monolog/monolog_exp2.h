@@ -18,8 +18,8 @@ namespace monolog {
  */
 template<typename monolog_impl>
 class monolog_iterator : public std::iterator<std::input_iterator_tag,
-    typename monolog_impl::value_type, typename monolog_impl::difference_type,
-    typename monolog_impl::pointer, typename monolog_impl::reference> {
+                                              typename monolog_impl::value_type, typename monolog_impl::difference_type,
+                                              typename monolog_impl::pointer, typename monolog_impl::reference> {
  public:
   /** The value type of the monolog */
   typedef typename monolog_impl::value_type value_type;
@@ -44,7 +44,7 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
    * @param impl The monolog implementation
    * @param pos The position of the iterator in the monolog
    */
-  monolog_iterator(const monolog_impl* impl, size_t pos)
+  monolog_iterator(const monolog_impl *impl, size_t pos)
       : impl_(impl),
         pos_(pos) {
   }
@@ -72,7 +72,7 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
    *
    * @return This advanced monolog iterator
    */
-  monolog_iterator& operator++() {
+  monolog_iterator &operator++() {
     pos_++;
     return *this;
   }
@@ -122,19 +122,18 @@ class monolog_iterator : public std::iterator<std::input_iterator_tag,
    *
    * @return This updated monolog iterator
    */
-  monolog_iterator& operator=(const monolog_iterator& other) {
+  monolog_iterator &operator=(const monolog_iterator &other) {
     impl_ = other.impl_;
     pos_ = other.pos_;
     return *this;
   }
 
  private:
-  const monolog_impl* impl_;
+  const monolog_impl *impl_;
   size_t pos_;
 };
 
 /**
->>>>>>> Doc generators for cpp, java, and python
  * The base class for MonoLog.
  *
  * Implements get/set/multiget/multiset functionalities,
@@ -151,15 +150,15 @@ class monolog_exp2_base {
   static const size_t FBS_HIBIT = 4;
 
   /** The monolog bucket type */
-  typedef atomic::type<T*> __atomic_bucket_ref;
+  typedef atomic::type<T *> __atomic_bucket_ref;
 
   /**
    * The default constructor that initializes all of the buckets
    * for the monolog
    */
   monolog_exp2_base() {
-    T* null_ptr = NULL;
-    for (auto& x : buckets_) {
+    T *null_ptr = NULL;
+    for (auto &x : buckets_) {
       atomic::init(&x, null_ptr);
     }
 
@@ -170,7 +169,7 @@ class monolog_exp2_base {
    * The default destructor that deletes all of the buckets
    */
   ~monolog_exp2_base() {
-    for (auto& x : buckets_) {
+    for (auto &x : buckets_) {
       delete[] atomic::load(&x);
     }
   }
@@ -202,9 +201,9 @@ class monolog_exp2_base {
   void set(size_t idx, const T val) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
-    T* bucket;
+    T *bucket;
     if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
       bucket = try_allocate_bucket(bucket_idx);
     }
@@ -220,7 +219,7 @@ class monolog_exp2_base {
   void set_unsafe(size_t idx, const T val) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     atomic::load(&buckets_[bucket_idx])[bucket_off] = val;
   }
@@ -230,15 +229,15 @@ class monolog_exp2_base {
    * @param data The data that needs to be stored
    * @param len The length of the region
    */
-  void set(size_t idx, const T* data, size_t len) {
+  void set(size_t idx, const T *data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
     while (data_remaining) {
-      T* bucket;
+      T *bucket;
       if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
         bucket = try_allocate_bucket(bucket_idx);
       }
@@ -261,10 +260,10 @@ class monolog_exp2_base {
    * @param data The data to be stored
    * @param len The length of the region
    */
-  void set_unsafe(size_t idx, const T* data, size_t len) {
+  void set_unsafe(size_t idx, const T *data, size_t len) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
@@ -286,10 +285,10 @@ class monolog_exp2_base {
    * @param idx The index of where to get the data
    * @return The pointer to the region
    */
-  const T* ptr(size_t idx) const {
+  const T *ptr(size_t idx) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     return atomic::load(&buckets_[bucket_idx]) + bucket_off;
   }
@@ -298,10 +297,10 @@ class monolog_exp2_base {
    * @param idx The index of where to get the data
    * @return A reference to the data at that index
    */
-  const T& get(size_t idx) const {
+  const T &get(size_t idx) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     return atomic::load(&buckets_[bucket_idx])[bucket_off];
   }
@@ -311,12 +310,12 @@ class monolog_exp2_base {
    * @param idx The index of what data to get
    * @return A reference to the data at the index
    */
-  T& operator[](size_t idx) {
+  T &operator[](size_t idx) {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
-    T* bucket;
+    T *bucket;
     if ((bucket = atomic::load(&buckets_[bucket_idx])) == NULL) {
       bucket = try_allocate_bucket(bucket_idx);
     }
@@ -330,10 +329,10 @@ class monolog_exp2_base {
    * @param idx The index for where the data is copied to
    * @param len The length of the buffer
    */
-  void get(T* data, size_t idx, size_t len) const {
+  void get(T *data, size_t idx, size_t len) const {
     size_t pos = idx + FBS;
     size_t hibit = bit_utils::highest_bit(pos);
-    size_t bucket_off = pos ^ (1 << hibit);
+    size_t bucket_off = pos ^(1 << hibit);
     size_t bucket_idx = hibit - FBS_HIBIT;
     size_t data_remaining = len * sizeof(T);
     size_t data_off = 0;
@@ -355,7 +354,7 @@ class monolog_exp2_base {
    * @return The size of storage in bytes
    */
   size_t storage_size() const {
-    size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref );
+    size_t bucket_size = buckets_.size() * sizeof(__atomic_bucket_ref);
     size_t data_size = 0;
     for (size_t i = 0; i < buckets_.size(); i++) {
       if (atomic::load(&buckets_[i]) != NULL) {
@@ -372,10 +371,10 @@ class monolog_exp2_base {
    * @param bucket_idx The index of the specified bucket
    * @return The specified bucket
    */
-  T* try_allocate_bucket(size_t bucket_idx) {
+  T *try_allocate_bucket(size_t bucket_idx) {
     size_t size = (1U << (bucket_idx + FBS_HIBIT));
-    T* new_bucket = new T[size];
-    T* expected = NULL;
+    T *new_bucket = new T[size];
+    T *expected = NULL;
 
     // Only one thread will be successful in replacing the NULL reference with newly
     // allocated bucket.
@@ -411,7 +410,7 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   /** The difference type */
   typedef T difference_type;
   /** The pointer to the monolog */
-  typedef T* pointer;
+  typedef T *pointer;
   /** The reference */
   typedef T reference;
   /** The iterator for the monolog */
@@ -444,7 +443,7 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
    *
    * @return The index of the value
    */
-  size_t push_back(const T& val) {
+  size_t push_back(const T &val) {
     size_t idx = atomic::faa(&tail_, 1UL);
     this->set(idx, val);
     return idx;
@@ -458,7 +457,7 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
    *
    * @return The index of the range of data
    */
-  size_t push_back_range(const T& start, const T& end) {
+  size_t push_back_range(const T &start, const T &end) {
     size_t cnt = (end - start + 1);
     size_t idx = atomic::faa(&tail_, cnt);
     for (size_t i = 0; i < cnt; i++)
@@ -473,7 +472,7 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
    *
    * @return The value at the index
    */
-  const T& at(size_t idx) const {
+  const T &at(size_t idx) const {
     return this->get(idx);
   }
 

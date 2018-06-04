@@ -12,7 +12,7 @@ class test_utils {
     bool fail = false;
     try {
       f();
-    } catch (std::exception& ex) {
+    } catch (std::exception &ex) {
       fail = true;
     }
     return fail;

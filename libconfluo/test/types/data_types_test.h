@@ -10,19 +10,20 @@ class DataTypesTest : public testing::Test {
 };
 
 TEST_F(DataTypesTest, GetterTest) {
-  data_type t1 = BOOL_TYPE, t2 = CHAR_TYPE, t3 = SHORT_TYPE, t4 = INT_TYPE, t5 =
-      LONG_TYPE, t6 = FLOAT_TYPE, t7 = DOUBLE_TYPE, t8 = NONE_TYPE;
+  data_type t1 = primitive_types::BOOL_TYPE(), t2 = primitive_types::CHAR_TYPE(), t3 = primitive_types::SHORT_TYPE(),
+      t4 = primitive_types::INT_TYPE(), t5 = primitive_types::LONG_TYPE(), t6 = primitive_types::FLOAT_TYPE(),
+      t7 = primitive_types::DOUBLE_TYPE(), t8 = primitive_types::NONE_TYPE();
 
-  ASSERT_TRUE(BOOL_TYPE == t1);
-  ASSERT_TRUE(CHAR_TYPE == t2);
-  ASSERT_TRUE(SHORT_TYPE == t3);
-  ASSERT_TRUE(INT_TYPE == t4);
-  ASSERT_TRUE(LONG_TYPE == t5);
-  ASSERT_TRUE(FLOAT_TYPE == t6);
-  ASSERT_TRUE(DOUBLE_TYPE == t7);
-  ASSERT_TRUE(NONE_TYPE == t8);
+  ASSERT_TRUE(primitive_types::BOOL_TYPE() == t1);
+  ASSERT_TRUE(primitive_types::CHAR_TYPE() == t2);
+  ASSERT_TRUE(primitive_types::SHORT_TYPE() == t3);
+  ASSERT_TRUE(primitive_types::INT_TYPE() == t4);
+  ASSERT_TRUE(primitive_types::LONG_TYPE() == t5);
+  ASSERT_TRUE(primitive_types::FLOAT_TYPE() == t6);
+  ASSERT_TRUE(primitive_types::DOUBLE_TYPE() == t7);
+  ASSERT_TRUE(primitive_types::NONE_TYPE() == t8);
 
-  ASSERT_TRUE(BOOL_TYPE != CHAR_TYPE);
+  ASSERT_TRUE(primitive_types::BOOL_TYPE() != primitive_types::CHAR_TYPE());
 
   ASSERT_TRUE(t1.name() == "bool");
   ASSERT_TRUE(t2.name() == "char");

@@ -15,7 +15,7 @@ TEST_F(RadixTreeTest, InsertGetTest) {
     tree.insert(byte_string(i * 8), i);
 
   for (int32_t i = 0; i < 256; i++) {
-    const reflog* r = tree.get(byte_string(i * 8));
+    const reflog *r = tree.get(byte_string(i * 8));
     ASSERT_TRUE(r != nullptr);
     ASSERT_EQ(static_cast<size_t>(i), r->at(0));
   }
@@ -50,7 +50,7 @@ TEST_F(RadixTreeTest, IteratorTest) {
   auto reflogs = tree.range_lookup_reflogs(0, 10000);
   int32_t i = 0;
   for (auto it = reflogs.begin(); it != reflogs.end(); it++) {
-    auto& refs = *it;
+    auto &refs = *it;
     ASSERT_EQ(it.key(), byte_string(i));
     i++;
   }
@@ -65,7 +65,7 @@ TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
   ASSERT_EQ(static_cast<size_t>(3), res1.count());
   int32_t i = 0;
   for (auto it = res1.begin(); it != res1.end(); ++it) {
-    const auto& refs = *it;
+    const auto &refs = *it;
     ASSERT_EQ(i, refs.at(0));
     ASSERT_TRUE(byte_string(i * 8) == it.key());
     i++;
@@ -75,7 +75,7 @@ TEST_F(RadixTreeTest, ReflogRangeLookupTest) {
   ASSERT_EQ(static_cast<size_t>(1), res2.count());
   i = 1;
   for (auto it = res2.begin(); it != res2.end(); ++it) {
-    const auto& refs = *it;
+    const auto &refs = *it;
     ASSERT_EQ(i, refs.at(0));
     ASSERT_TRUE(byte_string(i * 8) == it.key());
     i++;

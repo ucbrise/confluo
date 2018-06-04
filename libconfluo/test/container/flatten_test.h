@@ -15,7 +15,7 @@ class FlattenTest : public testing::Test {
 TEST_F(FlattenTest, VectorTest) {
   typedef std::vector<std::vector<int>> vector_t;
 
-  vector_t vec = { { 1, 2, 3 }, { }, { 4, 5 }, { 6 }, { }, { }, { 7, 8, 9 } };
+  vector_t vec = {{1, 2, 3}, {}, {4, 5}, {6}, {}, {}, {7, 8, 9}};
   flattened_container<vector_t> fvec(vec);
 
   int n = 1;

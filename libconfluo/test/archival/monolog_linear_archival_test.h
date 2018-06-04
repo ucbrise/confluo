@@ -21,7 +21,7 @@ class MonologLinearArchivalTest : public testing::Test {
   typedef monolog_linear<uint8_t, MAX_BUCKETS, BUCKET_SIZE, 1024> small_monolog_linear;
   typedef archival::monolog_linear_archiver<uint8_t, MAX_BUCKETS, BUCKET_SIZE, 1024> small_monolog_archiver;
 
-  void write_to_log(small_monolog_linear& log) {
+  void write_to_log(small_monolog_linear &log) {
     uint8_t buf[ARRAY_SIZE];
     for (size_t i = 0; i < ARRAY_SIZE; i++) {
       buf[i] = i % 256;
@@ -29,13 +29,13 @@ class MonologLinearArchivalTest : public testing::Test {
     log.append(buf, ARRAY_SIZE);
   }
 
-  void verify(small_monolog_linear& log, size_t start, size_t stop) {
+  void verify(small_monolog_linear &log, size_t start, size_t stop) {
     for (size_t i = start; i < stop; i++) {
       ASSERT_EQ(log.get(i), i % 256);
     }
   }
 
-  void verify_swap(small_monolog_linear& log, size_t start, size_t stop) {
+  void verify_swap(small_monolog_linear &log, size_t start, size_t stop) {
     read_only_ptr_t bucket_ptr;
     for (size_t i = 0; i < stop; i += BUCKET_SIZE) {
       log.ptr(i, bucket_ptr);

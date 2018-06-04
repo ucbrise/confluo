@@ -10,7 +10,7 @@ namespace lazy {
 
 /**
  * Stream of data
- */ 
+ */
 template<typename T>
 class stream {
  public:
@@ -47,7 +47,7 @@ class stream {
    *
    * @param other The other stream to construct this stream from
    */
-  stream(const stream& other)
+  stream(const stream &other)
       : head_ptr_(other.head_ptr_),
         tail_ptr_(other.tail_ptr_),
         gen_ptr_(other.gen_ptr_),
@@ -59,7 +59,7 @@ class stream {
    *
    * @param other The other stream which is an r value reference
    */
-  stream(stream&& other)
+  stream(stream &&other)
       : head_ptr_(std::move(other.head_ptr_)),
         tail_ptr_(std::move(other.tail_ptr_)),
         gen_ptr_(std::move(other.gen_ptr_)),
@@ -85,7 +85,7 @@ class stream {
    */
   template<typename H, typename U, typename std::enable_if<
       std::is_same<tail_t, typename base_type<U>::type>::value, int>::type = 0>
-  stream(H&& head, U&& tail)
+  stream(H &&head, U &&tail)
       : head_ptr_(std::make_shared<head_t>(std::forward<H>(head))),
         tail_ptr_(std::make_shared<tail_t>(std::forward<U>(tail))),
         gen_ptr_(nullptr),
@@ -109,7 +109,7 @@ class stream {
       typename std::enable_if<
           std::is_convertible<typename base_type<U>::type, generator_t>::value,
           int>::type = 0>
-  stream(H&& head, U&& gen)
+  stream(H &&head, U &&gen)
       : head_ptr_(std::make_shared<head_t>(std::forward<H>(head))),
         tail_ptr_(nullptr),
         gen_ptr_(std::make_shared<generator_t>(std::forward<U>(gen))),
@@ -131,7 +131,7 @@ class stream {
    *
    * @return The head of the stream
    */
-  const head_t& head() const {
+  const head_t &head() const {
     if (empty_) {
       throw std::range_error("head() called on empty stream");
     }
@@ -177,7 +177,7 @@ class stream {
    * @param f The function r value reference
    */
   template<typename F>
-  void for_each(F&& f) const {
+  void for_each(F &&f) const {
     stream t = *this;
     while (!t.empty()) {
       f(t.head());
@@ -197,7 +197,7 @@ class stream {
       return nil;
     }
 
-    const tail_t& t = tail();
+    const tail_t &t = tail();
 
     return stream(*head_ptr_, [t, n]() -> stream {
       return t.take(n - 1);
@@ -213,13 +213,13 @@ class stream {
    * @return Stream after function is applied
    */
   template<typename F>
-  auto map(F&& f) const -> stream<decltype(f(this->head()))> {
+  auto map(F &&f) const -> stream<decltype(f(this->head()))> {
     using U = decltype(f(this->head()));
     if (empty_) {
       return stream<U>::nil;
     }
 
-    const tail_t& t = tail();
+    const tail_t &t = tail();
 
     return stream<U>(f(*head_ptr_), [t, f]() -> stream<U> {
       return t.map(f);
@@ -238,7 +238,7 @@ class stream {
    * @return The accumulator
    */
   template<typename U, typename F>
-  U fold_left(const U& start, F&& f) const {
+  U fold_left(const U &start, F &&f) const {
     U accum = start;
     stream t = *this;
     while (!t.empty()) {
@@ -260,7 +260,7 @@ class stream {
       return other;
     }
 
-    const tail_t& t = tail();
+    const tail_t &t = tail();
 
     return stream(*head_ptr_, [t, other]() -> stream {
       return t.concat(other);
@@ -276,12 +276,12 @@ class stream {
    * @return The resultant stream
    */
   template<typename F>
-  stream filter(F&& f) const {
+  stream filter(F &&f) const {
     if (empty_) {
       return nil;
     }
 
-    const tail_t& t = tail();
+    const tail_t &t = tail();
 
     if (f(*head_ptr_)) {
       return stream(*head_ptr_, [t, f]() -> stream {
@@ -300,7 +300,7 @@ class stream {
    * @return The resultant stream
    */
   template<typename F>
-  auto flat_map(F&& f) const -> decltype(f(this->head())) {
+  auto flat_map(F &&f) const -> decltype(f(this->head())) {
     return flatten(map(std::forward<F>(f)));
   }
 
@@ -335,7 +335,7 @@ class stream {
    *
    * @return A pointer to this stream
    */
-  stream& operator=(const stream& other) {
+  stream &operator=(const stream &other) {
     head_ptr_ = other.head_ptr_;
     tail_ptr_ = other.tail_ptr_;
     gen_ptr_ = other.gen_ptr_;
@@ -350,7 +350,7 @@ class stream {
    *
    * @return A pointer to this stream
    */
-  stream& operator=(stream&& other) {
+  stream &operator=(stream &&other) {
     head_ptr_ = std::move(other.head_ptr_);
     tail_ptr_ = std::move(other.tail_ptr_);
     gen_ptr_ = std::move(other.gen_ptr_);
@@ -364,7 +364,7 @@ class stream {
       return nil;
     }
     auto v = *head_ptr_;
-    const tail_t& t = tail();
+    const tail_t &t = tail();
     if (seen->find(v) == seen->end()) {
       seen->insert(v);
       return stream(v, [t, seen]() {
@@ -393,7 +393,7 @@ stream<T> stream<T>::nil;
  * @return The flattened stream
  */
 template<typename U>
-static stream<U> flatten(stream<stream<U>> s) {
+stream<U> flatten(stream<stream<U>> s) {
   while (!s.empty() && s.head().empty()) {
     s = s.tail();
   }
@@ -418,7 +418,7 @@ static stream<U> flatten(stream<stream<U>> s) {
  * @return Stream with the elements in the iterator
  */
 template<typename I>
-static stream<typename I::value_type> iterator_to_stream(I it, I e) {
+stream<typename I::value_type> iterator_to_stream(I it, I e) {
   if (it == e) {
     return stream<typename I::value_type>::nil;
   }
@@ -436,7 +436,7 @@ static stream<typename I::value_type> iterator_to_stream(I it, I e) {
  * @return Stream with all of the elements in the iterator
  */
 template<typename C>
-static stream<typename C::value_type> container_to_stream(C const& c) {
+stream<typename C::value_type> container_to_stream(C const &c) {
   return iterator_to_stream(c.begin(), c.end());
 }
 
