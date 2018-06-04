@@ -23,8 +23,7 @@ atomic_multilog::atomic_multilog(const std::string &name,
   metadata_.write_schema(schema_);
   metadata_.write_storage_mode(s_mode);
   metadata_.write_archival_mode(a_mode);
-  monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
-                      configuration_params::MONITOR_PERIODICITY_MS());
+  monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this), configuration_params::MONITOR_PERIODICITY_MS());
   if (a_mode == archival_mode::ON) {
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
                          archival_configuration_params::PERIODICITY_MS());
@@ -56,8 +55,7 @@ atomic_multilog::atomic_multilog(const std::string &name, const std::string &pat
   data_log_ = data_log_type("data_log", path, s_mode);
   rt_ = read_tail_type(path, s_mode);
   load(s_mode);
-  monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this),
-                      configuration_params::MONITOR_PERIODICITY_MS());
+  monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this), configuration_params::MONITOR_PERIODICITY_MS());
   if (a_mode == archival_mode::ON) {
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
                          archival_configuration_params::PERIODICITY_MS());
@@ -649,10 +647,10 @@ void atomic_multilog::monitor_task() {
           size_t ntriggers = a->num_triggers();
           for (size_t tid = 0; tid < ntriggers; tid++) {
             trigger *t = a->get_trigger(tid);
-            if (t->is_valid() && cur_ms % t->periodicity_ms() == 0) {
+            if (t->is_valid()) {
               for (uint64_t ms = cur_ms - configuration_params::MONITOR_WINDOW_MS(); ms <= cur_ms; ms++) {
                 if (ms % t->periodicity_ms() == 0) {
-                  check_time_bucket(f, t, tid, cur_ms, version);
+                  check_time_bucket(f, t, tid, ms, version);
                 }
               }
             }
@@ -665,7 +663,7 @@ void atomic_multilog::monitor_task() {
 
 void atomic_multilog::check_time_bucket(filter *f, trigger *t, size_t tid, uint64_t time_bucket, uint64_t version) {
   size_t window_size = t->periodicity_ms();
-  for (uint64_t ms = time_bucket - window_size; ms <= time_bucket; ms++) {
+  for (uint64_t ms = time_bucket - window_size; ms < time_bucket; ms++) {
     const aggregated_reflog *ar = f->lookup(ms);
     if (ar != nullptr) {
       numeric agg = ar->get_aggregate(tid, version);

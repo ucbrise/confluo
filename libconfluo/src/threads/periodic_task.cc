@@ -43,9 +43,9 @@ bool periodic_task::start(std::function<void(void)> task, uint64_t interval_ms) 
                 task();
                 auto end = std::chrono::steady_clock::now();
                 auto elapsed = end - start;
-
-                if (elapsed < interval) {
-                  std::this_thread::sleep_for(interval - elapsed);
+                auto time_to_wait = interval - elapsed;
+                if (time_to_wait > std::chrono::milliseconds::zero()) {
+                  std::this_thread::sleep_for(time_to_wait);
                 } else {
                   auto extra_us = std::chrono::duration_cast<std::chrono::microseconds>(elapsed - interval).count();
                   LOG_WARN << name_ << ": Last execution overshot by " << extra_us << "us";

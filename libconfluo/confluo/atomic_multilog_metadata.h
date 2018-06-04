@@ -190,7 +190,6 @@ struct trigger_metadata {
  * Writer for metadata
  */
 class metadata_writer {
-
  public:
   typedef bool metadata_writer_state;
   static const metadata_writer_state UNINIT = false;
@@ -285,7 +284,6 @@ class metadata_writer {
   void write_trigger_metadata(const std::string &trigger_name,
                               const std::string &trigger_expr,
                               uint64_t periodicity_ms);
-
  private:
   std::string filename_;
   std::ofstream out_;

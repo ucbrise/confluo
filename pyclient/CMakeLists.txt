@@ -12,8 +12,9 @@ add_custom_target(pyclient ALL
 )
   
 if (BUILD_TESTS)
+  set(SERVER_EXEC "${CMAKE_CURRENT_BINARY_DIR}/../librpc/confluod")
   add_test(NAME PythonClientTest 
-    COMMAND ${CMAKE_COMMAND} -E env CONFLUO_SERVER_EXEC=${PROJECT_BINARY_DIR}/bin/confluod ${PYTHON_EXECUTABLE} setup.py test 
+    COMMAND ${CMAKE_COMMAND} -E env CONFLUO_SERVER_EXEC=${SERVER_EXEC} ${PYTHON_EXECUTABLE} setup.py test
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
   

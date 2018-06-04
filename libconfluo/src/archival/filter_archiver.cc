@@ -72,7 +72,7 @@ void filter_archiver::archive_bucket(byte_string key, reflog &refs, uint64_t *bu
   refs_writer_.commit(action.to_string());
 
   ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
-  void *archived_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
+  void *archived_bucket = allocator::instance().mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
   archival_utils::swap_bucket_ptr(refs, refs_tail_, encoded_reflog_ptr(archived_bucket));
 }
 
@@ -84,7 +84,7 @@ void filter_archiver::archive_reflog_aggregates(byte_string key, aggregated_refl
   if (num_aggs > 0) {
     size_t alloc_size = sizeof(aggregate) * num_aggs;
     ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
-    aggregate *archived_aggs = static_cast<aggregate *>(ALLOCATOR.alloc(alloc_size, aux));
+    aggregate *archived_aggs = static_cast<aggregate *>(allocator::instance().alloc(alloc_size, aux));
     for (size_t i = 0; i < num_aggs; i++) {
       numeric collapsed_aggregate = reflog.get_aggregate(i, version);
       aggs_writer_.append<data_type>(collapsed_aggregate.type());
@@ -114,7 +114,7 @@ size_t filter_load_utils::load_reflogs(const std::string &path, filter::idx_t &f
 
     auto *&refs = filter.get_or_create(cur_key);
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
-    void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
+    void *encoded_bucket = allocator::instance().mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
     init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
     refs->reserve(archival_metadata.bucket_size());
     reader.advance<uint8_t>(bucket_size);

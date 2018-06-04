@@ -3,6 +3,7 @@ set(JAVA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/java")
 set(JAVA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${DOC_INSTALL_DIR}/java")
 
 set(CONFLUO_CLIENT_ARTIFACTS confluo-client-0.1.0.jar confluo-client-0.1.0.pom)
+set(SERVER_EXEC "${CMAKE_CURRENT_BINARY_DIR}/../librpc/confluod")
 
 set(BUILD_XML_IN "${CMAKE_CURRENT_SOURCE_DIR}/build.xml.in")
 set(BUILD_XML "${CMAKE_CURRENT_BINARY_DIR}/build.xml")

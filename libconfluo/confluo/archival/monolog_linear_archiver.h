@@ -88,7 +88,7 @@ class monolog_linear_archiver : public archiver {
     writer_.commit<monolog_linear_archival_action>(action);
 
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE());
-    void *archived_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
+    void *archived_bucket = allocator::instance().mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
     log_->data()[archival_tail_ / BUCKET_SIZE].swap_ptr(encoded_ptr<T>(archived_bucket));
   }
 
@@ -117,7 +117,7 @@ class monolog_linear_load_utils {
       size_t size = reader.read<ptr_metadata>().data_size_;
 
       ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::DATA_LOG_ENCODING_TYPE());
-      void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), size, aux);
+      void *encoded_bucket = allocator::instance().mmap(off.path(), static_cast<off_t>(off.offset()), size, aux);
       buckets[load_offset / BUCKET_SIZE].init_ptr(encoded_ptr<T>(encoded_bucket));
 
       log.reserve(BUCKET_SIZE);

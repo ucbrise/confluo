@@ -25,8 +25,7 @@ class query_plan : public std::vector<std::shared_ptr<query_op>> {
    * @param schema The schema for the query plan
    * @param expr The query plan expression
    */
-  query_plan(const data_log *dlog, const schema_t *schema,
-             const parser::compiled_expression &expr);
+  query_plan(const data_log *dlog, const schema_t *schema, const parser::compiled_expression &expr);
 
   /**
    * Gets a string representation of the query plan

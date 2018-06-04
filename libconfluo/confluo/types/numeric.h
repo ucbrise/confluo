@@ -32,9 +32,6 @@ data_type max(const data_type &t1, const data_type &t2);
 
 class numeric {
  public:
-  /** The maximum size of data a numeric can hold in bytes */
-  static const size_t MAX_SIZE = sizeof(uint64_t);
-
   /**
    * Constructs a numeric of the none type
    */
@@ -184,8 +181,7 @@ class numeric {
    * @throw invalid_operation_exception
    * @return True if the relational comparison is true, false otherwise
    */
-  static bool relop(reational_op_id id, const numeric &first,
-                    const numeric &second);
+  static bool relop(reational_op_id id, const numeric &first, const numeric &second);
 
   /**
    * Less than operator
@@ -302,8 +298,7 @@ class numeric {
    *
    * @return A numeric containing the result of the binary expression
    */
-  static numeric binaryop(binary_op_id id, const numeric &first,
-                          const numeric &second);
+  static numeric binaryop(binary_op_id id, const numeric &first, const numeric &second);
 
   /**
    * The addition operator
@@ -524,10 +519,8 @@ class numeric {
    *
    * @return The value of type T
    */
-  template<typename T,
-      typename std::enable_if<
-          std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type * =
-      nullptr>
+  template<typename T, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                               T>::type * = nullptr>
   T &as() {
     return *reinterpret_cast<T *>(data_);
   }
@@ -539,10 +532,8 @@ class numeric {
    *
    * @return The value of type T that is not modifiable
    */
-  template<typename T,
-      typename std::enable_if<
-          std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type * =
-      nullptr>
+  template<typename T, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                               T>::type * = nullptr>
   const T &as() const {
     return *reinterpret_cast<const T *>(data_);
   }
@@ -554,13 +545,23 @@ class numeric {
    */
   std::string to_string() const;
 
+  /**
+   * Get the type for the numeric
+   *
+   * @return The numeric type
+   */
   data_type type();
 
+  /**
+   * Get raw data for the numeric
+   *
+   * @return Raw data for the numeric
+   */
   uint8_t *data();
 
  private:
   data_type type_;
-  uint8_t data_[MAX_SIZE];
+  uint8_t data_[sizeof(uint64_t)];
 };
 
 // Cast functions for primitive types

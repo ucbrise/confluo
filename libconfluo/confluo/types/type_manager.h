@@ -44,7 +44,7 @@ class primitive_types {
  public:
   /** The none data type */
   static data_type &NONE_TYPE() {
-    static data_type none_type(0, 0);
+    static data_type none_type(primitive_type::D_NONE, 0);
     return none_type;
   }
 

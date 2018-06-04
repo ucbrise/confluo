@@ -347,10 +347,10 @@ class monolog_exp2_linear_base {
    */
   void try_allocate_bucket(__atomic_bucket_ref* container, size_t bucket_idx, __atomic_bucket_copy_ref& copy) {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    void *new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T), aux);
+    void *new_bucket_data = allocator::instance().alloc(BUCKET_SIZE * sizeof(T), aux);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(storage::encoded_ptr<T>(new_bucket_data))) {
-      ALLOCATOR.dealloc(new_bucket_data);
+      allocator::instance().dealloc(new_bucket_data);
     }
     container[bucket_idx].atomic_copy(copy);
   }
@@ -364,11 +364,11 @@ class monolog_exp2_linear_base {
    */
   storage::encoded_ptr<T> try_allocate_bucket(__atomic_bucket_ref *container, size_t bucket_idx) {
     storage::ptr_aux_block aux(storage::state_type::D_IN_MEMORY, storage::encoding_type::D_UNENCODED);
-    void *new_bucket_data = ALLOCATOR.alloc(BUCKET_SIZE * sizeof(T), aux);
+    void *new_bucket_data = allocator::instance().alloc(BUCKET_SIZE * sizeof(T), aux);
     storage::encoded_ptr<T> enc_ptr(new_bucket_data);
     memset(new_bucket_data, 0xFF, BUCKET_SIZE * sizeof(T));
     if (!container[bucket_idx].atomic_init(enc_ptr)) {
-      ALLOCATOR.dealloc(new_bucket_data);
+      allocator::instance().dealloc(new_bucket_data);
       return container[bucket_idx].atomic_load();
     }
     return enc_ptr;

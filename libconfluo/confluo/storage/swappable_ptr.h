@@ -110,10 +110,10 @@ class read_only_ptr {
       bool uses_first_count = aux.state_ == state_type::D_IN_MEMORY;
       if (uses_first_count && ref_counts_->decrement_first_and_compare()) {
         lifecycle_util<T>::destroy(ptr_);
-        ALLOCATOR.dealloc(ptr_);
+        allocator::instance().dealloc(ptr_);
       } else if (!uses_first_count && ref_counts_->decrement_second_and_compare()) {
         lifecycle_util<T>::destroy(ptr_);
-        ALLOCATOR.dealloc(ptr_);
+        allocator::instance().dealloc(ptr_);
       }
     }
   }
@@ -288,7 +288,7 @@ class swappable_ptr {
    */
   static void destroy_dealloc(T *ptr) {
     lifecycle_util<T>::destroy(ptr);
-    ALLOCATOR.dealloc(ptr);
+    allocator::instance().dealloc(ptr);
   }
 
   mutable reference_counts ref_counts_; // mutable reference counts for logically const functions

@@ -137,6 +137,9 @@ add_library(confluo STATIC
         src/compression/confluo_encoder.cc
         src/container/data_log.cc
         src/container/reflog.cc
+        src/container/cursor/alert_cursor.cc
+        src/container/cursor/offset_cursors.cc
+        src/container/cursor/record_cursors.cc
         src/parser/aggregate_parser.cc
         src/parser/expression_compiler.cc
         src/parser/expression_parser.cc
@@ -182,11 +185,7 @@ add_library(confluo STATIC
         src/types/raw_data.cc
         src/types/numeric.cc
         src/types/type_properties.cc
-        src/types/type_manager.cc
-        src/container/cursor/alert_cursor.cc
-        src/container/cursor/offset_cursors.cc
-        src/container/cursor/record_cursors.cc
-        )
+        src/types/type_manager.cc)
 target_link_libraries(confluo confluoutils)
 
 if (BUILD_TESTS)

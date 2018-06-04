@@ -261,15 +261,13 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   i = 0;
   for (auto r = mlog->execute_filter("h == zzz"); r->has_more(); r->advance()) {
     ASSERT_TRUE(
-        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
-            == "zzz");
+        r->get().at(8).value().to_data().as<std::string>().substr(0, 3) == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog->execute_filter("a == true && b > 4"); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->execute_filter("a == true && b > 4"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -277,23 +275,19 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog->execute_filter("a == true && (b > 4 || c <= 30)");
-       r->has_more(); r->advance()) {
+  for (auto r = mlog->execute_filter("a == true && (b > 4 || c <= 30)"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r->get().at(2).value().to_data().as<int8_t>() > '4'
-            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
+        r->get().at(2).value().to_data().as<int8_t>() > '4' || r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->execute_filter("a == true && (b > 4 || f > 0.1)");
-       r->has_more(); r->advance()) {
+  for (auto r = mlog->execute_filter("a == true && (b > 4 || f > 0.1)"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r->get().at(2).value().to_data().as<int8_t>() > '4'
-            || r->get().at(6).value().to_data().as<float>() > 0.1);
+        r->get().at(2).value().to_data().as<int8_t>() > '4' || r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -310,8 +304,7 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
-  store->create_atomic_multilog(atomic_multilog_name, schema(),
-                                storage::IN_MEMORY);
+  store->create_atomic_multilog(atomic_multilog_name, schema(), storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
   auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
   std::thread serve_thread([&server] {
@@ -348,8 +341,8 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   client.install_trigger("trigger8", "agg8 >= 10");
 
   int64_t now_ns = time_utils::cur_ns();
-  int64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
-  int64_t end = beg;
+  uint64_t beg = now_ns / configuration_params::TIME_RESOLUTION_NS();
+  uint64_t end = beg;
   mlog->append(record(now_ns, false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog->append(record(now_ns, true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
   mlog->append(record(now_ns, false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
@@ -360,74 +353,63 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   mlog->append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
   size_t i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter1", beg, end); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter2", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter2", beg, end); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter3", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter3", beg, end); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter4", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter4", beg, end); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(4).value().to_data().as<int32_t>() == 0);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(1), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter5", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter5", beg, end); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(5).value().to_data().as<int64_t>() <= 100);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter6", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter6", beg, end); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(6), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter7", beg, end); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter7", beg, end); r->has_more(); r->advance()) {
     ASSERT_TRUE(r->get().at(7).value().to_data().as<double>() < 0.06);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(5), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter8", beg, end); r->has_more();
-       r->advance()) {
-    ASSERT_TRUE(
-        r->get().at(8).value().to_data().as<std::string>().substr(0, 3)
-            == "zzz");
+  for (auto r = mlog->query_filter("filter8", beg, end); r->has_more(); r->advance()) {
+    ASSERT_TRUE(r->get().at(8).value().to_data().as<std::string>().substr(0, 3) == "zzz");
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4"); r->has_more();
-       r->advance()) {
+  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(r->get().at(2).value().to_data().as<int8_t>() > '4');
     i++;
@@ -435,23 +417,19 @@ TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
   ASSERT_EQ(static_cast<size_t>(2), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4 || c <= 30");
-       r->has_more(); r->advance()) {
+  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4 || c <= 30"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r->get().at(2).value().to_data().as<int8_t>() > '4'
-            || r->get().at(3).value().to_data().as<int16_t>() <= 30);
+        r->get().at(2).value().to_data().as<int8_t>() > '4' || r->get().at(3).value().to_data().as<int16_t>() <= 30);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(4), i);
 
   i = 0;
-  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4 || f > 0.1");
-       r->has_more(); r->advance()) {
+  for (auto r = mlog->query_filter("filter1", beg, end, "b > 4 || f > 0.1"); r->has_more(); r->advance()) {
     ASSERT_EQ(true, r->get().at(1).value().to_data().as<bool>());
     ASSERT_TRUE(
-        r->get().at(2).value().to_data().as<int8_t>() > '4'
-            || r->get().at(6).value().to_data().as<float>() > 0.1);
+        r->get().at(2).value().to_data().as<int8_t>() > '4' || r->get().at(6).value().to_data().as<float>() > 0.1);
     i++;
   }
   ASSERT_EQ(static_cast<size_t>(3), i);
@@ -625,7 +603,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   client.install_trigger("trigger1", "agg1 >= 10");
   client.install_trigger("trigger2", "agg2 >= 10");
 
-  int64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS();
+  uint64_t beg = r.ts / configuration_params::TIME_RESOLUTION_NS();
   mlog->append(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
   mlog->append(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
   mlog->append(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
@@ -635,7 +613,7 @@ TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
   mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
-  int64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS();
+  uint64_t end = r.ts / configuration_params::TIME_RESOLUTION_NS();
 
   size_t i = 0;
   for (auto r = mlog->query_filter("filter1", beg, end); r->has_more();

@@ -7,9 +7,7 @@ query_plan::query_plan(const data_log *dlog, const schema_t *schema, const parse
     : std::vector<std::shared_ptr<query_op>>(),
       dlog_(dlog),
       schema_(schema),
-      expr_(expr) {
-
-}
+      expr_(expr) {}
 
 std::string query_plan::to_string() {
   if (!is_optimized()) {
@@ -41,21 +39,16 @@ numeric query_plan::aggregate(uint64_t version, uint16_t field_idx, const aggreg
 }
 
 std::unique_ptr<record_cursor> query_plan::using_full_scan(uint64_t version) {
-  std::unique_ptr<offset_cursor> o_cursor(
-      new data_log_cursor(version, schema_->record_size()));
-  return std::unique_ptr<record_cursor>(
-      new filter_record_cursor(std::move(o_cursor), dlog_, schema_, expr_));
+  std::unique_ptr<offset_cursor> o_cursor(new data_log_cursor(version, schema_->record_size()));
+  return std::unique_ptr<record_cursor>(new filter_record_cursor(std::move(o_cursor), dlog_, schema_, expr_));
 }
 
 std::unique_ptr<record_cursor> query_plan::using_indexes(uint64_t version) {
   if (size() == 1) {
-    index::radix_index::rt_result ret = std::dynamic_pointer_cast<index_op>(
-        at(0))->query_index();
-    std::unique_ptr<offset_cursor> o_cursor(
-        new offset_iterator_cursor<index::radix_index::rt_result::iterator>(
-            ret.begin(), ret.end(), version));
-    return std::unique_ptr<record_cursor>(
-        new filter_record_cursor(std::move(o_cursor), dlog_, schema_, expr_));
+    index::radix_index::rt_result ret = std::dynamic_pointer_cast<index_op>(at(0))->query_index();
+    std::unique_ptr<offset_cursor>
+        o_cursor(new offset_iterator_cursor<index::radix_index::rt_result::iterator>(ret.begin(), ret.end(), version));
+    return std::unique_ptr<record_cursor>(new filter_record_cursor(std::move(o_cursor), dlog_, schema_, expr_));
   }
   std::vector<index::radix_index::rt_result> res;
   for (size_t i = 0; i < size(); i++) {
@@ -63,12 +56,8 @@ std::unique_ptr<record_cursor> query_plan::using_indexes(uint64_t version) {
   }
   flattened_container<std::vector<index::radix_index::rt_result>> c(res);
   typedef flattened_container<std::vector<index::radix_index::rt_result>>::iterator iterator_t;
-  std::unique_ptr<offset_cursor> o_cursor(
-      new offset_iterator_cursor<iterator_t>(c.begin(), c.end(), version));
-  return make_distinct(
-      std::unique_ptr<record_cursor>(
-          new filter_record_cursor(std::move(o_cursor), dlog_, schema_,
-                                   expr_)));
+  std::unique_ptr<offset_cursor> o(new offset_iterator_cursor<iterator_t>(c.begin(), c.end(), version));
+  return make_distinct(std::unique_ptr<record_cursor>(new filter_record_cursor(std::move(o), dlog_, schema_, expr_)));
 }
 
 }

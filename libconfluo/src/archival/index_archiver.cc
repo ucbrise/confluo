@@ -62,7 +62,7 @@ size_t index_archiver::archive_bucket(byte_string key, reflog &refs, size_t idx,
   // Only swap pointer for full buckets.
   if (bucket_size == reflog_constants::BUCKET_SIZE) {
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
-    void *enc_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
+    void *enc_bucket = allocator::instance().mmap(off.path(), static_cast<off_t>(off.offset()), enc_size, aux);
     archival_utils::swap_bucket_ptr(refs, idx, encoded_reflog_ptr(enc_bucket));
   }
   return idx + bucket_size;
@@ -86,7 +86,7 @@ size_t index_load_utils::load(const std::string &path, index::radix_index *index
 
     auto *&refs = index->get_or_create(cur_key);
     ptr_aux_block aux(state_type::D_ARCHIVED, archival_configuration_params::REFLOG_ENCODING_TYPE());
-    void *encoded_bucket = ALLOCATOR.mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
+    void *encoded_bucket = allocator::instance().mmap(off.path(), static_cast<off_t>(off.offset()), bucket_size, aux);
     init_bucket_ptr(refs, reflog_idx, encoded_reflog_ptr(encoded_bucket));
     reader.advance<uint8_t>(bucket_size);
     reflog_idx += archival_metadata.bucket_size();

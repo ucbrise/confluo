@@ -6,7 +6,7 @@ confluo_store::confluo_store(const std::string &data_path)
     : data_path_(utils::file_utils::full_path(data_path)) {
   utils::file_utils::create_dir(data_path_);
   // Note that this assumes a one-to-one relationship between the confluo_store and allocator
-  ALLOCATOR.register_cleanup_callback(std::bind(&confluo_store::memory_management_callback, this));
+  allocator::instance().register_cleanup_callback(std::bind(&confluo_store::memory_management_callback, this));
 }
 
 int64_t confluo_store::create_atomic_multilog(const std::string &name,
@@ -65,8 +65,7 @@ atomic_multilog *confluo_store::get_atomic_multilog(const std::string &name) {
 
 atomic_multilog *confluo_store::get_atomic_multilog(int64_t id) {
   if (id >= static_cast<int64_t>(atomic_multilogs_.size())) {
-    throw management_exception(
-        "No such atomic multilog with id " + std::to_string(id));
+    throw management_exception("No such atomic multilog with id " + std::to_string(id));
   }
   return atomic_multilogs_[id];
 }
@@ -84,7 +83,7 @@ int64_t confluo_store::remove_atomic_multilog(int64_t id) {
 }
 
 void confluo_store::memory_management_task() {
-  if (ALLOCATOR.memory_utilization() >= configuration_params::MAX_MEMORY()) {
+  if (allocator::instance().memory_utilization() >= configuration_params::MAX_MEMORY()) {
     for (size_t id = 0; id < atomic_multilogs_.size(); id++) {
       // TODO how aggressively to archive and should multilogs with archival OFF be archived?
       atomic_multilogs_.get(id)->archive();
@@ -115,8 +114,7 @@ int64_t confluo_store::create_atomic_multilog_task(const std::string &name,
                                            mode, a_mode, mgmt_pool_);
   id = atomic_multilogs_.push_back(t);
   if (multilog_map_.put(name, id) == -1) {
-    ex = management_exception(
-        "Could not add atomic multilog " + name + " to atomic multilog map");
+    ex = management_exception("Could not add atomic multilog " + name + " to atomic multilog map");
     return INT64_C(-1);
   }
   return static_cast<int64_t>(id);
@@ -137,8 +135,7 @@ int64_t confluo_store::create_atomic_multilog_task(const std::string &name,
                                            mode, a_mode, mgmt_pool_);
   id = atomic_multilogs_.push_back(t);
   if (multilog_map_.put(name, id) == -1) {
-    ex = management_exception(
-        "Could not add atomic multilog " + name + " to atomic multilog map");
+    ex = management_exception("Could not add atomic multilog " + name + " to atomic multilog map");
     return INT64_C(-1);
   }
   return static_cast<int64_t>(id);
@@ -153,8 +150,7 @@ int64_t confluo_store::load_atomic_multilog_task(const std::string &name, option
   atomic_multilog *t = new atomic_multilog(name, data_path_ + "/" + name, mgmt_pool_);
   id = atomic_multilogs_.push_back(t);
   if (multilog_map_.put(name, id) == -1) {
-    ex = management_exception(
-        "Could not add atomic multilog " + name + " to atomic multilog map");
+    ex = management_exception("Could not add atomic multilog " + name + " to atomic multilog map");
     return INT64_C(-1);
   }
   return static_cast<int64_t>(id);

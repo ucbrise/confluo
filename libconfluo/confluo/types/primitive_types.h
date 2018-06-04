@@ -11,32 +11,19 @@ namespace confluo {
  */
 enum primitive_type
     : uint16_t {
-  /** Identifier for the none type */
-      D_NONE = 0,
-  /** Identifier for the boolean type */
-      D_BOOL = 1,
-  /** Identifier for the character type */
-      D_CHAR = 2,
-  /** Identifier for the unsigned character type */
-      D_UCHAR = 3,
-  /** Identifier for the short type */
-      D_SHORT = 4,
-  /** Identifier for the unsigned short type */
-      D_USHORT = 5,
-  /** Identifier for the signed integer type */
-      D_INT = 6,
-  /** Identifier for the unsigned integer type */
-      D_UINT = 7,
-  /** Identifier for the long type */
-      D_LONG = 8,
-  /** Identifier for the unsigned long type */
-      D_ULONG = 9,
-  /** Identifier for the float type */
-      D_FLOAT = 10,
-  /** Identifier for the double type */
-      D_DOUBLE = 11,
-  /** Identifier for the string type */
-      D_STRING = 12
+  D_NONE = 0, /** Identifier for the none type */
+  D_BOOL = 1, /** Identifier for the boolean type */
+  D_CHAR = 2, /** Identifier for the character type */
+  D_UCHAR = 3, /** Identifier for the unsigned character type */
+  D_SHORT = 4, /** Identifier for the short type */
+  D_USHORT = 5, /** Identifier for the unsigned short type */
+  D_INT = 6, /** Identifier for the signed integer type */
+  D_UINT = 7, /** Identifier for the unsigned integer type */
+  D_LONG = 8, /** Identifier for the long type */
+  D_ULONG = 9, /** Identifier for the unsigned long type */
+  D_FLOAT = 10, /** Identifier for the float type */
+  D_DOUBLE = 11, /** Identifier for the double type */
+  D_STRING = 12 /** Identifier for the string type */
 };
 
 class limits {

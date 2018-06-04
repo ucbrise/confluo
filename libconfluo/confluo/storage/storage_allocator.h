@@ -83,7 +83,6 @@ class storage_allocator {
 
   static const int MAX_CLEANUP_RETRIES = 10;
   static void no_op() {}
-
 };
 
 }

@@ -43,6 +43,9 @@ class string_utils {
   }
 };
 
+template<>
+bool string_utils::lexical_cast<bool>(const std::string &s);
+
 }
 
 #endif /* UTILS_STRING_UTILS_H_ */

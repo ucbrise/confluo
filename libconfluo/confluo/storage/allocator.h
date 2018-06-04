@@ -6,7 +6,13 @@
 namespace confluo {
 
 /** Static storage allocator */
-static storage::storage_allocator ALLOCATOR;
+class allocator {
+ public:
+  static storage::storage_allocator &instance() {
+    static storage::storage_allocator alloc;
+    return alloc;
+  }
+};
 
 }
 

@@ -20,7 +20,7 @@ void load_utils::load_data_log_storage(data_log &log, size_t start_bucket_idx) {
   size_t bucket_idx = start_bucket_idx;
   while (file_utils::exists_file(bucket_path)) {
     ptr_aux_block aux(state_type::D_IN_MEMORY, encoding_type::D_UNENCODED);
-    void *bucket = ALLOCATOR.mmap(bucket_path, 0, log.bucket_size(), aux);
+    void *bucket = allocator::instance().mmap(bucket_path, 0, log.bucket_size(), aux);
     buckets[bucket_idx].init_ptr(encoded_ptr<uint8_t>(bucket));
     bucket_idx++;
     bucket_path = log.bucket_data_path(bucket_idx);

@@ -14,15 +14,21 @@ query_plan query_planner::plan(const parser::compiled_expression &expr) const {
   for (const parser::compiled_minterm &m : expr) {
     std::shared_ptr<query_op> op = optimize_minterm(m);
     switch (op->op_type()) {
-      case query_op_type::D_NO_OP:break;
+      case query_op_type::D_NO_OP: {
+        break;
+      }
       case query_op_type::D_NO_VALID_INDEX_OP: {
         qp.clear();
         qp.push_back(std::make_shared<full_scan_op>());
         return qp;
       }
-      case query_op_type::D_INDEX_OP:qp.push_back(op);
+      case query_op_type::D_INDEX_OP: {
+        qp.push_back(op);
         break;
-      default:throw illegal_state_exception("Minterm generated invalid query_op");
+      }
+      default: {
+        throw illegal_state_exception("Minterm generated invalid query_op");
+      }
     }
   }
   return qp;

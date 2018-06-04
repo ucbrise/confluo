@@ -11,7 +11,7 @@ aggregated_reflog::aggregated_reflog()
 aggregated_reflog::aggregated_reflog(const aggregate_log &aggregates)
     : reflog() {
   size_t alloc_size = sizeof(aggregate) * aggregates.size();
-  aggregate* aggs = static_cast<aggregate*>(ALLOCATOR.alloc(alloc_size));
+  aggregate *aggs = static_cast<aggregate *>(allocator::instance().alloc(alloc_size));
   storage::lifecycle_util<aggregate>::construct(aggs);
   for (size_t i = 0; i < aggregates.size(); i++) {
     aggs[i] = aggregates.at(i)->create_aggregate();

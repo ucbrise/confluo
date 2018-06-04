@@ -35,6 +35,9 @@ struct immutable_raw_data {
   }
 };
 
+template<>
+std::string immutable_raw_data::as<std::string>() const;
+
 /**
  * Raw data that is modifiable
  */
@@ -156,6 +159,12 @@ struct mutable_raw_data {
   void allocate(size_t sz);
 
 };
+
+template<>
+std::string mutable_raw_data::as<std::string>() const;
+
+template<>
+mutable_raw_data &mutable_raw_data::set<std::string>(const std::string &value);
 
 }
 

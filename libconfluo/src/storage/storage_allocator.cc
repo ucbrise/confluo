@@ -60,7 +60,6 @@ void *storage_allocator::mmap(std::string path, size_t size, ptr_aux_block aux) 
 void *storage_allocator::mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux) {
   int mmap_delta = static_cast<int>(offset % getpagesize());
   off_t page_aligned_offset = offset - mmap_delta;
-
   size_t mmap_size = sizeof(ptr_metadata) + size + mmap_delta;
   mmap_stat_.increment(mmap_size);
 

@@ -30,6 +30,12 @@ class io_utils {
   static void flush(std::ostream &out);
 };
 
+template<>
+void io_utils::write<std::string>(std::ostream &out, const std::string &value);
+
+template<>
+std::string io_utils::read<std::string>(std::istream &in);
+
 }
 
 #endif /* UTILS_IO_UTILS_H_ */

@@ -121,7 +121,7 @@ class read_only_encoded_ptr {
    * @param data decoded data buffer
    */
   void encode(size_t idx, size_t len, const T *data) {
-    enc_ptr_.encode(idx + offset_, len, data);
+    enc_ptr_.encode(idx + offset_, data, len);
   }
 
   /**
@@ -179,10 +179,10 @@ class read_only_encoded_ptr {
       bool uses_first_count = ptr_aux_block::get(metadata).state_ == state_type::D_IN_MEMORY;
       if (uses_first_count && ref_counts_->decrement_first_and_compare()) {
         lifecycle_util<T>::destroy(internal_ptr);
-        ALLOCATOR.dealloc(internal_ptr);
+        allocator::instance().dealloc(internal_ptr);
       } else if (!uses_first_count && ref_counts_->decrement_second_and_compare()) {
         lifecycle_util<T>::destroy(internal_ptr);
-        ALLOCATOR.dealloc(internal_ptr);
+        allocator::instance().dealloc(internal_ptr);
       }
     }
   }
@@ -360,7 +360,7 @@ class swappable_encoded_ptr {
   static void destroy_dealloc(encoded_ptr<T> encoded_ptr) {
     void *internal_ptr = encoded_ptr.ptr();
     lifecycle_util<T>::destroy(internal_ptr);
-    ALLOCATOR.dealloc(internal_ptr);
+    allocator::instance().dealloc(internal_ptr);
   }
 
   mutable reference_counts ref_counts_; // mutable reference counts for logically const functions

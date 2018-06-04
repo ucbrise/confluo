@@ -21,7 +21,17 @@ add_library(confluoutils STATIC
         utils/error_handling.h
         utils/atomic.h
         src/utils/assertions.cc
-        src/utils/cmd_parse.cc src/utils/config_utils.cc src/utils/error_handling.cc src/utils/file_utils.cc src/utils/io_utils.cc src/utils/logger.cc src/utils/math_utils.cc src/utils/mmap_utils.cc src/utils/rand_utils.cc src/utils/string_utils.cc src/utils/time_utils.cc)
+        src/utils/cmd_parse.cc
+        src/utils/config_utils.cc
+        src/utils/error_handling.cc
+        src/utils/file_utils.cc
+        src/utils/io_utils.cc
+        src/utils/logger.cc
+        src/utils/math_utils.cc
+        src/utils/mmap_utils.cc
+        src/utils/rand_utils.cc
+        src/utils/string_utils.cc
+        src/utils/time_utils.cc)
 
 # install
 install(DIRECTORY utils/

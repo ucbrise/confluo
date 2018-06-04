@@ -107,7 +107,7 @@ class filter_load_utils {
       if (num_aggs > 0) {
         size_t size = sizeof(aggregate) * num_aggs;
         ptr_aux_block aux(state_type::D_ARCHIVED, encoding_type::D_UNENCODED);
-        aggregate *archived_aggs = static_cast<aggregate *>(ALLOCATOR.alloc(size, aux));
+        aggregate *archived_aggs = static_cast<aggregate *>(allocator::instance().alloc(size, aux));
         storage::lifecycle_util<aggregate>::construct(archived_aggs);
         for (size_t i = 0; i < num_aggs; i++) {
           data_type type = reader.read<data_type>();
