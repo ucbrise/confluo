@@ -8,11 +8,10 @@
 #include <cstring>
 #include <iostream>
 
+#include "storage/allocator.h"
 #include "bit_utils.h"
 
 namespace confluo {
-
-using namespace ::utils;
 
 /**
  * The bitmap class. Stores a bit-array of a fixed size, and supports access and
@@ -46,7 +45,7 @@ class bitmap {
    */
   bitmap(size_type num_bits) {
     size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(num_bits);
-    data_ = static_cast<data_type*>(ALLOCATOR.alloc(alloc_size));
+    data_ = static_cast<data_type*>(allocator::instance().alloc(alloc_size));
     memset(data_, 0, alloc_size);
     size_ = num_bits;
   }
@@ -56,7 +55,7 @@ class bitmap {
    */
   virtual ~bitmap() {
     if (data_ != NULL) {
-      ALLOCATOR.dealloc(data_);
+      allocator::instance().dealloc(data_);
       data_ = NULL;
     }
   }
@@ -125,6 +124,7 @@ class bitmap {
    */
   template<typename T>
   typename std::enable_if<std::is_arithmetic<T>::value>::type set_val_pos(pos_type pos, T val, width_type bits) {
+    using namespace ::utils;
     pos_type s_off = pos % 64;
     pos_type s_idx = pos / 64;
 
@@ -146,6 +146,7 @@ class bitmap {
    */
   template<typename T>
   typename std::enable_if<std::is_arithmetic<T>::value, T>::type get_val_pos(pos_type pos, width_type bits) const {
+    using namespace ::utils;
     pos_type s_off = pos % 64;
     pos_type s_idx = pos / 64;
 
@@ -187,7 +188,7 @@ class bitmap {
     in.read(reinterpret_cast<char *>(&size_), sizeof(size_type));
     in_size += sizeof(size_type);
     size_t alloc_size = sizeof(data_type) * BITS2BLOCKS(size_);
-    data_ = static_cast<data_type *>(ALLOCATOR.alloc(alloc_size));
+    data_ = static_cast<data_type *>(allocator::instance().alloc(alloc_size));
     memset(data_, 0, alloc_size);
     in.read(reinterpret_cast<char *>(data_), BITS2BLOCKS(size_) * sizeof(data_type));
     in_size += (BITS2BLOCKS(size_) * sizeof(data_type));

@@ -32,7 +32,7 @@ void *storage_allocator::alloc(size_t size, ptr_aux_block aux) {
   void* data_ptr = reinterpret_cast<void*>(md + 1);
 
   md->alloc_type_ = alloc_type::D_DEFAULT;
-  md->data_size_ = size;
+  md->data_size_ = static_cast<uint32_t>(size);
   md->offset_ = 0;
   md->aux_ = *reinterpret_cast<uint8_t*>(&aux);
 

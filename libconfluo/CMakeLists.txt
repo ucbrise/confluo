@@ -186,7 +186,8 @@ add_library(confluo STATIC
         src/types/numeric.cc
         src/types/type_properties.cc
         src/types/type_manager.cc)
-target_link_libraries(confluo confluoutils)
+target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
+add_dependencies(confluo lz4)
 
 if (BUILD_TESTS)
   # Build test
@@ -238,13 +239,12 @@ if (BUILD_TESTS)
           test/compression/delta_encode_test.h
           test/aggregated_reflog_test.h
           test/confluo_store_test.h)
-  target_link_libraries(ctest confluo gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
-  add_dependencies(ctest googletest lz4)
+  target_link_libraries(ctest confluo gtest gtest_main)
+  add_dependencies(ctest googletest)
 
   file(GLOB_RECURSE test_sources test/*.cc)
-  target_link_libraries(ctest ${TEST_LINK_LIBS} ${JEMALLOC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(ctest ${TEST_LINK_LIBS} ${CMAKE_THREAD_LIBS_INIT})
   add_dependencies(ctest googletest)
-  add_dependencies(ctest jemalloc)
 
   # Register test
   enable_testing()

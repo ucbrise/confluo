@@ -43,7 +43,7 @@ aggregate_list::aggregate_list(const aggregate_list &other)
   aggregate_node *other_tail = atomic::load(&other.head_);
   while (other_tail != nullptr) {
     aggregate_node* cur_head = atomic::load(&head_);
-    void* raw = ALLOCATOR.alloc(sizeof(aggregate_node));
+    void* raw = allocator::instance().alloc(sizeof(aggregate_node));
     aggregate_node* new_head = new(raw) aggregate_node(other_tail->value(), other_tail->version(), cur_head);
     atomic::store(&head_, new_head);
     other_tail = other_tail->next();
@@ -57,7 +57,7 @@ aggregate_list &aggregate_list::operator=(const aggregate_list &other) {
   aggregate_node *other_tail = atomic::load(&other.head_);
   while (other_tail != nullptr) {
     aggregate_node* cur_head = atomic::load(&head_);
-    void* raw = ALLOCATOR.alloc(sizeof(aggregate_node));
+    void* raw = allocator::instance().alloc(sizeof(aggregate_node));
     aggregate_node* new_head = new(raw) aggregate_node(other_tail->value(), other_tail->version(), cur_head);
     atomic::store(&head_, new_head);
     other_tail = other_tail->next();
@@ -70,7 +70,7 @@ aggregate_list::~aggregate_list() {
   while (cur_node != nullptr) {
     aggregate_node* next = cur_node->next();
     cur_node->~aggregate_node();
-    ALLOCATOR.dealloc(cur_node);
+    allocator::instance().dealloc(cur_node);
     cur_node = next;
   }
 }
@@ -87,7 +87,7 @@ void aggregate_list::comb_update(const numeric &value, uint64_t version) {
   aggregate_node *cur_head = atomic::load(&head_);
   aggregate_node *req = get_node(cur_head, version);
   numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
-  void* raw = ALLOCATOR.alloc(sizeof(aggregate_node));
+  void* raw = allocator::instance().alloc(sizeof(aggregate_node));
   aggregate_node* node = new(raw) aggregate_node(agg_.comb_op(old_agg, value), version, cur_head);
   atomic::store(&head_, node);
 }
@@ -96,7 +96,7 @@ void aggregate_list::seq_update(const numeric &value, uint64_t version) {
   aggregate_node *cur_head = atomic::load(&head_);
   aggregate_node *req = get_node(cur_head, version);
   numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
-  void* raw = ALLOCATOR.alloc(sizeof(aggregate_node));
+  void* raw = allocator::instance().alloc(sizeof(aggregate_node));
   aggregate_node* node = new(raw) aggregate_node(agg_.seq_op(old_agg, value), version, cur_head);
   atomic::store(&head_, node);
 }

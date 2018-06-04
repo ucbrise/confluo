@@ -37,8 +37,8 @@ add_executable(confluod
         src/rpc_record_stream.cc
         src/rpc_type_conversions.cc
         src/confluo_server.cc)
-target_link_libraries(confluod confluo ${CMAKE_THREAD_LIBS_INIT} thriftstatic ${lz4_STATIC_LIB} ${JEMALLOC_LIBRARIES})
-add_dependencies(confluod thrift lz4 jemalloc)
+target_link_libraries(confluod confluo thriftstatic)
+add_dependencies(confluod thrift)
 
 add_library(rpcclient STATIC
         rpc/rpc_constants.h
@@ -86,8 +86,8 @@ if (BUILD_TESTS)
           test/client_connection_test.h
           test/rpc_test_utils.h
           test/client_write_ops_test.h)
-  target_link_libraries(rpctest confluo gtest gtest_main ${CMAKE_THREAD_LIBS_INIT} rpcclient thriftstatic ${lz4_STATIC_LIB})
-  add_dependencies(rpctest googletest thrift)
+  target_link_libraries(rpctest confluo gtest gtest_main rpcclient)
+  add_dependencies(rpctest googletest)
 
   # Register test
   enable_testing()
