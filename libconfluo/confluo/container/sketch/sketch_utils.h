@@ -12,9 +12,9 @@ namespace sketch {
 #define ELEM_SWAP(a,b) { T t=(a); (a)=(b); (b)=t; }
 
 template<typename T>
-static T median(std::vector<T> data) {
-  int k = (data.size() & 1) ? (data.size() / 2) : (data.size() / 2) - 1;
-  int i, j, l, m;
+static T median(std::vector<T>& data) {
+  size_t k = (data.size() & 1) ? (data.size() / 2) : (data.size() / 2) - 1;
+  size_t i, j, l, m;
   T x;
   l = 0;
   m = data.size() - 1;
