@@ -2,7 +2,9 @@
 #define CONFLUO_CONTAINER_SKETCH_COUNT_SKETCH_H_
 
 #include <array>
+#include <algorithm>
 #include <vector>
+
 #include "atomic.h"
 #include "hash_manager.h"
 #include "types/primitive_types.h"
@@ -26,21 +28,26 @@ class count_sketch {
    * Constructor.
    * @param num_estimates number of estimates to track per update (depth)
    * @param num_buckets number of buckets (width)
-   * @param manager hash manager
    */
-  count_sketch(size_t num_estimates, size_t num_buckets, const hash_manager& manager)
+  count_sketch(size_t num_estimates, size_t num_buckets)
       : num_estimates_(num_estimates),
         num_buckets_(num_buckets),
         counters_(num_estimates_ * num_buckets_),
-        hash_manager_(manager) {
-    hash_manager_.guarantee_initialized(2 * num_estimates_);
+        bucket_hash_manager_(),
+        sign_hash_manager_() {
+    for (size_t i = 0; i < counters_.size(); i++) {
+      atomic::store(&counters_[i], counter_t());
+    }
+    bucket_hash_manager_.guarantee_initialized(num_estimates_);
+    sign_hash_manager_.guarantee_initialized(num_estimates_);
   }
 
   count_sketch(const count_sketch& other)
       : num_estimates_(other.num_estimates_),
         num_buckets_(other.num_buckets_),
         counters_(num_estimates_ * num_buckets_),
-        hash_manager_(other.hash_manager_) {
+        bucket_hash_manager_(other.bucket_hash_manager_),
+        sign_hash_manager_(other.sign_hash_manager_) {
     for (size_t i = 0; i < counters_.size(); i++) {
       atomic::store(&counters_[i], atomic::load(&other.counters_[i]));
     }
@@ -50,7 +57,8 @@ class count_sketch {
     num_estimates_ = other.num_estimates_;
     num_buckets_ = other.num_buckets_;
     counters_ = std::vector<atomic_counter_t>(num_estimates_ * num_buckets_);
-    hash_manager_ = other.hash_manager_;
+    bucket_hash_manager_ = other.bucket_hash_manager_;
+    sign_hash_manager_ = other.sign_hash_manager_;
     for (size_t i = 0; i < counters_.size(); i++) {
       atomic::store(&counters_[i], atomic::load(&other.counters_[i]));
     }
@@ -63,8 +71,8 @@ class count_sketch {
    */
   void update(T key) {
     for (size_t i = 0; i < num_estimates_; i++) {
-      int bucket_idx = hash_manager_.hash(i, key) % num_buckets_;
-      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, key));
+      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
+      counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
       atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
     }
   }
@@ -77,11 +85,11 @@ class count_sketch {
   counter_t estimate(T key) {
     std::vector<counter_t> median_buf(num_estimates_);
     for (size_t i = 0; i < num_estimates_; i++) {
-      size_t bucket_idx = hash_manager_.hash(i, key) % num_buckets_;
-      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, key));
+      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
+      counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
       median_buf[i] = sign * atomic::load(&counters_[num_buckets_ * i + bucket_idx]);
     }
-    return median<counter_t>(median_buf);
+    return median(median_buf);
   }
 
   /**
@@ -92,12 +100,21 @@ class count_sketch {
   counter_t update_and_estimate(T key) {
     std::vector<counter_t> median_buf(num_estimates_);
     for (size_t i = 0; i < num_estimates_; i++) {
-      int bucket_idx = hash_manager_.hash(i, key) % num_buckets_;
-      counter_t sign = to_sign(hash_manager_.hash(num_estimates_ + i, key));
+      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
+      counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
       counter_t old_count = atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
       median_buf[i] = sign * old_count;
     }
-    return median<counter_t>(median_buf);
+    return median(median_buf);
+  }
+
+  /**
+   * @return storage size of data structure in bytes
+   */
+  size_t storage_size() {
+   size_t counters_size_bytes = sizeof(atomic_counter_t) * (num_estimates_ * num_buckets_);
+   // TODO account for hashes (O(n) increase)
+   return counters_size_bytes;
   }
 
   /**
@@ -108,10 +125,9 @@ class count_sketch {
    * @return count min sketch with accuracy guarantees
    */
   // TODO rename func
-  static count_sketch create_parameterized(double gamma, double epsilon, hash_manager& manager) {
+  static count_sketch create_parameterized(double gamma, double epsilon) {
     return count_sketch(count_sketch<T>::perror_to_num_estimates(gamma),
-                        count_sketch<T>::error_margin_to_num_buckets(epsilon),
-                        manager);
+                        count_sketch<T>::error_margin_to_num_buckets(epsilon));
   }
 
   // TODO move
@@ -122,7 +138,7 @@ class count_sketch {
    */
   static size_t perror_to_num_estimates(double gamma) {
     // TODO assert
-    double n = std::pow(2, sizeof(T) * 8) - 1;
+    double n = std::pow(2.0, sizeof(T) * 8) - 1;
     return std::ceil(std::log2(n / gamma));
   }
 
@@ -145,7 +161,8 @@ class count_sketch {
   size_t num_buckets_; // width
 
   std::vector<atomic_counter_t> counters_;
-  hash_manager hash_manager_;
+  hash_manager<T> bucket_hash_manager_;
+  hash_manager<T> sign_hash_manager_;
 
 };
 
