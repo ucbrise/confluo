@@ -23,6 +23,7 @@ class count_sketch {
   typedef atomic::type<counter_t> atomic_counter_t;
 
   // TODO defaults
+  count_sketch() = default;
 
   /**
    * Constructor.
