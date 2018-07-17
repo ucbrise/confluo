@@ -8,42 +8,42 @@
 namespace confluo {
 namespace sketch {
 
-// TODO rename
-class simple_hash {
+/**
+ * Pairwise-independent hash
+ */
+template<typename T>
+class pairwise_indep_hash {
 
  public:
-  static const size_t PRIME = 4294967311;
+  static const size_t PRIME = 39916801;
 
-  simple_hash()
-      : simple_hash(0, 0) {
+  pairwise_indep_hash()
+      : pairwise_indep_hash(0, 0) {
   }
 
-  simple_hash(size_t a, size_t b)
+  pairwise_indep_hash(size_t a, size_t b)
       : a_(a),
-        b_(b) {
+        b_(b),
+        hash_() {
   }
 
-  template<typename T>
-  typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type apply(T elem) {
-    return (a_ * std::hash<T>(elem) + b_) % PRIME;
+  size_t apply(T elem) {
+    return (a_ * hash_(elem) + b_) % PRIME;
   }
 
-  template<typename T>
-  typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type apply(T elem) {
-    return (a_ * elem + b_) % PRIME;
-  }
-
-  static simple_hash generate_random() {
-    return simple_hash(utils::rand_utils::rand_uint64(PRIME), utils::rand_utils::rand_uint64(PRIME));
+  static pairwise_indep_hash<T> generate_random() {
+    return pairwise_indep_hash<T>(utils::rand_utils::rand_uint64(PRIME), utils::rand_utils::rand_uint64(PRIME));
   }
 
  private:
   size_t a_, b_;
+  std::hash<T> hash_;
 
 };
 
-const size_t simple_hash::PRIME;
+template<typename T> const size_t pairwise_indep_hash<T>::PRIME;
 
+template<typename T>
 class hash_manager {
  public:
   /**
@@ -63,7 +63,7 @@ class hash_manager {
     size_t cur_size = hashes_.size();
     size_t num_new_hashes = num_hashes > cur_size ? num_hashes - cur_size : 0;
     for (size_t i = 0; i < num_new_hashes; i++) {
-      hashes_.push_back(simple_hash::generate_random());
+      hashes_.push_back(pairwise_indep_hash<T>::generate_random());
     }
   }
 
@@ -73,13 +73,12 @@ class hash_manager {
    * @param elem element to hash
    * @return hashed value
    */
-  template<typename T>
   size_t hash(size_t hash_id, T elem) {
-    return hashes_[hash_id].apply<T>(elem);
+    return hashes_[hash_id].apply(elem);
   }
 
  private:
-  std::vector<simple_hash> hashes_;
+  std::vector<pairwise_indep_hash<T>> hashes_;
 
 };
 
