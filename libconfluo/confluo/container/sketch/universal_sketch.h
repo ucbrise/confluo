@@ -6,6 +6,7 @@
 #include "atomic.h"
 #include "count_sketch.h"
 #include "hash_manager.h"
+#include "priority_queue.h"
 
 namespace confluo {
 namespace sketch {
@@ -15,7 +16,7 @@ class substream_summary {
 
  public:
   typedef atomic::type<counter_t> atomic_counter_t;
-  typedef std::vector<atomic::type<T>> heavy_hitters_set;
+  typedef std::vector<atomic::type<T>> atomic_vector_t;
   typedef count_sketch<T, counter_t> sketch;
 
   substream_summary() = default;
@@ -26,14 +27,17 @@ class substream_summary {
    * @param b width (number of buckets)
    * @param k number of heavy hitters to track
    * @param a heavy hitter threshold
+   * @param precise track exact heavy hitters
    */
-  substream_summary(size_t t, size_t b, size_t k, double a)
+  substream_summary(size_t t, size_t b, size_t k, double a, bool precise = true)
       : hh_threshold_(a),
         num_hh_(k),
         l2_squared_(),
         sketch_(t, b),
         heavy_hitters_(k),
-        hh_hash_(pairwise_indep_hash<T>::generate_random()) {
+        hhs_precise_(),
+        hh_hash_(pairwise_indep_hash<T>::generate_random()),
+        use_precise_hh_(precise) {
   }
 
   substream_summary(const substream_summary& other)
@@ -42,7 +46,9 @@ class substream_summary {
         l2_squared_(atomic::load(&other.l2_squared_)),
         sketch_(other.sketch_),
         heavy_hitters_(other.heavy_hitters_.size()),
-        hh_hash_(other.hh_hash_) {
+        hhs_precise_(other.hhs_precise_),
+        hh_hash_(other.hh_hash_),
+        use_precise_hh_(other.use_precise_hh_) {
     for (size_t i = 0; i < other.heavy_hitters_.size(); i++) {
       atomic::store(&heavy_hitters_[i], atomic::load(&other.heavy_hitters_[i]));
     }
@@ -53,8 +59,10 @@ class substream_summary {
     num_hh_ = other.num_hh_;
     l2_squared_ = atomic::load(&other.l2_squared_);
     sketch_ = other.sketch_;
-    heavy_hitters_ = heavy_hitters_set(other.heavy_hitters_.size());
+    heavy_hitters_ = atomic_vector_t(other.heavy_hitters_.size());
+    hhs_precise_ = other.hhs_precise_;
     hh_hash_ = other.hh_hash_;
+    use_precise_hh_ = other.use_precise_hh_;
     for (size_t i = 0; i < other.heavy_hitters_.size(); i++) {
       atomic::store(&heavy_hitters_[i], atomic::load(&other.heavy_hitters_[i]));
     }
@@ -66,15 +74,36 @@ class substream_summary {
     counter_t update = l2_squared_update(old_count);
     counter_t old_l2_sq = atomic::faa(&l2_squared_, update);
     double new_l2 = std::sqrt(old_l2_sq + update);
-    this->update_heavy_hitters(key, old_count + 1, new_l2);
+
+    if (use_precise_hh_) {
+      this->update_hh_pq(key, old_count + 1, new_l2);
+    } else {
+      this->update_hh_approx(key, old_count + 1, new_l2);
+    }
   }
 
-  heavy_hitters_set& get_heavy_hitters() {
+  /**
+   * Estimate count
+   * @param key key
+   * @return estimated count
+   */
+  counter_t estimate(T key) {
+    return sketch_.estimate(key);
+  }
+
+  /**
+   * @return sketch
+   */
+  sketch& get_sketch() {
+    return sketch_;
+  }
+
+  atomic_vector_t& get_heavy_hitters() {
     return heavy_hitters_;
   }
 
-  sketch& get_sketch() {
-    return sketch_;
+  heavy_hitter_set<T, counter_t>& get_pq() {
+    return hhs_precise_;
   }
 
   /**
@@ -88,8 +117,36 @@ class substream_summary {
   }
 
  private:
+  /**
+   * Update heavy hitters priority queue
+   * @param key key
+   * @param count frequency count
+   * @param l2 current l2 norm
+   */
+  void update_hh_pq(T key, counter_t count, double l2) {
+    if (count < hh_threshold_ * l2) {
+      return;
+    }
+    if (hhs_precise_.size() < num_hh_) {
+      hhs_precise_.remove_if_exists(key);
+      hhs_precise_.pushp(key, count);
+    } else {
+      T head = hhs_precise_.top().key_;
+      if (sketch_.estimate(head) < count) {
+        hhs_precise_.pop();
+        hhs_precise_.remove_if_exists(key);
+        hhs_precise_.pushp(key, count);
+      }
+    }
+  }
 
-  void update_heavy_hitters(T key, counter_t count, double l2) {
+  /**
+   * Update heavy hitters approximate DS
+   * @param key key
+   * @param count frequency count
+   * @param l2 current l2 norm
+   */
+  void update_hh_approx(T key, counter_t count, double l2) {
     if (count < hh_threshold_ * l2) {
       return;
     }
@@ -113,12 +170,15 @@ class substream_summary {
   }
 
   double hh_threshold_; // heavy hitter threshold
-  size_t num_hh_; // number of heavy hitters to track
+  size_t num_hh_; // number of heavy hitters to track (k)
 
   atomic_counter_t l2_squared_; // L2 norm squared
   sketch sketch_;
-  heavy_hitters_set heavy_hitters_;
+  atomic_vector_t heavy_hitters_;
+  heavy_hitter_set<T, counter_t> hhs_precise_;
   pairwise_indep_hash<T> hh_hash_;
+
+  bool use_precise_hh_;
 
 };
 
@@ -135,10 +195,10 @@ class universal_sketch {
    * @param b count-sketch width (number of buckets)
    * @param k number of heavy hitters to track per layer
    * @param a heavy hitter threshold
-   * @param layer_hashes hash manager for layers
+   * @param precise track exact heavy hitters
    */
-  universal_sketch(size_t t, size_t b, size_t k, double a, hash_manager<T>& layer_hashes)
-      : universal_sketch(8 * sizeof(T), t, b, a, k, layer_hashes) {
+  universal_sketch(size_t t, size_t b, size_t k, double a)
+      : universal_sketch(8 * sizeof(T), t, b, a, k) {
   }
 
   /**
@@ -148,25 +208,28 @@ class universal_sketch {
    * @param b count-sketch width (number of buckets)
    * @param k number of heavy hitters to track per layer
    * @param a heavy hitter threshold
-   * @param layer_hashes hash manager for layers
+   * @param precise track exact heavy hitters
    */
-  universal_sketch(size_t l, size_t t, size_t b, size_t k, double a, const hash_manager<T>& layer_hashes)
+  universal_sketch(size_t l, size_t t, size_t b, size_t k, double a, bool precise = true)
       : substream_summaries_(l),
-        layer_hashes_(layer_hashes) {
+        layer_hashes_(l - 1),
+        precise_hh_(precise) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = substream_summary<T, counter_t>(t, b, k, a);
+      substream_summaries_[i] = substream_summary<T, counter_t>(t, b, k, a, precise);
     }
   }
 
   universal_sketch(const universal_sketch& other)
       : substream_summaries_(other.substream_summaries_),
-        layer_hashes_(other.layer_hashes_) {
+        layer_hashes_(other.layer_hashes_),
+        precise_hh_(other.precise_hh_) {
   }
 
   universal_sketch& operator=(const universal_sketch& other) {
     substream_summaries_ = other.substream_summaries_;
     layer_hashes_ = other.layer_hashes_;
+    precise_hh_ = other.precise_hh_;
     return *this;
   }
 
@@ -181,6 +244,11 @@ class universal_sketch {
     }
   }
 
+  /**
+   * Estimate count of an individual key.
+   * @param key key
+   * @return estimated count from most accurate layer
+   */
   counter_t estimate_count(T key) {
     counter_t est = substream_summaries_[0].estimate(key);
     // Refine count using lower layers.
@@ -190,6 +258,12 @@ class universal_sketch {
     return est;
   }
 
+  /**
+   * Evaluate a G_SUM function
+   * @tparam g_ret_t return type
+   * @param g function
+   * @return g sum
+   */
   template<typename g_ret_t = counter_t>
   g_ret_t evaluate(g_fn<g_ret_t> g) {
     g_ret_t recursive_sum = 0;
@@ -197,30 +271,54 @@ class universal_sketch {
     // Handle last substream
     size_t substream_i = substream_summaries_.size() - 1;
 
-    auto& last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
     auto& last_substream_sketch = substream_summaries_[substream_i].get_sketch();
-    for (size_t hh_i = 0; hh_i < last_substream_hhs.size(); hh_i++) {
-      T hh = atomic::load(&last_substream_hhs[hh_i]);
-      // TODO handle special case
-      if (hh != T()) {
-        counter_t count = last_substream_sketch.estimate(hh);
+
+    if (precise_hh_) {
+      auto& last_substream_hhs = substream_summaries_[substream_i].get_pq();
+      for (auto it = last_substream_hhs.begin(); it != last_substream_hhs.end(); ++it) {
+        T hh = (*it).key_;
+        counter_t count = (*it).priority_;
         recursive_sum += g(count);
+        LOG_INFO << recursive_sum;
+      }
+    }
+    else {
+      auto& last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
+      for (size_t hh_i = 0; hh_i < last_substream_hhs.size(); hh_i++) {
+        T hh = atomic::load(&last_substream_hhs[hh_i]);
+        // TODO handle special case
+        if (hh != T()) {
+          counter_t count = last_substream_sketch.estimate(hh);
+          recursive_sum += g(count);
+        }
       }
     }
 
     while (substream_i-- > 0) {
 
       g_ret_t substream_sum = 0;
-      auto& substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
       auto& substream_sketch = substream_summaries_[substream_i].get_sketch();
-      for (size_t hh_i = 0; hh_i < substream_hhs.size(); hh_i++) {
-        T hh = atomic::load(&substream_hhs[hh_i]);
-        // TODO handle special case
-        if (hh != T()) {
-          counter_t count = substream_sketch.estimate(hh);
+
+      if (precise_hh_) {
+        auto& substream_hhs = substream_summaries_[substream_i].get_pq();
+        for(auto it = substream_hhs.begin(); it != substream_hhs.end(); ++it) {
+          T hh = (*it).key_;
+          counter_t count = (*it).priority_;
           g_ret_t update = ((1 - 2 * (layer_hashes_.hash(substream_i, hh) % 2)) * g(count));
           substream_sum += update;
         }
+      }
+      else {
+          auto &substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
+          for (size_t hh_i = 0; hh_i < substream_hhs.size(); hh_i++) {
+            T hh = atomic::load(&substream_hhs[hh_i]);
+            counter_t count = substream_sketch.estimate(hh);
+            // TODO handle special case
+            if (hh != T()) {
+              g_ret_t update = ((1 - 2 * (layer_hashes_.hash(substream_i, hh) % 2)) * g(count));
+              substream_sum += update;
+            }
+          }
       }
 
       recursive_sum = 2 * recursive_sum + substream_sum;
@@ -254,6 +352,8 @@ class universal_sketch {
 
   std::vector<substream_summary<T, counter_t>> substream_summaries_;
   hash_manager<T> layer_hashes_;
+
+  bool precise_hh_;
 
 };
 
