@@ -2,7 +2,6 @@
 #define CONFLUO_CONTAINER_SKETCH_HASH_MANAGER_H_
 
 #include <vector>
-#include "container/monolog/monolog_exp2.h"
 #include "rand_utils.h"
 
 namespace confluo {
@@ -15,7 +14,7 @@ template<typename T>
 class pairwise_indep_hash {
 
  public:
-  static const size_t PRIME = 39916801;
+  static const size_t PRIME = 39916801UL;
 
   pairwise_indep_hash()
       : pairwise_indep_hash(0, 0) {
@@ -27,7 +26,7 @@ class pairwise_indep_hash {
         hash_() {
   }
 
-  size_t apply(T elem) {
+  size_t apply(T elem) const {
     return (a_ * hash_(elem) + b_) % PRIME;
   }
 
@@ -73,7 +72,7 @@ class hash_manager {
    * @param elem element to hash
    * @return hashed value
    */
-  size_t hash(size_t hash_id, T elem) {
+  size_t hash(size_t hash_id, T elem) const {
     return hashes_[hash_id].apply(elem);
   }
 

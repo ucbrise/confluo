@@ -83,7 +83,7 @@ class count_sketch {
    * @param key key
    * @return estimated count
    */
-  counter_t estimate(T key) {
+  counter_t estimate(T key) const {
     std::vector<counter_t> median_buf(num_estimates_);
     for (size_t i = 0; i < num_estimates_; i++) {
       size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
