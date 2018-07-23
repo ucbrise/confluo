@@ -252,10 +252,20 @@ class universal_sketch {
   counter_t estimate_count(T key) {
     counter_t est = substream_summaries_[0].estimate(key);
     // Refine count using lower layers.
-    for (size_t i = 1; i < substream_summaries_.size() && to_bool(layer_hashes_.hash(i - 1, key)); i++) {
+    for (size_t i = 1; i < substream_summaries_.size() && to_bool(layer_hashes_.hash(i - 1, key)) == 1; i++) {
       est = substream_summaries_[i].estimate(key);
     }
     return est;
+  }
+  /**
+   * Evaluate a G_SUM function using all layers
+   * @tparam g_ret_t return type
+   * @param g function
+   * @return g sum estimate
+   */
+  template<typename g_ret_t = counter_t>
+  g_ret_t evaluate(g_fn<g_ret_t> g) {
+    return evaluate(g, substream_summaries_.size());
   }
 
   /**
@@ -265,11 +275,11 @@ class universal_sketch {
    * @return g sum
    */
   template<typename g_ret_t = counter_t>
-  g_ret_t evaluate(g_fn<g_ret_t> g) {
+  g_ret_t evaluate(g_fn<g_ret_t> g, size_t nlayers) {
     g_ret_t recursive_sum = 0;
 
     // Handle last substream
-    size_t substream_i = substream_summaries_.size() - 1;
+    size_t substream_i = nlayers - 1;
 
     auto& last_substream_sketch = substream_summaries_[substream_i].get_sketch();
 
@@ -279,8 +289,8 @@ class universal_sketch {
         T hh = (*it).key_;
         counter_t count = (*it).priority_;
         recursive_sum += g(count);
-        LOG_INFO << recursive_sum;
       }
+      //LOG_INFO << substream_i << ": " << recursive_sum;
     }
     else {
       auto& last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
@@ -294,6 +304,8 @@ class universal_sketch {
       }
     }
 
+    // Handle rest recursively
+
     while (substream_i-- > 0) {
 
       g_ret_t substream_sum = 0;
@@ -301,10 +313,10 @@ class universal_sketch {
 
       if (precise_hh_) {
         auto& substream_hhs = substream_summaries_[substream_i].get_pq();
-        for(auto it = substream_hhs.begin(); it != substream_hhs.end(); ++it) {
+        for (auto it = substream_hhs.begin(); it != substream_hhs.end(); ++it) {
           T hh = (*it).key_;
           counter_t count = (*it).priority_;
-          g_ret_t update = ((1 - 2 * (layer_hashes_.hash(substream_i, hh) % 2)) * g(count));
+          g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh))) * g(count));
           substream_sum += update;
         }
       }
@@ -315,13 +327,14 @@ class universal_sketch {
             counter_t count = substream_sketch.estimate(hh);
             // TODO handle special case
             if (hh != T()) {
-              g_ret_t update = ((1 - 2 * (layer_hashes_.hash(substream_i, hh) % 2)) * g(count));
+              g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh))) * g(count));
               substream_sum += update;
             }
           }
       }
 
       recursive_sum = 2 * recursive_sum + substream_sum;
+      //LOG_INFO << substream_i << ": " << recursive_sum;
     }
     return recursive_sum;
   }
@@ -338,16 +351,15 @@ class universal_sketch {
   }
 
   static universal_sketch<T, counter_t> create_parameterized(double gamma, double epsilon,
-                                                              double hh_threshold, size_t num_heavy_hitters,
-                                                              hash_manager<T>& layer_hashes) {
+                                                             double hh_threshold, size_t num_heavy_hitters) {
     return universal_sketch<T, counter_t>(count_sketch<T, counter_t>::perror_to_num_estimates(gamma),
                                            count_sketch<T, counter_t>::error_margin_to_num_buckets(epsilon),
-                                           hh_threshold, num_heavy_hitters, layer_hashes);
+                                           hh_threshold, num_heavy_hitters);
   }
 
  private:
-  static inline bool to_bool(size_t hashed_value) {
-    return bool(hashed_value % 2);
+  static inline size_t to_bool(size_t hashed_value) {
+    return hashed_value % 2;
   }
 
   std::vector<substream_summary<T, counter_t>> substream_summaries_;
