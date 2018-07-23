@@ -1,4 +1,4 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -I/Users/Ujval/dev/research/univmon_extension/simulator/V0.3/")
 if (NOT APPLE AND UNIX)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
 endif ()
@@ -7,6 +7,32 @@ set(CONFLUO_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/confluo)
 set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 
 include_directories(${GTEST_INCLUDE_DIR} ${CONFLUO_INCLUDE} ${UTILS_INCLUDE} ${Boost_INCLUDE_DIRS})
+
+#SET(ALAN_UNIVMON_DIR "/Users/Ujval/dev/research/univmon_extension/simulator/V0.3/")
+#INCLUDE_DIRECTORIES(${ALAN_UNIVMON_DIR})
+
+#ADD_LIBRARY(
+#    alan_univmon 
+#    ${ALAN_UNIVMON_DIR}/common.h
+#    ${ALAN_UNIVMON_DIR}/countSketch.h
+#    ${ALAN_UNIVMON_DIR}/counterInfo.h
+#    ${ALAN_UNIVMON_DIR}/data_plane.h
+#    ${ALAN_UNIVMON_DIR}/hash.h
+#    ${ALAN_UNIVMON_DIR}/hashInfo.h
+#    ${ALAN_UNIVMON_DIR}/os_galoisField.h
+#    ${ALAN_UNIVMON_DIR}/os_mangler.h
+#    ${ALAN_UNIVMON_DIR}/packet.h
+#    ${ALAN_UNIVMON_DIR}/pickdrop.h
+#    ${ALAN_UNIVMON_DIR}/topK.h
+#    ${ALAN_UNIVMON_DIR}/countSketch.cpp
+#    ${ALAN_UNIVMON_DIR}/data_plane.h
+#    ${ALAN_UNIVMON_DIR}/testUniversalSketch.cpp
+#    ${ALAN_UNIVMON_DIR}/testCountSketch.cpp
+#    ${ALAN_UNIVMON_DIR}/hash.cpp
+#    ${ALAN_UNIVMON_DIR}/topK.cpp
+#        test/container/sketch/universal_sketch_test.h confluo/container/sketch/priority_queue.h)
+
+#TARGET_LINK_LIBRARIES(MYProgram svm_lib_light)
 
 add_library(confluo STATIC
         confluo/read_tail.h
@@ -95,6 +121,12 @@ add_library(confluo STATIC
         confluo/container/monolog/monolog_linear.h
         confluo/container/monolog/monolog_linear_bucket.h
         confluo/container/radix_tree.h
+        confluo/container/sketch
+        confluo/container/sketch/count_sketch.h
+        confluo/container/sketch/hash_manager.h
+        confluo/container/sketch/priority_queue.h
+        confluo/container/sketch/sketch_utils.h
+        confluo/container/sketch/universal_sketch.h
         confluo/schema/field.h
         confluo/schema/record.h
         confluo/schema/record_batch.h
@@ -185,7 +217,7 @@ add_library(confluo STATIC
         src/types/raw_data.cc
         src/types/numeric.cc
         src/types/type_properties.cc
-        src/types/type_manager.cc)
+        src/types/type_manager.cc confluo/container/sketch/confluo_universal_sketch.h confluo/univ_sketch_log.h confluo/container/sketch/confluo_count_sketch.h)
 target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
 add_dependencies(confluo lz4)
 
@@ -222,6 +254,8 @@ if (BUILD_TESTS)
           test/container/cursor/batched_cursor_test.h
           test/container/bitmap/bitmap_test.h
           test/container/bitmap/bitmap_array_test.h
+          test/container/sketch/count_sketch_test.h
+          test/container/sketch/universal_sketch_test.h
           test/container/bitmap/delta_encoded_array_test.h
           test/container/stream_test.h
           test/container/string_map_test.h
@@ -238,8 +272,8 @@ if (BUILD_TESTS)
           test/compression/lz4_encode_test.h
           test/compression/delta_encode_test.h
           test/aggregated_reflog_test.h
-          test/confluo_store_test.h)
-  target_link_libraries(ctest confluo gtest gtest_main)
+          test/confluo_store_test.h test/container/sketch/priority_queue_test.h)
+  target_link_libraries(ctest confluo gtest gtest_main) #alan_univmon)
   add_dependencies(ctest googletest)
 
   file(GLOB_RECURSE test_sources test/*.cc)

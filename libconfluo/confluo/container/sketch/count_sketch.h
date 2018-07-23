@@ -27,26 +27,26 @@ class count_sketch {
 
   /**
    * Constructor.
-   * @param num_estimates number of estimates to track per update (depth)
-   * @param num_buckets number of buckets (width)
+   * @param t number of estimates per update (depth)
+   * @param b number of buckets (width)
    */
-  count_sketch(size_t num_estimates, size_t num_buckets)
-      : num_estimates_(num_estimates),
-        num_buckets_(num_buckets),
-        counters_(num_estimates_ * num_buckets_),
+  count_sketch(size_t t, size_t b)
+      : depth_(t),
+        width_(b),
+        counters_(depth_ * width_),
         bucket_hash_manager_(),
         sign_hash_manager_() {
     for (size_t i = 0; i < counters_.size(); i++) {
       atomic::store(&counters_[i], counter_t());
     }
-    bucket_hash_manager_.guarantee_initialized(num_estimates_);
-    sign_hash_manager_.guarantee_initialized(num_estimates_);
+    bucket_hash_manager_.guarantee_initialized(depth_);
+    sign_hash_manager_.guarantee_initialized(depth_);
   }
 
   count_sketch(const count_sketch& other)
-      : num_estimates_(other.num_estimates_),
-        num_buckets_(other.num_buckets_),
-        counters_(num_estimates_ * num_buckets_),
+      : depth_(other.depth_),
+        width_(other.width_),
+        counters_(depth_ * width_),
         bucket_hash_manager_(other.bucket_hash_manager_),
         sign_hash_manager_(other.sign_hash_manager_) {
     for (size_t i = 0; i < counters_.size(); i++) {
@@ -55,9 +55,9 @@ class count_sketch {
   }
 
   count_sketch& operator=(const count_sketch& other) {
-    num_estimates_ = other.num_estimates_;
-    num_buckets_ = other.num_buckets_;
-    counters_ = std::vector<atomic_counter_t>(num_estimates_ * num_buckets_);
+    depth_ = other.depth_;
+    width_ = other.width_;
+    counters_ = std::vector<atomic_counter_t>(depth_ * width_);
     bucket_hash_manager_ = other.bucket_hash_manager_;
     sign_hash_manager_ = other.sign_hash_manager_;
     for (size_t i = 0; i < counters_.size(); i++) {
@@ -71,10 +71,10 @@ class count_sketch {
    * @param key key
    */
   void update(T key) {
-    for (size_t i = 0; i < num_estimates_; i++) {
-      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
+    for (size_t i = 0; i < depth_; i++) {
+      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % width_;
       counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
-      atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
+      atomic::faa<counter_t>(&counters_[width_ * i + bucket_idx], sign);
     }
   }
 
@@ -84,11 +84,11 @@ class count_sketch {
    * @return estimated count
    */
   counter_t estimate(T key) const {
-    std::vector<counter_t> median_buf(num_estimates_);
-    for (size_t i = 0; i < num_estimates_; i++) {
-      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
+    std::vector<counter_t> median_buf(depth_);
+    for (size_t i = 0; i < depth_; i++) {
+      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % width_;
       counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
-      median_buf[i] = sign * atomic::load(&counters_[num_buckets_ * i + bucket_idx]);
+      median_buf[i] = sign * atomic::load(&counters_[width_ * i + bucket_idx]);
     }
     return median(median_buf);
   }
@@ -99,53 +99,51 @@ class count_sketch {
    * @return old estimated count
    */
   counter_t update_and_estimate(T key) {
-    std::vector<counter_t> median_buf(num_estimates_);
-    for (size_t i = 0; i < num_estimates_; i++) {
-      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % num_buckets_;
+    std::vector<counter_t> median_buf(depth_);
+    for (size_t i = 0; i < depth_; i++) {
+      size_t bucket_idx = bucket_hash_manager_.hash(i, key) % width_;
       counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
-      counter_t old_count = atomic::faa<counter_t>(&counters_[num_buckets_ * i + bucket_idx], sign);
+      counter_t old_count = atomic::faa<counter_t>(&counters_[width_ * i + bucket_idx], sign);
       median_buf[i] = sign * old_count;
     }
     return median(median_buf);
   }
 
   size_t depth() {
-    return num_estimates_;
+    return depth_;
   }
 
   size_t width() {
-    return num_buckets_;
+    return width_;
   }
 
   /**
    * @return storage size of data structure in bytes
    */
   size_t storage_size() {
-   size_t counters_size_bytes = sizeof(atomic_counter_t) * (num_estimates_ * num_buckets_);
+   size_t counters_size_bytes = sizeof(atomic_counter_t) * (depth_ * width_);
    // TODO account for hashes (O(n) increase)
    return counters_size_bytes;
   }
 
   /**
-   * Create a cont_min_sketch with desired accuracy guarantees. TODO describe
-   * @param gamma desired probability of error (0 < gamma < 1)
+   * Create a count_sketch with desired accuracy guarantees.
    * @param epsilon desired margin of error (0 < epsilon < 1)
+   * @param gamma desired probability of error (0 < gamma < 1)
    * @param manager hash manager
    * @return count min sketch with accuracy guarantees
    */
-  // TODO rename func
-  static count_sketch create_parameterized(double gamma, double epsilon) {
-    return count_sketch(count_sketch<T>::perror_to_num_estimates(gamma),
-                        count_sketch<T>::error_margin_to_num_buckets(epsilon));
+  static count_sketch create_parameterized(double epsilon, double gamma) {
+    return count_sketch(count_sketch<T>::perror_to_depth(gamma),
+                        count_sketch<T>::error_margin_to_width(epsilon));
   }
 
-  // TODO move
   /**
    * Number of estimates per update computed from probability of error
    * @param gamma desired probability of error
    * @return number of estimates
    */
-  static size_t perror_to_num_estimates(double gamma) {
+  static size_t perror_to_depth(double gamma) {
     assert(gamma > 0.0 && gamma < 1.0);
     return size_t(std::ceil(sizeof(T) * 8 - std::log2(gamma))); // log2(N/gamma)
   }
@@ -155,7 +153,7 @@ class count_sketch {
    * @param epsilon desired error margin
    * @return number of buckets
    */
-  static size_t error_margin_to_num_buckets(double epsilon) {
+  static size_t error_margin_to_width(double epsilon) {
     assert(epsilon > 0.0 && epsilon < 1.0);
     return size_t(std::ceil(std::exp(1) / (epsilon * epsilon)));
   }
@@ -165,8 +163,8 @@ class count_sketch {
     return num % 2 == 1 ? 1 : -1;
   }
 
-  size_t num_estimates_; // depth
-  size_t num_buckets_; // width
+  size_t depth_; // number of estimates
+  size_t width_; // number of buckets
 
   std::vector<atomic_counter_t> counters_;
   hash_manager<T> bucket_hash_manager_;

@@ -3,7 +3,6 @@
 
 #include <functional>
 
-#include "/Users/Ujval/dev/research/univmon_extension/simulator/V0.3/countSketch.h"
 #include "container/sketch/count_sketch.h"
 #include "gtest/gtest.h"
 
@@ -11,13 +10,13 @@ using namespace ::confluo::sketch;
 
 class CountSketchTest : public testing::Test {
  public:
-  static constexpr int N = 1000000;
+  static constexpr int N = 1e6;
 
   static constexpr double MEAN = 0.0;
   static constexpr double SD = 500.0;
 
   static constexpr int X0 = 1;
-  static constexpr int X1 = 1000000;
+  static constexpr int X1 = 1e7;
 
   CountSketchTest()
       : dist(MEAN, SD),
@@ -91,18 +90,20 @@ const int CountSketchTest::N;
 TEST_F(CountSketchTest, EstimateAccuracyTest) {
 
   double alpha = 0.01;
-  double epsilon[] = { 0.01, 0.02, 0.04, 0.08, 0.16 };
-  double gamma[] = { 0.01 };
+  double epsilon[] = { 0.01, 0.02, 0.04, 0.08, 0.12, 0.16, 0.20 };
+  double gamma[] = { 0.05 };
+
+  std::ofstream summary_out("sketch_test_summary.out");
+  std::ofstream out("sketch_error.out");
 
   std::map<int, long int> hist;
   double l2 = generate_zipf(hist);
-  std::ofstream out("sketch_error.out");
   LOG_INFO << "L2-norm: " << l2;
 
   for (double g : gamma) {
     for (double e : epsilon) {
 
-      auto cs = count_sketch<int>::create_parameterized(g, e);
+      auto cs = count_sketch<int>::create_parameterized(e, g);
 
       for (auto p : hist)
         for (int i = 0; i < p.second; i++)
@@ -151,8 +152,10 @@ TEST_F(CountSketchTest, EstimateAccuracyTest) {
 
       ASSERT_LT(avg_relv_err, e);
 
-//      summary_out << num_rows[i] << " " << counters_per_row[j] << " " << violator_count/num_measurements <<
-//       " " << errors[int(errors.size()/2)] << "\n";
+      summary_out << cs.depth() << " " << cs.width() << " " <<
+                     g << " " << e << " " << cs.storage_size() / 1024 << " " <<
+                     relevant_errors[int(relevant_errors.size()/2)] <<
+                     "\n";
 
     }
   }
