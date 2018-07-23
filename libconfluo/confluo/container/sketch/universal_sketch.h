@@ -36,7 +36,7 @@ class substream_summary {
         sketch_(t, b),
         heavy_hitters_(k),
         hhs_precise_(),
-        hh_hash_(pairwise_indep_hash<T>::generate_random()),
+        hh_hash_(pairwise_indep_hash::generate_random()),
         use_precise_hh_(precise) {
   }
 
@@ -152,7 +152,7 @@ class substream_summary {
     }
     bool done = false;
     while (!done) {
-      size_t idx = hh_hash_.apply(key) % heavy_hitters_.size();
+      size_t idx = hh_hash_.apply<T>(key) % heavy_hitters_.size();
       T prev = atomic::load(&heavy_hitters_[idx]);
       if (prev == key)
         return;
@@ -176,7 +176,7 @@ class substream_summary {
   sketch sketch_;
   atomic_vector_t heavy_hitters_;
   heavy_hitter_set<T, counter_t> hhs_precise_;
-  pairwise_indep_hash<T> hh_hash_;
+  pairwise_indep_hash hh_hash_;
 
   bool use_precise_hh_;
 
@@ -198,7 +198,7 @@ class universal_sketch {
    * @param precise track exact heavy hitters
    */
   universal_sketch(size_t t, size_t b, size_t k, double a)
-      : universal_sketch(8 * sizeof(T), t, b, a, k) {
+      : universal_sketch(8 * sizeof(T), t, b, k, a) {
   }
 
   /**
@@ -235,7 +235,7 @@ class universal_sketch {
 
   /**
    * Update universal sketch with an element.
-   * @param elem element
+   * @param key key
    */
   void update(T key) {
     substream_summaries_[0].update(key);
@@ -350,11 +350,9 @@ class universal_sketch {
     return total_size;
   }
 
-  static universal_sketch<T, counter_t> create_parameterized(double gamma, double epsilon,
-                                                             double hh_threshold, size_t num_heavy_hitters) {
-    return universal_sketch<T, counter_t>(count_sketch<T, counter_t>::perror_to_num_estimates(gamma),
-                                           count_sketch<T, counter_t>::error_margin_to_num_buckets(epsilon),
-                                           hh_threshold, num_heavy_hitters);
+  static universal_sketch<T, counter_t> create_parameterized(double gamma, double epsilon, double a, size_t k) {
+    return universal_sketch<T, counter_t>(count_sketch<T, counter_t>::error_margin_to_width(epsilon),
+                                          count_sketch<T, counter_t>::perror_to_depth(gamma), k, a);
   }
 
  private:
