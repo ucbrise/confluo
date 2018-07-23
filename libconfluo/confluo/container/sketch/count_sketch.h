@@ -109,6 +109,14 @@ class count_sketch {
     return median(median_buf);
   }
 
+  size_t depth() {
+    return num_estimates_;
+  }
+
+  size_t width() {
+    return num_buckets_;
+  }
+
   /**
    * @return storage size of data structure in bytes
    */
@@ -138,9 +146,8 @@ class count_sketch {
    * @return number of estimates
    */
   static size_t perror_to_num_estimates(double gamma) {
-    // TODO assert
-    double n = std::pow(2.0, sizeof(T) * 8) - 1;
-    return std::ceil(std::log2(n / gamma));
+    assert(gamma > 0.0 && gamma < 1.0);
+    return size_t(std::ceil(sizeof(T) * 8 - std::log2(gamma))); // log2(N/gamma)
   }
 
   /**
@@ -149,8 +156,8 @@ class count_sketch {
    * @return number of buckets
    */
   static size_t error_margin_to_num_buckets(double epsilon) {
-    // TODO assert
-    return std::ceil(std::exp(1) / (epsilon * epsilon));
+    assert(epsilon > 0.0 && epsilon < 1.0);
+    return size_t(std::ceil(std::exp(1) / (epsilon * epsilon)));
   }
 
  private:
