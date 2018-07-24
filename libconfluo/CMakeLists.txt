@@ -127,6 +127,7 @@ add_library(confluo STATIC
         confluo/container/sketch/hash_manager.h
         confluo/container/sketch/priority_queue.h
         confluo/container/sketch/sketch_utils.h
+        confluo/container/sketch/substream_summary.h
         confluo/container/sketch/universal_sketch.h
         confluo/schema/field.h
         confluo/schema/record.h
@@ -174,6 +175,7 @@ add_library(confluo STATIC
         src/container/cursor/alert_cursor.cc
         src/container/cursor/offset_cursors.cc
         src/container/cursor/record_cursors.cc
+        src/container/sketch/hash_manager.cc
         src/parser/aggregate_parser.cc
         src/parser/expression_compiler.cc
         src/parser/expression_parser.cc
@@ -219,7 +221,7 @@ add_library(confluo STATIC
         src/types/raw_data.cc
         src/types/numeric.cc
         src/types/type_properties.cc
-        src/types/type_manager.cc)
+        src/types/type_manager.cc )
 target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
 add_dependencies(confluo lz4)
 

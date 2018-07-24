@@ -30,7 +30,10 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wall -ped
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl")
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
+endif()
+message("lol here it is: ${CMAKE_BUILD_TYPE}")
 
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not allowed.")
@@ -69,23 +72,23 @@ add_subdirectory(libconfluo)
 
 if (BUILD_RPC)
   # RPC Framework
-  add_subdirectory(librpc)
+  #add_subdirectory(librpc)
   
   # Python Client
-  if (WITH_PY_CLIENT)
-    add_subdirectory(pyclient)
-  endif()
-  
-  # Java Client
-  if (WITH_JAVA_CLIENT)
-    add_subdirectory(javaclient)
-  endif()
+  #  if (WITH_PY_CLIENT)
+  #    add_subdirectory(pyclient)
+  #  endif()
+  #  
+  #  # Java Client
+  #  if (WITH_JAVA_CLIENT)
+  #    add_subdirectory(javaclient)
+  #  endif()
 endif()
 
 # Confluo examples
 if (BUILD_EXAMPLES)
-  add_subdirectory(examples/libtimeseries)
-  add_subdirectory(examples/libstreaming)
+    #  add_subdirectory(examples/libtimeseries)
+    #  add_subdirectory(examples/libstreaming)
 endif()
 
 if (BUILD_DOC)
