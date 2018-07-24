@@ -30,12 +30,12 @@ public:
   confluo_universal_sketch(size_t l, size_t t, size_t b, size_t k, double a,
                            const schema_t& schema, const column_t& column,
                            bool precise = true)
-          : substream_summaries_(l),
-            layer_hashes_(l - 1),
-            schema_(schema),
-            column_(column),
-            precise_hh_(precise),
-            is_valid_(true) {
+      : substream_summaries_(l),
+        layer_hashes_(l - 1),
+        schema_(schema),
+        column_(column),
+        precise_hh_(precise),
+        is_valid_(true) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
       substream_summaries_[i] = substream_summary<size_t, counter_t>(t, b, k, a, precise);

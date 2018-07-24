@@ -69,16 +69,16 @@ public:
     return *this;
   }
 
-  void update(T key) {
+  void update(T key, size_t incr = 1) {
     counter_t old_count = sketch_.update_and_estimate(key);
-    counter_t update = l2_squared_update(old_count);
+    counter_t update = l2_squared_update(old_count, incr);
     counter_t old_l2_sq = atomic::faa(&l2_squared_, update);
     double new_l2 = std::sqrt(old_l2_sq + update);
 
     if (use_precise_hh_) {
-      this->update_hh_pq(key, old_count + 1, new_l2);
+      this->update_hh_pq(key, old_count + incr, new_l2);
     } else {
-      this->update_hh_approx(key, old_count + 1, new_l2);
+      this->update_hh_approx(key, old_count + incr, new_l2);
     }
   }
 
@@ -163,10 +163,11 @@ private:
 
   /**
    * L_2^2 += (c_i + 1)^2 - (c_i)^2
+   * L_2^2 += (c_i + incr)^2 - (c_i)^2
    * @param old_count estimate of a count before an update
    */
-  static inline counter_t l2_squared_update(counter_t old_count) {
-    return 2 * old_count + 1;
+  static inline counter_t l2_squared_update(counter_t old_count, size_t incr) {
+    return (2 * old_count * incr + incr) * incr;
   }
 
   double hh_threshold_; // heavy hitter threshold
