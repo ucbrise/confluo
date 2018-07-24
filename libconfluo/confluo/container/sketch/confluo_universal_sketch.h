@@ -205,7 +205,8 @@ public:
             layer_hashes_(l - 1),
             schema_(schema),
             column_(column),
-            precise_hh_(precise) {
+            precise_hh_(precise),
+            is_valid_(true) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
       substream_summaries_[i] = confluo_substream_summary<counter_t>(t, b, k, a, precise);
@@ -217,7 +218,8 @@ public:
             layer_hashes_(other.layer_hashes_),
             schema_(other.schema_),
             column_(other.column_),
-            precise_hh_(other.precise_hh_) {
+            precise_hh_(other.precise_hh_),
+            is_valid_(atomic::load(&other.is_valid_)) {
   }
 
   confluo_universal_sketch& operator=(const confluo_universal_sketch& other) {
@@ -226,15 +228,17 @@ public:
     schema_= other.schema_;
     column_ = other.column_;
     precise_hh_ = other.precise_hh_;
+    is_valid_ = atomic::load(&other.is_valid_);
     return *this;
   }
 
   bool is_valid() {
-    return true;
+    return atomic::load(&is_valid_);
   }
 
   bool invalidate() {
-    return false;
+    bool expected = true;
+    return atomic::strong::cas(&is_valid_, &expected, false);
   }
 
   /**
@@ -343,9 +347,15 @@ public:
     return total_size;
   }
 
-  static confluo_universal_sketch<counter_t> create_parameterized(double gamma, double epsilon, double a, size_t k) {
-    return confluo_universal_sketch<counter_t>(count_sketch<counter_t>::error_margin_to_width(epsilon),
-                                               count_sketch<counter_t>::perror_to_depth(gamma), k, a);
+  static confluo_universal_sketch<counter_t> create_parameterized(double epsilon, double gamma, size_t k, double a,
+                                                                  const schema_t& schema, const column_t& column) {
+    size_t nlayers = 8 * sizeof(column.type().size);
+    return {
+            nlayers,
+            count_sketch<counter_t>::error_margin_to_width(epsilon),
+            count_sketch<counter_t>::perror_to_depth(gamma),
+            k, a, schema, column
+    };
   }
 
 private:
@@ -360,6 +370,7 @@ private:
   column_t column_;
 
   bool precise_hh_;
+  atomic::type<bool> is_valid_;
 
 };
 
