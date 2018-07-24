@@ -272,6 +272,7 @@ class universal_sketch {
    * Evaluate a G_SUM function
    * @tparam g_ret_t return type
    * @param g function
+   * @param nlayers number of layers to use
    * @return g sum
    */
   template<typename g_ret_t = counter_t>
@@ -286,7 +287,6 @@ class universal_sketch {
     if (precise_hh_) {
       auto& last_substream_hhs = substream_summaries_[substream_i].get_pq();
       for (auto it = last_substream_hhs.begin(); it != last_substream_hhs.end(); ++it) {
-        T hh = (*it).key_;
         counter_t count = (*it).priority_;
         recursive_sum += g(count);
       }
@@ -350,9 +350,11 @@ class universal_sketch {
     return total_size;
   }
 
-  static universal_sketch<T, counter_t> create_parameterized(double gamma, double epsilon, double a, size_t k) {
-    return universal_sketch<T, counter_t>(count_sketch<T, counter_t>::error_margin_to_width(epsilon),
-                                          count_sketch<T, counter_t>::perror_to_depth(gamma), k, a);
+  static universal_sketch<T, counter_t> create_parameterized(double epsilon, double gamma, size_t k, double a) {
+    return { count_sketch<T, counter_t>::error_margin_to_width(epsilon),
+             count_sketch<T, counter_t>::perror_to_depth(gamma),
+             k, a
+    };
   }
 
  private:
