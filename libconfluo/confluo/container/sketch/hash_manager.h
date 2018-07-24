@@ -13,7 +13,7 @@ namespace sketch {
 class pairwise_indep_hash {
 
  public:
-  static constexpr size_t PRIME = 39916801UL;
+  static const size_t PRIME = 39916801UL;
 
   pairwise_indep_hash()
       : pairwise_indep_hash(0, 0) {
@@ -43,6 +43,8 @@ class pairwise_indep_hash {
   size_t a_, b_;
 
 };
+
+const size_t pairwise_indep_hash::PRIME;
 
 template<typename T>
 class hash_manager {

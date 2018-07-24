@@ -17,7 +17,7 @@ class substream_summary {
  public:
   typedef atomic::type<counter_t> atomic_counter_t;
   typedef std::vector<atomic::type<T>> atomic_vector_t;
-  typedef count_sketch<T, counter_t> sketch;
+  typedef count_sketch<T, counter_t> sketch_t;
 
   substream_summary() = default;
 
@@ -94,7 +94,7 @@ class substream_summary {
   /**
    * @return sketch
    */
-  sketch& get_sketch() {
+  sketch_t& get_sketch() {
     return sketch_;
   }
 
@@ -173,7 +173,7 @@ class substream_summary {
   size_t num_hh_; // number of heavy hitters to track (k)
 
   atomic_counter_t l2_squared_; // L2 norm squared
-  sketch sketch_;
+  sketch_t sketch_;
   atomic_vector_t heavy_hitters_;
   heavy_hitter_set<T, counter_t> hhs_precise_;
   pairwise_indep_hash hh_hash_;
