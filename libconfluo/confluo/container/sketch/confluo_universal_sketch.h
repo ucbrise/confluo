@@ -364,7 +364,7 @@ private:
   }
 
   std::vector<confluo_substream_summary<counter_t>> substream_summaries_;
-  hash_manager<size_t> layer_hashes_;
+  hash_manager layer_hashes_;
 
   schema_t schema_;
   column_t column_;

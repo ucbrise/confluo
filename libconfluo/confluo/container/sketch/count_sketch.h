@@ -167,8 +167,8 @@ class count_sketch {
   size_t width_; // number of buckets
 
   std::vector<atomic_counter_t> counters_;
-  hash_manager<T> bucket_hash_manager_;
-  hash_manager<T> sign_hash_manager_;
+  hash_manager bucket_hash_manager_;
+  hash_manager sign_hash_manager_;
 
 };
 
