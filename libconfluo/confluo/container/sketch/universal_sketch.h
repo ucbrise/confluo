@@ -363,7 +363,7 @@ class universal_sketch {
   }
 
   std::vector<substream_summary<T, counter_t>> substream_summaries_;
-  hash_manager<T> layer_hashes_;
+  hash_manager layer_hashes_;
 
   bool precise_hh_;
 
