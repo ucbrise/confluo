@@ -70,11 +70,11 @@ class count_sketch {
    * Update count estimates for key.
    * @param key key
    */
-  void update(T key) {
+  void update(T key, size_t incr = 1) {
     for (size_t i = 0; i < depth_; i++) {
       size_t bucket_idx = bucket_hash_manager_.hash(i, key) % width_;
       counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
-      atomic::faa<counter_t>(&counters_[width_ * i + bucket_idx], sign);
+      atomic::faa<counter_t>(&counters_[width_ * i + bucket_idx], sign * incr);
     }
   }
 
@@ -98,12 +98,12 @@ class count_sketch {
    * @param key key
    * @return old estimated count
    */
-  counter_t update_and_estimate(T key) {
+  counter_t update_and_estimate(T key, size_t incr = 1) {
     std::vector<counter_t> median_buf(depth_);
     for (size_t i = 0; i < depth_; i++) {
       size_t bucket_idx = bucket_hash_manager_.hash(i, key) % width_;
       counter_t sign = to_sign(sign_hash_manager_.hash(i, key));
-      counter_t old_count = atomic::faa<counter_t>(&counters_[width_ * i + bucket_idx], sign);
+      counter_t old_count = atomic::faa<counter_t>(&counters_[width_ * i + bucket_idx], sign * incr);
       median_buf[i] = sign * old_count;
     }
     return median(median_buf);

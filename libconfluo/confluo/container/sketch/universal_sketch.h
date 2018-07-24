@@ -66,10 +66,10 @@ class universal_sketch {
    * Update universal sketch with an element.
    * @param key key
    */
-  void update(T key) {
-    substream_summaries_[0].update(key);
+  void update(T key, size_t count = 1) {
+    substream_summaries_[0].update(key, count);
     for (size_t i = 1; i < substream_summaries_.size() && to_bool(layer_hashes_.hash(i - 1, key)); i++) {
-      substream_summaries_[i].update(key);
+      substream_summaries_[i].update(key, count);
     }
   }
 
