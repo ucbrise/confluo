@@ -17,8 +17,8 @@ class confluo_substream_summary {
 public:
   typedef atomic::type<counter_t> atomic_counter_t;
   typedef std::vector<atomic::type<size_t>> atomic_vector_t;
-  typedef count_sketch<counter_t> sketch;
-  typedef heavy_hitter_set<size_t, counter_t> heavy_hitter_set;
+  typedef count_sketch<counter_t> sketch_t;
+  typedef heavy_hitter_set<size_t, counter_t> heavy_hitter_set_t;
 
   confluo_substream_summary() = default;
 
@@ -94,7 +94,7 @@ public:
   /**
    * @return sketch
    */
-  sketch& get_sketch() {
+  sketch_t& get_sketch() {
     return sketch_;
   }
 
@@ -102,7 +102,7 @@ public:
     return heavy_hitters_;
   }
 
-  heavy_hitter_set& get_pq() {
+  heavy_hitter_set_t& get_pq() {
     return hhs_precise_;
   }
 
@@ -173,9 +173,9 @@ private:
   size_t num_hh_; // number of heavy hitters to track (k)
 
   atomic_counter_t l2_squared_; // L2 norm squared
-  sketch sketch_;
+  sketch_t sketch_;
   atomic_vector_t heavy_hitters_;
-  heavy_hitter_set hhs_precise_;
+  heavy_hitter_set_t hhs_precise_;
   pairwise_indep_hash hh_hash_;
 
   bool use_precise_hh_;
