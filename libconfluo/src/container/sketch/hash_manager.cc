@@ -14,7 +14,6 @@ pairwise_indep_hash::pairwise_indep_hash(size_t a, size_t b)
           b_(b) {
 }
 
-
 pairwise_indep_hash pairwise_indep_hash::generate_random() {
   return { utils::rand_utils::rand_uint64(PRIME), utils::rand_utils::rand_uint64(PRIME) };
 }

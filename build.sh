@@ -3,7 +3,7 @@ set -e
 
 mkdir -p build
 cd build
-cmake ..
+cmake "$@" .. 
 
 START=$(date +%s)
 make

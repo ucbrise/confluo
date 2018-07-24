@@ -134,7 +134,7 @@ TEST_F(UniversalSketchTest, EstimateAccuracyTest) {
   std::map<int, long int> hist;
   double l2 = generate_zipf(hist);
 
-  size_t l = 12;
+  size_t l = 32;
   size_t t = 64;
   size_t b = 27000;
   size_t k = 20;
