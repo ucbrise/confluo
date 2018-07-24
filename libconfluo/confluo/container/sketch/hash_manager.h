@@ -30,6 +30,11 @@ class pairwise_indep_hash {
     return (a_ * hash(elem) + b_) % PRIME;
   }
 
+  template<typename T>
+  typename std::enable_if<!std::is_unsigned<T>::value, bool>::type apply(T elem) {
+    return (a_ * elem + b_) % PRIME;
+  }
+
   static pairwise_indep_hash generate_random() {
     return { utils::rand_utils::rand_uint64(PRIME), utils::rand_utils::rand_uint64(PRIME) };
   }
