@@ -171,12 +171,19 @@ immutable_byte_string byte_string::copy() const {
   return immutable_byte_string(data_, size_);
 }
 
-uint8_t *byte_string::data() {
+uint8_t *byte_string::data() const {
   return data_;
 }
 
-size_t byte_string::size() {
+size_t byte_string::size() const {
   return size_;
+}
+
+size_t byte_string::hash() const {
+  size_t hash = 5381;
+  for (size_t i = 0; i < size_; i++)
+    hash += (hash << 5) + data_[i]; /* hash * 33 + c */
+  return hash;
 }
 
 std::string byte_string::to_string() const {

@@ -31,6 +31,31 @@ struct pq_element {
   P priority_;
 };
 
+//template<typename T, typename M, typename P>
+//struct pq_element_descript {
+//  pq_element_descript(T key, M metadata, P priority)
+//      : key_(key),
+//        metadata_(metadata),
+//        priority_(priority) {
+//  }
+
+//  static bool gt_compare(pq_element x, pq_element y) {
+//    return x.priority_ > y.priority_;
+//  }
+
+//  static bool lt_compare(pq_element x, pq_element y) {
+//    return x.priority_ < y.priority_;
+//  }
+
+//  static bool element_eq(const pq_element_descript& x, const pq_element_descript& y) {
+//    return x.key_ == y.key_;
+//  }
+
+//  T key_;
+//  M metadata_;
+//  P priority_;
+//};
+
 template<typename T, typename P, typename E = pq_element<T, P>>
 class heavy_hitter_set : public std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>> {
 
@@ -41,12 +66,12 @@ public:
   }
 
   void pushp(T key, P priority) {
-   this->push(E(key, priority));
+    this->push(E(key, priority));
   }
 
   bool remove_if_exists(const T& key) {
-    E dummy(key, 0);
-    auto it = std::find_if(this->c.begin(), this->c.end(), std::bind(E::element_eq, std::placeholders::_1, dummy));
+    E query(key, P());
+    auto it = std::find_if(this->c.begin(), this->c.end(), std::bind(E::element_eq, std::placeholders::_1, query));
     if (it != this->c.end()) {
       this->c.erase(it);
       std::make_heap(this->c.begin(), this->c.end(), this->comp);
