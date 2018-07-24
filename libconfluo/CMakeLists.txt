@@ -122,6 +122,7 @@ add_library(confluo STATIC
         confluo/container/monolog/monolog_linear_bucket.h
         confluo/container/radix_tree.h
         confluo/container/sketch
+        confluo/container/sketch/confluo_universal_sketch.h 
         confluo/container/sketch/count_sketch.h
         confluo/container/sketch/hash_manager.h
         confluo/container/sketch/priority_queue.h
@@ -151,8 +152,9 @@ add_library(confluo STATIC
         confluo/conf
         confluo/conf/configuration_params.h
         confluo/conf/defaults.h
-        confluo/filter.h
         confluo/alert.h
+        confluo/filter.h
+        confluo/univ_sketch_log.h
         src/confluo_store.cc
         src/atomic_multilog.cc
         src/filter.cc
@@ -217,7 +219,7 @@ add_library(confluo STATIC
         src/types/raw_data.cc
         src/types/numeric.cc
         src/types/type_properties.cc
-        src/types/type_manager.cc confluo/container/sketch/confluo_universal_sketch.h confluo/univ_sketch_log.h confluo/container/sketch/confluo_count_sketch.h)
+        src/types/type_manager.cc)
 target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
 add_dependencies(confluo lz4)
 
