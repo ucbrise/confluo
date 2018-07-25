@@ -6,7 +6,7 @@
 #include "atomic.h"
 #include "count_sketch.h"
 #include "hash_manager.h"
-#include "substream_summary.h"
+#include "container/sketch/substream_summary.h"
 
 namespace confluo {
 namespace sketch {
@@ -111,18 +111,16 @@ class universal_sketch {
     // Handle last substream
     size_t substream_i = nlayers - 1;
 
-    auto& last_substream_sketch = substream_summaries_[substream_i].get_sketch();
-
     if (precise_hh_) {
       auto& last_substream_hhs = substream_summaries_[substream_i].get_pq();
       for (auto it = last_substream_hhs.begin(); it != last_substream_hhs.end(); ++it) {
         counter_t count = (*it).priority_;
         recursive_sum += g(count);
       }
-      //LOG_INFO << substream_i << ": " << recursive_sum;
     }
     else {
       auto& last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
+      auto& last_substream_sketch = substream_summaries_[substream_i].get_sketch();
       for (size_t hh_i = 0; hh_i < last_substream_hhs.size(); hh_i++) {
         T hh = atomic::load(&last_substream_hhs[hh_i]);
         // TODO handle special case
@@ -138,7 +136,6 @@ class universal_sketch {
     while (substream_i-- > 0) {
 
       g_ret_t substream_sum = 0;
-      auto& substream_sketch = substream_summaries_[substream_i].get_sketch();
 
       if (precise_hh_) {
         auto& substream_hhs = substream_summaries_[substream_i].get_pq();
@@ -150,20 +147,21 @@ class universal_sketch {
         }
       }
       else {
-          auto &substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
-          for (size_t hh_i = 0; hh_i < substream_hhs.size(); hh_i++) {
-            T hh = atomic::load(&substream_hhs[hh_i]);
-            counter_t count = substream_sketch.estimate(hh);
-            // TODO handle special case
-            if (hh != T()) {
-              g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh))) * g(count));
-              substream_sum += update;
-            }
+        auto &substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
+        auto& substream_sketch = substream_summaries_[substream_i].get_sketch();
+        for (size_t hh_i = 0; hh_i < substream_hhs.size(); hh_i++) {
+          T hh = atomic::load(&substream_hhs[hh_i]);
+          counter_t count = substream_sketch.estimate(hh);
+          // TODO handle special case
+          if (hh != T()) {
+            g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh))) * g(count));
+            substream_sum += update;
           }
+        }
       }
 
+
       recursive_sum = 2 * recursive_sum + substream_sum;
-      //LOG_INFO << substream_i << ": " << recursive_sum;
     }
     return recursive_sum;
   }
@@ -180,14 +178,15 @@ class universal_sketch {
   }
 
   static universal_sketch<T, counter_t> create_parameterized(double epsilon, double gamma, size_t k, double a) {
-    return { count_sketch<T, counter_t>::error_margin_to_width(epsilon),
-             count_sketch<T, counter_t>::perror_to_depth(gamma),
-             k, a
+    return {
+      count_sketch<T, counter_t>::error_margin_to_width(epsilon),
+      count_sketch<T, counter_t>::perror_to_depth(gamma),
+      k, a
     };
   }
 
  private:
-  static inline size_t to_bool(size_t hashed_value) {
+  static inline counter_t to_bool(size_t hashed_value) {
     return hashed_value % 2;
   }
 

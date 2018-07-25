@@ -8,32 +8,6 @@ set(UTILS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../libutils/utils)
 
 include_directories(${GTEST_INCLUDE_DIR} ${CONFLUO_INCLUDE} ${UTILS_INCLUDE} ${Boost_INCLUDE_DIRS})
 
-#SET(ALAN_UNIVMON_DIR "/Users/Ujval/dev/research/univmon_extension/simulator/V0.3/")
-#INCLUDE_DIRECTORIES(${ALAN_UNIVMON_DIR})
-
-#ADD_LIBRARY(
-#    alan_univmon 
-#    ${ALAN_UNIVMON_DIR}/common.h
-#    ${ALAN_UNIVMON_DIR}/countSketch.h
-#    ${ALAN_UNIVMON_DIR}/counterInfo.h
-#    ${ALAN_UNIVMON_DIR}/data_plane.h
-#    ${ALAN_UNIVMON_DIR}/hash.h
-#    ${ALAN_UNIVMON_DIR}/hashInfo.h
-#    ${ALAN_UNIVMON_DIR}/os_galoisField.h
-#    ${ALAN_UNIVMON_DIR}/os_mangler.h
-#    ${ALAN_UNIVMON_DIR}/packet.h
-#    ${ALAN_UNIVMON_DIR}/pickdrop.h
-#    ${ALAN_UNIVMON_DIR}/topK.h
-#    ${ALAN_UNIVMON_DIR}/countSketch.cpp
-#    ${ALAN_UNIVMON_DIR}/data_plane.h
-#    ${ALAN_UNIVMON_DIR}/testUniversalSketch.cpp
-#    ${ALAN_UNIVMON_DIR}/testCountSketch.cpp
-#    ${ALAN_UNIVMON_DIR}/hash.cpp
-#    ${ALAN_UNIVMON_DIR}/topK.cpp
-#        test/container/sketch/universal_sketch_test.h confluo/container/sketch/priority_queue.h)
-
-#TARGET_LINK_LIBRARIES(MYProgram svm_lib_light)
-
 add_library(confluo STATIC
         confluo/read_tail.h
         confluo/atomic_multilog.h
@@ -222,8 +196,15 @@ add_library(confluo STATIC
         src/types/numeric.cc
         src/types/type_properties.cc
         src/types/type_manager.cc )
+
 target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
 add_dependencies(confluo lz4)
+
+add_executable(usexperiment
+    test/sketch_experiment.cc
+    )
+find_package(Boost 1.45.0 COMPONENTS program_options)
+target_link_libraries(usexperiment confluo ${Boost_LIBRARIES})
 
 if (BUILD_TESTS)
   # Build test
