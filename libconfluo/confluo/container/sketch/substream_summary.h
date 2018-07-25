@@ -70,7 +70,7 @@ public:
   }
 
   void update(T key, size_t incr = 1) {
-    counter_t old_count = sketch_.update_and_estimate(key);
+    counter_t old_count = sketch_.update_and_estimate(key, incr);
     counter_t update = l2_squared_update(old_count, incr);
     counter_t old_l2_sq = atomic::faa(&l2_squared_, update);
     double new_l2 = std::sqrt(old_l2_sq + update);
