@@ -20,6 +20,26 @@ class universal_sketch {
 
   /**
    * Constructor
+   * @param l number of layers
+   * @param t count-sketch depth (number of estimates)
+   * @param b count-sketch width (number of buckets)
+   * @param k number of heavy hitters to track per layer
+   * @param a heavy hitter threshold
+   * @param precise track exact heavy hitters
+   */
+  universal_sketch(size_t l, size_t t, size_t b, size_t k, double a,
+                   hash_manager m1, hash_manager* m2, hash_manager* m3,
+                   pairwise_indep_hash pwih)
+          : substream_summaries_(l),
+            layer_hashes_(m1),
+            precise_hh_(true) {
+    for (size_t i = 0; i < l; i++) {
+      substream_summaries_[i] = substream_summary<T, counter_t>(t, b, k, a, m2[i], m3[i], pwih);
+    }
+  }
+
+  /**
+   * Constructor
    * @param t count-sketch depth (number of estimates)
    * @param b count-sketch width (number of buckets)
    * @param k number of heavy hitters to track per layer
@@ -173,6 +193,17 @@ class universal_sketch {
     size_t total_size = 0;
     for (size_t i = 0; i < substream_summaries_.size(); i++) {
      total_size += substream_summaries_[i].storage_size();
+    }
+    return total_size;
+  }
+
+  /**
+   * @return size of data structure in bytes
+   */
+  size_t storage_size(size_t num_layers) {
+    size_t total_size = 0;
+    for (size_t i = 0; i < num_layers; i++) {
+      total_size += substream_summaries_[i].storage_size();
     }
     return total_size;
   }

@@ -89,6 +89,10 @@ public:
   typename std::vector<E>::const_iterator end() {
     return std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>>::c.end();
   }
+
+  size_t storage_size() {
+    return this->c.size() * sizeof(E);
+  }
 };
 
 }

@@ -30,6 +30,22 @@ class count_sketch {
    * @param t number of estimates per update (depth)
    * @param b number of buckets (width)
    */
+  count_sketch(size_t t, size_t b, hash_manager m1, hash_manager m2)
+          : depth_(t),
+            width_(b),
+            counters_(depth_ * width_),
+            bucket_hash_manager_(m1),
+            sign_hash_manager_(m2) {
+    for (size_t i = 0; i < counters_.size(); i++) {
+      atomic::store(&counters_[i], counter_t());
+    }
+  }
+
+  /**
+   * Constructor.
+   * @param t number of estimates per update (depth)
+   * @param b number of buckets (width)
+   */
   count_sketch(size_t t, size_t b)
       : depth_(t),
         width_(b),

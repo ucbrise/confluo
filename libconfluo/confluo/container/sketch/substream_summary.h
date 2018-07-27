@@ -29,6 +29,25 @@ public:
    * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
+  substream_summary(size_t t, size_t b, size_t k, double a, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
+          : hh_threshold_(a),
+            num_hh_(k),
+            l2_squared_(),
+            sketch_(t, b, m1, m2),
+            heavy_hitters_(k),
+            hhs_precise_(),
+            hh_hash_(pwih),
+            use_precise_hh_(true) {
+  }
+
+  /**
+   * Constructor
+   * @param t depth (number of estimates)
+   * @param b width (number of buckets)
+   * @param k number of heavy hitters to track
+   * @param a heavy hitter threshold
+   * @param precise track exact heavy hitters
+   */
   substream_summary(size_t t, size_t b, size_t k, double a, bool precise = true)
           : hh_threshold_(a),
             num_hh_(k),
@@ -112,7 +131,10 @@ public:
   size_t storage_size() {
     size_t total_size = 0;
     total_size += sketch_.storage_size();
-    total_size += heavy_hitters_.size();
+    if (use_precise_hh_)
+      total_size += hhs_precise_.storage_size();
+    else
+      total_size += heavy_hitters_.size();
     return total_size;
   }
 
