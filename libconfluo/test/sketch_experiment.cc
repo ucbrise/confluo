@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <assert.h>
+#include <assertions.h>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -61,7 +62,7 @@ class generator {
         low = mid+1;
       }
     }
-    assert((zipf_value >= X0) && (zipf_value <= X1));
+    assert((zipf_value >= x0) && (zipf_value <= x1));
     return zipf_value;
   }
 
@@ -145,44 +146,119 @@ class experiment {
       int64_t g_sum = us.evaluate(g, l);
       double error = double(std::abs(g_sum - actual))/actual;
 
-      std::cout << "Layers: " << l << "\n";
+      std::cout << "(l, b, k): (" << l << " " << b << " " << k << ")\n";
       std::cout << g_sum << " vs " << actual << "\n";
       std::cout << "Error: " << error << "\n";
-      std::cout << "Storage size: " << us.storage_size()/1024 << " KB" << "\n";
+      std::cout << "Storage size: " << us.storage_size(l)/1024.0 << " KB" << "\n";
       //LOG_INFO << "Latency per update: " << (update_b - update_a)/1000 << " us";
 //      LOG_INFO << "Evaluation latency: " << (eval_b - eval_a)/1000 << " us";
       std::cout << "\n";
 
-      out << l << "," << b << "," << k << "," << us.storage_size()/1024 << " " << error << "\n";
+      out << l << "," << b << "," << k << "," << us.storage_size(l)/1024.0 << "," << error << "\n";
     }
 
   }
 
 };
 
+void count_sketch_experiment(std::map<int, uint64_t>& hist, std::ofstream& out) {
+  double alpha = 0.001;
+  double gamma = 0.01;
+  double epsilon[] = { 0.005, 0.01, 0.02, 0.04, 0.06, 0.08, 0.10 };
+  double l2 = 0;
+  double l1 = 0;
+  for (auto p : hist) {
+    l2 += (p.second * p.second);
+    l1 += p.second;
+  }
+  l2 = std::sqrt(l2);
+  std::cout << l2 << "\n";
+
+  std::cout << "Updating...\n";
+  for (double e : epsilon) {
+
+    heavy_hitter_set<int, int64_t> hhs;
+    heavy_hitter_set<int, int64_t> hhs_actual;
+    size_t k = 20;
+    auto cs = count_sketch<int>::create_parameterized(e, gamma);
+
+    for (auto p : hist) {
+      cs.update(p.first, p.second);
+      int64_t est = cs.estimate(p.first);
+      if (hhs.size() < k) {
+        hhs.remove_if_exists(p.first);
+        hhs.pushp(p.first, est);
+      } else {
+        int head = hhs.top().key_;
+        if (cs.estimate(head) < est) {
+          hhs.pop();
+          hhs.remove_if_exists(p.first);
+          hhs.pushp(p.first, est);
+        }
+      }
+      if (hhs_actual.size() < k) {
+        hhs_actual.pushp(p.first, est);
+      } else {
+        int head = hhs.top().key_;
+        if (cs.estimate(head) < est) {
+          hhs_actual.pop();
+          hhs_actual.pushp(p.first, est);
+        }
+      }
+    }
+
+    double relv_err = 0.0;
+    for (auto p : hist) {
+      int64_t actual = p.second;
+      int64_t est = std::max(0LL, cs.estimate(p.first));
+      double diff = std::abs(est - actual);
+      double error = diff/actual;
+      relv_err += error * actual/l1;
+    }
+
+    int64_t smallest_actual = hhs_actual.top().priority_;
+    for (auto it = hhs.begin(); it != hhs.end(); ++it) {
+      assert_throw((1 - e) * smallest_actual < hist[(*it).key_],
+                   std::to_string(hist[(*it).key_]) + " " + std::to_string(smallest_actual));
+    }
+
+    // Print
+    std::cout << "Dimensions: " << cs.depth() << " x " << cs.width() << "\n";
+    std::cout << "Sketch size: " << (cs.storage_size() / 1024) << " KB" << "\n";
+    std::cout << "Weighted error: " << relv_err << "\n";
+    std::cout << "\n";
+
+    out << cs.width()
+        << "," << e << "," << cs.storage_size() / 1024 << ","
+        << relv_err << "\n";
+
+  }
+}
+
 int main(int argc, char** argv) {
 
   po::options_description desc("Usage");
   desc.add_options()
+          ("type", po::value<std::string>()->default_value("universal"), "[count|universal]")
           ("l", po::value<size_t>()->default_value(32), "# of layers")
           ("t", po::value<size_t>()->default_value(64), "Sketch depth")
           ("b", po::value<size_t>()->default_value(27000), "Sketch width")
           ("k", po::value<size_t>()->default_value(64), "# of heavy hitters")
-          ("a", po::value<size_t>()->default_value(0), "alpha")
-          ("input", po::value<std::string>()->default_value("sketch_exp.hist"), "Histogram input")
-          ("output", po::value<std::string>()->default_value("sketch_exp.out"), "output (error or histogram)");
+          ("a", po::value<double>()->default_value(0), "alpha")
+          ("in", po::value<std::string>()->default_value("sketch_exp.hist"), "Histogram input")
+          ("out", po::value<std::string>()->default_value("sketch_exp.csv"), "output (error or histogram)");
 
   po::variables_map opts;
   po::store(po::parse_command_line(argc, argv, desc), opts);
   try {
     po::notify(opts);
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     std::cerr << "Error: " << e.what() << "\n";
     return 1;
   }
 
-  std::string in_path = opts["input"].as<std::string>();
-  std::string out_path = opts["output"].as<std::string>();
+  std::string in_path = opts["in"].as<std::string>();
+  std::string out_path = opts["out"].as<std::string>();
   std::ifstream in(in_path);
   std::ofstream out(out_path);
 
@@ -196,22 +272,38 @@ int main(int argc, char** argv) {
     hist[key] = uint32_t(freq);
   }
 
+  std::string type = opts["type"].as<std::string>();
+  if (type == "count") {
+    count_sketch_experiment(hist, out);
+    return 0;
+  }
+
+
   size_t l = opts["l"].as<size_t>();
   size_t t = opts["t"].as<size_t>();
   size_t b = opts["b"].as<size_t>();
   size_t k = opts["k"].as<size_t>();
-  double a = 0;
+  double a = opts["a"].as<double>();
 
-  experiment e;
-  univ_sketch_t us(l, t, b, k, a);
-  std::cout << "Updating...\n";
-  int64_t actual = e.update(us, hist);
-  std::cout << "Evaluating...\n";
-
-  size_t kk[] = { 10, 20, 40, 80, 100, 500 };
-  size_t bb[] = { 100, 500, 1000, 4000, 8000, 16000, 24000 };
-  for (size_t kkk : kk)
-    for (size_t bbb : bb)
-      e.eval(us, actual, l, out, bbb, kkk);
+  size_t tt[] = {32, 36, 40, 44, 48 };
+  size_t kk[] = { 4, 8, 12, 14, 16, 18, 20, 40, 60, 80, 100 };
+  size_t bb[] = { 1000, 2000, 4000, 8000, 16000, 32000 };
+  hash_manager m1(l);
+  auto *m2 = new hash_manager[l]();
+  auto *m3 = new hash_manager[l]();
+  for (size_t i = 0; i < l; i++) {
+    m2[i] = hash_manager(tt[5]);
+    m3[i] = hash_manager(tt[5]);
+  }
+  auto pwih = pairwise_indep_hash::generate_random();
+  for (size_t ttt: tt)
+    for (size_t kkk : kk)
+      for (size_t bbb : bb) {
+        std::cout << "Updating...\n";
+        univ_sketch_t us(l, ttt, bbb, kkk, a, m1, m2, m3, pwih);
+        int64_t actual = experiment::update(us, hist);
+        std::cout << "Evaluating...\n";
+        experiment::eval(us, actual, l, out, bbb, kkk);
+      }
 
 }
