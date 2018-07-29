@@ -69,6 +69,11 @@ public:
     this->push(E(key, priority));
   }
 
+  void update(T key, P priority) {
+   this->remove_if_exists(key);
+   this->pushp(key, priority);
+  }
+
   bool remove_if_exists(const T& key) {
     E query(key, P());
     auto it = std::find_if(this->c.begin(), this->c.end(), std::bind(E::element_eq, std::placeholders::_1, query));

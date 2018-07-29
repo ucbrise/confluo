@@ -47,13 +47,14 @@ class hash_manager {
   explicit hash_manager(size_t num_hashes = 0);
 
   /**
+   *
    * Guarantee enough hashes are intialized.
    * @param num_hashes number of hashes
    */
   void guarantee_initialized(size_t num_hashes);
 
   /**
-   * Hash element.
+   * Hashes an element of arbitrary type.
    * @param hash_id id of hash to use
    * @param elem element to hash
    * @return hashed value
@@ -62,6 +63,17 @@ class hash_manager {
   size_t hash(size_t hash_id, T elem) const {
     return hashes_[hash_id].template apply<T>(elem);
   }
+
+  /**
+   * Returns the number of hashes
+   * @return size
+   */
+  size_t size() const;
+
+  /** Returns the storage size in bytes.
+   * @return storage size
+   */
+  size_t storage_size() const;
 
  private:
   std::vector<pairwise_indep_hash> hashes_;

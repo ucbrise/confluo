@@ -3,6 +3,7 @@
 
 #include <array>
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 #include "atomic.h"
@@ -29,16 +30,18 @@ class count_sketch {
    * Constructor.
    * @param t number of estimates per update (depth)
    * @param b number of buckets (width)
+   * @param m1 hash manager for buckets
+   * @param m2 hash manager for signs
    */
   count_sketch(size_t t, size_t b, hash_manager m1, hash_manager m2)
           : depth_(t),
             width_(b),
             counters_(depth_ * width_),
-            bucket_hash_manager_(m1),
-            sign_hash_manager_(m2) {
-    for (size_t i = 0; i < counters_.size(); i++) {
-      atomic::store(&counters_[i], counter_t());
-    }
+            bucket_hash_manager_(std::move(m1)),
+            sign_hash_manager_(std::move(m2)) {
+    this->clear();
+    bucket_hash_manager_.guarantee_initialized(depth_);
+    sign_hash_manager_.guarantee_initialized(depth_);
   }
 
   /**
@@ -47,16 +50,7 @@ class count_sketch {
    * @param b number of buckets (width)
    */
   count_sketch(size_t t, size_t b)
-      : depth_(t),
-        width_(b),
-        counters_(depth_ * width_),
-        bucket_hash_manager_(),
-        sign_hash_manager_() {
-    for (size_t i = 0; i < counters_.size(); i++) {
-      atomic::store(&counters_[i], counter_t());
-    }
-    bucket_hash_manager_.guarantee_initialized(depth_);
-    sign_hash_manager_.guarantee_initialized(depth_);
+      : count_sketch(t, b, hash_manager(), hash_manager()) {
   }
 
   count_sketch(const count_sketch& other)
@@ -125,21 +119,27 @@ class count_sketch {
     return median(median_buf);
   }
 
-  size_t depth() {
+  size_t depth() const {
     return depth_;
   }
 
-  size_t width() {
+  size_t width() const {
     return width_;
+  }
+
+  void clear() {
+    for (size_t i = 0; i < counters_.size(); i++) {
+      atomic::store(&counters_[i], counter_t());
+    }
   }
 
   /**
    * @return storage size of data structure in bytes
    */
-  size_t storage_size() {
-   size_t counters_size_bytes = sizeof(atomic_counter_t) * (depth_ * width_);
-   // TODO account for hashes (O(n) increase)
-   return counters_size_bytes;
+  size_t storage_size() const {
+   size_t counters_size_bytes = sizeof(atomic_counter_t) * counters_.capacity();
+   size_t hashes_size_bytes = bucket_hash_manager_.storage_size() + sign_hash_manager_.storage_size();
+   return counters_size_bytes + hashes_size_bytes;
   }
 
   /**

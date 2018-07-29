@@ -133,9 +133,8 @@ class universal_sketch {
 
     if (precise_hh_) {
       auto& last_substream_hhs = substream_summaries_[substream_i].get_pq();
-      for (auto it = last_substream_hhs.begin(); it != last_substream_hhs.end(); ++it) {
-        counter_t count = (*it).priority_;
-        recursive_sum += g(count);
+      for (auto hh : last_substream_hhs) {
+        recursive_sum += g(hh.priority_);
       }
     }
     else {
@@ -159,10 +158,9 @@ class universal_sketch {
 
       if (precise_hh_) {
         auto& substream_hhs = substream_summaries_[substream_i].get_pq();
-        for (auto it = substream_hhs.begin(); it != substream_hhs.end(); ++it) {
-          T hh = (*it).key_;
-          counter_t count = (*it).priority_;
-          g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh))) * g(count));
+        for (auto hh : substream_hhs) {
+          counter_t count = hh.priority_;
+          g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh.key_))) * g(count));
           substream_sum += update;
         }
       }
