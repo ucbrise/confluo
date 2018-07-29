@@ -67,7 +67,7 @@ class CountSketchTest : public testing::Test {
     return(zipf_value);
   }
 
-  double generate_zipf(std::map<int, long int>& hist) {
+  double generate_zipf(std::map<int, uint64_t>& hist) {
     for (int n = 0; n < N; n++)
       hist[std::abs(sample_zipf(1.2))]++;
 
@@ -76,6 +76,54 @@ class CountSketchTest : public testing::Test {
       l2_sq += (p.second * p.second);
 
     return std::sqrt(l2_sq);
+  }
+
+  static void run(std::map<int, uint64_t>& hist, double epsilon) {
+    double gamma = 0.001;
+    size_t k = 100;
+
+    heavy_hitter_set<int, int64_t> hhs;
+    heavy_hitter_set<int, int64_t> hhs_actual;
+    auto cs = count_sketch<int>::create_parameterized(epsilon, gamma);
+
+    std::cout << "Updating...\n";
+
+    // Forward to last updates
+    for (auto p : hist) {
+      if (p.second > 1)
+        cs.update(p.first, p.second);
+    }
+
+    for (auto p : hist) {
+      cs.update(p.first);
+      int64_t est = cs.estimate(p.first);
+      if (hhs.size() < k) {
+        hhs.pushp(p.first, est);
+      }
+      else {
+        int head = hhs.top().key_;
+        int64_t head_priority = hhs.top().priority_;
+        if (head_priority < est) {
+          hhs.pop();
+          hhs.pushp(p.first, est);
+          assert_throw(hhs.top().priority_ >= head_priority,
+                       std::to_string(hhs.top().priority_) + " > " + std::to_string(head_priority));
+        }
+      }
+      if (hhs_actual.size() < k) {
+        hhs_actual.pushp(p.first, est);
+      } else {
+        if (hhs_actual.top().priority_ < est) {
+          hhs_actual.pop();
+          hhs_actual.pushp(p.first, p.second);
+        }
+      }
+    }
+
+    int64_t smallest_actual = hhs_actual.top().priority_;
+    for (auto hh : hhs) {
+      ASSERT_LT((1 - epsilon) * smallest_actual, hist[hh.key_]);
+    }
   }
 
  private:
@@ -87,78 +135,20 @@ class CountSketchTest : public testing::Test {
 
 const int CountSketchTest::N;
 
-TEST_F(CountSketchTest, EstimateAccuracyTest) {
+//TEST_F(CountSketchTest, EstimateAccuracyTest) {
 
-  double alpha = 0.01;
-  double epsilon[] = { 0.01, 0.02, 0.04, 0.08, 0.12, 0.16, 0.20 };
-  double gamma[] = { 0.05 };
+//  double alpha = 0.01;
+//  double epsilon[] = { 0.01, 0.02, 0.04, 0.08, 0.12 };
 
-  std::ofstream summary_out("sketch_test_summary.out");
-  std::ofstream out("sketch_error.out");
+//  std::ofstream summary_out("sketch_test_summary.out");
+//  std::ofstream out("sketch_error.out");
 
-  std::map<int, long int> hist;
-  double l2 = generate_zipf(hist);
-  LOG_INFO << "L2-norm: " << l2;
+//  std::map<int, uint64_t> hist;
+//  double l2 = generate_zipf(hist);
 
-  for (double g : gamma) {
-    for (double e : epsilon) {
+//  for (double e: epsilon)
+//    run(hist, e);
 
-      auto cs = count_sketch<int>::create_parameterized(e, g);
-
-      for (auto p : hist)
-        for (int i = 0; i < p.second; i++)
-          cs.update(p.first);
-
-      double num_measurements = 0;
-      std::vector<double> errors;
-      std::vector<double> relevant_errors;
-
-      size_t negative_count = 0;
-      for (auto p : hist) {
-        int64_t actual = p.second;
-        num_measurements++;
-
-        // My estimate
-        int64_t est = cs.estimate(p.first);
-        double diff = std::abs(est - actual);
-        double error = diff/actual;
-        errors.push_back(error);
-
-        if (actual > alpha * l2) {
-          relevant_errors.push_back(error);
-        }
-
-        if (est < 0) {
-          negative_count++;
-        }
-      }
-
-      // Compute overall stats
-      std::sort(errors.begin(), errors.end());
-      double avg_err = std::accumulate(errors.begin(), errors.end(), 0.0)/errors.size();
-
-      std::sort(relevant_errors.begin(), relevant_errors.end());
-      double avg_relv_err = std::accumulate(relevant_errors.begin(), relevant_errors.end(), 0.0)/relevant_errors.size();
-
-      // Print
-      LOG_INFO << "Dimensions: " << cs.depth() << " x " << cs.width();
-      LOG_INFO << "Sketch size: " << (cs.storage_size() / 1024) << " KB";
-      LOG_INFO << "Negative rate: " << negative_count/num_measurements;
-      LOG_INFO << "Median error: " << errors[int(errors.size()/2)];
-      LOG_INFO << "Median relevant error: " << relevant_errors[int(relevant_errors.size()/2)];
-      LOG_INFO << "Mean error: " << avg_err;
-      LOG_INFO << "Mean relevant error: " << avg_relv_err;
-      LOG_INFO << "";
-
-      ASSERT_LT(avg_relv_err, e);
-
-      summary_out << cs.depth() << " " << cs.width() << " " <<
-                     g << " " << e << " " << cs.storage_size() / 1024 << " " <<
-                     relevant_errors[int(relevant_errors.size()/2)] <<
-                     "\n";
-
-    }
-  }
-}
+//}
 
 #endif /* TEST_COUNT_SKETCH_TEST */

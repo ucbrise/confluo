@@ -150,8 +150,6 @@ class experiment {
       std::cout << g_sum << " vs " << actual << "\n";
       std::cout << "Error: " << error << "\n";
       std::cout << "Storage size: " << us.storage_size(l)/1024.0 << " KB" << "\n";
-      //LOG_INFO << "Latency per update: " << (update_b - update_a)/1000 << " us";
-//      LOG_INFO << "Evaluation latency: " << (eval_b - eval_a)/1000 << " us";
       std::cout << "\n";
 
       out << l << "," << b << "," << k << "," << us.storage_size(l)/1024.0 << "," << error << "\n";
@@ -161,79 +159,116 @@ class experiment {
 
 };
 
-void count_sketch_experiment(std::map<int, uint64_t>& hist, std::ofstream& out) {
-  double alpha = 0.001;
-  double gamma = 0.01;
-  double epsilon[] = { 0.005, 0.01, 0.02, 0.04, 0.06, 0.08, 0.10 };
-  double l2 = 0;
-  double l1 = 0;
-  for (auto p : hist) {
-    l2 += (p.second * p.second);
-    l1 += p.second;
-  }
-  l2 = std::sqrt(l2);
-  std::cout << l2 << "\n";
+class count_sketch_experiment {
+public:
+  static void run(std::map<int, uint64_t> &hist, std::ofstream &out) {
+    std::array<double, 7> epsilon = {{0.005, 0.01, 0.02, 0.04, 0.06, 0.08, 0.10}};
+    std::array<double, 1> gamma = {{0.01}};
+//    std::array<double, 7> gamma = {0.005, 0.01, 0.02, 0.04, 0.06, 0.08, 0.10 };
 
-  std::cout << "Updating...\n";
-  for (double e : epsilon) {
-
-    heavy_hitter_set<int, int64_t> hhs;
-    heavy_hitter_set<int, int64_t> hhs_actual;
-    size_t k = 20;
-    auto cs = count_sketch<int>::create_parameterized(e, gamma);
-
+    double l2 = 0;
+    double l1 = 0;
+    size_t k = 200;
     for (auto p : hist) {
-      cs.update(p.first, p.second);
-      int64_t est = cs.estimate(p.first);
-      if (hhs.size() < k) {
-        hhs.remove_if_exists(p.first);
-        hhs.pushp(p.first, est);
-      } else {
-        int head = hhs.top().key_;
-        if (cs.estimate(head) < est) {
+      l2 += (p.second * p.second);
+      l1 += p.second;
+    }
+    l2 = std::sqrt(l2);
+
+    std::cout << "Updating...\n";
+    hash_manager m1(count_sketch<int>::perror_to_depth(gamma.back()));
+    hash_manager m2(count_sketch<int>::perror_to_depth(gamma.back()));
+    for (double g : gamma) {
+      for (double e : epsilon) {
+
+        heavy_hitter_set<int, int64_t> hhs;
+        heavy_hitter_set<int, int64_t> hhs_actual;
+        auto cs = count_sketch<int>(count_sketch<int>::error_margin_to_width(e),
+                                    count_sketch<int>::perror_to_depth(g),
+                                    m1, m2);
+
+        // Forward to last updates
+        for (auto p : hist) {
+          if (p.second > 1)
+            cs.update(p.first, p.second);
+        }
+
+        for (auto p : hist) {
+          cs.update(p.first);
+          int64_t est = cs.estimate(p.first);
+          if (hhs.size() < k) {
+            hhs.pushp(p.first, est);
+          } else {
+            int head = hhs.top().key_;
+            int64_t head_priority = hhs.top().priority_;
+            if (head_priority < est) {
+              hhs.pop();
+              hhs.pushp(p.first, est);
+              assert_throw(hhs.top().priority_ >= head_priority,
+                           std::to_string(hhs.top().priority_) + " > " + std::to_string(head_priority));
+            }
+          }
+          if (hhs_actual.size() < k) {
+            hhs_actual.pushp(p.first, est);
+          } else {
+            if (hhs_actual.top().priority_ < est) {
+              hhs_actual.pop();
+              hhs_actual.pushp(p.first, p.second);
+            }
+          }
+        }
+
+        std::cout << "Verifying correctness...\n";
+        // Verify correctness
+        int64_t smallest_actual = hhs_actual.top().priority_;
+        for (auto hh : hhs) {
+          assert_throw((1 - e) * smallest_actual < hist[hh.key_],
+                       std::to_string(smallest_actual) + " < \n" + to_string(hhs) + "\n\n" + to_string(hhs_actual) + "\n");
+        }
+
+        std::vector<int> top_k;
+        while (!hhs.empty()) {
+          top_k.push_back(hhs.top().key_);
           hhs.pop();
-          hhs.remove_if_exists(p.first);
-          hhs.pushp(p.first, est);
         }
-      }
-      if (hhs_actual.size() < k) {
-        hhs_actual.pushp(p.first, est);
-      } else {
-        int head = hhs.top().key_;
-        if (cs.estimate(head) < est) {
-          hhs_actual.pop();
-          hhs_actual.pushp(p.first, est);
+
+        std::cout << "Computing error...\n";
+        // Compute relevant error
+        double l1_regularized_err = 0.0;
+        double l2_regularized_err = 0.0;
+        double avg_err = 0.0;
+        size_t cur_k = 0;
+        for (size_t i = top_k.size(); i-- > 0;) {
+          size_t k_so_far = top_k.size() - i + 1;
+          int64_t actual = hist[top_k[i]];
+          int64_t est = cs.estimate(top_k[i]);
+          double diff = std::abs(est - actual);
+          double error = diff / actual;
+          avg_err += error;
+          out << cs.width() << "," << cs.depth() << "," << e << "," << g << ","
+              << cs.storage_size() / 1024 << "," << avg_err/k_so_far << "\n";
         }
+
+        // Print
+        std::cout << "Dimensions: " << cs.depth() << " x " << cs.width() << "\n";
+        std::cout << "Sketch size: " << (cs.storage_size() / 1024) << " KB" << "\n";
+        std::cout << "Avg error: " << avg_err/top_k.size() << "\n";
+        std::cout << "\n";
+
       }
     }
-
-    double relv_err = 0.0;
-    for (auto p : hist) {
-      int64_t actual = p.second;
-      int64_t est = std::max(0LL, cs.estimate(p.first));
-      double diff = std::abs(est - actual);
-      double error = diff/actual;
-      relv_err += error * actual/l1;
-    }
-
-    int64_t smallest_actual = hhs_actual.top().priority_;
-    for (auto it = hhs.begin(); it != hhs.end(); ++it) {
-      assert_throw((1 - e) * smallest_actual < hist[(*it).key_],
-                   std::to_string(hist[(*it).key_]) + " " + std::to_string(smallest_actual));
-    }
-
-    // Print
-    std::cout << "Dimensions: " << cs.depth() << " x " << cs.width() << "\n";
-    std::cout << "Sketch size: " << (cs.storage_size() / 1024) << " KB" << "\n";
-    std::cout << "Weighted error: " << relv_err << "\n";
-    std::cout << "\n";
-
-    out << cs.width()
-        << "," << e << "," << cs.storage_size() / 1024 << ","
-        << relv_err << "\n";
-
   }
-}
+
+ private:
+  static std::string to_string(heavy_hitter_set<int, int64_t>& hhs) {
+    std::string out = "";
+    for (auto hh : hhs) {
+      out += " (" + std::to_string(hh.key_) + " = " + std::to_string(hh.priority_) + "), ";
+    }
+    return out;
+  }
+};
+
 
 int main(int argc, char** argv) {
 
@@ -274,10 +309,9 @@ int main(int argc, char** argv) {
 
   std::string type = opts["type"].as<std::string>();
   if (type == "count") {
-    count_sketch_experiment(hist, out);
+    count_sketch_experiment::run(hist, out);
     return 0;
   }
-
 
   size_t l = opts["l"].as<size_t>();
   size_t t = opts["t"].as<size_t>();
@@ -292,8 +326,8 @@ int main(int argc, char** argv) {
   auto *m2 = new hash_manager[l]();
   auto *m3 = new hash_manager[l]();
   for (size_t i = 0; i < l; i++) {
-    m2[i] = hash_manager(tt[5]);
-    m3[i] = hash_manager(tt[5]);
+    m2[i] = hash_manager(tt[4]);
+    m3[i] = hash_manager(tt[4]);
   }
   auto pwih = pairwise_indep_hash::generate_random();
   for (size_t ttt: tt)

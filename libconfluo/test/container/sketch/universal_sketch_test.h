@@ -8,12 +8,13 @@ using namespace ::confluo::sketch;
 
 class UniversalSketchTest : public testing::Test {
 public:
-  static constexpr int N = 1000000;
+  static constexpr int N = int(5e8);
+
   static constexpr int MEAN = 0;
-  static constexpr int SD = 400;
+  static constexpr int SD = 100;
 
   static constexpr int X0 = 1;
-  static constexpr int X1 = 10000000;
+  static constexpr int X1 = int(1e8);
 
   UniversalSketchTest()
           : dist(MEAN, SD),
@@ -61,12 +62,15 @@ public:
       }
     }
     assert((zipf_value >= X0) && (zipf_value <= X1));
-    return(zipf_value);
+    return zipf_value;
   }
 
   double generate_zipf(std::map<int, long int>& hist) {
-    for (int n = 0; n < N; n++)
-      hist[std::abs(sample_zipf(1.2))]++;
+    for (int n = 0; n < N; n++) {
+      hist[sample_zipf(1.2)]++;
+      if (n % int(1e5) == 0)
+        LOG_INFO << "Completed... " << n;
+    }
 
     double l2_sq = 0.0;
     for (auto p : hist)
@@ -80,69 +84,125 @@ public:
   }
 
   static int64_t f1(int64_t x) {
-    return x;
+    return int64_t(x);
   }
 
   static int64_t f2(int64_t x) {
-    return x * x;
+    return int64_t(x * x);
   }
 
-  static void eval(universal_sketch<int>& us, std::map<int, long int>& hist, size_t layers) {
-
+  static int64_t update(universal_sketch<int>& us, std::map<int, uint64_t>& hist) {
     std::function<int64_t(int64_t)> g = f2;
-
     int64_t actual = 0;
 
-    int64_t update_a = time_utils::cur_ns();
+    LOG_INFO << "Creating stream...";
+    std::vector<int> stream;
     for (auto p : hist) {
-      for (int i = 0; i < p.second; i++) {
-        us.update(p.first);
-      }
       actual += g(p.second);
+      stream.push_back(p.first);
+      if (p.second > 1) {
+        us.update(p.first, p.second);
+      }
     }
+
+    LOG_INFO << "Shuffling...";
+    std::random_shuffle(stream.begin(), stream.end());
+
+    LOG_INFO << "Updating from shuffled...";
+    for (auto elem : stream) {
+      us.update(elem);
+    }
+
+    int64_t update_a = time_utils::cur_ns();
     int64_t update_b = time_utils::cur_ns();
+
+    return actual;
+  }
+
+  static void eval(universal_sketch<int>& us, int64_t actual, size_t layers, std::ofstream& out) {
+
+    std::function<int64_t(int64_t)> g = f2;
 
     for (size_t l = 1; l < layers; l++) {
       int64_t eval_a = time_utils::cur_ns();
       int64_t g_sum = us.evaluate(g, l);
       int64_t eval_b = time_utils::cur_ns();
+      double error = double(std::abs(g_sum - actual))/actual;
 
       LOG_INFO << "Layers: " << l;
       LOG_INFO << g_sum << " vs " << actual;
-      LOG_INFO << "Storage size: " << us.storage_size()/1024 << " KB";
-      LOG_INFO << "Error: " << double(std::abs(g_sum - actual))/actual;
+//      LOG_INFO << "Storage size: " << us.storage_size()/1024 << " KB";
+      LOG_INFO << "Error: " << error;
       //LOG_INFO << "Latency per update: " << (update_b - update_a)/1000 << " us";
-      LOG_INFO << "Evaluation latency: " << (eval_b - eval_a)/1000 << " us";
+//      LOG_INFO << "Evaluation latency: " << (eval_b - eval_a)/1000 << " us";
       LOG_INFO << "";
+
+      out << l << " " << us.storage_size()/1024 << " " << error << "\n";
     }
 
   }
 
- private:
   std::normal_distribution<double> dist;
   std::uniform_real_distribution<> udist;
   std::mt19937 e2;
 
 };
 
-TEST_F(UniversalSketchTest, EstimateAccuracyTest) {
+TEST_F(UniversalSketchTest, GenerateTest) {
 
-  std::ofstream out("univ_sketch_error.out");
+//  std::ofstream out("/Users/Ujval/dev/research/confluo/analyze/zipf.hist");
+//  double l2 = generate_zipf(hist);
 
-  std::random_device rd;
-  std::mt19937 e2(rd());
-  std::map<int, long int> hist;
-  double l2 = generate_zipf(hist);
+//  std::ofstream out("/Users/Ujval/dev/research/confluo/analyze/normal.hist");
+//  std::map<int, long int> hist;
+//  for (size_t i = 0; i < N; i++)
+//    hist[dist(e2)]++;
 
-  size_t l = 32;
-  size_t t = 64;
-  size_t b = 27000;
-  size_t k = 20;
-  double a = 0;
-  universal_sketch<int> us(l, t, b, k, a);
-  eval(us, hist, l);
+//  for (auto p: hist)
+//    out << p.first << " " << p.second << "\n";
 
 }
+
+//TEST_F(UniversalSketchTest, EstimateAccuracyTest) {
+
+//  std::ifstream in("/Users/Ujval/dev/research/confluo/analyze/zipf.hist");
+////  std::ifstream in("/Users/Ujval/dev/research/confluo/analyze/normal.hist");
+
+////  std::ofstream out("/Users/Ujval/dev/research/confluo/univ_sketch_error.001.out");
+//  std::ofstream out("/Users/Ujval/dev/research/confluo/univ_sketch_error.005.out");
+////  std::ofstream out("/Users/Ujval/dev/research/confluo/univ_sketch_error.03.out");
+
+//  LOG_INFO << "Loading...";
+//  std::map<int, uint64_t> hist;
+//  std::string line;
+
+//  while (getline(in, line)) {
+//    size_t space_idx = line.find(" ");
+//    int key = std::stoi(line.substr(0, space_idx));
+//    uint64_t freq = std::stoull(line.substr(space_idx + 1));
+//    hist[key] = uint32_t(freq);
+//  }
+
+//  // 0.01 margin of error
+//  size_t l = 32;
+//  size_t t = 64;
+////  size_t b = 27000; // epsilon = 0.01
+////  size_t b = 1087; // epsilon = 0.05
+//  size_t b = 50; // epsilon = idk
+//  size_t k = 20;
+//  double a = 0;
+////  universal_sketch<int> us(l, t, b, k, a);
+////  eval(us, hist, l, out);
+
+//  // 0.05 margin of error
+//  universal_sketch<int> us(l, t, b, k, a);
+
+//  LOG_INFO << "Updating...";
+//  int64_t actual = update(us, hist);
+//  LOG_INFO << "Evaluating...";
+//  eval(us, actual, l, out);
+
+//}
 
 const int UniversalSketchTest::N;
 
