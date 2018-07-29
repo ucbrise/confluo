@@ -23,17 +23,17 @@ public:
 
   /**
    * Constructor
-   * @param t depth (number of estimates)
    * @param b width (number of buckets)
+   * @param t depth (number of estimates)
    * @param k number of heavy hitters to track
    * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  substream_summary(size_t t, size_t b, size_t k, double a, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
+  substream_summary(size_t b, size_t t, size_t k, double a, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
           : hh_threshold_(a),
             num_hh_(k),
             l2_squared_(),
-            sketch_(t, b, m1, m2),
+            sketch_(b, t, m1, m2),
             heavy_hitters_(k),
             hhs_precise_(),
             hh_hash_(pwih),
@@ -42,17 +42,17 @@ public:
 
   /**
    * Constructor
-   * @param t depth (number of estimates)
    * @param b width (number of buckets)
+   * @param t depth (number of estimates)
    * @param k number of heavy hitters to track
    * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  substream_summary(size_t t, size_t b, size_t k, double a, bool precise = true)
+  substream_summary(size_t b, size_t t, size_t k, double a, bool precise = true)
           : hh_threshold_(a),
             num_hh_(k),
             l2_squared_(),
-            sketch_(t, b),
+            sketch_(b, t),
             heavy_hitters_(k),
             hhs_precise_(),
             hh_hash_(pairwise_indep_hash::generate_random()),

@@ -28,14 +28,14 @@ class count_sketch {
 
   /**
    * Constructor.
-   * @param t number of estimates per update (depth)
    * @param b number of buckets (width)
+   * @param t number of estimates per update (depth)
    * @param m1 hash manager for buckets
    * @param m2 hash manager for signs
    */
-  count_sketch(size_t t, size_t b, hash_manager m1, hash_manager m2)
-          : depth_(t),
-            width_(b),
+  count_sketch(size_t b, size_t t, hash_manager m1, hash_manager m2)
+          : width_(b),
+            depth_(t),
             counters_(depth_ * width_),
             bucket_hash_manager_(std::move(m1)),
             sign_hash_manager_(std::move(m2)) {
@@ -46,11 +46,11 @@ class count_sketch {
 
   /**
    * Constructor.
-   * @param t number of estimates per update (depth)
    * @param b number of buckets (width)
+   * @param t number of estimates per update (depth)
    */
-  count_sketch(size_t t, size_t b)
-      : count_sketch(t, b, hash_manager(), hash_manager()) {
+  count_sketch(size_t b, size_t t)
+      : count_sketch(b, t, hash_manager(), hash_manager()) {
   }
 
   count_sketch(const count_sketch& other)
@@ -150,8 +150,8 @@ class count_sketch {
    * @return count min sketch with accuracy guarantees
    */
   static count_sketch create_parameterized(double epsilon, double gamma) {
-    return count_sketch(count_sketch<T>::perror_to_depth(gamma),
-                        count_sketch<T>::error_margin_to_width(epsilon));
+    return count_sketch(count_sketch<T>::error_margin_to_width(epsilon),
+                        count_sketch<T>::perror_to_depth(gamma));
   }
 
   /**
@@ -179,8 +179,8 @@ class count_sketch {
     return num % 2 == 1 ? 1 : -1;
   }
 
-  size_t depth_; // number of estimates
   size_t width_; // number of buckets
+  size_t depth_; // number of estimates
 
   std::vector<atomic_counter_t> counters_;
   hash_manager bucket_hash_manager_;
