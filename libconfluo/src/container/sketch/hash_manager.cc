@@ -31,5 +31,13 @@ void hash_manager::guarantee_initialized(size_t num_hashes) {
   }
 }
 
+size_t hash_manager::size() const {
+  return hashes_.size();
+}
+
+size_t hash_manager::storage_size() const {
+  return sizeof(pairwise_indep_hash) * hashes_.capacity();
+}
+
 }
 }

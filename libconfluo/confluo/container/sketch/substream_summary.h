@@ -150,14 +150,13 @@ private:
       return;
     }
     if (hhs_precise_.size() < num_hh_) {
-      hhs_precise_.remove_if_exists(key);
-      hhs_precise_.pushp(key, count);
-    } else {
+      hhs_precise_.update(key, count);
+    }
+    else {
       T head = hhs_precise_.top().key_;
       if (sketch_.estimate(head) < count) {
         hhs_precise_.pop();
-        hhs_precise_.remove_if_exists(key);
-        hhs_precise_.pushp(key, count);
+        hhs_precise_.update(key, count);
       }
     }
   }
