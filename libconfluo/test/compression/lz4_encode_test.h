@@ -17,7 +17,6 @@ size_t const LZ4EncodeTest::BYTES_PER_BLOCK;
 
 TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
   // initialized array size
-  // why is it this?
   size_t size = 11048;
   uint8_t *source = new uint8_t[size];
 
@@ -47,7 +46,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodeFullTest) {
  */
 TEST_F(LZ4EncodeTest, EncodeDecodeFullBigBlockTest) {
   // initialized array size
-  // isn't uint8_t == 1 byte?
   size_t size = 2048;
   uint8_t *source = new uint8_t[size];
 
@@ -74,7 +72,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodeFullBigBlockTest) {
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
   // initialized array size
-  // why is it this?
   size_t size = 11048;
   uint8_t *source = new uint8_t[size];
 
@@ -104,7 +101,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialTest) {
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialLessThanBlockSizeTest) {
   // initialized array size
-  // why is it this?
   size_t size = 11048;
   uint8_t *source = new uint8_t[size];
 
@@ -116,7 +112,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLessThanBlockSizeTest) {
   size_t dest_size = 210;
   int src_index = 7210;
   // gets an upper bound on the size of the encoded buffer in bytes
-  // where is this used?
   size_t encode_buffer_size = lz4_encoder<>::get_buffer_size(size);
 
   // initializes destination array of smaller size
@@ -137,7 +132,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLessThanBlockSizeTest) {
 
 TEST_F(LZ4EncodeTest, EncodeDecodePartialLastIndexTest) {
   // initialized array size
-  // why is it this?
   size_t size = 11048;
   uint8_t *source = new uint8_t[size];
 
@@ -147,7 +141,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLastIndexTest) {
   }
 
   size_t dest_size = 790;
-  // how was this chosen?
   int src_index = 9210;
 
   // initializes destination array of smaller size
@@ -168,7 +161,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodePartialLastIndexTest) {
 
 TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
   // initialized array size
-  // why is it this?
   size_t size = 11048;
   uint8_t *source = new uint8_t[size];
 
@@ -177,7 +169,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
     source[i] = i % 256;
   }
 
-  // was this arbitrary?
   int src_index = 7210;
 
   // encodes the starting array into buffer
@@ -194,7 +185,6 @@ TEST_F(LZ4EncodeTest, EncodeDecodeIndexTest) {
 
 TEST_F(LZ4EncodeTest, EncodeDecodeIdxPtrTest) {
   // initialized array size
-  // why is it this?
   size_t size = 11048;
   uint8_t *source = new uint8_t[size];
 

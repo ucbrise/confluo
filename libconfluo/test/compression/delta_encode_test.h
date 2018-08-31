@@ -214,34 +214,5 @@ TEST_F(DeltaEncodeTest, DecodePtrIndexRandTest) {
   delete[] dest_buffer;
 }
 
-TEST_F(DeltaEncodeTest, DecodePartialOverflowTest) {
-  // initialized array size
-  size_t k_array_size = 1024;
-
-  // initializes starting array with monotonically increasing elements with constant increments 
-  uint64_t* array = new uint64_t[k_array_size];
-  for (size_t i = 0; i < k_array_size; i++) {
-    array[i] = i * 16;
-  }
-
-  // set to 500 to see how it deals with overflow src_index/buffer_sizes
-  size_t src_index = 500;
-  size_t buffer_size = 600;
-
-  // initializes destination array that is smaller than starting array
-  uint64_t *dest_buffer = new uint64_t[buffer_size];
-  // encodes the starting array into buffer
-  auto encoded_buffer = delta_encoder::encode(array, k_array_size);
-  // partially decodes (buffer_size) the buffer into destination array from the index
-  delta_decoder::decode(encoded_buffer.get(), dest_buffer, src_index, buffer_size);
-
-  // checks to see if starting array and destination array have same elements
-  for (size_t i = 0; i < buffer_size; i++) {
-    ASSERT_EQ(array[i + src_index], dest_buffer[i]);
-  }
-
-  delete[] array;
-  delete[] dest_buffer;
-}
 
 #endif /* CONFLUO_TEST_DELTA_ENCODE_TEST_H_ */
