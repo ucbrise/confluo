@@ -13,7 +13,7 @@ using namespace confluo::compression;
 
 class DeltaEncodeTest : public testing::Test {
  public:
-  const uint64_t kArraySize = (1024ULL * 1024ULL);  // 1 KBytes
+    const uint64_t kArraySize = (1024ULL * 1024ULL);  // 1 KBytes
 };
 
 TEST_F(DeltaEncodeTest, DecodeFullTest) {
