@@ -2,6 +2,8 @@
 #define CONFLUO_ATOMIC_MULTILOG_H_
 
 #include <cmath>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include <functional>
 #include <numeric>
