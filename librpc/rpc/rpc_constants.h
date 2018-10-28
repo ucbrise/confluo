@@ -9,8 +9,7 @@
 
 #include "rpc_types.h"
 
-namespace confluo {
-namespace rpc {
+namespace confluo { namespace rpc {
 
 class rpcConstants {
  public:
@@ -20,7 +19,6 @@ class rpcConstants {
 
 extern const rpcConstants g_rpc_constants;
 
-}
-} // namespace
+}} // namespace
 
 #endif

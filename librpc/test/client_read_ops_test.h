@@ -2,6 +2,9 @@
 #define RPC_TEST_READ_OPS_TEST_H_
 
 #include <iostream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include "gtest/gtest.h"
 
 #include "atomic_multilog.h"
@@ -85,6 +88,19 @@ class ClientReadOpsTest : public testing::Test {
     return reinterpret_cast<void *>(&r);
   }
 
+  static std::string make_json_record(int64_t ts, const std::string &msg) {
+    namespace pt = boost::property_tree;
+    pt::ptree root;
+
+    root.put("TIMESTAMP", ts);
+    root.put("MSG", msg);
+
+    std::stringstream ss;
+    pt::write_json(ss, root);
+    std::string ret = ss.str();
+    return ret;
+  }
+
   static confluo_store *simple_table_store(const std::string &multilog_name,
                                            storage::storage_mode id) {
     auto store = new confluo_store("/tmp");
@@ -154,6 +170,34 @@ class ClientReadOpsTest : public testing::Test {
 
 ClientReadOpsTest::rec ClientReadOpsTest::r;
 std::vector<column_t> ClientReadOpsTest::s = schema();
+
+TEST_F(ClientReadOpsTest, ReadJSONTest) {
+  std::string atomic_multilog_name = "my_multilog";
+  auto store = simple_table_store(atomic_multilog_name, storage::storage_mode::IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(atomic_multilog_name);
+  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  int64_t ts = utils::time_utils::cur_ns();
+  mlog->append_json(make_json_record(ts, "abc"));
+
+  std::string buf;
+  client.read_json(buf, 0);
+  ASSERT_EQ(buf, make_json_record(ts, "abc"));
+
+  client.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
 
 TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
   std::string multilog_name = "my_multilog";

@@ -94,6 +94,50 @@ std::string schema_t::to_string() const {
   return str;
 }
 
+void *schema_t::json_string_to_data(const std::string json_record) const {
+  // need to convert json_data into a record vector
+  std::stringstream ss;
+  // putting the json data into a stream
+  ss << json_record;
+
+  // initializing the boost property tree
+  namespace pt = boost::property_tree;
+  pt::ptree root;
+  // parsing the json data
+  pt::read_json(ss, root);
+
+  // this will store our record
+  std::vector<std::string> record;
+
+  // iterator over the boost property tree values
+  for (pt::ptree::value_type &pair : root)
+  {
+    // get the content of the node
+    std::string value = pair.second.data();
+    // put the content of the node into the record
+    record.push_back(value);
+  }
+
+  void *buf = record_vector_to_data(record);
+  return buf;
+}
+
+void schema_t::data_to_json_string(std::string &ret, const void *data) const {
+  namespace pt = boost::property_tree;
+  pt::ptree root;
+
+  for (size_t i = 0; i < size(); i++) {
+    const void *fptr = reinterpret_cast<const uint8_t *>(data) + columns_[i].offset();
+    data_type ftype = columns_[i].type();
+    std::string column_name = columns_[i].name();
+    root.put(column_name, ftype.to_string_op()(immutable_raw_data(fptr, ftype.size)));
+  }
+
+  std::stringstream ss;
+  pt::write_json(ss, root);
+  ret = ss.str();
+}
+
 void *schema_t::record_vector_to_data(const std::vector<std::string> &record) const {
   if (record.size() == columns_.size()) {
     // Timestamp is provided

@@ -228,6 +228,13 @@ size_t atomic_multilog::append(void *data) {
   return offset;
 }
 
+size_t atomic_multilog::append_json(std::string json_record) {
+  void *buf = schema_.json_string_to_data(json_record);
+  size_t off = append(buf);
+  delete[] reinterpret_cast<uint8_t *>(buf);
+  return off;
+}
+
 size_t atomic_multilog::append(const std::vector<std::string> &record) {
   void *buf = schema_.record_vector_to_data(record);
   size_t off = append(buf);
@@ -270,6 +277,18 @@ std::vector<std::string> atomic_multilog::read(uint64_t offset, uint64_t &versio
 std::vector<std::string> atomic_multilog::read(uint64_t offset) const {
   uint64_t version;
   return read(offset, version);
+}
+
+std::string atomic_multilog::read_json(uint64_t offset, uint64_t &version) const {
+  read_only_data_log_ptr rptr;
+  read(offset, version, rptr);
+  data_ptr dptr = rptr.decode();
+  return schema_.data_to_json_string(dptr.get());
+}
+
+std::string atomic_multilog::read_json(uint64_t offset) const {
+  uint64_t version;
+  return read_json(offset, version);
 }
 
 std::unique_ptr<record_cursor> atomic_multilog::execute_filter(const std::string &expr) const {

@@ -206,6 +206,16 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   int64_t append(int64_t id, const std::string &data);
 
   /**
+   * Appends string json-formatted data to the atomic multilog
+   *
+   * @param id The identifier for the atomic multilog
+   * @param json_data The data to be added
+   *
+   * @return The offset to where the data is
+   */
+  int64_t append_json(int64_t id, const std::string &json_data);
+
+  /**
    * Appends a record batch to the atomic multilog
    *
    * @param id The identifier of the atomic multilog
@@ -224,6 +234,16 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param nrecords The number of records to read
    */
   void read(std::string &_return, int64_t id, const int64_t offset, const int64_t nrecords);
+
+  /**
+   * Reads n json-formatted record strings from the atomic multilog
+   *
+   * @param _return The json-formatted record string read
+   * @param id The identifier of the atomic multilog
+   * @param offset The offset to read from
+   * @param nrecords The number of records to read
+   */
+  void read_json(std::string &_return, int64_t id, const int64_t offset, const int64_t nrecords);
 
   /**
    * Queries an aggregate from the atomic multilog

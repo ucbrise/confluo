@@ -2,6 +2,8 @@
 #define CONFLUO_ATOMIC_MULTILOG_H_
 
 #include <cmath>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include <functional>
 #include <numeric>
@@ -245,6 +247,13 @@ class atomic_multilog {
    */
   size_t append(void *data);
 
+  /**
+   * Appends json-formatted data to the atomic multilog
+   * @param json_data The json-formatted data to be stored
+   * @return The offset of where the data is located
+   */
+  size_t append_json(std::string json_data);
+
   // TODO: Add a std::tuple based variant
   // TODO: Add a JSON based variant
   /**
@@ -285,6 +294,21 @@ class atomic_multilog {
    * @return The corresponding record
    */
   std::vector<std::string> read(uint64_t offset) const;
+
+  /**
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @param version The current version
+   * @return The corresponding record as a vector of strings.
+   */
+  std::string read_json(uint64_t offset, uint64_t &version) const;
+
+  /**
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @return The corresponding record
+   */
+  std::string read_json(uint64_t offset) const;
 
   /**
    * Reads a record given an offset into the data log

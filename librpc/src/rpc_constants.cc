@@ -6,14 +6,12 @@
  */
 #include "rpc_constants.h"
 
-namespace confluo {
-namespace rpc {
+namespace confluo { namespace rpc {
 
 const rpcConstants g_rpc_constants;
 
 rpcConstants::rpcConstants() {
 }
 
-}
-} // namespace
+}} // namespace
 

@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include "exceptions.h"
 #include "types/immutable_value.h"
@@ -159,6 +161,37 @@ class schema_t {
    * @return A string containing the contents of the schema
    */
   std::string to_string() const;
+
+  /**
+   * Converts the records into a pointer to the record data
+   *
+   * @param record The records used for conversion
+   *
+   * @return A pointer to the record data
+   */
+  void *json_string_to_data(const std::string json_record) const;
+
+  /**
+   * Converts the records into a pointer to the record data
+   *
+   * @param record The records used for conversion
+   *
+   * @return A pointer to the record data
+   */
+  void data_to_json_string(std::string &ret, const void *data) const;
+
+  /**
+   * Converts the pointer to record data to a json-formatted string
+   *
+   * @param data The data used for conversion
+   *
+   * @return The json-formatted string that is returned
+   */
+  std::string data_to_json_string(const void *data) const {
+    std::string ret;
+    data_to_json_string(ret, data);
+    return ret;
+  }
 
   /**
    * Converts the records into a pointer to the record data

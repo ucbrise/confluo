@@ -159,6 +159,9 @@ int64_t rpc_service_handler::append(int64_t id, const std::string &data) {
   void *buf = (char *) &data[0];  // XXX: Fix
   return static_cast<int64_t>(store_->get_atomic_multilog(id)->append(buf));
 }
+int64_t rpc_service_handler::append_json(int64_t id, const std::string &json_data) {
+  return static_cast<int64_t>(store_->get_atomic_multilog(id)->append_json(json_data));
+}
 int64_t rpc_service_handler::append_batch(int64_t id, const rpc_record_batch &batch) {
   record_batch rbatch = rpc_type_conversions::convert_batch(batch);
   return static_cast<int64_t>(store_->get_atomic_multilog(id)->append_batch(rbatch));
@@ -173,6 +176,11 @@ void rpc_service_handler::read(std::string &_return, int64_t id, const int64_t o
   size_t size = std::min(static_cast<size_t>(limit - offset),
                          static_cast<size_t>(nrecords * mlog->record_size()));
   _return.assign(data, size);
+}
+void rpc_service_handler::read_json(std::string &_return, int64_t id, const int64_t offset, const int64_t nrecords) {
+  atomic_multilog *mlog = store_->get_atomic_multilog(id);
+  _return = mlog->read_json((uint64_t) offset);
+  // TODO: put in functionality for nrecords to be read
 }
 void rpc_service_handler::query_aggregate(std::string &_return,
                                           int64_t id,
