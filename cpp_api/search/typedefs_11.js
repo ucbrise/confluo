@@ -1,4 +1,0 @@
-var searchData=
-[
-  ['width_5ftype',['width_type',['../classconfluo_1_1bitmap.html#abb87266485de23815beab68f678b4fce',1,'confluo::bitmap::width_type()'],['../classconfluo_1_1unsized__bitmap__array.html#acb2a836c4b301efec8c45ca27bb6ec98',1,'confluo::unsized_bitmap_array::width_type()'],['../classconfluo_1_1unsigned__bitmap__array.html#a63c75dfa00cf46c94115aadf6a9f6f31',1,'confluo::unsigned_bitmap_array::width_type()'],['../classconfluo_1_1signed__bitmap__array.html#a48b0397693e9fac9cfe5f46f69ccd090',1,'confluo::signed_bitmap_array::width_type()'],['../classconfluo_1_1delta__encoded__array.html#a1d9cd4e9f1a1577806a35370d8b1c7fc',1,'confluo::delta_encoded_array::width_type()'],['../classconfluo_1_1elias__gamma__encoded__array.html#ad4ed6dde4155643bbfabe45bf551a2e9',1,'confluo::elias_gamma_encoded_array::width_type()']]]
-];

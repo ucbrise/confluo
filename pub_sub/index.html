@@ -34,7 +34,7 @@
     
     
       
-        <title>Type System - Confluo</title>
+        <title>Pub-sub System - Confluo</title>
       
     
     
@@ -96,7 +96,7 @@
                 Confluo
               </span>
               <span class="md-header-nav__topic">
-                Type System
+                Pub-sub System
               </span>
             
           
@@ -193,7 +193,7 @@
   
     <li class="md-tabs__item">
       
-        <a href="../quick_start/" title="User Guide" class="md-tabs__link md-tabs__link--active">
+        <a href="../quick_start/" title="User Guide" class="md-tabs__link">
           User Guide
         </a>
       
@@ -219,7 +219,7 @@
   
     <li class="md-tabs__item">
       
-        <a href="../case_studies/" title="Case Studies" class="md-tabs__link">
+        <a href="../case_studies/" title="Case Studies" class="md-tabs__link md-tabs__link--active">
           Case Studies
         </a>
       
@@ -324,12 +324,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
       User Guide
@@ -381,12 +379,10 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-4" type="checkbox" id="nav-5-4" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-4" type="checkbox" id="nav-5-4">
     
     <label class="md-nav__link" for="nav-5-4">
       Data Storage
@@ -414,68 +410,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="toc">
-        Type System
-      </label>
-    
-    <a href="./" title="Type System" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../type_system/" title="Type System" class="md-nav__link">
       Type System
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#registering-types" title="Registering Types" class="md-nav__link">
-    Registering Types
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#building-a-schema" title="Building a Schema" class="md-nav__link">
-    Building a Schema
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-records" title="Adding Records" class="md-nav__link">
-    Adding Records
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performing-filter-operations" title="Performing Filter Operations" class="md-nav__link">
-    Performing Filter Operations
-  </a>
-  
-</li>
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -685,10 +624,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
     
     <label class="md-nav__link" for="nav-7">
       Case Studies
@@ -740,11 +681,61 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../pub_sub/" title="Pub-sub System" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Pub-sub System
+      </label>
+    
+    <a href="./" title="Pub-sub System" class="md-nav__link md-nav__link--active">
       Pub-sub System
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" title="Implementation" class="md-nav__link">
+    Implementation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compared-systems-and-experimental-setup" title="Compared Systems and Experimental Setup" class="md-nav__link">
+    Compared Systems and Experimental Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results" title="Results" class="md-nav__link">
+    Results
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -774,29 +765,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#registering-types" title="Registering Types" class="md-nav__link">
-    Registering Types
+  <a href="#implementation" title="Implementation" class="md-nav__link">
+    Implementation
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#building-a-schema" title="Building a Schema" class="md-nav__link">
-    Building a Schema
+  <a href="#compared-systems-and-experimental-setup" title="Compared Systems and Experimental Setup" class="md-nav__link">
+    Compared Systems and Experimental Setup
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-records" title="Adding Records" class="md-nav__link">
-    Adding Records
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performing-filter-operations" title="Performing Filter Operations" class="md-nav__link">
-    Performing Filter Operations
+  <a href="#results" title="Results" class="md-nav__link">
+    Results
   </a>
   
 </li>
@@ -815,145 +799,28 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/ucbrise/confluo/edit/master/docs/type_system.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/ucbrise/confluo/edit/master/docs/pub_sub.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="confluo-type-system">Confluo Type System<a class="headerlink" href="#confluo-type-system" title="Permanent link">&para;</a></h1>
-<p>Confluo uses a strictly typed system. While primitive data types like
-<code>BOOL</code>, <code>CHAR</code>, <code>SHORT</code>, <code>INT</code>, <code>LONG</code>, <code>FLOAT</code>, <code>DOUBLE</code> and <code>STRING</code>
-are supported by default in Confluo, it is possible to add custom 
-user-defined data types. This requires defining a few operations that would
-allow operations like applying filters and triggers on attributes of
-the custom data type.</p>
-<h2 id="registering-types">Registering Types<a class="headerlink" href="#registering-types" title="Permanent link">&para;</a></h2>
-<p>To create a new type, we need to define the following properties so that
-native operations can be supported; these properties are summarised in the
-<a href="../../libconfluo/confluo/types/type_properties.h"><code>type_properties</code></a> 
-struct:</p>
+                <h1 id="pub-sub-system">Pub-sub System<a class="headerlink" href="#pub-sub-system" title="Permanent link">&para;</a></h1>
+<p>Pub-sub systems like <a href="https://kafka.apache.org">Kafka</a> and <a href="https://aws.amazon.com/kinesis/">Kinesis</a> expose a publish-subscribe interface atop partitioned logs. We describe the implementation of a pub-sub system using Confluo that enables high publish and subscribe throughput for messages via lock-free concurrency.</p>
+<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
+<p>Our distributed messaging system implementation employs Kafka’s interface and data model — messages are published to or subscribed from “topics”, which are logically streams of messages. The system maintains a collection of topics, where messages for each topic are stored across a user-specified number of DiaLog shards.</p>
+<p>In our implementation, each shard exposes a basic read and write interface. The publishers write messages in batches to shards of a particular topic, while subscribers asynchronously pull batches of messages from these shards. Similar to Kafka design, each subscriber keeps track of the objectId for its last read message in the shard, incrementing it as it consumes more messages. The key benefits of using Confluo for storing messages include:</p>
 <ul>
-<li><code>std::string name</code> - A unique name for the type</li>
-<li><code>size_t size</code> -  The size of underlying representation for fixed sized types. This should be set to zero for 
-dynamically sized types (e.g., see definintion for <a href="../../libconfluo/confluo/types/type_properties.h"><code>STRING</code></a> type).</li>
-<li><code>void* min</code> - This is a pointer to the minimum value that the type
-can hold. See <a href="../../libconfluo/confluo/types/type_properties.h">type_properties.h</a> 
-to see examples of <code>min</code> assigned to primitive types.</li>
-<li><code>void* max</code> - This is a pointer to the maximum value that the type
-can hold. See <a href="../../libconfluo/confluo/types/type_properties.h">type_properties.h</a> 
-to see examples of <code>max</code> assigned to primitive types.</li>
-<li><code>void* one</code> - This is a pointer to the step value with which the type
-can be incremented. See <a href="../../libconfluo/confluo/types/type_properties.h">type_properties.h</a> 
-to see examples of <code>one</code> assigned to primitive types.</li>
-<li><code>void* zero</code> - This is a pointer to the zero value for the type. See 
-<a href="../../libconfluo/confluo/types/type_properties.h">type_properties.h</a> to see 
-examples of <code>zero</code> assigned to primitive types.</li>
-<li><code>bool is_numeric</code> - This indicates whether the type is numeric or not; 
-numeric types typically support most arithmetic operators; see 
-[arithmetic_ops.h][../libconfluo/confluo/types/arithmetic_ops.h] for examples.</li>
-<li><code>relational_ops_t relational_ops</code> - Stores a list of relational operator functions
-for the given type, so that operations like <code>filter</code> can work. See 
-<a href="../../libconfluo/confluo/types/relational_ops.h">rel_ops.h</a> for examples of
-what relational functions can be defined.</li>
-<li><code>binary_ops_t binary_ops</code> - Stores a list of binary arithmetic operator functions
-for the given type, so that operations like filter can accurately be applied
-to the type. Check <a href="../../libconfluo/confluo/types/arithmetic_ops.h">arithmetic_ops.h</a>
-for examples of binary operator functions that can be defined.</li>
-<li><code>unary_ops_t unary_ops</code> - Stores a list of unary arithmetic operator functions
-for the given type, so that operations like filter can work for the given
-type. Check <a href="../../libconfluo/confluo/types/arithmetic_ops.h">arithmetic_ops.h</a> for
-examples of unary function operators that can be defined.</li>
-<li><code>key_op_t key_transform_op</code> - Stores the key-transform function. This function 
-is important for looking up attributes of the type in an index; see 
-<a href="../../libconfluo/confluo/types/key_ops.h">key_ops.h</a> for example
-definitions of key_transform.</li>
-<li><code>parse_op_t parse_op</code> - Parses data instance from a string representation of this type. See 
-<a href="../../libconfluo/confluo/types/string_ops.h">string_ops.h</a> for examples.</li>
-<li><code>to_string_op_t to_stirng_op</code> - Converts data instance of the type to its string representation. See 
-<a href="../../libconfluo/confluo/types/string_ops.h">string_ops.h</a> for examples.</li>
-<li><code>serialize_op_t serialize_op</code> - Serializes the underlying data representation of the type into raw bytes;
-see <a href="../../libconfluo/confluo/types/serde_ops.h">serde_ops.h</a> for examples.</li>
-<li><code>deserialize_op_t deserialize_op</code> - Reads the raw byte representation of the type and parses it to data;
-see <a href="../../libconfluo/confluo/types/serde_ops.h">serde_ops.h</a> for examples.</li>
+<li>The freedom from read-write contentions, and lock-free resolution of write-write contentions.</li>
+<li>Confluo provides an efficient means to obtain the snapshot of an entire topic, unlike Kafka. </li>
+<li>Support for rich online and offline queries on message streams beyond just publish and subscribe.</li>
 </ul>
-<p>Example declarations of user-defined types can be found at
-<a href="../../libconfluo/test/types/ip_address.h">ip_address.h</a> and 
-<a href="../../libconfluo/test/size_type.h">size_type.h</a>.</p>
-<p>Once the properties for custom type is defined in the <code>type_properties</code> struct, 
-it needs to be registered with Confluo's <a href="../../libconfluo/confluo/types/type_manager.h">type manager</a> 
-via the <code>type_manager::register_type</code> interface. We can register a type as 
-follows:</p>
-<pre class="codehilite"><code class="language-cpp">type_properties test_properties(&quot;test&quot;, sizeof(int), &amp;limits::int_min,
-                                &amp;limits::int_max, &amp;limits::int_one, 
-                                &amp;limits::int_one, &amp;limits::int_zero, false,
-                                get_relops(), get_unaryops(), 
-                                get_binaryops(),
-                                get_keyops(), &amp;test_type::parse_test,
-                                &amp;test_type::test_to_string,
-                                &amp;confluo::serialize&lt;test&gt;,
-                                &amp;confluo::deserialize&lt;test&gt;);
-type_manager::register_type(test_properties);</code></pre>
+<h2 id="compared-systems-and-experimental-setup">Compared Systems and Experimental Setup<a class="headerlink" href="#compared-systems-and-experimental-setup" title="Permanent link">&para;</a></h2>
+<p>We compare the performance for our pub-sub implementation against Apache Kafka. Since both systems are identical in terms of scaling read and write performance via multiple partitions, we ran our experiments on a single r3.8xlarge instance, using a single topic with one log partition for both systems. Reads and writes were performed for 64 byte messages, and concurrent subscribers in both systems belong to different subscriber groups, i.e., perform independent, uncoordinated reads on the partition. We mount Kafka’s storage on a sufficiently sized RAM disk, ensuring that both systems operate completely in memory.</p>
+<h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
+<p align="center">
+    <img src="/img/pub_sub_perf.png" />
+    <font size="-1"><b>Figure:</b> <em> Confluo observes close to linear write throughput scaling with #publishers as opposed to Kafka’s sub-linear scaling, while both systems observe close to linear read throughput scaling with #subscribers. Confluo observes sub-linear increase in read and write latency with batch sizes as opposed to Kafka’s linear increase (both axes are in log-scale).</em></font>
+</p>
 
-
-<p>Once registered, a useful symbolic
-reference to the data type, wrapped in a <code>data_type</code> object, can be obtained via
-the <code>type_manager::get_type</code> interface.</p>
-<p>With this object, it is possible to add new columns of this type in any 
-Atomic MultiLog. From here on out, appending records to the
-Atomic MultiLog, along with operations like filters and triggers, will work out
-of the box.</p>
-<h2 id="building-a-schema">Building a Schema<a class="headerlink" href="#building-a-schema" title="Permanent link">&para;</a></h2>
-<p>We can create columns of a custom user-defined type for an Atomic MultiLog
-as follows:</p>
-<pre class="codehilite"><code class="language-cpp">data_type test_type = type_manager::get_type(&quot;test&quot;);
-schema_builder builder;
-builder.add_column(test_type, &quot;a&quot;);
-std::vector&lt;column_t&gt; s = builder.get_columns();
-
-task_pool MGMT_POOL;
-atomic_multilog dtable(&quot;table&quot;, s, &quot;/tmp&quot;, storage::IN_MEMORY, MGMT_POOL);</code></pre>
-
-
-<p>We use the <code>type_manager::get_type</code> interface to get the <code>data_type</code> object
-associated with the new user-defined type. This object can then be passed
-into the <code>add_column</code> interface of the <code>schema_builder</code> along with the name
-of the column. Finally, the vector of columns can be passed into the Atomic
-Multilog and thus operations like filters and triggers can be performed on
-data of the user-defined type.</p>
-<h2 id="adding-records">Adding Records<a class="headerlink" href="#adding-records" title="Permanent link">&para;</a></h2>
-<p>First create a packed struct containing all of the member data_types 
-in a row of the schema. Be sure to include the timestamp as one of 
-the columns. An example is as follows: </p>
-<pre class="codehilite"><code class="language-cpp">struct rec {
-    int64_t ts;
-    test_type a;
-}__attribute__((packed));</code></pre>
-
-
-<p>Then get a pointer to an instance of the struct, which is passed into the
-<code>append</code> method of the Atomic MultiLog. The following is an exmaple:</p>
-<pre class="codehilite"><code class="language-cpp">rec r = {utils::time_utils::cur_ns(), test_type()};
-void* data = reinterpret_cast&lt;void*&gt;(&amp;r);
-dtable.append(r);</code></pre>
-
-
-<p>Here we initialize a record with the current timestamp and an instance of
-the test type. Then we pass a pointer to that data to the append method
-of the Atomic MultiLog instance.</p>
-<h2 id="performing-filter-operations">Performing Filter Operations<a class="headerlink" href="#performing-filter-operations" title="Permanent link">&para;</a></h2>
-<p>After adding records containing data of the user-defined type, we can 
-perform filter operations to select specific records. We can do so as 
-follows:</p>
-<pre class="codehilite"><code class="language-cpp">for (auto r = dtable.execute_filter(&quot;a &gt; 4&quot;); !r.empty(); r = r.tail()) {
-    std::cout &lt;&lt; &quot;A value: &quot; &lt;&lt; r.head().at(1).as&lt;test_type&gt;().get_test()
-                                            &lt;&lt; std::endl;
-}</code></pre>
-
-
-<p>We assume here that <code>4</code> can be parsed as a <code>test_type</code> using the 
-parse_test method. The <code>execute_filter</code> function is then called with an
-expression that selects records that satisfy the condition. This returns
-a stream of records which can then be read and processed.</p>
-<p>See <a href="../../libconfluo/test/types/type_manager_test.h">type_manager_test.h</a> for
-examples of building user-defined types including ip address and size types.</p>
+<p>Since Kafka employs locks to synchronize concurrent appends, publisher write throughput suffers due to write-write contentions (Figure (left)). Confluo employs lock-free resolution for these conflicts to achieve high write throughput. Larger batches (16K messages) alleviate locking overheads in Kafka to some extent, while Confluo approaches network saturation at 16K message batches with over 4 publishers. Since reads occur without contention in both systems, read throughput scales linearly with multiple subscribers (Figure (center)). Confluo achieves higher absolute read throughput, presumably due to system overheads in Kafka and not because of a fundamental design difference. As before, read throughput for Confluo saturates at 4 subscribers and 16K message batches due to network saturation. Confluo latency increase is sub-linear with the batch size for both reads and writes, while Kafka observes super-linear increase in latency, particularly for writes (Figure (right)). Again, we suspect this effect is likely due to implementation overheads in Kafka.</p>
                 
                   
                 
@@ -972,7 +839,7 @@ examples of building user-defined types including ip address and size types.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../loading_data/" title="Data Storage Overview" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../timeseries_db/" title="Timeseries Database" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -981,25 +848,11 @@ examples of building user-defined types including ip address and size types.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Data Storage Overview
+                Timeseries Database
               </span>
             </div>
           </a>
         
-        
-          <a href="../queries/" title="Queries Overview" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                Queries Overview
-              </span>
-            </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
         
       </nav>
     </div>
