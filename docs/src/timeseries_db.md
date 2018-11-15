@@ -34,7 +34,7 @@ these systems. Requests are issued as continuous streams with 8K record batches.
 ## Results
 
 <p align="center">
-	<img src="img/tsdb_perf.png" width="50%" />
+	<img src="../img/tsdb_perf.png" width="50%" />
 </p>
 <p align="center">
 	<font size="-1"><b>Figure:</b> <em>ConfluoD & ConfluoR measure performance for DURABLE & DURABLE_RELAXED 
