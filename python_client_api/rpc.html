@@ -1,0 +1,988 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>rpc package &#8212; Confluo  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rpc-package">
+<h1>rpc package<a class="headerlink" href="#rpc-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-rpc.data_types">
+<span id="rpc-data-types-module"></span><h2>rpc.data_types module<a class="headerlink" href="#module-rpc.data_types" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rpc.data_types.STRING_TYPE">
+<code class="descclassname">rpc.data_types.</code><code class="descname">STRING_TYPE</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.data_types.STRING_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="rpc.data_types.data_type">
+<em class="property">class </em><code class="descclassname">rpc.data_types.</code><code class="descname">data_type</code><span class="sig-paren">(</span><em>typeid</em>, <em>size=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.data_types.data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Functionality for data types.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rpc.data_types.type_id">
+<em class="property">class </em><code class="descclassname">rpc.data_types.</code><code class="descname">type_id</code><a class="headerlink" href="#rpc.data_types.type_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains the primitive types.</p>
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.NONE">
+<code class="descname">NONE</code><a class="headerlink" href="#rpc.data_types.type_id.NONE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The none type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.BOOL">
+<code class="descname">BOOL</code><a class="headerlink" href="#rpc.data_types.type_id.BOOL" title="Permalink to this definition">¶</a></dt>
+<dd><p>The boolean type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.CHAR">
+<code class="descname">CHAR</code><a class="headerlink" href="#rpc.data_types.type_id.CHAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>The character type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.UCHAR">
+<code class="descname">UCHAR</code><a class="headerlink" href="#rpc.data_types.type_id.UCHAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unsigned character type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.SHORT">
+<code class="descname">SHORT</code><a class="headerlink" href="#rpc.data_types.type_id.SHORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The short type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.USHORT">
+<code class="descname">USHORT</code><a class="headerlink" href="#rpc.data_types.type_id.USHORT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unsigned short type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.INT">
+<code class="descname">INT</code><a class="headerlink" href="#rpc.data_types.type_id.INT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The integer type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.UINT">
+<code class="descname">UINT</code><a class="headerlink" href="#rpc.data_types.type_id.UINT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unsigned integer type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.LONG">
+<code class="descname">LONG</code><a class="headerlink" href="#rpc.data_types.type_id.LONG" title="Permalink to this definition">¶</a></dt>
+<dd><p>The long type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.ULONG">
+<code class="descname">ULONG</code><a class="headerlink" href="#rpc.data_types.type_id.ULONG" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unsigned long type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.FLOAT">
+<code class="descname">FLOAT</code><a class="headerlink" href="#rpc.data_types.type_id.FLOAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The single precision floating type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.DOUBLE">
+<code class="descname">DOUBLE</code><a class="headerlink" href="#rpc.data_types.type_id.DOUBLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The double type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.data_types.type_id.STRING">
+<code class="descname">STRING</code><a class="headerlink" href="#rpc.data_types.type_id.STRING" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string type.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">BOOL</code><em class="property"> = 1</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">CHAR</code><em class="property"> = 2</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">DOUBLE</code><em class="property"> = 11</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">FLOAT</code><em class="property"> = 10</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">INT</code><em class="property"> = 6</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">LONG</code><em class="property"> = 8</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">NONE</code><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">SHORT</code><em class="property"> = 4</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">STRING</code><em class="property"> = 12</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">UCHAR</code><em class="property"> = 3</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">UINT</code><em class="property"> = 7</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">ULONG</code><em class="property"> = 9</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">USHORT</code><em class="property"> = 5</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc.rpc_client">
+<span id="rpc-rpc-client-module"></span><h2>rpc.rpc_client module<a class="headerlink" href="#module-rpc.rpc_client" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rpc.rpc_client.rpc_client">
+<em class="property">class </em><code class="descclassname">rpc.rpc_client.</code><code class="descname">rpc_client</code><span class="sig-paren">(</span><em>host='localhost'</em>, <em>port=9090</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Client for Confluo through RPC.</p>
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.add_aggregate">
+<code class="descname">add_aggregate</code><span class="sig-paren">(</span><em>aggregate_name</em>, <em>filter_name</em>, <em>aggregate_expr</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.add_aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an aggregate to the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>aggregate_name</strong> – The name of the aggregate.</li>
+<li><strong>filter_name</strong> – The name of the filter.</li>
+<li><strong>aggregate_expr</strong> – The aggregate expression.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.add_filter">
+<code class="descname">add_filter</code><span class="sig-paren">(</span><em>filter_name</em>, <em>filter_expr</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.add_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a filter to the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filter_name</strong> – The name of the filter</li>
+<li><strong>filter_expr</strong> – The filter expression</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.add_index">
+<code class="descname">add_index</code><span class="sig-paren">(</span><em>field_name</em>, <em>bucket_size=1</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.add_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an index to the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the rpc client.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>host</em>, <em>port</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connects the rpc client to the specified host and port.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> – The host of the client.</li>
+<li><strong>port</strong> – The port number to communicate through.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.create_atomic_multilog">
+<code class="descname">create_atomic_multilog</code><span class="sig-paren">(</span><em>atomic_multilog_name</em>, <em>schema</em>, <em>storage_mode</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.create_atomic_multilog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an atomic multilog for this client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> – The name of the atomic multilog to create.</li>
+<li><strong>schema</strong> – The schema for the atomic multilog.</li>
+<li><strong>storage_mode</strong> – The mode for storage.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects the rpc client from the host and port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.execute_filter">
+<code class="descname">execute_filter</code><span class="sig-paren">(</span><em>filter_expr</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.execute_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a specified filter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filter_expr</strong> – The filter expression.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Record stream containing the data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.get_aggregate">
+<code class="descname">get_aggregate</code><span class="sig-paren">(</span><em>aggregate_name</em>, <em>begin_ms</em>, <em>end_ms</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.get_aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an aggregate from the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>aggregate_name</strong> – The name of the aggregate.</li>
+<li><strong>begin_ms</strong> – The beginning time in milliseconds.</li>
+<li><strong>end_ms</strong> – The end time in milliseconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The aggregate.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.get_alerts">
+<code class="descname">get_alerts</code><span class="sig-paren">(</span><em>begin_ms</em>, <em>end_ms</em>, <em>trigger_name=''</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.get_alerts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the alerts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>begin_ms</strong> – The beginning time in milliseconds.</li>
+<li><strong>end_ms</strong> – The end time in milliseconds.</li>
+<li><strong>trigger_name</strong> – The name of the trigger.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A stream of alerts.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.get_batch_builder">
+<code class="descname">get_batch_builder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.get_batch_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a new record batch builder.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.install_trigger">
+<code class="descname">install_trigger</code><span class="sig-paren">(</span><em>trigger_name</em>, <em>trigger_expr</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.install_trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a trigger to the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trigger_name</strong> – The name of the trigger to add.</li>
+<li><strong>trigger_expr</strong> – The trigger expression.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.num_records">
+<code class="descname">num_records</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.num_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the number of records in the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The number of records.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.query_filter">
+<code class="descname">query_filter</code><span class="sig-paren">(</span><em>filter_name</em>, <em>begin_ms</em>, <em>end_ms</em>, <em>filter_expr=''</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.query_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries a filter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filter_name</strong> – The name of the filter.</li>
+<li><strong>begin_ms</strong> – The beginning time in milliseconds.</li>
+<li><strong>end_ms</strong> – The end time in milliseconds.</li>
+<li><strong>filter_expr</strong> – The filter expression.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A record stream containing the results of the filter.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>offset</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data from a specified offset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>offset</strong> – The offset from the log to read from.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The data at the offset.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.remove_aggregate">
+<code class="descname">remove_aggregate</code><span class="sig-paren">(</span><em>aggregate_name</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.remove_aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes an aggregate from the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>aggregate_name</strong> – The name of the aggregate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.remove_atomic_multilog">
+<code class="descname">remove_atomic_multilog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.remove_atomic_multilog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes an atomic multilog from the client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.remove_filter">
+<code class="descname">remove_filter</code><span class="sig-paren">(</span><em>filter_name</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.remove_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a filter from the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filter_name</strong> – The name of the filter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.remove_index">
+<code class="descname">remove_index</code><span class="sig-paren">(</span><em>field_name</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.remove_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes an index from the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>field_name</strong> – The name of the associated field.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.remove_trigger">
+<code class="descname">remove_trigger</code><span class="sig-paren">(</span><em>trigger_name</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.remove_trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a trigger from the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trigger_name</strong> – The name of the trigger.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.set_current_atomic_multilog">
+<code class="descname">set_current_atomic_multilog</code><span class="sig-paren">(</span><em>atomic_multilog_name</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.set_current_atomic_multilog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the atomic multilog to the desired atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atomic_multilog_name</strong> – The name of atomic multilog to set the current atomic multilog to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_client.rpc_client.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>record</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_client.rpc_client.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a record to the atomic multilog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>record</strong> – The record to write.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError.</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc.rpc_configuration_params">
+<span id="rpc-rpc-configuration-params-module"></span><h2>rpc.rpc_configuration_params module<a class="headerlink" href="#module-rpc.rpc_configuration_params" title="Permalink to this headline">¶</a></h2>
+<p>The batch size when reading.</p>
+</div>
+<div class="section" id="module-rpc.rpc_record_batch_builder">
+<span id="rpc-rpc-record-batch-builder-module"></span><h2>rpc.rpc_record_batch_builder module<a class="headerlink" href="#module-rpc.rpc_record_batch_builder" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rpc.rpc_record_batch_builder.rpc_record_batch_builder">
+<em class="property">class </em><code class="descclassname">rpc.rpc_record_batch_builder.</code><code class="descname">rpc_record_batch_builder</code><a class="headerlink" href="#rpc.rpc_record_batch_builder.rpc_record_batch_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A builder for a batch of records.</p>
+<dl class="attribute">
+<dt id="rpc.rpc_record_batch_builder.rpc_record_batch_builder.TIME_BLOCK">
+<code class="descname">TIME_BLOCK</code><a class="headerlink" href="#rpc.rpc_record_batch_builder.rpc_record_batch_builder.TIME_BLOCK" title="Permalink to this definition">¶</a></dt>
+<dd><p>The size of a time block for a record batch.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">TIME_BLOCK</code><em class="property"> = 1000000.0</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_record_batch_builder.rpc_record_batch_builder.add_record">
+<code class="descname">add_record</code><span class="sig-paren">(</span><em>record</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_record_batch_builder.rpc_record_batch_builder.add_record" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a record to the batch builder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>record</strong> – The record to add to the batch builder.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_record_batch_builder.rpc_record_batch_builder.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_record_batch_builder.rpc_record_batch_builder.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the record batch builder.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.rpc_record_batch_builder.rpc_record_batch_builder.get_batch">
+<code class="descname">get_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_record_batch_builder.rpc_record_batch_builder.get_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the record batch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The record batch containing the records.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc.rpc_stream">
+<span id="rpc-rpc-stream-module"></span><h2>rpc.rpc_stream module<a class="headerlink" href="#module-rpc.rpc_stream" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rpc.rpc_stream.alert_stream">
+<em class="property">class </em><code class="descclassname">rpc.rpc_stream.</code><code class="descname">alert_stream</code><span class="sig-paren">(</span><em>multilog_id</em>, <em>client</em>, <em>handle</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_stream.alert_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>A stream of alerts.</p>
+<dl class="method">
+<dt id="rpc.rpc_stream.alert_stream.has_more">
+<code class="descname">has_more</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_stream.alert_stream.has_more" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the stream has any more elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if there are any elements left in the stream, false otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rpc.rpc_stream.record_stream">
+<em class="property">class </em><code class="descclassname">rpc.rpc_stream.</code><code class="descname">record_stream</code><span class="sig-paren">(</span><em>multilog_id</em>, <em>schema</em>, <em>client</em>, <em>handle</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_stream.record_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>A stream of records and associated functionality.</p>
+<dl class="method">
+<dt id="rpc.rpc_stream.record_stream.has_more">
+<code class="descname">has_more</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_stream.record_stream.has_more" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the stream has any more elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if there are any more records in the stream, false otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc.rpc_type_conversions">
+<span id="rpc-rpc-type-conversions-module"></span><h2>rpc.rpc_type_conversions module<a class="headerlink" href="#module-rpc.rpc_type_conversions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="rpc.rpc_type_conversions.convert_to_rpc_schema">
+<code class="descclassname">rpc.rpc_type_conversions.</code><code class="descname">convert_to_rpc_schema</code><span class="sig-paren">(</span><em>schema</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_type_conversions.convert_to_rpc_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a schema to an rpc schema for the client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>schema</strong> – The schema to convert.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The rpc schema.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rpc.rpc_type_conversions.convert_to_schema">
+<code class="descclassname">rpc.rpc_type_conversions.</code><code class="descname">convert_to_schema</code><span class="sig-paren">(</span><em>rpc_schema</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.rpc_type_conversions.convert_to_schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an rpc schema to a schema for confluo.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rpc_schema</strong> – The rpc_schema to convert.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The schema for confluo.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc.schema">
+<span id="rpc-schema-module"></span><h2>rpc.schema module<a class="headerlink" href="#module-rpc.schema" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rpc.schema.column">
+<em class="property">class </em><code class="descclassname">rpc.schema.</code><code class="descname">column</code><span class="sig-paren">(</span><em>idx</em>, <em>offset</em>, <em>dtype</em>, <em>name</em>, <em>min_value</em>, <em>max_value</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container of values for a specific type in the schema.</p>
+<dl class="method">
+<dt id="rpc.schema.column.apply">
+<code class="descname">apply</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.column.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds data to the column.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – The data to add.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A field containing the data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rpc.schema.field">
+<em class="property">class </em><code class="descclassname">rpc.schema.</code><code class="descname">field</code><span class="sig-paren">(</span><em>idx</em>, <em>dtype</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains data stored as part of a record.</p>
+<dl class="attribute">
+<dt id="rpc.schema.field.FORMAT_CODES">
+<code class="descname">FORMAT_CODES</code><a class="headerlink" href="#rpc.schema.field.FORMAT_CODES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifiers for different data types.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">FORMAT_CODES</code><em class="property"> = {1: '?', 2: 'c', 4: 'h', 6: 'i', 8: 'l', 10: 'f', 11: 'd', 12: 's'}</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rpc.schema.field.unpack">
+<code class="descname">unpack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.field.unpack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpacks the field to get the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The data in the field.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rpc.schema.record">
+<em class="property">class </em><code class="descclassname">rpc.schema.</code><code class="descname">record</code><span class="sig-paren">(</span><em>log_offset</em>, <em>data</em>, <em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.record" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of values containing different types.</p>
+<dl class="method">
+<dt id="rpc.schema.record.at">
+<code class="descname">at</code><span class="sig-paren">(</span><em>idx</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.record.at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a field at a specific index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>idx</strong> – The index of the desired field.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The desired field.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.schema.record.push_back">
+<code class="descname">push_back</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.record.push_back" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a value to the record.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> – The value to add.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rpc.schema.schema">
+<em class="property">class </em><code class="descclassname">rpc.schema.</code><code class="descname">schema</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>The schema for the data in the atomic multilog.</p>
+<dl class="method">
+<dt id="rpc.schema.schema.apply">
+<code class="descname">apply</code><span class="sig-paren">(</span><em>offset</em>, <em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.schema.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds data to the schema.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>offset</strong> – The offset in the record where the data is</li>
+<li><strong>data</strong> – The data to add.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The record.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rpc.schema.schema_builder">
+<em class="property">class </em><code class="descclassname">rpc.schema.</code><code class="descname">schema_builder</code><a class="headerlink" href="#rpc.schema.schema_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builder of a schema for the atomic multilog.</p>
+<dl class="method">
+<dt id="rpc.schema.schema_builder.add_column">
+<code class="descname">add_column</code><span class="sig-paren">(</span><em>dtype</em>, <em>name</em>, <em>min_value=None</em>, <em>max_value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.schema_builder.add_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a column to the schema builder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dtype</strong> – The data type of the column.</li>
+<li><strong>name</strong> – The name of the column.</li>
+<li><strong>min_value</strong> – The minimum value of the column.</li>
+<li><strong>max_value</strong> – The maximum value of the column.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rpc.schema.schema_builder.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rpc.schema.schema_builder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a schema by returning the list of columns.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of columns that make up the schema.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc.storage">
+<span id="rpc-storage-module"></span><h2>rpc.storage module<a class="headerlink" href="#module-rpc.storage" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rpc.storage.storage_id">
+<em class="property">class </em><code class="descclassname">rpc.storage.</code><code class="descname">storage_id</code><a class="headerlink" href="#rpc.storage.storage_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Different storage modes for confluo.</p>
+<dl class="attribute">
+<dt id="rpc.storage.storage_id.IN_MEMORY">
+<code class="descname">IN_MEMORY</code><a class="headerlink" href="#rpc.storage.storage_id.IN_MEMORY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data stored in memory.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.storage.storage_id.DURABLE_RELAXED">
+<code class="descname">DURABLE_RELAXED</code><a class="headerlink" href="#rpc.storage.storage_id.DURABLE_RELAXED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relaxed (no linearizable guarantees).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rpc.storage.storage_id.DURABLE">
+<code class="descname">DURABLE</code><a class="headerlink" href="#rpc.storage.storage_id.DURABLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data is persisted.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">DURABLE</code><em class="property"> = 2</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">DURABLE_RELAXED</code><em class="property"> = 1</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">IN_MEMORY</code><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-rpc">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-rpc" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">rpc package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-rpc.data_types">rpc.data_types module</a></li>
+<li><a class="reference internal" href="#module-rpc.rpc_client">rpc.rpc_client module</a></li>
+<li><a class="reference internal" href="#module-rpc.rpc_configuration_params">rpc.rpc_configuration_params module</a></li>
+<li><a class="reference internal" href="#module-rpc.rpc_record_batch_builder">rpc.rpc_record_batch_builder module</a></li>
+<li><a class="reference internal" href="#module-rpc.rpc_stream">rpc.rpc_stream module</a></li>
+<li><a class="reference internal" href="#module-rpc.rpc_type_conversions">rpc.rpc_type_conversions module</a></li>
+<li><a class="reference internal" href="#module-rpc.schema">rpc.schema module</a></li>
+<li><a class="reference internal" href="#module-rpc.storage">rpc.storage module</a></li>
+<li><a class="reference internal" href="#module-rpc">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/rpc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Anurag Khandelwal.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/rpc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
