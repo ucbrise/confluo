@@ -36,8 +36,8 @@ pages:
       - C++: cpp_client_api.md
       - Python: python_client_api.md
       - Java: java_client_api.md
-  - Case Studies:
-    - Overview: case_studies.md
+  - Applications:
+    - Overview: applications.md
     - Network Monitoring and Diagnosis: network_monitoring.md
     - Timeseries Database: timeseries_db.md
     - Pub-sub System: pub_sub.md
