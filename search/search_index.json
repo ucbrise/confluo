@@ -37,12 +37,12 @@
         }, 
         {
             "location": "/contributing/", 
-            "text": "Contributing", 
+            "text": "Contributing\n\n\nPlease contribute by creating \n\npull-requests\n and filing \n\nissues\n on our GitHub repository.", 
             "title": "Contributing"
         }, 
         {
             "location": "/contributing/#contributing", 
-            "text": "", 
+            "text": "Please contribute by creating  pull-requests  and filing  issues  on our GitHub repository.", 
             "title": "Contributing"
         }, 
         {
@@ -506,12 +506,12 @@
             "title": "Java Client API Documentation"
         }, 
         {
-            "location": "/case_studies/", 
+            "location": "/applications/", 
             "text": "Case Studies\n\n\nWe have evaluated Confluo for a wide range of applications. Here, we describe the design and implementation for three such applications: \n\n\n\n\nA network monitoring and diagnosis tool\n\n\nA time-series database\n\n\nA pub-sub system\n\n\n\n\nWe also evaluate each of these applications against state-of-the art approaches in their respective domains.", 
             "title": "Overview"
         }, 
         {
-            "location": "/case_studies/#case-studies", 
+            "location": "/applications/#case-studies", 
             "text": "We have evaluated Confluo for a wide range of applications. Here, we describe the design and implementation for three such applications:    A network monitoring and diagnosis tool  A time-series database  A pub-sub system   We also evaluate each of these applications against state-of-the art approaches in their respective domains.", 
             "title": "Case Studies"
         }, 

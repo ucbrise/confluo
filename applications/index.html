@@ -34,7 +34,7 @@
     
     
       
-        <title>Installation - Confluo</title>
+        <title>Overview - Confluo</title>
       
     
     
@@ -96,7 +96,7 @@
                 Confluo
               </span>
               <span class="md-header-nav__topic">
-                Installation
+                Overview
               </span>
             
           
@@ -193,7 +193,7 @@
   
     <li class="md-tabs__item">
       
-        <a href="../quick_start/" title="User Guide" class="md-tabs__link md-tabs__link--active">
+        <a href="../quick_start/" title="User Guide" class="md-tabs__link">
           User Guide
         </a>
       
@@ -219,7 +219,7 @@
   
     <li class="md-tabs__item">
       
-        <a href="../applications/" title="Applications" class="md-tabs__link">
+        <a href="./" title="Applications" class="md-tabs__link md-tabs__link--active">
           Applications
         </a>
       
@@ -324,12 +324,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
       User Guide
@@ -357,61 +355,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="toc">
-        Installation
-      </label>
-    
-    <a href="./" title="Installation" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../install/" title="Installation" class="md-nav__link">
       Installation
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#download" title="Download" class="md-nav__link">
-    Download
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configure" title="Configure" class="md-nav__link">
-    Configure
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" title="Install" class="md-nav__link">
-    Install
-  </a>
-  
-</li>
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -676,10 +624,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
     
     <label class="md-nav__link" for="nav-7">
       Applications
@@ -695,11 +645,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../applications/" title="Overview" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+    <a href="./" title="Overview" class="md-nav__link md-nav__link--active">
       Overview
     </a>
+    
   </li>
 
         
@@ -761,34 +720,6 @@
     
   
   
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#download" title="Download" class="md-nav__link">
-    Download
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configure" title="Configure" class="md-nav__link">
-    Configure
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" title="Install" class="md-nav__link">
-    Install
-  </a>
-  
-</li>
-      
-      
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -799,80 +730,17 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/ucbrise/confluo/edit/master/docs/install.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/ucbrise/confluo/edit/master/docs/applications.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<p>Before you can install Confluo, make sure you have the following prerequisites:</p>
+                <h1 id="case-studies">Case Studies<a class="headerlink" href="#case-studies" title="Permanent link">&para;</a></h1>
+<p>We have evaluated Confluo for a wide range of applications. Here, we describe the design and implementation for three such applications: </p>
 <ul>
-<li>MacOS X or Unix-based OS; Windows is not yet supported.</li>
-<li>C++ compiler that supports C++11 standard</li>
-<li>CMake 2.8 or later</li>
-<li>Boost 1.53 or later</li>
+<li><a href="../network_monitoring/">A network monitoring and diagnosis tool</a></li>
+<li><a href="../timeseries_db/">A time-series database</a></li>
+<li><a href="../pub_sub/">A pub-sub system</a></li>
 </ul>
-<p>For python client, you will additionally require:</p>
-<ul>
-<li>Python 2.7 or later</li>
-<li>Python Packages: six 1.7.2 or later</li>
-</ul>
-<p>For java client, you will additionally require:</p>
-<ul>
-<li>Java 1.7 or later</li>
-<li>ant 1.6.2 or later</li>
-</ul>
-<h2 id="download">Download<a class="headerlink" href="#download" title="Permanent link">&para;</a></h2>
-<p>You can obtain the latest version of Confluo by cloning the GitHub repository:</p>
-<pre class="codehilite"><code class="language-bash">git clone https://github.com/ucbrise/confluo.git</code></pre>
-
-
-<h2 id="configure">Configure<a class="headerlink" href="#configure" title="Permanent link">&para;</a></h2>
-<p>To configure the build, Confluo uses CMake as its build system. Confluo only 
-supports out of source builds; the simplest way to configure the build would be 
-as follows:</p>
-<pre class="codehilite"><code class="language-bash">cd confluo
-mkdir -p build
-cd build
-cmake ..</code></pre>
-
-
-<p>It is possible to configure the build specifying certain options based on 
-requirements; the supported options are:</p>
-<ul>
-<li><code>BUILD_TESTS</code>: Builds all tests (ON by default)</li>
-<li><code>BUILD_RPC</code>: Builds the rpc daemon and client libraries (ON by default)</li>
-<li><code>BUILD_EXAMPLES</code>: Builds Confluo examples (ON by default)</li>
-<li><code>BUILD_DOC</code>: Builds Confluo documentation (OFF by default)</li>
-<li><code>WITH_PY_CLIENT</code>: Builds Confluo python rpc client (ON by default)</li>
-<li><code>WITH_JAVA_CLIENT</code>: Builds Confluo java rpc client (ON by default)</li>
-</ul>
-<p>In order to explicitly enable or disable any of these options, set the value of
-the corresponding variable to <code>ON</code> or <code>OFF</code> as follows:</p>
-<pre class="codehilite"><code class="language-bash">cmake -DBUILD_TESTS=OFF</code></pre>
-
-
-<p>Finally, you can configure the install location for Confluo by modifying the
-<code>CMAKE_INSTALL_PREFIX</code> variable (which is set to /usr/local by default):</p>
-<pre class="codehilite"><code class="language-bash">cmake -DCMAKE_INSTALL_PREFIX=/path/to/installation</code></pre>
-
-
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
-<p>Once the build is configured, you can proceed to compile, test and install 
-Confluo. </p>
-<p>To build, use:</p>
-<pre class="codehilite"><code class="language-bash">make</code></pre>
-
-
-<p>or </p>
-<pre class="codehilite"><code class="language-bash">make -j{NUM_CORES}</code></pre>
-
-
-<p>to speed up the build on multi-core systems.</p>
-<p>To run the various unit tests, run:</p>
-<pre class="codehilite"><code class="language-bash">make test</code></pre>
-
-
-<p>and finally, to install, use:</p>
-<pre class="codehilite"><code class="language-bash">make install</code></pre>
+<p>We also evaluate each of these applications against state-of-the art approaches in their respective domains.</p>
                 
                   
                 
@@ -891,7 +759,7 @@ Confluo. </p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../quick_start/" title="Quick Start" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../java_client_api/" title="Java" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -900,19 +768,19 @@ Confluo. </p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Quick Start
+                Java
               </span>
             </div>
           </a>
         
         
-          <a href="../modes_of_operation/" title="Modes of Operation" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../network_monitoring/" title="Network Monitoring and Diagnosis" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Modes of Operation
+                Network Monitoring and Diagnosis
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
