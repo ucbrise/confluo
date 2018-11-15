@@ -19,7 +19,7 @@ We compare the performance for our pub-sub implementation against Apache Kafka. 
 ## Results
 
 <p align="center">
-	<img src="/img/pub_sub_perf.png" />
+	<img src="img/pub_sub_perf.png" />
 	<font size="-1"><b>Figure:</b> <em> Confluo observes close to linear write throughput scaling with #publishers as opposed to Kafka’s sub-linear scaling, while both systems observe close to linear read throughput scaling with #subscribers. Confluo observes sub-linear increase in read and write latency with batch sizes as opposed to Kafka’s linear increase (both axes are in log-scale).</em></font>
 </p>
 
