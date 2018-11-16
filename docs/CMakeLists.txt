@@ -95,10 +95,23 @@ add_custom_command(
 add_custom_target(javaclient_doc ALL
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/java_client.log)
 
+add_custom_target(docs
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${CMAKE_CURRENT_BINARY_DIR}/cpp.log ${CMAKE_CURRENT_BINARY_DIR}/cpp_client.log ${CMAKE_CURRENT_BINARY_DIR}/py_client.log ${CMAKE_CURRENT_BINARY_DIR}/java_client.log)
+
 # serve documentation website locally
 add_custom_target(docs_serve
         COMMAND ${MKDOCS_EXECUTABLE} serve
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mkdocs.stamp ${CMAKE_CURRENT_BINARY_DIR}/cpp.log ${CMAKE_CURRENT_BINARY_DIR}/cpp_client.log ${CMAKE_CURRENT_BINARY_DIR}/py_client.log ${CMAKE_CURRENT_BINARY_DIR}/java_client.log
+        DEPENDS docs
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Serving Documentation built by MkDocs"
         VERBATIM)
+
+add_custom_target(docs_publish
+        DEPENDS docs
+        COMMAND git checkout gh-pages
+        COMMAND cp -r site/* ${PROJECT_SOURCE_DIR}
+        COMMAND git add -A
+        COMMAND git commit -m "Updated project GitHub Pages"
+        COMMAND git push
+        COMMAND git checkout -
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
