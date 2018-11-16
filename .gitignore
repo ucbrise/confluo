@@ -1,0 +1,90 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+lib/*
+
+# Executables
+*.exe
+*.out
+*.app
+bin/*
+
+# Directories
+external/thrift-0.10.0/lib/py/dist/
+external/thrift-0.10.0/lib/py/thrift.egg-info/
+external/thrift-0.10.0/lib/py/build/
+build
+target
+log
+thrift-gen.files
+.eggs
+pyclient/confluo.egg-info
+pyclient/dist
+
+# Eclipse files
+.settings
+debug
+
+# Netbeans files
+nbproject
+
+# Idea files
+.idea
+*.iml
+
+# CLion Files
+cmake-build-debug*
+cmake-build-release*
+
+# generic ignores
+*.deps
+*.dirstamp
+*.libs
+*.log
+*.trs
+*.suo
+*.pyc
+*.cache
+*.user
+*.ipch
+*.sdf
+*.jar
+*.exe
+*.dll
+*_ReSharper*
+*.opensdf
+*.swp
+*.hi
+*~
+*tmp*
+.*project
+junit*.properties
+gen-*
+aclocal.m4
+acinclude.m4
+autom4te.cache
+node_modules
+test-driver
+.sonar
+.DS_Store
+/Debug/
