@@ -9,6 +9,14 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
+ * \mainpage Java Client Documentation
+ *
+ * The library provides a client implementation, the \ref RPCClient that can communicate with the Confluo server.
+ *
+ * The library internally relies on <a href="http://thrift.apache.org/">Apache Thrift</a> to facilitate the RPCs.
+ */
+
+/**
  * Client for Confluo through RPC
  */
 public class RPCClient {
