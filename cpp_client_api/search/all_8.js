@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['operator_2b_2b',['operator++',['../classconfluo_1_1rpc_1_1rpc__alert__stream.html#aec52038f580212603415b03365b33773',1,'confluo::rpc::rpc_alert_stream::operator++()'],['../classconfluo_1_1rpc_1_1rpc__record__stream.html#ac848c967f8ad558a1847fe5a084c61f7',1,'confluo::rpc::rpc_record_stream::operator++()']]]
+  ['num_5frecords',['num_records',['../classconfluo_1_1rpc_1_1rpc__client.html#a80964a77ece846b1c02fe13141d90a5c',1,'confluo::rpc::rpc_client::num_records()'],['../classconfluo_1_1rpc_1_1rpc__record__batch__builder.html#a9814a9ce15a1388a0a29a5b8821a0e5a',1,'confluo::rpc::rpc_record_batch_builder::num_records()'],['../classconfluo_1_1rpc_1_1rpc__service__handler.html#af5aafe0700539537ed0bf5a3eefefbca',1,'confluo::rpc::rpc_service_handler::num_records()']]]
 ];

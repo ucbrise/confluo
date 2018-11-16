@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['libconfluo_20documentation',['libconfluo Documentation',['../index.html',1,'']]],
   ['last_5fchild',['last_child',['../structconfluo_1_1index_1_1radix__tree__node.html#ae091dd049007bd1b38200e0b02cb8a3a',1,'confluo::index::radix_tree_node']]],
   ['length',['length',['../structconfluo_1_1record__t.html#a679e00fe8a7d8a4d96a0bfadc8980ef6',1,'confluo::record_t']]],
   ['lifecycle_5futil',['lifecycle_util',['../structconfluo_1_1storage_1_1lifecycle__util.html',1,'confluo::storage']]],
