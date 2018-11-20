@@ -41,7 +41,7 @@ pages:
     - Timeseries Database: timeseries_db.md
     - Pub-sub System: pub_sub.md
   - People:
-    - People: contact.md
+    - Confluo Team: contact.md
 theme:
   name: null
   custom_dir: @CMAKE_CURRENT_SOURCE_DIR@/material-theme
