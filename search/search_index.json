@@ -562,12 +562,12 @@
         }, 
         {
             "location": "/contact/", 
-            "text": "People\n\n\nAnurag Khandelwal\n \n\nGraduate Student at UC Berkeley\n\nanuragk AT berkeley.edu\n\n\nRachit Agarwal\n \n\nAssistant Professor at Cornell University\n\nragarwal AT cs.cornell.edu\n\n\nIon Stoica\n \n\nProfessor at UC Berkeley\n\nistoica AT berkeley.edu\n\n\nConfluo also benefits from contributions from amazing current and past \nundergraduate students at UC Berkeley: \n\n\n\n\nUjval Misra\n\n\nNeil Giridharan\n\n\nSritej Attaluri", 
-            "title": "People"
+            "text": "People\n\n\n\n\nAnurag Khandelwal\n \n\nGraduate Student at UC Berkeley\n\nanuragk AT berkeley.edu\n\n\n\n\n\n\n\n\nRachit Agarwal\n \n\nAssistant Professor at Cornell University\n\nragarwal AT cs.cornell.edu\n\n\n\n\n\n\n\n\nIon Stoica\n \n\nProfessor at UC Berkeley\n\nistoica AT berkeley.edu\n\n\n\n\n\n\nConfluo also benefits from contributions from amazing current and past \nundergraduate students at UC Berkeley: \n\n\n\n\n\nUjval Misra\n\n\nNeil Giridharan\n\n\nSritej Attaluri", 
+            "title": "Confluo Team"
         }, 
         {
             "location": "/contact/#people", 
-            "text": "Anurag Khandelwal   \nGraduate Student at UC Berkeley \nanuragk AT berkeley.edu  Rachit Agarwal   \nAssistant Professor at Cornell University \nragarwal AT cs.cornell.edu  Ion Stoica   \nProfessor at UC Berkeley \nistoica AT berkeley.edu  Confluo also benefits from contributions from amazing current and past \nundergraduate students at UC Berkeley:    Ujval Misra  Neil Giridharan  Sritej Attaluri", 
+            "text": "Anurag Khandelwal   \nGraduate Student at UC Berkeley \nanuragk AT berkeley.edu     Rachit Agarwal   \nAssistant Professor at Cornell University \nragarwal AT cs.cornell.edu     Ion Stoica   \nProfessor at UC Berkeley \nistoica AT berkeley.edu    Confluo also benefits from contributions from amazing current and past \nundergraduate students at UC Berkeley:    Ujval Misra  Neil Giridharan  Sritej Attaluri", 
             "title": "People"
         }
     ]
