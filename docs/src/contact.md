@@ -1,9 +1,4 @@
-# Contact
-
-The best way to discuss Confluo feature requests and bug reportss is via 
-[GitHub issues](https://github.com/ucbrise/confluo/issues).
-
-## People
+# People
 
 [**Anurag Khandelwal**](http://people.eecs.berkeley.edu/~anuragk/) <br/>
 Graduate Student at UC Berkeley<br/>
