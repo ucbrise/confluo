@@ -1,6 +1,9 @@
 #ifndef CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 #define CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include "atomic_multilog.h"
 
 #include "gtest/gtest.h"
@@ -74,6 +77,30 @@ class AtomicMultilogTest : public testing::Test {
       r.h[i] = '\0';
     }
     return reinterpret_cast<void *>(&r);
+  }
+
+  static std::string make_json_record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const std::string &h) {
+    namespace pt = boost::property_tree;
+    pt::ptree root;
+
+    root.put("TIMESTAMP", ts);
+    root.put("A", a);
+    root.put("B", b);
+    root.put("C", c);
+    root.put("D", d);
+    root.put("E", e);
+    std::stringstream f_ss;
+    f_ss << std::fixed << std::setprecision(6) << f;
+    root.put("F", f_ss.str());
+    std::stringstream g_ss;
+    g_ss << std::fixed << std::setprecision(6) << g;
+    root.put("G", g_ss.str());
+    root.put("H", h);
+
+    std::stringstream ss;
+    pt::write_json(ss, root);
+    std::string ret = ss.str();
+    return ret;
   }
 
   static std::vector<column_t> schema() {
@@ -158,14 +185,16 @@ TEST_F(AtomicMultilogTest, AppendAndGetDurableRelaxedTest) {
 TEST_F(AtomicMultilogTest, AppendAndGetJSONRecordTest1) {
   atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
 
-  std::string rec1 = "{'a':'false', 'b':'0', 'c':'0', 'd':'0', 'e':'0', 'f':'0.000000', 'g':'0.010000', 'h':'abc'}";
-  std::string rec2 = "{'a':'true', 'b':'1', 'c':'10', 'd':'2', 'e':'10', 'f':'0.100000', 'g':'0.020000', 'h':'defg'}";
-  std::string rec3 = "{'a':'false', 'b':'2', 'c':'20', 'd':'4', 'e':'100', 'f':'0.200000', 'g':'0.030000', 'h':'hijkl'}";
-  std::string rec4 = "{'a':'true', 'b':'3', 'c':'30', 'd':'6', 'e':'1000', 'f':'0.300000', 'g':'0.040000', 'h':'mnopqr'}";
-  std::string rec5 = "{'a':'false', 'b':'4', 'c':'40', 'd':'8', 'e':'10000', 'f':'0.400000', 'g':'0.050000', 'h':'stuvwx'}";
-  std::string rec6 = "{'a':'true', 'b':'5', 'c':'50', 'd':'10', 'e':'100000', 'f':'0.500000', 'g':'0.060000', 'h':'yyy'}";
-  std::string rec7 = "{'a':'false', 'b':'6', 'c':'60', 'd':'12', 'e':'1000000', 'f':'0.600000', 'g':'0.070000', 'h':'zzz'}";
-  std::string rec8 = "{'a':'true', 'b':'7', 'c':'70', 'd':'14', 'e':'10000000', 'f':'0.700000', 'g':'0.080000', 'h':'zzz'}";
+  int64_t ts = utils::time_utils::cur_ns();
+
+  std::string rec1 = make_json_record(ts, false, 0, 0, 0, 0, 0.000000, 0.010000, "abc");
+  std::string rec2 = make_json_record(ts, true, 1, 10, 2, 10, 0.100000, 0.020000, "defg");
+  std::string rec3 = make_json_record(ts, false, 2, 20, 4, 100, 0.200000, 0.030000, "hijkl");
+  std::string rec4 = make_json_record(ts, true, 3, 30, 6, 1000, 0.300000, 0.040000, "mnopqr");
+  std::string rec5 = make_json_record(ts, false, 4, 40, 8, 10000, 0.400000, 0.050000, "stuvwx");
+  std::string rec6 = make_json_record(ts, true, 5, 50, 10, 100000, 0.500000, 0.060000, "yyy");
+  std::string rec7 = make_json_record(ts, false, 6, 60, 12, 1000000, 0.600000, 0.070000, "zzz");
+  std::string rec8 = make_json_record(ts, true, 7, 70, 14, 10000000, 0.700000, 0.080000, "zzz");
 
   ASSERT_EQ(mlog.record_size() * 0, mlog.append_json(rec1));
   ASSERT_EQ(mlog.record_size() * 1, mlog.append_json(rec2));
