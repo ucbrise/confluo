@@ -865,18 +865,27 @@ benchmarks with 500 million records to highlight the per-server performance of
 these systems. Requests are issued as continuous streams with 8K record batches.</p>
 <h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
 <p align="center">
-    <img src="../img/tsdb_perf.png" width="50%" />
+    <img src="../img/tsdb_perf.png" width="80%" />
 </p>
 
 <p align="center">
-    <font size="-1"><b>Figure:</b> <em>ConfluoD & ConfluoR measure performance for DURABLE & DURABLE_RELAXED 
-    modes respectively. ConfluoD achieves 2-20x higher throughput, 2-10x lower
-    latency for inserts, and 1.5-5x higher throughput, 5-20x lower latency for
-    time-range queries than compared systems.</em></font>
+    <font size="-1"> <b>Figure:</b> <em> ConfluoD & ConfluoR measure performance
+    for DURABLE & DURABLE_RELAXED modes respectively. ConfluoD achieves 2-20x 
+    higher throughput, 2-10x lower latency for inserts, and 1.5-5x higher 
+    throughput, 5-20x lower latency for time-range queries than compared 
+    systems. </em></font>
 </p>
 
-<p>The figure above shows that systems like CorfuDB and TimescaleDB achieve over 10x lower performance than BTrDB and Confluo. We emphasize that this is not a shortcoming: CorfuDB and TimescaleDB support stronger (transactional) semantics than BTrDB and Confluo. Thus, depending on desired semantics, either class of systems may be useful for an underlying application.</p>
-<p>Confluo, using DURABLE_RELAXED writes, is able to achieve close to 27 million inserts/second due to its cheap versioning and lock-free concurrency control. For time-range queries, almost all systems observe similar throughput since queries are served via in-memory indexes. Insertion and query latency trends are similar to throughput trends across different systems.</p>
+<p>The figure above shows that systems like CorfuDB and TimescaleDB achieve over 
+10x lower performance than BTrDB and Confluo. We emphasize that this is not a 
+shortcoming: CorfuDB and TimescaleDB support stronger (transactional) semantics 
+than BTrDB and Confluo. Thus, depending on desired semantics, either class of 
+systems may be useful for an underlying application.</p>
+<p>Confluo, using DURABLE_RELAXED writes, is able to achieve close to 27 million 
+inserts/second due to its cheap versioning and lock-free concurrency control. 
+For time-range queries, almost all systems observe similar throughput since 
+queries are served via in-memory indexes. Insertion and query latency trends are
+similar to throughput trends across different systems.</p>
                 
                   
                 
