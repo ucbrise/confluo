@@ -94,7 +94,7 @@ std::string schema_t::to_string() const {
   return str;
 }
 
-void *schema_t::json_string_to_data(const std::string json_record) const {
+void *schema_t::json_string_to_data(const std::string &json_record) const {
   // need to convert json_data into a record vector
   std::stringstream ss;
   // putting the json data into a stream

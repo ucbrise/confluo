@@ -169,14 +169,13 @@ class schema_t {
    *
    * @return A pointer to the record data
    */
-  void *json_string_to_data(const std::string json_record) const;
+  void *json_string_to_data(const std::string &json_record) const;
 
   /**
    * Converts the records into a pointer to the record data
    *
+   * @param ret The json string that is filled up with the data
    * @param record The records used for conversion
-   *
-   * @return A pointer to the record data
    */
   void data_to_json_string(std::string &ret, const void *data) const;
 

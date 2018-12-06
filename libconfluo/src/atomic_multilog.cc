@@ -228,7 +228,7 @@ size_t atomic_multilog::append(void *data) {
   return offset;
 }
 
-size_t atomic_multilog::append_json(std::string json_record) {
+size_t atomic_multilog::append_json(const std::string &json_record) {
   void *buf = schema_.json_string_to_data(json_record);
   size_t off = append(buf);
   delete[] reinterpret_cast<uint8_t *>(buf);
@@ -299,6 +299,12 @@ std::unique_ptr<record_cursor> atomic_multilog::execute_filter(const std::string
   return plan.execute(version);
 }
 
+std::unique_ptr<json_cursor> atomic_multilog::execute_filter_json(const std::string &expr) const {
+  std::unique_ptr<record_cursor> r_cursor = execute_filter(expr);
+
+  return std::unique_ptr<json_cursor>(new json_string_cursor(std::move(r_cursor), &schema_));
+}
+
 numeric atomic_multilog::execute_aggregate(const std::string &aggregate_expr, const std::string &filter_expr) {
   auto pa = parser::parse_aggregate(aggregate_expr);
   aggregator agg = aggregate_manager::get_aggregator(pa.agg);
@@ -331,6 +337,14 @@ std::unique_ptr<record_cursor> atomic_multilog::query_filter(const std::string &
                                parser::compiled_expression()));
 }
 
+std::unique_ptr<json_cursor> atomic_multilog::query_filter_json(const std::string &filter_name,
+                                                             uint64_t begin_ms,
+                                                             uint64_t end_ms) const {
+  std::unique_ptr<record_cursor> r_cursor = query_filter(filter_name, begin_ms, end_ms);
+
+  return std::unique_ptr<json_cursor>(new json_string_cursor(std::move(r_cursor), &schema_));
+}
+
 std::unique_ptr<record_cursor> atomic_multilog::query_filter(const std::string &filter_name,
                                                              uint64_t begin_ms,
                                                              uint64_t end_ms,
@@ -348,6 +362,15 @@ std::unique_ptr<record_cursor> atomic_multilog::query_filter(const std::string &
   std::unique_ptr<offset_cursor> o_cursor(
       new offset_iterator_cursor<filter::range_result::iterator>(res.begin(), res.end(), version));
   return std::unique_ptr<record_cursor>(new filter_record_cursor(std::move(o_cursor), &data_log_, &schema_, e));
+}
+
+std::unique_ptr<json_cursor> atomic_multilog::query_filter_json(const std::string &filter_name,
+                                                             uint64_t begin_ms,
+                                                             uint64_t end_ms,
+                                                             const std::string &additional_filter_expr) const {
+  std::unique_ptr<record_cursor> r_cursor = query_filter(filter_name, begin_ms, end_ms, additional_filter_expr);
+
+  return std::unique_ptr<json_cursor>(new json_string_cursor(std::move(r_cursor), &schema_));
 }
 
 numeric atomic_multilog::get_aggregate(const std::string &aggregate_name, uint64_t begin_ms, uint64_t end_ms) {

@@ -178,9 +178,11 @@ void rpc_service_handler::read(std::string &_return, int64_t id, const int64_t o
   _return.assign(data, size);
 }
 void rpc_service_handler::read_json(std::string &_return, int64_t id, const int64_t offset, const int64_t nrecords) {
+  if (nrecords > 1) {
+    THROW(unsupported_exception, "Reading more than 1 JSON records at a time is unsupported!");
+  }
   atomic_multilog *mlog = store_->get_atomic_multilog(id);
   _return = mlog->read_json((uint64_t) offset);
-  // TODO: put in functionality for nrecords to be read
 }
 void rpc_service_handler::query_aggregate(std::string &_return,
                                           int64_t id,
