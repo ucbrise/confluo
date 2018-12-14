@@ -185,12 +185,12 @@ TEST_F(ClientReadOpsTest, ReadJSONTest) {
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);
 
-  int64_t ts = utils::time_utils::cur_ns();
-  mlog->append_json(make_json_record(ts, "abc"));
+  std::string rec = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"MSG\": \"abc\"\n}\n";
+  mlog->append_json(rec);
 
   std::string buf;
   client.read_json(buf, 0);
-  ASSERT_EQ(buf, make_json_record(ts, "abc"));
+  ASSERT_EQ(buf, rec);
 
   client.disconnect();
   server->stop();
