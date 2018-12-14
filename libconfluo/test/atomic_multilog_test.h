@@ -187,14 +187,14 @@ TEST_F(AtomicMultilogTest, AppendAndGetJSONRecordTest1) {
 
   int64_t ts = utils::time_utils::cur_ns();
 
-  std::string rec1 = make_json_record(ts, false, 0, 0, 0, 0, 0.000000, 0.010000, "abc");
-  std::string rec2 = make_json_record(ts, true, 1, 10, 2, 10, 0.100000, 0.020000, "defg");
-  std::string rec3 = make_json_record(ts, false, 2, 20, 4, 100, 0.200000, 0.030000, "hijkl");
-  std::string rec4 = make_json_record(ts, true, 3, 30, 6, 1000, 0.300000, 0.040000, "mnopqr");
-  std::string rec5 = make_json_record(ts, false, 4, 40, 8, 10000, 0.400000, 0.050000, "stuvwx");
-  std::string rec6 = make_json_record(ts, true, 5, 50, 10, 100000, 0.500000, 0.060000, "yyy");
-  std::string rec7 = make_json_record(ts, false, 6, 60, 12, 1000000, 0.600000, 0.070000, "zzz");
-  std::string rec8 = make_json_record(ts, true, 7, 70, 14, 10000000, 0.700000, 0.080000, "zzz");
+  std::string rec1 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"0\",\n    \"C\": \"0\",\n    \"D\": \"0\",\n    \"E\": \"0\",\n    \"F\": \"0.000000\",\n    \"G\": \"0.010000\",\n    \"H\": \"abc\"\n}\n";
+  std::string rec2 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"1\",\n    \"C\": \"10\",\n    \"D\": \"2\",\n    \"E\": \"10\",\n    \"F\": \"0.100000\",\n    \"G\": \"0.020000\",\n    \"H\": \"defg\"\n}\n";
+  std::string rec3 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"2\",\n    \"C\": \"20\",\n    \"D\": \"4\",\n    \"E\": \"100\",\n    \"F\": \"0.200000\",\n    \"G\": \"0.030000\",\n    \"H\": \"hijkl\"\n}\n";
+  std::string rec4 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"3\",\n    \"C\": \"30\",\n    \"D\": \"6\",\n    \"E\": \"1000\",\n    \"F\": \"0.300000\",\n    \"G\": \"0.040000\",\n    \"H\": \"mnopqr\"\n}\n";
+  std::string rec5 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"4\",\n    \"C\": \"40\",\n    \"D\": \"8\",\n    \"E\": \"10000\",\n    \"F\": \"0.400000\",\n    \"G\": \"0.050000\",\n    \"H\": \"stuvwx\"\n}\n";
+  std::string rec6 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"5\",\n    \"C\": \"50\",\n    \"D\": \"10\",\n    \"E\": \"100000\",\n    \"F\": \"0.500000\",\n    \"G\": \"0.060000\",\n    \"H\": \"yyy\"\n}\n";
+  std::string rec7 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"6\",\n    \"C\": \"60\",\n    \"D\": \"12\",\n    \"E\": \"1000000\",\n    \"F\": \"0.600000\",\n    \"G\": \"0.070000\",\n    \"H\": \"zzz\"\n}\n";
+  std::string rec8 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"7\",\n    \"C\": \"70\",\n    \"D\": \"14\",\n    \"E\": \"10000000\",\n    \"F\": \"0.700000\",\n    \"G\": \"0.080000\",\n    \"H\": \"zzz\"\n}\n";
 
   ASSERT_EQ(mlog.record_size() * 0, mlog.append_json(rec1));
   ASSERT_EQ(mlog.record_size() * 1, mlog.append_json(rec2));
