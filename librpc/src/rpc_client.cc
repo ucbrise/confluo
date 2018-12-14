@@ -129,6 +129,13 @@ void rpc_client::append(const record_data &record) {
   }
   client_->append(cur_multilog_id_, record);
 }
+void rpc_client::append_json(const std::string &json_record) {
+  if (cur_multilog_id_ == -1) {
+    throw illegal_state_exception("Must set atomic multilog first");
+  }
+
+  client_->append_json(cur_multilog_id_, json_record);
+}
 void rpc_client::append(const std::vector<std::string> &record) {
   if (cur_multilog_id_ == -1) {
     throw illegal_state_exception("Must set atomic multilog first");
@@ -145,6 +152,9 @@ void rpc_client::append(const std::vector<std::string> &record) {
 void rpc_client::read(record_data &_return, int64_t offset) {
   read_batch(_return, offset, 1);
 }
+void rpc_client::read_json(std::string &_return, int64_t offset) {
+  read_batch_json(_return, offset, 1);
+}
 std::vector<std::string> rpc_client::read(int64_t offset) {
   record_data rdata;
   read_batch(rdata, offset, 1);
@@ -155,6 +165,12 @@ void rpc_client::read_batch(record_data &_return, int64_t offset, size_t nrecord
     throw illegal_state_exception("Must set atomic multilog first");
   }
   client_->read(_return, cur_multilog_id_, offset, static_cast<const int64_t>(nrecords));
+}
+void rpc_client::read_batch_json(std::string &_return, int64_t offset, size_t nrecords) {
+  if (cur_multilog_id_ == -1) {
+    throw illegal_state_exception("Must set atomic multilog first");
+  }
+  client_->read_json(_return, cur_multilog_id_, offset, static_cast<const int64_t>(nrecords));
 }
 std::vector<std::vector<std::string>> rpc_client::read_batch(int64_t offset, size_t nrecords) {
   record_data rdata;

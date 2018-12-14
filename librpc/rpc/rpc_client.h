@@ -192,6 +192,13 @@ class rpc_client {
   void append(const record_data &record);
 
   /**
+   * Appends a json record to the client
+   *
+   * @param record The record to append
+   */
+  void append_json(const std::string &json_record);
+
+  /**
    * Appends a vector of records to the client
    *
    * @param record The vector of records to append
@@ -206,6 +213,14 @@ class rpc_client {
    * @param offset The offset from the log to read from
    */
   void read(record_data &_return, int64_t offset);
+
+  /**
+   * Reads json data from a specified offset
+   *
+   * @param _return The data that is read
+   * @param offset The offset from the log to read from
+   */
+  void read_json(std::string &_return, int64_t offset);
 
   /**
    * Reads data from the log at a specified offset
@@ -224,6 +239,15 @@ class rpc_client {
    * @param nrecords The number of records to read
    */
   void read_batch(record_data &_return, int64_t offset, size_t nrecords);
+
+  /**
+   * Reads the batch of json data from an offset
+   *
+   * @param _return The data that is read
+   * @param offset The offset from the log
+   * @param nrecords The number of records to read
+   */
+  void read_batch_json(std::string &_return, int64_t offset, size_t nrecords);
 
   /**
    * Reads a batch from the specified offset

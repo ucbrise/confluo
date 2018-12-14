@@ -122,10 +122,12 @@ service rpc_service {
   /** Query ops **/
   // Write ops
   i64 append(1: i64 multilog_id, 2: binary data),
+  i64 append_json(1: i64 multilog_id, 2: string data),
   i64 append_batch(1: i64 multilog_id, 2: rpc_record_batch batch),
   
   // Read ops
   binary read(1: i64 multilog_id, 2: i64 offset, 3: i64 nrecords),
+  string read_json(1: i64 multilog_id, 2: i64 offset, 3: i64 nrecords),
   string query_aggregate(1: i64 multilog_id, 2: string aggregate_name, 
                          3: i64 begin_ms, 4: i64 end_ms)
           throws (1: rpc_invalid_operation ex),

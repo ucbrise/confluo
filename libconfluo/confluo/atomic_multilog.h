@@ -2,6 +2,8 @@
 #define CONFLUO_ATOMIC_MULTILOG_H_
 
 #include <cmath>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include <functional>
 #include <numeric>
@@ -20,6 +22,7 @@
 #include "conf/configuration_params.h"
 #include "container/data_log.h"
 #include "container/cursor/record_cursors.h"
+#include "container/cursor/json_cursors.h"
 #include "container/cursor/alert_cursor.h"
 #include "container/monolog/monolog.h"
 #include "container/radix_tree.h"
@@ -258,6 +261,13 @@ class atomic_multilog {
    */
   size_t append(void *data);
 
+  /**
+   * Appends json-formatted data to the atomic multilog
+   * @param json_data The json-formatted data to be stored
+   * @return The offset of where the data is located
+   */
+  size_t append_json(const std::string &json_data);
+
   // TODO: Add a std::tuple based variant
   // TODO: Add a JSON based variant
   /**
@@ -303,6 +313,21 @@ class atomic_multilog {
    * Reads a record given an offset into the data log
    * @param offset The offset into the data log of the record
    * @param version The current version
+   * @return The corresponding record as a vector of strings.
+   */
+  std::string read_json(uint64_t offset, uint64_t &version) const;
+
+  /**
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @return The corresponding record
+   */
+  std::string read_json(uint64_t offset) const;
+
+  /**
+   * Reads a record given an offset into the data log
+   * @param offset The offset into the data log of the record
+   * @param version The current version
    * @return Pointer to the corresponding raw record bytes
    */
   std::unique_ptr<uint8_t> read_raw(uint64_t offset, uint64_t &version) const;
@@ -321,6 +346,13 @@ class atomic_multilog {
    * @return The result of applying the filter to the atomic multilog
    */
   std::unique_ptr<record_cursor> execute_filter(const std::string &expr) const;
+
+  /**
+   * Executes the filter expression
+   * @param expr The filter expression
+   * @return The result of applying the filter to the atomic multilog
+   */
+  std::unique_ptr<json_cursor> execute_filter_json(const std::string &expr) const;
 
   // TODO: Add tests
   /**
@@ -346,6 +378,17 @@ class atomic_multilog {
 
   /**
    * Queries an existing filter
+   * @param filter_name Name of the filter
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
+   * @return A stream containing the results of the filter
+   */
+  std::unique_ptr<json_cursor> query_filter_json(const std::string &filter_name,
+                                                 uint64_t begin_ms,
+                                                 uint64_t end_ms) const;
+
+  /**
+   * Queries an existing filter
    * @param filter_name The name of the filter
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
@@ -353,6 +396,17 @@ class atomic_multilog {
    * @return A stream containing the results of the filter
    */
   std::unique_ptr<record_cursor> query_filter(const std::string &filter_name, uint64_t begin_ms, uint64_t end_ms,
+                                              const std::string &additional_filter_expr) const;
+
+  /**
+   * Queries an existing filter
+   * @param filter_name The name of the filter
+   * @param begin_ms Beginning of time-range in ms
+   * @param end_ms End of time-range in ms
+   * @param additional_filter_expr Additional filter expression
+   * @return A stream containing the results of the filter
+   */
+  std::unique_ptr<json_cursor> query_filter_json(const std::string &filter_name, uint64_t begin_ms, uint64_t end_ms,
                                               const std::string &additional_filter_expr) const;
 
   /**

@@ -6,29 +6,27 @@
  */
 #include "rpc_types.h"
 
+#include <algorithm>
 #include <ostream>
 
 #include <thrift/TToString.h>
 
-namespace confluo {
-namespace rpc {
+namespace confluo { namespace rpc {
 
 int _krpc_storage_modeValues[] = {
-    RPC_IN_MEMORY,
-    RPC_DURABLE_RELAXED,
-    RPC_DURABLE
+  RPC_IN_MEMORY,
+  RPC_DURABLE_RELAXED,
+  RPC_DURABLE
 };
-const char *_krpc_storage_modeNames[] = {
-    "RPC_IN_MEMORY",
-    "RPC_DURABLE_RELAXED",
-    "RPC_DURABLE"
+const char* _krpc_storage_modeNames[] = {
+  "RPC_IN_MEMORY",
+  "RPC_DURABLE_RELAXED",
+  "RPC_DURABLE"
 };
-const std::map<int, const char *> _rpc_storage_mode_VALUES_TO_NAMES
-    (::apache::thrift::TEnumIterator(3, _krpc_storage_modeValues, _krpc_storage_modeNames),
-     ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+const std::map<int, const char*> _rpc_storage_mode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(3, _krpc_storage_modeValues, _krpc_storage_modeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
 
-std::ostream &operator<<(std::ostream &out, const rpc_storage_mode val) {
-  std::map<int, const char *>::const_iterator it = _rpc_storage_mode_VALUES_TO_NAMES.find(val);
+std::ostream& operator<<(std::ostream& out, const rpc_storage_mode val) {
+  std::map<int, const char*>::const_iterator it = _rpc_storage_mode_VALUES_TO_NAMES.find(val);
   if (it != _rpc_storage_mode_VALUES_TO_NAMES.end()) {
     out << it->second;
   } else {
@@ -38,45 +36,43 @@ std::ostream &operator<<(std::ostream &out, const rpc_storage_mode val) {
 }
 
 int _krpc_data_typeValues[] = {
-    RPC_NONE,
-    RPC_BOOL,
-    RPC_CHAR,
-    RPC_UCHAR,
-    RPC_SHORT,
-    RPC_USHORT,
-    RPC_INT,
-    RPC_UINT,
-    RPC_LONG,
-    RPC_ULONG,
-    RPC_FLOAT,
-    RPC_DOUBLE,
-    RPC_STRING,
-    RPC_RECORD,
-    RPC_ALERT
+  RPC_NONE,
+  RPC_BOOL,
+  RPC_CHAR,
+  RPC_UCHAR,
+  RPC_SHORT,
+  RPC_USHORT,
+  RPC_INT,
+  RPC_UINT,
+  RPC_LONG,
+  RPC_ULONG,
+  RPC_FLOAT,
+  RPC_DOUBLE,
+  RPC_STRING,
+  RPC_RECORD,
+  RPC_ALERT
 };
-const char *_krpc_data_typeNames[] = {
-    "RPC_NONE",
-    "RPC_BOOL",
-    "RPC_CHAR",
-    "RPC_UCHAR",
-    "RPC_SHORT",
-    "RPC_USHORT",
-    "RPC_INT",
-    "RPC_UINT",
-    "RPC_LONG",
-    "RPC_ULONG",
-    "RPC_FLOAT",
-    "RPC_DOUBLE",
-    "RPC_STRING",
-    "RPC_RECORD",
-    "RPC_ALERT"
+const char* _krpc_data_typeNames[] = {
+  "RPC_NONE",
+  "RPC_BOOL",
+  "RPC_CHAR",
+  "RPC_UCHAR",
+  "RPC_SHORT",
+  "RPC_USHORT",
+  "RPC_INT",
+  "RPC_UINT",
+  "RPC_LONG",
+  "RPC_ULONG",
+  "RPC_FLOAT",
+  "RPC_DOUBLE",
+  "RPC_STRING",
+  "RPC_RECORD",
+  "RPC_ALERT"
 };
-const std::map<int, const char *> _rpc_data_type_VALUES_TO_NAMES
-    (::apache::thrift::TEnumIterator(15, _krpc_data_typeValues, _krpc_data_typeNames),
-     ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+const std::map<int, const char*> _rpc_data_type_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(15, _krpc_data_typeValues, _krpc_data_typeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
 
-std::ostream &operator<<(std::ostream &out, const rpc_data_type val) {
-  std::map<int, const char *>::const_iterator it = _rpc_data_type_VALUES_TO_NAMES.find(val);
+std::ostream& operator<<(std::ostream& out, const rpc_data_type val) {
+  std::map<int, const char*>::const_iterator it = _rpc_data_type_VALUES_TO_NAMES.find(val);
   if (it != _rpc_data_type_VALUES_TO_NAMES.end()) {
     out << it->second;
   } else {
@@ -86,23 +82,21 @@ std::ostream &operator<<(std::ostream &out, const rpc_data_type val) {
 }
 
 int _krpc_iterator_typeValues[] = {
-    RPC_ADHOC,
-    RPC_PREDEF,
-    RPC_COMBINED,
-    RPC_ALERTS
+  RPC_ADHOC,
+  RPC_PREDEF,
+  RPC_COMBINED,
+  RPC_ALERTS
 };
-const char *_krpc_iterator_typeNames[] = {
-    "RPC_ADHOC",
-    "RPC_PREDEF",
-    "RPC_COMBINED",
-    "RPC_ALERTS"
+const char* _krpc_iterator_typeNames[] = {
+  "RPC_ADHOC",
+  "RPC_PREDEF",
+  "RPC_COMBINED",
+  "RPC_ALERTS"
 };
-const std::map<int, const char *> _rpc_iterator_type_VALUES_TO_NAMES
-    (::apache::thrift::TEnumIterator(4, _krpc_iterator_typeValues, _krpc_iterator_typeNames),
-     ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+const std::map<int, const char*> _rpc_iterator_type_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(4, _krpc_iterator_typeValues, _krpc_iterator_typeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
 
-std::ostream &operator<<(std::ostream &out, const rpc_iterator_type val) {
-  std::map<int, const char *>::const_iterator it = _rpc_iterator_type_VALUES_TO_NAMES.find(val);
+std::ostream& operator<<(std::ostream& out, const rpc_iterator_type val) {
+  std::map<int, const char*>::const_iterator it = _rpc_iterator_type_VALUES_TO_NAMES.find(val);
   if (it != _rpc_iterator_type_VALUES_TO_NAMES.end()) {
     out << it->second;
   } else {
@@ -111,8 +105,10 @@ std::ostream &operator<<(std::ostream &out, const rpc_iterator_type val) {
   return out;
 }
 
+
 rpc_column::~rpc_column() throw() {
 }
+
 
 void rpc_column::__set_type_id(const int32_t val) {
   this->type_id = val;
@@ -122,13 +118,15 @@ void rpc_column::__set_type_size(const int32_t val) {
   this->type_size = val;
 }
 
-void rpc_column::__set_name(const std::string &val) {
+void rpc_column::__set_name(const std::string& val) {
   this->name = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_column &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_column& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_column &a, rpc_column &b) {
   using ::std::swap;
@@ -137,18 +135,18 @@ void swap(rpc_column &a, rpc_column &b) {
   swap(a.name, b.name);
 }
 
-rpc_column::rpc_column(const rpc_column &other0) {
+rpc_column::rpc_column(const rpc_column& other0) {
   type_id = other0.type_id;
   type_size = other0.type_size;
   name = other0.name;
 }
-rpc_column &rpc_column::operator=(const rpc_column &other1) {
+rpc_column& rpc_column::operator=(const rpc_column& other1) {
   type_id = other1.type_id;
   type_size = other1.type_size;
   name = other1.name;
   return *this;
 }
-void rpc_column::printTo(std::ostream &out) const {
+void rpc_column::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_column(";
   out << "type_id=" << to_string(type_id);
@@ -157,8 +155,10 @@ void rpc_column::printTo(std::ostream &out) const {
   out << ")";
 }
 
+
 rpc_iterator_descriptor::~rpc_iterator_descriptor() throw() {
 }
+
 
 void rpc_iterator_descriptor::__set_id(const rpc_iterator_id val) {
   this->id = val;
@@ -175,10 +175,12 @@ void rpc_iterator_descriptor::__set_data_type(const rpc_data_type val) {
 void rpc_iterator_descriptor::__set_handler_id(const rpc_handler_id val) {
   this->handler_id = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_iterator_descriptor &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_iterator_descriptor& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_iterator_descriptor &a, rpc_iterator_descriptor &b) {
   using ::std::swap;
@@ -188,20 +190,20 @@ void swap(rpc_iterator_descriptor &a, rpc_iterator_descriptor &b) {
   swap(a.handler_id, b.handler_id);
 }
 
-rpc_iterator_descriptor::rpc_iterator_descriptor(const rpc_iterator_descriptor &other4) {
+rpc_iterator_descriptor::rpc_iterator_descriptor(const rpc_iterator_descriptor& other4) {
   id = other4.id;
   type = other4.type;
   data_type = other4.data_type;
   handler_id = other4.handler_id;
 }
-rpc_iterator_descriptor &rpc_iterator_descriptor::operator=(const rpc_iterator_descriptor &other5) {
+rpc_iterator_descriptor& rpc_iterator_descriptor::operator=(const rpc_iterator_descriptor& other5) {
   id = other5.id;
   type = other5.type;
   data_type = other5.data_type;
   handler_id = other5.handler_id;
   return *this;
 }
-void rpc_iterator_descriptor::printTo(std::ostream &out) const {
+void rpc_iterator_descriptor::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_iterator_descriptor(";
   out << "id=" << to_string(id);
@@ -211,14 +213,16 @@ void rpc_iterator_descriptor::printTo(std::ostream &out) const {
   out << ")";
 }
 
+
 rpc_iterator_handle::~rpc_iterator_handle() throw() {
 }
 
-void rpc_iterator_handle::__set_desc(const rpc_iterator_descriptor &val) {
+
+void rpc_iterator_handle::__set_desc(const rpc_iterator_descriptor& val) {
   this->desc = val;
 }
 
-void rpc_iterator_handle::__set_data(const std::string &val) {
+void rpc_iterator_handle::__set_data(const std::string& val) {
   this->data = val;
 }
 
@@ -229,10 +233,12 @@ void rpc_iterator_handle::__set_num_entries(const int32_t val) {
 void rpc_iterator_handle::__set_has_more(const bool val) {
   this->has_more = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_iterator_handle &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_iterator_handle& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_iterator_handle &a, rpc_iterator_handle &b) {
   using ::std::swap;
@@ -242,20 +248,20 @@ void swap(rpc_iterator_handle &a, rpc_iterator_handle &b) {
   swap(a.has_more, b.has_more);
 }
 
-rpc_iterator_handle::rpc_iterator_handle(const rpc_iterator_handle &other6) {
+rpc_iterator_handle::rpc_iterator_handle(const rpc_iterator_handle& other6) {
   desc = other6.desc;
   data = other6.data;
   num_entries = other6.num_entries;
   has_more = other6.has_more;
 }
-rpc_iterator_handle &rpc_iterator_handle::operator=(const rpc_iterator_handle &other7) {
+rpc_iterator_handle& rpc_iterator_handle::operator=(const rpc_iterator_handle& other7) {
   desc = other7.desc;
   data = other7.data;
   num_entries = other7.num_entries;
   has_more = other7.has_more;
   return *this;
 }
-void rpc_iterator_handle::printTo(std::ostream &out) const {
+void rpc_iterator_handle::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_iterator_handle(";
   out << "desc=" << to_string(desc);
@@ -265,24 +271,28 @@ void rpc_iterator_handle::printTo(std::ostream &out) const {
   out << ")";
 }
 
+
 rpc_record_block::~rpc_record_block() throw() {
 }
+
 
 void rpc_record_block::__set_time_block(const int64_t val) {
   this->time_block = val;
 }
 
-void rpc_record_block::__set_data(const std::string &val) {
+void rpc_record_block::__set_data(const std::string& val) {
   this->data = val;
 }
 
 void rpc_record_block::__set_nrecords(const int64_t val) {
   this->nrecords = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_record_block &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_record_block& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_record_block &a, rpc_record_block &b) {
   using ::std::swap;
@@ -291,18 +301,18 @@ void swap(rpc_record_block &a, rpc_record_block &b) {
   swap(a.nrecords, b.nrecords);
 }
 
-rpc_record_block::rpc_record_block(const rpc_record_block &other8) {
+rpc_record_block::rpc_record_block(const rpc_record_block& other8) {
   time_block = other8.time_block;
   data = other8.data;
   nrecords = other8.nrecords;
 }
-rpc_record_block &rpc_record_block::operator=(const rpc_record_block &other9) {
+rpc_record_block& rpc_record_block::operator=(const rpc_record_block& other9) {
   time_block = other9.time_block;
   data = other9.data;
   nrecords = other9.nrecords;
   return *this;
 }
-void rpc_record_block::printTo(std::ostream &out) const {
+void rpc_record_block::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_record_block(";
   out << "time_block=" << to_string(time_block);
@@ -311,20 +321,24 @@ void rpc_record_block::printTo(std::ostream &out) const {
   out << ")";
 }
 
+
 rpc_record_batch::~rpc_record_batch() throw() {
 }
 
-void rpc_record_batch::__set_blocks(const std::vector<rpc_record_block> &val) {
+
+void rpc_record_batch::__set_blocks(const std::vector<rpc_record_block> & val) {
   this->blocks = val;
 }
 
 void rpc_record_batch::__set_nrecords(const int64_t val) {
   this->nrecords = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_record_batch &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_record_batch& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_record_batch &a, rpc_record_batch &b) {
   using ::std::swap;
@@ -332,16 +346,16 @@ void swap(rpc_record_batch &a, rpc_record_batch &b) {
   swap(a.nrecords, b.nrecords);
 }
 
-rpc_record_batch::rpc_record_batch(const rpc_record_batch &other16) {
+rpc_record_batch::rpc_record_batch(const rpc_record_batch& other16) {
   blocks = other16.blocks;
   nrecords = other16.nrecords;
 }
-rpc_record_batch &rpc_record_batch::operator=(const rpc_record_batch &other17) {
+rpc_record_batch& rpc_record_batch::operator=(const rpc_record_batch& other17) {
   blocks = other17.blocks;
   nrecords = other17.nrecords;
   return *this;
 }
-void rpc_record_batch::printTo(std::ostream &out) const {
+void rpc_record_batch::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_record_batch(";
   out << "blocks=" << to_string(blocks);
@@ -349,20 +363,24 @@ void rpc_record_batch::printTo(std::ostream &out) const {
   out << ")";
 }
 
+
 rpc_atomic_multilog_info::~rpc_atomic_multilog_info() throw() {
 }
+
 
 void rpc_atomic_multilog_info::__set_id(const int64_t val) {
   this->id = val;
 }
 
-void rpc_atomic_multilog_info::__set_schema(const rpc_schema &val) {
+void rpc_atomic_multilog_info::__set_schema(const rpc_schema& val) {
   this->schema = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_atomic_multilog_info &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_atomic_multilog_info& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_atomic_multilog_info &a, rpc_atomic_multilog_info &b) {
   using ::std::swap;
@@ -371,18 +389,18 @@ void swap(rpc_atomic_multilog_info &a, rpc_atomic_multilog_info &b) {
   swap(a.__isset, b.__isset);
 }
 
-rpc_atomic_multilog_info::rpc_atomic_multilog_info(const rpc_atomic_multilog_info &other24) {
+rpc_atomic_multilog_info::rpc_atomic_multilog_info(const rpc_atomic_multilog_info& other24) {
   id = other24.id;
   schema = other24.schema;
   __isset = other24.__isset;
 }
-rpc_atomic_multilog_info &rpc_atomic_multilog_info::operator=(const rpc_atomic_multilog_info &other25) {
+rpc_atomic_multilog_info& rpc_atomic_multilog_info::operator=(const rpc_atomic_multilog_info& other25) {
   id = other25.id;
   schema = other25.schema;
   __isset = other25.__isset;
   return *this;
 }
-void rpc_atomic_multilog_info::printTo(std::ostream &out) const {
+void rpc_atomic_multilog_info::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_atomic_multilog_info(";
   out << "id=" << to_string(id);
@@ -390,16 +408,20 @@ void rpc_atomic_multilog_info::printTo(std::ostream &out) const {
   out << ")";
 }
 
+
 rpc_management_exception::~rpc_management_exception() throw() {
 }
 
-void rpc_management_exception::__set_msg(const std::string &val) {
+
+void rpc_management_exception::__set_msg(const std::string& val) {
   this->msg = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_management_exception &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_management_exception& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_management_exception &a, rpc_management_exception &b) {
   using ::std::swap;
@@ -407,43 +429,47 @@ void swap(rpc_management_exception &a, rpc_management_exception &b) {
   swap(a.__isset, b.__isset);
 }
 
-rpc_management_exception::rpc_management_exception(const rpc_management_exception &other26) : TException() {
+rpc_management_exception::rpc_management_exception(const rpc_management_exception& other26) : TException() {
   msg = other26.msg;
   __isset = other26.__isset;
 }
-rpc_management_exception &rpc_management_exception::operator=(const rpc_management_exception &other27) {
+rpc_management_exception& rpc_management_exception::operator=(const rpc_management_exception& other27) {
   msg = other27.msg;
   __isset = other27.__isset;
   return *this;
 }
-void rpc_management_exception::printTo(std::ostream &out) const {
+void rpc_management_exception::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_management_exception(";
   out << "msg=" << to_string(msg);
   out << ")";
 }
 
-const char *rpc_management_exception::what() const throw() {
+const char* rpc_management_exception::what() const throw() {
   try {
     std::stringstream ss;
     ss << "TException - service has thrown: " << *this;
     this->thriftTExceptionMessageHolder_ = ss.str();
     return this->thriftTExceptionMessageHolder_.c_str();
-  } catch (const std::exception &) {
+  } catch (const std::exception&) {
     return "TException - service has thrown: rpc_management_exception";
   }
 }
 
+
 rpc_invalid_operation::~rpc_invalid_operation() throw() {
 }
 
-void rpc_invalid_operation::__set_msg(const std::string &val) {
+
+void rpc_invalid_operation::__set_msg(const std::string& val) {
   this->msg = val;
 }
-std::ostream &operator<<(std::ostream &out, const rpc_invalid_operation &obj) {
+std::ostream& operator<<(std::ostream& out, const rpc_invalid_operation& obj)
+{
   obj.printTo(out);
   return out;
 }
+
 
 void swap(rpc_invalid_operation &a, rpc_invalid_operation &b) {
   using ::std::swap;
@@ -451,32 +477,31 @@ void swap(rpc_invalid_operation &a, rpc_invalid_operation &b) {
   swap(a.__isset, b.__isset);
 }
 
-rpc_invalid_operation::rpc_invalid_operation(const rpc_invalid_operation &other28) : TException() {
+rpc_invalid_operation::rpc_invalid_operation(const rpc_invalid_operation& other28) : TException() {
   msg = other28.msg;
   __isset = other28.__isset;
 }
-rpc_invalid_operation &rpc_invalid_operation::operator=(const rpc_invalid_operation &other29) {
+rpc_invalid_operation& rpc_invalid_operation::operator=(const rpc_invalid_operation& other29) {
   msg = other29.msg;
   __isset = other29.__isset;
   return *this;
 }
-void rpc_invalid_operation::printTo(std::ostream &out) const {
+void rpc_invalid_operation::printTo(std::ostream& out) const {
   using ::apache::thrift::to_string;
   out << "rpc_invalid_operation(";
   out << "msg=" << to_string(msg);
   out << ")";
 }
 
-const char *rpc_invalid_operation::what() const throw() {
+const char* rpc_invalid_operation::what() const throw() {
   try {
     std::stringstream ss;
     ss << "TException - service has thrown: " << *this;
     this->thriftTExceptionMessageHolder_ = ss.str();
     return this->thriftTExceptionMessageHolder_.c_str();
-  } catch (const std::exception &) {
+  } catch (const std::exception&) {
     return "TException - service has thrown: rpc_invalid_operation";
   }
 }
 
-}
-} // namespace
+}} // namespace

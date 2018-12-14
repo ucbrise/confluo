@@ -130,6 +130,14 @@ class Iface(object):
         """
         pass
 
+    def append_json(self, multilog_id, data):
+        """
+        Parameters:
+         - multilog_id
+         - data
+        """
+        pass
+
     def append_batch(self, multilog_id, batch):
         """
         Parameters:
@@ -139,6 +147,15 @@ class Iface(object):
         pass
 
     def read(self, multilog_id, offset, nrecords):
+        """
+        Parameters:
+         - multilog_id
+         - offset
+         - nrecords
+        """
+        pass
+
+    def read_json(self, multilog_id, offset, nrecords):
         """
         Parameters:
          - multilog_id
@@ -698,6 +715,39 @@ class Client(Iface):
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "append failed: unknown result")
 
+    def append_json(self, multilog_id, data):
+        """
+        Parameters:
+         - multilog_id
+         - data
+        """
+        self.send_append_json(multilog_id, data)
+        return self.recv_append_json()
+
+    def send_append_json(self, multilog_id, data):
+        self._oprot.writeMessageBegin('append_json', TMessageType.CALL, self._seqid)
+        args = append_json_args()
+        args.multilog_id = multilog_id
+        args.data = data
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_append_json(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = append_json_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "append_json failed: unknown result")
+
     def append_batch(self, multilog_id, batch):
         """
         Parameters:
@@ -765,6 +815,41 @@ class Client(Iface):
         if result.success is not None:
             return result.success
         raise TApplicationException(TApplicationException.MISSING_RESULT, "read failed: unknown result")
+
+    def read_json(self, multilog_id, offset, nrecords):
+        """
+        Parameters:
+         - multilog_id
+         - offset
+         - nrecords
+        """
+        self.send_read_json(multilog_id, offset, nrecords)
+        return self.recv_read_json()
+
+    def send_read_json(self, multilog_id, offset, nrecords):
+        self._oprot.writeMessageBegin('read_json', TMessageType.CALL, self._seqid)
+        args = read_json_args()
+        args.multilog_id = multilog_id
+        args.offset = offset
+        args.nrecords = nrecords
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_read_json(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = read_json_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "read_json failed: unknown result")
 
     def query_aggregate(self, multilog_id, aggregate_name, begin_ms, end_ms):
         """
@@ -1118,8 +1203,10 @@ class Processor(Iface, TProcessor):
         self._processMap["add_trigger"] = Processor.process_add_trigger
         self._processMap["remove_trigger"] = Processor.process_remove_trigger
         self._processMap["append"] = Processor.process_append
+        self._processMap["append_json"] = Processor.process_append_json
         self._processMap["append_batch"] = Processor.process_append_batch
         self._processMap["read"] = Processor.process_read
+        self._processMap["read_json"] = Processor.process_read_json
         self._processMap["query_aggregate"] = Processor.process_query_aggregate
         self._processMap["adhoc_aggregate"] = Processor.process_adhoc_aggregate
         self._processMap["adhoc_filter"] = Processor.process_adhoc_filter
@@ -1500,6 +1587,29 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_append_json(self, seqid, iprot, oprot):
+        args = append_json_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = append_json_result()
+        try:
+            result.success = self._handler.append_json(args.multilog_id, args.data)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("append_json", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_append_batch(self, seqid, iprot, oprot):
         args = append_batch_args()
         args.read(iprot)
@@ -1542,6 +1652,29 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("read", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_read_json(self, seqid, iprot, oprot):
+        args = read_json_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = read_json_result()
+        try:
+            result.success = self._handler.read_json(args.multilog_id, args.offset, args.nrecords)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("read_json", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3656,6 +3789,139 @@ append_result.thrift_spec = (
 )
 
 
+class append_json_args(object):
+    """
+    Attributes:
+     - multilog_id
+     - data
+    """
+
+
+    def __init__(self, multilog_id=None, data=None,):
+        self.multilog_id = multilog_id
+        self.data = data
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.multilog_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.data = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('append_json_args')
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
+            oprot.writeFieldEnd()
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.STRING, 2)
+            oprot.writeString(self.data.encode('utf-8') if sys.version_info[0] == 2 else self.data)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(append_json_args)
+append_json_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'multilog_id', None, None, ),  # 1
+    (2, TType.STRING, 'data', 'UTF8', None, ),  # 2
+)
+
+
+class append_json_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I64:
+                    self.success = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('append_json_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I64, 0)
+            oprot.writeI64(self.success)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(append_json_result)
+append_json_result.thrift_spec = (
+    (0, TType.I64, 'success', None, None, ),  # 0
+)
+
+
 class append_batch_args(object):
     """
     Attributes:
@@ -3932,6 +4198,151 @@ class read_result(object):
 all_structs.append(read_result)
 read_result.thrift_spec = (
     (0, TType.STRING, 'success', 'BINARY', None, ),  # 0
+)
+
+
+class read_json_args(object):
+    """
+    Attributes:
+     - multilog_id
+     - offset
+     - nrecords
+    """
+
+
+    def __init__(self, multilog_id=None, offset=None, nrecords=None,):
+        self.multilog_id = multilog_id
+        self.offset = offset
+        self.nrecords = nrecords
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.multilog_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.offset = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.nrecords = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('read_json_args')
+        if self.multilog_id is not None:
+            oprot.writeFieldBegin('multilog_id', TType.I64, 1)
+            oprot.writeI64(self.multilog_id)
+            oprot.writeFieldEnd()
+        if self.offset is not None:
+            oprot.writeFieldBegin('offset', TType.I64, 2)
+            oprot.writeI64(self.offset)
+            oprot.writeFieldEnd()
+        if self.nrecords is not None:
+            oprot.writeFieldBegin('nrecords', TType.I64, 3)
+            oprot.writeI64(self.nrecords)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(read_json_args)
+read_json_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'multilog_id', None, None, ),  # 1
+    (2, TType.I64, 'offset', None, None, ),  # 2
+    (3, TType.I64, 'nrecords', None, None, ),  # 3
+)
+
+
+class read_json_result(object):
+    """
+    Attributes:
+     - success
+    """
+
+
+    def __init__(self, success=None,):
+        self.success = success
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('read_json_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRING, 0)
+            oprot.writeString(self.success.encode('utf-8') if sys.version_info[0] == 2 else self.success)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(read_json_result)
+read_json_result.thrift_spec = (
+    (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
 )
 
 

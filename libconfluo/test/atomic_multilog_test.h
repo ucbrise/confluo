@@ -1,6 +1,9 @@
 #ifndef CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 #define CONFLUO_TEST_ATOMIC_MULTILOG_TEST_H_
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include "atomic_multilog.h"
 
 #include "gtest/gtest.h"
@@ -74,6 +77,30 @@ class AtomicMultilogTest : public testing::Test {
       r.h[i] = '\0';
     }
     return reinterpret_cast<void *>(&r);
+  }
+
+  static std::string make_json_record(int64_t ts, bool a, int8_t b, int16_t c, int32_t d, int64_t e, float f, double g, const std::string &h) {
+    namespace pt = boost::property_tree;
+    pt::ptree root;
+
+    root.put("TIMESTAMP", ts);
+    root.put("A", a);
+    root.put("B", b);
+    root.put("C", c);
+    root.put("D", d);
+    root.put("E", e);
+    std::stringstream f_ss;
+    f_ss << std::fixed << std::setprecision(6) << f;
+    root.put("F", f_ss.str());
+    std::stringstream g_ss;
+    g_ss << std::fixed << std::setprecision(6) << g;
+    root.put("G", g_ss.str());
+    root.put("H", h);
+
+    std::stringstream ss;
+    pt::write_json(ss, root);
+    std::string ret = ss.str();
+    return ret;
   }
 
   static std::vector<column_t> schema() {
@@ -153,6 +180,48 @@ TEST_F(AtomicMultilogTest, AppendAndGetDurableRelaxedTest) {
       schema_builder().add_column(primitive_types::STRING_TYPE(DATA_SIZE), "msg").get_columns(),
       "/tmp", storage::DURABLE_RELAXED, archival_mode::OFF, MGMT_POOL);
   test_append_and_get(mlog);
+}
+
+TEST_F(AtomicMultilogTest, AppendAndGetJSONRecordTest1) {
+  atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
+
+  int64_t ts = utils::time_utils::cur_ns();
+
+  std::string rec1 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"0\",\n    \"C\": \"0\",\n    \"D\": \"0\",\n    \"E\": \"0\",\n    \"F\": \"0.000000\",\n    \"G\": \"0.010000\",\n    \"H\": \"abc\"\n}\n";
+  std::string rec2 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"1\",\n    \"C\": \"10\",\n    \"D\": \"2\",\n    \"E\": \"10\",\n    \"F\": \"0.100000\",\n    \"G\": \"0.020000\",\n    \"H\": \"defg\"\n}\n";
+  std::string rec3 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"2\",\n    \"C\": \"20\",\n    \"D\": \"4\",\n    \"E\": \"100\",\n    \"F\": \"0.200000\",\n    \"G\": \"0.030000\",\n    \"H\": \"hijkl\"\n}\n";
+  std::string rec4 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"3\",\n    \"C\": \"30\",\n    \"D\": \"6\",\n    \"E\": \"1000\",\n    \"F\": \"0.300000\",\n    \"G\": \"0.040000\",\n    \"H\": \"mnopqr\"\n}\n";
+  std::string rec5 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"4\",\n    \"C\": \"40\",\n    \"D\": \"8\",\n    \"E\": \"10000\",\n    \"F\": \"0.400000\",\n    \"G\": \"0.050000\",\n    \"H\": \"stuvwx\"\n}\n";
+  std::string rec6 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"5\",\n    \"C\": \"50\",\n    \"D\": \"10\",\n    \"E\": \"100000\",\n    \"F\": \"0.500000\",\n    \"G\": \"0.060000\",\n    \"H\": \"yyy\"\n}\n";
+  std::string rec7 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"false\",\n    \"B\": \"6\",\n    \"C\": \"60\",\n    \"D\": \"12\",\n    \"E\": \"1000000\",\n    \"F\": \"0.600000\",\n    \"G\": \"0.070000\",\n    \"H\": \"zzz\"\n}\n";
+  std::string rec8 = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"A\": \"true\",\n    \"B\": \"7\",\n    \"C\": \"70\",\n    \"D\": \"14\",\n    \"E\": \"10000000\",\n    \"F\": \"0.700000\",\n    \"G\": \"0.080000\",\n    \"H\": \"zzz\"\n}\n";
+
+  ASSERT_EQ(mlog.record_size() * 0, mlog.append_json(rec1));
+  ASSERT_EQ(mlog.record_size() * 1, mlog.append_json(rec2));
+  ASSERT_EQ(mlog.record_size() * 2, mlog.append_json(rec3));
+  ASSERT_EQ(mlog.record_size() * 3, mlog.append_json(rec4));
+  ASSERT_EQ(mlog.record_size() * 4, mlog.append_json(rec5));
+  ASSERT_EQ(mlog.record_size() * 5, mlog.append_json(rec6));
+  ASSERT_EQ(mlog.record_size() * 6, mlog.append_json(rec7));
+  ASSERT_EQ(mlog.record_size() * 7, mlog.append_json(rec8));
+
+  std::string res1 = mlog.read_json(mlog.record_size() * 0);
+  std::string res2 = mlog.read_json(mlog.record_size() * 1);
+  std::string res3 = mlog.read_json(mlog.record_size() * 2);
+  std::string res4 = mlog.read_json(mlog.record_size() * 3);
+  std::string res5 = mlog.read_json(mlog.record_size() * 4);
+  std::string res6 = mlog.read_json(mlog.record_size() * 5);
+  std::string res7 = mlog.read_json(mlog.record_size() * 6);
+  std::string res8 = mlog.read_json(mlog.record_size() * 7);
+
+  ASSERT_EQ(rec1, res1);
+  ASSERT_EQ(rec2, res2);
+  ASSERT_EQ(rec3, res3);
+  ASSERT_EQ(rec4, res4);
+  ASSERT_EQ(rec5, res5);
+  ASSERT_EQ(rec6, res6);
+  ASSERT_EQ(rec7, res7);
+  ASSERT_EQ(rec8, res8);
 }
 
 TEST_F(AtomicMultilogTest, AppendAndGetRecordTest1) {
