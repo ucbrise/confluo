@@ -386,7 +386,7 @@ client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)")
 Finally, we can install a trigger on an aggregate as follows:
 
 ```cpp tab="C++"
-client.install_trigger("high_latency_trigger", "max_latency > 1000");
+client.install_trigger("high_latency_trigger", "max_latency_ms > 1000");
 ```
 
 ```python tab="Python"
