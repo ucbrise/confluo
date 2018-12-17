@@ -7,25 +7,21 @@ import java.nio.ByteBuffer;
  */
 public class Column {
 
-  private int idx;
-  private long offset;
+  private int offset;
   private DataType dataType;
   private String name;
 
   /**
    * Initializes a column in the schema
    *
-   * @param idx    The index of the column
    * @param offset The offset of the column
    * @param dtype  The data type of values in the column
    * @param name   The name of the column
    */
-  public Column(int idx, long offset, DataType dtype, String name) {
-    this.idx = idx;
+  Column(int offset, DataType dtype, String name) {
     this.offset = offset;
     this.dataType = dtype;
     this.name = name.toUpperCase();
-
   }
 
   /**
@@ -34,18 +30,18 @@ public class Column {
    * @param data The data to add
    * @return A field containing the data
    */
-  public Field apply(ByteBuffer data) {
-    byte[] dataArray = data.array();
-    byte[] specifiedData = new byte[dataType.size];
+  Field apply(ByteBuffer data) {
+    return new Field(name, dataType, data, offset);
+  }
 
-    for (int i = 0; i < specifiedData.length; i++) {
-      specifiedData[i] = dataArray[(int) (offset + i)];
-    }
-    ByteBuffer result = ByteBuffer.wrap(specifiedData);
-    result.put(specifiedData);
-    result.flip();
-
-    return new Field(idx, dataType, result);
+  /**
+   * Pack data into to buffer.
+   *
+   * @param out Output buffer.
+   * @param data Data to write.
+   */
+  void pack(ByteBuffer out, String data) {
+    DataParser.parseFromString(dataType, out, data);
   }
 
   /**
@@ -53,7 +49,7 @@ public class Column {
    *
    * @return The data type
    */
-  public DataType getDataType() {
+  DataType getDataType() {
     return dataType;
   }
 
@@ -64,6 +60,15 @@ public class Column {
    */
   public String getName() {
     return name;
+  }
+
+  /**
+   * Convert to String.
+   * @return String representation of column.
+   */
+  @Override
+  public String toString() {
+    return name + ":" + dataType;
   }
 
 }

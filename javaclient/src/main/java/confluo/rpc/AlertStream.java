@@ -3,63 +3,61 @@ package confluo.rpc;
 import org.apache.thrift.TException;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 /**
  * A stream of alerts
  */
-public class AlertStream implements Iterable<String> {
+class AlertStream implements Iterator<String> {
 
-  private long multilogId;
+  private long mId;
   private rpc_service.Client client;
-  private byte[] stream;
+  private StringTokenizer stream;
   private rpc_iterator_handle handle;
 
   /**
    * Initializes a stream of alerts to the data passed in
    *
-   * @param multilogId The identifier of the atomic multilog
-   * @param client     The rpc client
-   * @param handle     The iterator for the stream
+   * @param mId    The identifier of the atomic multilog
+   * @param client The rpc client
+   * @param handle The iterator for the stream
    */
-  public AlertStream(long multilogId, rpc_service.Client client, rpc_iterator_handle handle) {
-    this.multilogId = multilogId;
+  AlertStream(long mId, rpc_service.Client client, rpc_iterator_handle handle) {
+    this.mId = mId;
     this.client = client;
     this.handle = handle;
-    this.stream = handle.getData();
+    this.stream = buildReader();
+  }
+
+  /**
+   * Build a reader from a byte array
+   *
+   * @return A BufferedReader instance
+   */
+  private StringTokenizer buildReader() {
+    return new StringTokenizer(new String(handle.getData()), "\n");
   }
 
   /**
    * Gets the next alert in the stream
    *
    * @return The next alert in the stream
-   * @throws TException Cannot get next alert
    */
-  private String next() throws TException {
-    int endIdx = 0;
-    for (int i = 0; i < stream.length; i++) {
-      if (stream[i] == '\n') {
-        endIdx = i;
-        break;
+  public String next() {
+    if (!stream.hasMoreElements()) {
+      if (handle.isHasMore()) {
+        try {
+          handle = client.getMore(mId, handle.getDesc());
+        } catch (TException e) {
+          throw new NoSuchElementException("Failed to readRaw data from server");
+        }
+        stream = buildReader();
+      } else {
+        throw new NoSuchElementException("No more elements");
       }
     }
-    byte[] alertBytes = new byte[endIdx];
-    for (int i = 0; i < alertBytes.length; i++) {
-      alertBytes[i] = stream[i];
-    }
-
-    String alert = new String(alertBytes);
-    byte[] newStream = new byte[stream.length - endIdx];
-    for (int i = 0; i < newStream.length; i++) {
-      newStream[i] = stream[i];
-    }
-
-    stream = newStream;
-    if (!alert.equals("") && handle.isHasMore()) {
-      handle = client.getMore(multilogId, handle.getDesc());
-      stream = handle.getData();
-    }
-
-    return alert;
+    return stream.nextElement().toString();
   }
 
   /**
@@ -67,31 +65,7 @@ public class AlertStream implements Iterable<String> {
    *
    * @return True if there are any elements left in the stream, false otherwise
    */
-  private boolean hasMore() {
-    return handle.isHasMore() || stream != null;
-  }
-
-  /**
-   * Iterator for the alert stream
-   *
-   * @return Iterator containing hasNext, next, and remove methods for alert stream
-   */
-  public Iterator<String> iterator() {
-    return new Iterator<String>() {
-      @Override
-      public boolean hasNext() {
-        return hasMore();
-      }
-
-      @Override
-      public String next() {
-        return next();
-      }
-
-      @Override
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
-    };
+  public boolean hasNext() {
+    return handle.isHasMore() || stream.hasMoreElements();
   }
 }

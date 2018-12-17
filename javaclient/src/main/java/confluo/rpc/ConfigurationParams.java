@@ -1,6 +1,6 @@
 package confluo.rpc;
 
-public class RPCConfigurationParams {
+public class ConfigurationParams {
   /**
    * The batch size when reading
    */

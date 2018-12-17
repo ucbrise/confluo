@@ -3,7 +3,7 @@ package confluo.rpc;
 /**
  * Different storage modes for Confluo
  */
-public class StorageId {
+public class StorageMode {
   /**
    * Data stored in memory
    */

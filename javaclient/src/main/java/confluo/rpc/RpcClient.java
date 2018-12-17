@@ -10,21 +10,20 @@ import java.util.List;
 
 /**
  * \mainpage Java Client Documentation
- *
- * The library provides a client implementation, the \ref RPCClient that can communicate with the Confluo server.
- *
+ * <p>
+ * The library provides a client implementation, the \ref RpcClient that can communicate with the Confluo server.
+ * <p>
  * The library internally relies on <a href="http://thrift.apache.org/">Apache Thrift</a> to facilitate the RPCs.
  */
 
 /**
  * Client for Confluo through RPC
  */
-public class RPCClient {
+public class RpcClient {
 
   private TTransport transport;
   private rpc_service.Client client;
   private long curMultilogId;
-  private rpc_atomic_multilog_info info;
   private Schema curSchema;
 
   /**
@@ -34,7 +33,7 @@ public class RPCClient {
    * @param port The port number to communicate through
    * @throws TException Cannot connect to host
    */
-  public RPCClient(String host, int port) throws TException {
+  public RpcClient(String host, int port) throws TException {
     connect(host, port);
     curMultilogId = -1;
   }
@@ -55,7 +54,7 @@ public class RPCClient {
    * @param port The port number to communicate through
    * @throws TException Cannot connect
    */
-  public void connect(String host, int port) throws TException {
+  private void connect(String host, int port) throws TException {
     transport = new TSocket(host, port);
     TBinaryProtocol protocol = new TBinaryProtocol(transport);
     client = new rpc_service.Client(protocol);
@@ -78,26 +77,41 @@ public class RPCClient {
   /**
    * Creates an atomic multilog for this client
    *
-   * @param atomicMultilogName The name of the atomic multilog to create
-   * @param schema             The schema for the atomic multilog
-   * @param storageMode        The mode for storage
+   * @param name        The name of the atomic multilog to create
+   * @param schema      The schema for the atomic multilog
+   * @param storageMode The mode for storage
    * @throws TException Cannot create the atomic multilog
    */
-  public void createAtomicMultilog(String atomicMultilogName, Schema schema, rpc_storage_mode storageMode) throws TException {
+  public void createAtomicMultilog(String name, Schema schema, rpc_storage_mode storageMode) throws TException {
     this.curSchema = schema;
-    List<rpc_column> rpcSchema = RPCTypeConversions.convertToRPCSchema(schema);
-    curMultilogId = client.createAtomicMultilog(atomicMultilogName, rpcSchema, storageMode);
+    List<rpc_column> rpcSchema = TypeConversions.convertToRPCSchema(this.curSchema);
+    curMultilogId = client.createAtomicMultilog(name, rpcSchema, storageMode);
   }
+
+  /**
+   * Creates an atomic multilog for this client
+   *
+   * @param name        The name of the atomic multilog to create
+   * @param schema      The schema for the atomic multilog
+   * @param storageMode The mode for storage
+   * @throws TException Cannot create the atomic multilog
+   */
+  public void createAtomicMultilog(String name, String schema, rpc_storage_mode storageMode) throws TException {
+    this.curSchema = new Schema(SchemaBuilder.fromString(schema));
+    List<rpc_column> rpcSchema = TypeConversions.convertToRPCSchema(this.curSchema);
+    curMultilogId = client.createAtomicMultilog(name, rpcSchema, storageMode);
+  }
+
 
   /**
    * Sets the atomic multilog to the desired atomic multilog
    *
-   * @param atomicMultilogName The name of atomic multilog to set the current atomic multilog to
+   * @param name The name of atomic multilog to set the current atomic multilog to
    * @throws TException Cannot set the atomic multilog
    */
-  public void setCurrentAtomicMultilog(String atomicMultilogName) throws TException {
-    info = client.getAtomicMultilogInfo(atomicMultilogName);
-    curSchema = RPCTypeConversions.convertToSchema(info.getSchema());
+  public void setCurrentAtomicMultilog(String name) throws TException {
+    rpc_atomic_multilog_info info = client.getAtomicMultilogInfo(name);
+    curSchema = TypeConversions.convertToSchema(info.getSchema());
     curMultilogId = info.getId();
   }
 
@@ -228,39 +242,66 @@ public class RPCClient {
    *
    * @return The RPC record batch builder
    */
-  public RPCRecordBatchBuilder getBatchBuilder() {
-    return new RPCRecordBatchBuilder(curSchema);
+  public RecordBatchBuilder getBatchBuilder() {
+    return new RecordBatchBuilder(curSchema);
   }
 
   /**
    * Writes a record to the atomic multilog
    *
    * @param record The record to write
+   * @return The offset into the log where the record is written.
    * @throws TException Cannot append the record
    */
-  public void append(ByteBuffer record) throws TException {
+  public long appendRaw(ByteBuffer record) throws TException {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
-    if (record.array().length != curSchema.getRecordSize()) {
-      throw new IllegalStateException("Record size incorrect; expected=" + curSchema.getRecordSize()
-          + ", got=" + record.array().length);
+    if (record.capacity() != curSchema.getRecordSize()) {
+      throw new IllegalStateException("Record size incorrect; expected=" + curSchema.getRecordSize() + ", got="
+          + record.capacity());
     }
-    client.append(curMultilogId, record);
+    return client.append(curMultilogId, record);
+  }
+
+  /**
+   * Writes a record to the atomic multilog
+   *
+   * @param record The record to write
+   * @return The offset into the log where the record is written.
+   * @throws TException Cannot append the record
+   */
+  public long append(List<String> record) throws TException {
+    return appendRaw(curSchema.pack(record));
+  }
+
+  /**
+   * Writes a record to the atomic multilog
+   *
+   * @param record The record to write
+   * @return The offset into the log where the record is written.
+   * @throws TException Cannot append the record
+   */
+  public long append(String... record) throws TException {
+    return appendRaw(curSchema.pack(record));
   }
 
   /**
    * Reads data from a specified offset
    *
-   * @param offset The offset from the log to read from
-   * @return The data at the offset
+   * @param offset The offset from the log to readRaw from
+   * @return The data get the offset
    * @throws TException Cannot read the record
    */
-  public ByteBuffer read(long offset) throws TException {
+  public ByteBuffer readRaw(long offset) throws TException {
     if (curMultilogId == -1) {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
     return client.read(curMultilogId, offset, 1);
+  }
+
+  public Record read(long offset) throws TException {
+    return curSchema.apply(readRaw(offset));
   }
 
   /**

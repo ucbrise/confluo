@@ -10,12 +10,12 @@ import java.util.TreeMap;
 /**
  * A builder for a batch of records
  */
-public class RPCRecordBatchBuilder {
+public class RecordBatchBuilder {
 
   /**
    * TIME_BLOCK: The size of a time block for a record batch
    */
-  static double TIME_BLOCK = 1e6;
+  private static double TIME_BLOCK = 1e6;
 
   private long numRecords;
   private TreeMap<Long, ByteArrayOutputStream> batch;
@@ -24,7 +24,7 @@ public class RPCRecordBatchBuilder {
   /**
    * Initializes an empty rpc record batch builder
    */
-  public RPCRecordBatchBuilder(Schema schema) {
+  RecordBatchBuilder(Schema schema) {
     this.numRecords = 0;
     this.schema = schema;
   }
