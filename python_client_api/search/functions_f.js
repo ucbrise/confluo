@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['write',['write',['../classconfluo_1_1rpc_1_1rpc__client_1_1rpc__client.html#a4efc60c207d2ff3bdf19cbfd19eeb823',1,'confluo::rpc::rpc_client::rpc_client']]]
+  ['unpack',['unpack',['../classconfluo_1_1rpc_1_1schema_1_1_field.html#a0927f47b9b2370061aa26fb93c692341',1,'confluo::rpc::schema::Field']]]
 ];

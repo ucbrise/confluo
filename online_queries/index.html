@@ -21,6 +21,10 @@
       
         <meta name="lang:search.language" content="en">
       
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
         <meta name="lang:search.result.none" content="No matching documents">
       
         <meta name="lang:search.result.one" content="1 matching document">
@@ -30,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../theme/assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-3.1.0">
     
     
       
@@ -38,20 +42,27 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.5d3fffba.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.11e41852.css">
       
-        <link rel="stylesheet" href="../assets/stylesheets/application-palette.fbd935c7.css">
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.22915126.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#7cb342">
       
     
     
-      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+      <script src="../assets/javascripts/modernizr.20ef595d.js"></script>
     
     
       
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Inconsolata">
         <style>body,input{font-family:"Lato","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Inconsolata","Courier New",Courier,monospace}</style>
       
-      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
     
     
     
@@ -59,21 +70,41 @@
   
     
     
-    
-      <body data-md-color-primary="light-green" data-md-color-accent="orange">
-    
+    <body dir="ltr" data-md-color-primary="light-green" data-md-color-accent="orange">
   
     <svg class="md-svg">
       <defs>
         
         
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
         
       </defs>
     </svg>
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
-    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#online-queries" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header-nav md-grid">
@@ -81,12 +112,12 @@
       <div class="md-flex__cell md-flex__cell--shrink">
         <a href=".." title="Confluo" class="md-header-nav__button md-logo">
           
-            <i class="md-icon"></i>
+            <img src="../img/logo.png" width="24" height="24">
           
         </a>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
       </div>
       <div class="md-flex__cell md-flex__cell--stretch">
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
@@ -105,15 +136,17 @@
       <div class="md-flex__cell md-flex__cell--shrink">
         
           
-            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
             
 <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="search"></label>
-  <div class="md-search__inner">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
-      <label class="md-icon md-search__icon" for="search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">&#xE5CD;</button>
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -143,7 +176,7 @@
     
       <div class="md-source__icon">
         <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#github" width="24" height="24"></use>
+          <use xlink:href="#__github" width="24" height="24"></use>
         </svg>
       </div>
     
@@ -250,12 +283,12 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="drawer">
-    <span class="md-nav__button md-logo">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href=".." title="Confluo" class="md-nav__button md-logo">
       
-        <i class="md-icon"></i>
+        <img src="../img/logo.png" width="48" height="48">
       
-    </span>
+    </a>
     Confluo
   </label>
   
@@ -270,7 +303,7 @@
     
       <div class="md-source__icon">
         <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#github" width="24" height="24"></use>
+          <use xlink:href="#__github" width="24" height="24"></use>
         </svg>
       </div>
     
@@ -466,12 +499,12 @@
 
   <li class="md-nav__item md-nav__item--active">
     
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
       
     
     
-      <label class="md-nav__link md-nav__link--active" for="toc">
+      <label class="md-nav__link md-nav__link--active" for="__toc">
         Online Queries
       </label>
     
@@ -486,7 +519,7 @@
     
   
   
-    <label class="md-nav__title" for="toc">Table of contents</label>
+    <label class="md-nav__title" for="__toc">Table of contents</label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
@@ -556,6 +589,8 @@
     </nav>
   
 </li>
+      
+      
       
       
       
@@ -845,7 +880,7 @@
     
   
   
-    <label class="md-nav__title" for="toc">Table of contents</label>
+    <label class="md-nav__title" for="__toc">Table of contents</label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
@@ -918,6 +953,8 @@
       
       
       
+      
+      
     </ul>
   
 </nav>
@@ -944,16 +981,16 @@ at how we can retrieve the results of these online queries.</p>
 the Atomic MultiLog has already been created, and filters, aggregates and triggers
 have been added to it as outlined in <a href="../loading_data/">Data Storage</a>.</p>
 <p>To start with, we have a reference to the Atomic MultiLog as follows:</p>
-<pre class="codehilite"><code class="language-cpp">confluo::atomic_multilog* mlog = store.get_atomic_multilog(&quot;perf_log&quot;);</code></pre>
-
+<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">atomic_multilog</span><span class="o">*</span> <span class="n">mlog</span> <span class="o">=</span> <span class="n">store</span><span class="p">.</span><span class="n">get_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
+</pre></div>
 
 <h3 id="querying-pre-defined-filters">Querying Pre-defined Filters<a class="headerlink" href="#querying-pre-defined-filters" title="Permanent link">&para;</a></h3>
 <p>We can query a pre-defined filter as follows:</p>
-<pre class="codehilite"><code class="language-cpp">auto record_stream = mlog-&gt;query_filter(&quot;low_resources&quot;, 0, UINT64_MAX);
-for (auto s = record_stream; !s.empty(); s = s.tail()) {
-  std::cout &lt;&lt; s.head().to_string();
-}</code></pre>
-
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
 
 <p>The first parameter corresponds to the name of the filter to be queried, while 
 the second and third parameters correspond to the begining timestamp and end 
@@ -964,9 +1001,9 @@ stream which supports functional semantics such as filter, map, etc. See Confluo
 for more details on how to work with lazy streams.</p>
 <h3 id="obtaining-pre-defined-aggregates">Obtaining Pre-defined Aggregates<a class="headerlink" href="#obtaining-pre-defined-aggregates" title="Permanent link">&para;</a></h3>
 <p>We can obtian a pre-defined aggregate as follows:</p>
-<pre class="codehilite"><code class="language-cpp">auto value = mlog-&gt;get_aggregate(&quot;max_latency_ms&quot;, 0, UINT64_MAX);
-std::cout &lt;&lt; value.to_string();</code></pre>
-
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">value</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">value</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span>
+</pre></div>
 
 <p>The operation takes the name of the aggregate as its first parameter, while the 
 second and third parameters correspond to begin and end timestmaps, as with 
@@ -976,11 +1013,11 @@ object, which is a wrapper around numeric values in C++.</p>
 <h3 id="obtaining-alerts-from-a-pre-defined-trigger">Obtaining Alerts from a Pre-defined Trigger<a class="headerlink" href="#obtaining-alerts-from-a-pre-defined-trigger" title="Permanent link">&para;</a></h3>
 <p>Finally, we can obtain alerts generated by triggers installed on an Atomic 
 MultiLog as follows:</p>
-<pre class="codehilite"><code class="language-cpp">auto alert_stream = mlog-&gt;get_alerts(0, UINT64_MAX, &quot;high_latency_trigger&quot;);
-for (auto s = alert_stream; !s.empty(); s = s.tail()) {
-  std::cout &lt;&lt; s.head().to_string();
-}</code></pre>
-
+<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">alert_stream</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">alert_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
 
 <p>The query takes begin and end timestamps as its first and second arguments,
 and an optional trigger name as its third argument. The query returns a lazy 
@@ -992,35 +1029,71 @@ almost identical to the C++ Client API.</p>
 <p>As with the embedded mode, we work with the assumption that the client is connected to the server, 
 has already created the Atomic MultiLog, and added all relevant filters, aggregates and triggers.
 Also, the current Atomic MultiLog for the client has been set to <code>perf_log</code> as follows:</p>
-<pre class="codehilite"><code class="language-cpp">client.set_current_atomic_multilog(&quot;perf_log&quot;);</code></pre>
-
-
+<div class="superfences-tabs">
+<input name="__tabs_1" type="radio" id="__tab_1_0" checked="checked" />
+<label for="__tab_1_0">C++</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
+</pre></div></div>
+<input name="__tabs_1" type="radio" id="__tab_1_1" />
+<label for="__tab_1_1">Python</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s2">&quot;perf_log&quot;</span><span class="p">)</span>
+</pre></div></div>
+</div>
 <h3 id="querying-pre-defined-filters_1">Querying Pre-defined Filters<a class="headerlink" href="#querying-pre-defined-filters_1" title="Permanent link">&para;</a></h3>
 <p>We can query a pre-defined filter as follows:</p>
-<pre class="codehilite"><code class="language-cpp">auto record_stream = client.query_filter(&quot;low_resources&quot;, 0, UINT64_MAX);
-for (auto s = record_stream; !s.empty(); ++s) {
-  std::cout &lt;&lt; s.get().to_string();
-}</code></pre>
-
-
+<div class="superfences-tabs">
+<input name="__tabs_2" type="radio" id="__tab_2_0" checked="checked" />
+<label for="__tab_2_0">C++</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">query_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div></div>
+<input name="__tabs_2" type="radio" id="__tab_2_1" />
+<label for="__tab_2_1">Python</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">query_filter</span><span class="p">(</span><span class="s2">&quot;low_resources&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">record_stream</span><span class="p">:</span>
+  <span class="k">print</span> <span class="n">r</span>
+</pre></div></div>
+</div>
 <p>This operation returns a lazy stream of records, which automatically fetches
 more data from the server as the clients consumes them.</p>
 <h3 id="obtaining-pre-defined-aggregates_1">Obtaining Pre-defined Aggregates<a class="headerlink" href="#obtaining-pre-defined-aggregates_1" title="Permanent link">&para;</a></h3>
 <p>We can obtian a pre-defined aggregate as follows:</p>
-<pre class="codehilite"><code class="language-cpp">std::string value = client.get_aggregate(&quot;max_latency_ms&quot;, 0, UINT64_MAX);
-std::cout &lt;&lt; value;</code></pre>
-
-
+<div class="superfences-tabs">
+<input name="__tabs_3" type="radio" id="__tab_3_0" checked="checked" />
+<label for="__tab_3_0">C++</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">value</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">value</span><span class="p">;</span>
+</pre></div></div>
+<input name="__tabs_3" type="radio" id="__tab_3_1" />
+<label for="__tab_3_1">Python</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_aggregate</span><span class="p">(</span><span class="s2">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxint</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">value</span>
+</pre></div></div>
+</div>
 <p>The operation returns a string representation of the aggregate.</p>
 <h3 id="obtaining-alerts-from-a-pre-defined-trigger_1">Obtaining Alerts from a Pre-defined Trigger<a class="headerlink" href="#obtaining-alerts-from-a-pre-defined-trigger_1" title="Permanent link">&para;</a></h3>
 <p>Finally, we can obtain alerts generated by triggers installed on an Atomic 
 MultiLog as follows:</p>
-<pre class="codehilite"><code class="language-cpp">auto alert_stream = client.get_alerts(0, UINT64_MAX, &quot;high_latency_trigger&quot;);
-for (auto s = alert_stream; !s.empty(); ++s) {
-  std::cout &lt;&lt; s.get();
-}</code></pre>
-
-
+<div class="superfences-tabs">
+<input name="__tabs_4" type="radio" id="__tab_4_0" checked="checked" />
+<label for="__tab_4_0">C++</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">alert_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UINT64_MAX</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">alert_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div></div>
+<input name="__tabs_4" type="radio" id="__tab_4_1" />
+<label for="__tab_4_1">Python</label>
+<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">import</span> <span class="n">sys</span>
+<span class="n">alert_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_alerts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sys</span><span class="p">.</span><span class="n">maxint</span><span class="p">,</span> <span class="s">&quot;high_latency_trigger&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">a</span> <span class="n">in</span> <span class="nl">alert_stream</span><span class="p">:</span>
+  <span class="n">print</span> <span class="n">a</span>
+</pre></div></div>
+</div>
 <p>Similar to the filter query, this operation returns a lazy stream of alerts, 
 which automatically fetches more data from the server as the clients consumes them.</p>
                 
@@ -1029,6 +1102,8 @@ which automatically fetches more data from the server as the clients consumes th
               
               
                 
+
+
               
             </article>
           </div>
@@ -1078,7 +1153,7 @@ which automatically fetches more data from the server as the clients consumes th
       <div class="md-footer-copyright">
         
         powered by
-        <a href="http://www.mkdocs.org">MkDocs</a>
+        <a href="https://www.mkdocs.org">MkDocs</a>
         and
         <a href="https://squidfunk.github.io/mkdocs-material/">
           Material for MkDocs</a>
@@ -1092,12 +1167,14 @@ which automatically fetches more data from the server as the clients consumes th
       
     </div>
     
-      <script src="../assets/javascripts/application.e8b9464e.js"></script>
+      <script src="../assets/javascripts/application.905597d0.js"></script>
       
-      <script>app.initialize({version:"0.17.2",url:{base:".."}})</script>
+      <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
       
     
     
+      
+        <script>!function(e,a,t,n,o,c,i){e.GoogleAnalyticsObject=o,e.ga=e.ga||function(){(e.ga.q=e.ga.q||[]).push(arguments)},e.ga.l=1*new Date,c=a.createElement(t),i=a.getElementsByTagName(t)[0],c.async=1,c.src="https://www.google-analytics.com/analytics.js",i.parentNode.insertBefore(c,i)}(window,document,"script",0,"ga"),ga("create","None","auto"),ga("set","anonymizeIp",!0),ga("send","pageview");var links=document.getElementsByTagName("a");if(Array.prototype.map.call(links,function(a){a.host!=document.location.host&&a.addEventListener("click",function(){var e=a.getAttribute("data-md-action")||"follow";ga("send","event","outbound",e,a.href)})}),document.forms.search){var query=document.forms.search.query;query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}</script>
       
     
   </body>

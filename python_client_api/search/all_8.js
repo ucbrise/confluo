@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['has_5fmore',['has_more',['../classconfluo_1_1rpc_1_1rpc__stream_1_1record__stream.html#ada4b7e462883fc6a427f1f37070d985d',1,'confluo.rpc.rpc_stream.record_stream.has_more()'],['../classconfluo_1_1rpc_1_1rpc__stream_1_1alert__stream.html#ad6f3edb9c58132f6bb53061325b10fff',1,'confluo.rpc.rpc_stream.alert_stream.has_more()']]]
+  ['has_5fmore',['has_more',['../classconfluo_1_1rpc_1_1stream_1_1_record_stream.html#a94e0b995359583dfb0e972ff41252131',1,'confluo.rpc.stream.RecordStream.has_more()'],['../classconfluo_1_1rpc_1_1stream_1_1_alert_stream.html#a396d92b86b18cc1da8248c94e3e43ba5',1,'confluo.rpc.stream.AlertStream.has_more()']]]
 ];

@@ -2,8 +2,9 @@ var searchData=
 [
   ['read_5fargs',['read_args',['../classconfluo_1_1rpc_1_1rpc__service_1_1read__args.html',1,'confluo::rpc::rpc_service']]],
   ['read_5fresult',['read_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1read__result.html',1,'confluo::rpc::rpc_service']]],
-  ['record',['record',['../classconfluo_1_1rpc_1_1schema_1_1record.html',1,'confluo::rpc::schema']]],
-  ['record_5fstream',['record_stream',['../classconfluo_1_1rpc_1_1rpc__stream_1_1record__stream.html',1,'confluo::rpc::rpc_stream']]],
+  ['record',['Record',['../classconfluo_1_1rpc_1_1schema_1_1_record.html',1,'confluo::rpc::schema']]],
+  ['recordbatchbuilder',['RecordBatchBuilder',['../classconfluo_1_1rpc_1_1batch_1_1_record_batch_builder.html',1,'confluo::rpc::batch']]],
+  ['recordstream',['RecordStream',['../classconfluo_1_1rpc_1_1stream_1_1_record_stream.html',1,'confluo::rpc::stream']]],
   ['register_5fhandler_5fargs',['register_handler_args',['../classconfluo_1_1rpc_1_1rpc__service_1_1register__handler__args.html',1,'confluo::rpc::rpc_service']]],
   ['register_5fhandler_5fresult',['register_handler_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1register__handler__result.html',1,'confluo::rpc::rpc_service']]],
   ['remove_5faggregate_5fargs',['remove_aggregate_args',['../classconfluo_1_1rpc_1_1rpc__service_1_1remove__aggregate__args.html',1,'confluo::rpc::rpc_service']]],
@@ -17,7 +18,6 @@ var searchData=
   ['remove_5ftrigger_5fargs',['remove_trigger_args',['../classconfluo_1_1rpc_1_1rpc__service_1_1remove__trigger__args.html',1,'confluo::rpc::rpc_service']]],
   ['remove_5ftrigger_5fresult',['remove_trigger_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1remove__trigger__result.html',1,'confluo::rpc::rpc_service']]],
   ['rpc_5fatomic_5fmultilog_5finfo',['rpc_atomic_multilog_info',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__atomic__multilog__info.html',1,'confluo::rpc::ttypes']]],
-  ['rpc_5fclient',['rpc_client',['../classconfluo_1_1rpc_1_1rpc__client_1_1rpc__client.html',1,'confluo::rpc::rpc_client']]],
   ['rpc_5fcolumn',['rpc_column',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__column.html',1,'confluo::rpc::ttypes']]],
   ['rpc_5fdata_5ftype',['rpc_data_type',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__data__type.html',1,'confluo::rpc::ttypes']]],
   ['rpc_5finvalid_5foperation',['rpc_invalid_operation',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__invalid__operation.html',1,'confluo::rpc::ttypes']]],
@@ -26,7 +26,7 @@ var searchData=
   ['rpc_5fiterator_5ftype',['rpc_iterator_type',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__iterator__type.html',1,'confluo::rpc::ttypes']]],
   ['rpc_5fmanagement_5fexception',['rpc_management_exception',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__management__exception.html',1,'confluo::rpc::ttypes']]],
   ['rpc_5frecord_5fbatch',['rpc_record_batch',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__record__batch.html',1,'confluo::rpc::ttypes']]],
-  ['rpc_5frecord_5fbatch_5fbuilder',['rpc_record_batch_builder',['../classconfluo_1_1rpc_1_1rpc__record__batch__builder_1_1rpc__record__batch__builder.html',1,'confluo::rpc::rpc_record_batch_builder']]],
   ['rpc_5frecord_5fblock',['rpc_record_block',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__record__block.html',1,'confluo::rpc::ttypes']]],
-  ['rpc_5fstorage_5fmode',['rpc_storage_mode',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__storage__mode.html',1,'confluo::rpc::ttypes']]]
+  ['rpc_5fstorage_5fmode',['rpc_storage_mode',['../classconfluo_1_1rpc_1_1ttypes_1_1rpc__storage__mode.html',1,'confluo::rpc::ttypes']]],
+  ['rpcclient',['RpcClient',['../classconfluo_1_1rpc_1_1client_1_1_rpc_client.html',1,'confluo::rpc::client']]]
 ];
