@@ -9,7 +9,11 @@ lock-free concurrency.
 ## Implementation
 
 Our distributed messaging system implementation employs Kafka’s interface and 
-data model — messages are published to or subscribed from “topics”, which are 
+data model — messages are published to or subscribed from 
+
+"topics
+
+", which are 
 logically streams of messages. The system maintains a collection of topics, 
 where messages for each topic are stored across a user-specified number of 
 Confluo shards.

@@ -2,16 +2,16 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="{{ config.site_url | default(nav.homepage.url, true) }}" title="{{ config.site_name }}" class="md-header-nav__button md-logo">
+        <a href="{{ config.site_url | default(nav.homepage.url, true) | url }}" title="{{ config.site_name }}" class="md-header-nav__button md-logo">
           {% if config.theme.logo.icon %}
             <i class="md-icon">{{ config.theme.logo.icon }}</i>
           {% else %}
-            <img src="{{ base_url }}/{{ config.theme.logo }}" width="24" height="24">
+            <img src="{{ config.theme.logo | url }}" width="24" height="24">
           {% endif %}
         </a>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
       </div>
       <div class="md-flex__cell md-flex__cell--stretch">
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
@@ -32,7 +32,7 @@
       <div class="md-flex__cell md-flex__cell--shrink">
         {% block search_box %}
           {% if "search" in config["plugins"] %}
-            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
             {% include "partials/search.html" %}
           {% endif %}
         {% endblock %}

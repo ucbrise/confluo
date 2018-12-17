@@ -58,31 +58,45 @@ As with the embedded mode, we work with the assumption that the client is connec
 has already created the Atomic MultiLog, and added all relevant filters, aggregates and triggers.
 Also, the current Atomic MultiLog for the client has been set to `perf_log` as follows:
 
-```cpp
+```cpp tab="C++"
 client.set_current_atomic_multilog("perf_log");
+```
+
+```python tab="Python"
+client.set_current_atomic_multilog("perf_log")
 ```
 
 ### Retrieving Records
 
 It is straightforward to retrieve records given their offsets:
 
-```cpp
+```cpp tab="C++"
 auto record1 = client.read(off1);
 auto record2 = client.read(off2);
 auto record3 = client.read(off3);
 ```
 
-Each of `record1`, `record2`, and `record3` are vectors of strings.
+```python tab="Python"
+record1 = client.read(off1)
+record2 = client.read(off2)
+record3 = client.read(off3)
+```
 
 ### Evaluating Ad-hoc Filter Expressions
 
 We can query indexed attributes as follows:
 
-```cpp
+```cpp tab="C++"
 auto record_stream = client.execute_filter("cpu_util>0.5 || mem_avail<0.5");
 for (auto s = record_stream; !s.empty(); ++s) {
   std::cout << s.get().to_string();
 }
+```
+
+```python
+record_stream = client.execute_filter("cpu_util>0.5 || mem_avail<0.5")
+for r in record_stream:
+  print r
 ```
 
 This operation returns a lazy stream of records, which automatically fetches
