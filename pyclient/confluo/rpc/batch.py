@@ -9,9 +9,10 @@ class RecordBatchBuilder:
     """
     TIME_BLOCK = 1e6
 
-    def __init__(self):
+    def __init__(self, schema):
         """ Initializes an empty rpc record batch builder.
         """
+        self.schema_ = schema
         self.num_records_ = 0
         self.clear()
 
@@ -21,10 +22,11 @@ class RecordBatchBuilder:
         Args:
             record: The record to add to the batch builder.
         """
-        ts = struct.unpack('l', record[:8])[0]
+        buf = self.schema_.pack(record)
+        ts = struct.unpack('l', buf[:8])[0]
         time_block = int(ts / self.TIME_BLOCK)
-        self.batch_sizes_[time_block] = len(record) + self.batch_sizes_.get(time_block, 0)
-        self.batch_[time_block].append(record)
+        self.batch_sizes_[time_block] = len(buf) + self.batch_sizes_.get(time_block, 0)
+        self.batch_[time_block].append(buf)
         self.num_records_ += 1
 
     def get_batch(self):

@@ -4,6 +4,7 @@ from thrift.transport import TTransport, TSocket
 
 import rpc_service
 import type_conversions
+from batch import RecordBatchBuilder
 from schema import make_schema
 from stream import RecordStream, AlertStream
 
@@ -207,6 +208,14 @@ class RpcClient:
             ValueError.
         """
         return self.append_raw(self.cur_schema_.pack(rec))
+
+    def get_batch_builder(self):
+        """Get a record batch builder instance
+
+        Returns:
+             A record batch builder instance.
+        """
+        return RecordBatchBuilder(self.cur_schema_)
 
     def read_raw(self, offset):
         """ Reads raw data from a specified offset.
