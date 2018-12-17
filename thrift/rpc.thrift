@@ -39,10 +39,10 @@ struct rpc_column {
   3: required string name,
 }
 
-typedef list<rpc_column> rpc_schema;
+typedef list<rpc_column> rpc_schema
 
-typedef i64 rpc_iterator_id;
-typedef i32 rpc_handler_id;
+typedef i64 rpc_iterator_id
+typedef i32 rpc_handler_id
 
 struct rpc_iterator_descriptor {
   1: required rpc_iterator_id id,
@@ -91,66 +91,56 @@ service rpc_service {
           throws (1: rpc_management_exception ex),
   
   // Store ops
-  i64 create_atomic_multilog(1: string name, 2: rpc_schema schema, 
-                             3: rpc_storage_mode mode) 
+  i64 create_atomic_multilog(1: string name, 2: rpc_schema schema, 3: rpc_storage_mode mode)
           throws (1: rpc_management_exception ex),
-  rpc_atomic_multilog_info get_atomic_multilog_info(1: string name),
-  void remove_atomic_multilog(1: i64 multilog_id)
+  rpc_atomic_multilog_info get_atomic_multilog_info(1: string name)
+          throws (1: rpc_management_exception ex),
+  void remove_atomic_multilog(1: i64 mid)
           throws (1: rpc_management_exception ex),
   
   // Table ops
-  void add_index(1: i64 multilog_id, 2: string field_name, 
-                 3: double bucket_size) 
+  void add_index(1: i64 mid, 2: string field_name, 3: double bucket_size)
           throws (1: rpc_management_exception ex),
-  void remove_index(1: i64 multilog_id, 2: string field_name) 
+  void remove_index(1: i64 mid, 2: string field_name) 
           throws (1: rpc_management_exception ex),
-  void add_filter(1: i64 multilog_id, 2: string filter_name, 
-                  3: string filter_expr)
+  void add_filter(1: i64 mid, 2: string filter_id, 3: string filter_ex)
           throws (1: rpc_management_exception ex),
-  void remove_filter(1: i64 multilog_id, 2: string filter_name) 
+  void remove_filter(1: i64 mid, 2: string filter_id) 
           throws (1: rpc_management_exception ex),
-  void add_aggregate(1: i64 mutlilog_id, 2: string aggregate_name, 
-                     3: string filter_name, 4: string aggregate_expr) 
+  void add_aggregate(1: i64 mid, 2: string aggregate_name, 3: string filter_id, 4: string aggregate_expr)
           throws (1: rpc_management_exception ex),
-  void remove_aggregate(1: i64 multilog_id, 2: string aggregate_name),
-  void add_trigger(1: i64 multilog_id, 2: string trigger_name, 
-                   3: string trigger_expr)
+  void remove_aggregate(1: i64 mid, 2: string aggregate_name)
           throws (1: rpc_management_exception ex),
-  void remove_trigger(1: i64 multilog_id, 2: string trigger_name) 
+  void add_trigger(1: i64 mid, 2: string trigger_id, 3: string trigger_expr)
+          throws (1: rpc_management_exception ex),
+  void remove_trigger(1: i64 mid, 2: string trigger_id) 
           throws (1: rpc_management_exception ex),
             
   /** Query ops **/
   // Write ops
-  i64 append(1: i64 multilog_id, 2: binary data),
-  i64 append_batch(1: i64 multilog_id, 2: rpc_record_batch batch),
+  i64 append(1: i64 mid, 2: binary data),
+  i64 append_batch(1: i64 mid, 2: rpc_record_batch batch),
   
-  // Read ops
-  binary read(1: i64 multilog_id, 2: i64 offset, 3: i64 nrecords),
-  string query_aggregate(1: i64 multilog_id, 2: string aggregate_name, 
-                         3: i64 begin_ms, 4: i64 end_ms)
+  // Read op
+  binary read(1: i64 mid, 2: i64 offset, 3: i64 nrecords),
+
+  // Query op
+  string query_aggregate(1: i64 mid, 2: string aggregate_name, 3: i64 beg_ms, 4: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  string adhoc_aggregate(1: i64 multilog_id, 2: string aggregate_expr, 
-                         3: string filter_expr)
+  string adhoc_aggregate(1: i64 mid, 2: string aggregate_expr, 3: string filter_ex)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle adhoc_filter(1: i64 multilog_id, 2: string filter_expr)
+  rpc_iterator_handle adhoc_filter(1: i64 mid, 2: string filter_ex)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle predef_filter(1: i64 multilog_id, 2: string filter_name, 
-                                    3: i64 begin_ms, 4: i64 end_ms)
+  rpc_iterator_handle predef_filter(1: i64 mid, 2: string filter_id, 3: i64 beg_ms, 4: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle combined_filter(1: i64 multilog_id, 2: string filter_name,
-                                      3: string filter_expr, 
-                                      4: i64 begin_ms, 5: i64 end_ms)
+  rpc_iterator_handle combined_filter(1: i64 mid, 2: string filter_id, 3: string filter_ex, 4: i64 beg_ms, 5: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle alerts_by_time(1: i64 multilog_id, 2: i64 begin_ms, 
-                                     3: i64 end_ms)
+  rpc_iterator_handle alerts_by_time(1: i64 mid, 2: i64 beg_ms, 3: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle alerts_by_trigger_and_time(1: i64 multilog_id,
-                                                 2: string trigger_name,
-                                                 3: i64 begin_ms, 4: i64 end_ms)
+  rpc_iterator_handle alerts_by_trigger_and_time(1: i64 mid, 2: string trigger_id, 3: i64 beg_ms, 4: i64 end_ms)
           throws (1: rpc_invalid_operation ex),
-  rpc_iterator_handle get_more(1: i64 multilog_id, 
-                               2: rpc_iterator_descriptor desc)
+  rpc_iterator_handle get_more(1: i64 mid, 2: rpc_iterator_descriptor desc)
           throws (1: rpc_invalid_operation ex),
 
-  i64 num_records(1: i64 multilog_id),  
+  i64 num_records(1: i64 mid),  
 }
