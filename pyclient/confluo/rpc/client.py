@@ -1,17 +1,17 @@
 import logging
-import rpc_type_conversions
-import rpc_configuration_params
-import rpc_service
-from rpc_record_batch_builder import rpc_record_batch_builder
-from rpc_stream import record_stream, alert_stream
-
-from ttypes import *
-from thrift.transport import TTransport, TSocket
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.transport import TTransport, TSocket
 
-class rpc_client:
+import rpc_service
+import type_conversions
+from schema import make_schema
+from stream import RecordStream, AlertStream
+
+
+class RpcClient:
     """ Client for Confluo through RPC.
     """
+
     def __init__(self, host='localhost', port=9090):
         """ Initializes the rpc client to the specified host and port.
 
@@ -54,7 +54,7 @@ class rpc_client:
             self.client_.deregister_handler()
             self.transport_.close()
 
-    def create_atomic_multilog(self, atomic_multilog_name, schema, storage_mode):
+    def create_atomic_multilog(self, name, schema, storage_mode):
         """ Creates an atomic multilog for this client.
 
         Args:
@@ -62,20 +62,20 @@ class rpc_client:
             schema: The schema for the atomic multilog.
             storage_mode: The mode for storage.
         """
-        self.cur_schema_ = schema
-        rpc_schema = rpc_type_conversions.convert_to_rpc_schema(schema)
-        self.cur_multilog_id_ = self.client_.create_atomic_multilog(atomic_multilog_name, rpc_schema, storage_mode)
-        
+        self.cur_schema_ = make_schema(schema)
+        rpc_schema = type_conversions.convert_to_rpc_schema(self.cur_schema_)
+        self.cur_multilog_id_ = self.client_.create_atomic_multilog(name, rpc_schema, storage_mode)
+
     def set_current_atomic_multilog(self, atomic_multilog_name):
         """ Sets the atomic multilog to the desired atomic multilog.
 
         Args:
             atomic_multilog_name: The name of atomic multilog to set the current atomic multilog to.
         """
-        info = self.client_.get_atomic_multilog_info(atomic_multilog_name) 
-        self.cur_schema_ = rpc_type_conversions.convert_to_schema(info.schema)
-        self.cur_multilog_id_ = info.atomic_multilog_id
-        
+        info = self.client_.get_atomic_multilog_info(atomic_multilog_name)
+        self.cur_schema_ = type_conversions.convert_to_schema(info.schema)
+        self.cur_multilog_id_ = info.id
+
     def remove_atomic_multilog(self):
         """ Removes an atomic multilog from the client.
 
@@ -86,7 +86,7 @@ class rpc_client:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_atomic_multilog(self.cur_multilog_id_)
         self.cur_multilog_id_ = -1
-    
+
     def add_index(self, field_name, bucket_size=1):
         """ Adds an index to the atomic multilog.
 
@@ -133,7 +133,7 @@ class rpc_client:
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_filter(self.cur_multilog_id_, filter_name)
-        
+
     def add_aggregate(self, aggregate_name, filter_name, aggregate_expr):
         """ Adds an aggregate to the atomic multilog.
 
@@ -184,28 +184,32 @@ class rpc_client:
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_trigger(self.cur_multilog_id_, trigger_name)
-        
-    def get_batch_builder(self):
-        """ Gets a new record batch builder.
-        """
-        return rpc_record_batch_builder()
-        
-    def write(self, record):
-        """ Writes a record to the atomic multilog.
+
+    def append_raw(self, data):
+        """ Append raw data to the atomic multilog.
 
         Args:
-            record: The record to write.
+            data: The data to append.
         Raises:
             ValueError.
         """
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
-        if len(record) != self.cur_schema_.record_size_:
-            raise ValueError("Record must be of length " + str(self.cur_schema_.record_size_))
-        self.client_.append(self.cur_multilog_id_, record)
-            
-    def read(self, offset):
-        """ Reads data from a specified offset.
+        if len(data) != self.cur_schema_.record_size_:
+            raise ValueError("Record length must be: {}, is: {}".format(self.cur_schema_.record_size_, len(data)))
+        return self.client_.append(self.cur_multilog_id_, data)
+
+    def append(self, rec):
+        """ Append record to the atomic multilog.
+        Args:
+            rec: The record to append.
+        Raises:
+            ValueError.
+        """
+        return self.append_raw(self.cur_schema_.pack(rec))
+
+    def read_raw(self, offset):
+        """ Reads raw data from a specified offset.
 
         Args:
             offset: The offset from the log to read from.
@@ -217,7 +221,11 @@ class rpc_client:
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         return self.client_.read(self.cur_multilog_id_, offset, self.cur_schema_.record_size_)
-    
+
+    def read(self, offset):
+        buf = self.read_raw(offset)
+        return self.cur_schema_.apply(offset, buf)
+
     def get_aggregate(self, aggregate_name, begin_ms, end_ms):
         """ Gets an aggregate from the atomic multilog.
 
@@ -247,9 +255,9 @@ class rpc_client:
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         handle = self.client_.adhoc_filter(self.cur_multilog_id_, filter_expr)
-        return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+        return RecordStream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
 
-    def query_filter(self, filter_name, begin_ms, end_ms, filter_expr = ""):
+    def query_filter(self, filter_name, begin_ms, end_ms, filter_expr=""):
         """ Queries a filter.
 
         Args:
@@ -266,12 +274,12 @@ class rpc_client:
             raise ValueError("Must set atomic multilog first.")
         if filter_expr == "":
             handle = self.client_.predef_filter(self.cur_multilog_id_, filter_name, begin_ms, end_ms)
-            return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+            return RecordStream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
         else:
             handle = self.client_.combined_filter(self.cur_multilog_id_, filter_name, filter_expr, begin_ms, end_ms)
-            return record_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+            return RecordStream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
 
-    def get_alerts(self, begin_ms, end_ms, trigger_name = ""):
+    def get_alerts(self, begin_ms, end_ms, trigger_name=""):
         """ Gets the alerts.
 
         Args:
@@ -286,11 +294,11 @@ class rpc_client:
         if self.cur_multilog_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         if trigger_name == "":
-            handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, begin_ms, end_ms)
-            return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+            handle = self.client_.alerts_by_time(self.cur_multilog_id_, begin_ms, end_ms)
+            return AlertStream(self.cur_multilog_id_, self.client_, handle)
         else:
-            handle = self.client.alerts_by_time(self.cur_multilog_id_, handle, trigger_name, begin_ms, end_ms)
-            return alert_stream(self.cur_multilog_id_, self.cur_schema_, self.client_, handle)
+            handle = self.client_.alerts_by_trigger_and_time(self.cur_multilog_id_, trigger_name, begin_ms, end_ms)
+            return AlertStream(self.cur_multilog_id_, self.client_, handle)
 
     def num_records(self):
         """ Gets the number of records in the atomic multilog.

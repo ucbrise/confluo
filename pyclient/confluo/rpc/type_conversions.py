@@ -1,6 +1,7 @@
+from data_types import DataType
+from schema import SchemaBuilder, Schema
 from ttypes import rpc_column
-from schema import schema_builder, schema
-from data_types import data_type
+
 
 def convert_to_rpc_schema(schema):
     """ Converts a schema to an rpc schema for the client.
@@ -16,6 +17,7 @@ def convert_to_rpc_schema(schema):
         rpc_columns.append(rpc_col)
     return rpc_columns
 
+
 def convert_to_schema(rpc_schema):
     """ Converts an rpc schema to a schema for confluo.
 
@@ -24,7 +26,7 @@ def convert_to_schema(rpc_schema):
     Returns:
         The schema for confluo.
     """
-    builder = schema_builder()
+    builder = SchemaBuilder()
     for column in rpc_schema:
-        builder.add_column(data_type(column.type_id, column.type_size), column.name)
-    return schema(builder.build())
+        builder.add_column(DataType(column.type_id, column.type_size), column.name)
+    return Schema(builder.build())

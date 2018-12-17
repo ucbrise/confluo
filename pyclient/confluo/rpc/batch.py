@@ -1,15 +1,14 @@
-from collections import defaultdict
-from ttypes import rpc_record_batch, rpc_record_block
 import struct
+from collections import defaultdict
 
-class rpc_record_batch_builder:
+from ttypes import rpc_record_batch, rpc_record_block
+
+
+class RecordBatchBuilder:
     """ A builder for a batch of records.
-
-    Attributes:
-        TIME_BLOCK: The size of a time block for a record batch.
     """
     TIME_BLOCK = 1e6
-    
+
     def __init__(self):
         """ Initializes an empty rpc record batch builder.
         """

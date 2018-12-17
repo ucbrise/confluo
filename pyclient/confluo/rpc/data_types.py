@@ -1,24 +1,15 @@
+import re
+import struct
+
 from ttypes import rpc_data_type
 
 
-class type_id:
+class TypeID:
     """ Contains the primitive types.
-
-    Attributes:
-        NONE: The none type.
-        BOOL: The boolean type.
-        CHAR: The character type.
-        UCHAR: The unsigned character type.
-        SHORT: The short type.
-        USHORT: The unsigned short type.
-        INT: The integer type.
-        UINT: The unsigned integer type.
-        LONG: The long type.
-        ULONG: The unsigned long type.
-        FLOAT: The single precision floating type.
-        DOUBLE: The double type.
-        STRING: The string type.
     """
+
+    def __init__(self):
+        pass
 
     NONE = rpc_data_type.RPC_NONE
     BOOL = rpc_data_type.RPC_BOOL
@@ -35,11 +26,56 @@ class type_id:
     STRING = rpc_data_type.RPC_STRING
 
 
-class data_type:
+FORMAT_CODES = {
+    TypeID.BOOL: '?',
+    TypeID.CHAR: 'c',
+    TypeID.UCHAR: 'B',
+    TypeID.SHORT: 'h',
+    TypeID.USHORT: 'H',
+    TypeID.INT: 'i',
+    TypeID.UINT: 'I',
+    TypeID.LONG: 'q',
+    TypeID.ULONG: 'Q',
+    TypeID.FLOAT: 'f',
+    TypeID.DOUBLE: 'd',
+    TypeID.STRING: 's'
+}
+
+
+def to_string(tid, size):
+    if tid == TypeID.NONE:
+        return 'NONE'
+    elif tid == TypeID.BOOL:
+        return 'BOOL'
+    elif tid == TypeID.CHAR:
+        return 'CHAR'
+    elif tid == TypeID.UCHAR:
+        return 'UCHAR'
+    elif tid == TypeID.SHORT:
+        return 'SHORT'
+    elif tid == TypeID.USHORT:
+        return 'USHORT'
+    elif tid == TypeID.INT:
+        return 'INT'
+    elif tid == TypeID.UINT:
+        return 'UINT'
+    elif tid == TypeID.LONG:
+        return 'LONG'
+    elif tid == TypeID.ULONG:
+        return 'ULONG'
+    elif tid == TypeID.FLOAT:
+        return 'FLOAT'
+    elif tid == TypeID.DOUBLE:
+        return 'DOUBLE'
+    elif tid == TypeID.STRING:
+        return 'STRING({})'.format(size)
+
+
+class DataType:
     """ Functionality for data types.
 
     """
-    
+
     def __init__(self, typeid, size=0):
         """ Initializes a data type based on id and size.
 
@@ -50,6 +86,14 @@ class data_type:
         self.type_id_ = typeid
         self.size_ = size
 
+    def __str__(self):
+        """ Convert to string
+
+        Returns:
+            String representation of data type
+        """
+        return to_string(self.type_id_, self.size_)
+
     def __eq__(self, other):
         """ Performs an equality check between this data type and the other data type.
 
@@ -59,7 +103,7 @@ class data_type:
             True if the two data types are equal, false otherwise.
         """
         if other.type_id_ == self.type_id_ and other.size_ == self.size_:
-            return True 
+            return True
         return False
 
     def __ne__(self, other):
@@ -72,16 +116,69 @@ class data_type:
         """
         return not self.__eq__(other)
 
+    def format_code(self):
+        """ Get format code corresponding to data type
 
-BOOL_TYPE = data_type(type_id.BOOL, 1)
-CHAR_TYPE = data_type(type_id.CHAR, 1)
-UCHAR_TYPE = data_type(type_id.UCHAR, 1)
-SHORT_TYPE = data_type(type_id.SHORT, 2)
-USHORT_TYPE = data_type(type_id.USHORT, 2)
-INT_TYPE = data_type(type_id.INT, 4)
-UINT_TYPE = data_type(type_id.UINT, 4)
-LONG_TYPE = data_type(type_id.LONG, 8)
-ULONG_TYPE = data_type(type_id.ULONG, 8)
-FLOAT_TYPE = data_type(type_id.FLOAT, 4)
-DOUBLE_TYPE = data_type(type_id.DOUBLE, 8)
-STRING_TYPE = lambda size: data_type(type_id.STRING, size)
+        Returns:
+            Format code for data type
+        """
+        if self.type_id_ == TypeID.STRING:
+            return '{}s'.format(self.size_)
+        return FORMAT_CODES[self.type_id_]
+
+    def pack(self, data):
+        """
+
+        Args:
+            data: Python data
+        Returns:
+            Binary data
+        """
+        try:
+            return struct.pack(self.format_code(), data)
+        except Exception as e:
+            raise ValueError('Error converting {} to {}: {}'.format(data, to_string(self.type_id_, self.size_), e))
+
+
+BOOL_TYPE = DataType(TypeID.BOOL, 1)
+CHAR_TYPE = DataType(TypeID.CHAR, 1)
+UCHAR_TYPE = DataType(TypeID.UCHAR, 1)
+SHORT_TYPE = DataType(TypeID.SHORT, 2)
+USHORT_TYPE = DataType(TypeID.USHORT, 2)
+INT_TYPE = DataType(TypeID.INT, 4)
+UINT_TYPE = DataType(TypeID.UINT, 4)
+LONG_TYPE = DataType(TypeID.LONG, 8)
+ULONG_TYPE = DataType(TypeID.ULONG, 8)
+FLOAT_TYPE = DataType(TypeID.FLOAT, 4)
+DOUBLE_TYPE = DataType(TypeID.DOUBLE, 8)
+STRING_TYPE = lambda size: DataType(TypeID.STRING, size)
+
+
+def make_type(t_str):
+    m = re.match(r'STRING\((\d+)\)', t_str)
+    if t_str == 'BOOL':
+        return BOOL_TYPE
+    elif t_str == 'CHAR':
+        return CHAR_TYPE
+    elif t_str == 'UCHAR':
+        return CHAR_TYPE
+    elif t_str == 'SHORT':
+        return SHORT_TYPE
+    elif t_str == 'USHORT':
+        return USHORT_TYPE
+    elif t_str == 'INT':
+        return INT_TYPE
+    elif t_str == 'UINT':
+        return UINT_TYPE
+    elif t_str == 'LONG':
+        return LONG_TYPE
+    elif t_str == 'ULONG':
+        return ULONG_TYPE
+    elif t_str == 'FLOAT':
+        return FLOAT_TYPE
+    elif t_str == 'DOUBLE':
+        return DOUBLE_TYPE
+    elif m:
+        return STRING_TYPE(int(m.group(1)))
+    else:
+        raise ValueError('Invalid type {}'.format(t_str))
