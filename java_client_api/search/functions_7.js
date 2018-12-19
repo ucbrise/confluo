@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['installtrigger',['installTrigger',['../classconfluo_1_1rpc_1_1_r_p_c_client.html#a07ba6244740aff57cce2acc756479bb6',1,'confluo::rpc::RPCClient']]],
+  ['installtrigger',['installTrigger',['../classconfluo_1_1rpc_1_1_rpc_client.html#a50916b13d91f80ba02ac1c01c2deeee6',1,'confluo::rpc::RpcClient']]],
   ['isset',['isSet',['../classconfluo_1_1rpc_1_1rpc__atomic__multilog__info.html#a753ea6d19d7979309146f788eff45477',1,'confluo.rpc.rpc_atomic_multilog_info.isSet()'],['../classconfluo_1_1rpc_1_1rpc__column.html#a534d9000f2e6817ca2fc7b6c20b344c6',1,'confluo.rpc.rpc_column.isSet()'],['../classconfluo_1_1rpc_1_1rpc__invalid__operation.html#aaab19920587185ad8f6a2c90492514d8',1,'confluo.rpc.rpc_invalid_operation.isSet()'],['../classconfluo_1_1rpc_1_1rpc__iterator__descriptor.html#ad2a59817b0641cc33bf55ebd3bb476d0',1,'confluo.rpc.rpc_iterator_descriptor.isSet()'],['../classconfluo_1_1rpc_1_1rpc__iterator__handle.html#a530d1d2f30bf677d7547ebb0b7da21b9',1,'confluo.rpc.rpc_iterator_handle.isSet()'],['../classconfluo_1_1rpc_1_1rpc__management__exception.html#a9c409a8cacb0e3476ee2cae7dbcf9504',1,'confluo.rpc.rpc_management_exception.isSet()'],['../classconfluo_1_1rpc_1_1rpc__record__batch.html#a82cbe04c752d936c366f05192af44e27',1,'confluo.rpc.rpc_record_batch.isSet()'],['../classconfluo_1_1rpc_1_1rpc__record__block.html#a1d1f108098af3ef82e27e94ee61ebf7e',1,'confluo.rpc.rpc_record_block.isSet()']]],
   ['issetblocks',['isSetBlocks',['../classconfluo_1_1rpc_1_1rpc__record__batch.html#a87bcfb52c011a5c5989fe7914efcb6e2',1,'confluo::rpc::rpc_record_batch']]],
   ['issetdata',['isSetData',['../classconfluo_1_1rpc_1_1rpc__iterator__handle.html#a9ba32bcdd4e88b9508d1df9a86d23ac7',1,'confluo.rpc.rpc_iterator_handle.isSetData()'],['../classconfluo_1_1rpc_1_1rpc__record__block.html#a1ec9ee7e1e8390af081ef503efe8756a',1,'confluo.rpc.rpc_record_block.isSetData()']]],
@@ -18,5 +18,5 @@ var searchData=
   ['issettype',['isSetType',['../classconfluo_1_1rpc_1_1rpc__iterator__descriptor.html#aced46ab641d05b2881830d1a74a4bfc5',1,'confluo::rpc::rpc_iterator_descriptor']]],
   ['issettypeid',['isSetTypeId',['../classconfluo_1_1rpc_1_1rpc__column.html#ae276c92a893e2e99d3660e7549b8c611',1,'confluo::rpc::rpc_column']]],
   ['issettypesize',['isSetTypeSize',['../classconfluo_1_1rpc_1_1rpc__column.html#a647d11124922028f8b1378c4a97758e6',1,'confluo::rpc::rpc_column']]],
-  ['iterator',['iterator',['../classconfluo_1_1rpc_1_1_alert_stream.html#a7cc298647b707fbf7a3d3e9ee63d09a4',1,'confluo.rpc.AlertStream.iterator()'],['../classconfluo_1_1rpc_1_1_record_stream.html#af60322257c8674161639e29a4474b63a',1,'confluo.rpc.RecordStream.iterator()']]]
+  ['iterator',['iterator',['../classconfluo_1_1rpc_1_1_record.html#aee58c800896bc79fd822947148c38660',1,'confluo::rpc::Record']]]
 ];

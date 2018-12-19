@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['numrecords',['numRecords',['../classconfluo_1_1rpc_1_1_r_p_c_client.html#ac2fd0a78f0ce2615f36709da07b1eda4',1,'confluo::rpc::RPCClient']]]
+  ['next',['next',['../classconfluo_1_1rpc_1_1_record_stream.html#a517ace604abce60492ea06030bf38097',1,'confluo::rpc::RecordStream']]],
+  ['numrecords',['numRecords',['../classconfluo_1_1rpc_1_1_rpc_client.html#a9d48adbab7350bfb71e4fa2094f82228',1,'confluo::rpc::RpcClient']]]
 ];

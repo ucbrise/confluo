@@ -1,6 +1,7 @@
 var searchData=
 [
   ['record',['Record',['../classconfluo_1_1rpc_1_1_record.html',1,'confluo::rpc']]],
+  ['recordbatchbuilder',['RecordBatchBuilder',['../classconfluo_1_1rpc_1_1_record_batch_builder.html',1,'confluo::rpc']]],
   ['recordstream',['RecordStream',['../classconfluo_1_1rpc_1_1_record_stream.html',1,'confluo::rpc']]],
   ['rpc_5fatomic_5fmultilog_5finfo',['rpc_atomic_multilog_info',['../classconfluo_1_1rpc_1_1rpc__atomic__multilog__info.html',1,'confluo::rpc']]],
   ['rpc_5fcolumn',['rpc_column',['../classconfluo_1_1rpc_1_1rpc__column.html',1,'confluo::rpc']]],
@@ -14,8 +15,5 @@ var searchData=
   ['rpc_5frecord_5fblock',['rpc_record_block',['../classconfluo_1_1rpc_1_1rpc__record__block.html',1,'confluo::rpc']]],
   ['rpc_5fservice',['rpc_service',['../classconfluo_1_1rpc_1_1rpc__service.html',1,'confluo::rpc']]],
   ['rpc_5fstorage_5fmode',['rpc_storage_mode',['../enumconfluo_1_1rpc_1_1rpc__storage__mode.html',1,'confluo::rpc']]],
-  ['rpcclient',['RPCClient',['../classconfluo_1_1rpc_1_1_r_p_c_client.html',1,'confluo::rpc']]],
-  ['rpcconfigurationparams',['RPCConfigurationParams',['../classconfluo_1_1rpc_1_1_r_p_c_configuration_params.html',1,'confluo::rpc']]],
-  ['rpcrecordbatchbuilder',['RPCRecordBatchBuilder',['../classconfluo_1_1rpc_1_1_r_p_c_record_batch_builder.html',1,'confluo::rpc']]],
-  ['rpctypeconversions',['RPCTypeConversions',['../classconfluo_1_1rpc_1_1_r_p_c_type_conversions.html',1,'confluo::rpc']]]
+  ['rpcclient',['RpcClient',['../classconfluo_1_1rpc_1_1_rpc_client.html',1,'confluo::rpc']]]
 ];

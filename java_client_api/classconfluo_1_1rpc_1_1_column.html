@@ -76,138 +76,14 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a05a29e589fb010b646c4fd86559274af"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_column.html#a05a29e589fb010b646c4fd86559274af">Column</a> (int idx, long offset, <a class="el" href="classconfluo_1_1rpc_1_1_data_type.html">DataType</a> dtype, String name)</td></tr>
-<tr class="separator:a05a29e589fb010b646c4fd86559274af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25973f7a0423ca8ade253b574687708b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_column.html#a25973f7a0423ca8ade253b574687708b">apply</a> (ByteBuffer data)</td></tr>
-<tr class="separator:a25973f7a0423ca8ade253b574687708b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35e9de479daaff175ad74aef7a687dac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classconfluo_1_1rpc_1_1_data_type.html">DataType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_column.html#a35e9de479daaff175ad74aef7a687dac">getDataType</a> ()</td></tr>
-<tr class="separator:a35e9de479daaff175ad74aef7a687dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73d703858e674291a51aff72b5dd6250"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_column.html#a73d703858e674291a51aff72b5dd6250">getName</a> ()</td></tr>
 <tr class="separator:a73d703858e674291a51aff72b5dd6250"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe880618dd0c5cab6f71f8da49f1b5e1"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_column.html#abe880618dd0c5cab6f71f8da49f1b5e1">toString</a> ()</td></tr>
+<tr class="separator:abe880618dd0c5cab6f71f8da49f1b5e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Container of values for a specific type in the schema </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a05a29e589fb010b646c4fd86559274af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05a29e589fb010b646c4fd86559274af">&#9670;&nbsp;</a></span>Column()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">confluo.rpc.Column.Column </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>idx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>offset</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classconfluo_1_1rpc_1_1_data_type.html">DataType</a>&#160;</td>
-          <td class="paramname"><em>dtype</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Initializes a column in the schema</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">idx</td><td>The index of the column </td></tr>
-    <tr><td class="paramname">offset</td><td>The offset of the column </td></tr>
-    <tr><td class="paramname">dtype</td><td>The data type of values in the column </td></tr>
-    <tr><td class="paramname">name</td><td>The name of the column </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="a25973f7a0423ca8ade253b574687708b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25973f7a0423ca8ade253b574687708b">&#9670;&nbsp;</a></span>apply()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a> confluo.rpc.Column.apply </td>
-          <td>(</td>
-          <td class="paramtype">ByteBuffer&#160;</td>
-          <td class="paramname"><em>data</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Adds data to the column</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">data</td><td>The data to add </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A field containing the data </dd></dl>
-
-</div>
-</div>
-<a id="a35e9de479daaff175ad74aef7a687dac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35e9de479daaff175ad74aef7a687dac">&#9670;&nbsp;</a></span>getDataType()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classconfluo_1_1rpc_1_1_data_type.html">DataType</a> confluo.rpc.Column.getDataType </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Gets the data type of the column</p>
-<dl class="section return"><dt>Returns</dt><dd>The data type </dd></dl>
-
-</div>
-</div>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a73d703858e674291a51aff72b5dd6250"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a73d703858e674291a51aff72b5dd6250">&#9670;&nbsp;</a></span>getName()</h2>
 
@@ -232,6 +108,32 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Gets the name of the column</p>
 <dl class="section return"><dt>Returns</dt><dd>The name of the column </dd></dl>
+
+</div>
+</div>
+<a id="abe880618dd0c5cab6f71f8da49f1b5e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe880618dd0c5cab6f71f8da49f1b5e1">&#9670;&nbsp;</a></span>toString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">String confluo.rpc.Column.toString </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Convert to String. </p><dl class="section return"><dt>Returns</dt><dd>String representation of column. </dd></dl>
 
 </div>
 </div>

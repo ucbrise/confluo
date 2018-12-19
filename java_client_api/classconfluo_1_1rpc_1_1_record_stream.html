@@ -84,14 +84,16 @@ Inheritance diagram for confluo.rpc.RecordStream:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af60322257c8674161639e29a4474b63a"><td class="memItemLeft" align="right" valign="top">Iterator&lt; <a class="el" href="classconfluo_1_1rpc_1_1_record.html">Record</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record_stream.html#af60322257c8674161639e29a4474b63a">iterator</a> ()</td></tr>
-<tr class="separator:af60322257c8674161639e29a4474b63a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a517ace604abce60492ea06030bf38097"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classconfluo_1_1rpc_1_1_record.html">Record</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record_stream.html#a517ace604abce60492ea06030bf38097">next</a> ()</td></tr>
+<tr class="separator:a517ace604abce60492ea06030bf38097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e1eab474656d27a3e3b93bf981ea926"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record_stream.html#a3e1eab474656d27a3e3b93bf981ea926">hasNext</a> ()</td></tr>
+<tr class="separator:a3e1eab474656d27a3e3b93bf981ea926"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A stream of records and associated functionality </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="af60322257c8674161639e29a4474b63a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af60322257c8674161639e29a4474b63a">&#9670;&nbsp;</a></span>iterator()</h2>
+<a id="a3e1eab474656d27a3e3b93bf981ea926"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e1eab474656d27a3e3b93bf981ea926">&#9670;&nbsp;</a></span>hasNext()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -100,7 +102,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Iterator&lt;<a class="el" href="classconfluo_1_1rpc_1_1_record.html">Record</a>&gt; confluo.rpc.RecordStream.iterator </td>
+          <td class="memname">boolean confluo.rpc.RecordStream.hasNext </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -112,8 +114,35 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Iterator for the record stream</p>
-<dl class="section return"><dt>Returns</dt><dd>Iterator containing hasNext, next, and remove methods for record stream </dd></dl>
+<p>Checks whether the stream has any more elements</p>
+<dl class="section return"><dt>Returns</dt><dd>True if there are any more records in the stream, false otherwise </dd></dl>
+
+</div>
+</div>
+<a id="a517ace604abce60492ea06030bf38097"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a517ace604abce60492ea06030bf38097">&#9670;&nbsp;</a></span>next()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classconfluo_1_1rpc_1_1_record.html">Record</a> confluo.rpc.RecordStream.next </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Iterator next method for the record stream</p>
+<dl class="section return"><dt>Returns</dt><dd>A record containing the next element in the stream </dd></dl>
 
 </div>
 </div>

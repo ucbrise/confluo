@@ -1,11 +1,9 @@
 var searchData=
 [
-  ['clear',['clear',['../classconfluo_1_1rpc_1_1_r_p_c_record_batch_builder.html#a200f74251c0be0ad0451ee49b4d2fc43',1,'confluo::rpc::RPCRecordBatchBuilder']]],
-  ['close',['close',['../classconfluo_1_1rpc_1_1_r_p_c_client.html#a42fa15d6c4abac17064ef6a4eae0fcd7',1,'confluo::rpc::RPCClient']]],
-  ['column',['Column',['../classconfluo_1_1rpc_1_1_column.html',1,'confluo.rpc.Column'],['../classconfluo_1_1rpc_1_1_column.html#a05a29e589fb010b646c4fd86559274af',1,'confluo.rpc.Column.Column()']]],
-  ['connect',['connect',['../classconfluo_1_1rpc_1_1_r_p_c_client.html#a27a7f53a44790539f13940814874908a',1,'confluo::rpc::RPCClient']]],
-  ['converttorpcschema',['convertToRPCSchema',['../classconfluo_1_1rpc_1_1_r_p_c_type_conversions.html#ae8514c4ce2dd5f3e28915a6855783ca3',1,'confluo::rpc::RPCTypeConversions']]],
-  ['converttoschema',['convertToSchema',['../classconfluo_1_1rpc_1_1_r_p_c_type_conversions.html#a36c1d19ab9ffa0d4e8f709723146e6ea',1,'confluo::rpc::RPCTypeConversions']]],
-  ['createatomicmultilog',['createAtomicMultilog',['../classconfluo_1_1rpc_1_1_r_p_c_client.html#acdc29039bdd94e3fd3517e7c4d847100',1,'confluo::rpc::RPCClient']]],
-  ['rpc',['rpc',['../namespaceconfluo_1_1rpc.html',1,'confluo']]]
+  ['data_5ftype',['DATA_TYPE',['../enumconfluo_1_1rpc_1_1rpc__iterator__descriptor_1_1___fields.html#ae8e62b3a2e55ae16f0b9fdca15881b12',1,'confluo::rpc::rpc_iterator_descriptor::_Fields']]],
+  ['datatype',['DataType',['../classconfluo_1_1rpc_1_1_data_type.html',1,'confluo::rpc']]],
+  ['datatypes',['DataTypes',['../classconfluo_1_1rpc_1_1_data_types.html',1,'confluo::rpc']]],
+  ['disconnect',['disconnect',['../classconfluo_1_1rpc_1_1_rpc_client.html#a0a80ee2298671c13b49419045319c3c4',1,'confluo::rpc::RpcClient']]],
+  ['durable',['DURABLE',['../classconfluo_1_1rpc_1_1_storage_mode.html#a91050262c4c6a81dcb03c4bf1bd250e0',1,'confluo::rpc::StorageMode']]],
+  ['durable_5frelaxed',['DURABLE_RELAXED',['../classconfluo_1_1rpc_1_1_storage_mode.html#a2b7d59f573033249aafbec76de93dd28',1,'confluo::rpc::StorageMode']]]
 ];

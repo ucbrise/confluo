@@ -73,23 +73,29 @@ $(function() {
 <div class="title">confluo.rpc.Record Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Inheritance diagram for confluo.rpc.Record:</div>
+<div class="dyncontent">
+ <div class="center">
+  <img src="classconfluo_1_1rpc_1_1_record.png" usemap="#confluo.rpc.Record_map" alt=""/>
+  <map id="confluo.rpc.Record_map" name="confluo.rpc.Record_map">
+</map>
+ </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab6d40ee82bdeb4ea94abff9f9316aef6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#ab6d40ee82bdeb4ea94abff9f9316aef6">Record</a> (long logOffset, ByteBuffer data, long size)</td></tr>
-<tr class="separator:ab6d40ee82bdeb4ea94abff9f9316aef6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6913ce3ae30edd13cfe528ec43fce714"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#a6913ce3ae30edd13cfe528ec43fce714">pushBack</a> (<a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a> value)</td></tr>
-<tr class="separator:a6913ce3ae30edd13cfe528ec43fce714"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea9d0a64054ba6bd888a78b0fa1f918c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#aea9d0a64054ba6bd888a78b0fa1f918c">at</a> (int idx)</td></tr>
-<tr class="separator:aea9d0a64054ba6bd888a78b0fa1f918c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaae205039baec95d935e942d30cc027c"><td class="memItemLeft" align="right" valign="top">ByteBuffer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#aaae205039baec95d935e942d30cc027c">getData</a> ()</td></tr>
-<tr class="separator:aaae205039baec95d935e942d30cc027c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81c032d340733bbc62462310df1398be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#a81c032d340733bbc62462310df1398be">get</a> (int idx)</td></tr>
+<tr class="separator:a81c032d340733bbc62462310df1398be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5576b3eb29706d3a02a0ffe6042b5116"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#a5576b3eb29706d3a02a0ffe6042b5116">toString</a> ()</td></tr>
+<tr class="separator:a5576b3eb29706d3a02a0ffe6042b5116"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee58c800896bc79fd822947148c38660"><td class="memItemLeft" align="right" valign="top">Iterator&lt; <a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1_record.html#aee58c800896bc79fd822947148c38660">iterator</a> ()</td></tr>
+<tr class="separator:aee58c800896bc79fd822947148c38660"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A collection of values containing different types </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab6d40ee82bdeb4ea94abff9f9316aef6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6d40ee82bdeb4ea94abff9f9316aef6">&#9670;&nbsp;</a></span>Record()</h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a81c032d340733bbc62462310df1398be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81c032d340733bbc62462310df1398be">&#9670;&nbsp;</a></span>get()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -98,59 +104,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">confluo.rpc.Record.Record </td>
-          <td>(</td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>logOffset</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ByteBuffer&#160;</td>
-          <td class="paramname"><em>data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>size</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Initializes a record to the specified values</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">logOffset</td><td>The offset from the log </td></tr>
-    <tr><td class="paramname">data</td><td>The data the record should hold </td></tr>
-    <tr><td class="paramname">size</td><td>The size of the record in bytes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="aea9d0a64054ba6bd888a78b0fa1f918c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aea9d0a64054ba6bd888a78b0fa1f918c">&#9670;&nbsp;</a></span>at()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a> confluo.rpc.Record.at </td>
+          <td class="memname"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a> confluo.rpc.Record.get </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>idx</em></td><td>)</td>
@@ -163,7 +117,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets a field at a specific index</p>
+<p>Gets a field get a specific index</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">idx</td><td>The index of the desired field </td></tr>
@@ -174,8 +128,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aaae205039baec95d935e942d30cc027c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaae205039baec95d935e942d30cc027c">&#9670;&nbsp;</a></span>getData()</h2>
+<a id="aee58c800896bc79fd822947148c38660"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee58c800896bc79fd822947148c38660">&#9670;&nbsp;</a></span>iterator()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -184,7 +138,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ByteBuffer confluo.rpc.Record.getData </td>
+          <td class="memname">Iterator&lt;<a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a>&gt; confluo.rpc.Record.iterator </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -196,13 +150,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Gets the data of the record</p>
-<dl class="section return"><dt>Returns</dt><dd>THe data </dd></dl>
+<p>Returns an iterator over elements <a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a> elements.</p>
+<dl class="section return"><dt>Returns</dt><dd>an Iterator. </dd></dl>
 
 </div>
 </div>
-<a id="a6913ce3ae30edd13cfe528ec43fce714"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6913ce3ae30edd13cfe528ec43fce714">&#9670;&nbsp;</a></span>pushBack()</h2>
+<a id="a5576b3eb29706d3a02a0ffe6042b5116"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5576b3eb29706d3a02a0ffe6042b5116">&#9670;&nbsp;</a></span>toString()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -211,10 +165,9 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void confluo.rpc.Record.pushBack </td>
+          <td class="memname">String confluo.rpc.Record.toString </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classconfluo_1_1rpc_1_1_field.html">Field</a>&#160;</td>
-          <td class="paramname"><em>value</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -224,13 +177,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Adds a value to the record</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">value</td><td>The value to add </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Convert record to string.</p>
+<dl class="section return"><dt>Returns</dt><dd>String representation of record. </dd></dl>
 
 </div>
 </div>

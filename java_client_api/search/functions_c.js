@@ -1,8 +1,4 @@
 var searchData=
 [
-  ['schema',['Schema',['../classconfluo_1_1rpc_1_1_schema.html#a4d4db9eae69d651798360ce69e4f342c',1,'confluo::rpc::Schema']]],
-  ['schemabuilder',['SchemaBuilder',['../classconfluo_1_1rpc_1_1_schema_builder.html#ae6c97d0db44cb1c2dd5da5ec51af225e',1,'confluo::rpc::SchemaBuilder']]],
-  ['setcurrentatomicmultilog',['setCurrentAtomicMultilog',['../classconfluo_1_1rpc_1_1_r_p_c_client.html#a29bea40b05fd396e3f496fdbbdc6a7ea',1,'confluo::rpc::RPCClient']]],
-  ['setdatatype',['setDataType',['../classconfluo_1_1rpc_1_1rpc__iterator__descriptor.html#a74069d1c71d6dc7e612a321aba24c36b',1,'confluo::rpc::rpc_iterator_descriptor']]],
-  ['settype',['setType',['../classconfluo_1_1rpc_1_1rpc__iterator__descriptor.html#a0d12196e85081d06eb56718b80bd5e99',1,'confluo::rpc::rpc_iterator_descriptor']]]
+  ['tostring',['toString',['../classconfluo_1_1rpc_1_1_column.html#abe880618dd0c5cab6f71f8da49f1b5e1',1,'confluo.rpc.Column.toString()'],['../classconfluo_1_1rpc_1_1_field.html#a3b33d8edce60daaa6b66a8d9f20ff72e',1,'confluo.rpc.Field.toString()'],['../classconfluo_1_1rpc_1_1_record.html#a5576b3eb29706d3a02a0ffe6042b5116',1,'confluo.rpc.Record.toString()']]]
 ];
