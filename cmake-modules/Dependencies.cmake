@@ -2,7 +2,7 @@ include (ExternalProject)
 
 set(GTEST_VERSION "1.8.0")
 set(THRIFT_VERSION "0.11.0")
-set(BOOST_VERSION "1.53")
+set(BOOST_VERSION "1.58")
 set(DOXYGEN_VERSION "1.8")
 
 find_package(Threads REQUIRED)

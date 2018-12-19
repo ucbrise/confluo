@@ -5,7 +5,7 @@ Before you can install Confluo, make sure you have the following prerequisites:
 * MacOS X or Unix-based OS; Windows is not yet supported.
 * C++ compiler that supports C++11 standard
 * CMake 2.8 or later
-* Boost 1.53 or later
+* Boost 1.58 or later
 
 For python client, you will additionally require:
 
