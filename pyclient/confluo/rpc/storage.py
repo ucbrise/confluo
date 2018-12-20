@@ -3,7 +3,7 @@ from ttypes import *
 
 # Alias for rpc_storage_mode
 class StorageMode:
-    """ Different storage modes for confluo.
+    """ Confluo storage modes.
 
     Attributes:
         IN_MEMORY: Data stored in memory.

@@ -51,16 +51,15 @@ class Schema:
         """
         return self.columns_
 
-    def apply(self, offset, data):
+    def apply(self, data):
         """ Adds data to the schema.
 
         Args:
-            offset: The offset in the record where the data is
             data: The data to add.
         Returns:
             The record.
         """
-        return Record(offset, data, self)
+        return Record(data, self)
 
     def pack(self, rec):
         """ Pack data into a record.
@@ -89,22 +88,23 @@ class Column:
     """ Container of values for a specific type in the schema.
     """
 
-    def __init__(self, idx, offset, dtype, name, min_value, max_value):
+    def __init__(self, idx, offset, data_type, name, min_value, max_value):
         """ Initializes a column in the schema.
 
         Args:
             idx: The index of the column.
             offset: The offset of the column.
-            dtype: The data type of values in the column.
+            data_type: The data type of values in the column.
             name: The name of the column.
             min_value: The minimum value of the column.
             max_value: The maximum value of the column.
         """
         self.idx_ = idx
         self.offset_ = offset
-        self.data_type_ = dtype
+        self.data_type_ = data_type
         self.name_ = name.upper()
-        self.min_value_ = min_value
+        self.value = min_value
+        self.min_value_ = self.value
         self.max_value = max_value
 
     def __str__(self):
@@ -131,20 +131,16 @@ class Record:
     """ A collection of values containing different types.
     """
 
-    def __init__(self, offset, data, schm):
+    def __init__(self, data, schema):
         """
         Initializes a record to the specified values.
 
         Args:
-            offset: The offset from the log.
             data: The data the record should hold.
-            schm: The schema for the record.
+            schema: The schema for the record.
         """
-        self.offset_ = offset
         self.data_ = data
-        self.size_ = schm.record_size()
-        self.version_ = self.offset_ + self.size_
-        self.fields_ = [c.apply(self.data_) for c in schm.columns()]
+        self.fields_ = [c.apply(self.data_) for c in schema.columns()]
 
     def __str__(self):
         """ Converts to string
@@ -169,16 +165,16 @@ class Field:
     """ Contains data stored as part of a record.
     """
 
-    def __init__(self, idx, d_type, data):
+    def __init__(self, idx, data_type, data):
         """ Initializes the field to the data passed in.
 
         Args:
             idx: The index of the field.
-            d_type: The data type the value of the field contains.
+            data_type: The data type the value of the field contains.
             data: The data that the field contains.
         """
         self.idx_ = idx
-        self.data_type_ = d_type
+        self.data_type_ = data_type
         self.data_ = data
 
     def unpack(self):
@@ -209,23 +205,23 @@ class SchemaBuilder:
         self.columns_.append(timestamp_col)
         self.offset_ += data_types.ULONG_TYPE.size_
 
-    def add_column(self, dtype, name, min_value=None, max_value=None):
+    def add_column(self, data_type, name, min_value=None, max_value=None):
         """ Adds a column to the schema builder.
 
         Args:
-            dtype: The data type of the column.
+            data_type: The data type of the column.
             name: The name of the column.
             min_value: The minimum value of the column.
             max_value: The maximum value of the column.
         """
         if name.upper() == "TIMESTAMP":
             self.user_provided_ts_ = True
-            if dtype != data_types.ULONG_TYPE:
+            if data_type != data_types.ULONG_TYPE:
                 raise ValueError("TIMESTAMP must be of ULONG_TYPE")
             return self
-        col = Column(len(self.columns_), self.offset_, dtype, name, min_value, max_value)
+        col = Column(len(self.columns_), self.offset_, data_type, name, min_value, max_value)
         self.columns_.append(col)
-        self.offset_ += dtype.size_
+        self.offset_ += data_type.size_
         return self
 
     def build(self):
@@ -238,6 +234,14 @@ class SchemaBuilder:
 
 
 def make_schema(s):
+    """Converts a JSON-like string representation of the schema to our internal representation of the schema.
+
+    Args:
+        s: A JSON-like schema string
+
+    Returns:
+        Our internal representation of the schema.
+    """
     def ordered_load(stream):
         class OrderedLoader(yaml.Loader):
             pass

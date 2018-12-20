@@ -14,7 +14,8 @@ class RecordBatchBuilder:
         """
         self.schema_ = schema
         self.num_records_ = 0
-        self.clear()
+        self.batch_ = defaultdict(list)
+        self.batch_sizes_ = {}
 
     def add_record(self, record):
         """ Adds a record to the batch builder.
