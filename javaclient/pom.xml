@@ -6,7 +6,7 @@
 
   <groupId>riselab</groupId>
   <artifactId>confluo-client</artifactId>
-  <version>0.1.0</version>
+  <version>test</version>
   <packaging>jar</packaging>
   <name>Confluo Client</name>
 
