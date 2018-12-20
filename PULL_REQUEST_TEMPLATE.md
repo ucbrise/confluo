@@ -6,4 +6,4 @@
 
 (Please explain how this patch was tested. E.g. unit tests, integration tests, manual tests)
 
-Please review the [CONTRIBUTING](contributing.md) document before opening a pull request.
+Please review the [CONTRIBUTING](./CONTRIBUTING.md) document before opening a pull request.
