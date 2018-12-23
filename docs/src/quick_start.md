@@ -6,14 +6,14 @@ load some sample data, and query it.
 ## Pre-requisites
 
 * MacOS X or Unix-based OS; Windows is not yet supported.
-* C++ compiler that supports C++11 standard
-* CMake 2.8 or later
+* C++ compiler that supports C++11 standard (e.g., GCC 5.3 or later)
+* CMake 3.2 or later
 * Boost 1.58 or later
 
 For python client, you will additionally require:
 
 * Python 2.7 or later
-* Python Packages: six 1.7.2 or later
+* Python Packages: setuptools, six 1.7.2 or later
 
 For java client, you will additionally require:
 
