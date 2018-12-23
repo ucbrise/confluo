@@ -878,14 +878,14 @@
 <p>Before you can install Confluo, make sure you have the following prerequisites:</p>
 <ul>
 <li>MacOS X or Unix-based OS; Windows is not yet supported.</li>
-<li>C++ compiler that supports C++11 standard</li>
-<li>CMake 2.8 or later</li>
+<li>C++ compiler that supports C++11 standard (e.g., GCC 5.3 or later)</li>
+<li>CMake 3.2 or later</li>
 <li>Boost 1.58 or later</li>
 </ul>
 <p>For python client, you will additionally require:</p>
 <ul>
 <li>Python 2.7 or later</li>
-<li>Python Packages: six 1.7.2 or later</li>
+<li>Python Packages: setuptools, six 1.7.2 or later</li>
 </ul>
 <p>For java client, you will additionally require:</p>
 <ul>
@@ -894,18 +894,16 @@
 </ul>
 <h2 id="download">Download<a class="headerlink" href="#download" title="Permanent link">&para;</a></h2>
 <p>You can obtain the latest version of Confluo by cloning the GitHub repository:</p>
-<div class="codehilite"><pre><span></span>git clone https://github.com/ucbrise/confluo.git
-</pre></div>
+<pre class="codehilite"><code class="language-bash">git clone https://github.com/ucbrise/confluo.git</code></pre>
 
 <h2 id="configure">Configure<a class="headerlink" href="#configure" title="Permanent link">&para;</a></h2>
 <p>To configure the build, Confluo uses CMake as its build system. Confluo only 
 supports out of source builds; the simplest way to configure the build would be 
 as follows:</p>
-<div class="codehilite"><pre><span></span><span class="nb">cd</span> confluo
+<pre class="codehilite"><code class="language-bash">cd confluo
 mkdir -p build
-<span class="nb">cd</span> build
-cmake ..
-</pre></div>
+cd build
+cmake ..</code></pre>
 
 <p>It is possible to configure the build specifying certain options based on 
 requirements; the supported options are:</p>
@@ -919,33 +917,27 @@ requirements; the supported options are:</p>
 </ul>
 <p>In order to explicitly enable or disable any of these options, set the value of
 the corresponding variable to <code>ON</code> or <code>OFF</code> as follows:</p>
-<div class="codehilite"><pre><span></span>cmake -DBUILD_TESTS<span class="o">=</span>OFF
-</pre></div>
+<pre class="codehilite"><code class="language-bash">cmake -DBUILD_TESTS=OFF</code></pre>
 
 <p>Finally, you can configure the install location for Confluo by modifying the
 <code>CMAKE_INSTALL_PREFIX</code> variable (which is set to /usr/local by default):</p>
-<div class="codehilite"><pre><span></span>cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/path/to/installation
-</pre></div>
+<pre class="codehilite"><code class="language-bash">cmake -DCMAKE_INSTALL_PREFIX=/path/to/installation</code></pre>
 
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <p>Once the build is configured, you can proceed to compile, test and install 
 Confluo. </p>
 <p>To build, use:</p>
-<div class="codehilite"><pre><span></span>make
-</pre></div>
+<pre class="codehilite"><code class="language-bash">make</code></pre>
 
 <p>or </p>
-<div class="codehilite"><pre><span></span>make -j<span class="o">{</span>NUM_CORES<span class="o">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-bash">make -j{NUM_CORES}</code></pre>
 
 <p>to speed up the build on multi-core systems.</p>
 <p>To run the various unit tests, run:</p>
-<div class="codehilite"><pre><span></span>make <span class="nb">test</span>
-</pre></div>
+<pre class="codehilite"><code class="language-bash">make test</code></pre>
 
 <p>and finally, to install, use:</p>
-<div class="codehilite"><pre><span></span>make install
-</pre></div>
+<pre class="codehilite"><code class="language-bash">make install</code></pre>
                 
                   
                 

@@ -1261,14 +1261,13 @@ Confluo internally assigns one during the write operation. </p>
 <p>A schema in Confluo is a collection of strongly-typed attributes. It is specified
 via JSON like semantics; for instance, consider the example below for a simple schema 
 with three attributes: </p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
-  <span class="err">timestamp:</span> <span class="err">ULONG,</span>
-  <span class="err">op_latency_ms:</span> <span class="err">DOUBLE,</span>
-  <span class="err">cpu_util:</span> <span class="err">DOUBLE,</span>
-  <span class="err">mem_avail:</span> <span class="err">DOUBLE,</span>
-  <span class="err">log_msg:</span> <span class="err">STRING(100)</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-json">{
+  timestamp: ULONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}</code></pre>
 
 <p>The first attribute is timestamp with a 8-byte signed integer type; the second, third and
 fourth attributes correspond to operation latency (in ms), CPU utilization and available 
@@ -1352,23 +1351,21 @@ header file to include is <code>confluo_store.h</code>. </p>
 <h4 id="creating-a-new-confluo-store">Creating a New Confluo Store<a class="headerlink" href="#creating-a-new-confluo-store" title="Permanent link">&para;</a></h4>
 <p>We will first create a new Confluo Store with the data path for it to use 
 as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">confluo_store</span> <span class="n">store</span><span class="p">(</span><span class="s">&quot;/path/to/data&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">confluo::confluo_store store("/path/to/data");</code></pre>
 
 <h4 id="creating-a-new-atomic-multilog">Creating a New Atomic MultiLog<a class="headerlink" href="#creating-a-new-atomic-multilog" title="Permanent link">&para;</a></h4>
 <p>We then create a new Atomic MultiLog within the Store (synonymous to a database
 table); this requires three parameters: a name for the Atomic MultiLog, a fixed
 schema, and a storage mode:</p>
-<div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">schema</span> <span class="o">=</span> <span class="s">&quot;{</span>
-  <span class="nl">timestamp</span><span class="p">:</span> <span class="n">ULONG</span><span class="p">,</span>
-  <span class="nl">op_latency_ms</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">cpu_util</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">mem_avail</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">log_msg</span><span class="p">:</span> <span class="n">STRING</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="p">}</span><span class="s">&quot;;</span>
-<span class="k">auto</span> <span class="n">storage_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">;</span>
-<span class="n">store</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">std::string schema = "{
+  timestamp: ULONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}";
+auto storage_mode = confluo::storage::IN_MEMORY;
+store.create_atomic_multilog("perf_log", schema, storage_mode);</code></pre>
 
 <p>Our Atomic MultiLog adopts the same schema outlined <a href="./#schema">above</a>. The 
 storage mode is set to in-memory, but can be of the following types:</p>
@@ -1395,26 +1392,22 @@ storage mode is set to in-memory, but can be of the following types:</p>
 </tbody>
 </table>
 <p>We then obtain a reference to our newly created Atomic MultiLog:</p>
-<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">atomic_multilog</span><span class="o">*</span> <span class="n">mlog</span> <span class="o">=</span> <span class="n">store</span><span class="p">.</span><span class="n">get_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">confluo::atomic_multilog* mlog = store.get_atomic_multilog("perf_log");</code></pre>
 
 <h4 id="adding-indexes">Adding Indexes<a class="headerlink" href="#adding-indexes" title="Permanent link">&para;</a></h4>
 <p>We can define indexes on the Atomic MultiLog as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_index</span><span class="p">(</span><span class="s">&quot;op_latency_ms&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;add_index("op_latency_ms");</code></pre>
 
 <p>to add an index on <code>op_latency_ms</code> attribute. </p>
 <h4 id="adding-filters">Adding Filters<a class="headerlink" href="#adding-filters" title="Permanent link">&para;</a></h4>
 <p>We can also install filters as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;add_filter("low_resources", "cpu_util&gt;0.8 || mem_avail&lt;0.1");</code></pre>
 
 <p>to explicitly filter out records that indicate low system resources (CPU 
 utilization &gt; 80%, Available Memory &lt; 10%), using a filter named <code>low_resources</code>. </p>
 <h4 id="adding-aggregates">Adding Aggregates<a class="headerlink" href="#adding-aggregates" title="Permanent link">&para;</a></h4>
 <p>Additionally, we can add aggregates on filters as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;MAX(op_latency_ms)&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)");</code></pre>
 
 <p>This adds a new stored aggregate <code>max_latency_ms</code> on the filter 
 <code>low_resources</code> we defined before. In essence, it records the highest 
@@ -1422,8 +1415,7 @@ operation latency reported in any record that also indicated low
 available resources.</p>
 <h4 id="installing-triggers">Installing Triggers<a class="headerlink" href="#installing-triggers" title="Permanent link">&para;</a></h4>
 <p>Finally, we can install a trigger on aggregates as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">install_trigger</span><span class="p">(</span><span class="s">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s">&quot;max_latency &gt; 1000&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;install_trigger("high_latency_trigger", "max_latency &gt; 1000");</code></pre>
 
 <p>This installs a trigger <code>high_latency_trigger</code> on the aggregate 
 <code>max_latency_ms</code>, which should generate an alert whenever the 
@@ -1440,10 +1432,9 @@ the vector corresponds to a single record. The number of entries in the
 vector must match the number of entries in the schema, with the exception
 of the timestamp --- if the timestamp is not provided, Confluo will automatically
 assign one.</p>
-<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.5&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span>  <span class="s">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;500&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.05&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off3</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;1001&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.03&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">});</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">size_t off1 = mlog-&gt;append({"100", "0.5", "0.9",  "INFO: Launched 1 tasks"});
+size_t off2 = mlog-&gt;append({"500", "0.9", "0.05", "WARN: Server {2} down"});
+size_t off3 = mlog-&gt;append({"1001", "0.9", "0.03", "WARN: Server {2, 4, 5} down"});</code></pre>
 
 <p>Also note that the operation returns a unique offset corresponding to each append
 operation. This forms the "key" for records stored in the Atomic MultiLog -- records
@@ -1452,46 +1443,40 @@ can be retrieved by specifying their corresponding offsets.</p>
 <p>This version of <code>append</code> takes as its input a pointer to a C/C++ struct, that maps
 exactly to the Atomic MultiLog's schema. For instance, our schema would map to the following
 C/C++ struct:</p>
-<div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">perf_log_record</span> <span class="p">{</span>
-  <span class="kt">int64_t</span> <span class="n">timestamp</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">op_latency_ms</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">cpu_util</span><span class="p">;</span>
-  <span class="kt">double</span> <span class="n">mem_avail</span><span class="p">;</span>
-  <span class="kt">char</span> <span class="n">log_msg</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
-<span class="p">};</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">struct perf_log_record {
+  int64_t timestamp;
+  double op_latency_ms;
+  double cpu_util;
+  double mem_avail;
+  char log_msg[100];
+};</code></pre>
 
 <p>Note that <code>log_msg</code> maps to a <code>char[100]</code> rather than an <code>std::string</code>. To add a new record, we
 would populate a struct instance, and pass its reference to the append function:</p>
-<div class="codehilite"><pre><span></span><span class="kt">int64_t</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">();</span>
-<span class="n">perf_log_record</span> <span class="n">rec</span> <span class="o">=</span> <span class="p">{</span> <span class="n">ts</span><span class="p">,</span> <span class="mf">2000.0</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span> <span class="p">};</span>
-<span class="kt">size_t</span> <span class="n">off4</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">int64_t ts = utils::time_utils::cur_ns();
+perf_log_record rec = { ts, 2000.0, 0.95, 0.01, "WARN: Server {2, 4, 5} down" };
+size_t off4 = mlog-&gt;append(&amp;rec);</code></pre>
 
 <p>Note that this is a more efficient variant of append, since it avoids the overheads of parsing 
 strings to the corresponding attribute data types.</p>
 <h5 id="batched-appends">Batched Appends<a class="headerlink" href="#batched-appends" title="Permanent link">&para;</a></h5>
 <p>It is also possible to batch multiple record appends into a single append. The first
 step in building a batch is to obtain a batch builder:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">batch_bldr</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">get_batch_builder</span><span class="p">();</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto batch_bldr = mlog-&gt;get_batch_builder();</code></pre>
 
 <p>The batch builder supports adding new records via both string vector and raw byte interfaces:</p>
-<div class="codehilite"><pre><span></span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">({</span> <span class="s">&quot;400&quot;</span><span class="p">,</span> <span class="s">&quot;0.85&quot;</span><span class="p">,</span> <span class="s">&quot;0.07&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4} down&quot;</span><span class="p">});</span>
-<span class="n">perf_log_record</span> <span class="n">rec</span> <span class="o">=</span> <span class="p">{</span> <span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">(),</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span> <span class="p">};</span>
-<span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rec</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">batch_bldr.add_record({ "400", "0.85", "0.07", "WARN: Server {2, 4} down"});
+perf_log_record rec = { utils::time_utils::cur_ns(), 100.0, 0.65, 0.25, "WARN: Server {2} down" };
+batch_bldr.add_record(&amp;rec);</code></pre>
 
 <p>Once the batch is populated, we can append the batch to the Atomic MultiLog as follows:</p>
-<div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off5</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">append_batch</span><span class="p">(</span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">get_batch</span><span class="p">());</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">size_t off5 = mlog-&gt;append_batch(batch_bldr.get_batch());</code></pre>
 
 <p>To understand how we can query the data we have loaded so far, read the guide on <a href="../queries/">Confluo Queries</a>.</p>
 <h3 id="stand-alone-mode">Stand-alone Mode<a class="headerlink" href="#stand-alone-mode" title="Permanent link">&para;</a></h3>
 <p>In the stand-alone mode, Confluo runs as a daemon server, serving client requests
 using Apache Thrift protocol. To start the server, run:</p>
-<div class="codehilite"><pre><span></span>confuod --address<span class="o">=</span><span class="m">127</span>.0.0.1 --port<span class="o">=</span><span class="m">9090</span>
-</pre></div>
+<pre class="codehilite"><code class="language-bash">confuod --address=127.0.0.1 --port=9090</code></pre>
 
 <p>Once the server daemon is running, you can send requests to it using the 
 C++/Python/Java client APIs. Note that the C++ Client API is almost identical to 
@@ -1504,14 +1489,12 @@ stand-alone mode. The relevant header file to include for the C++ Client API is
 <div class="superfences-tabs">
 <input name="__tabs_1" type="radio" id="__tab_1_0" checked="checked" />
 <label for="__tab_1_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">rpc</span><span class="o">::</span><span class="n">rpc_client</span> <span class="n">client</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">9090</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">confluo::rpc::rpc_client client("127.0.0.1", 9090);</code></pre></div>
 <input name="__tabs_1" type="radio" id="__tab_1_1" />
 <label for="__tab_1_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">confluo.rpc.client</span> <span class="kn">import</span> <span class="n">RpcClient</span>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">from confluo.rpc.client import RpcClient
 
-<span class="n">client</span> <span class="o">=</span> <span class="n">RpcClient</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">9090</span><span class="p">)</span>
-</pre></div></div>
+client = RpcClient("127.0.0.1", 9090)</code></pre></div>
 </div>
 <p>The first argument to the <code>rpc_client</code> constructor corresponds to the server
 hostname, while the second argument corresponds to the server port.</p>
@@ -1522,30 +1505,28 @@ MultiLog, a fixed schema, and a storage mode:</p>
 <div class="superfences-tabs">
 <input name="__tabs_2" type="radio" id="__tab_2_0" checked="checked" />
 <label for="__tab_2_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">schema</span> <span class="o">=</span> <span class="s">&quot;{</span>
-  <span class="nl">timestamp</span><span class="p">:</span> <span class="n">LONG</span><span class="p">,</span>
-  <span class="nl">op_latency_ms</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">cpu_util</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">mem_avail</span><span class="p">:</span> <span class="n">DOUBLE</span><span class="p">,</span>
-  <span class="nl">log_msg</span><span class="p">:</span> <span class="n">STRING</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="p">}</span><span class="s">&quot;;</span>
-<span class="k">auto</span> <span class="n">storage_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">;</span>
-<span class="n">client</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">std::string schema = "{
+  timestamp: LONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}";
+auto storage_mode = confluo::storage::IN_MEMORY;
+client.create_atomic_multilog("perf_log", schema, storage_mode);</code></pre></div>
 <input name="__tabs_2" type="radio" id="__tab_2_1" />
 <label for="__tab_2_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">confluo.rpc.storage</span> <span class="kn">import</span> <span class="n">StorageMode</span>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">from confluo.rpc.storage import StorageMode
 
-<span class="n">schema</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;{</span>
-<span class="s2">  timestamp: ULONG,</span>
-<span class="s2">  op_latency_ms: DOUBLE,</span>
-<span class="s2">  cpu_util: DOUBLE,</span>
-<span class="s2">  mem_avail: DOUBLE,</span>
-<span class="s2">  log_msg: STRING(100)</span>
-<span class="s2">}&quot;&quot;&quot;</span>
-<span class="n">storage_mode</span> <span class="o">=</span> <span class="n">StorageMode</span><span class="o">.</span><span class="n">IN_MEMORY</span>
-<span class="n">client</span><span class="o">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s2">&quot;perf_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage_mode</span><span class="p">)</span>
-</pre></div></div>
+schema = """{
+  timestamp: ULONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}"""
+storage_mode = StorageMode.IN_MEMORY
+client.create_atomic_multilog("perf_log", schema, storage_mode)</code></pre></div>
 </div>
 <p>This operation also internally sets the current Atomic MultiLog 
 for the client to the one we just created (i.e., <code>perf_log</code>). It
@@ -1554,12 +1535,10 @@ the client as follows:</p>
 <div class="superfences-tabs">
 <input name="__tabs_3" type="radio" id="__tab_3_0" checked="checked" />
 <label for="__tab_3_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">client.set_current_atomic_multilog("perf_log");</code></pre></div>
 <input name="__tabs_3" type="radio" id="__tab_3_1" />
 <label for="__tab_3_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s2">&quot;perf_log&quot;</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">client.set_current_atomic_multilog("perf_log")</code></pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1572,48 +1551,40 @@ will result in exceptions.</p>
 <div class="superfences-tabs">
 <input name="__tabs_4" type="radio" id="__tab_4_0" checked="checked" />
 <label for="__tab_4_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_index</span><span class="p">(</span><span class="s">&quot;op_latency_ms&quot;</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">client.add_index("op_latency_ms");</code></pre></div>
 <input name="__tabs_4" type="radio" id="__tab_4_1" />
 <label for="__tab_4_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">add_index</span><span class="p">(</span><span class="s2">&quot;op_latency_ms&quot;</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">client.add_index("op_latency_ms")</code></pre></div>
 </div>
 <h4 id="adding-filters_1">Adding Filters<a class="headerlink" href="#adding-filters_1" title="Permanent link">&para;</a></h4>
 <p>We can also install filters as follows:</p>
 <div class="superfences-tabs">
 <input name="__tabs_5" type="radio" id="__tab_5_0" checked="checked" />
 <label for="__tab_5_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">client.add_filter("low_resources", "cpu_util&gt;0.8 || mem_avail&lt;0.1");</code></pre></div>
 <input name="__tabs_5" type="radio" id="__tab_5_1" />
 <label for="__tab_5_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="s2">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s2">&quot;cpu_util&gt;0.8 || mem_avail&lt;0.1&quot;</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">client.add_filter("low_resources", "cpu_util&gt;0.8 || mem_avail&lt;0.1")</code></pre></div>
 </div>
 <h4 id="adding-aggregates_1">Adding Aggregates<a class="headerlink" href="#adding-aggregates_1" title="Permanent link">&para;</a></h4>
 <p>Additionally, we can add aggregates on filters as follows:</p>
 <div class="superfences-tabs">
 <input name="__tabs_6" type="radio" id="__tab_6_0" checked="checked" />
 <label for="__tab_6_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s">&quot;MAX(op_latency_ms)&quot;</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)");</code></pre></div>
 <input name="__tabs_6" type="radio" id="__tab_6_1" />
 <label for="__tab_6_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">add_aggregate</span><span class="p">(</span><span class="s2">&quot;max_latency_ms&quot;</span><span class="p">,</span> <span class="s2">&quot;low_resources&quot;</span><span class="p">,</span> <span class="s2">&quot;MAX(op_latency_ms)&quot;</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)")</code></pre></div>
 </div>
 <h4 id="installing-triggers_1">Installing Triggers<a class="headerlink" href="#installing-triggers_1" title="Permanent link">&para;</a></h4>
 <p>Finally, we can install a trigger on an aggregate as follows:</p>
 <div class="superfences-tabs">
 <input name="__tabs_7" type="radio" id="__tab_7_0" checked="checked" />
 <label for="__tab_7_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">install_trigger</span><span class="p">(</span><span class="s">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s">&quot;max_latency_ms &gt; 1000&quot;</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">client.install_trigger("high_latency_trigger", "max_latency_ms &gt; 1000");</code></pre></div>
 <input name="__tabs_7" type="radio" id="__tab_7_1" />
 <label for="__tab_7_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">install_trigger</span><span class="p">(</span><span class="s2">&quot;high_latency_trigger&quot;</span><span class="p">,</span> <span class="s2">&quot;max_latency_ms &gt; 1000&quot;</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">client.install_trigger("high_latency_trigger", "max_latency_ms &gt; 1000")</code></pre></div>
 </div>
 <h4 id="loading-sample-data-into-atomic-multilog_1">Loading sample data into Atomic MultiLog<a class="headerlink" href="#loading-sample-data-into-atomic-multilog_1" title="Permanent link">&para;</a></h4>
 <p>We are now ready to load some data into the Atomic MultiLog on the server. </p>
@@ -1621,16 +1592,14 @@ will result in exceptions.</p>
 <div class="superfences-tabs">
 <input name="__tabs_8" type="radio" id="__tab_8_0" checked="checked" />
 <label for="__tab_8_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off1</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.5&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span>  <span class="s">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off2</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;500&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.05&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span><span class="p">});</span>
-<span class="kt">size_t</span> <span class="n">off3</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">&quot;1001&quot;</span><span class="p">,</span> <span class="s">&quot;0.9&quot;</span><span class="p">,</span> <span class="s">&quot;0.03&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">});</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">size_t off1 = client.append({"100", "0.5", "0.9",  "INFO: Launched 1 tasks"});
+size_t off2 = client.append({"500", "0.9", "0.05", "WARN: Server {2} down"});
+size_t off3 = client.append({"1001", "0.9", "0.03", "WARN: Server {2, 4, 5} down"});</code></pre></div>
 <input name="__tabs_8" type="radio" id="__tab_8_1" />
 <label for="__tab_8_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">off1</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span>  <span class="s2">&quot;INFO: Launched 1 tasks&quot;</span><span class="p">])</span>
-<span class="n">off2</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mf">500.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="s2">&quot;WARN: Server {2} down&quot;</span><span class="p">])</span>
-<span class="n">off3</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mf">1001.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="s2">&quot;WARN: Server {2, 4, 5} down&quot;</span><span class="p">])</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">off1 = client.append([100.0, 0.5, 0.9,  "INFO: Launched 1 tasks"])
+off2 = client.append([500.0, 0.9, 0.05, "WARN: Server {2} down"])
+off3 = client.append([1001.0, 0.9, 0.03, "WARN: Server {2, 4, 5} down"])</code></pre></div>
 </div>
 <h5 id="batched-appends_1">Batched Appends<a class="headerlink" href="#batched-appends_1" title="Permanent link">&para;</a></h5>
 <p>It is also possible to batch multiple record appends into a single append operation via the client API. 
@@ -1639,36 +1608,30 @@ This is particularly useful since batching helps amortize the cost of network la
 <div class="superfences-tabs">
 <input name="__tabs_9" type="radio" id="__tab_9_0" checked="checked" />
 <label for="__tab_9_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">batch_bldr</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">get_batch_builder</span><span class="p">();</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">auto batch_bldr = client.get_batch_builder();</code></pre></div>
 <input name="__tabs_9" type="radio" id="__tab_9_1" />
 <label for="__tab_9_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">batch_bldr</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_batch_builder</span><span class="p">()</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">batch_bldr = client.get_batch_builder()</code></pre></div>
 </div>
 <p>The batch builder supports adding new records via both string vector and raw byte interfaces:</p>
 <div class="superfences-tabs">
 <input name="__tabs_10" type="radio" id="__tab_10_0" checked="checked" />
 <label for="__tab_10_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">({</span> <span class="s">&quot;400&quot;</span><span class="p">,</span> <span class="s">&quot;0.85&quot;</span><span class="p">,</span> <span class="s">&quot;0.07&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2, 4} down&quot;</span><span class="p">});</span>
-<span class="n">batch_bldr</span><span class="p">.</span><span class="n">add_record</span><span class="p">({</span> <span class="s">&quot;100&quot;</span><span class="p">,</span> <span class="s">&quot;0.65&quot;</span><span class="p">,</span> <span class="s">&quot;0.25&quot;</span><span class="p">,</span> <span class="s">&quot;WARN: Server {2} down&quot;</span> <span class="p">});</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">batch_bldr.add_record({ "400", "0.85", "0.07", "WARN: Server {2, 4} down"});
+batch_bldr.add_record({ "100", "0.65", "0.25", "WARN: Server {2} down" });</code></pre></div>
 <input name="__tabs_10" type="radio" id="__tab_10_1" />
 <label for="__tab_10_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">batch_bldr</span><span class="o">.</span><span class="n">add_record</span><span class="p">([</span> <span class="mf">400.0</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="s2">&quot;WARN: Server {2, 4} down&quot;</span> <span class="p">])</span>
-<span class="n">batch_bldr</span><span class="o">.</span><span class="n">add_record</span><span class="p">([</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s2">&quot;WARN: Server {2} down&quot;</span> <span class="p">])</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">batch_bldr.add_record([ 400.0, 0.85, 0.07, "WARN: Server {2, 4} down" ])
+batch_bldr.add_record([ 100.0, 0.65, 0.25, "WARN: Server {2} down" ])</code></pre></div>
 </div>
 <p>Once the batch is populated, we can append the batch as follows:</p>
 <div class="superfences-tabs">
 <input name="__tabs_11" type="radio" id="__tab_11_0" checked="checked" />
 <label for="__tab_11_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="kt">size_t</span> <span class="n">off4</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">append_batch</span><span class="p">(</span><span class="n">batch_bldr</span><span class="p">.</span><span class="n">get_batch</span><span class="p">());</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">size_t off4 = client.append_batch(batch_bldr.get_batch());</code></pre></div>
 <input name="__tabs_11" type="radio" id="__tab_11_1" />
 <label for="__tab_11_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">off4</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">append_batch</span><span class="p">(</span><span class="n">batch_bldr</span><span class="o">.</span><span class="n">get_batch</span><span class="p">())</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">off4 = client.append_batch(batch_bldr.get_batch())</code></pre></div>
 </div>
 <p>Details on querying the data via the client interface can be found in the guide on <a href="../queries/">Confluo Queries</a>.</p>
 <div class="footnote">

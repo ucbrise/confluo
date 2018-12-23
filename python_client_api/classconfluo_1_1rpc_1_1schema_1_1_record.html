@@ -77,8 +77,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5f77dcd1598303a94f8d30d00c975637"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_record.html#a5f77dcd1598303a94f8d30d00c975637">__init__</a> (self, offset, data, schm)</td></tr>
-<tr class="separator:a5f77dcd1598303a94f8d30d00c975637"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aead9ff217fb05d5787c1bd5d2e5bd391"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_record.html#aead9ff217fb05d5787c1bd5d2e5bd391">__init__</a> (self, data, schema)</td></tr>
+<tr class="separator:aead9ff217fb05d5787c1bd5d2e5bd391"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2ed09c993b1c359a109425a195a9bb1"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_record.html#ab2ed09c993b1c359a109425a195a9bb1">__str__</a> (self)</td></tr>
 <tr class="separator:ab2ed09c993b1c359a109425a195a9bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8c93542d1d63c60efb9e9f0f9a81687"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_record.html#af8c93542d1d63c60efb9e9f0f9a81687">__getitem__</a> (self, idx)</td></tr>
@@ -86,18 +86,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ade7138ecb5d1b6f361e91cb33331a8f3"><td class="memItemLeft" align="right" valign="top"><a id="ade7138ecb5d1b6f361e91cb33331a8f3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>offset_</b></td></tr>
-<tr class="separator:ade7138ecb5d1b6f361e91cb33331a8f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b314b302f9c0756a7291a49edc3fc12"><td class="memItemLeft" align="right" valign="top"><a id="a3b314b302f9c0756a7291a49edc3fc12"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>data_</b></td></tr>
 <tr class="separator:a3b314b302f9c0756a7291a49edc3fc12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4d30d3a18e6b6ee26dbc4cfe9d9f991"><td class="memItemLeft" align="right" valign="top"><a id="ad4d30d3a18e6b6ee26dbc4cfe9d9f991"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>size_</b></td></tr>
-<tr class="separator:ad4d30d3a18e6b6ee26dbc4cfe9d9f991"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade649bffb14b5115b49e11b711a108d3"><td class="memItemLeft" align="right" valign="top"><a id="ade649bffb14b5115b49e11b711a108d3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>version_</b></td></tr>
-<tr class="separator:ade649bffb14b5115b49e11b711a108d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a487e3de1541156e06087645f11dd9415"><td class="memItemLeft" align="right" valign="top"><a id="a487e3de1541156e06087645f11dd9415"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>fields_</b></td></tr>
 <tr class="separator:a487e3de1541156e06087645f11dd9415"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -105,8 +96,8 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">A collection of values containing different types.
 </pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a5f77dcd1598303a94f8d30d00c975637"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f77dcd1598303a94f8d30d00c975637">&#9670;&nbsp;</a></span>__init__()</h2>
+<a id="aead9ff217fb05d5787c1bd5d2e5bd391"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aead9ff217fb05d5787c1bd5d2e5bd391">&#9670;&nbsp;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -121,19 +112,13 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>offset</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">&#160;</td>
           <td class="paramname"><em>data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>schm</em>&#160;</td>
+          <td class="paramname"><em>schema</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -145,9 +130,8 @@ Public Attributes</h2></td></tr>
 <pre class="fragment">Initializes a record to the specified values.
 
 Args:
-    offset: The offset from the log.
     data: The data the record should hold.
-    schm: The schema for the record.
+    schema: The schema for the record.
 </pre> 
 </div>
 </div>

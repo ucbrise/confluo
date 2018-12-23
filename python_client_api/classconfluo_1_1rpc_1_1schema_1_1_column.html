@@ -77,8 +77,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aabf45412cca81009585bf3d9ba69f6d3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_column.html#aabf45412cca81009585bf3d9ba69f6d3">__init__</a> (self, idx, offset, dtype, name, min_value, max_value)</td></tr>
-<tr class="separator:aabf45412cca81009585bf3d9ba69f6d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f342dae6a5db795672e9e2ee631cb8f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_column.html#a7f342dae6a5db795672e9e2ee631cb8f">__init__</a> (self, idx, offset, data_type, name, min_value, max_value)</td></tr>
+<tr class="separator:a7f342dae6a5db795672e9e2ee631cb8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6db5bfddf86ec53fb0d55d2c142e2a2f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_column.html#a6db5bfddf86ec53fb0d55d2c142e2a2f">__str__</a> (self)</td></tr>
 <tr class="separator:a6db5bfddf86ec53fb0d55d2c142e2a2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37b24b5b0e239b7db5cc6ee522b19f40"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1schema_1_1_column.html#a37b24b5b0e239b7db5cc6ee522b19f40">apply</a> (self, data)</td></tr>
@@ -98,6 +98,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a228b2955b4a587f82a9548da10b2abb1"><td class="memItemLeft" align="right" valign="top"><a id="a228b2955b4a587f82a9548da10b2abb1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>name_</b></td></tr>
 <tr class="separator:a228b2955b4a587f82a9548da10b2abb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a950b04b3f80fd93fa31983118f0b6999"><td class="memItemLeft" align="right" valign="top"><a id="a950b04b3f80fd93fa31983118f0b6999"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>value</b></td></tr>
+<tr class="separator:a950b04b3f80fd93fa31983118f0b6999"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad33569f9fea96b9d5fc3b149a2921fb4"><td class="memItemLeft" align="right" valign="top"><a id="ad33569f9fea96b9d5fc3b149a2921fb4"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>min_value_</b></td></tr>
 <tr class="separator:ad33569f9fea96b9d5fc3b149a2921fb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -108,8 +111,8 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">Container of values for a specific type in the schema.
 </pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aabf45412cca81009585bf3d9ba69f6d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aabf45412cca81009585bf3d9ba69f6d3">&#9670;&nbsp;</a></span>__init__()</h2>
+<a id="a7f342dae6a5db795672e9e2ee631cb8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f342dae6a5db795672e9e2ee631cb8f">&#9670;&nbsp;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -136,7 +139,7 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>dtype</em>, </td>
+          <td class="paramname"><em>data_type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -168,7 +171,7 @@ Public Attributes</h2></td></tr>
 Args:
     idx: The index of the column.
     offset: The offset of the column.
-    dtype: The data type of values in the column.
+    data_type: The data type of values in the column.
     name: The name of the column.
     min_value: The minimum value of the column.
     max_value: The maximum value of the column.

@@ -953,17 +953,16 @@ see <a href="../libconfluo/confluo/types/serde_ops.h">serde_ops.h</a> for exampl
 it needs to be registered with Confluo's <a href="../libconfluo/confluo/types/type_manager.h">type manager</a> 
 via the <code>type_manager::register_type</code> interface. We can register a type as 
 follows:
-<div class="codehilite"><pre><span></span><span class="n">type_properties</span> <span class="nf">test_properties</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">limits</span><span class="o">::</span><span class="n">int_min</span><span class="p">,</span>
-                                <span class="o">&amp;</span><span class="n">limits</span><span class="o">::</span><span class="n">int_max</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">limits</span><span class="o">::</span><span class="n">int_one</span><span class="p">,</span> 
-                                <span class="o">&amp;</span><span class="n">limits</span><span class="o">::</span><span class="n">int_one</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">limits</span><span class="o">::</span><span class="n">int_zero</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span>
-                                <span class="n">get_relops</span><span class="p">(),</span> <span class="n">get_unaryops</span><span class="p">(),</span> 
-                                <span class="n">get_binaryops</span><span class="p">(),</span>
-                                <span class="n">get_keyops</span><span class="p">(),</span> <span class="o">&amp;</span><span class="n">test_type</span><span class="o">::</span><span class="n">parse_test</span><span class="p">,</span>
-                                <span class="o">&amp;</span><span class="n">test_type</span><span class="o">::</span><span class="n">test_to_string</span><span class="p">,</span>
-                                <span class="o">&amp;</span><span class="n">confluo</span><span class="o">::</span><span class="n">serialize</span><span class="o">&lt;</span><span class="n">test</span><span class="o">&gt;</span><span class="p">,</span>
-                                <span class="o">&amp;</span><span class="n">confluo</span><span class="o">::</span><span class="n">deserialize</span><span class="o">&lt;</span><span class="n">test</span><span class="o">&gt;</span><span class="p">);</span>
-<span class="n">type_manager</span><span class="o">::</span><span class="n">register_type</span><span class="p">(</span><span class="n">test_properties</span><span class="p">);</span>
-</pre></div></p>
+<pre class="codehilite"><code class="language-cpp">type_properties test_properties("test", sizeof(int), &amp;limits::int_min,
+                                &amp;limits::int_max, &amp;limits::int_one, 
+                                &amp;limits::int_one, &amp;limits::int_zero, false,
+                                get_relops(), get_unaryops(), 
+                                get_binaryops(),
+                                get_keyops(), &amp;test_type::parse_test,
+                                &amp;test_type::test_to_string,
+                                &amp;confluo::serialize&lt;test&gt;,
+                                &amp;confluo::deserialize&lt;test&gt;);
+type_manager::register_type(test_properties);</code></pre></p>
 <p>Once registered, a useful symbolic
 reference to the data type, wrapped in a <code>data_type</code> object, can be obtained via
 the <code>type_manager::get_type</code> interface.</p>
@@ -974,14 +973,13 @@ of the box.</p>
 <h2 id="building-a-schema">Building a Schema<a class="headerlink" href="#building-a-schema" title="Permanent link">&para;</a></h2>
 <p>We can create columns of a custom user-defined type for an Atomic MultiLog
 as follows:
-<div class="codehilite"><pre><span></span><span class="n">data_type</span> <span class="n">test_type</span> <span class="o">=</span> <span class="n">type_manager</span><span class="o">::</span><span class="n">get_type</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">);</span>
-<span class="n">schema_builder</span> <span class="n">builder</span><span class="p">;</span>
-<span class="n">builder</span><span class="p">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">test_type</span><span class="p">,</span> <span class="s">&quot;a&quot;</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">column_t</span><span class="o">&gt;</span> <span class="n">s</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">get_columns</span><span class="p">();</span>
+<pre class="codehilite"><code class="language-cpp">data_type test_type = type_manager::get_type("test");
+schema_builder builder;
+builder.add_column(test_type, "a");
+std::vector&lt;column_t&gt; s = builder.get_columns();
 
-<span class="n">task_pool</span> <span class="n">MGMT_POOL</span><span class="p">;</span>
-<span class="n">atomic_multilog</span> <span class="nf">dtable</span><span class="p">(</span><span class="s">&quot;table&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s">&quot;/tmp&quot;</span><span class="p">,</span> <span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">,</span> <span class="n">MGMT_POOL</span><span class="p">);</span>
-</pre></div>
+task_pool MGMT_POOL;
+atomic_multilog dtable("table", s, "/tmp", storage::IN_MEMORY, MGMT_POOL);</code></pre>
 We use the <code>type_manager::get_type</code> interface to get the <code>data_type</code> object
 associated with the new user-defined type. This object can then be passed
 into the <code>add_column</code> interface of the <code>schema_builder</code> along with the name
@@ -992,17 +990,15 @@ data of the user-defined type.</p>
 <p>First create a packed struct containing all of the member data_types 
 in a row of the schema. Be sure to include the timestamp as one of 
 the columns. An example is as follows: 
-<div class="codehilite"><pre><span></span><span class="k">struct</span> <span class="n">rec</span> <span class="p">{</span>
-    <span class="kt">int64_t</span> <span class="n">ts</span><span class="p">;</span>
-    <span class="n">test_type</span> <span class="n">a</span><span class="p">;</span>
-<span class="p">}</span><span class="n">__attribute__</span><span class="p">((</span><span class="n">packed</span><span class="p">));</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">struct rec {
+    int64_t ts;
+    test_type a;
+}__attribute__((packed));</code></pre>
 Then get a pointer to an instance of the struct, which is passed into the
 <code>append</code> method of the Atomic MultiLog. The following is an exmaple:
-<div class="codehilite"><pre><span></span><span class="n">rec</span> <span class="n">r</span> <span class="o">=</span> <span class="p">{</span><span class="n">utils</span><span class="o">::</span><span class="n">time_utils</span><span class="o">::</span><span class="n">cur_ns</span><span class="p">(),</span> <span class="n">test_type</span><span class="p">()};</span>
-<span class="kt">void</span><span class="o">*</span> <span class="n">data</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">r</span><span class="p">);</span>
-<span class="n">dtable</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">rec r = {utils::time_utils::cur_ns(), test_type()};
+void* data = reinterpret_cast&lt;void*&gt;(&amp;r);
+dtable.append(r);</code></pre>
 Here we initialize a record with the current timestamp and an instance of
 the test type. Then we pass a pointer to that data to the append method
 of the Atomic MultiLog instance.</p>
@@ -1010,11 +1006,10 @@ of the Atomic MultiLog instance.</p>
 <p>After adding records containing data of the user-defined type, we can 
 perform filter operations to select specific records. We can do so as 
 follows:
-<div class="codehilite"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">r</span> <span class="o">=</span> <span class="n">dtable</span><span class="p">.</span><span class="n">execute_filter</span><span class="p">(</span><span class="s">&quot;a &gt; 4&quot;</span><span class="p">);</span> <span class="o">!</span><span class="n">r</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
-    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;A value: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">r</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">at</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">as</span><span class="o">&lt;</span><span class="n">test_type</span><span class="o">&gt;</span><span class="p">().</span><span class="n">get_test</span><span class="p">()</span>
-                                            <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">for (auto r = dtable.execute_filter("a &gt; 4"); !r.empty(); r = r.tail()) {
+    std::cout &lt;&lt; "A value: " &lt;&lt; r.head().at(1).as&lt;test_type&gt;().get_test()
+                                            &lt;&lt; std::endl;
+}</code></pre>
 We assume here that <code>4</code> can be parsed as a <code>test_type</code> using the 
 parse_test method. The <code>execute_filter</code> function is then called with an
 expression that selects records that satisfy the condition. This returns

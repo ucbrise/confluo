@@ -954,24 +954,21 @@ this data.</p>
 the Atomic MultiLog has already been created, and filters, aggregates and triggers
 have been added to it as outlined in <a href="../loading_data/">Data Storage</a>.</p>
 <p>To start with, we have a reference to the Atomic MultiLog as follows:</p>
-<div class="codehilite"><pre><span></span><span class="n">confluo</span><span class="o">::</span><span class="n">atomic_multilog</span><span class="o">*</span> <span class="n">mlog</span> <span class="o">=</span> <span class="n">store</span><span class="p">.</span><span class="n">get_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">confluo::atomic_multilog* mlog = store.get_atomic_multilog("perf_log");</code></pre>
 
 <h3 id="retrieving-records">Retrieving Records<a class="headerlink" href="#retrieving-records" title="Permanent link">&para;</a></h3>
 <p>It is straightforward to retrieve records given their offsets:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record1</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off1</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record2</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off2</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record3</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">off3</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record1 = mlog-&gt;read(off1);
+auto record2 = mlog-&gt;read(off2);
+auto record3 = mlog-&gt;read(off3);</code></pre>
 
 <p>Each of <code>record1</code>, <code>record2</code>, and <code>record3</code> are vectors of strings.</p>
 <h3 id="evaluating-ad-hoc-filter-expressions">Evaluating Ad-hoc Filter Expressions<a class="headerlink" href="#evaluating-ad-hoc-filter-expressions" title="Permanent link">&para;</a></h3>
 <p>We can query indexed attributes as follows:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">mlog</span><span class="o">-&gt;</span><span class="n">execute_filter</span><span class="p">(</span><span class="s">&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">tail</span><span class="p">())</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">head</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto record_stream = mlog-&gt;execute_filter("cpu_util&gt;0.5 || mem_avail&lt;0.5");
+for (auto s = record_stream; !s.empty(); s = s.tail()) {
+  std::cout &lt;&lt; s.head().to_string();
+}</code></pre>
 
 <p>The query takes as its argument a filter expression; see the guide on <a href="../loading_data/">Data Storage</a> 
 for details on the elements of the filter expression. The operation returns a lazily evaluated stream, 
@@ -988,44 +985,38 @@ Also, the current Atomic MultiLog for the client has been set to <code>perf_log<
 <div class="superfences-tabs">
 <input name="__tabs_1" type="radio" id="__tab_1_0" checked="checked" />
 <label for="__tab_1_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="p">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s">&quot;perf_log&quot;</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">client.set_current_atomic_multilog("perf_log");</code></pre></div>
 <input name="__tabs_1" type="radio" id="__tab_1_1" />
 <label for="__tab_1_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">client</span><span class="o">.</span><span class="n">set_current_atomic_multilog</span><span class="p">(</span><span class="s2">&quot;perf_log&quot;</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">client.set_current_atomic_multilog("perf_log")</code></pre></div>
 </div>
 <h3 id="retrieving-records_1">Retrieving Records<a class="headerlink" href="#retrieving-records_1" title="Permanent link">&para;</a></h3>
 <p>It is straightforward to retrieve records given their offsets:</p>
 <div class="superfences-tabs">
 <input name="__tabs_2" type="radio" id="__tab_2_0" checked="checked" />
 <label for="__tab_2_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record1</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">off1</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record2</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">off2</span><span class="p">);</span>
-<span class="k">auto</span> <span class="n">record3</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">off3</span><span class="p">);</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">auto record1 = client.read(off1);
+auto record2 = client.read(off2);
+auto record3 = client.read(off3);</code></pre></div>
 <input name="__tabs_2" type="radio" id="__tab_2_1" />
 <label for="__tab_2_1">Python</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="n">record1</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">off1</span><span class="p">)</span>
-<span class="n">record2</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">off2</span><span class="p">)</span>
-<span class="n">record3</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">off3</span><span class="p">)</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-python">record1 = client.read(off1)
+record2 = client.read(off2)
+record3 = client.read(off3)</code></pre></div>
 </div>
 <h3 id="evaluating-ad-hoc-filter-expressions_1">Evaluating Ad-hoc Filter Expressions<a class="headerlink" href="#evaluating-ad-hoc-filter-expressions_1" title="Permanent link">&para;</a></h3>
 <p>We can query indexed attributes as follows:</p>
 <div class="superfences-tabs">
 <input name="__tabs_3" type="radio" id="__tab_3_0" checked="checked" />
 <label for="__tab_3_0">C++</label>
-<div class="superfences-content"><div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">execute_filter</span><span class="p">(</span><span class="s">&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;</span><span class="p">);</span>
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">record_stream</span><span class="p">;</span> <span class="o">!</span><span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">().</span><span class="n">to_string</span><span class="p">();</span>
-<span class="p">}</span>
-</pre></div></div>
+<div class="superfences-content"><pre class="codehilite"><code class="language-cpp">auto record_stream = client.execute_filter("cpu_util&gt;0.5 || mem_avail&lt;0.5");
+for (auto s = record_stream; !s.empty(); ++s) {
+  std::cout &lt;&lt; s.get().to_string();
+}</code></pre></div>
 </div>
-<div class="codehilite"><pre><span></span><span class="n">record_stream</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">execute_filter</span><span class="p">(</span><span class="s2">&quot;cpu_util&gt;0.5 || mem_avail&lt;0.5&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">record_stream</span><span class="p">:</span>
-  <span class="k">print</span> <span class="n">r</span>
-</pre></div>
+<pre class="codehilite"><code class="language-python">record_stream = client.execute_filter("cpu_util&gt;0.5 || mem_avail&lt;0.5")
+for r in record_stream:
+  print r</code></pre>
 
 <p>This operation returns a lazy stream of records, which automatically fetches
 more data from the server as the clients consumes them.</p>

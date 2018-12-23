@@ -3,7 +3,7 @@ var searchData=
   ['add_5faggregate',['add_aggregate',['../classconfluo_1_1rpc_1_1client_1_1_rpc_client.html#a31f3c38b7e96ec16fc258c2e376978a2',1,'confluo.rpc.client.RpcClient.add_aggregate()'],['../classconfluo_1_1rpc_1_1rpc__service_1_1_iface.html#ac44ad1b44a294d94a47bf61fd9818519',1,'confluo.rpc.rpc_service.Iface.add_aggregate()'],['../classconfluo_1_1rpc_1_1rpc__service_1_1_client.html#a442f6c48aeaf7f5331ed24da7370c706',1,'confluo.rpc.rpc_service.Client.add_aggregate()']]],
   ['add_5faggregate_5fargs',['add_aggregate_args',['../classconfluo_1_1rpc_1_1rpc__service_1_1add__aggregate__args.html',1,'confluo::rpc::rpc_service']]],
   ['add_5faggregate_5fresult',['add_aggregate_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1add__aggregate__result.html',1,'confluo::rpc::rpc_service']]],
-  ['add_5fcolumn',['add_column',['../classconfluo_1_1rpc_1_1schema_1_1_schema_builder.html#a09679b4ba35586d975e5e8f8ddd2e6ee',1,'confluo::rpc::schema::SchemaBuilder']]],
+  ['add_5fcolumn',['add_column',['../classconfluo_1_1rpc_1_1schema_1_1_schema_builder.html#af5687f18aca635af4e95a91300146032',1,'confluo::rpc::schema::SchemaBuilder']]],
   ['add_5ffilter',['add_filter',['../classconfluo_1_1rpc_1_1client_1_1_rpc_client.html#a9195c3f4880240f1587ae010144353df',1,'confluo.rpc.client.RpcClient.add_filter()'],['../classconfluo_1_1rpc_1_1rpc__service_1_1_iface.html#a9be921c4a2a1997e8fe3bca2bc08d13f',1,'confluo.rpc.rpc_service.Iface.add_filter()'],['../classconfluo_1_1rpc_1_1rpc__service_1_1_client.html#abdb2ff4a6a7bb48cc066d0c94782ed59',1,'confluo.rpc.rpc_service.Client.add_filter()']]],
   ['add_5ffilter_5fargs',['add_filter_args',['../classconfluo_1_1rpc_1_1rpc__service_1_1add__filter__args.html',1,'confluo::rpc::rpc_service']]],
   ['add_5ffilter_5fresult',['add_filter_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1add__filter__result.html',1,'confluo::rpc::rpc_service']]],
@@ -34,5 +34,5 @@ var searchData=
   ['append_5fbatch_5fresult',['append_batch_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1append__batch__result.html',1,'confluo::rpc::rpc_service']]],
   ['append_5fraw',['append_raw',['../classconfluo_1_1rpc_1_1client_1_1_rpc_client.html#ad2cd1b9dcfd26e378a4635dd61e8210b',1,'confluo::rpc::client::RpcClient']]],
   ['append_5fresult',['append_result',['../classconfluo_1_1rpc_1_1rpc__service_1_1append__result.html',1,'confluo::rpc::rpc_service']]],
-  ['apply',['apply',['../classconfluo_1_1rpc_1_1schema_1_1_schema.html#a6083afab171304f4ba5b03faa05143bc',1,'confluo.rpc.schema.Schema.apply()'],['../classconfluo_1_1rpc_1_1schema_1_1_column.html#a37b24b5b0e239b7db5cc6ee522b19f40',1,'confluo.rpc.schema.Column.apply()']]]
+  ['apply',['apply',['../classconfluo_1_1rpc_1_1schema_1_1_schema.html#a72ee786db8c3945b13ecaff08fa0b3ca',1,'confluo.rpc.schema.Schema.apply()'],['../classconfluo_1_1rpc_1_1schema_1_1_column.html#a37b24b5b0e239b7db5cc6ee522b19f40',1,'confluo.rpc.schema.Column.apply()']]]
 ];

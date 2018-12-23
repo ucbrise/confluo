@@ -77,8 +77,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:acb350266339b872da808d32752410f28"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1stream_1_1_record_stream.html#acb350266339b872da808d32752410f28">__init__</a> (self, multilog_id, schema, client, handle)</td></tr>
-<tr class="separator:acb350266339b872da808d32752410f28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9b2b7394e28ed647b1919ba9b820fcc"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1stream_1_1_record_stream.html#aa9b2b7394e28ed647b1919ba9b820fcc">__init__</a> (self, m_id, schema, client, handle)</td></tr>
+<tr class="separator:aa9b2b7394e28ed647b1919ba9b820fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b9ba44bfcd040c3229422a56f858002"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1stream_1_1_record_stream.html#a5b9ba44bfcd040c3229422a56f858002">__iter__</a> (self)</td></tr>
 <tr class="separator:a5b9ba44bfcd040c3229422a56f858002"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94e0b995359583dfb0e972ff41252131"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classconfluo_1_1rpc_1_1stream_1_1_record_stream.html#a94e0b995359583dfb0e972ff41252131">has_more</a> (self)</td></tr>
@@ -86,9 +86,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a2ddae6008b04fd9161df2ef7f668950d"><td class="memItemLeft" align="right" valign="top"><a id="a2ddae6008b04fd9161df2ef7f668950d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>multilog_id_</b></td></tr>
-<tr class="separator:a2ddae6008b04fd9161df2ef7f668950d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fcde0d35509f03d53e66a6811e9a9fe"><td class="memItemLeft" align="right" valign="top"><a id="a5fcde0d35509f03d53e66a6811e9a9fe"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>m_id_</b></td></tr>
+<tr class="separator:a5fcde0d35509f03d53e66a6811e9a9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac444222d07992244a69a6e8c25adaed8"><td class="memItemLeft" align="right" valign="top"><a id="ac444222d07992244a69a6e8c25adaed8"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>schema_</b></td></tr>
 <tr class="separator:ac444222d07992244a69a6e8c25adaed8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -105,8 +105,8 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">A stream of records and associated functionality.
 </pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="acb350266339b872da808d32752410f28"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb350266339b872da808d32752410f28">&#9670;&nbsp;</a></span>__init__()</h2>
+<a id="aa9b2b7394e28ed647b1919ba9b820fcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9b2b7394e28ed647b1919ba9b820fcc">&#9670;&nbsp;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -121,7 +121,7 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>multilog_id</em>, </td>
+          <td class="paramname"><em>m_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -151,7 +151,7 @@ Public Attributes</h2></td></tr>
 <pre class="fragment">Initializes an empty record stream.
 
 Args:
-    multilog_id: The identifier for the atomic multilog.
+    m_id: The identifier for the atomic multilog.
     schema: The associated schema.
     client: The rpc client.
     handle: Iterator through the stream.

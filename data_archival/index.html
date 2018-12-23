@@ -907,30 +907,25 @@
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <h3 id="periodic-archival">Periodic Archival<a class="headerlink" href="#periodic-archival" title="Permanent link">&para;</a></h3>
 <p>To initialize a multilog with periodic archiving capabilities:</p>
-<div class="codehilite"><pre><span></span><span class="k">auto</span> <span class="n">archival_mode</span> <span class="o">=</span> <span class="n">confluo</span><span class="o">::</span><span class="n">archival</span><span class="o">::</span><span class="n">periodic_archival_mode</span><span class="o">::</span><span class="n">ON</span><span class="p">;</span>
-<span class="n">store</span><span class="p">.</span><span class="n">create_atomic_multilog</span><span class="p">(</span><span class="s">&quot;my_log&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">storage</span><span class="o">::</span><span class="n">IN_MEMORY</span><span class="p">,</span> <span class="n">archival_mode</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">auto archival_mode = confluo::archival::periodic_archival_mode::ON;
+store.create_atomic_multilog("my_log", schema, storage::IN_MEMORY, archival_mode);</code></pre>
 
 <p>Alternatively, for an existing multilog, we can toggle periodic archival:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">set_periodic_archival</span><span class="p">(</span><span class="n">confluo</span><span class="o">::</span><span class="n">archival</span><span class="o">::</span><span class="n">periodic_archival_mode</span><span class="o">::</span><span class="n">ON</span><span class="p">);</span>
-<span class="n">mlog</span><span class="o">-&gt;</span><span class="n">set_periodic_archival</span><span class="p">(</span><span class="n">confluo</span><span class="o">::</span><span class="n">archival</span><span class="o">::</span><span class="n">periodic_archival_mode</span><span class="o">::</span><span class="n">OFF</span><span class="p">);</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;set_periodic_archival(confluo::archival::periodic_archival_mode::ON);
+mlog-&gt;set_periodic_archival(confluo::archival::periodic_archival_mode::OFF);</code></pre>
 
 <p>By default, if archival is on, the archiver will run periodically every 5 minutes. This can be changed through configuration parameters. The maximum amount of data log data in memory can also be configured.</p>
-<div class="codehilite"><pre><span></span>archival_periodicity_ms 
-archival_in_memory_datalog_window_bytes *TODO better name for above param*
-</pre></div>
+<pre class="codehilite"><code>archival_periodicity_ms 
+archival_in_memory_datalog_window_bytes *TODO better name for above param*</code></pre>
 
 <h3 id="forced-archival">Forced Archival<a class="headerlink" href="#forced-archival" title="Permanent link">&para;</a></h3>
 <p>Regardless of whether archival is turned on for a particular multilog, the user can force archival up to a data log offset by calling:</p>
-<div class="codehilite"><pre><span></span><span class="n">mlog</span><span class="o">-&gt;</span><span class="n">archive</span><span class="p">();</span> <span class="c1">// Archive up to the read tail</span>
-<span class="n">mlog</span><span class="o">-&gt;</span><span class="n">archive</span><span class="p">(</span><span class="n">offset</span><span class="p">);</span> <span class="c1">// Archive up to any offset before the read tail</span>
-</pre></div>
+<pre class="codehilite"><code class="language-cpp">mlog-&gt;archive(); // Archive up to the read tail
+mlog-&gt;archive(offset); // Archive up to any offset before the read tail</code></pre>
 
 <h3 id="allocator-triggered-archival">Allocator-triggered Archival<a class="headerlink" href="#allocator-triggered-archival" title="Permanent link">&para;</a></h3>
 <p>In cases where the periodic archiver cannot keep up with write pressure and the maximum memory of the system is reached, the allocator will block until Confluo makes more memory available, which is done by archiving the multilogs aggressively. All multilogs are archived in their entirety to make space for newer data. This can be configured by changing:</p>
-<div class="codehilite"><pre><span></span>max_memory
-</pre></div>
+<pre class="codehilite"><code>max_memory</code></pre>
                 
                   
                 
