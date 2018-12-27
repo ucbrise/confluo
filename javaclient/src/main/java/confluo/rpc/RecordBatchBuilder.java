@@ -3,7 +3,6 @@ package confluo.rpc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,6 +26,7 @@ public class RecordBatchBuilder {
   RecordBatchBuilder(Schema schema) {
     this.numRecords = 0;
     this.schema = schema;
+    this.batch=new TreeMap();
   }
 
   /**

@@ -101,7 +101,7 @@ public class Schema {
    *
    * @return The record size
    */
-  int getRecordSize() {
+  public int getRecordSize() {
     return recordSize;
   }
 }

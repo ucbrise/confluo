@@ -115,6 +115,17 @@ public class RpcClient {
     curMultilogId = info.getId();
   }
 
+
+  /**
+   * return the current schema
+   *
+   **/
+  public Schema getSchema(){
+    return curSchema;
+  }
+
+
+
   /**
    * Removes an atomic multilog from the client
    *
@@ -246,6 +257,9 @@ public class RpcClient {
     return new RecordBatchBuilder(curSchema);
   }
 
+
+
+
   /**
    * Writes a record to the atomic multilog
    *
@@ -285,6 +299,20 @@ public class RpcClient {
   public long append(String... record) throws TException {
     return appendRaw(curSchema.pack(record));
   }
+
+  /**
+   *
+   * write a batch record to the atomic multilog
+   * @param  batchRecord the batch record to write
+   * @return the  offset into the log
+   *
+   **/
+  public long appendBatch(rpc_record_batch batchRecord) throws TException{
+    return client.appendBatch(curMultilogId,batchRecord);
+  }
+
+
+
 
   /**
    * Reads data from a specified offset
