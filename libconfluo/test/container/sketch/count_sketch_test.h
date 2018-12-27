@@ -4,6 +4,7 @@
 #include <functional>
 
 #include "container/sketch/count_sketch.h"
+#include "container/sketch/count_sketch_simple.h"
 #include "gtest/gtest.h"
 
 using namespace ::confluo::sketch;
@@ -78,52 +79,50 @@ class CountSketchTest : public testing::Test {
     return std::sqrt(l2_sq);
   }
 
+  template<typename T, typename P>
+  static void bounded_pq_insert(pq<T, P>& queue, T key, P priority, size_t k) {
+    assert_throw(queue.size() <= k, "Queue can't be larger than " + std::to_string(k) + " elements");
+    assert_throw(!queue.contains(key), "Key " + std::to_string(key) + " is not unique");
+    if (queue.size() < k) {
+      queue.pushp(key, priority);
+    }
+    else if (queue.top().priority < priority) {
+      queue.pop();
+      queue.pushp(key, priority);
+    }
+  }
+
   static void run(std::map<int, uint64_t>& hist, double epsilon) {
-    double gamma = 0.001;
+    // very small gamma to enforce invariant and remove randomness
+    // TODO run multiple trials and calculate gamma empirically
+    double gamma = 0.000001;
     size_t k = 100;
 
-    heavy_hitter_set<int, int64_t> hhs;
-    heavy_hitter_set<int, int64_t> hhs_actual;
     auto cs = count_sketch<int>::create_parameterized(epsilon, gamma);
-
-    std::cout << "Updating...\n";
-
-    // Forward to last updates
     for (auto p : hist) {
-      if (p.second > 1)
-        cs.update(p.first, p.second);
+      cs.update(p.first, p.second);
     }
 
+    pq<int, int64_t> hhs;
+    pq<int, int64_t> hhs_actual;
     for (auto p : hist) {
-      cs.update(p.first);
       int64_t est = cs.estimate(p.first);
-      if (hhs.size() < k) {
-        hhs.pushp(p.first, est);
-      }
-      else {
-        int head = hhs.top().key_;
-        int64_t head_priority = hhs.top().priority_;
-        if (head_priority < est) {
-          hhs.pop();
-          hhs.pushp(p.first, est);
-          assert_throw(hhs.top().priority_ >= head_priority,
-                       std::to_string(hhs.top().priority_) + " > " + std::to_string(head_priority));
-        }
-      }
-      if (hhs_actual.size() < k) {
-        hhs_actual.pushp(p.first, est);
-      } else {
-        if (hhs_actual.top().priority_ < est) {
-          hhs_actual.pop();
-          hhs_actual.pushp(p.first, p.second);
-        }
-      }
+      // Update estimated and actual heavy hitters
+      bounded_pq_insert<int, int64_t>(hhs, p.first, est, k);
+      bounded_pq_insert<int, int64_t>(hhs_actual, p.first, p.second, k);
     }
 
-    int64_t smallest_actual = hhs_actual.top().priority_;
+    // Invariant defined by Charikhar count-sketch paper:
+    // k elements such that every element i has actual frequency ni > (1 - e)nk
+    int64_t smallest_actual = hhs_actual.top().priority;
+    std::vector<double> errors;
     for (auto hh : hhs) {
-      ASSERT_LT((1 - epsilon) * smallest_actual, hist[hh.key_]);
+      ASSERT_GE(hist[hh.key], std::floor((1 - epsilon) * smallest_actual));
+
+      auto error = std::abs(int64_t(hist[hh.key]) - hh.priority) * 1.0 / hist[hh.key];
+      errors.push_back(error);
     }
+    std::cerr << "Median error: " << median(errors) << "\n";
   }
 
  private:
@@ -135,20 +134,45 @@ class CountSketchTest : public testing::Test {
 
 const int CountSketchTest::N;
 
-//TEST_F(CountSketchTest, EstimateAccuracyTest) {
+/**
+ * Tests against non-thread-safe implementation
+ */
+TEST_F(CountSketchTest, SanityComparisonAgainstSimpleTest) {
 
-//  double alpha = 0.01;
-//  double epsilon[] = { 0.01, 0.02, 0.04, 0.08, 0.12 };
+  std::map<int, uint64_t> hist;
+  generate_zipf(hist);
 
-//  std::ofstream summary_out("sketch_test_summary.out");
-//  std::ofstream out("sketch_error.out");
+  size_t b = 100, t = 40;
+  hash_manager hm1(t), hm2(t);
 
-//  std::map<int, uint64_t> hist;
-//  double l2 = generate_zipf(hist);
+  count_sketch<int, int64_t> cs(b, t, hm1, hm2);
+  count_sketch_simple<int> cs_simple(b, t, hm1, hm2);
 
-//  for (double e: epsilon)
-//    run(hist, e);
+  // Forward to last updates
+  for (auto p : hist) {
+    cs.update(p.first, p.second);
+    cs_simple.update(p.first, p.second);
+  }
 
-//}
+  for (auto p : hist) {
+    ASSERT_EQ(cs.estimate(p.first), cs_simple.estimate(p.first));
+  }
+
+}
+
+TEST_F(CountSketchTest, EstimateAccuracyTest) {
+
+  double epsilon[] = { 0.01, 0.02, 0.04, 0.08, 0.12 };
+
+  std::ofstream summary_out("sketch_test_summary.out");
+  std::ofstream out("sketch_error.out");
+
+  std::map<int, uint64_t> hist;
+  double l2 = generate_zipf(hist);
+
+  for (double e : epsilon)
+    run(hist, e);
+
+}
 
 #endif /* TEST_COUNT_SKETCH_TEST */
