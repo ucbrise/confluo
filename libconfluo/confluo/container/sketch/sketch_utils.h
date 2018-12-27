@@ -34,7 +34,7 @@ static T median(std::vector<T>& data) {
       }
     } while (i<= j);
 
-    if (j<k)
+    if (j < k)
       l = i;
     if (k < i)
       m = j;

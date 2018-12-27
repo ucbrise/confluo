@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "atomic.h"
 #include "hash_manager.h"
@@ -42,6 +43,7 @@ class count_sketch {
     this->clear();
     bucket_hash_manager_.guarantee_initialized(depth_);
     sign_hash_manager_.guarantee_initialized(depth_);
+    assert(bucket_hash_manager_ != sign_hash_manager_);
   }
 
   /**
@@ -54,8 +56,8 @@ class count_sketch {
   }
 
   count_sketch(const count_sketch& other)
-      : depth_(other.depth_),
-        width_(other.width_),
+      : width_(other.width_),
+        depth_(other.depth_),
         counters_(depth_ * width_),
         bucket_hash_manager_(other.bucket_hash_manager_),
         sign_hash_manager_(other.sign_hash_manager_) {
@@ -65,8 +67,8 @@ class count_sketch {
   }
 
   count_sketch& operator=(const count_sketch& other) {
-    depth_ = other.depth_;
     width_ = other.width_;
+    depth_ = other.depth_;
     counters_ = std::vector<atomic_counter_t>(depth_ * width_);
     bucket_hash_manager_ = other.bucket_hash_manager_;
     sign_hash_manager_ = other.sign_hash_manager_;
@@ -77,8 +79,9 @@ class count_sketch {
   }
 
   /**
-   * Update count estimates for key.
+   * Update count estimates for key
    * @param key key
+   * @param incr increment
    */
   void update(T key, size_t incr = 1) {
     for (size_t i = 0; i < depth_; i++) {
@@ -89,7 +92,7 @@ class count_sketch {
   }
 
   /**
-   * Estimate count of a key.
+   * Estimate count of a key
    * @param key key
    * @return estimated count
    */
@@ -106,6 +109,7 @@ class count_sketch {
   /**
    * Update counts and get the old estimate.
    * @param key key
+   * @param incr increment
    * @return old estimated count
    */
   counter_t update_and_estimate(T key, size_t incr = 1) {
@@ -119,14 +123,23 @@ class count_sketch {
     return median(median_buf);
   }
 
+  /**
+   * @return sketch depth
+   */
   size_t depth() const {
     return depth_;
   }
 
+  /**
+   * @return sketch width
+   */
   size_t width() const {
     return width_;
   }
 
+  /**
+   * Clear all counters (not thread-safe)
+   */
   void clear() {
     for (size_t i = 0; i < counters_.size(); i++) {
       atomic::store(&counters_[i], counter_t());
@@ -146,8 +159,7 @@ class count_sketch {
    * Create a count_sketch with desired accuracy guarantees.
    * @param epsilon desired margin of error (0 < epsilon < 1)
    * @param gamma desired probability of error (0 < gamma < 1)
-   * @param manager hash manager
-   * @return count min sketch with accuracy guarantees
+   * @return count sketch with desired accuracy
    */
   static count_sketch create_parameterized(double epsilon, double gamma) {
     return count_sketch(count_sketch<T>::error_margin_to_width(epsilon),
@@ -179,8 +191,8 @@ class count_sketch {
     return num % 2 == 1 ? 1 : -1;
   }
 
-  size_t width_; // number of buckets
-  size_t depth_; // number of estimates
+  size_t width_{}; // number of buckets
+  size_t depth_{}; // number of estimates
 
   std::vector<atomic_counter_t> counters_;
   hash_manager bucket_hash_manager_;

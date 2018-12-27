@@ -15,7 +15,6 @@ template<typename T, typename counter_t = int64_t>
 class universal_sketch {
 
  public:
-  typedef std::vector<atomic::type<T>> heavy_hitters_set;
   template<typename g_ret_t> using g_fn = std::function<g_ret_t(counter_t)>;
 
   /**
@@ -25,14 +24,13 @@ class universal_sketch {
    * @param t count-sketch depth (number of estimates)
    * @param k number of heavy hitters to track per layer
    * @param a heavy hitter threshold
-   * @param precise track exact heavy hitters
    */
   universal_sketch(size_t l, size_t b, size_t t, size_t k, double a,
                    hash_manager m1, hash_manager* m2, hash_manager* m3,
                    pairwise_indep_hash pwih)
-          : substream_summaries_(l),
-            layer_hashes_(m1),
-            precise_hh_(true) {
+      : substream_summaries_(l),
+        layer_hashes_(std::move(m1)),
+        precise_hh_(true) {
     for (size_t i = 0; i < l; i++) {
       substream_summaries_[i] = substream_summary<T, counter_t>(b, t, k, a, m2[i], m3[i], pwih);
     }
@@ -59,13 +57,13 @@ class universal_sketch {
    * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  universal_sketch(size_t l, size_t t, size_t b, size_t k, double a, bool precise = true)
+  universal_sketch(size_t l, size_t b, size_t t, size_t k, double a, bool precise = true)
       : substream_summaries_(l),
         layer_hashes_(l - 1),
         precise_hh_(precise) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = substream_summary<T, counter_t>(t, b, k, a, precise);
+      substream_summaries_[i] = substream_summary<T, counter_t>(b, t, k, a, precise);
     }
   }
 
@@ -132,14 +130,14 @@ class universal_sketch {
     size_t substream_i = nlayers - 1;
 
     if (precise_hh_) {
-      auto& last_substream_hhs = substream_summaries_[substream_i].get_pq();
+      auto &last_substream_hhs = substream_summaries_[substream_i].get_pq();
       for (auto hh : last_substream_hhs) {
-        recursive_sum += g(hh.priority_);
+        recursive_sum += g(hh.priority);
       }
     }
     else {
-      auto& last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
-      auto& last_substream_sketch = substream_summaries_[substream_i].get_sketch();
+      auto &last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
+      auto &last_substream_sketch = substream_summaries_[substream_i].get_sketch();
       for (size_t hh_i = 0; hh_i < last_substream_hhs.size(); hh_i++) {
         T hh = atomic::load(&last_substream_hhs[hh_i]);
         // TODO handle special case
@@ -151,22 +149,20 @@ class universal_sketch {
     }
 
     // Handle rest recursively
-
     while (substream_i-- > 0) {
-
       g_ret_t substream_sum = 0;
 
       if (precise_hh_) {
-        auto& substream_hhs = substream_summaries_[substream_i].get_pq();
+        auto &substream_hhs = substream_summaries_[substream_i].get_pq();
         for (auto hh : substream_hhs) {
-          counter_t count = hh.priority_;
-          g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh.key_))) * g(count));
+          counter_t count = hh.priority;
+          g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh.key))) * g(count));
           substream_sum += update;
         }
       }
       else {
         auto &substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
-        auto& substream_sketch = substream_summaries_[substream_i].get_sketch();
+        auto &substream_sketch = substream_summaries_[substream_i].get_sketch();
         for (size_t hh_i = 0; hh_i < substream_hhs.size(); hh_i++) {
           T hh = atomic::load(&substream_hhs[hh_i]);
           counter_t count = substream_sketch.estimate(hh);
@@ -177,8 +173,6 @@ class universal_sketch {
           }
         }
       }
-
-
       recursive_sum = 2 * recursive_sum + substream_sum;
     }
     return recursive_sum;
@@ -188,15 +182,13 @@ class universal_sketch {
    * @return size of data structure in bytes
    */
   size_t storage_size() {
-    size_t total_size = 0;
-    for (size_t i = 0; i < substream_summaries_.size(); i++) {
-     total_size += substream_summaries_[i].storage_size();
-    }
-    return total_size;
+    return storage_size(substream_summaries_.size());
   }
 
   /**
-   * @return size of data structure in bytes
+   * Size of data structure's first n layers
+   * @param num_layers number of layers
+   * @return size of data structure's first n layers in bytes
    */
   size_t storage_size(size_t num_layers) {
     size_t total_size = 0;

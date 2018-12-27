@@ -10,8 +10,8 @@ pairwise_indep_hash::pairwise_indep_hash()
 }
 
 pairwise_indep_hash::pairwise_indep_hash(size_t a, size_t b)
-        : a_(a),
-          b_(b) {
+    : a_(a),
+      b_(b) {
 }
 
 pairwise_indep_hash pairwise_indep_hash::generate_random() {
@@ -19,7 +19,7 @@ pairwise_indep_hash pairwise_indep_hash::generate_random() {
 }
 
 hash_manager::hash_manager(size_t num_hashes)
-        : hashes_() {
+    : hashes_() {
   this->guarantee_initialized(num_hashes);
 }
 

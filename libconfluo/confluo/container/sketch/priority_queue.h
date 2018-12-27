@@ -11,69 +11,76 @@ namespace sketch {
 template<typename T, typename P>
 struct pq_element {
   pq_element(T key, P priority)
-          : key_(key),
-            priority_(priority) {
+          : key(key),
+            priority(priority) {
   }
 
   static bool gt_compare(pq_element x, pq_element y) {
-    return x.priority_ > y.priority_;
+    return x.priority > y.priority;
   }
 
   static bool lt_compare(pq_element x, pq_element y) {
-    return x.priority_ < y.priority_;
+    return x.priority < y.priority;
   }
 
   static bool element_eq(const pq_element& x, const pq_element& y) {
-    return x.key_ == y.key_;
+    return x.key == y.key;
   }
 
-  T key_;
-  P priority_;
+  T key;
+  P priority;
 };
 
-//template<typename T, typename M, typename P>
-//struct pq_element_descript {
-//  pq_element_descript(T key, M metadata, P priority)
-//      : key_(key),
-//        metadata_(metadata),
-//        priority_(priority) {
-//  }
-
-//  static bool gt_compare(pq_element x, pq_element y) {
-//    return x.priority_ > y.priority_;
-//  }
-
-//  static bool lt_compare(pq_element x, pq_element y) {
-//    return x.priority_ < y.priority_;
-//  }
-
-//  static bool element_eq(const pq_element_descript& x, const pq_element_descript& y) {
-//    return x.key_ == y.key_;
-//  }
-
-//  T key_;
-//  M metadata_;
-//  P priority_;
-//};
-
+// TODO make thread-safe
 template<typename T, typename P, typename E = pq_element<T, P>>
-class heavy_hitter_set : public std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>> {
+class pq : public std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>> {
 
 public:
 
-  heavy_hitter_set()
+  pq()
       : std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>>(E::gt_compare) {
   }
 
+  /**
+   * Inserts a new element into the priority queue. Does not perform de-duplication.
+   * @param key key of element to push
+   * @param priority key's priority
+   */
   void pushp(T key, P priority) {
     this->push(E(key, priority));
   }
 
-  void update(T key, P priority) {
-   this->remove_if_exists(key);
-   this->pushp(key, priority);
+  /**
+   * Updates the key's priority if it already exists.
+   * @param key key of element to update
+   * @param priority key's new priority
+   * @param insert_if_not_found if the key isn't found insert a new element for it
+   */
+  bool update(T key, P priority, bool insert_if_not_found = false) {
+   bool found = this->remove_if_exists(key);
+   if (found || insert_if_not_found) {
+     this->pushp(key, priority);
+     return true;
+   }
+   return false;
   }
 
+  /**
+   * Checks if priority queue contains element.
+   * @param key key of element
+   * @return true if priority queue contains element, else false
+   */
+  bool contains(T key) {
+    E query(key, P());
+    auto it = std::find_if(this->c.begin(), this->c.end(), std::bind(E::element_eq, std::placeholders::_1, query));
+    return it != this->c.end();
+  }
+
+  /**
+   * Remove from priority queue if key already exists in it.
+   * @param key key of element to remove
+   * @return true iff the key was found and the element was removed
+   */
   bool remove_if_exists(const T& key) {
     E query(key, P());
     auto it = std::find_if(this->c.begin(), this->c.end(), std::bind(E::element_eq, std::placeholders::_1, query));
@@ -82,9 +89,7 @@ public:
       std::make_heap(this->c.begin(), this->c.end(), this->comp);
       return true;
     }
-    else {
-      return false;
-    }
+    return false;
   }
 
   typename std::vector<E>::const_iterator begin() {
