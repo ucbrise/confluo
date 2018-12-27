@@ -91,15 +91,14 @@ public class ConfluoProducer {
         int batched=0;
         try {
             for (long i = 0; i < produceNum; i++) {
-                message.putLong(0, System.nanoTime());
                 // bug  start with small num
                 // message.putLong(8,i);
+                message.putLong(0, System.nanoTime());
                 message.clear();
                 long offset=0;
                 if(batch) {
                     batchBuilder.addRecord(message);
                     batched++;
-
                     if(batched>=produceBathSize){
                          offset=client.appendBatch(batchBuilder.getBatch());
                         //logger.info("write offset:"+offset);
@@ -134,7 +133,7 @@ public class ConfluoProducer {
         try {
             long start=System.currentTimeMillis();
             producer.start();
-            producer.produce(true);
+            producer.produce(false);
             producer.stop();
             long time=System.currentTimeMillis()-start;
             long qps=producer.produceNum*1000/time;

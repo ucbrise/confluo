@@ -6,6 +6,7 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -328,8 +329,42 @@ public class RpcClient {
     return client.read(curMultilogId, offset, 1);
   }
 
+  /**
+   * Reads data from a specified offset,
+   * @param   batchSize size
+   * @param offset The offset from the log to readRaw from
+   * @return The data get the offset
+   * @throws TException Cannot read the record
+   */
+  public ByteBuffer readBatchRaw(long offset,int batchSize) throws TException {
+    if (curMultilogId == -1) {
+      throw new IllegalStateException("Must set Atomic Multilog first");
+    }
+    return client.read(curMultilogId, offset, batchSize);
+  }
+
+
   public Record read(long offset) throws TException {
     return curSchema.apply(readRaw(offset));
+  }
+
+  /**
+   * read batch record
+   *
+   **/
+  public List<Record> readBatch(long offset,int batchSize) throws TException {
+    ByteBuffer batchBuffer=readBatchRaw(offset,batchSize);
+    List<Record> batchResult=new ArrayList<>(batchSize);
+    int remaining=batchBuffer.remaining();
+    ByteBuffer slice;
+    for(int i=0;i<remaining;){
+      slice=batchBuffer.slice();
+      slice.position(i);
+      slice.limit(slice.position()+curSchema.getRecordSize());
+      batchResult.add(curSchema.apply(slice.slice()));
+      i+=curSchema.getRecordSize();
+    }
+    return batchResult;
   }
 
   /**
