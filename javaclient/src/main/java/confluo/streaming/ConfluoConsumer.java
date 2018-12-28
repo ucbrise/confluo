@@ -22,6 +22,8 @@ public class ConfluoConsumer {
     private long maxIndex;
     private int  prefetchSize;
     private  RpcClient client;
+    private boolean prefetchEnable;
+    private int consumeLogSample;
     private int read=0;
     public ConfluoConsumer(){
         URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
@@ -33,7 +35,9 @@ public class ConfluoConsumer {
             port=Integer.valueOf(properties.getProperty("mq.server.port"));
             minIndex=Long.valueOf(properties.getProperty("mq.consume.message.min.index"));
             maxIndex=Long.valueOf(properties.getProperty("mq.consume.message.max.index"));
-            prefetchSize=Integer.valueOf(properties.getProperty("mq.consumer.prefetch.size"));
+            prefetchSize=Integer.valueOf(properties.getProperty("mq.consume.prefetch.size"));
+            consumeLogSample=Integer.valueOf(properties.getProperty("mq.consume.log.sample","1"));
+            prefetchEnable=Boolean.valueOf(properties.getProperty("mq.consume.prefetch.enable","false"));
             logger.info(String.format("server address: %s,port:%d,topic:%s",host,port,topic));
         }catch (IOException e){
             logger.info("io error",e);
@@ -54,7 +58,7 @@ public class ConfluoConsumer {
      *
      **/
     public void consume(long offset) throws TException{
-//        Record record;
+        Record singleRecord;
         Schema schema=client.getSchema();
         if(schema==null){
             throw new IllegalStateException("schema is null");
@@ -62,18 +66,27 @@ public class ConfluoConsumer {
         int  recordSize=schema.getRecordSize();
         long startOffset=Math.max(minIndex,offset)*recordSize;// real offset in log
         long maxOffset= Math.min(client.numRecords(),maxIndex)*recordSize;
-        long readMod=10000;
+        int  batchSize;
         for(long i=startOffset;i<maxOffset;){
-             List<Record> records= client.readBatch(i,prefetchSize);
-             for(Record record:records) {
-                 if (record != null) {
-                     if (read % readMod == 0) {
-                         logger.info(String.format("offset:%d,timestamp:%d,message:%s", i, record.get(0).asLong(), record.get(1).asString()));
-                     }
-                 }
-             }
-             read+=records.size();
-             i+=recordSize*records.size();
+            if(prefetchEnable) {
+                List<Record> records = client.readBatch(i, prefetchSize);
+                batchSize=records.size();
+                singleRecord=records.get(0);
+                for (Record record : records) {
+                    //consume
+                    singleRecord=record;
+                }
+            }else{
+                singleRecord=client.read(i);
+                batchSize=1;
+            }
+            if (singleRecord != null) {
+                if (read % consumeLogSample == 0) {
+                    logger.info(String.format("offset:%d,timestamp:%d,message:%s", i, singleRecord.get(0).asLong(),singleRecord.get(1).asString()));
+                }
+            }
+            read +=batchSize;
+            i+=recordSize*batchSize;
         }
 
     }

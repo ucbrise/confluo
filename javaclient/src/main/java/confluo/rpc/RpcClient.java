@@ -115,6 +115,17 @@ public class RpcClient {
     curSchema = TypeConversions.convertToSchema(info.getSchema());
     curMultilogId = info.getId();
   }
+  /**
+   * get the atomic multilog id
+   *
+   * @param name The name of atomic multilog to set the current atomic multilog to
+   * @return  multilog id
+   * @throws TException Cannot set the atomic multilog
+   */
+  public long getAtomicMultilog(String name) throws TException {
+    rpc_atomic_multilog_info info = client.getAtomicMultilogInfo(name);
+    return info.getId();
+  }
 
 
   /**
