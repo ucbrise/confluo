@@ -18,13 +18,13 @@ public class ConfluoConsumer {
     private String topic;
     private String host;
     private int port;
-    private long minIndex;
-    private long maxIndex;
+
     private int  prefetchSize;
     private  RpcClient client;
     private boolean prefetchEnable;
     private int consumeLogSample;
-    private int read=0;
+    private int totalRead =0;
+    private Schema schema;
     public ConfluoConsumer(){
         URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
         try {
@@ -33,10 +33,7 @@ public class ConfluoConsumer {
             topic=properties.getProperty("mq.consume.topic");
             host=properties.getProperty("mq.server.address");
             port=Integer.valueOf(properties.getProperty("mq.server.port"));
-            minIndex=Long.valueOf(properties.getProperty("mq.consume.message.min.index"));
-            maxIndex=Long.valueOf(properties.getProperty("mq.consume.message.max.index"));
             prefetchSize=Integer.valueOf(properties.getProperty("mq.consume.prefetch.size"));
-            consumeLogSample=Integer.valueOf(properties.getProperty("mq.consume.log.sample","1"));
             prefetchEnable=Boolean.valueOf(properties.getProperty("mq.consume.prefetch.enable","false"));
             logger.info(String.format("server address: %s,port:%d,topic:%s",host,port,topic));
         }catch (IOException e){
@@ -50,57 +47,81 @@ public class ConfluoConsumer {
     public void start() throws TException {
         client= new RpcClient(host, port);
         client.setCurrentAtomicMultilog(topic);
+        schema=client.getSchema();
     }
 
     /**
+     * best effort consume
      * consume from target offset
-     * @param offset  record index offset
-     *
+     * @param offset long offset
+     * @return  result count
      **/
-    public void consume(long offset) throws TException{
-        Record singleRecord;
-        Schema schema=client.getSchema();
-        if(schema==null){
-            throw new IllegalStateException("schema is null");
-        }
-        int  recordSize=schema.getRecordSize();
-        long startOffset=Math.max(minIndex,offset)*recordSize;// real offset in log
-        long maxOffset= Math.min(client.numRecords(),maxIndex)*recordSize;
+    public int pull(long offset,MessageListener messageListener) throws TException{
         int  batchSize;
-        for(long i=startOffset;i<maxOffset;){
             if(prefetchEnable) {
-                List<Record> records = client.readBatch(i, prefetchSize);
+                List<Record> records = client.readBatch(offset, prefetchSize);
                 batchSize=records.size();
-                singleRecord=records.get(0);
-                for (Record record : records) {
-                    //consume
-                    singleRecord=record;
-                }
+                messageListener.onMessage(records);
             }else{
-                singleRecord=client.read(i);
+                messageListener.onMessage(client.read(offset));
                 batchSize=1;
             }
-            if (singleRecord != null) {
-                if (read % consumeLogSample == 0) {
-                    logger.info(String.format("offset:%d,timestamp:%d,message:%s", i, singleRecord.get(0).asLong(),singleRecord.get(1).asString()));
-                }
-            }
-            read +=batchSize;
-            i+=recordSize*batchSize;
-        }
+            return  batchSize;
+    }
 
+    public Schema getSchema(){
+        return schema;
+    }
+
+    /**
+     * 消息条数
+     **/
+    public long maxRecord() throws TException{
+        return client.numRecords();
     }
 
     public static void main(String[] args){
         Logger logger= LoggerFactory.getLogger(ConfluoConsumer.class);
-        ConfluoConsumer consumer=new ConfluoConsumer();
+        Properties properties=new Properties();
+        URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
         try {
-            long start=System.currentTimeMillis();
+            InputStream in = propertiesUrl.openStream();
+            properties.load(in);
+        }catch (IOException e){
+            logger.info("io error",e);
+        }
+        ConfluoConsumer consumer=new ConfluoConsumer();
+        long consumeMaxTime=1*1000;
+        long start=System.currentTimeMillis();
+        long totalRead=0;
+        long read=0;
+        long time;
+        long consumeLogSample=Integer.valueOf(properties.getProperty("mq.consume.log.sample","1"));
+        MessageListener messageListener=new DefaultMessageListener(consumeLogSample);
+        try {
+            long minIndex=Long.valueOf(properties.getProperty("mq.consume.message.min.index","0"));
             consumer.start();
-            consumer.consume(0);
-            long time=System.currentTimeMillis()-start;
-            long qps=consumer.read*1000/time;
-            logger.info(String.format("total msg:%d, elapsed:%d ms, qps:%d/s",consumer.read,time,qps));
+            int  recordSize=consumer.getSchema().getRecordSize();
+            while(true) {
+                long startOffset = Math.max(minIndex, 0) * recordSize;// real offset in log
+                long maxOffset = consumer.maxRecord() * recordSize;
+                long count;
+                long i= startOffset;
+                for ( ; i < maxOffset; ) {
+                    count = consumer.pull(i, messageListener);
+                    totalRead += count;
+                    read += count;
+                    i += recordSize * count;
+                }
+                minIndex +=read;
+                read = 0;
+                time = System.currentTimeMillis() - start;
+                if (time >= consumeMaxTime) {
+                    break;
+                }
+            }
+            long qps=totalRead *1000/time;
+            logger.info(String.format("total msg:%d, elapsed:%d ms, qps:%d/s",totalRead,time,qps));
         }catch (TException e){
             logger.info("error",e);
         }
