@@ -17,6 +17,7 @@ namespace sketch {
 
 /**
  * Thread-safe count-sketch.
+ * Theory: http://www.cs.princeton.edu/courses/archive/spring04/cos598B/bib/CharikarCF.pdf
  */
 template<typename T, typename counter_t = int64_t>
 class count_sketch {

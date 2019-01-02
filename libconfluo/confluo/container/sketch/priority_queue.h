@@ -77,7 +77,7 @@ public:
   }
 
   /**
-   * Remove from priority queue if key already exists in it.
+   * Removes from priority queue if key already exists.
    * @param key key of element to remove
    * @return true iff the key was found and the element was removed
    */

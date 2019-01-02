@@ -143,6 +143,7 @@ public:
 private:
   /**
    * Update heavy hitters priority queue
+   * TODO make thread-safe
    * @param key key
    * @param count frequency count
    * @param l2 current l2 norm
