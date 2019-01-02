@@ -23,16 +23,15 @@ class universal_sketch {
    * @param b count-sketch width (number of buckets)
    * @param t count-sketch depth (number of estimates)
    * @param k number of heavy hitters to track per layer
-   * @param a heavy hitter threshold
    */
-  universal_sketch(size_t l, size_t b, size_t t, size_t k, double a,
+  universal_sketch(size_t l, size_t b, size_t t, size_t k,
                    hash_manager m1, hash_manager* m2, hash_manager* m3,
                    pairwise_indep_hash pwih)
       : substream_summaries_(l),
         layer_hashes_(std::move(m1)),
         precise_hh_(true) {
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = stream_summary<T, counter_t>(b, t, k, a, m2[i], m3[i], pwih);
+      substream_summaries_[i] = stream_summary<T, counter_t>(b, t, k, m2[i], m3[i], pwih);
     }
   }
 
@@ -41,11 +40,10 @@ class universal_sketch {
    * @param b count-sketch width (number of buckets)
    * @param t count-sketch depth (number of estimates)
    * @param k number of heavy hitters to track per layer
-   * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  universal_sketch(size_t b, size_t t, size_t k, double a)
-      : universal_sketch(8 * sizeof(T), b, t, k, a) {
+  universal_sketch(size_t b, size_t t, size_t k)
+      : universal_sketch(8 * sizeof(T), b, t, k) {
   }
 
   /**
@@ -54,16 +52,15 @@ class universal_sketch {
    * @param t count-sketch depth (number of estimates)
    * @param b count-sketch width (number of buckets)
    * @param k number of heavy hitters to track per layer
-   * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  universal_sketch(size_t l, size_t b, size_t t, size_t k, double a, bool precise = true)
+  universal_sketch(size_t l, size_t b, size_t t, size_t k, bool precise = true)
       : substream_summaries_(l),
         layer_hashes_(l - 1),
         precise_hh_(precise) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = stream_summary<T, counter_t>(b, t, k, a, precise);
+      substream_summaries_[i] = stream_summary<T, counter_t>(b, t, k, precise);
     }
   }
 
@@ -198,11 +195,11 @@ class universal_sketch {
     return total_size;
   }
 
-  static universal_sketch<T, counter_t> create_parameterized(double epsilon, double gamma, size_t k, double a) {
+  static universal_sketch<T, counter_t> create_parameterized(double epsilon, double gamma, size_t k) {
     return {
       count_sketch<T, counter_t>::error_margin_to_width(epsilon),
       count_sketch<T, counter_t>::perror_to_depth(gamma),
-      k, a
+      k
     };
   }
 

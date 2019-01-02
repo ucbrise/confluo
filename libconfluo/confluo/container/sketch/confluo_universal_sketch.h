@@ -24,10 +24,9 @@ public:
    * @param t count-sketch depth (number of estimates)
    * @param b count-sketch width (number of buckets)
    * @param k number of heavy hitters to track per layer
-   * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  confluo_universal_sketch(size_t l, size_t t, size_t b, size_t k, double a,
+  confluo_universal_sketch(size_t l, size_t t, size_t b, size_t k,
                            const schema_t& schema, const column_t& column,
                            bool precise = true)
       : substream_summaries_(l),
@@ -38,7 +37,7 @@ public:
         is_valid_(true) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = stream_summary<size_t, counter_t>(t, b, k, a, precise);
+      substream_summaries_[i] = stream_summary<size_t, counter_t>(t, b, k, precise);
     }
   }
 
@@ -176,14 +175,14 @@ public:
     return total_size;
   }
 
-  static confluo_universal_sketch<counter_t> create_parameterized(double epsilon, double gamma, size_t k, double a,
+  static confluo_universal_sketch<counter_t> create_parameterized(double epsilon, double gamma, size_t k,
                                                                   const schema_t& schema, const column_t& column) {
     size_t nlayers = 8 * sizeof(column.type().size);
     return {
             nlayers,
             count_sketch<counter_t>::error_margin_to_width(epsilon),
             count_sketch<counter_t>::perror_to_depth(gamma),
-            k, a, schema, column
+            k, schema, column
     };
   }
 

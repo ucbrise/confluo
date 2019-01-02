@@ -26,14 +26,12 @@ public:
    * @param b width (number of buckets)
    * @param t depth (number of estimates)
    * @param k number of heavy hitters to track
-   * @param a heavy hitter threshold
    * @param m1 sketch's hash manager for buckets
    * @param m2 sketch's hash manager for signs
    * @param pwih hash function for heavy hitter approximation
    */
-  stream_summary(size_t b, size_t t, size_t k, double a, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
-      : hh_threshold_(a),
-        num_hh_(k),
+  stream_summary(size_t b, size_t t, size_t k, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
+      : num_hh_(k),
         l2_squared_(),
         sketch_(b, t, m1, m2),
         heavy_hitters_(k),
@@ -47,12 +45,10 @@ public:
    * @param b width (number of buckets)
    * @param t depth (number of estimates)
    * @param k number of heavy hitters to track
-   * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  stream_summary(size_t b, size_t t, size_t k, double a, bool precise = true)
-      : hh_threshold_(a),
-        num_hh_(k),
+  stream_summary(size_t b, size_t t, size_t k, bool precise = true)
+      : num_hh_(k),
         l2_squared_(),
         sketch_(b, t),
         heavy_hitters_(k),
@@ -62,8 +58,7 @@ public:
   }
 
   stream_summary(const stream_summary& other)
-      : hh_threshold_(other.hh_threshold_),
-        num_hh_(other.num_hh_),
+      : num_hh_(other.num_hh_),
         l2_squared_(atomic::load(&other.l2_squared_)),
         sketch_(other.sketch_),
         heavy_hitters_(other.heavy_hitters_.size()),
@@ -76,7 +71,6 @@ public:
   }
 
   stream_summary& operator=(const stream_summary& other) {
-    hh_threshold_ = other.hh_threshold_;
     num_hh_ = other.num_hh_;
     l2_squared_ = atomic::load(&other.l2_squared_);
     sketch_ = other.sketch_;
@@ -92,14 +86,10 @@ public:
 
   void update(T key, size_t incr = 1) {
     counter_t old_count = sketch_.update_and_estimate(key, incr);
-    counter_t update = l2_squared_update(old_count, incr);
-    counter_t old_l2_sq = atomic::faa(&l2_squared_, update);
-    double new_l2 = std::sqrt(old_l2_sq + update);
-
     if (use_precise_hh_) {
-      this->update_hh_pq(key, old_count + incr, new_l2);
+      this->update_hh_pq(key, old_count + incr);
     } else {
-      this->update_hh_approx(key, old_count + incr, new_l2);
+      this->update_hh_approx(key, old_count + incr);
     }
   }
 
@@ -146,12 +136,8 @@ private:
    * TODO make thread-safe
    * @param key key
    * @param count frequency count
-   * @param l2 current l2 norm
    */
-  void update_hh_pq(T key, counter_t count, double l2) {
-    if (count < hh_threshold_ * l2) {
-      return;
-    }
+  void update_hh_pq(T key, counter_t count) {
     if (hhs_precise_.size() < num_hh_) {
       hhs_precise_.update(key, count, true);
     }
@@ -172,12 +158,8 @@ private:
    * Update heavy hitters approximate DS
    * @param key key
    * @param count frequency count
-   * @param l2 current l2 norm
    */
-  void update_hh_approx(T key, counter_t count, double l2) {
-    if (count < hh_threshold_ * l2) {
-      return;
-    }
+  void update_hh_approx(T key, counter_t count) {
     bool done = false;
     while (!done) {
       size_t idx = hh_hash_.apply<T>(key) % heavy_hitters_.size();
@@ -189,16 +171,6 @@ private:
     }
   }
 
-  /**
-   * L_2^2 += (c_i + 1)^2 - (c_i)^2
-   * L_2^2 += (c_i + incr)^2 - (c_i)^2
-   * @param old_count estimate of a count before an update
-   */
-  static inline counter_t l2_squared_update(counter_t old_count, size_t incr) {
-    return (2 * old_count * incr + incr) * incr;
-  }
-
-  double hh_threshold_; // heavy hitter threshold
   size_t num_hh_; // number of heavy hitters to track (k)
 
   atomic_counter_t l2_squared_; // L2 norm squared
