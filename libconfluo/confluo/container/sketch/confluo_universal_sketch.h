@@ -6,7 +6,7 @@
 #include "atomic.h"
 #include "count_sketch.h"
 #include "hash_manager.h"
-#include "substream_summary.h"
+#include "stream_summary.h"
 
 namespace confluo {
 namespace sketch {
@@ -38,7 +38,7 @@ public:
         is_valid_(true) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = substream_summary<size_t, counter_t>(t, b, k, a, precise);
+      substream_summaries_[i] = stream_summary<size_t, counter_t>(t, b, k, a, precise);
     }
   }
 
@@ -192,7 +192,7 @@ private:
     return hashed_value % 2;
   }
 
-  std::vector<substream_summary<size_t, counter_t>> substream_summaries_;
+  std::vector<stream_summary<size_t, counter_t>> substream_summaries_;
   hash_manager layer_hashes_;
 
   schema_t schema_{};

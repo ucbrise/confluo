@@ -12,14 +12,14 @@ namespace confluo {
 namespace sketch {
 
 template<typename T, typename counter_t = int64_t>
-class substream_summary {
+class stream_summary {
 
 public:
   typedef atomic::type<counter_t> atomic_counter_t;
   typedef std::vector<atomic::type<T>> atomic_vector_t;
   typedef count_sketch<T, counter_t> sketch_t;
 
-  substream_summary() = default;
+  stream_summary() = default;
 
   /**
    * Constructor
@@ -31,7 +31,7 @@ public:
    * @param m2 sketch's hash manager for signs
    * @param pwih hash function for heavy hitter approximation
    */
-  substream_summary(size_t b, size_t t, size_t k, double a, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
+  stream_summary(size_t b, size_t t, size_t k, double a, hash_manager m1, hash_manager m2, pairwise_indep_hash pwih)
       : hh_threshold_(a),
         num_hh_(k),
         l2_squared_(),
@@ -50,7 +50,7 @@ public:
    * @param a heavy hitter threshold
    * @param precise track exact heavy hitters
    */
-  substream_summary(size_t b, size_t t, size_t k, double a, bool precise = true)
+  stream_summary(size_t b, size_t t, size_t k, double a, bool precise = true)
       : hh_threshold_(a),
         num_hh_(k),
         l2_squared_(),
@@ -61,7 +61,7 @@ public:
         use_precise_hh_(precise) {
   }
 
-  substream_summary(const substream_summary& other)
+  stream_summary(const stream_summary& other)
       : hh_threshold_(other.hh_threshold_),
         num_hh_(other.num_hh_),
         l2_squared_(atomic::load(&other.l2_squared_)),
@@ -75,7 +75,7 @@ public:
     }
   }
 
-  substream_summary& operator=(const substream_summary& other) {
+  stream_summary& operator=(const stream_summary& other) {
     hh_threshold_ = other.hh_threshold_;
     num_hh_ = other.num_hh_;
     l2_squared_ = atomic::load(&other.l2_squared_);

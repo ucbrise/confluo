@@ -6,7 +6,7 @@
 #include "atomic.h"
 #include "count_sketch.h"
 #include "hash_manager.h"
-#include "container/sketch/substream_summary.h"
+#include "container/sketch/stream_summary.h"
 
 namespace confluo {
 namespace sketch {
@@ -32,7 +32,7 @@ class universal_sketch {
         layer_hashes_(std::move(m1)),
         precise_hh_(true) {
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = substream_summary<T, counter_t>(b, t, k, a, m2[i], m3[i], pwih);
+      substream_summaries_[i] = stream_summary<T, counter_t>(b, t, k, a, m2[i], m3[i], pwih);
     }
   }
 
@@ -63,7 +63,7 @@ class universal_sketch {
         precise_hh_(precise) {
     layer_hashes_.guarantee_initialized(l - 1);
     for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = substream_summary<T, counter_t>(b, t, k, a, precise);
+      substream_summaries_[i] = stream_summary<T, counter_t>(b, t, k, a, precise);
     }
   }
 
@@ -211,7 +211,7 @@ class universal_sketch {
     return hashed_value % 2;
   }
 
-  std::vector<substream_summary<T, counter_t>> substream_summaries_;
+  std::vector<stream_summary<T, counter_t>> substream_summaries_;
   hash_manager layer_hashes_;
 
   bool precise_hh_;
