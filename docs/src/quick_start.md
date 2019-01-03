@@ -211,7 +211,7 @@ In the stand-alone mode, Confluo runs as a daemon server, serving client request
 using Apache Thrift protocol. To start the server, run:
 
 ```bash
-confuod --address=127.0.0.1 --port=9090
+confluod --address=127.0.0.1 --port=9090
 ```
 
 Once the server daemon is running, you can query it using the C++, Python or Java 
