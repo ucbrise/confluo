@@ -19,7 +19,7 @@ size_t json_string_cursor::load_next_batch() {
   for (; i < current_batch_.size() && r_cursor_->has_more();
          ++i, r_cursor_->advance()) {
     record_t r = r_cursor_->get();
-    std::string json_rec = schema_.data_to_json_string(r.data());
+    std::string json_rec = schema_.record_to_json_string(r);
     current_batch_[i] = json_rec;
   }
   return i;

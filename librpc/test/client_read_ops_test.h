@@ -185,12 +185,21 @@ TEST_F(ClientReadOpsTest, ReadJSONTest) {
   rpc_client client(SERVER_ADDRESS, SERVER_PORT);
   client.set_current_atomic_multilog(atomic_multilog_name);
 
-  std::string rec = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"MSG\": \"abc\"\n}\n";
-  mlog->append_json(rec);
+  // this tests inputs with different whitespace formatting
+  std::string rec_formatted = "{\n    \"TIMESTAMP\": \"1544808666571819000\",\n    \"MSG\": \"abc\"\n}\n";
+  std::string rec_some_space = "{\"TIMESTAMP\":  \"1544808666571819000\",    \"MSG\":   \"abc\"}";
+  std::string rec_no_space = "{\"TIMESTAMP\":\"1544808666571819000\",\"MSG\":\"abc\"}";
+  mlog->append_json(rec_no_space);
+  mlog->append_json(rec_some_space);
+  mlog->append_json(rec_formatted);
 
   std::string buf;
-  client.read_json(buf, 0);
-  ASSERT_EQ(buf, rec);
+  client.read_json(buf, mlog->record_size() * 0);
+  ASSERT_EQ(buf, rec_formatted);
+  client.read_json(buf, mlog->record_size() * 1);
+  ASSERT_EQ(buf, rec_formatted);
+  client.read_json(buf, mlog->record_size() * 2);
+  ASSERT_EQ(buf, rec_formatted);
 
   client.disconnect();
   server->stop();

@@ -138,6 +138,20 @@ void schema_t::data_to_json_string(std::string &ret, const void *data) const {
   ret = ss.str();
 }
 
+void schema_t::record_to_json_string(std::string &ret, record_t record) const {
+  namespace pt = boost::property_tree;
+  pt::ptree root;
+
+  for (size_t i = 0; i < record.length(); i++) {
+    std::string column_name = columns_[i].name();
+    root.put(column_name, record.at(i).to_string());
+  }
+
+  std::stringstream ss;
+  pt::write_json(ss, root);
+  ret = ss.str();
+}
+
 void *schema_t::record_vector_to_data(const std::vector<std::string> &record) const {
   if (record.size() == columns_.size()) {
     // Timestamp is provided
