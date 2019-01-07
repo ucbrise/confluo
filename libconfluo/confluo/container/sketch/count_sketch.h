@@ -1,11 +1,11 @@
 #ifndef CONFLUO_CONTAINER_SKETCH_COUNT_SKETCH_H_
 #define CONFLUO_CONTAINER_SKETCH_COUNT_SKETCH_H_
 
-#include <array>
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <utility>
 #include <vector>
-#include <chrono>
 
 #include "atomic.h"
 #include "hash_manager.h"

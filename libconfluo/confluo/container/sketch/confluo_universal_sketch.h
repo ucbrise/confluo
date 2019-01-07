@@ -1,85 +1,95 @@
 #ifndef CONFLUO_CONTAINER_SKETCH_CONFLUO_UNIVERSAL_SKETCH_H
 #define CONFLUO_CONTAINER_SKETCH_CONFLUO_UNIVERSAL_SKETCH_H
 
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "atomic.h"
 #include "count_sketch.h"
+#include "../data_log.h"
+#include "../../schema/column.h"
+#include "../../schema/record.h"
 #include "hash_manager.h"
-#include "stream_summary.h"
 
 namespace confluo {
 namespace sketch {
 
 template<typename counter_t = int64_t>
+class functions {
+
+ public:
+  // This is a frequency-domain function and must be monotonically increasing
+  // in f and O(f^2), where f is the frequency of the data point
+  template<typename g_ret_t> using g_fn = std::function<g_ret_t(counter_t)>;
+
+  static counter_t l2_norm(counter_t freq) {
+   return freq * freq;
+  }
+
+  static double entropy(counter_t freq) {
+    return freq * std::log(freq);
+  }
+
+  static counter_t cardinality(counter_t freq) {
+    return 1;
+  }
+
+};
+
 class confluo_universal_sketch {
 
 public:
-  typedef std::vector<atomic::type<size_t>> heavy_hitters_set;
-  template<typename g_ret_t> using g_fn = std::function<g_ret_t(counter_t)>;
+  typedef size_t key_t;
+  typedef int64_t counter_t;
+  typedef functions<counter_t> fn_t;
+  typedef count_sketch<key_t, counter_t> sketch_t;
+  typedef std::vector<atomic::type<size_t>> heavy_hitters_t;
+
+  /**
+   * Constructor
+   * @param epsilon epsilon
+   * @param gamma gamma
+   * @param k number of heavy hitters to track per layer
+   * @param log data log
+   * @param column column of field to sketch
+   */
+  confluo_universal_sketch(double epsilon, double gamma, size_t k, data_log *log, column_t column);
 
   /**
    * Constructor
    * @param l number of layers
-   * @param t count-sketch depth (number of estimates)
    * @param b count-sketch width (number of buckets)
+   * @param t count-sketch depth (number of estimates)
    * @param k number of heavy hitters to track per layer
-   * @param precise track exact heavy hitters
+   * @param log data log
+   * @param column column of field to sketch
    */
-  confluo_universal_sketch(size_t l, size_t t, size_t b, size_t k,
-                           const schema_t& schema, const column_t& column,
-                           bool precise = true)
-      : substream_summaries_(l),
-        layer_hashes_(l - 1),
-        schema_(schema),
-        column_(column),
-        precise_hh_(precise),
-        is_valid_(true) {
-    layer_hashes_.guarantee_initialized(l - 1);
-    for (size_t i = 0; i < l; i++) {
-      substream_summaries_[i] = stream_summary<size_t, counter_t>(t, b, k, precise);
-    }
-  }
+  confluo_universal_sketch(size_t l, size_t b, size_t t, size_t k, data_log *log, column_t column);
 
-  confluo_universal_sketch(const confluo_universal_sketch& other)
-          : substream_summaries_(other.substream_summaries_),
-            layer_hashes_(other.layer_hashes_),
-            schema_(other.schema_),
-            column_(other.column_),
-            precise_hh_(other.precise_hh_),
-            is_valid_(atomic::load(&other.is_valid_)) {
-  }
+  confluo_universal_sketch(const confluo_universal_sketch &other);
 
-  confluo_universal_sketch& operator=(const confluo_universal_sketch& other) {
-    substream_summaries_ = other.substream_summaries_;
-    layer_hashes_ = other.layer_hashes_;
-    schema_= other.schema_;
-    column_ = other.column_;
-    precise_hh_ = other.precise_hh_;
-    is_valid_ = atomic::load(&other.is_valid_);
-    return *this;
-  }
+  confluo_universal_sketch &operator=(const confluo_universal_sketch &other);
 
-  bool is_valid() {
-    return atomic::load(&is_valid_);
-  }
+  bool is_valid();
 
-  bool invalidate() {
-    bool expected = true;
-    return atomic::strong::cas(&is_valid_, &expected, false);
-  }
+  /**
+   * Invalidate sketch
+   */
+  bool invalidate();
 
   /**
    * Update universal sketch with a record.
    * @param r record
    */
-  void update(const record_t &r) {
-    size_t key_hash = r.at(column_.idx()).get_key().hash();
-    substream_summaries_[0].update(key_hash);
-    for (size_t i = 1; i < substream_summaries_.size() && to_bool(layer_hashes_.hash(i - 1, key_hash)); i++) {
-      substream_summaries_[i].update(key_hash);
-    }
-  }
+  void update(const record_t &r);
+
+  /**
+   * Get heavy hitters and their estimated frequencies from the top layer
+   * @param num_layers number of layers to use to refine count
+   * @return heavy hitters
+   */
+  std::unordered_map<std::string, counter_t> get_heavy_hitters();
 
   /**
    * Evaluate a G_SUM function using all layers
@@ -88,116 +98,105 @@ public:
    * @return g sum estimate
    */
   template<typename g_ret_t = counter_t>
-  g_ret_t evaluate(g_fn<g_ret_t> g) {
-    return evaluate(g, substream_summaries_.size());
+  g_ret_t evaluate(fn_t::g_fn<g_ret_t> g) {
+    return evaluate(g, num_layers_);
   }
 
   /**
    * Evaluate a G_SUM function
    * @tparam g_ret_t return type
-   * @param g function
-   * @param nlayers number of layers to use
+   * @param g function bounded by O(f^2) where f is the frequency
+   * @param num_layers number of layers to use to compute G_SUM
    * @return g sum
    */
   template<typename g_ret_t = counter_t>
-  g_ret_t evaluate(g_fn<g_ret_t> g, size_t nlayers) {
+  g_ret_t evaluate(fn_t::g_fn<g_ret_t> g, size_t num_layers) {
     g_ret_t recursive_sum = 0;
+    size_t substream_i = num_layers - 1;
 
-    // Handle last substream
-    size_t substream_i = nlayers - 1;
-
-    auto& last_substream_sketch = substream_summaries_[substream_i].get_sketch();
-
-    if (precise_hh_) {
-      auto& last_substream_hhs = substream_summaries_[substream_i].get_pq();
-      for (auto it = last_substream_hhs.begin(); it != last_substream_hhs.end(); ++it) {
-        counter_t count = (*it).priority_;
+    // Handle last substream (base case)
+    for (auto &last_substream_hh : substream_heavy_hitters_[substream_i]) {
+      key_t key = atomic::load(&last_substream_hh);
+      // Make sure a key exists in the slot
+      if (key != zero()) {
+        counter_t count = substream_sketches_[substream_i].estimate(key);
         recursive_sum += g(count);
       }
-      //LOG_INFO << substream_i << ": " << recursive_sum;
-    }
-    else {
-      auto& last_substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
-      for (size_t hh_i = 0; hh_i < last_substream_hhs.size(); hh_i++) {
-        auto hh_rec_off = atomic::load(&last_substream_hhs[hh_i]);
-        // TODO handle special case
-        if (hh_rec_off != 0) {
-          size_t hh_hash = 0;
-          counter_t count = last_substream_sketch.estimate(hh_hash);
-          recursive_sum += g(count);
-        }
-      }
     }
 
-    // Handle rest recursively
-
+    // Handle rest (recursive case)
     while (substream_i-- > 0) {
-
       g_ret_t substream_sum = 0;
-      auto& substream_sketch = substream_summaries_[substream_i].get_sketch();
-
-      if (precise_hh_) {
-        auto& substream_hhs = substream_summaries_[substream_i].get_pq();
-        for (auto it = substream_hhs.begin(); it != substream_hhs.end(); ++it) {
-          size_t hh_hash = (*it).key_;
-          counter_t count = (*it).priority_;
-          g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh_hash))) * g(count));
+      for (auto &substream_hh : substream_heavy_hitters_[substream_i]) {
+        key_t key = atomic::load(&substream_hh);
+        // Make sure a key exists in the slot
+        if (key != zero()) {
+          counter_t count = substream_sketches_[substream_i].estimate(key);
+          g_ret_t update = ((1 - 2 * to_bool(substream_hashes_.hash(substream_i, key))) * g(count));
           substream_sum += update;
         }
       }
-      else {
-        auto &substream_hhs = substream_summaries_[substream_i].get_heavy_hitters();
-        for (size_t hh_i = 0; hh_i < substream_hhs.size(); hh_i++) {
-          auto hh_hash = atomic::load(&substream_hhs[hh_i]);
-          counter_t count = substream_sketch.estimate(hh_hash);
-          // TODO handle special case
-          if (hh_hash != byte_string().hash()) {
-            g_ret_t update = ((1 - 2 * to_bool(layer_hashes_.hash(substream_i, hh_hash))) * g(count));
-            substream_sum += update;
-          }
-        }
-      }
-
       recursive_sum = 2 * recursive_sum + substream_sum;
-      //LOG_INFO << substream_i << ": " << recursive_sum;
     }
+
     return recursive_sum;
   }
 
   /**
-   * @return size of data structure in bytes
+   * Size of data structure's first n layers
+   * @param num_layers number of layers
+   * @return size of data structure's first n layers in bytes
    */
-  size_t storage_size() {
-    size_t total_size = 0;
-    for (size_t i = 0; i < substream_summaries_.size(); i++) {
-      total_size += substream_summaries_[i].storage_size();
-    }
-    return total_size;
-  }
-
-  static confluo_universal_sketch<counter_t> create_parameterized(double epsilon, double gamma, size_t k,
-                                                                  const schema_t& schema, const column_t& column) {
-    size_t nlayers = 8 * sizeof(column.type().size);
-    return {
-            nlayers,
-            count_sketch<counter_t>::error_margin_to_width(epsilon),
-            count_sketch<counter_t>::perror_to_depth(gamma),
-            k, schema, column
-    };
-  }
+  size_t storage_size();
 
 private:
-  static inline size_t to_bool(size_t hashed_value) {
+  /**
+   * Convert record's relevant field value to an indexable key
+   * @param r record
+   * @return field value as an indexable key
+   */
+  inline key_t record_to_key(const record_t &r);
+
+  /**
+   * Convert record's relevant field value to an indexable key
+   * @param ptr pointer into data log where record is stored
+   * @return field value as an indexable key
+   */
+  inline key_t record_ptr_to_key(const read_only_data_log_ptr &ptr);
+
+  /**
+   * Convert record's relevant field value to a string
+   * @param ptr pointer into data log where record is stored
+   * @return field value as a string
+   */
+  inline std::string record_ptr_to_string(const read_only_data_log_ptr &ptr);
+
+  /**
+   * Update the heavy hitters of a substream
+   * @param idx index of substream
+   * @param key key
+   * @param offset offset of record holding key into data log
+   * @param count count of key
+   */
+  void update_heavy_hitters(size_t idx, key_t key, size_t offset, counter_t count);
+
+  static inline key_t to_bool(key_t hashed_value) {
     return hashed_value % 2;
   }
 
-  std::vector<stream_summary<size_t, counter_t>> substream_summaries_;
-  hash_manager layer_hashes_;
+  static inline key_t zero() {
+   static key_t zero = byte_string().hash();
+   return zero;
+  }
 
-  schema_t schema_{};
-  column_t column_{};
+  std::vector<sketch_t> substream_sketches_;
+  std::vector<heavy_hitters_t> substream_heavy_hitters_;
+  hash_manager substream_hashes_;
+  pairwise_indep_hash hh_hash_;
+  size_t num_layers_;
 
-  bool precise_hh_;
+  data_log *data_log_;
+  column_t column_;
   atomic::type<bool> is_valid_;
 
 };

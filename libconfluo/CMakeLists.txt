@@ -101,8 +101,6 @@ add_library(confluo STATIC
         confluo/container/sketch/hash_manager.h
         confluo/container/sketch/priority_queue.h
         confluo/container/sketch/sketch_utils.h
-        confluo/container/sketch/substream_summary.h
-        confluo/container/sketch/universal_sketch.h
         confluo/schema/field.h
         confluo/schema/record.h
         confluo/schema/record_batch.h
@@ -149,6 +147,7 @@ add_library(confluo STATIC
         src/container/cursor/alert_cursor.cc
         src/container/cursor/offset_cursors.cc
         src/container/cursor/record_cursors.cc
+        src/container/sketch/confluo_universal_sketch.cc
         src/container/sketch/hash_manager.cc
         src/parser/aggregate_parser.cc
         src/parser/expression_compiler.cc
@@ -195,16 +194,12 @@ add_library(confluo STATIC
         src/types/raw_data.cc
         src/types/numeric.cc
         src/types/type_properties.cc
-        src/types/type_manager.cc )
+        src/types/type_manager.cc)
 
 target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
 add_dependencies(confluo lz4)
 
-add_executable(usexperiment
-    test/sketch_experiment.cc
-    )
 find_package(Boost 1.45.0 COMPONENTS program_options)
-target_link_libraries(usexperiment confluo ${Boost_LIBRARIES})
 
 if (BUILD_TESTS)
   # Build test
@@ -240,7 +235,9 @@ if (BUILD_TESTS)
           test/container/bitmap/bitmap_test.h
           test/container/bitmap/bitmap_array_test.h
           test/container/sketch/count_sketch_test.h
+          test/container/sketch/sketch_test_utils.h
           test/container/sketch/universal_sketch_test.h
+          test/container/sketch/priority_queue_test.h
           test/container/bitmap/delta_encoded_array_test.h
           test/container/stream_test.h
           test/container/string_map_test.h
@@ -257,7 +254,7 @@ if (BUILD_TESTS)
           test/compression/lz4_encode_test.h
           test/compression/delta_encode_test.h
           test/aggregated_reflog_test.h
-          test/confluo_store_test.h test/container/sketch/priority_queue_test.h)
+          test/confluo_store_test.h)
   target_link_libraries(ctest confluo gtest gtest_main) #alan_univmon)
   add_dependencies(ctest googletest)
 
