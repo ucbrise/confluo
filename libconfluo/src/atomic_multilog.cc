@@ -109,38 +109,6 @@ bool atomic_multilog::is_indexed(const std::string &field_name) {
   return col.is_indexed();
 }
 
-void atomic_multilog::add_universal_sketch(const std::string &name, const std::string &field_name, double epsilon) {
-  optional<management_exception> ex;
-  std::future<void> ret = mgmt_pool_.submit(
-          [name, field_name, epsilon, &ex, this] {
-            add_universal_sketch_task(name, field_name, epsilon, ex);
-          });
-  ret.wait();
-  if (ex.has_value())
-    throw ex.value();
-}
-
-void atomic_multilog::remove_universal_sketch(const std::string &name) {
-  optional<management_exception> ex;
-  std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
-    remove_universal_sketch_task(name, ex);
-  });
-  ret.wait();
-  if (ex.has_value())
-    throw ex.value();
-}
-
-template<typename g_ret_t>
-g_ret_t atomic_multilog::evaluate_frequency_fn(const std::string &name, std::function<g_ret_t(int64_t)> &g_fn) {
-  optional<management_exception> ex;
-  univ_sketch_id_t univ_sketch_id;
-  if (univ_sketch_map_.get(name, univ_sketch_id) == -1) {
-    ex = management_exception("Universal sketch " + name + " does not exist.");
-    throw ex.value();
-  }
-  return univ_sketches_.at(univ_sketch_id)->evaluate(g_fn);
-}
-
 void atomic_multilog::add_filter(const std::string &name, const std::string &expr) {
   optional<management_exception> ex;
   std::future<void> ret = mgmt_pool_.submit([name, expr, &ex, this] {
@@ -254,10 +222,6 @@ size_t atomic_multilog::append(void *data) {
   for (const field_t &f : r)
     if (f.is_indexed())
       indexes_.at(f.index_id())->insert(f.get_key(), offset);
-
-  for (auto sketch : univ_sketches_)
-    if (sketch->is_valid())
-      sketch->update(r);
 
   data_log_.flush(offset, record_size);
   rt_.advance(offset, static_cast<uint32_t>(record_size));
@@ -538,38 +502,6 @@ void atomic_multilog::remove_index_task(const std::string &field_name, optional<
     ex = management_exception("Could not remove index for " + field_name + ": No index exists");
     return;
   }
-}
-
-void atomic_multilog::add_universal_sketch_task(const std::string &name, const std::string &field_name, double epsilon,
-                                                optional<management_exception> &ex) {
-  univ_sketch_id_t univ_sketch_id;
-  if (univ_sketch_map_.get(name, univ_sketch_id) != -1) {
-    ex = management_exception("Universal sketch " + name + " does not exist.");
-    return;
-  }
-  size_t idx = schema_.get_field_index(field_name);
-  univ_sketch_id = univ_sketches_.push_back(new confluo_universal_sketch<>(
-          confluo_universal_sketch<>::create_parameterized(epsilon, 0.01, 0, 100, schema_, schema_[idx])
-  ));
-  // TODO write metadata
-  if (univ_sketch_map_.put(name, univ_sketch_id) == -1) {
-    ex = management_exception("Could not add universal sketch " + name + " to universal sketch map.");
-    return;
-  }
-}
-
-void atomic_multilog::remove_universal_sketch_task(const std::string &name, optional<management_exception> &ex) {
-  univ_sketch_id_t univ_sketch_id;
-  if (univ_sketch_map_.get(name, univ_sketch_id) == -1) {
-    ex = management_exception("Universal sketch " + name + " does not exist.");
-    return;
-  }
-  bool success = univ_sketches_.at(univ_sketch_id)->invalidate();
-  if (!success) {
-    ex = management_exception("Universal sketch already invalidated.");
-    return;
-  }
-  univ_sketch_map_.remove(name, univ_sketch_id);
 }
 
 void atomic_multilog::add_filter_task(const std::string &name,

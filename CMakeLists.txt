@@ -71,23 +71,23 @@ add_subdirectory(libconfluo)
 
 if (BUILD_RPC)
   # RPC Framework
-  #add_subdirectory(librpc)
+  add_subdirectory(librpc)
   
   # Python Client
-  #  if (WITH_PY_CLIENT)
-  #    add_subdirectory(pyclient)
-  #  endif()
-  #  
-  #  # Java Client
-  #  if (WITH_JAVA_CLIENT)
-  #    add_subdirectory(javaclient)
-  #  endif()
+  if (WITH_PY_CLIENT)
+    add_subdirectory(pyclient)
+  endif()
+  
+  # Java Client
+  if (WITH_JAVA_CLIENT)
+    add_subdirectory(javaclient)
+  endif()
 endif()
 
 # Confluo examples
 if (BUILD_EXAMPLES)
-    #  add_subdirectory(examples/libtimeseries)
-    #  add_subdirectory(examples/libstreaming)
+  add_subdirectory(examples/libtimeseries)
+  add_subdirectory(examples/libstreaming)
 endif()
 
 if (BUILD_DOC)

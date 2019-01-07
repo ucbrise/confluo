@@ -22,7 +22,6 @@
 #include "container/cursor/record_cursors.h"
 #include "container/cursor/alert_cursor.h"
 #include "container/monolog/monolog.h"
-#include "container/sketch/confluo_universal_sketch.h"
 #include "container/radix_tree.h"
 #include "container/string_map.h"
 #include "filter.h"
@@ -43,7 +42,6 @@
 #include "string_utils.h"
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
-#include "univ_sketch_log.h"
 
 /**
  * \mainpage libconfluo Documentation
@@ -60,7 +58,6 @@
  */
 using namespace ::confluo::archival;
 using namespace ::confluo::monolog;
-using namespace ::confluo::sketch;
 using namespace ::confluo::index;
 using namespace ::confluo::monitor;
 using namespace ::confluo::parser;
@@ -93,11 +90,6 @@ class atomic_multilog {
    * Type of metadata_writer
    */
   typedef metadata_writer metadata_writer_type;
-
-  /**
-   * Identifier for universal sketch
-   */
-  typedef size_t univ_sketch_id_t;
 
   /**
    * Identifier for filter
@@ -194,19 +186,6 @@ class atomic_multilog {
    * @throw ex Management exception
    */
   bool is_indexed(const std::string &field_name);
-
-  /**
-   * Adds a universal sketch ton monitor a field.
-   * @param name The name of the sketch
-   * @param field_name The name of the field to monitor.
-   * @param epsilon margin of error
-   */
-  void add_universal_sketch(const std::string &name, const std::string &field_name, double epsilon = 0.01);
-
-  void remove_universal_sketch(const std::string &name);
-
-  template<typename g_ret_t>
-  g_ret_t evaluate_frequency_fn(const std::string &name, std::function<g_ret_t(int64_t)> &g_fn);
 
   /**
    * Adds filter to the atomic multilog
@@ -468,13 +447,6 @@ class atomic_multilog {
    */
   void remove_index_task(const std::string &field_name, optional<management_exception> &ex);
 
-  void add_universal_sketch_task(const std::string &name,
-                                 const std::string &field_name,
-                                 double epsilon,
-                                 optional<management_exception> &ex);
-
-  void remove_universal_sketch_task(const std::string &name, optional<management_exception> &ex);
-
   /**
    * Adds a filter to be executed on the data
    *
@@ -575,13 +547,9 @@ class atomic_multilog {
   filter_log filters_;
   /** The list of indexes */
   index_log indexes_;
-  /** The list of universal sketches */
-  univ_sketch_log univ_sketches_;
   /** The list of alerts */
   alert_index alerts_;
 
-  /** A map from id to universal_sketch */
-  string_map<univ_sketch_id_t> univ_sketch_map_;
   /** A map from id to filter */
   string_map<filter_id_t> filter_map_;
   /** A map from id to aggregate */

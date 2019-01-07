@@ -1,4 +1,4 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -I/Users/Ujval/dev/research/univmon_extension/simulator/V0.3/")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 if (NOT APPLE AND UNIX)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
 endif ()
@@ -255,7 +255,7 @@ if (BUILD_TESTS)
           test/compression/delta_encode_test.h
           test/aggregated_reflog_test.h
           test/confluo_store_test.h)
-  target_link_libraries(ctest confluo gtest gtest_main) #alan_univmon)
+  target_link_libraries(ctest confluo gtest gtest_main)
   add_dependencies(ctest googletest)
 
   file(GLOB_RECURSE test_sources test/*.cc)
