@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(confluo C CXX)
 
 set(CONFLUO_VERSION_MAJOR "0")

@@ -3,7 +3,7 @@
 Confluo uses:
 
 * MkDocs to generate documentation html
-* Doxygen to generate C++ API documentation
+* Doxygen to generate API documentation
 
 as a part of its build. 
 

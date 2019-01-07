@@ -43,6 +43,19 @@
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
 
+/**
+ * \mainpage libconfluo Documentation
+ *
+ * `libconfluo` is Confluo’s data structure library, that supports high
+ *  throughput ingestion of logs, along with a wide range of online (live
+ *  aggregates, conditional trigger executions, etc.) and offline (ad-hoc filters,
+ *  aggregates, etc.) queries.
+ *
+ *  The main data structure in this library is the \ref atomic_multilog, a collection
+ *  of lock-free concurrent logs that stores raw data, aggregate statistics, and
+ *  materialized views and uses new techniques to efficiently update the entire
+ *  collection as a single atomic operation.
+ */
 using namespace ::confluo::archival;
 using namespace ::confluo::monolog;
 using namespace ::confluo::index;

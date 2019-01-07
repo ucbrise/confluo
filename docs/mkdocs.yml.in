@@ -1,40 +1,14 @@
+# Project Information
 site_name: Confluo
 docs_dir: @CMAKE_CURRENT_SOURCE_DIR@/src
 site_dir: @CMAKE_CURRENT_BINARY_DIR@/site
 site_author: 'Anurag Khandelwal'
+
+# Repository
 repo_name: ucbrise/confluo
 repo_url: https://github.com/ucbrise/confluo/
-markdown_extensions:
-  - admonition
-  - codehilite
-  - meta
-  - footnotes
-  - toc:
-      permalink: true
-pages:
-  - About: index.md
-  - Research Papers: research.md
-  - Contributing: contributing.md
-  - Contact: contact.md
-  - User Guide:
-    - Quick Start: quick_start.md
-    - Installation: install.md
-    - Modes of Operation: modes_of_operation.md
-    - Data Storage: 
-      - Data Storage Overview: loading_data.md
-      - Type System: type_system.md
-    - Querying Data:
-      - Queries Overview: queries.md
-      - Online Queries: online_queries.md
-      - Offline Queries: offline_queries.md
-    - Archiving Data: data_archival.md
-  - API Docs:
-    - C++: cpp_api.md
-    - Client APIs:
-      - Overview: client_api.md
-      - C++: cpp_client_api.md
-      - Python: python_client_api.md
-      - Java: java_client_api.md
+
+# Configuration
 theme:
   name: null
   custom_dir: @CMAKE_CURRENT_SOURCE_DIR@/material-theme
@@ -75,8 +49,7 @@ theme:
 
   # The logo of the documentation shown in the header and navigation can either
   # be a Material Icon ligature or an image URL
-  logo:
-    icon: "\uE0B3"
+  logo: 'img/logo.png'
 
   # Material includes the search in the header as a partial, not as a separate
   # template, so it's correct that search.html is missing
@@ -89,3 +62,67 @@ theme:
   # Static pages to build
   static_templates:
     - 404.html
+
+markdown_extensions:
+  - markdown.extensions.admonition
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+  - About: index.md
+  - Research Papers: research.md
+  - Contributing: contributing.md
+  - User Guide:
+    - Quick Start: quick_start.md
+    - Installation: install.md
+    - Modes of Operation: modes_of_operation.md
+    - Data Storage: 
+      - Data Storage Overview: loading_data.md
+      - Type System: type_system.md
+    - Querying Data:
+      - Queries Overview: queries.md
+      - Online Queries: online_queries.md
+      - Offline Queries: offline_queries.md
+    - Archiving Data: data_archival.md
+  - API Docs:
+    - Overview: api.md
+    - C++: cpp_api.md
+    - Client APIs:
+      - Overview: client_api.md
+      - C++: cpp_client_api.md
+      - Python: python_client_api.md
+      - Java: java_client_api.md
+  - Applications:
+    - Overview: applications.md
+    - Network Monitoring and Diagnosis: network_monitoring.md
+    - Timeseries Database: timeseries_db.md
+    - Pub-sub System: pub_sub.md
+  - People:
+    - Confluo Team: contact.md
+
+# Google Analytics
+google_analytics:
+  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - auto

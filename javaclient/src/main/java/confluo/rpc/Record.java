@@ -2,60 +2,64 @@ package confluo.rpc;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * A collection of values containing different types
  */
-public class Record {
+public class Record implements Iterable<Field> {
 
-  private long logOffset;
-  private long size;
-  private ByteBuffer data;
-  private long version;
   private List<Field> fields;
 
   /**
    * Initializes a record to the specified values
    *
-   * @param logOffset The offset from the log
-   * @param data      The data the record should hold
-   * @param size      The size of the record in bytes
+   * @param data   The data the record should hold
+   * @param schema The schema the record conforms to
    */
-  public Record(long logOffset, ByteBuffer data, long size) {
-    this.logOffset = logOffset;
-    this.data = data;
-    this.size = size;
-    this.version = this.logOffset + this.size;
+  Record(ByteBuffer data, Schema schema) {
     this.fields = new ArrayList<>();
-
+    for (Column column : schema.getColumns()) {
+      fields.add(column.apply(data));
+    }
   }
 
   /**
-   * Adds a value to the record
-   *
-   * @param value The value to add
-   */
-  public void pushBack(Field value) {
-    fields.add(value);
-  }
-
-  /**
-   * Gets a field at a specific index
+   * Gets a field get a specific index
    *
    * @param idx The index of the desired field
    * @return The desired field
    */
-  public Field at(int idx) {
+  public Field get(int idx) {
     return fields.get(idx);
   }
 
   /**
-   * Gets the data of the record
+   * Convert record to string.
    *
-   * @return THe data
+   * @return String representation of record.
    */
-  public ByteBuffer getData() {
-    return data;
+  @Override
+  public String toString() {
+    StringBuilder out = new StringBuilder("[");
+    for (int i = 0; i < fields.size(); ++i) {
+      out.append(fields.get(i).toString());
+      if (i != fields.size() - 1) {
+        out.append(", ");
+      }
+    }
+    out.append("]");
+    return out.toString();
+  }
+
+  /**
+   * Returns an iterator over elements Field elements.
+   *
+   * @return an Iterator.
+   */
+  @Override
+  public Iterator<Field> iterator() {
+    return fields.iterator();
   }
 }

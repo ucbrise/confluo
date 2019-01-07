@@ -12,6 +12,3 @@ To see how Confluo supports online and offline queries, see the individual guide
 
 * [Online Queries](online_queries.md)
 * [Offline Queries](offline_queries.md)
-
-
-

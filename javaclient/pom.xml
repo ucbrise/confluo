@@ -6,7 +6,7 @@
 
   <groupId>riselab</groupId>
   <artifactId>confluo-client</artifactId>
-  <version>0.1.0</version>
+  <version>test</version>
   <packaging>jar</packaging>
   <name>Confluo Client</name>
 
@@ -47,6 +47,11 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+          <version>2.2.4</version>
+      </dependency>
   </dependencies>
 
   <build>

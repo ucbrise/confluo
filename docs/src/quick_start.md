@@ -6,18 +6,18 @@ load some sample data, and query it.
 ## Pre-requisites
 
 * MacOS X or Unix-based OS; Windows is not yet supported.
-* C++ compiler that supports C++11 standard
-* CMake 2.8 or later
-* Boost 1.53 or later
+* C++ compiler that supports C++11 standard (e.g., GCC 5.3 or later)
+* CMake 3.2 or later
+* Boost 1.58 or later
 
 For python client, you will additionally require:
 
 * Python 2.7 or later
-* Python Packages: six 1.7.2 or later
+* Python Packages: setuptools, six 1.7.2 or later
 
 For java client, you will additionally require:
 
-* Java 1.7 or later
+* Java JDK 1.7 or later
 * ant 1.6.2 or later
 
 ## Download and Install
@@ -211,18 +211,22 @@ In the stand-alone mode, Confluo runs as a daemon server, serving client request
 using Apache Thrift protocol. To start the server, run:
 
 ```bash
-confuod --address=127.0.0.1 --port=9090
+confluod --address=127.0.0.1 --port=9090
 ```
 
 Once the server daemon is running, you can query it using the C++, Python or Java 
-client APIs. The client APIs closely resemble the embedded API. In this guide, 
-we will focus on the C++ client API, although client APIs for Python and Java are
-almost identical.
+client APIs. The client APIs closely resemble the embedded API.
 
 We first create a new client connection to the Confluo daemon:
 
-```cpp
+```cpp tab="C++"
 confluo::rpc::rpc_client client("127.0.0.1", 9090);
+```
+
+```python tab="Python"
+from confluo.rpc.client import RpcClient
+
+client = RpcClient("127.0.0.1", 9090)
 ```
 
 The first argument to the `rpc_client` constructor corresponds to the server
@@ -232,9 +236,9 @@ We then create a new Atomic MultiLog within the Store (synonymous to a database
 table); as before, this requires three parameters: a name for the Atomic 
 MultiLog, a fixed schema, and a storage mode:
 
-```cpp
+```cpp tab="C++"
 std::string schema = "{
-  timestamp: LONG,
+  timestamp: ULONG,
   op_latency_ms: DOUBLE,
   cpu_util: DOUBLE,
   mem_avail: DOUBLE,
@@ -244,82 +248,150 @@ auto storage_mode = confluo::storage::IN_MEMORY;
 client.create_atomic_multilog("perf_log", schema, storage_mode);
 ```
 
+```python tab="Python"
+from confluo.rpc.storage import StorageMode
+
+schema = """{
+  timestamp: ULONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}"""
+storage_mode = StorageMode.IN_MEMORY
+client.create_atomic_multilog("perf_log", schema, storage_mode)
+```
+
 This operation also internally sets the current Atomic MultiLog 
 for the client to the one we just created (i.e., `perf_log`).
 
 We can define indexes as follows:
 
-```cpp
+```cpp tab="C++"
 client.add_index("op_latency_ms");
+```
+
+```python tab="Python"
+client.add_index("op_latency_ms")
 ```
 
 We can also install filters as follows:
 
-```cpp
+```cpp tab="C++"
 client.add_filter("low_resources", "cpu_util>0.8 || mem_avail<0.1");
+```
+
+```python tab="Python"
+client.add_filter("low_resources", "cpu_util>0.8 || mem_avail<0.1")
 ```
 
 Additionally, we can add aggregates on filters as follows:
 
-```cpp
+```cpp tab="C++"
 client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)");
+```
+
+```python tab="Python"
+client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)")
 ```
 
 Finally, we can install a trigger on an aggregate as follows:
 
-```cpp
-client.install_trigger("high_latency_trigger", "max_latency > 1000");
+```cpp tab="C++"
+client.install_trigger("high_latency_trigger", "max_latency_ms > 1000");
+```
+
+```python tab="Python"
+client.install_trigger("high_latency_trigger", "max_latency_ms > 1000")
 ```
 
 To load data into the Atomic MultiLog:
 
-```cpp
+```cpp tab="C++"
 size_t off1 = client.append({"100", "0.5", "0.9",  "INFO: Launched 1 tasks"});
 size_t off2 = client.append({"500", "0.9", "0.05", "WARN: Server {2} down"});
 size_t off3 = client.append({"1001", "0.9", "0.03", "WARN: Server {2, 4, 5} down"});
+```
+
+```python tab="Python"
+off1 = client.append([100.0, 0.5, 0.9,  "INFO: Launched 1 tasks"])
+off2 = client.append([500.0, 0.9, 0.05, "WARN: Server {2} down"])
+off3 = client.append([1001.0, 0.9, 0.03, "WARN: Server {2, 4, 5} down"])
 ```
 
 Querying data in the Atomic MultiLog is also similar to the Embedded mode API.
 
 It is straightforward to retrieve records given their offsets:
 
-```cpp
+```cpp tab="C++"
 auto record1 = client.read(off1);
 auto record2 = client.read(off2);
 auto record3 = client.read(off3);
 ```
 
+```python tab="Python"
+record1 = client.read(off1)
+record2 = client.read(off2)
+record3 = client.read(off3)
+```
+
 We can query indexed attributes as follows:
 
-```cpp
+```cpp tab="C++"
 auto record_stream = client.execute_filter("cpu_util>0.5 || mem_avail<0.5");
 for (auto s = record_stream; !s.empty(); ++s) {
   std::cout << s.get().to_string();
 }
 ```
 
+```python tab="Python"
+record_stream = client.execute_filter("cpu_util>0.5 || mem_avail<0.5")
+for r in record_stream:
+  print r
+```
+
 We can query a pre-defined filter as follows:
 
-```cpp
+```cpp tab="C++"
 auto record_stream = client.query_filter("low_resources", 0, UINT64_MAX);
 for (auto s = record_stream; !s.empty(); ++s) {
   std::cout << s.get().to_string();
 }
 ```
 
+```python tab="Python"
+import sys
+record_stream = client.query_filter("low_resources", 0, sys.maxsize)
+for r in record_stream:
+  print r
+```
+
 We can obtian the value of a pre-defined aggregate as follows:
 
-```cpp
+```cpp tab="C++"
 std::string value = client.get_aggregate("max_latency_ms", 0, UINT64_MAX);
 std::cout << value;
+```
+
+```python tab="Python"
+import sys
+value = client.get_aggregate("max_latency_ms", 0, sys.maxsize)
+print value
 ```
 
 Finally, we can obtain alerts generated by triggers installed on an Atomic 
 MultiLog as follows:
 
-```cpp
+```cpp tab="C++"
 auto alert_stream = client.get_alerts(0, UINT64_MAX, "high_latency_trigger");
 for (auto s = alert_stream; !s.empty(); ++s) {
   std::cout << s.get();
 }
+```
+
+```python tab="Python"
+import sys
+alert_stream = client.get_alerts(0, sys.maxsize, "high_latency_trigger")
+for a in alert_stream:
+  print a
 ```

@@ -20,6 +20,16 @@
 #include "rpc_configuration_params.h"
 #include "logger.h"
 
+/**
+ * \mainpage librpc Documentation
+ *
+ * librpc encapsulates data structures in libconfluo as a long-running server, the \ref rpc_server, exposing its
+ * operations via an RPC interface. The library also provides a client implementation, the \ref rpc_client that can
+ * communicate with the server.
+ *
+ * The library internally relies on <a href="http://thrift.apache.org/">Apache Thrift</a> to facilitate the RPCs.
+ */
+
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;

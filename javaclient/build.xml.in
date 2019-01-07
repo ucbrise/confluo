@@ -38,6 +38,7 @@
     <pathelement location="${maven.repo.local}/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"/>
     <pathelement location="${maven.repo.local}/commons-codec/commons-codec/1.9/commons-codec-1.9.jar"/>
     <pathelement location="${maven.repo.local}/org/apache/httpcomponents/httpcore/4.4.1/httpcore-4.4.1.jar"/>
+    <pathelement location="${maven.repo.local}/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar"/>
   </path>
   <path id="build.test.classpath">
     <pathelement location="${maven.repo.local}/org/apache/thrift/libthrift/@THRIFT_VERSION@/libthrift-@THRIFT_VERSION@.jar"/>
@@ -48,6 +49,7 @@
     <pathelement location="${maven.repo.local}/org/apache/httpcomponents/httpcore/4.4.1/httpcore-4.4.1.jar"/>
     <pathelement location="${maven.repo.local}/junit/junit/4.12/junit-4.12.jar"/>
     <pathelement location="${maven.repo.local}/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"/>
+    <pathelement location="${maven.repo.local}/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar"/>
   </path>
 
   <pathconvert refid="build.classpath" property="build.jarlist" pathsep="," dirsep="/">
@@ -121,6 +123,10 @@
     <mkdir dir="${maven.repo.local}/org/hamcrest/hamcrest-core/1.3"/>
     <get src="https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar" 
          dest="${maven.repo.local}/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar" 
+         usetimestamp="false" 
+         ignoreerrors="true"/>
+    <get src="https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar" 
+         dest="${maven.repo.local}/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar" 
          usetimestamp="false" 
          ignoreerrors="true"/>
   </target>

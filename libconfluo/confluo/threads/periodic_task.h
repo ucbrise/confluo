@@ -5,6 +5,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <functional>
 
 #include "atomic.h"
 #include "logger.h"

@@ -1,25 +1,28 @@
 package confluo.rpc;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Builder of a schema for the atomic multilog
  */
-public class SchemaBuilder {
+class SchemaBuilder {
 
-  private boolean userProvidedTs;
-  private long offset;
+  private int offset;
   private List<Column> columns;
 
   /**
    * Initializes a default schema builder
    */
-  public SchemaBuilder() {
-    this.userProvidedTs = false;
+  SchemaBuilder() {
     this.offset = 0;
     this.columns = new ArrayList<>();
-    Column timestampCol = new Column(0, 0, DataTypes.ULONG_TYPE, "TIMESTAMP");
+    Column timestampCol = new Column(0, DataTypes.ULONG_TYPE, "TIMESTAMP");
     this.columns.add(timestampCol);
     this.offset += DataTypes.ULONG_TYPE.size;
   }
@@ -27,22 +30,19 @@ public class SchemaBuilder {
   /**
    * Adds a column to the schema builder
    *
-   * @param dtype The data type of the column
-   * @param name  The name of the column
-   * @return This schema builder with the column added
+   * @param dataType The data type of the column
+   * @param name     The name of the column
    */
-  public SchemaBuilder addColumn(DataType dtype, String name) {
+  void addColumn(DataType dataType, String name) {
     if (name.toUpperCase().equals("TIMESTAMP")) {
-      userProvidedTs = true;
-      if (!dtype.equals(DataTypes.ULONG_TYPE)) {
+      if (!dataType.equals(DataTypes.ULONG_TYPE)) {
         throw new IllegalStateException("TIMESTAMP must be of ULONG_TYPE");
       }
-      return this;
+      return;
     }
-    Column col = new Column(columns.size(), offset, dtype, name);
+    Column col = new Column(offset, dataType, name);
     columns.add(col);
-    offset += dtype.size;
-    return this;
+    offset += dataType.size;
   }
 
   /**
@@ -50,7 +50,22 @@ public class SchemaBuilder {
    *
    * @return A list of columns that make up the schema
    */
-  public List<Column> build() {
+  List<Column> build() {
     return columns;
+  }
+
+  /**
+   * Build schema from String.
+   *
+   * @param schema String representation of schema.
+   * @return The parsed schema.
+   */
+  static List<Column> fromString(String schema) {
+    JsonObject schemaObj = new JsonParser().parse(schema).getAsJsonObject();
+    SchemaBuilder builder = new SchemaBuilder();
+    for (Map.Entry<String, JsonElement> entry : schemaObj.entrySet()) {
+      builder.addColumn(DataType.fromString(entry.getValue().getAsString()), entry.getKey());
+    }
+    return builder.build();
   }
 }

@@ -25,7 +25,7 @@ with three attributes:
 
 ```json
 {
-  timestamp: LONG,
+  timestamp: ULONG,
   op_latency_ms: DOUBLE,
   cpu_util: DOUBLE,
   mem_avail: DOUBLE,
@@ -110,7 +110,7 @@ schema, and a storage mode:
 
 ```cpp
 std::string schema = "{
-  timestamp: LONG,
+  timestamp: ULONG,
   op_latency_ms: DOUBLE,
   cpu_util: DOUBLE,
   mem_avail: DOUBLE,
@@ -266,13 +266,12 @@ In the stand-alone mode, Confluo runs as a daemon server, serving client request
 using Apache Thrift protocol. To start the server, run:
 
 ```bash
-confuod --address=127.0.0.1 --port=9090
+confluod --address=127.0.0.1 --port=9090
 ```
 
 Once the server daemon is running, you can send requests to it using the 
-C++/Python/Java client APIs. We will focus on the C++ Client API, although 
-the Python/Java API is almost identical. In fact, even the C++ Client API is 
-almost identical to the embedded mode API.
+C++/Python/Java client APIs. Note that the C++ Client API is almost identical to 
+the embedded mode API.
 
 We look at the same performance monitoring and diagnosis tool example for the
 stand-alone mode. The relevant header file to include for the C++ Client API is
@@ -282,8 +281,14 @@ stand-alone mode. The relevant header file to include for the C++ Client API is
 
 To begin with, we first have to establish a client connection with the server.
 
-```cpp
+```cpp tab="C++"
 confluo::rpc::rpc_client client("127.0.0.1", 9090);
+```
+
+```python tab="Python"
+from confluo.rpc.client import RpcClient
+
+client = RpcClient("127.0.0.1", 9090)
 ```
 
 The first argument to the `rpc_client` constructor corresponds to the server
@@ -296,7 +301,7 @@ We then create a new Atomic MultiLog within the Store (synonymous to a database
 table); as before, this requires three parameters: a name for the Atomic 
 MultiLog, a fixed schema, and a storage mode:
 
-```cpp
+```cpp tab="C++"
 std::string schema = "{
   timestamp: LONG,
   op_latency_ms: DOUBLE,
@@ -308,50 +313,84 @@ auto storage_mode = confluo::storage::IN_MEMORY;
 client.create_atomic_multilog("perf_log", schema, storage_mode);
 ```
 
+```python tab="Python"
+from confluo.rpc.storage import StorageMode
+
+schema = """{
+  timestamp: ULONG,
+  op_latency_ms: DOUBLE,
+  cpu_util: DOUBLE,
+  mem_avail: DOUBLE,
+  log_msg: STRING(100)
+}"""
+storage_mode = StorageMode.IN_MEMORY
+client.create_atomic_multilog("perf_log", schema, storage_mode)
+```
+
 This operation also internally sets the current Atomic MultiLog 
 for the client to the one we just created (i.e., `perf_log`). It
 is also possible to explicitly set the current Atomic MultiLog for
 the client as follows:
 
-```cpp
+```cpp tab="C++"
 client.set_current_atomic_multilog("perf_log");
 ```
 
+```python tab="Python"
+client.set_current_atomic_multilog("perf_log")
+```
+
 !!! note
-    It is necessary to set the current Atomic MultiLog for the `rpc_client`;
-    issuing requests via the client without setting the current Atomic MultiLog
+    It is necessary to set the current Atomic MultiLog for the `rpc_client`.
+    Issuing requests via the client without setting the current Atomic MultiLog
     will result in exceptions.
 
 #### Adding Indexes
 
 We can define indexes as follows:
 
-```cpp
+```cpp tab="C++"
 client.add_index("op_latency_ms");
+```
+
+```python tab="Python"
+client.add_index("op_latency_ms")
 ```
 
 #### Adding Filters
 
 We can also install filters as follows:
 
-```cpp
+```cpp tab="C++"
 client.add_filter("low_resources", "cpu_util>0.8 || mem_avail<0.1");
+```
+
+```python tab="Python"
+client.add_filter("low_resources", "cpu_util>0.8 || mem_avail<0.1")
 ```
 
 #### Adding Aggregates
 
 Additionally, we can add aggregates on filters as follows:
 
-```cpp
+```cpp tab="C++"
 client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)");
+```
+
+```python tab="Python"
+client.add_aggregate("max_latency_ms", "low_resources", "MAX(op_latency_ms)")
 ```
 
 #### Installing Triggers
 
 Finally, we can install a trigger on an aggregate as follows:
 
-```cpp
-client.install_trigger("high_latency_trigger", "max_latency > 1000");
+```cpp tab="C++"
+client.install_trigger("high_latency_trigger", "max_latency_ms > 1000");
+```
+
+```python tab="Python"
+client.install_trigger("high_latency_trigger", "max_latency_ms > 1000")
 ```
 
 #### Loading sample data into Atomic MultiLog
@@ -360,37 +399,17 @@ We are now ready to load some data into the Atomic MultiLog on the server.
 
 ##### Appending String Vectors
 
-```cpp
+```cpp tab="C++"
 size_t off1 = client.append({"100", "0.5", "0.9",  "INFO: Launched 1 tasks"});
 size_t off2 = client.append({"500", "0.9", "0.05", "WARN: Server {2} down"});
 size_t off3 = client.append({"1001", "0.9", "0.03", "WARN: Server {2, 4, 5} down"});
 ```
 
-##### Appending Raw bytes
-
-As with the embedded mode, this version of `append` takes as its input a pointer to a C/C++ struct that maps
-_exactly_ to the Atomic MultiLog's schema. Our schema would map to the following C/C++ struct:
-
-```cpp
-struct perf_log_record {
-  int64_t timestamp;
-  double op_latency_ms;
-  double cpu_util;
-  double mem_avail;
-  char log_msg[100];
-};
+```python tab="Python"
+off1 = client.append([100.0, 0.5, 0.9,  "INFO: Launched 1 tasks"])
+off2 = client.append([500.0, 0.9, 0.05, "WARN: Server {2} down"])
+off3 = client.append([1001.0, 0.9, 0.03, "WARN: Server {2, 4, 5} down"])
 ```
-
-Unlike the embedded interface, to add a new record, we now have to wrap the struct reference in a `record_data` object:
-
-```cpp
-int64_t ts = utils::time_utils::cur_ns();
-perf_log_record rec = { ts, 2000.0, 0.95, 0.01, "WARN: Server {2, 4, 5} down" };
-size_t off4 = client.append(confluo::rpc::record_data(&rec, sizeof(rec)));
-```
-
-As before, this is a more efficient variant of append, since it avoids the overheads of parsing 
-strings to the corresponding attribute data types.
 
 ##### Batched Appends
 
@@ -399,22 +418,34 @@ This is particularly useful since batching helps amortize the cost of network la
 
 The first step in building a batch is to obtain a batch builder:
 
-```cpp
+```cpp tab="C++"
 auto batch_bldr = client.get_batch_builder();
+```
+
+```python tab="Python"
+batch_bldr = client.get_batch_builder()
 ```
 
 The batch builder supports adding new records via both string vector and raw byte interfaces:
 
-```cpp
+```cpp tab="C++"
 batch_bldr.add_record({ "400", "0.85", "0.07", "WARN: Server {2, 4} down"});
-perf_log_record rec = { utils::time_utils::cur_ns(), 100.0, 0.65, 0.25, "WARN: Server {2} down" };
-batch_bldr.add_record(confluo::rpc::record_data(&rec, sizeof(rec)));
+batch_bldr.add_record({ "100", "0.65", "0.25", "WARN: Server {2} down" });
+```
+
+```python tab="Python"
+batch_bldr.add_record([ 400.0, 0.85, 0.07, "WARN: Server {2, 4} down" ])
+batch_bldr.add_record([ 100.0, 0.65, 0.25, "WARN: Server {2} down" ])
 ```
 
 Once the batch is populated, we can append the batch as follows:
 
-```cpp
-size_t off5 = client.append_batch(batch_bldr.get_batch());
+```cpp tab="C++"
+size_t off4 = client.append_batch(batch_bldr.get_batch());
+```
+
+```python tab="Python"
+off4 = client.append_batch(batch_bldr.get_batch())
 ```
 
 Details on querying the data via the client interface can be found in the guide on [Confluo Queries](queries.md).
