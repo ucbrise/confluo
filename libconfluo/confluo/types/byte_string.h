@@ -448,9 +448,9 @@ class byte_string {
    */
   immutable_byte_string copy() const;
 
-  uint8_t *data();
+  uint8_t *data() const;
 
-  size_t size();
+  size_t size() const;
 
   /**
    * Formats the data into a readable form

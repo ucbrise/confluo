@@ -432,8 +432,23 @@ class monolog_exp2_linear : public monolog_exp2_linear_base<T, NCONTAINERS, BUCK
   /**
    * Constructs a relaxed monolog implementation
    */
-  monolog_exp2_linear()
-      : tail_(0) {
+  monolog_exp2_linear(size_t count = 0)
+      : tail_(count) {
+  }
+
+  monolog_exp2_linear(const monolog_exp2_linear& other) {
+    atomic::store(&tail_, other.size());
+    for (size_t i = 0; i < this->size(); i++) {
+      this->set(i, other.at(i));
+    }
+  }
+
+  monolog_exp2_linear& operator=(const monolog_exp2_linear& other) {
+    atomic::store(&tail_, other.size());
+    for (size_t i = 0; i < this->size(); i++) {
+      this->set(i, other.at(i));
+    }
+    return *this;
   }
 
   /**
