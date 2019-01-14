@@ -71,7 +71,7 @@ TEST_F(CountSketchTest, InvariantTest) {
   double epsilon[] = { 0.01, 0.02, 0.04 };
 
   histogram_t hist;
-  ZipfGenerator().generate_zipf(hist, 1000000);
+  ZipfGenerator().sample(hist, 1000000);
 
   for (double e : epsilon)
     run(hist, e, g, k);

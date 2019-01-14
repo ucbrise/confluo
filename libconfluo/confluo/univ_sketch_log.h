@@ -2,12 +2,12 @@
 #define CONFLUO_UNIV_SKETCH_LOG_H
 
 #include "container/monolog/monolog_exp2.h"
-#include "container/sketch/confluo_universal_sketch.h"
+#include "container/sketch/universal_sketch.h"
 
 namespace confluo {
 
 /** A log for universal sketches */
-typedef monolog::monolog_exp2<sketch::confluo_universal_sketch *> univ_sketch_log;
+typedef monolog::monolog_exp2<sketch::universal_sketch *> univ_sketch_log;
 
 }
 

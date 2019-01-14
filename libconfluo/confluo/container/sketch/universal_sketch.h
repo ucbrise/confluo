@@ -7,6 +7,7 @@
 
 #include "atomic.h"
 #include "count_sketch.h"
+#include "frequency_functions.h"
 #include "../data_log.h"
 #include "../../schema/column.h"
 #include "../../schema/record.h"
@@ -15,36 +16,16 @@
 namespace confluo {
 namespace sketch {
 
-template<typename counter_t = int64_t>
-class functions {
 
- public:
-  // This is a frequency-domain function and must be monotonically increasing
-  // in f and O(f^2), where f is the frequency of the data point
-  template<typename g_ret_t> using g_fn = std::function<g_ret_t(counter_t)>;
-
-  static counter_t l2_norm(counter_t freq) {
-   return freq * freq;
-  }
-
-  static double entropy(counter_t freq) {
-    return freq * std::log(freq);
-  }
-
-  static counter_t cardinality(counter_t freq) {
-    return 1;
-  }
-
-};
-
-class confluo_universal_sketch {
+class universal_sketch {
 
 public:
   typedef size_t key_t;
   typedef int64_t counter_t;
-  typedef functions<counter_t> fn_t;
+  typedef frequency_functions<counter_t> fns;
   typedef count_sketch<key_t, counter_t> sketch_t;
   typedef std::vector<atomic::type<size_t>> heavy_hitters_t;
+  typedef std::unordered_map<std::string, counter_t> heavy_hitters_map_t;
 
   /**
    * Constructor
@@ -54,7 +35,7 @@ public:
    * @param log data log
    * @param column column of field to sketch
    */
-  confluo_universal_sketch(double epsilon, double gamma, size_t k, data_log *log, column_t column);
+  universal_sketch(double epsilon, double gamma, size_t k, data_log *log, column_t column);
 
   /**
    * Constructor
@@ -65,53 +46,60 @@ public:
    * @param log data log
    * @param column column of field to sketch
    */
-  confluo_universal_sketch(size_t l, size_t b, size_t t, size_t k, data_log *log, column_t column);
+  universal_sketch(size_t l, size_t b, size_t t, size_t k, data_log *log, column_t colum);
 
-  confluo_universal_sketch(const confluo_universal_sketch &other);
+  universal_sketch(const universal_sketch &other);
 
-  confluo_universal_sketch &operator=(const confluo_universal_sketch &other);
+  universal_sketch &operator=(const universal_sketch &other);
 
   bool is_valid();
 
   /**
-   * Invalidate sketch
+   * Invalidates sketch
    */
   bool invalidate();
 
   /**
-   * Update universal sketch with a record.
+   * Updates universal sketch with a record using the relevant field(s)
    * @param r record
+   * @param incr increment
    */
-  void update(const record_t &r);
+  void update(const record_t &r, size_t incr = 1);
 
   /**
-   * Get heavy hitters and their estimated frequencies from the top layer
-   * @param num_layers number of layers to use to refine count
+   * Estimates the frequency of the key
+   * @return estimated key frequency
+   */
+  int64_t estimate_frequency(const std::string &key);
+
+  /**
+   * Gets heavy hitters and their estimated frequencies
+   * @param num_layers number of layers to use
    * @return heavy hitters
    */
-  std::unordered_map<std::string, counter_t> get_heavy_hitters();
+  heavy_hitters_map_t get_heavy_hitters(size_t num_layers);
 
   /**
-   * Evaluate a G_SUM function using all layers
-   * @tparam g_ret_t return type
-   * @param g function
-   * @return g sum estimate
+   * Evaluates a function over the universal sketch using all layers
+   * @tparam ret_t return type
+   * @param f function
+   * @return estimate of summary function
    */
-  template<typename g_ret_t = counter_t>
-  g_ret_t evaluate(fn_t::g_fn<g_ret_t> g) {
-    return evaluate(g, num_layers_);
+  template<typename ret_t = counter_t>
+  ret_t evaluate(fns::fn<ret_t> f) {
+    return evaluate(f, num_layers_);
   }
 
   /**
-   * Evaluate a G_SUM function
-   * @tparam g_ret_t return type
-   * @param g function bounded by O(f^2) where f is the frequency
+   * Evaluates a function over the universal sketch
+   * @tparam ret_t return type
+   * @param f frequency-domain function bounded by O(f^2) where f is the frequency
    * @param num_layers number of layers to use to compute G_SUM
-   * @return g sum
+   * @return estimate of summary function
    */
-  template<typename g_ret_t = counter_t>
-  g_ret_t evaluate(fn_t::g_fn<g_ret_t> g, size_t num_layers) {
-    g_ret_t recursive_sum = 0;
+  template<typename ret_t = counter_t>
+  ret_t evaluate(fns::fn<ret_t> f, size_t num_layers) {
+    ret_t recursive_sum = 0;
     size_t substream_i = num_layers - 1;
 
     // Handle last substream (base case)
@@ -120,19 +108,19 @@ public:
       // Make sure a key exists in the slot
       if (key != zero()) {
         counter_t count = substream_sketches_[substream_i].estimate(key);
-        recursive_sum += g(count);
+        recursive_sum += f(count);
       }
     }
 
     // Handle rest (recursive case)
     while (substream_i-- > 0) {
-      g_ret_t substream_sum = 0;
+      ret_t substream_sum = 0;
       for (auto &substream_hh : substream_heavy_hitters_[substream_i]) {
         key_t key = atomic::load(&substream_hh);
         // Make sure a key exists in the slot
         if (key != zero()) {
           counter_t count = substream_sketches_[substream_i].estimate(key);
-          g_ret_t update = ((1 - 2 * to_bool(substream_hashes_.hash(substream_i, key))) * g(count));
+          ret_t update = ((1 - 2 * to_bool(substream_hashes_.hash(substream_i, key))) * f(count));
           substream_sum += update;
         }
       }
@@ -151,34 +139,41 @@ public:
 
 private:
   /**
-   * Convert record's relevant field value to an indexable key
+   * Converts record's relevant field value to an indexable key
    * @param r record
    * @return field value as an indexable key
    */
-  inline key_t record_to_key(const record_t &r);
+  inline key_t get_key_hash(const record_t &r);
 
   /**
-   * Convert record's relevant field value to an indexable key
+   * Converts record's relevant field value to an indexable key
    * @param ptr pointer into data log where record is stored
    * @return field value as an indexable key
    */
-  inline key_t record_ptr_to_key(const read_only_data_log_ptr &ptr);
+  inline key_t get_key_hash(const read_only_data_log_ptr &ptr);
 
   /**
-   * Convert record's relevant field value to a string
+   * Converts string to an indexable key
+   * @param str string to convert
+   * @return field value as an indexable key
+   */
+  inline key_t str_to_key(const std::string &str);
+
+  /**
+   * Converts record's relevant field value to a string
    * @param ptr pointer into data log where record is stored
    * @return field value as a string
    */
-  inline std::string record_ptr_to_string(const read_only_data_log_ptr &ptr);
+  inline std::string record_key_to_string(const read_only_data_log_ptr &ptr);
 
   /**
-   * Update the heavy hitters of a substream
+   * Updates the heavy hitters of a substream
    * @param idx index of substream
-   * @param key key
+   * @param key_hash key
    * @param offset offset of record holding key into data log
    * @param count count of key
    */
-  void update_heavy_hitters(size_t idx, key_t key, size_t offset, counter_t count);
+  void update_heavy_hitters(size_t idx, key_t key_hash, size_t offset, counter_t count);
 
   static inline key_t to_bool(key_t hashed_value) {
     return hashed_value % 2;

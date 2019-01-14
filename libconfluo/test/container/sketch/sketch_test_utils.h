@@ -5,6 +5,34 @@
 #include <rand_utils.h>
 #include <unordered_map>
 
+class NormalGenerator {
+ public:
+  NormalGenerator(int mean, int sd)
+    : dist_(mean, sd) {
+    std::random_device rd;
+    e2_ = std::mt19937(rd());
+  }
+
+  int sample() {
+    return int(std::round(dist_(e2_)));
+  }
+
+  double sample(std::unordered_map<int, uint64_t> &hist, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+      hist[sample()]++;
+    }
+    double l2_sq = 0.0;
+    for (auto p : hist)
+      l2_sq += (p.second * p.second);
+    return std::sqrt(l2_sq);
+  }
+
+ private:
+  std::normal_distribution<double> dist_;
+  std::mt19937 e2_;
+
+};
+
 class ZipfGenerator {
  public:
   static constexpr int X0 = 1;
@@ -16,7 +44,7 @@ class ZipfGenerator {
     e2 = std::mt19937(rd());
   }
 
-  int sample_zipf(double alpha) {
+  int sample(double alpha) {
     static bool first = true;      // Static first time flag
     static double c = 0;          // Normalization constant
     static double* sum_probs;     // Pre-calculated sum of probabilities
@@ -58,9 +86,9 @@ class ZipfGenerator {
     return zipf_value;
   }
 
-  double generate_zipf(std::unordered_map<int, uint64_t>& hist, int n) {
-    for (int i = 0; i < n; i++) {
-      hist[sample_zipf(1.2)]++;
+  double sample(std::unordered_map<int, uint64_t> &hist, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+      hist[sample(1.2)]++;
     }
     double l2_sq = 0.0;
     for (auto p : hist)

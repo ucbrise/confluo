@@ -96,11 +96,12 @@ add_library(confluo STATIC
         confluo/container/monolog/monolog_linear_bucket.h
         confluo/container/radix_tree.h
         confluo/container/sketch
-        confluo/container/sketch/confluo_universal_sketch.h 
         confluo/container/sketch/count_sketch.h
+        confluo/container/sketch/frequency_functions.h
         confluo/container/sketch/hash_manager.h
         confluo/container/sketch/priority_queue.h
         confluo/container/sketch/sketch_utils.h
+        confluo/container/sketch/universal_sketch.h
         confluo/schema/field.h
         confluo/schema/record.h
         confluo/schema/record_batch.h
@@ -147,7 +148,7 @@ add_library(confluo STATIC
         src/container/cursor/alert_cursor.cc
         src/container/cursor/offset_cursors.cc
         src/container/cursor/record_cursors.cc
-        src/container/sketch/confluo_universal_sketch.cc
+        src/container/sketch/universal_sketch.cc
         src/container/sketch/hash_manager.cc
         src/parser/aggregate_parser.cc
         src/parser/expression_compiler.cc
