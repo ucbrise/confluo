@@ -31,15 +31,15 @@ struct pq_element {
   P priority;
 };
 
- /**
-  *
-  * This priority queue is not thread-safe.
-  * @tparam T type of key
-  * @tparam P type of priority
-  * @tparam E type of element to store, containing key and priority
-  */
+/**
+ *
+ * This priority queue is not thread-safe.
+ * @tparam T type of key
+ * @tparam P type of priority
+ * @tparam E type of element to store, containing key and priority
+ */
 template<typename T, typename P, typename E = pq_element<T, P>>
-class pq : public std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>> {
+class thread_unsafe_pq : public std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>> {
 
 public:
 
@@ -47,7 +47,7 @@ public:
    * Constructor
    * @param compare comparison function (default behavior: min-pq)
    */
-  pq(std::function<bool(E, E)> compare = E::gt_compare)
+  thread_unsafe_pq(std::function<bool(E, E)> compare = E::gt_compare)
       : std::priority_queue<E, std::vector<E>, std::function<bool(E, E)>>(compare) {
   }
 

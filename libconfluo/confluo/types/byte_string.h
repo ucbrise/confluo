@@ -452,8 +452,6 @@ class byte_string {
 
   size_t size() const;
 
-  size_t hash() const;
-
   /**
    * Formats the data into a readable form
    * @return A string representation of the data

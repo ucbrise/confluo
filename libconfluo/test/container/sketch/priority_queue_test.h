@@ -12,7 +12,7 @@ class PriorityQueueTest : public testing::Test {
 
 TEST_F(PriorityQueueTest, TestPushPopTop) {
 
-  pq<int, int> hhs;
+  thread_unsafe_pq<int, int> hhs;
   hhs.pushp(0, 5);
   hhs.pushp(1, 3);
   hhs.pushp(2, 9);
@@ -40,7 +40,7 @@ TEST_F(PriorityQueueTest, TestPushPopTop) {
 
 TEST_F(PriorityQueueTest, TestRemoveIfExists) {
 
-  pq<int, int> hhs;
+  thread_unsafe_pq<int, int> hhs;
   hhs.pushp(0, 5);
   hhs.pushp(1, 3);
   hhs.pushp(2, 9);
@@ -58,7 +58,7 @@ TEST_F(PriorityQueueTest, TestRemoveIfExists) {
 
 TEST_F(PriorityQueueTest, TestContains) {
 
-  pq<int, int> hhs;
+  thread_unsafe_pq<int, int> hhs;
   ASSERT_EQ(hhs.contains(3), false);
 
   hhs.pushp(0, 5);

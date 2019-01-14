@@ -13,7 +13,7 @@ using namespace ::confluo::sketch;
 class UniversalSketchTest : public testing::Test {
 public:
   typedef std::unordered_map<int, uint64_t> hist_t;
-  typedef pq<int, uint64_t> min_pq_t;
+  typedef thread_unsafe_pq<int, uint64_t> min_pq_t;
 
   static int64_t f0(int64_t x) {
     return 1;
@@ -56,27 +56,24 @@ public:
   }
 
   void fill(data_log &log, const schema_t &schema, hist_t &hist, universal_sketch &sketch) {
-    // Update sketch
-    double avg_lat = 0;
+    // Simulate n-1 updates
+    double latency_sum = 0;
     size_t i = 0;
     for (auto p : hist) {
-      i++;
       auto pt = data_point(i, p.first);
       auto *data = reinterpret_cast<uint8_t *>(&pt);
       auto off = log.append(data, schema.record_size());
       auto r = schema.apply_unsafe(off, data);
 
-      auto start = time_utils::cur_ns();
-      if (p.second > 1)
+      if (p.second > 1) {
+        auto start = time_utils::cur_ns();
         sketch.update(r, p.second - 1);
-      auto stop = time_utils::cur_ns();
-      avg_lat += (stop - start);
-
-      if (log.size() % 2000 == 0) {
-        LOG_INFO << log.size() << ", avg insertion lat = " << (avg_lat)/1000 << "ns";
-        avg_lat = 0;
+        auto stop = time_utils::cur_ns();
+        latency_sum += (stop - start);
+        i++;
       }
     }
+    LOG_INFO << "Universal Sketch update latency: " << (latency_sum) / i << "ns";
     // Last round of sketch updates
     for (auto p : hist) {
       i++;
@@ -91,51 +88,65 @@ public:
 };
 
 TEST_F(UniversalSketchTest, EstimateAccuracyTest) {
+  double epsilon = 0.01;
+  double gamma = 0.01;
+  size_t k = 10;
 
   hist_t hist;
-  NormalGenerator(0, 100).sample(hist, 10000000);
-
-  size_t l = 32;
-  size_t b = 2700; // epsilon = 0.01
-  size_t t = 32;
-  size_t k = 10;
+  NormalGenerator(0, 100).sample(hist, 1000000);
 
   schema_t schema = build_schema();
   data_log log("data_log", "/tmp", storage::IN_MEMORY);
-  universal_sketch univ_sketch(l, b, t, k, &log, schema.columns()[1]);
+  universal_sketch univ_sketch(epsilon, gamma, k, &log, schema.columns()[1]);
 
+  fill(log, schema, hist, univ_sketch);
+  auto actual_heavy_hitters = get_heavy_hitters(hist, k);
+  auto estimated_heavy_hitters = univ_sketch.get_heavy_hitters();
+
+  // TODO introduce more reliable, deterministic checks
+  for (const auto &hh : actual_heavy_hitters) {
+    auto est = univ_sketch.estimate_frequency(std::to_string(hh.key));
+    // (1 - epsilon) * actual <= est <= (1 + epsilon) * actual
+    ASSERT_LE(size_t((1 - epsilon) * hh.priority), est);
+    ASSERT_GE(size_t((1 + epsilon) * hh.priority), est);
+  }
+  for (const auto &hh : estimated_heavy_hitters) {
+    // (1 - epsilon) * actual <= est <= (1 + epsilon) * actual
+    auto actual = hist[std::stoi(hh.first)];
+    ASSERT_GE(hh.second, size_t((1 - epsilon) * actual));
+    ASSERT_LE(hh.second, size_t((1 + epsilon) * actual));
+  }
 }
 
 TEST_F(UniversalSketchTest, GetHeavyHittersTest) {
   hist_t hist;
   NormalGenerator(0, 100).sample(hist, 10000000);
 
-  // 0.01 margin of error
-  size_t l = 32;
-  size_t b = 2700; // epsilon = 0.01
-  size_t t = 32;
+  double epsilon = 0.01;
+  double gamma = 0.01;
   size_t k = 10;
+  // Conservatively check if we identified at least 40% of the heavy hitters correctly
+  // Note that this is especially acceptable since the distribution is normal
+  // and there are several possible heavy hitters.
+  double target_identified = 0.4;
 
   schema_t schema = build_schema();
   data_log log("data_log", "/tmp", storage::IN_MEMORY);
-  universal_sketch univ_sketch(l, b, t, k, &log, schema.columns()[1]);
+  universal_sketch univ_sketch(epsilon, gamma, k, &log, schema.columns()[1]);
   fill(log, schema, hist, univ_sketch);
   auto actual_heavy_hitters = get_heavy_hitters(hist, k);
 
-  auto hhs = univ_sketch.get_heavy_hitters(1);
-  for (auto hh : hhs) {
-    LOG_INFO << "[univ] " << hh.first << ": " << hh.second;
+  size_t num_heavy_hitters_identified = 0;
+  auto estimated_heavy_hitters = univ_sketch.get_heavy_hitters(10);
+  for (const auto &hh : estimated_heavy_hitters) {
+    if (actual_heavy_hitters.contains(std::stoi(hh.first))) {
+      num_heavy_hitters_identified++;
+    }
   }
-  for (auto hh : actual_heavy_hitters) {
-    auto key = std::to_string(hh.key);
-    LOG_INFO << "[actual] " << hh.key << ": " << hh.priority << " vs [x] " << univ_sketch.estimate_frequency(key);
-  }
-//
-//  for (auto p : hhs_actual) {
-//    auto est = us.estimate_count(p.key);
-//    auto error = std::abs(est - p.priority) * 1.0 / est;
-//    LOG_INFO << "Error for " << p.key << ": " << error << " (" << est << " vs " << p.priority << ")";
-//  }
+
+  // TODO introduce more reliable, deterministic checks
+  LOG_INFO << num_heavy_hitters_identified;
+  ASSERT_GE(num_heavy_hitters_identified * 1.0 / k, target_identified);
 
 }
 

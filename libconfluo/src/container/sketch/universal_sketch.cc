@@ -82,7 +82,7 @@ void universal_sketch::update(const record_t &r, size_t incr) {
 }
 
 int64_t universal_sketch::estimate_frequency(const std::string &key) {
-  key_t key_hash = byte_string(key).hash();
+  key_t key_hash = str_to_key_hash(key);
   return substream_sketches_[0].estimate(key_hash);
 }
 
@@ -113,17 +113,19 @@ size_t universal_sketch::storage_size() {
 
 
 universal_sketch::key_t universal_sketch::get_key_hash(const record_t &r) {
-  return r.at(column_.idx()).get_key().hash();
+  return hash_util::hash(r.at(column_.idx()).value());
 }
 
 universal_sketch::key_t universal_sketch::get_key_hash(const read_only_data_log_ptr &ptr) {
-  auto field_value = column_.apply(ptr.decode().get());
-  return field_value.get_key().hash();
+  return hash_util::hash(column_.apply(ptr.decode().get()).value());
 }
 
-universal_sketch::key_t universal_sketch::str_to_key(const std::string &str) {
-  // TODO avoid the unnecessary copy resulting from byte string construction
-  return byte_string(str).hash();
+universal_sketch::key_t universal_sketch::str_to_key_hash(const std::string &str) {
+  size_t data_size = column_.type().size;
+  auto buf = std::unique_ptr<uint8_t[]>(new uint8_t[data_size]);
+  column_.type().parse_op()(str, buf.get());
+  key_t key_hash = hash_util::hash(buf.get(), data_size);
+  return key_hash;
 }
 
 std::string universal_sketch::record_key_to_string(const read_only_data_log_ptr &ptr) {
@@ -135,8 +137,8 @@ std::string universal_sketch::record_key_to_string(const read_only_data_log_ptr 
 void universal_sketch::update_heavy_hitters(size_t idx, key_t key_hash, size_t offset, counter_t count) {
   auto &heavy_hitters = substream_heavy_hitters_[idx];
   auto &sketch = substream_sketches_[idx];
-
   bool done = false;
+  // TODO possibly use a different hash for each substream
   size_t hh_idx = hh_hash_.apply<key_t>(key_hash) % heavy_hitters.size();
   while (!done) {
     size_t prev_record_offset = atomic::load(&heavy_hitters[hh_idx]);

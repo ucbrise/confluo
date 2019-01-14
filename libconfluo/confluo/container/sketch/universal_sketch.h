@@ -9,23 +9,24 @@
 #include "count_sketch.h"
 #include "frequency_functions.h"
 #include "../data_log.h"
-#include "../../schema/column.h"
-#include "../../schema/record.h"
+#include "schema/column.h"
+#include "schema/record.h"
 #include "hash_manager.h"
 
 namespace confluo {
 namespace sketch {
 
-
 class universal_sketch {
 
-public:
+ public:
   typedef size_t key_t;
   typedef int64_t counter_t;
   typedef frequency_functions<counter_t> fns;
   typedef count_sketch<key_t, counter_t> sketch_t;
   typedef std::vector<atomic::type<size_t>> heavy_hitters_t;
   typedef std::unordered_map<std::string, counter_t> heavy_hitters_map_t;
+
+  // TODO replace constructors with config-based constructor
 
   /**
    * Constructor
@@ -77,7 +78,7 @@ public:
    * @param num_layers number of layers to use
    * @return heavy hitters
    */
-  heavy_hitters_map_t get_heavy_hitters(size_t num_layers);
+  heavy_hitters_map_t get_heavy_hitters(size_t num_layers = 1);
 
   /**
    * Evaluates a function over the universal sketch using all layers
@@ -157,7 +158,7 @@ private:
    * @param str string to convert
    * @return field value as an indexable key
    */
-  inline key_t str_to_key(const std::string &str);
+  inline key_t str_to_key_hash(const std::string &str);
 
   /**
    * Converts record's relevant field value to a string
@@ -180,7 +181,7 @@ private:
   }
 
   static inline key_t zero() {
-   static key_t zero = byte_string().hash();
+   static key_t zero = hash_util::hash(immutable_value());
    return zero;
   }
 

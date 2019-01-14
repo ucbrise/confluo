@@ -179,13 +179,6 @@ size_t byte_string::size() const {
   return size_;
 }
 
-size_t byte_string::hash() const {
-  size_t hash = 5381;
-  for (size_t i = 0; i < size_; i++)
-    hash += (hash << 5) + data_[i]; /* hash * 33 + c */
-  return hash;
-}
-
 std::string byte_string::to_string() const {
   std::string str = "{";
   size_t i;
@@ -197,12 +190,10 @@ std::string byte_string::to_string() const {
 }
 
 byte_string &byte_string::operator=(byte_string &&other) {
-  size_ = std::move(other.size_);
-  data_ = std::move(other.data_);
-
+  size_ = other.size_;
+  data_ = other.data_;
   other.size_ = 0;
   other.data_ = nullptr;
-
   return *this;
 }
 
