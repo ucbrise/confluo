@@ -1,3 +1,4 @@
+
 #include "schema/schema.h"
 
 namespace confluo {
@@ -9,9 +10,9 @@ schema_t::schema_t()
 schema_t::schema_t(const std::vector<column_t> &columns)
     : columns_(columns) {
   record_size_ = 0;
-  for (size_t i = 0; i < columns_.size(); i++) {
-    name_map_.insert(std::make_pair(columns_[i].name(), columns_[i].idx()));
-    record_size_ += columns_[i].type().size;
+  for (auto &column : columns_) {
+    name_map_.insert(std::make_pair(column.name(), column.idx()));
+    record_size_ += column.type().size;
   }
 }
 
@@ -31,8 +32,7 @@ column_t &schema_t::operator[](const std::string &name) {
   try {
     return columns_[name_map_.at(string_utils::to_upper(name))];
   } catch (std::exception &e) {
-    THROW(invalid_operation_exception,
-          "No such attribute " + name + ": " + e.what());
+    THROW(invalid_operation_exception, "No such attribute " + name + ": " + e.what());
   }
 }
 
@@ -40,8 +40,7 @@ column_t const &schema_t::operator[](const std::string &name) const {
   try {
     return columns_[name_map_.at(string_utils::to_upper(name))];
   } catch (std::exception &e) {
-    THROW(invalid_operation_exception,
-          "No such attribute " + name + ": " + e.what());
+    THROW(invalid_operation_exception, "No such attribute " + name + ": " + e.what());
   }
 }
 
@@ -56,16 +55,16 @@ size_t schema_t::size() const {
 record_t schema_t::apply(size_t offset, storage::read_only_encoded_ptr<uint8_t> &data) const {
   record_t r(offset, data, record_size_);
   r.reserve(columns_.size());
-  for (uint16_t i = 0; i < columns_.size(); i++)
-    r.push_back(columns_[i].apply(r.data()));
+  for (const auto &column : columns_)
+    r.push_back(column.apply(r.data()));
   return r;
 }
 
 record_t schema_t::apply_unsafe(size_t offset, void *data) const {
   record_t r(offset, reinterpret_cast<uint8_t *>(data), record_size_);
   r.reserve(columns_.size());
-  for (uint16_t i = 0; i < columns_.size(); i++)
-    r.push_back(columns_[i].apply(r.data()));
+  for (const auto &column : columns_)
+    r.push_back(column.apply(r.data()));
   return r;
 }
 

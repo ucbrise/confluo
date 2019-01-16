@@ -4,12 +4,12 @@
 class archiver {
 
  public:
+  virtual ~archiver() = default;
+
   /**
    * Archive up to data log offset.
    * @param offset data log offset
    */
-  virtual ~archiver() {};
-
   virtual void archive(size_t offset) = 0;
 
 };

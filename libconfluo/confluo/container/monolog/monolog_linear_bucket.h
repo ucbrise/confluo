@@ -64,7 +64,7 @@ class monolog_linear_bucket {
         mode_(other.mode_) {
     __atomic_block_copy_ref copy;
     other.data_.atomic_copy(copy);
-    data_.atomic_init(copy.ptr_);
+    data_.atomic_init(copy.get());
   }
 
   /**
@@ -205,7 +205,7 @@ class monolog_linear_bucket {
     atomic::init(&state_, atomic::load(&other.state_));
     __atomic_block_copy_ref copy;
     other.data_.atomic_copy(copy);
-    data_.atomic_init(copy.ptr_);
+    data_.atomic_init(copy.get());
     return *this;
   }
 

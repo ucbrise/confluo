@@ -93,7 +93,9 @@ std::string record_t::to_string() const {
   for (auto &f : *this) {
     str += f.to_string() + ", ";
   }
-  str.pop_back();
+  if (str != "(") {
+    str.pop_back();
+  }
   str += ")";
   return str;
 }

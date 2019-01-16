@@ -25,7 +25,7 @@ typedef struct encoding_type {
 } encoding_type;
 
 /**
- * Pointer auxillary block containing
+ * Pointer auxiliary block containing
  * contextual metadata about the data
  * pointed to. This data structure takes
  * 1B of space on its own but when set to
