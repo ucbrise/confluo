@@ -4,16 +4,19 @@
 #include "aggregated_reflog.h"
 #include "container/radix_tree.h"
 #include "container/reflog.h"
-#include "trigger.h"
-#include "trigger_log.h"
+#include "container/sketch/universal_sketch.h"
 #include "parser/expression_compiler.h"
 #include "schema/record_batch.h"
 #include "schema/schema.h"
+#include "trigger.h"
+#include "trigger_log.h"
+#include "univ_sketch_log.h"
 
 // TODO: Update tests
 
 using namespace ::utils;
 using namespace ::confluo::parser;
+using namespace ::confluo::sketch;
 
 namespace confluo {
 namespace monitor {
@@ -76,7 +79,7 @@ class filter {
   /**
    * Invalidate aggregate identified by id.
    *
-   * @param id for the aggregate.
+   * @param id ID for the aggregate.
    * @return True if invalidation was successful, false otherwise.
    */
   bool remove_aggregate(size_t id);
@@ -84,17 +87,39 @@ class filter {
   /**
    * Get the aggregate corresponding to id.
    *
-   * @param id for the aggregate.
+   * @param id ID for the aggregate.
    * @return Reference to aggregate corresponding to id.
    */
   aggregate_info *get_aggregate_info(size_t id);
 
   /**
    * Get the number of aggregates associated with this filter.
+   * This includes aggregates that have been invalidated.
    *
    * @return The number of aggregates associated with this filter.
    */
   size_t num_aggregates() const;
+
+  /**
+   * Adds a sketch to the filter.
+   * @param sketch Pointer to the sketch to add.
+   */
+  size_t add_sketch(universal_sketch *sketch);
+
+  /**
+   * Removes a sketch from the filter.
+   * @param id The ID of the sketch.
+   * @return True if invalidation was successful, false otherwise.
+   */
+  bool remove_sketch(size_t id);
+
+  /**
+   * Gets the number of sketches associated with this filter.
+   * This includes sketches that have been invalidated.
+   *
+   * @return The number of sketches associated with this filter.
+   */
+  size_t num_sketches() const;
 
   /**
    * Updates the filter index with a new data point. If the new data point
@@ -149,6 +174,21 @@ class filter {
   reflog_result lookup_range_reflogs(uint64_t ts_block_begin, uint64_t ts_block_end) const;
 
   /**
+   * Estimates frequency of a key from a filter's sketch
+   * @param id The ID of the sketch
+   * @param key The string representation of the key to estimate
+   * @return estimated frequency of key
+   */
+  int64_t estimate_frequency(size_t id, const std::string &key);
+
+  /**
+   * Gets the approximate heavy hitters associated with a filter's sketch
+   * @param id The ID of the sketch
+   * @return a map of heavy hitters to their estimated frequencies
+   */
+  universal_sketch::heavy_hitters_map_t get_heavy_hitters(size_t id);
+
+  /**
    * Invalidates the filter expression
    *
    * @return True if the filter was succesfully validated, false otherwise
@@ -173,6 +213,7 @@ class filter {
   filter_fn fn_;                    // Filter function
   idx_t idx_;                       // The filtered data index
   aggregate_log aggregates_;        // List of aggregates on this filter
+  univ_sketch_log sketches_;        // List of universal sketches on this filter
   atomic::type<bool> is_valid_;     // Marks if the filter is valid or not
 };
 

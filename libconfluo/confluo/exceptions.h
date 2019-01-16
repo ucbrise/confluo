@@ -23,7 +23,10 @@ class name : public std::exception {\
   const char* what() const noexcept {\
     return msg_.c_str();\
   }\
-  name& operator=(const name& other) {\
+  name(const name& other) noexcept {\
+    msg_ = other.msg_;\
+  }\
+  name &operator=(const name& other) {\
     msg_ = other.msg_;\
     return *this;\
   }\

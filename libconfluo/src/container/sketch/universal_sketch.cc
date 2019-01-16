@@ -96,7 +96,7 @@ universal_sketch::heavy_hitters_map_t universal_sketch::get_heavy_hitters(size_t
         data_log_->cptr(record_offset, ptr);
         auto key = get_key_hash(ptr);
         auto str_rep = record_key_to_string(ptr);
-        heavy_hitters[str_rep] = substream_sketches_[i].estimate(key);
+        heavy_hitters[str_rep] = size_t(substream_sketches_[i].estimate(key));
       }
     }
   }

@@ -24,7 +24,7 @@ class universal_sketch {
   typedef frequency_functions<counter_t> fns;
   typedef count_sketch<key_t, counter_t> sketch_t;
   typedef std::vector<atomic::type<size_t>> heavy_hitters_t;
-  typedef std::unordered_map<std::string, counter_t> heavy_hitters_map_t;
+  typedef std::unordered_map<std::string, size_t> heavy_hitters_map_t;
 
   // TODO replace constructors with config-based constructor
 
