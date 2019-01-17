@@ -11,7 +11,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
-
+/**
+ * thread safe
+ *
+ **/
 public class ConfluoConsumer {
     Logger logger= LoggerFactory.getLogger(ConfluoConsumer.class);
     private Properties properties=new Properties();
@@ -21,8 +24,6 @@ public class ConfluoConsumer {
     private int  prefetchSize;
     private  RpcClient client;
     private boolean prefetchEnable;
-    private int consumeLogSample;
-    private int totalRead =0;
     private Schema schema;
     public ConfluoConsumer(){
         URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
