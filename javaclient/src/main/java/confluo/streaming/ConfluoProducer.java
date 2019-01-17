@@ -54,7 +54,7 @@ public class ConfluoProducer {
             batchEnable=Boolean.valueOf(properties.getProperty("mq.produce.batch.enable","false"));
             produceBathSize=Integer.valueOf(properties.getProperty("mq.produce.batch.size","20"));
             message=random(messageSize);
-            logger.error(String.format("\n ------------------- \n server address: %s,port:%d,topic:%s,schema:%s \n mutlilog:%s ;batch:%s; batchSize:%d;storage mode:%s \n ----------------",
+            logger.info(String.format("\n ------------------- \n server address: %s,port:%d,topic:%s,schema:%s \n mutlilog:%s ;batch:%s; batchSize:%d;storage mode:%s \n ----------------",
                      host,port,topic,produceSchema,topic,batchEnable,produceBathSize,storageMode));
 
         }catch (IOException e){
@@ -74,6 +74,8 @@ public class ConfluoProducer {
             logger.error(String.format("%s exist,atomic multilog id %d,reuse it now",topic,atomicLogId));
         }catch (TApplicationException e){
                client.createAtomicMultilog(topic,produceSchema,storageMode);
+        }finally {
+            logger.error("e");
         }
         curSchema=client.getSchema();
         if(batchEnable) {
@@ -176,6 +178,11 @@ public class ConfluoProducer {
             logger.info("error", e);
         }
     }
+
+
+
+
+
 
 
 }
