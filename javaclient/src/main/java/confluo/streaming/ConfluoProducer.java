@@ -93,7 +93,6 @@ public class ConfluoProducer {
       return String.format("{ msg: STRING(%d)}",len);
      }
 
-
      /**
       * @return  random  byte buffer
       **/
@@ -112,8 +111,9 @@ public class ConfluoProducer {
 
     }
 
+
     /**
-     * produce
+     * produce a message
      *
      **/
     public void produce() throws TException{
@@ -140,6 +140,10 @@ public class ConfluoProducer {
     }
 
 
+    public long getTotalProduceNum() {
+        return totalProduceNum;
+    }
+
     public void flush() throws IOException,TException{
         if(batchEnable&&batched>0){
             long offset=client.appendBatch(batchBuilder.getBatch());
@@ -154,30 +158,7 @@ public class ConfluoProducer {
         client.close();
     }
 
-    public static void main(String[] args) {
-        Logger logger = LoggerFactory.getLogger(ConfluoProducer.class);
-        ConfluoProducer producer = new ConfluoProducer();
-        long maxProduceTime=60*1000;
-        try {
-            logger.error("start to produce");
-            long start=System.currentTimeMillis();
-            producer.start();
-            while(true){
-                producer.produce();
-               long time= System.currentTimeMillis()-start;
-               if(time>maxProduceTime){
-                   break;
-               }
-            }
-            producer.flush();
-            producer.stop();
-            long time=System.currentTimeMillis()-start;
-            long qps=producer.totalProduceNum *1000/time;
-            logger.error(String.format("produce end,total msg:%d, elapsed:%d ms, qps:%d/s",producer.totalProduceNum,time,qps));
-        } catch (Exception e) {
-            logger.info("error", e);
-        }
-    }
+
 
 
 
