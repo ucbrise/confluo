@@ -26,6 +26,7 @@ public class ConsumerBenchmark {
         logger.info(String.format("%d consumer and duration %d ms",consumeNum,durationMs));
         Thread[] consumers=new Thread[consumeNum];
         ConsumeTask[] consumerTasks=new ConsumeTask[consumeNum];
+        long start=System.currentTimeMillis();
         for(int i=0;i<consumeNum;i++){
             consumerTasks[i]=new ConsumeTask(durationMs,consumeLogSampleMs,consumeStartOffset);
             consumers[i]=new Thread(consumerTasks[i],String.valueOf(i));
@@ -39,8 +40,9 @@ public class ConsumerBenchmark {
             for(ConsumeTask task:consumerTasks){
                 totalConsumedMsgNum+=task.getConsumedMessage();
             }
-            long qps=totalConsumedMsgNum *1000/durationMs;
-            logger.error(String.format("%d consume finished,total msg:%d, elapsed:%d ms, qps:%d/s",consumeNum,totalConsumedMsgNum,durationMs,qps));
+            long acutalDurationMs=System.currentTimeMillis()-start;
+            long qps=totalConsumedMsgNum *1000/acutalDurationMs;
+            logger.error(String.format("%d consume finished,total msg:%d, elapsed:%d ms, qps:%d/s",consumeNum,totalConsumedMsgNum,acutalDurationMs,qps));
         }catch (InterruptedException e){
             logger.info("interrupted",e);
         }

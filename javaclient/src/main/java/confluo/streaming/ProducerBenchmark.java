@@ -22,6 +22,7 @@ public class ProducerBenchmark {
         int producerNum=Integer.valueOf(properties.getProperty("mq.produce.concurrency","10"));
         int durationMs=Integer.valueOf(properties.getProperty("mq.produce.duration","60000"));
         logger.info(String.format("%d producer and duration %d ms",producerNum,durationMs));
+        long startTime=System.currentTimeMillis();
          Thread[] producers=new Thread[producerNum];
          ProduceTask[] producerTasks=new ProduceTask[producerNum];
          for(int i=0;i<producerNum;i++){
@@ -37,8 +38,9 @@ public class ProducerBenchmark {
              for(ProduceTask task:producerTasks){
                  totalProducedMsgNum+=task.getProducedMessage();
              }
-             long qps=totalProducedMsgNum *1000/durationMs;
-             logger.info(String.format("%d producer finished,total msg:%d, elapsed:%d ms, qps:%d/s",producerNum,totalProducedMsgNum,durationMs,qps));
+             long actualDurationMs=System.currentTimeMillis()-startTime;
+             long qps=totalProducedMsgNum *1000/actualDurationMs;
+             logger.info(String.format("%d producer finished,total msg:%d, elapsed:%d ms, qps:%d/s",producerNum,totalProducedMsgNum,actualDurationMs,qps));
          }catch (InterruptedException e){
              logger.info("interrupted",e);
          }

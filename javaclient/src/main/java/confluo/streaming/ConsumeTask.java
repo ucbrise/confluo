@@ -33,10 +33,21 @@ public class ConsumeTask implements Runnable {
             consumer.start();
             int  recordSize=consumer.getSchema().getRecordSize();
             long start=System.currentTimeMillis();
-            long time;
+            long elapsed=1; //
+            int startOffsetEqualMaxCount=0;
             while(true) {
                 long startOffset = Math.max(recordOffset, 0) * recordSize;// real offset in log
                 long maxOffset = consumer.maxRecord() * recordSize;
+                if(startOffset==maxOffset){
+                    //logger.info("");
+                    // no more new message,consider exit
+                    startOffsetEqualMaxCount++;
+                    if(startOffsetEqualMaxCount>10){
+                        logger.info("possible no more messages");
+                        break;
+                    }
+                    Thread.sleep(1);
+                }
                 long count;
                 long i= startOffset;
                 for ( ; i < maxOffset; ) {
@@ -51,15 +62,17 @@ public class ConsumeTask implements Runnable {
                 }
                 recordOffset +=read;
                 read = 0;
-                time = System.currentTimeMillis() - start;
-                if (time >= consumeMaxTime) {
+                elapsed = System.currentTimeMillis() - start;
+                if (elapsed >= consumeMaxTime) {
                     break;
                 }
             }
-            long qps=totalRead *1000/time;
-            logger.info(String.format("total msg:%d, elapsed:%d ms, qps:%d/s",totalRead,time,qps));
+            long qps=totalRead *1000/elapsed;
+            logger.info(String.format("total msg:%d, elapsed:%d ms, qps:%d/s",totalRead,elapsed,qps));
         }catch (TException e){
             logger.info("error",e);
+        }catch (InterruptedException e){
+            logger.info("interrupted");
         }
     }
 }
