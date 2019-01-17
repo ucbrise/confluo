@@ -1,14 +1,10 @@
 package confluo.streaming;
 
-import confluo.rpc.MessageBatchBuilder;
-import confluo.rpc.RpcClient;
-import confluo.rpc.Schema;
-import confluo.rpc.rpc_storage_mode;
+import confluo.rpc.*;
 import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -17,6 +13,10 @@ import java.nio.ByteOrder;
 import java.util.Properties;
 import java.util.Random;
 
+/**
+ * not thread safe
+ *
+ * */
 public class ConfluoProducer {
     Logger logger= LoggerFactory.getLogger(ConfluoProducer.class);
     private static final char[] encodeTable = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
@@ -33,7 +33,6 @@ public class ConfluoProducer {
     private int messageSize;
     private rpc_storage_mode storageMode;
     private String produceSchema;
-    private ByteBuffer message;
     private RpcClient client;
     private MessageBatchBuilder batchBuilder;
     private Schema curSchema;
@@ -53,8 +52,8 @@ public class ConfluoProducer {
 
             batchEnable=Boolean.valueOf(properties.getProperty("mq.produce.batch.enable","false"));
             produceBathSize=Integer.valueOf(properties.getProperty("mq.produce.batch.size","20"));
-            message=random(messageSize);
-            logger.info(String.format("\n ------------------- \n server address: %s,port:%d,topic:%s,schema:%s \n mutlilog:%s ;batch:%s; batchSize:%d;storage mode:%s \n ----------------",
+
+            logger.info(String.format("\n ------------------- \n producer config \n server address: %s,port:%d,topic:%s,schema:%s \n mutlilog:%s ;batch:%s; batchSize:%d;storage mode:%s \n ----------------",
                      host,port,topic,produceSchema,topic,batchEnable,produceBathSize,storageMode));
 
         }catch (IOException e){
@@ -66,22 +65,24 @@ public class ConfluoProducer {
      *  create a topic or reuse existed topic
      *
      **/
-    public void start() throws TException {
+    public void start() throws TException{
         client= new RpcClient(host, port);
-        try {
-           long atomicLogId= client.getAtomicMultilog(topic);
-            client.setCurrentAtomicMultilog(topic);
-            logger.error(String.format("%s exist,atomic multilog id %d,reuse it now",topic,atomicLogId));
-        }catch (TApplicationException e){
-               client.createAtomicMultilog(topic,produceSchema,storageMode);
-        }finally {
-            logger.error("e");
-        }
+            try {
+                long atomicLogId = client.getAtomicMultilog(topic);
+                client.setCurrentAtomicMultilog(topic);
+                logger.info(String.format("%s exist,atomic multilog id %d,reuse it now", topic, atomicLogId));
+
+            } catch (TApplicationException e) {
+                client.createAtomicMultilog(topic, produceSchema, storageMode);
+            } catch (TException    e){
+                logger.info("start error",e);
+            }
         curSchema=client.getSchema();
         if(batchEnable) {
             batchBuilder = new MessageBatchBuilder(client.getSchema());
         }
     }
+
 
     /**
      *  default a timestamp
@@ -89,14 +90,24 @@ public class ConfluoProducer {
      *  { long:a;msg:STRING(len)}
      *
      **/
-    public String getSchema(int len){
-      return String.format("{ msg: STRING(%d)}",len);
+     private String getSchema(int len){
+      return String.format("{msg: STRING(%d)}",len);
+     }
+
+
+     /**
+      * @return  current schema
+      **/
+     public Schema getSchema(){
+         return curSchema;
      }
 
      /**
-      * @return  random  byte buffer
+      * @param len  message length
+      * @return    byte buffer message
+      *
       **/
-    public ByteBuffer random(int len){
+    public ByteBuffer byteMessage(int len){
         Random rd = new Random();
         ByteBuffer buffer=ByteBuffer.allocate(len);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -116,7 +127,7 @@ public class ConfluoProducer {
      * produce a message
      *
      **/
-    public void produce() throws TException{
+    public void produce(ByteBuffer message) throws TException{
         try {
                 message.putLong(0, System.currentTimeMillis());
                 message.clear();
@@ -139,11 +150,18 @@ public class ConfluoProducer {
         }
     }
 
-
+    /**
+     * @return  get total produced messages
+     *
+     **/
     public long getTotalProduceNum() {
         return totalProduceNum;
     }
 
+    /**
+     *  flush the last batch message
+     *
+     **/
     public void flush() throws IOException,TException{
         if(batchEnable&&batched>0){
             long offset=client.appendBatch(batchBuilder.getBatch());
@@ -153,6 +171,10 @@ public class ConfluoProducer {
             batched=0;
         }
     }
+
+    /**
+     *
+     **/
     public void stop() throws  TException{
         client.disconnect();
         client.close();

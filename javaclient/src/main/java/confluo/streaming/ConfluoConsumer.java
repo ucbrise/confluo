@@ -18,7 +18,6 @@ public class ConfluoConsumer {
     private String topic;
     private String host;
     private int port;
-
     private int  prefetchSize;
     private  RpcClient client;
     private boolean prefetchEnable;
@@ -80,50 +79,4 @@ public class ConfluoConsumer {
         return client.numRecords();
     }
 
-    public static void main(String[] args){
-        Logger logger= LoggerFactory.getLogger(ConfluoConsumer.class);
-        Properties properties=new Properties();
-        URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
-        try {
-            InputStream in = propertiesUrl.openStream();
-            properties.load(in);
-        }catch (IOException e){
-            logger.info("io error",e);
-        }
-        ConfluoConsumer consumer=new ConfluoConsumer();
-        long consumeMaxTime=1*1000;
-        long start=System.currentTimeMillis();
-        long totalRead=0;
-        long read=0;
-        long time;
-        long consumeLogSample=Integer.valueOf(properties.getProperty("mq.consume.log.sample","1"));
-        MessageListener messageListener=new DefaultMessageListener(consumeLogSample);
-        try {
-            long minIndex=Long.valueOf(properties.getProperty("mq.consume.message.min.index","0"));
-            consumer.start();
-            int  recordSize=consumer.getSchema().getRecordSize();
-            while(true) {
-                long startOffset = Math.max(minIndex, 0) * recordSize;// real offset in log
-                long maxOffset = consumer.maxRecord() * recordSize;
-                long count;
-                long i= startOffset;
-                for ( ; i < maxOffset; ) {
-                    count = consumer.pull(i, messageListener);
-                    totalRead += count;
-                    read += count;
-                    i += recordSize * count;
-                }
-                minIndex +=read;
-                read = 0;
-                time = System.currentTimeMillis() - start;
-                if (time >= consumeMaxTime) {
-                    break;
-                }
-            }
-            long qps=totalRead *1000/time;
-            logger.info(String.format("total msg:%d, elapsed:%d ms, qps:%d/s",totalRead,time,qps));
-        }catch (TException e){
-            logger.info("error",e);
-        }
-    }
 }

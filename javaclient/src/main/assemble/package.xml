@@ -1,0 +1,30 @@
+<assembly xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/assembly-1.0.0.xsd">
+	<id>package</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>true</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>src/main/bin</directory>
+			<outputDirectory>bin</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>conf</outputDirectory>
+			<filtered>true</filtered>
+		</fileSet>
+		<fileSet>
+			<directory>lib</directory>
+			<outputDirectory>lib</outputDirectory>
+		</fileSet>
+	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>lib</outputDirectory>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+</assembly>
