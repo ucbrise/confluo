@@ -62,10 +62,17 @@ class universal_sketch {
 
   /**
    * Updates universal sketch with a record using the relevant field(s)
-   * @param r record
+   * @param record record
    * @param incr increment
    */
-  void update(const record_t &r, size_t incr = 1);
+  void update(const record_t &record, size_t incr = 1);
+
+  /**
+   * Updates universal sketch with a record using the relevant field(s)
+   * @param record record
+   * @param incr increment
+   */
+  void update(void *record, size_t offset, size_t incr = 1);
 
   /**
    * Estimates the frequency of the key
@@ -141,10 +148,17 @@ class universal_sketch {
 private:
   /**
    * Converts record's relevant field value to an indexable key
-   * @param r record
+   * @param record record
    * @return field value as an indexable key
    */
-  inline key_t get_key_hash(const record_t &r);
+  inline key_t get_key_hash(const record_t &record);
+
+  /**
+   * Converts record's relevant field value to an indexable key
+   * @param record pointer to raw record data
+   * @return field value as an indexable key
+   */
+  inline key_t get_key_hash(void *record);
 
   /**
    * Converts record's relevant field value to an indexable key

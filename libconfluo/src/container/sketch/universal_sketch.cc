@@ -68,9 +68,21 @@ bool universal_sketch::invalidate() {
   return atomic::strong::cas(&is_valid_, &expected, false);
 }
 
-void universal_sketch::update(const record_t &r, size_t incr) {
-  key_t key_hash = get_key_hash(r);
-  auto offset = r.log_offset();
+void universal_sketch::update(const record_t &record, size_t incr) {
+  key_t key_hash = get_key_hash(record);
+  auto offset = record.log_offset();
+  // Update top layer
+  counter_t old_count = substream_sketches_[0].update_and_estimate(key_hash, incr);
+  update_heavy_hitters(0, key_hash, offset, old_count + incr);
+  // Update rest
+  for (size_t i = 1; i < num_layers_ && to_bool(substream_hashes_.hash(i - 1, key_hash)); i++) {
+    old_count = substream_sketches_[i].update_and_estimate(key_hash, incr);
+    update_heavy_hitters(i, key_hash, offset, old_count + incr);
+  }
+}
+
+void universal_sketch::update(void *record, size_t offset, size_t incr) {
+  key_t key_hash = get_key_hash(record);
   // Update top layer
   counter_t old_count = substream_sketches_[0].update_and_estimate(key_hash, incr);
   update_heavy_hitters(0, key_hash, offset, old_count + incr);
@@ -112,12 +124,16 @@ size_t universal_sketch::storage_size() {
 }
 
 
-universal_sketch::key_t universal_sketch::get_key_hash(const record_t &r) {
-  return hash_util::hash(r.at(column_.idx()).value());
+universal_sketch::key_t universal_sketch::get_key_hash(const record_t &record) {
+  return hash_util::hash(record.at(column_.idx()).value());
+}
+
+universal_sketch::key_t universal_sketch::get_key_hash(void *record) {
+  return hash_util::hash(column_.apply(record).value());
 }
 
 universal_sketch::key_t universal_sketch::get_key_hash(const read_only_data_log_ptr &ptr) {
-  return hash_util::hash(column_.apply(ptr.decode().get()).value());
+  return get_key_hash(ptr.decode().get());
 }
 
 universal_sketch::key_t universal_sketch::str_to_key_hash(const std::string &str) {

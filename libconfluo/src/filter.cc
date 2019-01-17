@@ -82,9 +82,14 @@ void filter::update(size_t log_offset, const schema_snapshot &snap, record_block
         local_aggs.resize(refs->num_aggregates());
       }
       refs->push_back(rec_off);
+
       for (size_t j = 0; j < local_aggs.size(); j++)
         if (aggregates_.at(j)->is_valid())
           local_aggs[j] = aggregates_.at(j)->seq_op(local_aggs[j], snap, cur_rec);
+
+      for (auto *sketch : sketches_)
+        if (sketch->is_valid())
+          sketch->update(cur_rec, rec_off);
     }
   }
 

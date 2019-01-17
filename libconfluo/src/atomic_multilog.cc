@@ -491,7 +491,11 @@ void atomic_multilog::update_aux_record_block(uint64_t log_offset, record_block 
 
   for (auto sketch : global_sketches_) {
     if (sketch->is_valid()) {
-      // TODO update sketch for block
+      for (size_t i = 0; i < block.nrecords; i++) {
+        void *cur_rec = reinterpret_cast<uint8_t *>(&block.data[i * record_size]);
+        uint64_t rec_off = log_offset + i * record_size;
+        sketch->update(cur_rec, rec_off);
+      }
     }
   }
 
