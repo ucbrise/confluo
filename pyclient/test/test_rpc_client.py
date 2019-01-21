@@ -1,5 +1,6 @@
 import os
 import subprocess
+import multiprocessing
 import time
 import unittest
 from confluo.rpc.client import RpcClient
@@ -31,7 +32,8 @@ class TestRpcClient(unittest.TestCase):
 
     def test_concurrent_connections(self):
         self.start_server()
-        clients = [RpcClient("127.0.0.1", 9090) for x in xrange(4)]
+        num_clients = min(multiprocessing.cpu_count(), 4)
+        clients = [RpcClient("127.0.0.1", 9090) for _ in range(num_clients)]
 
         try:
             for c in clients:
