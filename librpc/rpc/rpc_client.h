@@ -51,7 +51,7 @@ class rpc_client {
   /**
    * Destructs the rpc client
    */
-  ~rpc_client();
+  virtual ~rpc_client();
 
   virtual /**
    * Disconnects the rpc client

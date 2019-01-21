@@ -64,11 +64,12 @@ public class TestRpcClient {
 
   @Test
   public void testConcurrentConnections() throws TException {
+    int numClients = Math.min(Runtime.getRuntime().availableProcessors(), 4);
     List<RpcClient> clients = new ArrayList<>();
-    clients.add(new RpcClient(HOST, PORT));
-    clients.add(new RpcClient(HOST, PORT));
-    clients.add(new RpcClient(HOST, PORT));
-    clients.add(new RpcClient(HOST, PORT));
+
+    for (int i = 0; i < numClients; ++i) {
+      clients.add(new RpcClient(HOST, PORT));
+    }
 
     for (RpcClient c : clients) {
       c.disconnect();
