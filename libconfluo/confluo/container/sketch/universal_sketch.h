@@ -21,7 +21,6 @@ class universal_sketch {
  public:
   typedef size_t key_t;
   typedef int64_t counter_t;
-  typedef frequency_functions<counter_t> fns;
   typedef count_sketch<key_t, counter_t> sketch_t;
   typedef std::vector<atomic::type<size_t>> heavy_hitters_t;
   typedef std::unordered_map<std::string, size_t> heavy_hitters_map_t;
@@ -90,11 +89,11 @@ class universal_sketch {
   /**
    * Evaluates a function over the universal sketch using all layers
    * @tparam ret_t return type
-   * @param f function
+   * @param f function to evaluate
    * @return estimate of summary function
    */
-  template<typename ret_t = counter_t>
-  ret_t evaluate(fns::fn<ret_t> f) {
+  template <typename ret_t = counter_t>
+  ret_t evaluate(const fn<counter_t, ret_t> &f) {
     return evaluate(f, num_layers_);
   }
 
@@ -105,8 +104,8 @@ class universal_sketch {
    * @param num_layers number of layers to use to compute G_SUM
    * @return estimate of summary function
    */
-  template<typename ret_t = counter_t>
-  ret_t evaluate(fns::fn<ret_t> f, size_t num_layers) {
+  template <typename ret_t = counter_t>
+  ret_t evaluate(const fn<counter_t, ret_t> &f, size_t num_layers) {
     ret_t recursive_sum = 0;
     size_t substream_i = num_layers - 1;
 

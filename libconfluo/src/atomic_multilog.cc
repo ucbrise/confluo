@@ -305,10 +305,10 @@ std::vector<std::string> atomic_multilog::read(uint64_t offset) const {
   return read(offset, version);
 }
 
-size_t atomic_multilog::estimate_frequency(const std::string &name, const std::string &key) {
+size_t atomic_multilog::estimate_frequency(const std::string &sketch_name, const std::string &key) {
   sketch_id_t sketch_id{};
-  if (univ_sketch_map_.get(name, sketch_id) == -1) {
-    throw management_exception("Sketch " + name + " does not exist.");
+  if (univ_sketch_map_.get(sketch_name, sketch_id) == -1) {
+    throw management_exception("Sketch " + sketch_name + " does not exist.");
   }
   if (sketch_id.is_global)
     return size_t(global_sketches_.at(sketch_id.sketch_idx)->estimate_frequency(key));
@@ -316,10 +316,22 @@ size_t atomic_multilog::estimate_frequency(const std::string &name, const std::s
     return size_t(filters_.at(sketch_id.filter_idx)->estimate_frequency(sketch_id.sketch_idx, key));
 }
 
-std::unordered_map<std::string, size_t> atomic_multilog::get_heavy_hitters(const std::string &name) {
+double atomic_multilog::evaluate_metric(const std::string &sketch_name, const frequency_metric &metric) {
   sketch_id_t sketch_id{};
-  if (univ_sketch_map_.get(name, sketch_id) == -1) {
-    throw management_exception("Sketch " + name + " does not exist.");
+  if (univ_sketch_map_.get(sketch_name, sketch_id) == -1) {
+    throw management_exception("Sketch " + sketch_name + " does not exist.");
+  }
+  auto frequency_fn = frequency_functions<>::get(metric);
+  if (sketch_id.is_global)
+    return global_sketches_.at(sketch_id.sketch_idx)->evaluate(frequency_fn);
+  else
+    return filters_.at(sketch_id.filter_idx)->evaluate(sketch_id.sketch_idx, frequency_fn);
+}
+
+std::unordered_map<std::string, size_t> atomic_multilog::get_heavy_hitters(const std::string &sketch_name) {
+  sketch_id_t sketch_id{};
+  if (univ_sketch_map_.get(sketch_name, sketch_id) == -1) {
+    throw management_exception("Sketch " + sketch_name + " does not exist.");
   }
   if (sketch_id.is_global)
     return global_sketches_.at(sketch_id.sketch_idx)->get_heavy_hitters();

@@ -4,6 +4,7 @@
 #include "aggregated_reflog.h"
 #include "container/radix_tree.h"
 #include "container/reflog.h"
+#include "container/sketch/frequency_functions.h"
 #include "container/sketch/universal_sketch.h"
 #include "parser/expression_compiler.h"
 #include "schema/record_batch.h"
@@ -175,18 +176,26 @@ class filter {
 
   /**
    * Estimates frequency of a key from a filter's sketch
-   * @param id The ID of the sketch
+   * @param sketch_id The ID of the sketch
    * @param key The string representation of the key to estimate
    * @return estimated frequency of key
    */
-  int64_t estimate_frequency(size_t id, const std::string &key);
+  int64_t estimate_frequency(size_t sketch_id, const std::string &key);
+
+  /**
+   * Estimates the value of a valid frequency-domain metric using a sketch.
+   * @param sketch_id The ID of the sketch
+   * @param metric The metric to evaluate
+   * @return estimated value
+   */
+  double evaluate(size_t sketch_id, const frequency_functions<>::fn_t &f);
 
   /**
    * Gets the approximate heavy hitters associated with a filter's sketch
-   * @param id The ID of the sketch
+   * @param sketch_id The ID of the sketch
    * @return a map of heavy hitters to their estimated frequencies
    */
-  universal_sketch::heavy_hitters_map_t get_heavy_hitters(size_t id);
+  universal_sketch::heavy_hitters_map_t get_heavy_hitters(size_t sketch_id);
 
   /**
    * Invalidates the filter expression

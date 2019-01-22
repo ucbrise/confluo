@@ -22,6 +22,7 @@
 #include "container/cursor/record_cursors.h"
 #include "container/cursor/alert_cursor.h"
 #include "container/monolog/monolog.h"
+#include "container/sketch/frequency_functions.h"
 #include "container/sketch/universal_sketch.h"
 #include "container/radix_tree.h"
 #include "container/string_map.h"
@@ -362,14 +363,24 @@ class atomic_multilog {
    * @param key The string representation of the key to estimate
    * @return estimated frequency of key
    */
-  size_t estimate_frequency(const std::string &name, const std::string &key);
+  size_t estimate_frequency(const std::string &sketch_name, const std::string &key);
+
+  /**
+   * [Experimental API]
+   * Evaluates a valid monotonically increasing frequency-domain metric using a sketch.
+   * @param sketch_name The name of the sketch
+   * @param metric The metric to evaluate
+   * @return estimated value
+   */
+  double evaluate_metric(const std::string &sketch_name, const frequency_metric &metric);
 
   /**
    * [Experimental API]
    * Gets the approximate heavy hitters associated with the sketch
+   * @param sketch_name The name of the sketch
    * @return a map of heavy hitters to their estimated frequencies
    */
-  std::unordered_map<std::string, size_t> get_heavy_hitters(const std::string &name);
+  std::unordered_map<std::string, size_t> get_heavy_hitters(const std::string &sketch_name);
 
   /**
    * Executes the filter expression

@@ -117,12 +117,16 @@ filter::reflog_result filter::lookup_range_reflogs(uint64_t ts_block_begin, uint
                                    byte_string(ts_block_end));
 }
 
-int64_t filter::estimate_frequency(size_t id, const std::string &key) {
-  return sketches_.at(id)->estimate_frequency(key);
+int64_t filter::estimate_frequency(size_t sketch_id, const std::string &key) {
+  return sketches_.at(sketch_id)->estimate_frequency(key);
 }
 
-universal_sketch::heavy_hitters_map_t filter::get_heavy_hitters(size_t id) {
-  return sketches_.at(id)->get_heavy_hitters();
+double filter::evaluate(size_t sketch_id, const frequency_functions<>::fn_t &f) {
+  return sketches_.at(sketch_id)->evaluate(f);
+}
+
+universal_sketch::heavy_hitters_map_t filter::get_heavy_hitters(size_t sketch_id) {
+  return sketches_.at(sketch_id)->get_heavy_hitters();
 }
 
 bool filter::invalidate() {
