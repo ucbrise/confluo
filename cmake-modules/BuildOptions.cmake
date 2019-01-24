@@ -2,6 +2,7 @@ include(CMakeDependentOption)
 
 # Components to build
 option(BUILD_TESTS "Build with unittests" ON)
+option(BUILD_STRESS_TESTS "Build with stress tests" OFF)
 option(BUILD_RPC "Build RPC framework" ON)
 option(BUILD_DOC "Build documentation" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)

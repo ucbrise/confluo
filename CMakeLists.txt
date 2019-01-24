@@ -63,6 +63,10 @@ if (BUILD_TESTS)
   include(CTest)
 endif()
 
+if (BUILD_STRESS_TESTS)
+  add_definitions(-DSTRESS_TEST)
+endif()
+
 # Utilities
 add_subdirectory(libutils)
 
