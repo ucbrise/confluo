@@ -36,7 +36,7 @@ class CountSketchTest : public testing::Test {
       cs.update(p.first, p.second);
     }
     auto stop = utils::time_utils::cur_ns();
-    LOG_INFO << "Count Sketch update latency: " << (stop - start) / hist.size();
+    LOG_INFO << "Size: " << cs.storage_size() / 1024 <<" KB, Update Latency: " << (stop - start) / hist.size() << " ns";
 
     thread_unsafe_pq<int, int64_t> estimated_heavy_hitters, actual_heavy_hitters;
     for (auto p : hist) {
@@ -64,18 +64,30 @@ class CountSketchTest : public testing::Test {
  * http://www.cs.princeton.edu/courses/archive/spring04/cos598B/bib/CharikarCF.pdf
  */
 TEST_F(CountSketchTest, InvariantTest) {
+  size_t k = 10;
+  hist_t hist;
+  NormalGenerator(0, 100).sample(hist, 1000000);
+
   // TODO run multiple trials and determine gamma empirically to avoid randomness in testing
   // for now use very small gamma to enforce invariant and remove randomness
-  double g = 0.01;
-  size_t k = 100;
   double epsilon[] = { 0.01, 0.02, 0.04 };
+  for (double e : epsilon)
+    run(hist, e, 0.01, k);
+}
 
+#ifdef STRESS_TEST
+TEST_F(CountSketchTest, InvariantStressTest) {
+  size_t k = 10;
   hist_t hist;
   ZipfGenerator().sample(hist, 1000000);
 
-  for (double e : epsilon)
-    run(hist, e, g, k);
+  double epsilon[] = { 0.01, 0.02, 0.04 };
+  double gamma[] = { 0.01, 0.02, 0.04, 0.06, 0.08 };
 
+  for (double e : epsilon)
+    for (double g : gamma)
+      run(hist, e, g, k);
 }
+#endif
 
 #endif /* TEST_COUNT_SKETCH_TEST */

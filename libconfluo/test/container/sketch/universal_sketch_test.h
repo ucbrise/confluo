@@ -89,7 +89,7 @@ public:
 
 TEST_F(UniversalSketchTest, EstimateAccuracyTest) {
   double epsilon = 0.01;
-  double gamma = 0.01;
+  double gamma = 0.05;
   size_t k = 10;
 
   hist_t hist;
@@ -118,16 +118,14 @@ TEST_F(UniversalSketchTest, EstimateAccuracyTest) {
   }
 }
 
-TEST_F(UniversalSketchTest, GetHeavyHittersTest) {
+TEST_F(UniversalSketchTest, GetHeavyHittersZipfTest) {
   hist_t hist;
-  NormalGenerator(0, 100).sample(hist, 10000000);
+  ZipfGenerator().sample(hist, 10000000);
 
   double epsilon = 0.01;
-  double gamma = 0.01;
+  double gamma = 0.05;
   size_t k = 10;
   // Conservatively check if we identified at least 40% of the heavy hitters correctly
-  // Note that this is especially acceptable since the distribution is normal
-  // and there are several possible heavy hitters.
   double target_identified = 0.4;
 
   schema_t schema = build_schema();
@@ -137,7 +135,7 @@ TEST_F(UniversalSketchTest, GetHeavyHittersTest) {
   auto actual_heavy_hitters = get_heavy_hitters(hist, k);
 
   size_t num_heavy_hitters_identified = 0;
-  auto estimated_heavy_hitters = univ_sketch.get_heavy_hitters(10);
+  auto estimated_heavy_hitters = univ_sketch.get_heavy_hitters();
   for (const auto &hh : estimated_heavy_hitters) {
     if (actual_heavy_hitters.contains(std::stoi(hh.first))) {
       num_heavy_hitters_identified++;
@@ -145,10 +143,38 @@ TEST_F(UniversalSketchTest, GetHeavyHittersTest) {
   }
 
   // TODO introduce more reliable, deterministic checks
-  LOG_INFO << num_heavy_hitters_identified;
   ASSERT_GE(num_heavy_hitters_identified * 1.0 / k, target_identified);
-
 }
 
+#ifdef STRESS_TEST
+TEST_F(UniversalSketchTest, GetHeavyHittersGaussianTest) {
+  hist_t hist;
+  NormalGenerator(0, 100).sample(hist, 10000000);
+
+  double epsilon = 0.01;
+  double gamma = 0.05;
+  size_t k = 10;
+  // Conservatively check if we identified at least 30% of the heavy hitters correctly
+  double target_identified = 0.3;
+
+  schema_t schema = build_schema();
+  data_log log("data_log", "/tmp", storage::IN_MEMORY);
+  universal_sketch univ_sketch(epsilon, gamma, k, &log, schema.columns()[1]);
+  fill(log, schema, hist, univ_sketch);
+  auto actual_heavy_hitters = get_heavy_hitters(hist, k);
+
+  size_t num_heavy_hitters_identified = 0;
+  auto estimated_heavy_hitters = univ_sketch.get_heavy_hitters();
+  for (const auto &hh : estimated_heavy_hitters) {
+    if (actual_heavy_hitters.contains(std::stoi(hh.first))) {
+      num_heavy_hitters_identified++;
+    }
+  }
+
+  // TODO introduce more reliable, deterministic checks
+  LOG_INFO << num_heavy_hitters_identified << " heavy hitters identified.";
+  ASSERT_GE(num_heavy_hitters_identified * 1.0 / k, target_identified);
+}
+#endif
 
 #endif //TEST_UNIVERSAL_SKETCH_TEST_H
