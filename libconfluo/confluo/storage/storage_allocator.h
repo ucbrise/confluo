@@ -47,7 +47,7 @@ class storage_allocator {
    *
    * @param path backing file
    * @param size size to allocate
-   * @param state pointer state (bit field, constrained to storage::state_type)
+   * @param aux auxiliary pointer state
    * @return pointer to memory
    */
   void* mmap(std::string path, size_t size, ptr_aux_block aux = ptr_aux_block());
@@ -58,7 +58,7 @@ class storage_allocator {
    * @param path path of file
    * @param offset file offset (does not need to be page aligned)
    * @param size size to mmap, exclusive of metadata
-   * @param state pointer state (bit field, constrained to storage::state_type)
+   * @param aux auxiliary pointer state
    * @return pointer to memory
    */
   void* mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux = ptr_aux_block());

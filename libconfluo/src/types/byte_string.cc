@@ -171,11 +171,11 @@ immutable_byte_string byte_string::copy() const {
   return immutable_byte_string(data_, size_);
 }
 
-uint8_t *byte_string::data() {
+uint8_t *byte_string::data() const {
   return data_;
 }
 
-size_t byte_string::size() {
+size_t byte_string::size() const {
   return size_;
 }
 
@@ -190,12 +190,10 @@ std::string byte_string::to_string() const {
 }
 
 byte_string &byte_string::operator=(byte_string &&other) {
-  size_ = std::move(other.size_);
-  data_ = std::move(other.data_);
-
+  size_ = other.size_;
+  data_ = other.data_;
   other.size_ = 0;
   other.data_ = nullptr;
-
   return *this;
 }
 

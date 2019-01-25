@@ -95,6 +95,13 @@ add_library(confluo STATIC
         confluo/container/monolog/monolog_linear.h
         confluo/container/monolog/monolog_linear_bucket.h
         confluo/container/radix_tree.h
+        confluo/container/sketch
+        confluo/container/sketch/count_sketch.h
+        confluo/container/sketch/frequency_functions.h
+        confluo/container/sketch/hash_manager.h
+        confluo/container/sketch/priority_queue.h
+        confluo/container/sketch/sketch_utils.h
+        confluo/container/sketch/universal_sketch.h
         confluo/schema/field.h
         confluo/schema/record.h
         confluo/schema/record_batch.h
@@ -119,8 +126,9 @@ add_library(confluo STATIC
         confluo/conf
         confluo/conf/configuration_params.h
         confluo/conf/defaults.h
-        confluo/filter.h
         confluo/alert.h
+        confluo/filter.h
+        confluo/univ_sketch_log.h
         src/confluo_store.cc
         src/atomic_multilog.cc
         src/filter.cc
@@ -140,6 +148,8 @@ add_library(confluo STATIC
         src/container/cursor/alert_cursor.cc
         src/container/cursor/offset_cursors.cc
         src/container/cursor/record_cursors.cc
+        src/container/sketch/universal_sketch.cc
+        src/container/sketch/hash_manager.cc
         src/parser/aggregate_parser.cc
         src/parser/expression_compiler.cc
         src/parser/expression_parser.cc
@@ -186,8 +196,11 @@ add_library(confluo STATIC
         src/types/numeric.cc
         src/types/type_properties.cc
         src/types/type_manager.cc)
+
 target_link_libraries(confluo confluoutils ${CMAKE_THREAD_LIBS_INIT} ${lz4_STATIC_LIB})
 add_dependencies(confluo lz4)
+
+find_package(Boost 1.45.0 COMPONENTS program_options)
 
 if (BUILD_TESTS)
   # Build test
@@ -222,6 +235,10 @@ if (BUILD_TESTS)
           test/container/cursor/batched_cursor_test.h
           test/container/bitmap/bitmap_test.h
           test/container/bitmap/bitmap_array_test.h
+          test/container/sketch/count_sketch_test.h
+          test/container/sketch/sketch_test_utils.h
+          test/container/sketch/universal_sketch_test.h
+          test/container/sketch/priority_queue_test.h
           test/container/bitmap/delta_encoded_array_test.h
           test/container/stream_test.h
           test/container/string_map_test.h

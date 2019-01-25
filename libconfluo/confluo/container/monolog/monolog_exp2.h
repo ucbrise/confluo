@@ -421,8 +421,23 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
   /**
    * Constructs a default monolog iterator
    */
-  monolog_exp2()
-      : tail_(0) {
+  monolog_exp2(size_t count = 0)
+      : tail_(count) {
+  }
+
+  monolog_exp2(const monolog_exp2& other) {
+    atomic::store(&tail_, other.size());
+    for (size_t i = 0; i < this->size(); i++) {
+      this->set(i, other.at(i));
+    }
+  }
+
+  monolog_exp2& operator=(const monolog_exp2& other) {
+    atomic::store(&tail_, other.size());
+    for (size_t i = 0; i < this->size(); i++) {
+      this->set(i, other.at(i));
+    }
+    return *this;
   }
 
   /**

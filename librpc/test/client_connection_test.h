@@ -1,6 +1,8 @@
 #ifndef RPC_TEST_SERVER_CLIENT_TEST_H_
 #define RPC_TEST_SERVER_CLIENT_TEST_H_
 
+#include <thread>
+
 #include "gtest/gtest.h"
 
 #include "conf/configuration_params.h"
@@ -25,7 +27,8 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
   });
 
   rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
-  std::vector<rpc_client> clients(static_cast<unsigned long>(configuration_params::MAX_CONCURRENCY()));
+  size_t num_clients = std::min((size_t)std::thread::hardware_concurrency(), (size_t)4);
+  std::vector<rpc_client> clients(num_clients);
   for (auto &client : clients) {
     client.connect(SERVER_ADDRESS, SERVER_PORT);
   }

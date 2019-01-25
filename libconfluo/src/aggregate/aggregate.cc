@@ -88,7 +88,7 @@ void aggregate_list::comb_update(const numeric &value, uint64_t version) {
   aggregate_node *req = get_node(cur_head, version);
   numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
   void* raw = allocator::instance().alloc(sizeof(aggregate_node));
-  aggregate_node* node = new(raw) aggregate_node(agg_.comb_op(old_agg, value), version, cur_head);
+  aggregate_node *node = new(raw) aggregate_node(agg_.comb_op(old_agg, value), version, cur_head);
   atomic::store(&head_, node);
 }
 
@@ -97,7 +97,7 @@ void aggregate_list::seq_update(const numeric &value, uint64_t version) {
   aggregate_node *req = get_node(cur_head, version);
   numeric old_agg = (req == nullptr) ? agg_.zero : req->value();
   void* raw = allocator::instance().alloc(sizeof(aggregate_node));
-  aggregate_node* node = new(raw) aggregate_node(agg_.seq_op(old_agg, value), version, cur_head);
+  aggregate_node *node = new(raw) aggregate_node(agg_.seq_op(old_agg, value), version, cur_head);
   atomic::store(&head_, node);
 }
 

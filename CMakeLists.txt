@@ -30,7 +30,9 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wall -ped
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl")
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
+endif()
 
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are not allowed.")
@@ -59,6 +61,10 @@ include(Dependencies)
 # Testing
 if (BUILD_TESTS)
   include(CTest)
+endif()
+
+if (BUILD_STRESS_TESTS)
+  add_definitions(-DSTRESS_TEST)
 endif()
 
 # Utilities
