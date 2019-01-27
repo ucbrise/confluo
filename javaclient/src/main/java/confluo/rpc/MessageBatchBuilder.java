@@ -3,6 +3,12 @@ package confluo.rpc;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ *
+ *  A builder for a batch of message,which different from
+ *  @see RecordBatchBuilder ,we don't batch the record,which has same time block,into the same block
+ *
+ **/
 public class MessageBatchBuilder {
     /**
      * TIME_BLOCK: The size of a time block for a record batch

@@ -3,21 +3,19 @@ package confluo.streaming;
 import confluo.rpc.Record;
 import confluo.rpc.RpcClient;
 import confluo.rpc.Schema;
+import confluo.streaming.config.ConsumerConfig;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 import java.util.Properties;
+
 /**
  * thread safe
  *
  **/
 public class ConfluoConsumer {
     Logger logger= LoggerFactory.getLogger(ConfluoConsumer.class);
-    private Properties properties=new Properties();
     private String topic;
     private String host;
     private int port;
@@ -25,20 +23,17 @@ public class ConfluoConsumer {
     private  RpcClient client;
     private boolean prefetchEnable;
     private Schema schema;
-    public ConfluoConsumer(){
-        URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
-        try {
-            InputStream in  = propertiesUrl.openStream();
-            properties.load(in);
-            topic=properties.getProperty("mq.consume.topic");
-            host=properties.getProperty("mq.server.address");
-            port=Integer.valueOf(properties.getProperty("mq.server.port"));
-            prefetchSize=Integer.valueOf(properties.getProperty("mq.consume.prefetch.size"));
-            prefetchEnable=Boolean.valueOf(properties.getProperty("mq.consume.prefetch.enable","false"));
-            logger.info(String.format("server address: %s,port:%d,topic:%s",host,port,topic));
-        }catch (IOException e){
-            logger.info("io error",e);
-        }
+    public ConfluoConsumer(Properties properties){
+        host=properties.getProperty(ConsumerConfig.BOOTSTRAP_ADDRESS,ConsumerConfig.BOOTSTRAP_ADDRESS_DEFAULT);
+        port=Integer.valueOf(properties.getProperty(ConsumerConfig.BOOTSTRAP_PORT,ConsumerConfig.BOOTSTRAP_PORT_DEFAULT));
+        topic=properties.getProperty(ConsumerConfig.TOPIC,ConsumerConfig.TOPIC_DEFAULT);
+        prefetchSize=Integer.valueOf(properties.getProperty(ConsumerConfig.PREFETCH_SIZE,ConsumerConfig.PREFETCH_SIZE_DEFAULT));
+        prefetchEnable=prefetchSize>1?true:false;
+        logger.info(String.format("\n ------------------- " +
+                                  "\n consumer config" +
+                                  "\n server address: %s,port:%d,topic:%s,prefetch size:%d",host,port,topic,prefetchSize)+
+                                  "\n ------------------- " );
+
     }
 
     /**
@@ -53,8 +48,8 @@ public class ConfluoConsumer {
     /**
      * best effort consume
      * consume from target offset
-     * @param offset long offset
-     * @return  result count
+     * @param offset  log offset
+     * @return  record count
      **/
     public int pull(long offset,MessageListener messageListener) throws TException{
         int  batchSize;
@@ -74,7 +69,7 @@ public class ConfluoConsumer {
     }
 
     /**
-     * 消息条数
+     * the number of records for the topic
      **/
     public long maxRecord() throws TException{
         return client.numRecords();

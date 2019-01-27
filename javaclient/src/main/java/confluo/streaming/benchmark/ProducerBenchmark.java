@@ -1,32 +1,31 @@
-package confluo.streaming;
+package confluo.streaming.benchmark;
 
+import confluo.PropertiesParser;
+import confluo.streaming.ProduceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 
 public class ProducerBenchmark {
     public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger(ProducerBenchmark.class);
-        Properties properties=new Properties();
-        URL propertiesUrl=ConfluoConsumer.class.getClassLoader().getResource("mq.properties");
+        Properties properties;
         try {
-            InputStream in = propertiesUrl.openStream();
-            properties.load(in);
-        }catch (IOException e){
-            logger.info("io error",e);
+            properties = PropertiesParser.parse("mq.produce.benchmark","mq.properties");
+        }catch (IOException e) {
+            logger.info("parse properties error", e);
+            throw new IllegalStateException("init exception", e);
         }
-        int producerNum=Integer.valueOf(properties.getProperty("mq.produce.concurrency","10"));
-        int durationMs=Integer.valueOf(properties.getProperty("mq.produce.duration","60000"));
+        int producerNum=Integer.valueOf(properties.getProperty("concurrency","10"));
+        int durationMs=Integer.valueOf(properties.getProperty("duration","60000"));
+        int logSampleMs=Integer.valueOf(properties.getProperty("log.sample","30000"));
         logger.info(String.format("%d producer and duration %d ms",producerNum,durationMs));
         long startTime=System.currentTimeMillis();
          Thread[] producers=new Thread[producerNum];
          ProduceTask[] producerTasks=new ProduceTask[producerNum];
          for(int i=0;i<producerNum;i++){
-             producerTasks[i]=new ProduceTask(durationMs);
+             producerTasks[i]=new ProduceTask(durationMs,logSampleMs);
              producers[i]=new Thread(producerTasks[i],String.valueOf(i));
              producers[i].start();
          }

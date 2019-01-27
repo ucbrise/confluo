@@ -38,5 +38,5 @@ fi
   -Dactivemq_log="${LOGDIR}" \
   -Dbasedir="$BASEDIR" \
   -Dfile.encoding="UTF-8" \
-  confluo.streaming.ConsumerBenchmark \
+  confluo.streaming.benchmark.ConsumerBenchmark \
 #  "$@" >/dev/null 2>/dev/null &
