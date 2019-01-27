@@ -7,11 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- *
- *
- *
- *
- * @see RecordBatchBuilder
+ * A builder for a batch of records
  */
 public class RecordBatchBuilder {
 

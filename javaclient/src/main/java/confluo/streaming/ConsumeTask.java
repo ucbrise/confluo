@@ -35,7 +35,7 @@ public class ConsumeTask implements Runnable {
     }
 
     /**
-     *  返回消费的总消息数
+     *  @return  total consumed messages
      **/
     public long getConsumedMessage(){
         return totalRead;

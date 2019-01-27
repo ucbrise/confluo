@@ -115,12 +115,13 @@ public class RpcClient {
     curSchema = TypeConversions.convertToSchema(info.getSchema());
     curMultilogId = info.getId();
   }
+
   /**
    * get the atomic multilog id
    *
    * @param name The name of atomic multilog to set the current atomic multilog to
    * @return  multilog id
-   * @throws TException Cannot set the atomic multilog
+   * @throws TException Cannot get the atomic multilog
    */
   public long getAtomicMultilog(String name) throws TException {
     rpc_atomic_multilog_info info = client.getAtomicMultilogInfo(name);
@@ -129,7 +130,7 @@ public class RpcClient {
 
 
   /**
-   * return the current schema
+   * @return the current schema
    *
    **/
   public Schema getSchema(){
@@ -260,14 +261,6 @@ public class RpcClient {
     client.removeTrigger(curMultilogId, triggerName);
   }
 
-  /**
-   * Gets a new record batch builder
-   *
-   * @return The RPC record batch builder
-   */
-  public RecordBatchBuilder getBatchBuilder() {
-    return new RecordBatchBuilder(curSchema);
-  }
 
 
 
@@ -316,7 +309,7 @@ public class RpcClient {
    *
    * write a batch record to the atomic multilog
    * @param  batchRecord the batch record to write
-   * @return the  offset into the log
+   * @return the offset into the log where the record is written
    *
    **/
   public long appendBatch(rpc_record_batch batchRecord) throws TException{
@@ -360,8 +353,8 @@ public class RpcClient {
   }
 
   /**
-   * read batch record
-   *
+   * read batch record raw and parse into record list
+   * @@return  record list
    **/
   public List<Record> readBatch(long offset,int batchSize) throws TException {
     ByteBuffer batchBuffer=readBatchRaw(offset,batchSize);

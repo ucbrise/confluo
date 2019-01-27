@@ -26,7 +26,7 @@ public class ProduceTask implements Runnable {
     // init
     ConfluoProducer producer;
     private long durationMs;
-    private long start;
+    private long startMs;
     private long sampleMs;
     public ProduceTask(long durationMs,long produceLogSample){
         this.durationMs=durationMs;
@@ -67,10 +67,10 @@ public class ProduceTask implements Runnable {
             Schema curSchema=producer.getSchema();
             // prepare a default message, random generate
             ByteBuffer message=byteMessage(curSchema.getRecordSize());
-            start=System.currentTimeMillis();
+            startMs=System.currentTimeMillis();
             while(true){
                 producer.send(message);
-                long time= System.currentTimeMillis()-start;
+                long time= System.currentTimeMillis()-startMs;
                 // may log multiple times in the same ms
                 if(time%sampleMs==0&&(time-lastLogTimeMs)>logBreakMs){
                     lastLogTimeMs=time;
@@ -81,7 +81,7 @@ public class ProduceTask implements Runnable {
                 }
             }
             stop();
-            long time=System.currentTimeMillis()-start;
+            long time=System.currentTimeMillis()-startMs;
             long qps=producer.getTotalProducedNum() *1000/time;
             logger.info(String.format("time elapsed:%d ms,%s send end,total msg:%d,  qps:%d/s",time,Thread.currentThread().getName(),producer.getTotalProducedNum(),qps));
         } catch (Exception e) {
