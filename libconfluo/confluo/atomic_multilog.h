@@ -22,6 +22,8 @@
 #include "container/cursor/record_cursors.h"
 #include "container/cursor/alert_cursor.h"
 #include "container/monolog/monolog.h"
+#include "container/sketch/frequency_functions.h"
+#include "container/sketch/universal_sketch.h"
 #include "container/radix_tree.h"
 #include "container/string_map.h"
 #include "filter.h"
@@ -42,6 +44,7 @@
 #include "string_utils.h"
 #include "threads/periodic_task.h"
 #include "threads/task_pool.h"
+#include "univ_sketch_log.h"
 
 /**
  * \mainpage libconfluo Documentation
@@ -58,6 +61,7 @@
  */
 using namespace ::confluo::archival;
 using namespace ::confluo::monolog;
+using namespace ::confluo::sketch;
 using namespace ::confluo::index;
 using namespace ::confluo::monitor;
 using namespace ::confluo::parser;
@@ -95,6 +99,19 @@ class atomic_multilog {
    * Identifier for filter
    */
   typedef size_t filter_id_t;
+
+
+  /**
+   * Identifier for sketch
+   */
+  struct sketch_id_t {
+    /** Whether or not the sketch exists in the global namespace or for a filter */
+    bool is_global;
+    /** The filter index, if any */
+    filter_id_t filter_idx;
+    /** The sketch index */
+    size_t sketch_idx;
+  };
 
   /**
    * Identifier for aggregate
@@ -186,6 +203,30 @@ class atomic_multilog {
    * @throw ex Management exception
    */
   bool is_indexed(const std::string &field_name);
+
+  /**
+   * [Experimental API]
+   * Adds a sketch for a given field
+   * @param name The name of the sketch
+   * @param field_name The name of the field to sketch
+   */
+  void add_sketch(const std::string &name, const std::string &field_name);
+
+  /**
+   * [Experimental API]
+   * Adds a sketch for a given field for filtered records
+   * @param name The name of the sketch
+   * @param field_name The name of the field to sketch
+   * @param filter_name The name of the filter
+   */
+  void add_sketch(const std::string &name, const std::string &field_name, const std::string &filter_name);
+
+  /**
+   * [Experimental API]
+   * Removes a sketch
+   * @param name The name of the sketch
+   */
+  void remove_sketch(const std::string &name);
 
   /**
    * Adds filter to the atomic multilog
@@ -316,6 +357,32 @@ class atomic_multilog {
   std::unique_ptr<uint8_t> read_raw(uint64_t offset) const;
 
   /**
+   * [Experimental API]
+   * Estimates frequency of a key from a sketch
+   * @param name The name of the sketch
+   * @param key The string representation of the key to estimate
+   * @return estimated frequency of key
+   */
+  size_t estimate_frequency(const std::string &sketch_name, const std::string &key);
+
+  /**
+   * [Experimental API]
+   * Evaluates a valid monotonically increasing frequency-domain metric using a sketch.
+   * @param sketch_name The name of the sketch
+   * @param metric The metric to evaluate
+   * @return estimated value
+   */
+  double evaluate_metric(const std::string &sketch_name, const frequency_metric &metric);
+
+  /**
+   * [Experimental API]
+   * Gets the approximate heavy hitters associated with the sketch
+   * @param sketch_name The name of the sketch
+   * @return a map of heavy hitters to their estimated frequencies
+   */
+  std::unordered_map<std::string, size_t> get_heavy_hitters(const std::string &sketch_name);
+
+  /**
    * Executes the filter expression
    * @param expr The filter expression
    * @return The result of applying the filter to the atomic multilog
@@ -376,7 +443,7 @@ class atomic_multilog {
    * Obtain a cursor over alerts on a given trigger in a time-range
    * @param begin_ms Beginning of time-range in ms
    * @param end_ms End of time-range in ms
-   * @param trigger_name Name of the trigger.
+   * @param trigger_name Name of the trigger
    * @return Cursor over alerts in the time range
    */
   std::unique_ptr<alert_cursor> get_alerts(uint64_t begin_ms, uint64_t end_ms, const std::string &trigger_name) const;
@@ -446,6 +513,27 @@ class atomic_multilog {
    * @param ex The exception when the index could not be removed
    */
   void remove_index_task(const std::string &field_name, optional<management_exception> &ex);
+
+  /**
+   * Adds a sketch
+   *
+   * @param name The name of the sketch
+   * @param field_name The name of the field to sketch
+   * @param filter_name The name of the associated filter, if any
+   * @param ex The exception when the sketch could not be added
+   */
+  void add_sketch_task(const std::string &name,
+                       const std::string &field_name,
+                       const std::string &filter_name,
+                       optional<management_exception> &ex);
+
+  /**
+   * Removes a sketch
+   *
+   * @param name The name of the sketch
+   * @param ex The exception when the sketch could not be removed
+   */
+  void remove_sketch_task(const std::string &name, optional<management_exception> &ex);
 
   /**
    * Adds a filter to be executed on the data
@@ -547,9 +635,13 @@ class atomic_multilog {
   filter_log filters_;
   /** The list of indexes */
   index_log indexes_;
+  /** The list of universal sketches */
+  univ_sketch_log global_sketches_;
   /** The list of alerts */
   alert_index alerts_;
 
+  /** A map from id to universal_sketch */
+  string_map<sketch_id_t> univ_sketch_map_;
   /** A map from id to filter */
   string_map<filter_id_t> filter_map_;
   /** A map from id to aggregate */

@@ -1,3 +1,4 @@
+#include <utility>
 #include "storage/storage_allocator.h"
 
 namespace confluo {
@@ -11,8 +12,8 @@ storage_allocator::storage_allocator()
       mem_cleanup_callback_(no_op) {
 }
 
-void storage_allocator::register_cleanup_callback(storage_allocator::callback_fn callback) {
-  mem_cleanup_callback_ = callback;
+void storage_allocator::register_cleanup_callback(callback_fn callback) {
+  mem_cleanup_callback_ = std::move(callback);
 }
 
 void *storage_allocator::alloc(size_t size, ptr_aux_block aux) {
@@ -27,14 +28,14 @@ void *storage_allocator::alloc(size_t size, ptr_aux_block aux) {
   mem_stat_.increment(alloc_size);
 
   // allocate contiguous memory for both the ptr and metadata
-  void* ptr = malloc(alloc_size);
-  ptr_metadata* md = new (ptr) ptr_metadata;
-  void* data_ptr = reinterpret_cast<void*>(md + 1);
+  void *ptr = malloc(alloc_size);
+  auto *md = new (ptr) ptr_metadata;
+  auto *data_ptr = reinterpret_cast<void *>(md + 1);
 
   md->alloc_type_ = alloc_type::D_DEFAULT;
   md->data_size_ = static_cast<uint32_t>(size);
   md->offset_ = 0;
-  md->aux_ = *reinterpret_cast<uint8_t*>(&aux);
+  md->aux_ = *reinterpret_cast<uint8_t *>(&aux);
 
   return data_ptr;
 }
@@ -48,7 +49,7 @@ void *storage_allocator::mmap(std::string path, size_t size, ptr_aux_block aux) 
   void *ptr = utils::mmap_utils::map(fd, nullptr, 0, alloc_size);
   utils::file_utils::close_file(fd);
 
-  storage::ptr_metadata *metadata = static_cast<ptr_metadata *>(ptr);
+  auto *metadata = static_cast<ptr_metadata *>(ptr);
   metadata->alloc_type_ = alloc_type::D_MMAP;
   metadata->data_size_ = static_cast<uint32_t>(size);
   metadata->offset_ = 0;
@@ -58,19 +59,19 @@ void *storage_allocator::mmap(std::string path, size_t size, ptr_aux_block aux) 
 }
 
 void *storage_allocator::mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux) {
-  int mmap_delta = static_cast<int>(offset % getpagesize());
+  auto mmap_delta = static_cast<int>(offset % getpagesize());
   off_t page_aligned_offset = offset - mmap_delta;
   size_t mmap_size = sizeof(ptr_metadata) + size + mmap_delta;
   mmap_stat_.increment(mmap_size);
 
   int fd = utils::file_utils::open_file(path, O_RDWR);
-  uint8_t *ptr =
+  auto *ptr =
       static_cast<uint8_t *>(utils::mmap_utils::map(fd, nullptr, static_cast<size_t>(page_aligned_offset), mmap_size));
   utils::file_utils::close_file(fd);
 
   ptr += mmap_delta;
 
-  storage::ptr_metadata *metadata = reinterpret_cast<ptr_metadata *>(ptr);
+  auto *metadata = reinterpret_cast<ptr_metadata *>(ptr);
   metadata->alloc_type_ = alloc_type::D_MMAP;
   metadata->data_size_ = static_cast<uint32_t>(size);
   metadata->offset_ = static_cast<uint16_t>(mmap_delta);

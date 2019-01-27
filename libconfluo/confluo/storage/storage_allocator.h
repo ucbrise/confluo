@@ -39,7 +39,7 @@ class storage_allocator {
    * @param size size in bytes to allocate
    * @return pointer to allocated memory
    */
-  void* alloc(size_t size, ptr_aux_block aux = ptr_aux_block());
+  void *alloc(size_t size, ptr_aux_block aux = ptr_aux_block());
 
   /**
    * Allocates new memory backed by file. Creates the file, overwriting old
@@ -50,7 +50,7 @@ class storage_allocator {
    * @param aux auxiliary pointer state
    * @return pointer to memory
    */
-  void* mmap(std::string path, size_t size, ptr_aux_block aux = ptr_aux_block());
+  void *mmap(std::string path, size_t size, ptr_aux_block aux = ptr_aux_block());
 
   /**
    * Memory-maps part of an existing file.
@@ -61,7 +61,7 @@ class storage_allocator {
    * @param aux auxiliary pointer state
    * @return pointer to memory
    */
-  void* mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux = ptr_aux_block());
+  void *mmap(std::string path, off_t offset, size_t size, ptr_aux_block aux = ptr_aux_block());
 
   /**
    * Deallocate or unmap pointer returned by this allocator.

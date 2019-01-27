@@ -32,12 +32,27 @@ size_t filter::num_aggregates() const {
   return aggregates_.size();
 }
 
+size_t filter::add_sketch(universal_sketch *sketch) {
+  return sketches_.push_back(sketch);
+}
+
+bool filter::remove_sketch(size_t id) {
+  return sketches_.at(id)->invalidate();
+}
+
+size_t filter::num_sketches() const {
+  return sketches_.size();
+}
+
 void filter::update(const record_t &r) {
   if (exp_.test(r) && fn_(r)) {
+    // Insert into filter
     aggregated_reflog *refs = idx_.insert(
         byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS()),
         r.log_offset(), aggregates_);
     int tid = thread_manager::get_id();
+
+    // Update filter aggregates
     for (size_t i = 0; i < refs->num_aggregates(); i++) {
       if (aggregates_.at(i)->is_valid()) {
         size_t field_idx = aggregates_.at(i)->field_idx();
@@ -45,6 +60,11 @@ void filter::update(const record_t &r) {
         refs->seq_update_aggregate(tid, i, val, r.version());
       }
     }
+
+    // Update filter sketches
+    for (auto *sketch : sketches_)
+      if (sketch->is_valid())
+        sketch->update(r);
   }
 }
 
@@ -58,16 +78,18 @@ void filter::update(size_t log_offset, const schema_snapshot &snap, record_block
     uint64_t rec_off = log_offset + i * record_size;
     if (exp_.test(snap, cur_rec)) {
       if (refs == nullptr) {
-        refs = idx_.get_or_create(
-            byte_string(static_cast<uint64_t>(block.time_block)),
-            aggregates_);
+        refs = idx_.get_or_create(byte_string(static_cast<uint64_t>(block.time_block)), aggregates_);
         local_aggs.resize(refs->num_aggregates());
       }
       refs->push_back(rec_off);
+
       for (size_t j = 0; j < local_aggs.size(); j++)
         if (aggregates_.at(j)->is_valid())
-          local_aggs[j] = aggregates_.at(j)->seq_op(local_aggs[j], snap,
-                                                    cur_rec);
+          local_aggs[j] = aggregates_.at(j)->seq_op(local_aggs[j], snap, cur_rec);
+
+      for (auto *sketch : sketches_)
+        if (sketch->is_valid())
+          sketch->update(cur_rec, rec_off);
     }
   }
 
@@ -93,6 +115,18 @@ filter::range_result filter::lookup_range(uint64_t ts_block_begin, uint64_t ts_b
 filter::reflog_result filter::lookup_range_reflogs(uint64_t ts_block_begin, uint64_t ts_block_end) const {
   return idx_.range_lookup_reflogs(byte_string(ts_block_begin),
                                    byte_string(ts_block_end));
+}
+
+int64_t filter::estimate_frequency(size_t sketch_id, const std::string &key) {
+  return sketches_.at(sketch_id)->estimate_frequency(key);
+}
+
+double filter::evaluate(size_t sketch_id, const frequency_functions<>::fn_t &f) {
+  return sketches_.at(sketch_id)->evaluate(f);
+}
+
+universal_sketch::heavy_hitters_map_t filter::get_heavy_hitters(size_t sketch_id) {
+  return sketches_.at(sketch_id)->get_heavy_hitters();
 }
 
 bool filter::invalidate() {

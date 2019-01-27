@@ -109,6 +109,33 @@ bool atomic_multilog::is_indexed(const std::string &field_name) {
   return col.is_indexed();
 }
 
+void atomic_multilog::add_sketch(const std::string &name, const std::string &field_name) {
+  add_sketch(name, field_name, std::string());
+}
+
+void atomic_multilog::add_sketch(const std::string &name,
+                                 const std::string &field_name,
+                                 const std::string &filter_name) {
+  optional<management_exception> ex;
+  std::future<void> ret = mgmt_pool_.submit(
+      [name, field_name, filter_name, &ex, this] {
+        add_sketch_task(name, field_name, filter_name, ex);
+      });
+  ret.wait();
+  if (ex.has_value())
+    throw ex.value();
+}
+
+void atomic_multilog::remove_sketch(const std::string &name) {
+  optional<management_exception> ex;
+  std::future<void> ret = mgmt_pool_.submit([name, &ex, this] {
+    remove_sketch_task(name, ex);
+  });
+  ret.wait();
+  if (ex.has_value())
+    throw ex.value();
+}
+
 void atomic_multilog::add_filter(const std::string &name, const std::string &expr) {
   optional<management_exception> ex;
   std::future<void> ret = mgmt_pool_.submit([name, expr, &ex, this] {
@@ -223,6 +250,11 @@ size_t atomic_multilog::append(void *data) {
     if (f.is_indexed())
       indexes_.at(f.index_id())->insert(f.get_key(), offset);
 
+  // Update global namespace sketches
+  for (auto *sketch : global_sketches_)
+    if (sketch->is_valid())
+      sketch->update(r);
+
   data_log_.flush(offset, record_size);
   rt_.advance(offset, static_cast<uint32_t>(record_size));
   return offset;
@@ -231,6 +263,7 @@ size_t atomic_multilog::append(void *data) {
 size_t atomic_multilog::append(const std::vector<std::string> &record) {
   void *buf = schema_.record_vector_to_data(record);
   size_t off = append(buf);
+  // TODO replace with unique_ptr
   delete[] reinterpret_cast<uint8_t *>(buf);
   return off;
 }
@@ -272,6 +305,40 @@ std::vector<std::string> atomic_multilog::read(uint64_t offset) const {
   return read(offset, version);
 }
 
+size_t atomic_multilog::estimate_frequency(const std::string &sketch_name, const std::string &key) {
+  sketch_id_t sketch_id{};
+  if (univ_sketch_map_.get(sketch_name, sketch_id) == -1) {
+    throw management_exception("Sketch " + sketch_name + " does not exist.");
+  }
+  if (sketch_id.is_global)
+    return size_t(global_sketches_.at(sketch_id.sketch_idx)->estimate_frequency(key));
+  else
+    return size_t(filters_.at(sketch_id.filter_idx)->estimate_frequency(sketch_id.sketch_idx, key));
+}
+
+double atomic_multilog::evaluate_metric(const std::string &sketch_name, const frequency_metric &metric) {
+  sketch_id_t sketch_id{};
+  if (univ_sketch_map_.get(sketch_name, sketch_id) == -1) {
+    throw management_exception("Sketch " + sketch_name + " does not exist.");
+  }
+  auto frequency_fn = frequency_functions<>::get(metric);
+  if (sketch_id.is_global)
+    return global_sketches_.at(sketch_id.sketch_idx)->evaluate(frequency_fn);
+  else
+    return filters_.at(sketch_id.filter_idx)->evaluate(sketch_id.sketch_idx, frequency_fn);
+}
+
+std::unordered_map<std::string, size_t> atomic_multilog::get_heavy_hitters(const std::string &sketch_name) {
+  sketch_id_t sketch_id{};
+  if (univ_sketch_map_.get(sketch_name, sketch_id) == -1) {
+    throw management_exception("Sketch " + sketch_name + " does not exist.");
+  }
+  if (sketch_id.is_global)
+    return global_sketches_.at(sketch_id.sketch_idx)->get_heavy_hitters();
+  else
+    return filters_.at(sketch_id.filter_idx)->get_heavy_hitters(sketch_id.sketch_idx);
+}
+
 std::unique_ptr<record_cursor> atomic_multilog::execute_filter(const std::string &expr) const {
   uint64_t version = rt_.get();
   auto t = parser::parse_expression(expr);
@@ -296,12 +363,10 @@ std::unique_ptr<record_cursor> atomic_multilog::query_filter(const std::string &
                                                              uint64_t end_ms) const {
   filter_id_t filter_id;
   if (filter_map_.get(filter_name, filter_id) == -1) {
-    throw invalid_operation_exception(
-        "Filter " + filter_name + " does not exist.");
+    throw invalid_operation_exception("Filter " + filter_name + " does not exist.");
   }
 
-  filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms,
-                                                                  end_ms);
+  filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
   uint64_t version = rt_.get();
   std::unique_ptr<offset_cursor> o_cursor(
       new offset_iterator_cursor<filter::range_result::iterator>(res.begin(),
@@ -320,8 +385,7 @@ std::unique_ptr<record_cursor> atomic_multilog::query_filter(const std::string &
   auto e = parser::compile_expression(t, schema_);
   filter_id_t filter_id;
   if (filter_map_.get(filter_name, filter_id) == -1) {
-    throw invalid_operation_exception(
-        "Filter " + filter_name + " does not exist.");
+    throw invalid_operation_exception("Filter " + filter_name + " does not exist.");
   }
 
   filter::range_result res = filters_.at(filter_id)->lookup_range(begin_ms, end_ms);
@@ -332,7 +396,7 @@ std::unique_ptr<record_cursor> atomic_multilog::query_filter(const std::string &
 }
 
 numeric atomic_multilog::get_aggregate(const std::string &aggregate_name, uint64_t begin_ms, uint64_t end_ms) {
-  aggregate_id_t aggregate_id;
+  aggregate_id_t aggregate_id{};
   if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
     throw invalid_operation_exception("Aggregate " + aggregate_name + " does not exist.");
   }
@@ -431,9 +495,19 @@ void atomic_multilog::load_metadata(const std::string &path, storage_mode &s_mod
 
 void atomic_multilog::update_aux_record_block(uint64_t log_offset, record_block &block, size_t record_size) {
   schema_snapshot snap = schema_.snapshot();
-  for (size_t i = 0; i < filters_.size(); i++) {
-    if (filters_.at(i)->is_valid()) {
-      filters_.at(i)->update(log_offset, snap, block, record_size);
+  for (auto filter : filters_) {
+    if (filter->is_valid()) {
+      filter->update(log_offset, snap, block, record_size);
+    }
+  }
+
+  for (auto sketch : global_sketches_) {
+    if (sketch->is_valid()) {
+      for (size_t i = 0; i < block.nrecords; i++) {
+        void *cur_rec = reinterpret_cast<uint8_t *>(&block.data[i * record_size]);
+        uint64_t rec_off = log_offset + i * record_size;
+        sketch->update(cur_rec, rec_off);
+      }
     }
   }
 
@@ -504,6 +578,58 @@ void atomic_multilog::remove_index_task(const std::string &field_name, optional<
   }
 }
 
+void atomic_multilog::add_sketch_task(const std::string &name,
+                                      const std::string &field_name,
+                                      const std::string &filter_name,
+                                      optional<management_exception> &ex) {
+  sketch_id_t sketch_id{};
+  if (univ_sketch_map_.get(name, sketch_id) != -1) {
+    ex = management_exception("Sketch " + name + " already exists.");
+    return;
+  }
+  size_t idx = schema_.get_field_index(field_name);
+  if (filter_name.empty()) {
+    sketch_id.is_global = true;
+    sketch_id.sketch_idx = global_sketches_.push_back(new universal_sketch(0.01, 0.01, 10, &data_log_, schema_[idx]));
+  }
+  else {
+    filter_id_t filter_id;
+    if (filter_map_.get(filter_name, filter_id) == -1) {
+      ex = management_exception("Filter " + filter_name + " does not exist.");
+      return;
+    }
+    sketch_id.is_global = false;
+    sketch_id.filter_idx = filter_id;
+    auto *sketch = new universal_sketch(0.01, 0.01, 10, &data_log_, schema_[idx]);
+    sketch_id.sketch_idx = filters_.at(filter_id)->add_sketch(sketch);
+  }
+  // TODO write metadata
+  if (univ_sketch_map_.put(field_name, sketch_id) == -1) {
+    ex = management_exception("Could not add sketch for field " + field_name + " to sketch map.");
+    return;
+  }
+}
+
+void atomic_multilog::remove_sketch_task(const std::string &name, optional<management_exception> &ex) {
+  sketch_id_t sketch_id{};
+  if (univ_sketch_map_.get(name, sketch_id) == -1) {
+    ex = management_exception("Sketch " + name + " does not exist.");
+    return;
+  }
+  bool success;
+  if (sketch_id.is_global) {
+    success = global_sketches_.at(sketch_id.sketch_idx)->invalidate();
+  }
+  else {
+    success = filters_.at(sketch_id.filter_idx)->remove_sketch(sketch_id.sketch_idx);
+  }
+  if (!success) {
+    ex = management_exception("Sketch " + name + " already invalidated.");
+    return;
+  }
+  univ_sketch_map_.remove(name, sketch_id);
+}
+
 void atomic_multilog::add_filter_task(const std::string &name,
                                       const std::string &expr,
                                       optional<management_exception> &ex) {
@@ -540,7 +666,7 @@ void atomic_multilog::add_aggregate_task(const std::string &name,
                                          const std::string &filter_name,
                                          const std::string &expr,
                                          optional<management_exception> &ex) {
-  aggregate_id_t aggregate_id;
+  aggregate_id_t aggregate_id{};
   if (aggregate_map_.get(name, aggregate_id) != -1) {
     ex = management_exception("Aggregate " + name + " already exists.");
     return;
@@ -553,7 +679,7 @@ void atomic_multilog::add_aggregate_task(const std::string &name,
   aggregate_id.filter_idx = filter_id;
   auto pa = parser::parse_aggregate(expr);
   const column_t &col = schema_[pa.field_name];
-  aggregate_info *a = new aggregate_info(name, aggregate_manager::get_aggregator(pa.agg), col.idx());
+  auto *a = new aggregate_info(name, aggregate_manager::get_aggregator(pa.agg), col.idx());
   aggregate_id.aggregate_idx = filters_.at(filter_id)->add_aggregate(a);
   if (aggregate_map_.put(name, aggregate_id) == -1) {
     ex = management_exception("Could not add trigger " + filter_name + " to trigger map.");
@@ -563,7 +689,7 @@ void atomic_multilog::add_aggregate_task(const std::string &name,
 }
 
 void atomic_multilog::remove_aggregate_task(const std::string &name, optional<management_exception> &ex) {
-  aggregate_id_t aggregate_id;
+  aggregate_id_t aggregate_id{};
   if (aggregate_map_.get(name, aggregate_id) == -1) {
     ex = management_exception("Aggregate " + name + " does not exist.");
     return;
@@ -580,14 +706,14 @@ void atomic_multilog::add_trigger_task(const std::string &name,
                                        const std::string &expr,
                                        uint64_t periodicity_ms,
                                        optional<management_exception> &ex) {
-  trigger_id_t trigger_id;
+  trigger_id_t trigger_id{};
   if (trigger_map_.get(name, trigger_id) != -1) {
     ex = management_exception("Trigger " + name + " already exists.");
     return;
   }
   auto pt = parser::parse_trigger(expr);
   std::string aggregate_name = pt.aggregate_name;
-  aggregate_id_t aggregate_id;
+  aggregate_id_t aggregate_id{};
   if (aggregate_map_.get(aggregate_name, aggregate_id) == -1) {
     ex = management_exception(
         "Aggregate " + aggregate_name + " does not exist.");
@@ -606,7 +732,7 @@ void atomic_multilog::add_trigger_task(const std::string &name,
 }
 
 void atomic_multilog::remove_trigger_task(const std::string &name, optional<management_exception> &ex) {
-  trigger_id_t trigger_id;
+  trigger_id_t trigger_id{};
   if (trigger_map_.get(name, trigger_id) == -1) {
     ex = management_exception("Trigger " + name + " does not exist.");
     return;
@@ -673,5 +799,6 @@ void atomic_multilog::check_time_bucket(filter *f, trigger *t, size_t tid, uint6
     }
   }
 }
+
 
 }

@@ -21,10 +21,9 @@ class universal_sketch {
  public:
   typedef size_t key_t;
   typedef int64_t counter_t;
-  typedef frequency_functions<counter_t> fns;
   typedef count_sketch<key_t, counter_t> sketch_t;
   typedef std::vector<atomic::type<size_t>> heavy_hitters_t;
-  typedef std::unordered_map<std::string, counter_t> heavy_hitters_map_t;
+  typedef std::unordered_map<std::string, size_t> heavy_hitters_map_t;
 
   // TODO replace constructors with config-based constructor
 
@@ -62,10 +61,17 @@ class universal_sketch {
 
   /**
    * Updates universal sketch with a record using the relevant field(s)
-   * @param r record
+   * @param record record
    * @param incr increment
    */
-  void update(const record_t &r, size_t incr = 1);
+  void update(const record_t &record, size_t incr = 1);
+
+  /**
+   * Updates universal sketch with a record using the relevant field(s)
+   * @param record record
+   * @param incr increment
+   */
+  void update(void *record, size_t offset, size_t incr = 1);
 
   /**
    * Estimates the frequency of the key
@@ -83,11 +89,11 @@ class universal_sketch {
   /**
    * Evaluates a function over the universal sketch using all layers
    * @tparam ret_t return type
-   * @param f function
+   * @param f function to evaluate
    * @return estimate of summary function
    */
-  template<typename ret_t = counter_t>
-  ret_t evaluate(fns::fn<ret_t> f) {
+  template <typename ret_t = counter_t>
+  ret_t evaluate(const fn<counter_t, ret_t> &f) {
     return evaluate(f, num_layers_);
   }
 
@@ -98,8 +104,8 @@ class universal_sketch {
    * @param num_layers number of layers to use to compute G_SUM
    * @return estimate of summary function
    */
-  template<typename ret_t = counter_t>
-  ret_t evaluate(fns::fn<ret_t> f, size_t num_layers) {
+  template <typename ret_t = counter_t>
+  ret_t evaluate(const fn<counter_t, ret_t> &f, size_t num_layers) {
     ret_t recursive_sum = 0;
     size_t substream_i = num_layers - 1;
 
@@ -141,10 +147,17 @@ class universal_sketch {
 private:
   /**
    * Converts record's relevant field value to an indexable key
-   * @param r record
+   * @param record record
    * @return field value as an indexable key
    */
-  inline key_t get_key_hash(const record_t &r);
+  inline key_t get_key_hash(const record_t &record);
+
+  /**
+   * Converts record's relevant field value to an indexable key
+   * @param record pointer to raw record data
+   * @return field value as an indexable key
+   */
+  inline key_t get_key_hash(void *record);
 
   /**
    * Converts record's relevant field value to an indexable key
