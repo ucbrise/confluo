@@ -6,14 +6,14 @@ public class TestPubSub {
 
 
     @Test
-    public void publish(){
-        ProduceTask produceTask=new ProduceTask(60000,20000);
+    public void produce(){
+        ProduceTask produceTask=new ProduceTask(10000,5000);
         produceTask.run();
     }
 
     @Test
     public void consume(){
-        ConsumeTask consumeTask=new ConsumeTask(60000,10000,0);
+        ConsumeTask consumeTask=new ConsumeTask(10000,10000,0);
         consumeTask.run();
     }
 }
