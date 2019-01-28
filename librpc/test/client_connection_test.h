@@ -27,8 +27,7 @@ TEST_F(ClientConnectionTest, ConcurrentConnectionsTest) {
   });
 
   rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
-  size_t num_clients = std::min((size_t)std::thread::hardware_concurrency(), (size_t)4);
-  std::vector<rpc_client> clients(num_clients);
+  std::vector<rpc_client> clients(4);
   for (auto &client : clients) {
     client.connect(SERVER_ADDRESS, SERVER_PORT);
   }

@@ -23,6 +23,14 @@ class FilterLoadTest : public testing::Test {
   static const uint64_t kMillisecs = static_cast<const uint64_t>(1e6);
   static const uint64_t record_size = 16;
 
+  void SetUp() override {
+    thread_manager::register_thread();
+  }
+
+  void TearDown() override {
+    thread_manager::deregister_thread();
+  }
+
   struct data_point {
     int64_t ts;
     int64_t val;

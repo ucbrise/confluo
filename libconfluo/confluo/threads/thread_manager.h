@@ -12,12 +12,14 @@
 
 namespace confluo {
 
+typedef pthread_t thread_id_t;
+
 /**
  * Information about the thread
  */
 struct thread_info {
   /** The identifier of the thread */
-  std::thread::id tid;
+  thread_id_t tid;
   /** Whether the thread is valid */
   atomic::type<bool> valid;
 };
@@ -32,19 +34,19 @@ class thread_manager {
    * Registers a thread to the manager
    * @return The id of the thread
    */
-  static int register_thread();
+  static int register_thread(thread_id_t thread_id = pthread_self());
 
   /**
    * Deregisters the thread
    * @return The id of the deregistered thread
    */
-  static int deregister_thread();
+  static int deregister_thread(thread_id_t thread_id = pthread_self());
 
   /**
    * Finds the thread
    * @return The id of the found thread
    */
-  static int get_id();
+  static int get_id(thread_id_t thread_id = pthread_self());
 
   /**
    * Gets the maximum number of threads
@@ -65,14 +67,14 @@ class thread_manager {
    *
    * @return The identifier for the thread
    */
-  static int find();
+  static int find(thread_id_t thread_id);
 
   /**
    * Sets the thread identifier
    *
    * @return Integer representing the index of the thread 
    */
-  static int set();
+  static int set(thread_id_t thread_id );
 
   /**
    * Sets the thread to be invalid

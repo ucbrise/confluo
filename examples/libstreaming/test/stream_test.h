@@ -132,16 +132,12 @@ class StreamTest : public testing::Test {
     return builder.get_batch();
   }
 
+  std::shared_ptr<TServer> create_server(confluo_store *store) {
+    return rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  }
+
  protected:
   uint8_t data_[DATA_SIZE];
-
-  virtual void SetUp() override {
-    thread_manager::register_thread();
-  }
-
-  virtual void TearDown() override {
-    thread_manager::deregister_thread();
-  }
 };
 
 StreamTest::rec StreamTest::r;
@@ -162,7 +158,7 @@ TEST_F(StreamTest, WriteTest) {
   dtable->add_index("g", 0.01);
   dtable->add_index("h");
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -202,7 +198,7 @@ TEST_F(StreamTest, BufferTest) {
   auto store = simple_table_store(multilog_name, storage::IN_MEMORY);
   auto dtable = store->get_atomic_multilog(multilog_name);
   auto schema_size = dtable->get_schema().record_size();
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -250,7 +246,7 @@ TEST_F(StreamTest, ReadTest) {
   dtable->add_index("g", 0.01);
   dtable->add_index("h");
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -298,7 +294,7 @@ TEST_F(StreamTest, ReadWriteTest) {
   dtable->add_index("g", 0.01);
   dtable->add_index("h");
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });

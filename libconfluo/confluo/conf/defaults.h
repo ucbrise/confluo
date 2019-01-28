@@ -45,7 +45,9 @@ class defaults {
  public:
   /** The thread hardware concurrency */
   static inline int HARDWARE_CONCURRENCY() {
-    return std::thread::hardware_concurrency();
+    auto hw_concurrency = std::thread::hardware_concurrency();
+    // TODO: Print warning if hardware concurrency is 1
+    return hw_concurrency > 0 ? hw_concurrency : 1;
   }
 
   /** Default bucket size for index */

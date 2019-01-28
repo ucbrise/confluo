@@ -102,6 +102,11 @@ class ClientWriteOpsTest : public testing::Test {
     return builder.get_columns();
   }
 
+  std::shared_ptr<TServer> create_server(confluo_store *store) {
+    auto num_workers = configuration_params::MAX_CONCURRENCY() - 1;
+    return rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT, num_workers);
+  }
+
  protected:
   uint8_t data_[DATA_SIZE];
 
@@ -122,7 +127,7 @@ TEST_F(ClientWriteOpsTest, CreateTableTest) {
   std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -149,7 +154,7 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
 
   auto store = simple_multilog_store(atomic_multilog_name, storage::storage_mode::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -180,7 +185,7 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
   store->create_atomic_multilog(atomic_multilog_name, schema(),
                                 storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -300,13 +305,17 @@ TEST_F(ClientWriteOpsTest, AddIndexTest) {
 }
 
 TEST_F(ClientWriteOpsTest, AddFilterAndTriggerTest) {
+  if (configuration_params::MAX_CONCURRENCY() < 2) {
+    LOG_WARN << "Need at least 2 cores to run this test, skipping...";
+    return; // TODO: Replace this with GTEST_SKIP when v1.8.2 is released
+  }
 
   std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(atomic_multilog_name, schema(), storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -537,7 +546,7 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
                                 storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -580,13 +589,17 @@ TEST_F(ClientWriteOpsTest, RemoveIndexTest) {
 }
 
 TEST_F(ClientWriteOpsTest, RemoveFilterTriggerTest) {
+  if (configuration_params::MAX_CONCURRENCY() < 2) {
+    LOG_WARN << "Need at least 2 cores to run this test, skipping...";
+    return; // TODO: Replace this with GTEST_SKIP when v1.8.2 is released
+  }
   std::string atomic_multilog_name = "my_multilog";
 
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(atomic_multilog_name, schema(),
                                 storage::IN_MEMORY);
   auto mlog = store->get_atomic_multilog(atomic_multilog_name);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
