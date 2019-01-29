@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 #include <utility>
 
 #include "rpc_thread_factory.h"
@@ -26,18 +45,24 @@ class rpc_thread : public Thread {
   pthread_t pthread_;
   Monitor monitor_;        // guard to protect state_ and also notification
   STATE state_;         // to protect proper thread start behavior
+  int policy_;
   int priority_;
   int stackSize_;
-  stdcxx::weak_ptr<rpc_thread> self_;
+  std::weak_ptr<rpc_thread> self_;
   bool detached_;
 
  public:
-  rpc_thread(int priority,
+  rpc_thread(int policy,
+             int priority,
              int stackSize,
              bool detached,
-             stdcxx::shared_ptr<Runnable> runnable)
-      : pthread_(nullptr),
+             std::shared_ptr<Runnable> runnable)
+      :
+#ifndef _WIN32
+        pthread_(0),
+#endif // _WIN32
         state_(uninitialized),
+        policy_(policy),
         priority_(priority),
         stackSize_(stackSize),
         detached_(detached) {
@@ -93,6 +118,13 @@ class rpc_thread : public Thread {
       throw SystemResourceException("pthread_attr_setstacksize failed");
     }
 
+// Set thread policy
+#ifdef _WIN32
+    // WIN32 Pthread implementation doesn't seem to support sheduling policies other then
+    // PosixThreadFactory::OTHER - runtime error
+    policy_ = PosixThreadFactory::OTHER;
+#endif
+
 #if _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     if (pthread_attr_setschedpolicy(&thread_attr, policy_) != 0) {
       throw SystemResourceException("pthread_attr_setschedpolicy failed");
@@ -108,7 +140,7 @@ class rpc_thread : public Thread {
     }
 
     // Create reference
-    auto *selfRef = new stdcxx::shared_ptr<rpc_thread>();
+    auto *selfRef = new std::shared_ptr<rpc_thread>();
     *selfRef = self_.lock();
 
     setState(starting);
@@ -162,19 +194,19 @@ class rpc_thread : public Thread {
     return (Thread::id_t) pthread_;
   }
 
-  stdcxx::shared_ptr<Runnable> runnable() const override { return Thread::runnable(); }
+  std::shared_ptr<Runnable> runnable() const override { return Thread::runnable(); }
 
-  void runnable(stdcxx::shared_ptr<Runnable> value) override { Thread::runnable(value); }
+  void runnable(std::shared_ptr<Runnable> value) override { Thread::runnable(value); }
 
-  void weakRef(stdcxx::shared_ptr<rpc_thread> self) {
+  void weakRef(std::shared_ptr<rpc_thread> self) {
     assert(self.get() == this);
-    self_ = stdcxx::weak_ptr<rpc_thread>(self);
+    self_ = std::weak_ptr<rpc_thread>(self);
   }
 };
 
 void *rpc_thread::threadMain(void *arg) {
-  stdcxx::shared_ptr<rpc_thread> thread = *(stdcxx::shared_ptr<rpc_thread> *) arg;
-  delete reinterpret_cast<stdcxx::shared_ptr<rpc_thread> *>(arg);
+  std::shared_ptr<rpc_thread> thread = *(std::shared_ptr<rpc_thread> *) arg;
+  delete reinterpret_cast<std::shared_ptr<rpc_thread> *>(arg);
 
   thread->setState(started);
   thread->runnable()->run();
@@ -244,9 +276,9 @@ rpc_thread_factory::rpc_thread_factory(bool detached)
       stackSize_(1) {
 }
 
-stdcxx::shared_ptr<Thread> rpc_thread_factory::newThread(stdcxx::shared_ptr<Runnable> runnable) const {
-  stdcxx::shared_ptr<rpc_thread> result
-      = stdcxx::shared_ptr<rpc_thread>(new rpc_thread(
+std::shared_ptr<Thread> rpc_thread_factory::newThread(std::shared_ptr<Runnable> runnable) const {
+  std::shared_ptr<rpc_thread> result
+      = std::shared_ptr<rpc_thread>(new rpc_thread(toPthreadPolicy(policy_),
           toPthreadPriority(policy_, priority_),
           stackSize_,
           isDetached(),

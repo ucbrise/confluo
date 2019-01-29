@@ -6,7 +6,7 @@ int thread_manager::register_thread(thread_id_t thread_id) {
   // De-register if already registered
   deregister_thread(thread_id);
   int core_id = set(thread_id);
-  utils::thread_utils::set_self_core_affinity(core_id);
+  utils::thread_utils::set_core_affinity(thread_id, core_id);
   return core_id;
 }
 
