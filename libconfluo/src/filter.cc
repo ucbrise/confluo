@@ -38,6 +38,9 @@ void filter::update(const record_t &r) {
         byte_string(r.timestamp() / configuration_params::TIME_RESOLUTION_NS()),
         r.log_offset(), aggregates_);
     int tid = thread_manager::get_id();
+    if (tid < 0) {
+      throw std::runtime_error("Thread is not registered");
+    }
     for (size_t i = 0; i < refs->num_aggregates(); i++) {
       if (aggregates_.at(i)->is_valid()) {
         size_t field_idx = aggregates_.at(i)->field_idx();
@@ -50,6 +53,9 @@ void filter::update(const record_t &r) {
 
 void filter::update(size_t log_offset, const schema_snapshot &snap, record_block &block, size_t record_size) {
   int tid = thread_manager::get_id();
+  if (tid < 0) {
+    throw std::runtime_error("Thread is not registered");
+  }
   aggregated_reflog *refs = nullptr;
   std::vector<numeric> local_aggs;
 

@@ -25,8 +25,10 @@ add_executable(confluod
         rpc/rpc_service.h
         rpc/rpc_record_batch_builder.h
         rpc/rpc_defaults.h
+        rpc/rpc_thread_factory.h
         rpc/rpc_types.h
         rpc/rpc_service.tcc
+        rpc/rpc_handler_registry.h
         src/rpc_constants.cc
         src/rpc_service.cc
         src/rpc_server.cc
@@ -36,13 +38,19 @@ add_executable(confluod
         src/rpc_record_batch_builder.cc
         src/rpc_record_stream.cc
         src/rpc_type_conversions.cc
-        src/confluo_server.cc)
+        src/confluo_server.cc
+        src/rpc_thread_factory.cc
+        src/rpc_handler_registry.cc)
 target_link_libraries(confluod confluo thriftstatic)
 add_dependencies(confluod thrift)
 
 add_library(rpcclient STATIC
         rpc/rpc_constants.h
         src/rpc_constants.cc
+        rpc/rpc_thread_factory.h
+        src/rpc_thread_factory.cc
+        rpc/rpc_handler_registry.h
+        src/rpc_handler_registry.cc
         rpc/rpc_server.h
         src/rpc_server.cc
         rpc/rpc_service.h
@@ -68,19 +76,6 @@ add_dependencies(rpcclient thrift)
 if (BUILD_TESTS)
   # Build test
   add_executable(rpctest
-          rpc/rpc_type_conversions.h
-          rpc/rpc_client.h
-          rpc/rpc_configuration_params.h
-          rpc/rpc_alert_stream.h
-          rpc/rpc_record_stream.h
-          rpc/rpc_server.h
-          rpc/rpc_constants.h
-          rpc/rpc_types.tcc
-          rpc/rpc_service.h
-          rpc/rpc_record_batch_builder.h
-          rpc/rpc_defaults.h
-          rpc/rpc_types.h
-          rpc/rpc_service.tcc
           test/client_read_ops_test.h
           test/test_main.cc
           test/client_connection_test.h

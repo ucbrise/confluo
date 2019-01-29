@@ -140,6 +140,11 @@ class ClientReadOpsTest : public testing::Test {
     return builder.get_batch();
   }
 
+  std::shared_ptr<TServer> create_server(confluo_store *store) {
+    auto num_workers = configuration_params::MAX_CONCURRENCY() - 1;
+    return rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT, num_workers);
+  }
+
  protected:
   uint8_t data_[DATA_SIZE];
 
@@ -158,7 +163,7 @@ std::vector<column_t> ClientReadOpsTest::s = schema();
 TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
   std::string multilog_name = "my_multilog";
   auto store = simple_table_store(multilog_name, storage::IN_MEMORY);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -181,7 +186,7 @@ TEST_F(ClientReadOpsTest, ReadInMemoryTest) {
 TEST_F(ClientReadOpsTest, ReadDurableTest) {
   std::string multilog_name = "my_multilog";
   auto store = simple_table_store(multilog_name, storage::DURABLE);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -204,7 +209,7 @@ TEST_F(ClientReadOpsTest, ReadDurableTest) {
 TEST_F(ClientReadOpsTest, ReadDurableRelaxedTest) {
   std::string multilog_name = "my_multilog";
   auto store = simple_table_store(multilog_name, storage::DURABLE_RELAXED);
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -248,7 +253,7 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
   mlog->append(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   mlog->append(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -355,6 +360,10 @@ TEST_F(ClientReadOpsTest, AdHocFilterTest) {
 }
 
 TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
+  if (configuration_params::MAX_CONCURRENCY() < 2) {
+    LOG_WARN << "Need at least 2 cores to run this test, skipping...";
+    return; // TODO: Replace this with GTEST_SKIP when v1.8.2 is released
+  }
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
   store->create_atomic_multilog(multilog_name, schema(), storage::IN_MEMORY);
@@ -397,7 +406,7 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
   mlog->append(record(now_ns, false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
   mlog->append(record(now_ns, true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -499,7 +508,6 @@ TEST_F(ClientReadOpsTest, FilterAggregateTriggerTest) {
 
   // Test aggregates
   std::string val1 = client.get_aggregate("agg1", beg, end);
-  fprintf(stderr, "Aggregate: %s\n", val1.c_str());
   ASSERT_TRUE("double(32.000000)" == val1);
   std::string val2 = client.get_aggregate("agg2", beg, end);
   ASSERT_TRUE("double(36.000000)" == val2);
@@ -577,7 +585,7 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
   record_batch batch = build_batch(*mlog);
   mlog->append_batch(batch);
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });
@@ -684,6 +692,10 @@ TEST_F(ClientReadOpsTest, BatchAdHocFilterTest) {
 }
 
 TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
+  if (configuration_params::MAX_CONCURRENCY() < 2) {
+    LOG_WARN << "Need at least 2 cores to run this test, skipping...";
+    return; // TODO: Replace this with GTEST_SKIP when v1.8.2 is released
+  }
 
   std::string multilog_name = "my_multilog";
   auto store = new confluo_store("/tmp");
@@ -721,7 +733,7 @@ TEST_F(ClientReadOpsTest, BatchFilterAggregateTriggerTest) {
   record_batch batch = build_batch(*mlog, now_ns);
   mlog->append_batch(batch);
 
-  auto server = rpc_server::create(store, SERVER_ADDRESS, SERVER_PORT);
+  auto server = create_server(store);
   std::thread serve_thread([&server] {
     server->serve();
   });

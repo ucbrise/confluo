@@ -2,23 +2,23 @@
 
 namespace confluo {
 
-int thread_manager::register_thread() {
+int thread_manager::register_thread(thread_id_t thread_id) {
   // De-register if already registered
-  deregister_thread();
-  int core_id = set();
-  utils::thread_utils::set_self_core_affinity(core_id);
+  deregister_thread(thread_id);
+  int core_id = set(thread_id);
+  utils::thread_utils::set_core_affinity(thread_id, core_id);
   return core_id;
 }
 
-int thread_manager::deregister_thread() {
+int thread_manager::deregister_thread(thread_id_t thread_id) {
   int core_id;
-  if ((core_id = find()) != -1)
+  if ((core_id = find(thread_id)) != -1)
     unset(core_id);
   return core_id;
 }
 
-int thread_manager::get_id() {
-  return find();
+int thread_manager::get_id(thread_id_t thread_id) {
+  return find(thread_id);
 }
 
 int thread_manager::get_max_concurrency() {
@@ -26,16 +26,15 @@ int thread_manager::get_max_concurrency() {
 }
 
 thread_info *thread_manager::init_thread_info() {
-  thread_info *tinfo = new thread_info[MAX_CONCURRENCY()];
+  auto *tinfo = new thread_info[MAX_CONCURRENCY()];
   for (int i = 0; i < thread_manager::MAX_CONCURRENCY(); i++)
     atomic::init(&tinfo[i].valid, false);
   return tinfo;
 }
 
-int thread_manager::find() {
-  auto tid = std::this_thread::get_id();
+int thread_manager::find(thread_id_t thread_id ) {
   for (int i = 0; i < thread_manager::MAX_CONCURRENCY(); i++) {
-    if (atomic::load(&THREAD_INFO()[i].valid) && THREAD_INFO()[i].tid == tid) {
+    if (atomic::load(&THREAD_INFO()[i].valid) && THREAD_INFO()[i].tid == thread_id) {
       return i;
     }
   }
@@ -43,12 +42,11 @@ int thread_manager::find() {
   return -1;
 }
 
-int thread_manager::set() {
-  auto tid = std::this_thread::get_id();
+int thread_manager::set(thread_id_t thread_id) {
   bool expected = false;
   for (int i = 0; i < thread_manager::MAX_CONCURRENCY(); i++) {
     if (atomic::strong::cas(&THREAD_INFO()[i].valid, &expected, true)) {
-      THREAD_INFO()[i].tid = tid;
+      THREAD_INFO()[i].tid = thread_id;
       return i;
     }
     expected = false;

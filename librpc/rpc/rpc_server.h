@@ -4,6 +4,7 @@
 #include "rpc_service.h"
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
+#include <thrift/server/TThreadPoolServer.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
@@ -74,19 +75,19 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param store The confluo store used to initialize the service
    * handler
    */
-  rpc_service_handler(confluo_store *store);
+  explicit rpc_service_handler(confluo_store *store);
 
   /**
    * Registers this service handler on a new thread
    * @throw management_expcetion If this service handler could not
    * be registered
    */
-  void register_handler();
+  void register_handler() override;
 
   /**
    * Deregisters this service handler and its associated thread
    */
-  void deregister_handler();
+  void deregister_handler() override;
 
   /**
    * Creates an atomic multilog from the given name, schema, and storage
@@ -100,7 +101,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @return ID associated with the atomic multilog, -1 if it could
    * not be created
    */
-  int64_t create_atomic_multilog(const std::string &name, const rpc_schema &schema, const rpc_storage_mode mode);
+  int64_t create_atomic_multilog(const std::string &name, const rpc_schema &schema, rpc_storage_mode mode) override;
 
   /**
    * Gets information about the atomic multilog
@@ -108,7 +109,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param _return The info about the atomic multilog that is filled up
    * @param name The name of the atomic multilog
    */
-  void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name);
+  void get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name) override;
 
   /**
    * Removes the atomic multilog with the matching ID
@@ -117,7 +118,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @throw management_excpetion If the atomic multilog could not be
    * removed
    */
-  void remove_atomic_multilog(int64_t id);
+  void remove_atomic_multilog(int64_t id) override;
 
   /**
    * Adds an index to a field in the atomic multilog
@@ -127,7 +128,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param bucket_size The size of the bucket
    * @throw managmeent_exception If the index could not be added
    */
-  void add_index(int64_t id, const std::string &field_name, const double bucket_size);
+  void add_index(int64_t id, const std::string &field_name, double bucket_size) override;
 
   /**
    * Removes an index from a field in the atomic multilog
@@ -136,7 +137,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param field_name The name of the field in the atomic multilog
    * @throw management_exception If the index could not be removed
    */
-  void remove_index(int64_t id, const std::string &field_name);
+  void remove_index(int64_t id, const std::string &field_name) override;
 
   /**
    * Adds a filter to the atomic multilog
@@ -149,7 +150,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * expression
    */
   void add_filter(int64_t id, const std::string &filter_name,
-                  const std::string &filter_expr);
+                  const std::string &filter_expr) override;
 
   /**
    * Removes a filter from the atomic multilog
@@ -158,7 +159,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param filter_name The name of the filter
    * @throw managment_exception If the filter could not be removed
    */
-  void remove_filter(int64_t id, const std::string &filter_name);
+  void remove_filter(int64_t id, const std::string &filter_name) override;
 
   /**
    * Adds an aggregate to the atomic multilog
@@ -173,7 +174,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void add_aggregate(int64_t id,
                      const std::string &aggregate_name,
                      const std::string &filter_name,
-                     const std::string &aggregate_expr);
+                     const std::string &aggregate_expr) override;
 
   /**
    * Removes an aggregate from the atomic multilog
@@ -182,7 +183,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param aggregate_name The name of the aggregate
    * @throw management_exception If the aggregate could not be removed
    */
-  void remove_aggregate(int64_t id, const std::string &aggregate_name);
+  void remove_aggregate(int64_t id, const std::string &aggregate_name) override;
 
   /**
    * Adds a trigger to the atomic multilog
@@ -194,7 +195,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @throw parse_exception If the trigger expression could not be
    * parsed
    */
-  void add_trigger(int64_t id, const std::string &trigger_name, const std::string &trigger_expr);
+  void add_trigger(int64_t id, const std::string &trigger_name, const std::string &trigger_expr) override;
 
   /**
    * Removes a trigger from the atomic multilog
@@ -203,7 +204,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param trigger_name The name of the trigger
    * @throw management_exception If the trigger could not be removed
    */
-  void remove_trigger(int64_t id, const std::string &trigger_name);
+  void remove_trigger(int64_t id, const std::string &trigger_name) override;
 
   /**
    * Appends string data to the atomic multilog
@@ -213,7 +214,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    *
    * @return The offset to where the data is
    */
-  int64_t append(int64_t id, const std::string &data);
+  int64_t append(int64_t id, const std::string &data) override;
 
   /**
    * Appends a record batch to the atomic multilog
@@ -223,7 +224,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    *
    * @return The offset where the batch is located
    */
-  int64_t append_batch(int64_t id, const rpc_record_batch &batch);
+  int64_t append_batch(int64_t id, const rpc_record_batch &batch) override;
 
   /**
    * Reads n record strings from the atomic multilog
@@ -233,7 +234,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param offset The offset to read from
    * @param nrecords The number of records to read
    */
-  void read(std::string &_return, int64_t id, const int64_t offset, const int64_t nrecords);
+  void read(std::string &_return, int64_t id, int64_t offset, int64_t nrecords) override;
 
   /**
    * Queries an aggregate from the atomic multilog
@@ -248,7 +249,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
                        int64_t id,
                        const std::string &aggregate_name,
                        int64_t begin_ms,
-                       int64_t end_ms);
+                       int64_t end_ms) override;
 
   // TODO: Add tests
   /**
@@ -262,7 +263,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void adhoc_aggregate(std::string &_return,
                        int64_t id,
                        const std::string &aggregate_expr,
-                       const std::string &filter_expr);
+                       const std::string &filter_expr) override;
 
   /**
    * Executes an ad hoc filter
@@ -271,7 +272,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param id The identifier of the atomic multilog
    * @param filter_expr The filter expression
    */
-  void adhoc_filter(rpc_iterator_handle &_return, int64_t id, const std::string &filter_expr);
+  void adhoc_filter(rpc_iterator_handle &_return, int64_t id, const std::string &filter_expr) override;
 
   /**
    * Queries a predefined filter
@@ -286,8 +287,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void predef_filter(rpc_iterator_handle &_return,
                      int64_t id,
                      const std::string &filter_name,
-                     const int64_t begin_ms,
-                     const int64_t end_ms);
+                     int64_t begin_ms,
+                     int64_t end_ms) override;
 
   /**
    * Queries a combined filter
@@ -304,8 +305,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
                        int64_t id,
                        const std::string &filter_name,
                        const std::string &filter_expr,
-                       const int64_t begin_ms,
-                       const int64_t end_ms);
+                       int64_t begin_ms,
+                       int64_t end_ms) override;
 
   /**
    * Gets the alerts from a time range
@@ -316,7 +317,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param end_ms The end time in milliseconds
    * @throw rpc_invalid_exception If there was a duplicate rpc iterator
    */
-  void alerts_by_time(rpc_iterator_handle &_return, int64_t id, const int64_t begin_ms, const int64_t end_ms);
+  void alerts_by_time(rpc_iterator_handle &_return, int64_t id, int64_t begin_ms, int64_t end_ms) override;
 
   /**
    * Gets the alerts from a time range and by trigger
@@ -331,8 +332,8 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   void alerts_by_trigger_and_time(rpc_iterator_handle &_return,
                                   int64_t id,
                                   const std::string &trigger_name,
-                                  const int64_t begin_ms,
-                                  const int64_t end_ms);
+                                  int64_t begin_ms,
+                                  int64_t end_ms) override;
 
   /**
    * Gets more from the map
@@ -341,7 +342,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @param id The identifier
    * @param desc The iterator description
    */
-  void get_more(rpc_iterator_handle &_return, int64_t id, const rpc_iterator_descriptor &desc);
+  void get_more(rpc_iterator_handle &_return, int64_t id, const rpc_iterator_descriptor &desc) override;
 
   /**
    * Gets the number of records from the store
@@ -350,7 +351,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    *
    * @return The number of records
    */
-  int64_t num_records(int64_t id);
+  int64_t num_records(int64_t id) override;
 
  private:
   rpc_iterator_id new_iterator_id();
@@ -384,12 +385,12 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
    *
    * @param store The confluo store for the rpc clone
    */
-  rpc_clone_factory(confluo_store *store);
+  explicit rpc_clone_factory(confluo_store *store);
 
   /**
    * Destructs the rpc clone factory
    */
-  virtual ~rpc_clone_factory();
+  ~rpc_clone_factory() override;
 
   /**
    * Gets the service handler for the rpc connection
@@ -398,14 +399,14 @@ class rpc_clone_factory : public rpc_serviceIfFactory {
    *
    * @return An rpc service handler for the confluo store
    */
-  virtual rpc_serviceIf *getHandler(const TConnectionInfo &conn_info);
+  rpc_serviceIf *getHandler(const TConnectionInfo &conn_info) override;
 
   /**
    * Destructs the handler
    *
    * @param handler The handler to destruct
    */
-  virtual void releaseHandler(rpc_serviceIf *handler);
+  void releaseHandler(rpc_serviceIf *handler) override;
 
  private:
   confluo_store *store_;
@@ -425,7 +426,8 @@ class rpc_server {
    *
    * @return A pointer to the server
    */
-  static std::shared_ptr<TThreadedServer> create(confluo_store *store, const std::string &address, int port);
+  static std::shared_ptr<TServer> create(confluo_store *store, const std::string &address,
+                                         int port, int num_workers = configuration_params::MAX_CONCURRENCY());
 };
 
 }
