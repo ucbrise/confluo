@@ -1,0 +1,22 @@
+FROM alpine:latest
+
+EXPOSE 9090
+
+RUN apk update && apk add --no-cache \ 
+        build-base cmake boost-dev bash
+
+RUN mkdir -p /opt/confluo
+COPY . /opt/confluo
+
+WORKDIR /opt/confluo
+RUN mkdir build \
+    && cd build \
+    && cmake -DBUILD_TESTS=OFF -DWITH_PY_CLIENT=OFF -DWITH_JAVA_CLIENT=OFF .. \
+    && make install
+
+RUN mkdir -p /var/db
+VOLUME /var/db
+
+WORKDIR /opt/confluo
+ENTRYPOINT ["confluod"]
+CMD ["--address=0.0.0.0", "--port=9090", "--data-path=/var/db", "2>/var/log/confluo.stderr 1>/var/log/confluo.stdout"]

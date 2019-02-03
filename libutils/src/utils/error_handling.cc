@@ -2,6 +2,7 @@
 
 namespace utils {
 
+#ifdef __GLIBC__
 std::string error_handling::stacktrace() {
   std::ostringstream out;
   out << "stack trace: \n";
@@ -94,5 +95,6 @@ void error_handling::sighandler_stacktrace(int sig) {
   fprintf(stderr, "%s\n", stacktrace().c_str());
   exit(-1);
 }
+#endif
 
 }

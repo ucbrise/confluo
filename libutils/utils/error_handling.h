@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __GLIBC__
 #include <execinfo.h>
+#endif
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <sstream>
@@ -22,14 +24,18 @@ class error_handling {
   template<typename ...args>
   static inline void install_signal_handler(const char *exec, int sig,
                                             args ... more) {
+#ifdef __GLIBC__
     signal(sig, error_handling::sighandler_stacktrace);
     error_handling::install_signal_handler(exec, std::forward<int>(more)...);
+#endif
   }
 
+#ifdef __GLIBC__
   static std::string stacktrace();
 
  private:
   static void sighandler_stacktrace(int sig);
+#endif
 };
 
 }
