@@ -252,7 +252,7 @@ class byte_string {
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
     uval = utils::byte_utils::byte_swap(uval);
 #else
-    uval = utils::byte_utils::is_big_endian() ? uval : byte_utils::byte_swap(uval);
+    uval = utils::byte_utils::is_big_endian() ? uval : utils::byte_utils::byte_swap(uval);
 #endif
     memcpy(data_, &uval, size_);
   }
@@ -272,7 +272,7 @@ class byte_string {
 #elif CONFLUO_ENDIANNESS == CONFLUO_LITTLE_ENDIAN
     val = utils::byte_utils::byte_swap(val);
 #else
-    val = byte_utils::is_big_endian() ? val : byte_utils::byte_swap(val);
+    val = utils::byte_utils::is_big_endian() ? val : utils::byte_utils::byte_swap(val);
 #endif
     memcpy(data_, &val, size_);
   }
@@ -436,7 +436,7 @@ class byte_string {
     if (utils::byte_utils::is_big_endian()) {
       val = *reinterpret_cast<T*>(data_);
     } else {
-      val = utils::byte_utils::reverse(data_, size_);
+      val = utils::byte_utils::reverse_as<T>(data_, size_);
     }
 #endif
     return val;
