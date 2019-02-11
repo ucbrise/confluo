@@ -123,7 +123,7 @@ public class RpcClient {
    * @return  multilog id
    * @throws TException Cannot get the atomic multilog
    */
-  public long getAtomicMultilog(String name) throws TException {
+  public long getAtomicMultilogId(String name) throws TException {
     rpc_atomic_multilog_info info = client.getAtomicMultilogInfo(name);
     return info.getId();
   }
@@ -260,9 +260,6 @@ public class RpcClient {
     }
     client.removeTrigger(curMultilogId, triggerName);
   }
-
-
-
 
 
   /**

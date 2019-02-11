@@ -2,6 +2,7 @@ package confluo.streaming;
 
 import confluo.rpc.*;
 import confluo.streaming.config.ProducerConfig;
+import java.io.Closeable;
 import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -13,10 +14,11 @@ import java.util.Properties;
 /**
  *
  *  not thread safe
- *  auto batch message if batch size bigger than 1
+ *  ConfluoProducer will create the topic if it isn't existed,or reuse the old topic.
+ *  batch produce message can be enable if batch size was set to bigger than 1,
  *
  * */
-public class ConfluoProducer {
+public class ConfluoProducer implements Closeable {
     Logger logger= LoggerFactory.getLogger(ConfluoProducer.class);
     private String topic;
     private String host;
@@ -31,7 +33,7 @@ public class ConfluoProducer {
     private MessageBatchBuilder batchBuilder;
     private Schema curSchema;
     private int batched;
-    public ConfluoProducer(Properties properties){
+    public ConfluoProducer(Properties properties)  throws TException{
             host=properties.getProperty(ProducerConfig.BOOTSTRAP_ADDRESS,ProducerConfig.BOOTSTRAP_ADDRESS_DEFAULT);
             port=Integer.valueOf(properties.getProperty(ProducerConfig.BOOTSTRAP_PORT,ProducerConfig.BOOTSTRAP_PORT_DEFAULT));
             topic=properties.getProperty(ProducerConfig.TOPIC,ProducerConfig.TOPIC_DEFAULT);
@@ -40,12 +42,14 @@ public class ConfluoProducer {
             produceSchema= createSchema(messageSize-8);
             produceBatchSize=Integer.valueOf(properties.getProperty(ProducerConfig.BATCH_SIZE,ProducerConfig.BATCH_SIZE_DEFAULT));
             batchEnable=produceBatchSize>1?true:false;
+            start();
             logger.info(String.format("\n ------------------- " +
                                       "\n producer config" +
                                       "\n server address: %s,port:%d,topic:%s,schema:%s " +
                                       "\n mutlilog:%s ;batch:%s; batchSize:%d;storage mode:%s" +
                                       "\n ------------------- ",
                      host,port,topic,produceSchema,topic,batchEnable,produceBatchSize,storageMode));
+
     }
 
     /**
@@ -53,10 +57,10 @@ public class ConfluoProducer {
      *  create a topic or reuse existed topic
      *  @throws TException when exception occurs
      **/
-    public void start() throws TException{
+    private void start() throws TException{
         client= new RpcClient(host, port);
             try {
-                long atomicLogId = client.getAtomicMultilog(topic);
+                long atomicLogId = client.getAtomicMultilogId(topic);
                 client.setCurrentAtomicMultilog(topic);
                 logger.info(String.format("%s exist,atomic multilog id %d,reuse it now", topic, atomicLogId));
             } catch (TApplicationException e) {
@@ -96,7 +100,7 @@ public class ConfluoProducer {
 
     /**
      *
-     * fill timestamp and send message
+     * fill timestamp and send message,
      *
      **/
     public void send(ByteBuffer message) throws TException{
@@ -132,27 +136,34 @@ public class ConfluoProducer {
 
     /**
      *
-     *  flush the last batch message
+     *  flush the last batch messages
      *
      **/
     public void flush() throws IOException,TException{
         if(batchEnable&&batched>0){
             long offset=client.appendBatch(batchBuilder.getBatch());
-            //logger.info("write offset:"+offset);
             batchBuilder.clear();
             totalProducedNum +=batched;
             batched=0;
         }
     }
 
-    /**
-     * stop and close client
-     *
-     **/
-    public void stop() throws  TException{
-        client.disconnect();
+  /**
+   * stop and close client
+   *
+   **/
+  @Override
+  public void close() throws IOException {
+    try{
+        flush();
         client.close();
+      }catch (TException e){
+        throw new IOException(e);
     }
+  }
+
+
+
 
 
 

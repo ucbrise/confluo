@@ -3,6 +3,7 @@ package confluo.streaming;
 import confluo.PropertiesParser;
 import confluo.rpc.Schema;
 import confluo.rpc.rpc_management_exception;
+import java.io.Closeable;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import java.util.Random;
  * timed producer task
  *
  **/
-public class ProduceTask implements Runnable {
+public class ProduceTask implements Runnable, Closeable {
     Logger logger = LoggerFactory.getLogger(ProduceTask.class);
     private static final char[] encodeTable = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
             'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6',
@@ -37,7 +38,7 @@ public class ProduceTask implements Runnable {
             logger.info("parse properties error",e);
             throw new IllegalStateException("init exception",e);
         }
-             producer= new ConfluoProducer(properties);
+
     }
     public long getProducedMessage(){
         return producer.getTotalProducedNum();
@@ -54,7 +55,7 @@ public class ProduceTask implements Runnable {
             boolean startSuccessful=false;
             while(tryCount++<maxTry) { //concurrent create exception
                 try {
-                    producer.start();
+                    producer= new ConfluoProducer(properties);
                     logger.info(String.format("start finished, tried %d times ",tryCount));
                     startSuccessful=true;
                     break;
@@ -63,7 +64,7 @@ public class ProduceTask implements Runnable {
                 }
             }
 
-            if(!startSuccessful){ logger.info("start failure");stop();return;}
+            if(!startSuccessful){ logger.info("start failure");close();return;}
             Schema curSchema=producer.getSchema();
             // prepare a default message, random generate
             ByteBuffer message=byteMessage(curSchema.getRecordSize());
@@ -80,7 +81,7 @@ public class ProduceTask implements Runnable {
                     break;
                 }
             }
-            stop();
+            close();
             long time=System.currentTimeMillis()-startMs;
             long qps=producer.getTotalProducedNum() *1000/time;
             logger.info(String.format("time elapsed:%d ms,%s send end,total msg:%d,  qps:%d/s",time,Thread.currentThread().getName(),producer.getTotalProducedNum(),qps));
@@ -108,8 +109,10 @@ public class ProduceTask implements Runnable {
         return  buffer;
 
     }
-    public void stop() throws TException, IOException {
-        producer.flush();
-        producer.stop();
+
+    @Override
+    public void close() throws IOException {
+        producer.close();
     }
+
 }

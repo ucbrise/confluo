@@ -31,7 +31,7 @@ public class ConsumeTask implements Runnable {
             logger.info("parse properties error",e);
             throw new IllegalStateException("init exception",e);
         }
-        consumer=new ConfluoConsumer(properties);
+
     }
 
     /**
@@ -46,7 +46,7 @@ public class ConsumeTask implements Runnable {
         long read=0;
         MessageListener messageListener=new DefaultMessageListener(consumeLogSample);
         try {
-            consumer.start();
+            consumer=new ConfluoConsumer(properties);
             int  recordSize=consumer.getSchema().getRecordSize();
             long start=System.currentTimeMillis();
             long elapsed=1; //

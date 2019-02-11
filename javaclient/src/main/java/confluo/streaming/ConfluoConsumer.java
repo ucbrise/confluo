@@ -4,6 +4,8 @@ import confluo.rpc.Record;
 import confluo.rpc.RpcClient;
 import confluo.rpc.Schema;
 import confluo.streaming.config.ConsumerConfig;
+import java.io.Closeable;
+import java.io.IOException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +13,11 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * thread safe
+ *
+ * confluo message consumer,thread safe
  *
  **/
-public class ConfluoConsumer {
+public class ConfluoConsumer  implements Closeable {
     Logger logger= LoggerFactory.getLogger(ConfluoConsumer.class);
     private String topic;
     private String host;
@@ -23,27 +26,21 @@ public class ConfluoConsumer {
     private  RpcClient client;
     private boolean prefetchEnable;
     private Schema schema;
-    public ConfluoConsumer(Properties properties){
+    public ConfluoConsumer(Properties properties) throws TException{
         host=properties.getProperty(ConsumerConfig.BOOTSTRAP_ADDRESS,ConsumerConfig.BOOTSTRAP_ADDRESS_DEFAULT);
         port=Integer.valueOf(properties.getProperty(ConsumerConfig.BOOTSTRAP_PORT,ConsumerConfig.BOOTSTRAP_PORT_DEFAULT));
         topic=properties.getProperty(ConsumerConfig.TOPIC,ConsumerConfig.TOPIC_DEFAULT);
         prefetchSize=Integer.valueOf(properties.getProperty(ConsumerConfig.PREFETCH_SIZE,ConsumerConfig.PREFETCH_SIZE_DEFAULT));
         prefetchEnable=prefetchSize>1?true:false;
-        logger.info(String.format("\n ------------------- " +
-                                  "\n consumer config" +
-                                  "\n server address: %s,port:%d,topic:%s,prefetch size:%d",host,port,topic,prefetchSize)+
-                                  "\n ------------------- " );
-
-    }
-
-    /**
-     *
-     **/
-    public void start() throws TException {
         client= new RpcClient(host, port);
         client.setCurrentAtomicMultilog(topic);
         schema=client.getSchema();
+        logger.info(String.format("\n ------------------- " +
+            "\n consumer config" +
+            "\n server address: %s,port:%d,topic:%s,prefetch size:%d",host,port,topic,prefetchSize)+
+            "\n ------------------- " );
     }
+
 
     /**
      * best effort consume
@@ -75,4 +72,12 @@ public class ConfluoConsumer {
         return client.numRecords();
     }
 
+    @Override
+    public void close() throws IOException {
+        try{
+            client.close();
+        }catch (TException e){
+            throw new IOException(e);
+        }
+    }
 }
