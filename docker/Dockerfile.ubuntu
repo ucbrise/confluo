@@ -18,4 +18,4 @@ RUN mkdir -p /var/db
 VOLUME /var/db
 
 ENTRYPOINT ["confluod"]
-CMD ["--address=0.0.0.0", "--port=9090", "--data-path=/var/db", "2>/var/log/confluo.stderr 1>/var/log/confluo.stdout"]
+CMD ["--address=0.0.0.0", "--port=9090", "--data-path=/var/db"]
