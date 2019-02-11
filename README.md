@@ -115,3 +115,10 @@ alert_stream = client.get_alerts(0, sys.maxsize, "high_latency_trigger")
 for a in alert_stream:
   print a
 ```
+
+## Contributing
+
+Please create a GitHub issue to file a bug or request a feature. We welcome pull-requests, but request that you review the [pull-request process](CONTRIBUTING.md) before submitting one.
+
+Please subscribe to the mailing list (confluo-dev@googlegroups.com) for project announcements, and discussion regarding use-cases and development.
+
