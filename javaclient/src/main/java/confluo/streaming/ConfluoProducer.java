@@ -13,9 +13,9 @@ import java.util.Properties;
 
 /**
  *
- *  not thread safe
+ *
  *  ConfluoProducer will create the topic if it isn't existed,or reuse the old topic.
- *  batch produce message can be enable if batch size was set to bigger than 1,
+ *  batch produce message can be enable if batch size was set to bigger than 1,not thread safe
  *
  * */
 public class ConfluoProducer implements Closeable {
@@ -54,7 +54,7 @@ public class ConfluoProducer implements Closeable {
 
     /**
      *
-     *  create a topic or reuse existed topic
+     *  Create a topic or reuse existed topic
      *  @throws TException when exception occurs
      **/
     private void start() throws TException{
@@ -79,7 +79,7 @@ public class ConfluoProducer implements Closeable {
 
     /**
      *
-     *  for a pub/sub system,it's schemaless,but here we define a relatively relaxed
+     *  For a pub/sub system,it's schemaless,but here we define a relatively relaxed
      *  schema{ long:a;msg:STRING(len)} with default timestamp,msg with fixed length is the actual payload for
      *  producer
      * @param  len message body length
@@ -100,7 +100,7 @@ public class ConfluoProducer implements Closeable {
 
     /**
      *
-     * fill timestamp and send message,
+     * Fill timestamp and send message,
      *
      **/
     public void send(ByteBuffer message) throws TException{
@@ -136,7 +136,7 @@ public class ConfluoProducer implements Closeable {
 
     /**
      *
-     *  flush the last batch messages
+     *  Flush the last batch messages
      *
      **/
     public void flush() throws IOException,TException{
@@ -149,7 +149,7 @@ public class ConfluoProducer implements Closeable {
     }
 
   /**
-   * stop and close client
+   * Stop and close client
    *
    **/
   @Override

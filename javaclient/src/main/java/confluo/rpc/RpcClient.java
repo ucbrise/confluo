@@ -304,7 +304,7 @@ public class RpcClient {
 
   /**
    *
-   * write a batch record to the atomic multilog
+   * Write a batch record to the atomic multilog
    * @param  batchRecord the batch record to write
    * @return the offset into the log where the record is written
    *

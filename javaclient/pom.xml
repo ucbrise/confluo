@@ -112,15 +112,9 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.5.5</version>
         <configuration>
-          <!-- not append assembly id in release file name -->
-          <finalName>confluo-client</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-          <descriptors>
-            <descriptor>src/main/assemble/package.xml</descriptor>
-          </descriptors>
-          <!--<descriptorRefs>-->
-            <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
-          <!--</descriptorRefs>-->
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
         </configuration>
         <executions>
           <execution>
@@ -132,7 +126,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
