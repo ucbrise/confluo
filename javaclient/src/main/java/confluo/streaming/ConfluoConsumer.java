@@ -12,7 +12,11 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Properties;
 
-/** Confluo message consumer,thread safe */
+/**
+ * ConfluoConsumer is message consumer can pull messages  start from the target offset
+ * batch pull message can be enable if batch size was set to bigger than 1
+ * thread safe
+ */
 public class ConfluoConsumer implements Closeable {
   Logger logger = LoggerFactory.getLogger(ConfluoConsumer.class);
   private String topic;
@@ -43,7 +47,7 @@ public class ConfluoConsumer implements Closeable {
   }
 
   /**
-   * best effort consume consume from target offset
+   * Best effort consume consume from target offset
    *
    * @param offset log offset
    * @return record count
@@ -65,7 +69,7 @@ public class ConfluoConsumer implements Closeable {
     return schema;
   }
 
-  /** the number of records for the topic */
+  /** The number of records for the topic */
   public long maxRecord() throws TException {
     return client.numRecords();
   }
