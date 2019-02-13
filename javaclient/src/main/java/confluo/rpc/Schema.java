@@ -66,8 +66,18 @@ public class Schema {
    * @param rec The record.
    * @return The packed ByteBuffer.
    */
-  ByteBuffer pack(String... rec) {
-    ByteBuffer buffer = ByteBuffer.allocateDirect(recordSize);
+  public ByteBuffer pack(String... rec) {
+    return pack(true,rec);
+  }
+
+  /**
+   * Pack record into a ByteBuffer.
+   * @param direct pack record into direct buffer if true
+   * @param rec The record.
+   * @return The packed ByteBuffer.
+   */
+  public ByteBuffer pack(boolean direct,String... rec) {
+    ByteBuffer buffer = direct?ByteBuffer.allocateDirect(recordSize):ByteBuffer.allocate(recordSize);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     int recordOff = 0;
     if (rec.length == columns.size()) {

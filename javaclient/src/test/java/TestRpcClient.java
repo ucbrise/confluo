@@ -93,6 +93,33 @@ public class TestRpcClient {
     client.disconnect();
   }
 
+  private void batchWriteRead(rpc_storage_mode mode) throws TException {
+    RpcClient client = new RpcClient(HOST, PORT);
+    client.createAtomicMultilog(MULTILOG_NAME, "{ msg: STRING(8) }", mode);
+    RecordBatchBuilder batchBuilder = client.getBatchBuilder();
+    // batchBuilder.addRecord();
+    try {
+      batchBuilder.addRecord(client.getSchema().pack(false, "abcdef01"));
+      batchBuilder.addRecord(client.getSchema().pack(false, "abcdef02"));
+      batchBuilder.addRecord(client.getSchema().pack(false, "abcdef03"));
+      client.appendBatch(batchBuilder.getBatch());
+      Record record = client.read(0);
+      assertEquals("abcdef01", record.get(1).asString());
+      record = client.read(client.getSchema().getRecordSize());
+      assertEquals("abcdef02", record.get(1).asString());
+      record = client.read(2 * client.getSchema().getRecordSize());
+      assertEquals("abcdef03", record.get(1).asString());
+    } catch (IOException e) {
+      throw new TException(e);
+    }
+    client.disconnect();
+  }
+
+  @Test
+  public void testBatchWriteReadInMemory() throws TException {
+    batchWriteRead(StorageMode.IN_MEMORY);
+  }
+
   @Test
   public void testReadWriteInMemory() throws TException {
     readWrite(StorageMode.IN_MEMORY);

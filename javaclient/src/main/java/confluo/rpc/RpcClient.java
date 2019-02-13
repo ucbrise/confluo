@@ -261,6 +261,14 @@ public class RpcClient {
     client.removeTrigger(curMultilogId, triggerName);
   }
 
+  /**
+   * Gets a new record batch builder
+   *
+   * @return The RPC record batch builder
+   */
+  public RecordBatchBuilder getBatchBuilder() {
+    return new RecordBatchBuilder(curSchema);
+  }
 
   /**
    * Writes a record to the atomic multilog
