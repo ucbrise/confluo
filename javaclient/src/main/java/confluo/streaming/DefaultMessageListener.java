@@ -1,12 +1,13 @@
 package confluo.streaming;
 
 import confluo.rpc.Record;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class DefaultMessageListener implements MessageListener {
+public class DefaultMessageListener implements Consumer<List<Record>> {
   Logger logger = LoggerFactory.getLogger(DefaultMessageListener.class);
   private long receive = 0;
   private long logSample;
@@ -16,20 +17,14 @@ public class DefaultMessageListener implements MessageListener {
   }
 
   @Override
-  public void onMessage(List<Record> messages) {
+  public void accept(List<Record> messages) {
     receive += messages.size();
     if (receive % logSample == 0) {
       log(messages.get(0));
     }
   }
 
-  @Override
-  public void onMessage(Record message) {
-    receive++;
-    if (receive % logSample == 0) {
-      log(message);
-    }
-  }
+
 
   public void log(Record record) {
     if (record != null)

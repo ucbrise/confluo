@@ -6,6 +6,8 @@ import confluo.rpc.Schema;
 import confluo.streaming.config.ConsumerConfig;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +54,16 @@ public class ConfluoConsumer implements Closeable {
    * @param offset log offset
    * @return record count
    */
-  public int pull(long offset, MessageListener messageListener) throws TException {
+  public int pull(long offset, Consumer<List<Record>> messageListener) throws TException {
     int batchSize;
     if (prefetchEnable) {
       List<Record> records = client.readBatch(offset, prefetchSize);
       batchSize = records.size();
-      messageListener.onMessage(records);
+      messageListener.accept(records);
     } else {
-      messageListener.onMessage(client.read(offset));
+      List<Record> messages=new ArrayList<>();
+      messages.add(client.read(offset));
+      messageListener.accept(messages);
       batchSize = 1;
     }
     return batchSize;

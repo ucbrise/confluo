@@ -1,6 +1,9 @@
 package confluo.streaming;
 
 import confluo.PropertiesParser;
+import confluo.rpc.Record;
+import java.util.List;
+import java.util.function.Consumer;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +41,7 @@ public class ConsumeTask implements Runnable {
   public void run() {
     long consumeMaxTime = maxConsumeMs;
     long read = 0;
-    MessageListener messageListener = new DefaultMessageListener(consumeLogSample);
+    Consumer<List<Record>> messageListener = new DefaultMessageListener(consumeLogSample);
     try {
       consumer = new ConfluoConsumer(properties);
       int recordSize = consumer.getSchema().getRecordSize();
