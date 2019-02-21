@@ -32,36 +32,21 @@ public class ConfluoProducer implements Closeable {
   private int batched;
 
   public ConfluoProducer(Properties properties) throws TException {
-    host =
-        properties.getProperty(
-            ProducerConfig.BOOTSTRAP_ADDRESS, ProducerConfig.BOOTSTRAP_ADDRESS_DEFAULT);
-    port =
-        Integer.valueOf(
-            properties.getProperty(
-                ProducerConfig.BOOTSTRAP_PORT, ProducerConfig.BOOTSTRAP_PORT_DEFAULT));
+    host = properties.getProperty(ProducerConfig.HOST_ADDRESS, ProducerConfig.HOST_ADDRESS_DEFAULT);
+    port = Integer.valueOf(properties.getProperty(ProducerConfig.HOST_PORT, ProducerConfig.HOST_PORT_DEFAULT));
     topic = properties.getProperty(ProducerConfig.TOPIC, ProducerConfig.TOPIC_DEFAULT);
-    storageMode =
-        rpc_storage_mode.valueOf(
-            properties.getProperty(
-                ProducerConfig.ARCHIVE_MODE, ProducerConfig.ARCHIVE_MODE_DEFAULT));
-    messageSize =
-        Integer.valueOf(
-            properties.getProperty(
-                ProducerConfig.MESSAGE_SIZE, ProducerConfig.MESSAGE_SIZE_DEFAULT));
+    storageMode = rpc_storage_mode.valueOf(properties.getProperty(ProducerConfig.ARCHIVE_MODE, ProducerConfig.ARCHIVE_MODE_DEFAULT));
+    messageSize = Integer.valueOf(properties.getProperty(ProducerConfig.MESSAGE_SIZE, ProducerConfig.MESSAGE_SIZE_DEFAULT));
     produceSchema = createSchema(messageSize - 8);
-    produceBatchSize =
-        Integer.valueOf(
-            properties.getProperty(ProducerConfig.BATCH_SIZE, ProducerConfig.BATCH_SIZE_DEFAULT));
+    produceBatchSize = Integer.valueOf(properties.getProperty(ProducerConfig.BATCH_SIZE, ProducerConfig.BATCH_SIZE_DEFAULT));
     batchEnable = produceBatchSize > 1 ? true : false;
-    start();
-    logger.info(
-        String.format(
-            "\n ------------------- "
-                + "\n producer config"
-                + "\n server address: %s,port:%d,topic:%s,schema:%s "
-                + "\n mutlilog:%s ;batch:%s; batchSize:%d;storage mode:%s"
-                + "\n ------------------- ",
-            host, port, topic, produceSchema, topic, batchEnable, produceBatchSize, storageMode));
+    initialize();
+    logger.info(String.format(
+      "\n ------------------- "
+        + "\n Producer config"
+        + "\n Server address: %s,port: %d,topic: %s,schema: %s "
+        + "\n Mutlilog: %s;batch: %s; batchSize: %d;storage mode: %s"
+        + "\n ------------------- ", host, port, topic, produceSchema, topic, batchEnable, produceBatchSize, storageMode));
   }
 
   /**
@@ -69,7 +54,7 @@ public class ConfluoProducer implements Closeable {
    *
    * @throws TException when exception occurs
    */
-  private void start() throws TException {
+  private void initialize() throws TException {
     client = new RpcClient(host, port);
     try {
       long atomicLogId = client.getAtomicMultilogId(topic);
@@ -79,7 +64,7 @@ public class ConfluoProducer implements Closeable {
       // process concurrently create topic
       client.createAtomicMultilog(topic, produceSchema, storageMode);
     } catch (TException e) {
-      logger.info("start error", e);
+      logger.info("initialize error", e);
       throw e;
     }
     curSchema = client.getSchema();
@@ -115,7 +100,6 @@ public class ConfluoProducer implements Closeable {
         batched++;
         if (batched >= produceBatchSize) {
           long offset = client.appendBatch(batchBuilder.getBatch());
-          // logger.info("write offset:"+offset);
           batchBuilder.clear();
           totalProducedNum += batched;
           batched = 0;

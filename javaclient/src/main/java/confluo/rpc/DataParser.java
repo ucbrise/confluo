@@ -119,7 +119,9 @@ class DataParser {
     public String parseToString(ByteBuffer in, int size) {
       String value = StandardCharsets.UTF_8.decode(in).toString();
       int endOff = value.indexOf('\0');
-      return "\"" + value.substring(0, endOff) + "\"";
+      if (endOff != -1)
+        return value.substring(0, endOff);
+      return value;
     }
   }
 

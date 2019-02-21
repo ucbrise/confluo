@@ -16,11 +16,11 @@ public class PropertiesParser {
    */
   public static Properties parse(String domain, String file) throws IOException {
     URL url = PropertiesParser.class.getClassLoader().getResource(file);
-    Properties pro = new Properties();
+    Properties properties = new Properties();
     Properties filtered = new Properties();
     InputStream inputStream = url.openStream();
-    pro.load(inputStream);
-    Set<Map.Entry<Object, Object>> entries = pro.entrySet();
+    properties.load(inputStream);
+    Set<Map.Entry<Object, Object>> entries = properties.entrySet();
     String domainKey;
     for (Map.Entry<Object, Object> entry : entries) {
       domainKey = (String) entry.getKey();

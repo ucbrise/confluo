@@ -40,7 +40,7 @@ public class ConsumerBenchmark {
       }
       long actualDurationMs = System.currentTimeMillis() - start;
       long qps = totalConsumedMsgNum * 1000 / actualDurationMs;
-      logger.error(
+      logger.info(
           String.format(
               "%d consumer finished,total msg:%d, elapsed:%d ms, qps:%d/s",
               consumeNum, totalConsumedMsgNum, actualDurationMs, qps));

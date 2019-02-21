@@ -27,7 +27,7 @@ public class ConsumeTask implements Runnable {
     try {
       properties = PropertiesParser.parse("mq.consume", "mq.properties");
     } catch (IOException e) {
-      logger.info("parse properties error", e);
+      logger.info("Parse properties error", e);
       throw new IllegalStateException("init exception", e);
     }
   }
@@ -56,7 +56,7 @@ public class ConsumeTask implements Runnable {
           // no more new message,consider exit
           startOffsetEqualMaxCount++;
           if (startOffsetEqualMaxCount > 10) {
-            logger.info("possible no more messages");
+            logger.info("Possible no more messages");
             break;
           }
           Thread.sleep(1);
@@ -69,7 +69,7 @@ public class ConsumeTask implements Runnable {
           read += count;
           i += recordSize * count;
           if (totalRead % 10000 == 0 && (System.currentTimeMillis() - start) > consumeMaxTime) {
-            logger.info("timeout and exit");
+            logger.info("Timeout and exit");
             break;
           }
         }
@@ -81,7 +81,7 @@ public class ConsumeTask implements Runnable {
         }
       }
       long qps = totalRead * 1000 / elapsed;
-      logger.info(String.format("total msg:%d, elapsed:%d ms, qps:%d/s", totalRead, elapsed, qps));
+      logger.info(String.format("Total msg:%d, elapsed:%d ms, qps:%d/s", totalRead, elapsed, qps));
     } catch (TException e) {
       logger.info("error", e);
     } catch (InterruptedException e) {

@@ -128,7 +128,6 @@ public class RpcClient {
     return info.getId();
   }
 
-
   /**
    * @return the current schema
    *
@@ -136,8 +135,6 @@ public class RpcClient {
   public Schema getSchema(){
     return curSchema;
   }
-
-
 
   /**
    * Removes an atomic multilog from the client
@@ -321,9 +318,6 @@ public class RpcClient {
     return client.appendBatch(curMultilogId,batchRecord);
   }
 
-
-
-
   /**
    * Reads data from a specified offset
    *
@@ -352,26 +346,26 @@ public class RpcClient {
     return client.read(curMultilogId, offset, batchSize);
   }
 
-
   public Record read(long offset) throws TException {
     return curSchema.apply(readRaw(offset));
   }
 
   /**
    * read batch record raw and parse into record list
+   *
    * @@return  record list
    **/
   public List<Record> readBatch(long offset,int batchSize) throws TException {
-    ByteBuffer batchBuffer=readBatchRaw(offset,batchSize);
-    List<Record> batchResult=new ArrayList<>(batchSize);
-    int remaining=batchBuffer.remaining();
+    ByteBuffer batchBuffer = readBatchRaw(offset, batchSize);
+    List<Record> batchResult = new ArrayList<>(batchSize);
+    int remaining = batchBuffer.remaining();
     ByteBuffer slice;
-    for(int i=0;i<remaining;){
-      slice=batchBuffer.slice();
+    for (int i = 0; i < remaining; ) {
+      slice = batchBuffer.slice();
       slice.position(i);
-      slice.limit(slice.position()+curSchema.getRecordSize());
+      slice.limit(slice.position() + curSchema.getRecordSize());
       batchResult.add(curSchema.apply(slice.slice()));
-      i+=curSchema.getRecordSize();
+      i += curSchema.getRecordSize();
     }
     return batchResult;
   }

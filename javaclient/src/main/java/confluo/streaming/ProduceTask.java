@@ -34,7 +34,7 @@ public class ProduceTask implements Runnable, Closeable {
     try {
       properties = PropertiesParser.parse("mq.produce", "mq.properties");
     } catch (IOException e) {
-      logger.info("parse properties error", e);
+      logger.info("Parse properties error", e);
       throw new IllegalStateException("init exception", e);
     }
   }
@@ -45,27 +45,26 @@ public class ProduceTask implements Runnable, Closeable {
 
   @Override
   public void run() {
-    // long maxProduceTime=60*1000;
     long logBreakMs = 1000;
     long lastLogTimeMs = 0;
     try {
-      logger.info("start to send");
+      logger.info("Start to send");
       int maxTry = 3;
       int tryCount = 0;
       boolean startSuccessful = false;
       while (tryCount++ < maxTry) { // concurrent create exception
         try {
           producer = new ConfluoProducer(properties);
-          logger.info(String.format("start finished, tried %d times ", tryCount));
+          logger.info(String.format("Start finished, tried %d times ", tryCount));
           startSuccessful = true;
           break;
         } catch (rpc_management_exception e) {
-          logger.info("start error", e);
+          logger.info("Start error", e);
         }
       }
 
       if (!startSuccessful) {
-        logger.info("start failure");
+        logger.info("Start failure");
         close();
         return;
       }
@@ -79,10 +78,7 @@ public class ProduceTask implements Runnable, Closeable {
         // may log multiple times in the same ms
         if (time % sampleMs == 0 && (time - lastLogTimeMs) > logBreakMs) {
           lastLogTimeMs = time;
-          logger.info(
-              String.format(
-                  "time elapsed %d(ms),%s produced  %d message",
-                  time, Thread.currentThread().getName(), producer.getTotalProducedNum()));
+          logger.info(String.format("Time elapsed %d(ms),%s produced  %d message", time, Thread.currentThread().getName(), producer.getTotalProducedNum()));
         }
         if (time > durationMs) {
           break;
@@ -91,10 +87,7 @@ public class ProduceTask implements Runnable, Closeable {
       close();
       long time = System.currentTimeMillis() - startMs;
       long qps = producer.getTotalProducedNum() * 1000 / time;
-      logger.info(
-          String.format(
-              "time elapsed:%d ms,%s send end,total msg:%d,  qps:%d/s",
-              time, Thread.currentThread().getName(), producer.getTotalProducedNum(), qps));
+      logger.info(String.format("Time elapsed:%d ms,%s send end,total msg:%d,  qps:%d/s", time, Thread.currentThread().getName(), producer.getTotalProducedNum(), qps));
     } catch (Exception e) {
       logger.info("error", e);
     }

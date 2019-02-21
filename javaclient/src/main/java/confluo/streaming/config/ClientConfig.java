@@ -2,15 +2,15 @@ package confluo.streaming.config;
 
 public class ClientConfig {
 
-  /** <code>bootstrap.address</code> */
-  public static final String BOOTSTRAP_ADDRESS = "bootstrap.address";
+  /** <code>host.address</code> */
+  public static final String HOST_ADDRESS = "bootstrap.address";
 
-  public static final String BOOTSTRAP_ADDRESS_DEFAULT = "127.0.0.1";
+  public static final String HOST_ADDRESS_DEFAULT = "127.0.0.1";
 
-  /** <code>bootstrap.port</code> */
-  public static final String BOOTSTRAP_PORT = "bootstrap.port";
+  /** <code>host.port</code> */
+  public static final String HOST_PORT = "bootstrap.port";
 
-  public static final String BOOTSTRAP_PORT_DEFAULT = "9090";
+  public static final String HOST_PORT_DEFAULT = "9090";
   /** <code>batch.size</code> */
   public static final String BATCH_SIZE = "batch.size";
 

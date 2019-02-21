@@ -31,21 +31,19 @@ public class ConfluoConsumer implements Closeable {
 
   public ConfluoConsumer(Properties properties) throws TException {
 
-    host = properties.getProperty(ConsumerConfig.BOOTSTRAP_ADDRESS, ConsumerConfig.BOOTSTRAP_ADDRESS_DEFAULT);
-    port = Integer.valueOf(properties.getProperty(ConsumerConfig.BOOTSTRAP_PORT, ConsumerConfig.BOOTSTRAP_PORT_DEFAULT));
+    host = properties.getProperty(ConsumerConfig.HOST_ADDRESS, ConsumerConfig.HOST_ADDRESS_DEFAULT);
+    port = Integer.valueOf(properties.getProperty(ConsumerConfig.HOST_PORT, ConsumerConfig.HOST_PORT_DEFAULT));
     topic = properties.getProperty(ConsumerConfig.TOPIC, ConsumerConfig.TOPIC_DEFAULT);
     prefetchSize = Integer.valueOf(properties.getProperty(ConsumerConfig.PREFETCH_SIZE, ConsumerConfig.PREFETCH_SIZE_DEFAULT));
     prefetchEnable = prefetchSize > 1 ? true : false;
     client = new RpcClient(host, port);
     client.setCurrentAtomicMultilog(topic);
     schema = client.getSchema();
-    logger.info(
-        String.format(
-                "\n ------------------- "
-                    + "\n consumer config"
-                    + "\n server address: %s,port:%d,topic:%s,prefetch size:%d",
-                host, port, topic, prefetchSize)
-            + "\n ------------------- ");
+    logger.info(String.format(
+      "\n ------------------- "
+        +"\n Consumer config"
+        +"\n Server address: %s,port: %d,topic: %s,prefetch size: %d", host, port, topic, prefetchSize)
+        +"\n ------------------- ");
   }
 
   /**
@@ -56,14 +54,15 @@ public class ConfluoConsumer implements Closeable {
    */
   public int pull(long offset, Consumer<List<Record>> messageListener) throws TException {
     int batchSize;
+    List<Record> records;
     if (prefetchEnable) {
-      List<Record> records = client.readBatch(offset, prefetchSize);
+      records = client.readBatch(offset, prefetchSize);
       batchSize = records.size();
       messageListener.accept(records);
     } else {
-      List<Record> messages=new ArrayList<>();
-      messages.add(client.read(offset));
-      messageListener.accept(messages);
+      records=new ArrayList();
+      records.add(client.read(offset));
+      messageListener.accept(records);
       batchSize = 1;
     }
     return batchSize;

@@ -31,7 +31,7 @@ public class Schema {
    * @param data The data to add
    * @return The record
    */
-  Record apply(ByteBuffer data) {
+  public Record apply(ByteBuffer data) {
     return new Record(data, this);
   }
 
@@ -72,6 +72,7 @@ public class Schema {
 
   /**
    * Pack record into a ByteBuffer.
+   *
    * @param direct pack record into direct buffer if true
    * @param rec The record.
    * @return The packed ByteBuffer.
@@ -88,7 +89,6 @@ public class Schema {
     } else {
       throw new IllegalArgumentException("Invalid number of attributes in record");
     }
-
     for (int i = 0; i < columns.size() - 1; ++i) {
       columns.get(i + 1).pack(buffer, rec[i + recordOff]);
     }
