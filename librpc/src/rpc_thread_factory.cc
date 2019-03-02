@@ -110,16 +110,16 @@ class rpc_thread : public Thread {
       throw SystemResourceException(msg);
     }
 
-    auto pthread_attr_setdetachstate = pthread_attr_setdetachstate(&thread_attr, detached_ ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE);
-    if (pthread_attr_state != 0) {
-      std::string errMsg = "pthread_attr_setdatchstate failed: " + std::to_string(pthread_attr_setdetachstate);
+    auto ret_detach_state = pthread_attr_setdetachstate(&thread_attr, detached_ ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE);
+    if (ret_detach_state != 0) {
+      std::string errMsg = "pthread_attr_setdatchstate failed: " + std::to_string(ret_detach_state);
       throw SystemResourceException(errMsg);
     }
 
     // Set thread stack size
-    auto pthread_attr_stacksize = pthread_attr_setstacksize(&thread_attr, static_cast<size_t>(MB * stackSize_));
-    if (pthread_attr_stacksize != 0) {
-      std::string errMsg = "pthread_attr_stacksize failed: " + std::to_string(pthread_attr_stacksize);
+    auto ret_stack_size = pthread_attr_setstacksize(&thread_attr, static_cast<size_t>(MB * stackSize_));
+    if (ret_stack_size != 0) {
+      std::string errMsg = "pthread_attr_stacksize failed: " + std::to_string(ret_stack_size);
       throw SystemResourceException(errMsg);
     }
 
