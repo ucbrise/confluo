@@ -104,18 +104,20 @@ class rpc_thread : public Thread {
     }
 
     pthread_attr_t thread_attr;
-    if (pthread_attr_init(&thread_attr) != 0) {
-      throw SystemResourceException("pthread_attr_init failed");
+    auto ret_init = pthread_attr_init(&thread_attr);
+    if (ret_init != 0) {
+      throw SystemResourceException("pthread_attr_init failed: " + std::to_string(ret_init));
     }
 
-    if (pthread_attr_setdetachstate(&thread_attr, detached_ ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE)
-        != 0) {
-      throw SystemResourceException("pthread_attr_setdetachstate failed");
+    auto ret_detach_state = pthread_attr_setdetachstate(&thread_attr, detached_ ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE);
+    if (ret_detach_state != 0) {
+      throw SystemResourceException("pthread_attr_setdatchstate failed: " + std::to_string(ret_detach_state));
     }
 
     // Set thread stack size
-    if (pthread_attr_setstacksize(&thread_attr, static_cast<size_t>(MB * stackSize_)) != 0) {
-      throw SystemResourceException("pthread_attr_setstacksize failed");
+    auto ret_stack_size = pthread_attr_setstacksize(&thread_attr, static_cast<size_t>(MB * stackSize_));
+    if (ret_stack_size != 0) {
+      throw SystemResourceException("pthread_attr_stacksize failed: " + std::to_string(ret_stack_size));
     }
 
 // Set thread policy
