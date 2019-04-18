@@ -112,7 +112,13 @@ if (BUILD_RPC)
                         "-DWITH_BOOSTTHREADS=OFF"
                         "-DWITH_STATIC_LIB=ON")
 
-  set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
+
+  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thriftd")
+  else ()
+    set(THRIFT_STATIC_LIB_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}thrift")
+  endif ()
+
   set(THRIFT_STATIC_LIB "${THRIFT_PREFIX}/lib/${THRIFT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   ExternalProject_Add(thrift
       URL "http://archive.apache.org/dist/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
