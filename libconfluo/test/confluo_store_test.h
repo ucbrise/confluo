@@ -11,71 +11,7 @@ using namespace ::confluo;
 
 class ConfluoStoreTest : public testing::Test {
  public:
-  static task_pool MGMT_POOL;
-  static void generate_bytes(uint8_t *buf, size_t len, uint64_t val) {
-    uint8_t val_uint8 = (uint8_t) (val % 256);
-    for (uint32_t i = 0; i < len; i++)
-      buf[i] = val_uint8;
-  }
-
-  void test_append_and_get(atomic_multilog &dtable) {
-    std::vector<uint64_t> offsets;
-    for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      ConfluoStoreTest::generate_bytes(data_, DATA_SIZE, i);
-      uint64_t offset = dtable.append(data_);
-      offsets.push_back(offset);
-    }
-
-    record_t r;
-    for (uint64_t i = 0; i < MAX_RECORDS; i++) {
-      read_only_data_log_ptr ptr;
-      dtable.read(offsets[i], ptr);
-      ASSERT_TRUE(ptr.get().ptr() != nullptr);
-      uint8_t expected = static_cast<uint8_t>(i % 256);
-      for (uint32_t j = 0; j < DATA_SIZE; j++) {
-        ASSERT_EQ(ptr[j], expected);
-      }
-    }
-    ASSERT_EQ(MAX_RECORDS, dtable.num_records());
-  }
-
   static std::vector<column_t> s;
-
-  struct rec {
-    int64_t ts;
-    bool a;
-    int8_t b;
-    int16_t c;
-    int32_t d;
-    int64_t e;
-    float f;
-    double g;
-    char h[16];
-  }__attribute__((packed));
-
-  static rec r;
-  static char test_str[16];
-
-  static char *test_string(const char *str) {
-    size_t len = std::min(static_cast<size_t>(16), strlen(str));
-    memcpy(test_str, str, len);
-    for (size_t i = len; i < 16; i++) {
-      test_str[i] = '\0';
-    }
-    return test_str;
-  }
-
-  static void *record(bool a, int8_t b, int16_t c, int32_t d, int64_t e,
-                      float f, double g, const char *h) {
-    int64_t ts = utils::time_utils::cur_ns();
-    r = {ts, a, b, c, d, e, f, g, {}};
-    size_t len = std::min(static_cast<size_t>(16), strlen(h));
-    memcpy(r.h, h, len);
-    for (size_t i = len; i < 16; i++) {
-      r.h[i] = '\0';
-    }
-    return reinterpret_cast<void *>(&r);
-  }
 
   static std::vector<column_t> schema() {
     schema_builder builder;
@@ -90,34 +26,9 @@ class ConfluoStoreTest : public testing::Test {
     return builder.get_columns();
   }
 
-  static record_batch get_batch() {
-    record_batch_builder builder(s);
-    builder.add_record(record(false, '0', 0, 0, 0, 0.0, 0.01, "abc"));
-    builder.add_record(record(true, '1', 10, 2, 1, 0.1, 0.02, "defg"));
-    builder.add_record(record(false, '2', 20, 4, 10, 0.2, 0.03, "hijkl"));
-    builder.add_record(record(true, '3', 30, 6, 100, 0.3, 0.04, "mnopqr"));
-    builder.add_record(record(false, '4', 40, 8, 1000, 0.4, 0.05, "stuvwx"));
-    builder.add_record(record(true, '5', 50, 10, 10000, 0.5, 0.06, "yyy"));
-    builder.add_record(record(false, '6', 60, 12, 100000, 0.6, 0.07, "zzz"));
-    builder.add_record(record(true, '7', 70, 14, 1000000, 0.7, 0.08, "zzz"));
-    return builder.get_batch();
-  }
-
- protected:
-  uint8_t data_[DATA_SIZE];
-
-  virtual void SetUp() override {
-    thread_manager::register_thread();
-  }
-
-  virtual void TearDown() override {
-    thread_manager::deregister_thread();
-  }
 };
 
-ConfluoStoreTest::rec ConfluoStoreTest::r;
 std::vector<column_t> ConfluoStoreTest::s = schema();
-task_pool ConfluoStoreTest::MGMT_POOL;
 
 TEST_F(ConfluoStoreTest, AddTableTest) {
   confluo_store store("/tmp");
@@ -133,6 +44,36 @@ TEST_F(ConfluoStoreTest, RemoveTableTest) {
     store.remove_atomic_multilog("my_table");
   } catch (std::exception &e) {
     ASSERT_STREQ("No such atomic multilog my_table", e.what());
+  }
+}
+
+TEST_F(ConfluoStoreTest, LoadTest) {
+  std::vector<column_t> s = schema();
+
+  confluo_store store("/tmp");
+  int64_t id = store.create_atomic_multilog("my_table", s, storage::storage_mode::IN_MEMORY);
+  auto *mlog = store.get_atomic_multilog(id);
+
+  typedef std::vector<std::string> rec_vector;
+  mlog->append(rec_vector{"false", "0", "0", "0", "0", "0.000000", "0.010000", "abc"});
+  mlog->append(rec_vector{"true", "1", "10", "2", "1", "0.100000", "0.020000", "defg"});
+  mlog->append(rec_vector{"false", "2", "20", "4", "10", "0.200000", "0.030000", "hijkl"});
+  mlog->append(rec_vector{"true", "3", "30", "6", "100", "0.300000", "0.040000", "mnopqr"});
+  mlog->append(rec_vector{"false", "4", "40", "8", "1000", "0.400000", "0.050000", "stuvwx"});
+  mlog->append(rec_vector{"true", "5", "50", "10", "10000", "0.500000", "0.060000", "yyy"});
+  mlog->append(rec_vector{"false", "6", "60", "12", "100000", "0.600000", "0.070000", "zzz"});
+  mlog->append(rec_vector{"true", "7", "70", "14", "1000000", "0.700000", "0.080000", "zzz"});
+
+  // Archive data that we will attempt to load
+  mlog->archive();
+  store.remove_atomic_multilog("my_table");
+
+  // Load data back into a new multilog
+  int64_t loaded_mlog_id = store.load_atomic_multilog("my_table");
+  auto *loaded_mlog = store.get_atomic_multilog(loaded_mlog_id);
+
+  for (uint64_t i = 0; i < loaded_mlog->num_records() * loaded_mlog->record_size(); i++) {
+    ASSERT_EQ(loaded_mlog->read_raw(i) , mlog->read_raw(i));
   }
 }
 

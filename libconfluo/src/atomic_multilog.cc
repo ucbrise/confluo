@@ -1,5 +1,6 @@
 #include "atomic_multilog.h"
 
+
 namespace confluo {
 
 atomic_multilog::atomic_multilog(const std::string &name,
@@ -42,19 +43,25 @@ atomic_multilog::atomic_multilog(const std::string &name,
 atomic_multilog::atomic_multilog(const std::string &name, const std::string &path, task_pool &pool)
     : name_(name),
       schema_(),
-      metadata_(path),
+      data_log_(),
+      rt_(),
+      metadata_(),
       planner_(&data_log_, &indexes_, &schema_),
       archiver_(path, rt_, &data_log_, &filters_, &indexes_, &schema_, false),
       archival_task_("archival"),
       archival_pool_(),
       mgmt_pool_(pool),
       monitor_task_("monitor") {
+  // Load multilog metadata
   storage_mode s_mode;
   archival_mode a_mode;
   load_metadata(path, s_mode, a_mode);
-  data_log_ = data_log_type("data_log", path, s_mode);
+  metadata_ = metadata_writer(path, false);
+  // Load multilog data
+  data_log_.init("data_log", path, s_mode);
   rt_ = read_tail_type(path, s_mode);
   load(s_mode);
+  // Start background tasks
   monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this), configuration_params::MONITOR_PERIODICITY_MS());
   if (a_mode == archival_mode::ON) {
     archival_task_.start(std::bind(&atomic_multilog::archival_task, this),
@@ -386,10 +393,9 @@ void atomic_multilog::load(const storage::storage_mode &mode) {
 
 void atomic_multilog::load_metadata(const std::string &path, storage_mode &s_mode, archival_mode &a_mode) {
   metadata_reader reader(path);
-  metadata_writer temp = metadata_;
-  metadata_ = metadata_writer(); // metadata shouldn't be written while loading
   while (reader.has_next()) {
-    switch (reader.next_type()) {
+    auto type = reader.next_type();
+    switch (type) {
       case D_SCHEMA_METADATA: {
         schema_ = reader.next_schema();
         break;
@@ -424,9 +430,11 @@ void atomic_multilog::load_metadata(const std::string &path, storage_mode &s_mod
         a_mode = reader.next_archival_mode();
         break;
       }
+      default: {
+        throw illegal_state_exception("Unexpected type found while loading metadata!");
+      }
     }
   }
-  metadata_ = temp;
 }
 
 void atomic_multilog::update_aux_record_block(uint64_t log_offset, record_block &block, size_t record_size) {

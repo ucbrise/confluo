@@ -203,9 +203,9 @@ class metadata_writer {
   /**
    * Constructor that initializes metadata writer
    * @param path The path of where the metadata is
-   * @param id The id of the storage type 
+   * @param overwrite Whether or not to overwrite previous contents of file
    */
-  explicit metadata_writer(const std::string &path);
+  explicit metadata_writer(const std::string &path, bool overwrite = true);
 
   /**
    * Initializes the schema metadata writer
