@@ -1,4 +1,5 @@
 #include "atomic_multilog_metadata.h"
+#include "file_utils.h"
 
 namespace confluo {
 
@@ -51,13 +52,17 @@ uint64_t trigger_metadata::periodicity_ms() const {
   return periodicity_ms_;
 }
 metadata_writer::metadata_writer()
-    : metadata_writer("") {
-  state_ = UNINIT;
+    : filename_(""),
+      state_(UNINIT) {
 }
-metadata_writer::metadata_writer(const std::string &path)
+metadata_writer::metadata_writer(const std::string &path, bool overwrite)
     : filename_(path + "/metadata"),
       state_(INIT) {
-  out_.open(filename_);
+  if (overwrite) {
+    out_.open(filename_);
+  } else {
+    out_.open(filename_, std::ofstream::app);
+  }
 }
 metadata_writer::metadata_writer(const metadata_writer &other)
     : filename_(other.filename_),
@@ -150,13 +155,13 @@ metadata_reader::metadata_reader(const std::string &path)
       in_(filename_) {
 }
 bool metadata_reader::has_next() {
-  return !in_.eof();
+  return in_.tellg() != utils::file_utils::file_size(filename_);
 }
 metadata_type metadata_reader::next_type() {
   return io_utils::read<metadata_type>(in_);
 }
 schema_t metadata_reader::next_schema() {
-  size_t ncolumns = io_utils::read<size_t>(in_);
+  auto ncolumns = io_utils::read<size_t>(in_);
   schema_builder builder;
   for (size_t i = 0; i < ncolumns; i++) {
     std::string name = io_utils::read<std::string>(in_);
@@ -167,7 +172,7 @@ schema_t metadata_reader::next_schema() {
 }
 index_metadata metadata_reader::next_index_metadata() {
   std::string field_name = io_utils::read<std::string>(in_);
-  double bucket_size = io_utils::read<double>(in_);
+  auto bucket_size = io_utils::read<double>(in_);
   return index_metadata(field_name, bucket_size);
 }
 filter_metadata metadata_reader::next_filter_metadata() {
@@ -184,7 +189,7 @@ aggregate_metadata metadata_reader::next_aggregate_metadata() {
 trigger_metadata metadata_reader::next_trigger_metadata() {
   std::string trigger_name = io_utils::read<std::string>(in_);
   std::string trigger_expr = io_utils::read<std::string>(in_);
-  uint64_t periodicity_ms = io_utils::read<uint64_t>(in_);
+  auto periodicity_ms = io_utils::read<uint64_t>(in_);
   return trigger_metadata(trigger_name, trigger_expr, periodicity_ms);
 }
 storage::storage_mode metadata_reader::next_storage_mode() {
