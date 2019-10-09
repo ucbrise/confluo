@@ -53,7 +53,7 @@ class rpc_client {
    */
   virtual ~rpc_client();
 
-  virtual /**
+  /**
    * Disconnects the rpc client
    */
   void disconnect();
@@ -74,7 +74,7 @@ class rpc_client {
    * @param schema The schema of the atomic multilog
    * @param mode The storage mode of the atomic multilog
    */
-  void create_atomic_multilog(const std::string &name, const schema_t &schema, const storage::storage_mode mode);
+  void create_atomic_multilog(const std::string &name, const schema_t &schema, storage::storage_mode mode);
 
   /**
    * Sets the current atomic multilog to the name of the desired atomic
@@ -84,6 +84,13 @@ class rpc_client {
    * multilog to
    */
   void set_current_atomic_multilog(const std::string &name);
+
+  /**
+   * Load the atomic multilog with the given name from persistent storage.
+   * @param name The name of the atomic multilog to set the current atomic
+   * multilog to
+   */
+  void load_atomic_multilog(const std::string &name);
 
   /**
    * Gets the current schema
@@ -167,6 +174,13 @@ class rpc_client {
    * @param trigger_name The name of the trigger to remove
    */
   void remove_trigger(const std::string &trigger_name);
+
+  /**
+   * Archive atomic multilog until provided offset.
+   *
+   * @param offset Offset until which data is to be archived (-1 for entire multilog)
+   */
+  void archive(int64_t offset = -1);
 
   /** Query ops **/
   // Write ops

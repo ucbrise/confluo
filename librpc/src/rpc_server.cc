@@ -47,6 +47,18 @@ int64_t rpc_service_handler::create_atomic_multilog(const std::string &name,
   return ret;
 }
 
+int64_t rpc_service_handler::load_atomic_multilog(const std::string &name) {
+  int64_t ret;
+  try {
+    ret = store_->load_atomic_multilog(name);
+  } catch (management_exception &ex) {
+    rpc_management_exception e;
+    e.msg = ex.what();
+    throw e;
+  }
+  return ret;
+}
+
 void rpc_service_handler::get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name) {
   _return.id = store_->get_atomic_multilog_id(name);
   auto dschema = store_->get_atomic_multilog(_return.id)->get_schema().columns();
@@ -151,6 +163,20 @@ void rpc_service_handler::add_trigger(int64_t id, const std::string &trigger_nam
 void rpc_service_handler::remove_trigger(int64_t id, const std::string &trigger_name) {
   try {
     store_->get_atomic_multilog(id)->remove_trigger(trigger_name);
+  } catch (management_exception &ex) {
+    rpc_management_exception e;
+    e.msg = ex.what();
+    throw e;
+  }
+}
+
+void rpc_service_handler::archive(int64_t id, int64_t offset) {
+  try {
+    if (offset >= 0) {
+      store_->get_atomic_multilog(id)->archive(offset);
+    } else {
+      store_->get_atomic_multilog(id)->archive();
+    }
   } catch (management_exception &ex) {
     rpc_management_exception e;
     e.msg = ex.what();

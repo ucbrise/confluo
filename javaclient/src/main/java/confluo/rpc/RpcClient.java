@@ -102,6 +102,16 @@ public class RpcClient {
     curMultilogId = client.createAtomicMultilog(name, rpcSchema, storageMode);
   }
 
+  /**
+   * Load atomic multilog with given name.
+   * @param name        The name of the atomic multilog
+   * @throws TException Cannot load atomic multilog
+   */
+  public void loadAtomicMultilog(String name) throws TException {
+    curMultilogId = client.loadAtomicMultilog(name);
+    this.setCurrentAtomicMultilog(name);
+  }
+
 
   /**
    * Sets the atomic multilog to the desired atomic multilog
@@ -235,6 +245,26 @@ public class RpcClient {
       throw new IllegalStateException("Must set Atomic Multilog first");
     }
     client.removeTrigger(curMultilogId, triggerName);
+  }
+
+  /**
+   * Archive atomic multilog upto provided offset.
+   * @param offset Offset until which atomic multilog should be archived.
+   * @throws TException Archival failure.
+   */
+  public void archive(long offset) throws TException {
+    if (curMultilogId == -1) {
+      throw new IllegalStateException("Must set Atomic Multilog first");
+    }
+    client.archive(curMultilogId, offset);
+  }
+
+  /**
+   * Archive entire atomic multilog.
+   * @throws TException Archival failure.
+   */
+  public void archive() throws TException {
+    archive(-1);
   }
 
   /**

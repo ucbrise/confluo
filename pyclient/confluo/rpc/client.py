@@ -74,13 +74,22 @@ class RpcClient:
         rpc_schema = type_conversions.convert_to_rpc_schema(self.cur_schema_)
         self.cur_m_id_ = self.client_.create_atomic_multilog(name, rpc_schema, storage_mode)
 
-    def set_current_atomic_multilog(self, atomic_multilog_name):
+    def load_atomic_multilog(self, name):
+        """ Loads the atomic multilog with specified name
+
+        Args:
+            name: The name of the atomic multilog to create.
+        """
+        self.cur_m_id_ = self.client_.load_atomic_multilog(name)
+        self.set_current_atomic_multilog(name)
+
+    def set_current_atomic_multilog(self, name):
         """ Sets the atomic multilog to the desired atomic multilog.
 
         Args:
-            atomic_multilog_name: The name of atomic multilog to set the current atomic multilog to.
+            name: The name of atomic multilog to set the current atomic multilog to.
         """
-        info = self.client_.get_atomic_multilog_info(atomic_multilog_name)
+        info = self.client_.get_atomic_multilog_info(name)
         self.cur_schema_ = type_conversions.convert_to_schema(info.schema)
         self.cur_m_id_ = info.id
 
@@ -192,6 +201,18 @@ class RpcClient:
         if self.cur_m_id_ == -1:
             raise ValueError("Must set atomic multilog first.")
         self.client_.remove_trigger(self.cur_m_id_, trigger_name)
+
+    def archive(self, offset=-1):
+        """ Archives the atomic multilog until provided offset.
+
+        Args:
+            offset: Offset until which multilog should be archived (-1 for full archival).
+        Raises:
+            ValueError.
+        """
+        if self.cur_m_id_ == -1:
+            raise ValueError("Must set atomic multilog first.")
+        self.client_.archive(self.cur_m_id_, offset)
 
     def append_raw(self, data):
         """ Append raw data to the atomic multilog.
