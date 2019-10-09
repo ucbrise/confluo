@@ -83,14 +83,20 @@ public class TestRpcClient {
     client.disconnect();
   }
 
-  private void readWrite(rpc_storage_mode mode) throws TException {
-    RpcClient client = new RpcClient(HOST, PORT);
+  private void write(RpcClient client, rpc_storage_mode mode) throws TException {
     client.createAtomicMultilog(MULTILOG_NAME, "{ msg: STRING(8) }", mode);
-
     client.append("abcdefgh");
+  }
+
+  private void read(RpcClient client) throws TException {
     Record record = client.read(0);
     assertEquals("abcdefgh", record.get(1).asString());
+  }
 
+  private void readWrite(rpc_storage_mode mode) throws TException {
+    RpcClient client = new RpcClient(HOST, PORT);
+    write(client, mode);
+    read(client);
     client.disconnect();
   }
 
@@ -107,6 +113,18 @@ public class TestRpcClient {
   @Test
   public void testReadWriteDurable() throws TException {
     readWrite(StorageMode.DURABLE);
+  }
+
+  @Test
+  public void testLoad() throws TException {
+    RpcClient client = new RpcClient(HOST, PORT);
+    write(client, StorageMode.IN_MEMORY);
+    client.archive();
+    client.disconnect();
+    client = new RpcClient(HOST, PORT);
+    client.loadAtomicMultilog(MULTILOG_NAME);
+    read(client);
+    client.disconnect();
   }
 
   @Test
