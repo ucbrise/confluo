@@ -423,4 +423,17 @@ public class RpcClient {
     }
     return client.numRecords(curMultilogId);
   }
+
+  /**
+   * Gets the records size for the atomic multilog
+   *
+   * @return The number of records
+   * @throws TException Cannot get the number of records
+   */
+  public long recordSize() throws TException {
+    if (curMultilogId == -1) {
+      throw new IllegalStateException("Must set Atomic Multilog first");
+    }
+    return curSchema.getRecordSize();
+  }
 }
