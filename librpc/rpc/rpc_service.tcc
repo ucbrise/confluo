@@ -680,8 +680,8 @@ uint32_t rpc_service_load_atomic_multilog_result::read(Protocol_* iprot) {
     switch (fid)
     {
       case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64(this->success);
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->success.read(iprot);
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -715,8 +715,8 @@ uint32_t rpc_service_load_atomic_multilog_result::write(Protocol_* oprot) const 
   xfer += oprot->writeStructBegin("rpc_service_load_atomic_multilog_result");
 
   if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I64, 0);
-    xfer += oprot->writeI64(this->success);
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_STRUCT, 0);
+    xfer += this->success.write(oprot);
     xfer += oprot->writeFieldEnd();
   } else if (this->__isset.ex) {
     xfer += oprot->writeFieldBegin("ex", ::apache::thrift::protocol::T_STRUCT, 1);
@@ -752,8 +752,8 @@ uint32_t rpc_service_load_atomic_multilog_presult::read(Protocol_* iprot) {
     switch (fid)
     {
       case 0:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
-          xfer += iprot->readI64((*(this->success)));
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += (*(this->success)).read(iprot);
           this->__isset.success = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -5805,10 +5805,10 @@ int64_t rpc_serviceClientT<Protocol_>::recv_create_atomic_multilog()
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::load_atomic_multilog(const std::string& name)
+void rpc_serviceClientT<Protocol_>::load_atomic_multilog(rpc_atomic_multilog_info& _return, const std::string& name)
 {
   send_load_atomic_multilog(name);
-  return recv_load_atomic_multilog();
+  recv_load_atomic_multilog(_return);
 }
 
 template <class Protocol_>
@@ -5827,7 +5827,7 @@ void rpc_serviceClientT<Protocol_>::send_load_atomic_multilog(const std::string&
 }
 
 template <class Protocol_>
-int64_t rpc_serviceClientT<Protocol_>::recv_load_atomic_multilog()
+void rpc_serviceClientT<Protocol_>::recv_load_atomic_multilog(rpc_atomic_multilog_info& _return)
 {
 
   int32_t rseqid = 0;
@@ -5852,7 +5852,6 @@ int64_t rpc_serviceClientT<Protocol_>::recv_load_atomic_multilog()
     this->iprot_->readMessageEnd();
     this->iprot_->getTransport()->readEnd();
   }
-  int64_t _return;
   rpc_service_load_atomic_multilog_presult result;
   result.success = &_return;
   result.read(this->iprot_);
@@ -5860,7 +5859,8 @@ int64_t rpc_serviceClientT<Protocol_>::recv_load_atomic_multilog()
   this->iprot_->getTransport()->readEnd();
 
   if (result.__isset.success) {
-    return _return;
+    // _return pointer has now been filled
+    return;
   }
   if (result.__isset.ex) {
     throw result.ex;
@@ -7723,7 +7723,7 @@ void rpc_serviceProcessorT<Protocol_>::process_load_atomic_multilog(int32_t seqi
 
   rpc_service_load_atomic_multilog_result result;
   try {
-    result.success = iface_->load_atomic_multilog(args.name);
+    iface_->load_atomic_multilog(result.success, args.name);
     result.__isset.success = true;
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
@@ -7781,7 +7781,7 @@ void rpc_serviceProcessorT<Protocol_>::process_load_atomic_multilog(int32_t seqi
 
   rpc_service_load_atomic_multilog_result result;
   try {
-    result.success = iface_->load_atomic_multilog(args.name);
+    iface_->load_atomic_multilog(result.success, args.name);
     result.__isset.success = true;
   } catch (rpc_management_exception &ex) {
     result.ex = ex;
@@ -10709,10 +10709,10 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_create_atomic_multilog(con
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::load_atomic_multilog(const std::string& name)
+void rpc_serviceConcurrentClientT<Protocol_>::load_atomic_multilog(rpc_atomic_multilog_info& _return, const std::string& name)
 {
   int32_t seqid = send_load_atomic_multilog(name);
-  return recv_load_atomic_multilog(seqid);
+  recv_load_atomic_multilog(_return, seqid);
 }
 
 template <class Protocol_>
@@ -10735,7 +10735,7 @@ int32_t rpc_serviceConcurrentClientT<Protocol_>::send_load_atomic_multilog(const
 }
 
 template <class Protocol_>
-int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_load_atomic_multilog(const int32_t seqid)
+void rpc_serviceConcurrentClientT<Protocol_>::recv_load_atomic_multilog(rpc_atomic_multilog_info& _return, const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -10773,7 +10773,6 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_load_atomic_multilog(const
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      int64_t _return;
       rpc_service_load_atomic_multilog_presult result;
       result.success = &_return;
       result.read(this->iprot_);
@@ -10781,8 +10780,9 @@ int64_t rpc_serviceConcurrentClientT<Protocol_>::recv_load_atomic_multilog(const
       this->iprot_->getTransport()->readEnd();
 
       if (result.__isset.success) {
+        // _return pointer has now been filled
         sentry.commit();
-        return _return;
+        return;
       }
       if (result.__isset.ex) {
         sentry.commit();

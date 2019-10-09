@@ -2443,8 +2443,9 @@ class load_atomic_multilog_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.I64:
-                    self.success = iprot.readI64()
+                if ftype == TType.STRUCT:
+                    self.success = rpc_atomic_multilog_info()
+                    self.success.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
@@ -2464,8 +2465,8 @@ class load_atomic_multilog_result(object):
             return
         oprot.writeStructBegin('load_atomic_multilog_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.I64, 0)
-            oprot.writeI64(self.success)
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
             oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
@@ -2489,7 +2490,7 @@ class load_atomic_multilog_result(object):
         return not (self == other)
 all_structs.append(load_atomic_multilog_result)
 load_atomic_multilog_result.thrift_spec = (
-    (0, TType.I64, 'success', None, None, ),  # 0
+    (0, TType.STRUCT, 'success', [rpc_atomic_multilog_info, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [rpc_management_exception, None], None, ),  # 1
 )
 

@@ -47,16 +47,16 @@ int64_t rpc_service_handler::create_atomic_multilog(const std::string &name,
   return ret;
 }
 
-int64_t rpc_service_handler::load_atomic_multilog(const std::string &name) {
-  int64_t ret;
+void rpc_service_handler::load_atomic_multilog(rpc_atomic_multilog_info &_return, const std::string &name) {
   try {
-    ret = store_->load_atomic_multilog(name);
+    _return.id = store_->load_atomic_multilog(name);
+    auto dschema = store_->get_atomic_multilog(_return.id)->get_schema().columns();
+    _return.schema = rpc_type_conversions::convert_schema(dschema);
   } catch (management_exception &ex) {
     rpc_management_exception e;
     e.msg = ex.what();
     throw e;
   }
-  return ret;
 }
 
 void rpc_service_handler::get_atomic_multilog_info(rpc_atomic_multilog_info &_return, const std::string &name) {

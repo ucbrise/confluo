@@ -21,7 +21,7 @@ public class rpc_service {
 
     public long createAtomicMultilog(java.lang.String name, java.util.List<rpc_column> schema, rpc_storage_mode mode) throws rpc_management_exception, org.apache.thrift.TException;
 
-    public long loadAtomicMultilog(java.lang.String name) throws rpc_management_exception, org.apache.thrift.TException;
+    public rpc_atomic_multilog_info loadAtomicMultilog(java.lang.String name) throws rpc_management_exception, org.apache.thrift.TException;
 
     public rpc_atomic_multilog_info getAtomicMultilogInfo(java.lang.String name) throws rpc_management_exception, org.apache.thrift.TException;
 
@@ -85,7 +85,7 @@ public class rpc_service {
 
     public void createAtomicMultilog(java.lang.String name, java.util.List<rpc_column> schema, rpc_storage_mode mode, org.apache.thrift.async.AsyncMethodCallback<java.lang.Long> resultHandler) throws org.apache.thrift.TException;
 
-    public void loadAtomicMultilog(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<java.lang.Long> resultHandler) throws org.apache.thrift.TException;
+    public void loadAtomicMultilog(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info> resultHandler) throws org.apache.thrift.TException;
 
     public void getAtomicMultilogInfo(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info> resultHandler) throws org.apache.thrift.TException;
 
@@ -227,7 +227,7 @@ public class rpc_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "create_atomic_multilog failed: unknown result");
     }
 
-    public long loadAtomicMultilog(java.lang.String name) throws rpc_management_exception, org.apache.thrift.TException
+    public rpc_atomic_multilog_info loadAtomicMultilog(java.lang.String name) throws rpc_management_exception, org.apache.thrift.TException
     {
       sendLoadAtomicMultilog(name);
       return recvLoadAtomicMultilog();
@@ -240,7 +240,7 @@ public class rpc_service {
       sendBase("load_atomic_multilog", args);
     }
 
-    public long recvLoadAtomicMultilog() throws rpc_management_exception, org.apache.thrift.TException
+    public rpc_atomic_multilog_info recvLoadAtomicMultilog() throws rpc_management_exception, org.apache.thrift.TException
     {
       load_atomic_multilog_result result = new load_atomic_multilog_result();
       receiveBase(result, "load_atomic_multilog");
@@ -960,16 +960,16 @@ public class rpc_service {
       }
     }
 
-    public void loadAtomicMultilog(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<java.lang.Long> resultHandler) throws org.apache.thrift.TException {
+    public void loadAtomicMultilog(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       load_atomic_multilog_call method_call = new load_atomic_multilog_call(name, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
-    public static class load_atomic_multilog_call extends org.apache.thrift.async.TAsyncMethodCall<java.lang.Long> {
+    public static class load_atomic_multilog_call extends org.apache.thrift.async.TAsyncMethodCall<rpc_atomic_multilog_info> {
       private java.lang.String name;
-      public load_atomic_multilog_call(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<java.lang.Long> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public load_atomic_multilog_call(java.lang.String name, org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.name = name;
       }
@@ -982,7 +982,7 @@ public class rpc_service {
         prot.writeMessageEnd();
       }
 
-      public java.lang.Long getResult() throws rpc_management_exception, org.apache.thrift.TException {
+      public rpc_atomic_multilog_info getResult() throws rpc_management_exception, org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new java.lang.IllegalStateException("Method call not finished!");
         }
@@ -1992,7 +1992,6 @@ public class rpc_service {
         load_atomic_multilog_result result = new load_atomic_multilog_result();
         try {
           result.success = iface.loadAtomicMultilog(args.name);
-          result.setSuccessIsSet(true);
         } catch (rpc_management_exception ex) {
           result.ex = ex;
         }
@@ -2891,7 +2890,7 @@ public class rpc_service {
       }
     }
 
-    public static class load_atomic_multilog<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, load_atomic_multilog_args, java.lang.Long> {
+    public static class load_atomic_multilog<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, load_atomic_multilog_args, rpc_atomic_multilog_info> {
       public load_atomic_multilog() {
         super("load_atomic_multilog");
       }
@@ -2900,13 +2899,12 @@ public class rpc_service {
         return new load_atomic_multilog_args();
       }
 
-      public org.apache.thrift.async.AsyncMethodCallback<java.lang.Long> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
+      public org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info> getResultHandler(final org.apache.thrift.server.AbstractNonblockingServer.AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new org.apache.thrift.async.AsyncMethodCallback<java.lang.Long>() { 
-          public void onComplete(java.lang.Long o) {
+        return new org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info>() { 
+          public void onComplete(rpc_atomic_multilog_info o) {
             load_atomic_multilog_result result = new load_atomic_multilog_result();
             result.success = o;
-            result.setSuccessIsSet(true);
             try {
               fcall.sendResponse(fb, result, org.apache.thrift.protocol.TMessageType.REPLY,seqid);
             } catch (org.apache.thrift.transport.TTransportException e) {
@@ -2952,7 +2950,7 @@ public class rpc_service {
         return false;
       }
 
-      public void start(I iface, load_atomic_multilog_args args, org.apache.thrift.async.AsyncMethodCallback<java.lang.Long> resultHandler) throws org.apache.thrift.TException {
+      public void start(I iface, load_atomic_multilog_args args, org.apache.thrift.async.AsyncMethodCallback<rpc_atomic_multilog_info> resultHandler) throws org.apache.thrift.TException {
         iface.loadAtomicMultilog(args.name,resultHandler);
       }
     }
@@ -7185,13 +7183,13 @@ public class rpc_service {
   public static class load_atomic_multilog_result implements org.apache.thrift.TBase<load_atomic_multilog_result, load_atomic_multilog_result._Fields>, java.io.Serializable, Cloneable, Comparable<load_atomic_multilog_result>   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("load_atomic_multilog_result");
 
-    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.I64, (short)0);
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRUCT, (short)0);
     private static final org.apache.thrift.protocol.TField EX_FIELD_DESC = new org.apache.thrift.protocol.TField("ex", org.apache.thrift.protocol.TType.STRUCT, (short)1);
 
     private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new load_atomic_multilog_resultStandardSchemeFactory();
     private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new load_atomic_multilog_resultTupleSchemeFactory();
 
-    private long success; // required
+    private @org.apache.thrift.annotation.Nullable rpc_atomic_multilog_info success; // required
     private @org.apache.thrift.annotation.Nullable rpc_management_exception ex; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -7258,13 +7256,11 @@ public class rpc_service {
     }
 
     // isset id assignments
-    private static final int __SUCCESS_ISSET_ID = 0;
-    private byte __isset_bitfield = 0;
     public static final java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       java.util.Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new java.util.EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, rpc_atomic_multilog_info.class)));
       tmpMap.put(_Fields.EX, new org.apache.thrift.meta_data.FieldMetaData("ex", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, rpc_management_exception.class)));
       metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
@@ -7275,12 +7271,11 @@ public class rpc_service {
     }
 
     public load_atomic_multilog_result(
-      long success,
+      rpc_atomic_multilog_info success,
       rpc_management_exception ex)
     {
       this();
       this.success = success;
-      setSuccessIsSet(true);
       this.ex = ex;
     }
 
@@ -7288,8 +7283,9 @@ public class rpc_service {
      * Performs a deep copy on <i>other</i>.
      */
     public load_atomic_multilog_result(load_atomic_multilog_result other) {
-      __isset_bitfield = other.__isset_bitfield;
-      this.success = other.success;
+      if (other.isSetSuccess()) {
+        this.success = new rpc_atomic_multilog_info(other.success);
+      }
       if (other.isSetEx()) {
         this.ex = new rpc_management_exception(other.ex);
       }
@@ -7301,32 +7297,35 @@ public class rpc_service {
 
     @Override
     public void clear() {
-      setSuccessIsSet(false);
-      this.success = 0;
+      if (this.success != null) {
+        this.success.clear();
+      }
       this.ex = null;
     }
 
-    public long getSuccess() {
+    @org.apache.thrift.annotation.Nullable
+    public rpc_atomic_multilog_info getSuccess() {
       return this.success;
     }
 
-    public load_atomic_multilog_result setSuccess(long success) {
+    public load_atomic_multilog_result setSuccess(@org.apache.thrift.annotation.Nullable rpc_atomic_multilog_info success) {
       this.success = success;
-      setSuccessIsSet(true);
       return this;
     }
 
     public void unsetSuccess() {
-      __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
+      this.success = null;
     }
 
     /** Returns true if field success is set (has been assigned a value) and false otherwise */
     public boolean isSetSuccess() {
-      return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
+      return this.success != null;
     }
 
     public void setSuccessIsSet(boolean value) {
-      __isset_bitfield = org.apache.thrift.EncodingUtils.setBit(__isset_bitfield, __SUCCESS_ISSET_ID, value);
+      if (!value) {
+        this.success = null;
+      }
     }
 
     @org.apache.thrift.annotation.Nullable
@@ -7360,7 +7359,7 @@ public class rpc_service {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((java.lang.Long)value);
+          setSuccess((rpc_atomic_multilog_info)value);
         }
         break;
 
@@ -7418,12 +7417,12 @@ public class rpc_service {
       if (this == that)
         return true;
 
-      boolean this_present_success = true;
-      boolean that_present_success = true;
+      boolean this_present_success = true && this.isSetSuccess();
+      boolean that_present_success = true && that.isSetSuccess();
       if (this_present_success || that_present_success) {
         if (!(this_present_success && that_present_success))
           return false;
-        if (this.success != that.success)
+        if (!this.success.equals(that.success))
           return false;
       }
 
@@ -7443,7 +7442,9 @@ public class rpc_service {
     public int hashCode() {
       int hashCode = 1;
 
-      hashCode = hashCode * 8191 + org.apache.thrift.TBaseHelper.hashCode(success);
+      hashCode = hashCode * 8191 + ((isSetSuccess()) ? 131071 : 524287);
+      if (isSetSuccess())
+        hashCode = hashCode * 8191 + success.hashCode();
 
       hashCode = hashCode * 8191 + ((isSetEx()) ? 131071 : 524287);
       if (isSetEx())
@@ -7502,7 +7503,11 @@ public class rpc_service {
       boolean first = true;
 
       sb.append("success:");
-      sb.append(this.success);
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
       first = false;
       if (!first) sb.append(", ");
       sb.append("ex:");
@@ -7519,6 +7524,9 @@ public class rpc_service {
     public void validate() throws org.apache.thrift.TException {
       // check for required fields
       // check for sub-struct validity
+      if (success != null) {
+        success.validate();
+      }
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -7531,8 +7539,6 @@ public class rpc_service {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, java.lang.ClassNotFoundException {
       try {
-        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
-        __isset_bitfield = 0;
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -7558,8 +7564,11 @@ public class rpc_service {
           }
           switch (schemeField.id) {
             case 0: // SUCCESS
-              if (schemeField.type == org.apache.thrift.protocol.TType.I64) {
-                struct.success = iprot.readI64();
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                if (struct.success == null) {
+                  struct.success = new rpc_atomic_multilog_info();
+                }
+                struct.success.read(iprot);
                 struct.setSuccessIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
@@ -7591,9 +7600,9 @@ public class rpc_service {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
-        if (struct.isSetSuccess()) {
+        if (struct.success != null) {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
-          oprot.writeI64(struct.success);
+          struct.success.write(oprot);
           oprot.writeFieldEnd();
         }
         if (struct.ex != null) {
@@ -7627,7 +7636,7 @@ public class rpc_service {
         }
         oprot.writeBitSet(optionals, 2);
         if (struct.isSetSuccess()) {
-          oprot.writeI64(struct.success);
+          struct.success.write(oprot);
         }
         if (struct.isSetEx()) {
           struct.ex.write(oprot);
@@ -7639,7 +7648,10 @@ public class rpc_service {
         org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
         java.util.BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
-          struct.success = iprot.readI64();
+          if (struct.success == null) {
+            struct.success = new rpc_atomic_multilog_info();
+          }
+          struct.success.read(iprot);
           struct.setSuccessIsSet(true);
         }
         if (incoming.get(1)) {

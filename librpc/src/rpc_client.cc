@@ -46,8 +46,11 @@ void rpc_client::create_atomic_multilog(const std::string &name,
 }
 
 void rpc_client::load_atomic_multilog(const std::string &name) {
-  cur_multilog_id_ = client_->load_atomic_multilog(name);
-  set_current_atomic_multilog(name);
+  rpc_atomic_multilog_info info;
+  client_->load_atomic_multilog(info, name);
+  cur_schema_ = schema_t(rpc_type_conversions::convert_schema(info.schema));
+  cur_multilog_id_ = info.id;
+  std::cerr << "Got info id: " << cur_multilog_id_ << "\n";
 }
 
 void rpc_client::set_current_atomic_multilog(const std::string &name) {

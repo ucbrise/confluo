@@ -28,7 +28,7 @@ class rpc_serviceIf {
   virtual void register_handler() = 0;
   virtual void deregister_handler() = 0;
   virtual int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode) = 0;
-  virtual int64_t load_atomic_multilog(const std::string& name) = 0;
+  virtual void load_atomic_multilog(rpc_atomic_multilog_info& _return, const std::string& name) = 0;
   virtual void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) = 0;
   virtual void remove_atomic_multilog(const int64_t mid) = 0;
   virtual void add_index(const int64_t mid, const std::string& field_name, const double bucket_size) = 0;
@@ -98,9 +98,8 @@ class rpc_serviceNull : virtual public rpc_serviceIf {
     int64_t _return = 0;
     return _return;
   }
-  int64_t load_atomic_multilog(const std::string& /* name */) {
-    int64_t _return = 0;
-    return _return;
+  void load_atomic_multilog(rpc_atomic_multilog_info& /* _return */, const std::string& /* name */) {
+    return;
   }
   void get_atomic_multilog_info(rpc_atomic_multilog_info& /* _return */, const std::string& /* name */) {
     return;
@@ -567,16 +566,16 @@ class rpc_service_load_atomic_multilog_result {
 
   rpc_service_load_atomic_multilog_result(const rpc_service_load_atomic_multilog_result&);
   rpc_service_load_atomic_multilog_result& operator=(const rpc_service_load_atomic_multilog_result&);
-  rpc_service_load_atomic_multilog_result() : success(0) {
+  rpc_service_load_atomic_multilog_result() {
   }
 
   virtual ~rpc_service_load_atomic_multilog_result() throw();
-  int64_t success;
+  rpc_atomic_multilog_info success;
   rpc_management_exception ex;
 
   _rpc_service_load_atomic_multilog_result__isset __isset;
 
-  void __set_success(const int64_t val);
+  void __set_success(const rpc_atomic_multilog_info& val);
 
   void __set_ex(const rpc_management_exception& val);
 
@@ -612,7 +611,7 @@ class rpc_service_load_atomic_multilog_presult {
 
 
   virtual ~rpc_service_load_atomic_multilog_presult() throw();
-  int64_t* success;
+  rpc_atomic_multilog_info* success;
   rpc_management_exception ex;
 
   _rpc_service_load_atomic_multilog_presult__isset __isset;
@@ -3518,9 +3517,9 @@ class rpc_serviceClientT : virtual public rpc_serviceIf {
   int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
   void send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
   int64_t recv_create_atomic_multilog();
-  int64_t load_atomic_multilog(const std::string& name);
+  void load_atomic_multilog(rpc_atomic_multilog_info& _return, const std::string& name);
   void send_load_atomic_multilog(const std::string& name);
-  int64_t recv_load_atomic_multilog();
+  void recv_load_atomic_multilog(rpc_atomic_multilog_info& _return);
   void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name);
   void send_get_atomic_multilog_info(const std::string& name);
   void recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return);
@@ -3816,13 +3815,14 @@ class rpc_serviceMultiface : virtual public rpc_serviceIf {
     return ifaces_[i]->create_atomic_multilog(name, schema, mode);
   }
 
-  int64_t load_atomic_multilog(const std::string& name) {
+  void load_atomic_multilog(rpc_atomic_multilog_info& _return, const std::string& name) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->load_atomic_multilog(name);
+      ifaces_[i]->load_atomic_multilog(_return, name);
     }
-    return ifaces_[i]->load_atomic_multilog(name);
+    ifaces_[i]->load_atomic_multilog(_return, name);
+    return;
   }
 
   void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name) {
@@ -4082,9 +4082,9 @@ class rpc_serviceConcurrentClientT : virtual public rpc_serviceIf {
   int64_t create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
   int32_t send_create_atomic_multilog(const std::string& name, const rpc_schema& schema, const rpc_storage_mode mode);
   int64_t recv_create_atomic_multilog(const int32_t seqid);
-  int64_t load_atomic_multilog(const std::string& name);
+  void load_atomic_multilog(rpc_atomic_multilog_info& _return, const std::string& name);
   int32_t send_load_atomic_multilog(const std::string& name);
-  int64_t recv_load_atomic_multilog(const int32_t seqid);
+  void recv_load_atomic_multilog(rpc_atomic_multilog_info& _return, const int32_t seqid);
   void get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const std::string& name);
   int32_t send_get_atomic_multilog_info(const std::string& name);
   void recv_get_atomic_multilog_info(rpc_atomic_multilog_info& _return, const int32_t seqid);

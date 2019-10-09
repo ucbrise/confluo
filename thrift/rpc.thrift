@@ -93,7 +93,7 @@ service rpc_service {
   // Store ops
   i64 create_atomic_multilog(1: string name, 2: rpc_schema schema, 3: rpc_storage_mode mode)
           throws (1: rpc_management_exception ex),
-  i64 load_atomic_multilog(1: string name)
+  rpc_atomic_multilog_info load_atomic_multilog(1: string name)
           throws (1: rpc_management_exception ex),
   rpc_atomic_multilog_info get_atomic_multilog_info(1: string name)
           throws (1: rpc_management_exception ex),

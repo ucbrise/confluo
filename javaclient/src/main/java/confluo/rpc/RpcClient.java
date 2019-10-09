@@ -108,8 +108,9 @@ public class RpcClient {
    * @throws TException Cannot load atomic multilog
    */
   public void loadAtomicMultilog(String name) throws TException {
-    curMultilogId = client.loadAtomicMultilog(name);
-    this.setCurrentAtomicMultilog(name);
+    rpc_atomic_multilog_info info = client.loadAtomicMultilog(name);
+    curSchema = TypeConversions.convertToSchema(info.getSchema());
+    curMultilogId = info.getId();
   }
 
 

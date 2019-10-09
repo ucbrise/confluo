@@ -116,6 +116,19 @@ public class TestRpcClient {
   }
 
   @Test
+  public void testLoad() throws TException {
+    RpcClient client = new RpcClient(HOST, PORT);
+    write(client, StorageMode.IN_MEMORY);
+    client.archive();
+    client.removeAtomicMultilog();
+    client.disconnect();
+    client = new RpcClient(HOST, PORT);
+    client.loadAtomicMultilog(MULTILOG_NAME);
+    read(client);
+    client.disconnect();
+  }
+
+  @Test
   public void testExecuteFilter() throws TException {
     RpcClient client = new RpcClient(HOST, PORT);
     String multilogSchema = "{\n" +

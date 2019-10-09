@@ -109,7 +109,7 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @return ID associated with the atomic multilog, -1 if it could
    * not be loaded
    */
-  int64_t load_atomic_multilog(const std::string &name) override;
+  void load_atomic_multilog(rpc_atomic_multilog_info &_return, const std::string &name) override;
 
   /**
    * Gets information about the atomic multilog

@@ -80,8 +80,9 @@ class RpcClient:
         Args:
             name: The name of the atomic multilog to create.
         """
-        self.cur_m_id_ = self.client_.load_atomic_multilog(name)
-        self.set_current_atomic_multilog(name)
+        info = self.client_.load_atomic_multilog(name)
+        self.cur_schema_ = type_conversions.convert_to_schema(info.schema)
+        self.cur_m_id_ = info.id
 
     def set_current_atomic_multilog(self, name):
         """ Sets the atomic multilog to the desired atomic multilog.
