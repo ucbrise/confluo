@@ -177,6 +177,50 @@ TEST_F(ClientWriteOpsTest, WriteTest) {
   }
 }
 
+TEST_F(ClientWriteOpsTest, LoadTest) {
+  std::string atomic_multilog_name = "my_multilog";
+
+  auto store = new confluo_store("/tmp");
+  auto id = store->create_atomic_multilog(atomic_multilog_name, schema(), storage::IN_MEMORY);
+  auto mlog = store->get_atomic_multilog(id);
+  auto server = create_server(store);
+  std::thread serve_thread([&server] {
+    server->serve();
+  });
+
+  rpc_test_utils::wait_till_server_ready(SERVER_ADDRESS, SERVER_PORT);
+
+  rpc_client client(SERVER_ADDRESS, SERVER_PORT);
+  client.set_current_atomic_multilog(atomic_multilog_name);
+
+  typedef std::vector<std::string> rec_vector;
+  client.append(rec_vector{"false", "0", "0", "0", "0", "0.000000", "0.010000", "abc"});
+  client.append(rec_vector{"true", "1", "10", "2", "1", "0.100000", "0.020000", "defg"});
+  client.append(rec_vector{"false", "2", "20", "4", "10", "0.200000", "0.030000", "hijkl"});
+  client.append(rec_vector{"true", "3", "30", "6", "100", "0.300000", "0.040000", "mnopqr"});
+  client.append(rec_vector{"false", "4", "40", "8", "1000", "0.400000", "0.050000", "stuvwx"});
+  client.append(rec_vector{"true", "5", "50", "10", "10000", "0.500000", "0.060000", "yyy"});
+  client.append(rec_vector{"false", "6", "60", "12", "100000", "0.600000", "0.070000", "zzz"});
+  client.append(rec_vector{"true", "7", "70", "14", "1000000", "0.700000", "0.080000", "zzz"});
+  client.archive();
+  client.remove_atomic_multilog();
+  client.disconnect();
+
+  rpc_client client2(SERVER_ADDRESS, SERVER_PORT);
+  client2.load_atomic_multilog(atomic_multilog_name);
+
+  auto loaded_mlog = store->get_atomic_multilog(atomic_multilog_name);
+  for (uint64_t i = 0; i < loaded_mlog->num_records() * loaded_mlog->record_size(); i++) {
+    ASSERT_EQ(loaded_mlog->read_raw(i) , mlog->read_raw(i));
+  }
+
+  client2.disconnect();
+  server->stop();
+  if (serve_thread.joinable()) {
+    serve_thread.join();
+  }
+}
+
 TEST_F(ClientWriteOpsTest, AddIndexTest) {
 
   std::string atomic_multilog_name = "my_multilog";

@@ -16,7 +16,7 @@ mv gen-cpp/*.cc $sbin/../librpc/src/
 mv gen-cpp/* $sbin/../librpc/rpc/
 
 # Generate java files
-thrift -r --gen java:private-members,fullcamel,handle_runtime_exceptions,reuse-objects $sbin/rpc.thrift
+thrift -r --gen java:private-members,fullcamel,reuse-objects $sbin/rpc.thrift
 
 # Move to destination
 rsync -r --remove-source-files  gen-java/confluo $sbin/../javaclient/src/main/java

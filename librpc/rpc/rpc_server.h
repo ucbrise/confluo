@@ -104,6 +104,14 @@ class rpc_service_handler : virtual public rpc_serviceIf {
   int64_t create_atomic_multilog(const std::string &name, const rpc_schema &schema, rpc_storage_mode mode) override;
 
   /**
+   * Load the atomic multilog with the given name from persistent storage.
+   * @param name The name of the atomic multilog
+   * @return ID associated with the atomic multilog, -1 if it could
+   * not be loaded
+   */
+  void load_atomic_multilog(rpc_atomic_multilog_info &_return, const std::string &name) override;
+
+  /**
    * Gets information about the atomic multilog
    *
    * @param _return The info about the atomic multilog that is filled up
@@ -205,6 +213,14 @@ class rpc_service_handler : virtual public rpc_serviceIf {
    * @throw management_exception If the trigger could not be removed
    */
   void remove_trigger(int64_t id, const std::string &trigger_name) override;
+
+  /**
+   * Archive atomic multilog.
+   *
+   * @param id The identifier of the atomic multilog
+   * @param offset Offset until which data should be archived (-1 for complete archival)
+   */
+  void archive(int64_t id, int64_t offset) override;
 
   /**
    * Appends string data to the atomic multilog
