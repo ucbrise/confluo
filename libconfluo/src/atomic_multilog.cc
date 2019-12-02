@@ -62,9 +62,10 @@ atomic_multilog::atomic_multilog(const std::string &name, const std::string &pat
   rt_ = read_tail_type(path, s_mode, /* load = */ s_mode == storage::storage_mode::DURABLE);
   load_utils::load_data_log(archiver_.data_log_path(), s_mode, data_log_);
   if (s_mode == storage::storage_mode::DURABLE) {
-    // can't use reserve here due to archival load... add some func to set tail
+    // Use the tail as the source of truth since the data log is durable.
     data_log_.set_tail(rt_.get());
   } else {
+    // Otherwise use the data log size as the source of truth.
     rt_.advance(0, static_cast<uint32_t>(data_log_.size()));
   }
   load(s_mode);

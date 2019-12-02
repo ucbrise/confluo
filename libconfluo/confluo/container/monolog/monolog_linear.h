@@ -410,6 +410,15 @@ class monolog_linear : public monolog_linear_base<T, MAX_BUCKETS, BUCKET_SIZE, B
   }
 
   /**
+   * Set the tail to the specified number of elements.
+   *
+   * @param len The value of the tail to set.
+   */
+  void set_tail(size_t len) {
+    return atomic::store(&tail_, len);
+  }
+
+  /**
    * Get the element at specified index.
    *
    * @param idx The index into the monolog.
