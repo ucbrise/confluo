@@ -22,7 +22,7 @@ void read_tail::init(const std::string &data_path, const storage::storage_mode &
   }
   auto storage_func = storage::storage_mode_functions::STORAGE_FNS()[mode_];
   read_tail_ = (atomic::type<uint64_t> *) storage_func.allocate(path, sizeof(uint64_t));
-  atomic::store(read_tail_, UINT64_C(value));
+  atomic::store(read_tail_, value);
 }
 
 uint64_t read_tail::get() const {

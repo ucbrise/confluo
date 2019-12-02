@@ -246,6 +246,22 @@ TEST_F(AtomicMultilogTest, ArchiveTest) {
   mlog.archive();
 }
 
+TEST_F(AtomicMultilogTest, LoadTest) {
+  size_t num_records = 0;
+  {
+    atomic_multilog mlog("my_table", s, "/tmp", storage::DURABLE, archival_mode::OFF, MGMT_POOL);
+    std::vector<std::string> rec1{"false", "0", "0", "0", "0", "0.000000", "0.010000", "abc"};
+    mlog.append(rec1);
+    num_records = mlog.num_records();
+  }
+
+  {
+    atomic_multilog loaded_mlog("my_table", "/tmp", MGMT_POOL);
+    ASSERT_EQ(num_records, loaded_mlog.num_records());
+  }
+
+}
+
 TEST_F(AtomicMultilogTest, IndexTest) {
   atomic_multilog mlog("my_table", s, "/tmp", storage::IN_MEMORY, archival_mode::OFF, MGMT_POOL);
   mlog.add_index("a");
