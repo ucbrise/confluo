@@ -17,7 +17,7 @@ namespace monolog {
  * Iterator over monolog data.
  */
 template<typename monolog_impl>
-class monolog_iterator : public std::iterator<std::input_iterator_tag,
+class monolog_iterator : public std::iterator<std::forward_iterator_tag,
                                               typename monolog_impl::value_type, typename monolog_impl::difference_type,
                                               typename monolog_impl::pointer, typename monolog_impl::reference> {
  public:
@@ -425,14 +425,14 @@ class monolog_exp2 : public monolog_exp2_base<T, NBUCKETS> {
       : tail_(count) {
   }
 
-  monolog_exp2(const monolog_exp2& other) {
+  monolog_exp2(const monolog_exp2 &other) {
     atomic::store(&tail_, other.size());
     for (size_t i = 0; i < this->size(); i++) {
       this->set(i, other.at(i));
     }
   }
 
-  monolog_exp2& operator=(const monolog_exp2& other) {
+  monolog_exp2 &operator=(const monolog_exp2 &other) {
     atomic::store(&tail_, other.size());
     for (size_t i = 0; i < this->size(); i++) {
       this->set(i, other.at(i));
