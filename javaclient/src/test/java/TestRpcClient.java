@@ -17,6 +17,7 @@ public class TestRpcClient {
 
   private Process process;
   private final String MULTILOG_NAME = "my_multilog";
+  private final String MULTILOG_NAME2 = "my_multilog2";
   private final String HOST = "127.0.0.1";
   private final int PORT = 9090;
 
@@ -98,6 +99,21 @@ public class TestRpcClient {
     write(client, mode);
     read(client);
     client.disconnect();
+  }
+
+  @Test
+  public void testArchive() throws TException {
+    RpcClient client = new RpcClient(HOST, PORT);
+    client.createAtomicMultilog(MULTILOG_NAME2, "{ msg: STRING(8) }", StorageMode.DURABLE_RELAXED);
+    client.append("abcdefgh");
+    client.archive();
+    client.removeAtomicMultilog();
+    client.disconnect();
+
+    RpcClient client2 = new RpcClient(HOST, PORT);
+    client2.loadAtomicMultilog(MULTILOG_NAME2);
+    read(client2);
+    client2.disconnect();
   }
 
   @Test
