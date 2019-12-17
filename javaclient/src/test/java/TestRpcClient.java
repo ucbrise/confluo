@@ -104,7 +104,7 @@ public class TestRpcClient {
   @Test
   public void testArchive() throws TException {
     RpcClient client = new RpcClient(HOST, PORT);
-    client.createAtomicMultilog(MULTILOG_NAME2, "{ msg: STRING(8) }", StorageMode.DURABLE_RELAXED);
+    client.createAtomicMultilog(MULTILOG_NAME2, "{ msg: STRING(8) }", StorageMode.DURABLE);
     client.append("abcdefgh");
     client.archive();
     client.removeAtomicMultilog();
