@@ -1,4 +1,5 @@
 #include "read_tail.h"
+#include "io_utils.h"
 
 namespace confluo {
 
@@ -7,15 +8,21 @@ read_tail::read_tail() {
   mode_ = storage::IN_MEMORY;
 }
 
-read_tail::read_tail(const std::string &data_path, const storage::storage_mode &mode) {
-  init(data_path, mode);
+read_tail::read_tail(const std::string &data_path, const storage::storage_mode &mode, bool load) {
+  init(data_path, mode, load);
 }
 
-void read_tail::init(const std::string &data_path, const storage::storage_mode &mode) {
+void read_tail::init(const std::string &data_path, const storage::storage_mode &mode, bool load) {
   mode_ = mode;
-  read_tail_ = (atomic::type<uint64_t> *) storage::storage_mode_functions::STORAGE_FNS()[mode_].allocate(
-      data_path + "/read_tail", sizeof(uint64_t));
-  atomic::store(read_tail_, UINT64_C(0));
+  auto path = data_path + "/read_tail";
+  uint64_t value = 0;
+  if (load) {
+    std::ifstream rt_ifstream(path);
+    value = io_utils::read<uint64_t>(rt_ifstream);
+  }
+  auto storage_func = storage::storage_mode_functions::STORAGE_FNS()[mode_];
+  read_tail_ = (atomic::type<uint64_t> *) storage_func.allocate(path, sizeof(uint64_t));
+  atomic::store(read_tail_, value);
 }
 
 uint64_t read_tail::get() const {

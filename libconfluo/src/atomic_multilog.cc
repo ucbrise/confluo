@@ -59,7 +59,15 @@ atomic_multilog::atomic_multilog(const std::string &name, const std::string &pat
   metadata_ = metadata_writer(path, false);
   // Load multilog data
   data_log_.init("data_log", path, s_mode);
-  rt_ = read_tail_type(path, s_mode);
+  rt_ = read_tail_type(path, s_mode, /* load = */ s_mode == storage::storage_mode::DURABLE);
+  load_utils::load_data_log(archiver_.data_log_path(), s_mode, data_log_);
+  if (s_mode == storage::storage_mode::DURABLE) {
+    // Use the tail as the source of truth since the data log is durable.
+    data_log_.set_tail(rt_.get());
+  } else {
+    // Otherwise use the data log size as the source of truth.
+    rt_.advance(0, static_cast<uint32_t>(data_log_.size()));
+  }
   load(s_mode);
   // Start background tasks
   monitor_task_.start(std::bind(&atomic_multilog::monitor_task, this), configuration_params::MONITOR_PERIODICITY_MS());
@@ -385,10 +393,8 @@ size_t atomic_multilog::record_size() const {
 }
 
 void atomic_multilog::load(const storage::storage_mode &mode) {
-  load_utils::load_data_log(archiver_.data_log_path(), mode, data_log_);
   load_utils::load_replay_filter_log(archiver_.filter_log_path(), filters_, data_log_, schema_);
   load_utils::load_replay_index_log(archiver_.index_log_path(), indexes_, data_log_, schema_);
-  rt_.advance(0, static_cast<uint32_t>(data_log_.size()));
 }
 
 void atomic_multilog::load_metadata(const std::string &path, storage_mode &s_mode, archival_mode &a_mode) {

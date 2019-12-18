@@ -26,16 +26,18 @@ class read_tail {
    *
    * @param data_path The data path
    * @param mode The storage mode
+   * @param load Whether or not to load the tail in from the path.
    */
-  read_tail(const std::string &data_path, const storage::storage_mode &mode);
+  read_tail(const std::string &data_path, const storage::storage_mode &mode, bool load=false);
 
   /**
    * Initializes the read tail to the beginning
    *
    * @param data_path The data path of the read tail
    * @param mode The storage mode of the read tail
+   * @param load Whether or not to load the tail in from the path.
    */
-  void init(const std::string &data_path, const storage::storage_mode &mode);
+  void init(const std::string &data_path, const storage::storage_mode &mode, bool load=false);
 
   /**
    * Loads the read tail marker
