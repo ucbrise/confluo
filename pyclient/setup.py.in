@@ -37,7 +37,7 @@ setup(name='confluo',
       package_dir={'conflo': 'confluo'},
       packages=['confluo.rpc'],
       setup_requires=['pytest-runner>=2.0,<4.0', 'thrift>=0.10.0'],
-      tests_require=['pytest-cov', 'pytest>2.0,<4.0', 'thrift>=${THRIFT_VERSION}'],
+      tests_require=['pytest>2.0,<4.0', 'pytest-cov', 'thrift>=${THRIFT_VERSION}'],
       install_requires=['thrift>=0.10.0'],
       cmdclass={'shell' : ConfluoShell}
       )
