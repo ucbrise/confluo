@@ -6,6 +6,7 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -124,6 +125,26 @@ public class RpcClient {
     rpc_atomic_multilog_info info = client.getAtomicMultilogInfo(name);
     curSchema = TypeConversions.convertToSchema(info.getSchema());
     curMultilogId = info.getId();
+  }
+
+  /**
+   * get the atomic multilog id
+   *
+   * @param name The name of atomic multilog to set the current atomic multilog to
+   * @return  multilog id
+   * @throws TException Cannot get the atomic multilog
+   */
+  public long getAtomicMultilogId(String name) throws TException {
+    rpc_atomic_multilog_info info = client.getAtomicMultilogInfo(name);
+    return info.getId();
+  }
+
+  /**
+   * @return the current schema
+   *
+   **/
+  public Schema getSchema(){
+    return curSchema;
   }
 
   /**
@@ -318,6 +339,17 @@ public class RpcClient {
   }
 
   /**
+   *
+   * Write a batch record to the atomic multilog
+   * @param  batchRecord the batch record to write
+   * @return the offset into the log where the record is written
+   *
+   **/
+  public long appendBatch(rpc_record_batch batchRecord) throws TException{
+    return client.appendBatch(curMultilogId,batchRecord);
+  }
+
+  /**
    * Reads data from a specified offset
    *
    * @param offset The offset from the log to readRaw from
@@ -331,8 +363,42 @@ public class RpcClient {
     return client.read(curMultilogId, offset, 1);
   }
 
+  /**
+   * Reads data from a specified offset,
+   * @param   batchSize size
+   * @param offset The offset from the log to readRaw from
+   * @return The data get the offset
+   * @throws TException Cannot read the record
+   */
+  public ByteBuffer readBatchRaw(long offset,int batchSize) throws TException {
+    if (curMultilogId == -1) {
+      throw new IllegalStateException("Must set Atomic Multilog first");
+    }
+    return client.read(curMultilogId, offset, batchSize);
+  }
+
   public Record read(long offset) throws TException {
     return curSchema.apply(readRaw(offset));
+  }
+
+  /**
+   * read batch record raw and parse into record list
+   *
+   * @@return  record list
+   **/
+  public List<Record> readBatch(long offset,int batchSize) throws TException {
+    ByteBuffer batchBuffer = readBatchRaw(offset, batchSize);
+    List<Record> batchResult = new ArrayList<>(batchSize);
+    int remaining = batchBuffer.remaining();
+    ByteBuffer slice;
+    for (int i = 0; i < remaining; ) {
+      slice = batchBuffer.slice();
+      slice.position(i);
+      slice.limit(slice.position() + curSchema.getRecordSize());
+      batchResult.add(curSchema.apply(slice.slice()));
+      i += curSchema.getRecordSize();
+    }
+    return batchResult;
   }
 
   /**

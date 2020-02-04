@@ -31,7 +31,7 @@ public class Schema {
    * @param data The data to add
    * @return The record
    */
-  Record apply(ByteBuffer data) {
+  public Record apply(ByteBuffer data) {
     return new Record(data, this);
   }
 
@@ -66,8 +66,19 @@ public class Schema {
    * @param rec The record.
    * @return The packed ByteBuffer.
    */
-  ByteBuffer pack(String... rec) {
-    ByteBuffer buffer = ByteBuffer.allocateDirect(recordSize);
+  public ByteBuffer pack(String... rec) {
+    return pack(true,rec);
+  }
+
+  /**
+   * Pack record into a ByteBuffer.
+   *
+   * @param direct pack record into direct buffer if true
+   * @param rec The record.
+   * @return The packed ByteBuffer.
+   */
+  public ByteBuffer pack(boolean direct,String... rec) {
+    ByteBuffer buffer = direct?ByteBuffer.allocateDirect(recordSize):ByteBuffer.allocate(recordSize);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     int recordOff = 0;
     if (rec.length == columns.size()) {
@@ -78,7 +89,6 @@ public class Schema {
     } else {
       throw new IllegalArgumentException("Invalid number of attributes in record");
     }
-
     for (int i = 0; i < columns.size() - 1; ++i) {
       columns.get(i + 1).pack(buffer, rec[i + recordOff]);
     }
@@ -101,7 +111,7 @@ public class Schema {
    *
    * @return The record size
    */
-  int getRecordSize() {
+  public int getRecordSize() {
     return recordSize;
   }
 }

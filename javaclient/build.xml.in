@@ -149,9 +149,15 @@
            source="1.8">
       <src>
         <pathelement location="${maven.build.srcDir.0}"/>
+        <pathelement location="${maven.build.resourceDir.0}"/>
       </src>
       <classpath refid="build.classpath"/>
     </javac>
+    <copy todir="${maven.build.outputDir}">
+         <fileset dir="${maven.build.resourceDir.0}" >
+             <include name="**/*.properties"/>
+         </fileset>
+    </copy>
   </target>
 
   <!-- ====================================================================== -->

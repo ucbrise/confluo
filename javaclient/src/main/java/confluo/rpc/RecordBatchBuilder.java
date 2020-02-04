@@ -3,30 +3,24 @@ package confluo.rpc;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * A builder for a batch of records
- */
+/** A builder for a batch of records */
 public class RecordBatchBuilder {
 
-  /**
-   * TIME_BLOCK: The size of a time block for a record batch
-   */
+  /** TIME_BLOCK: The size of a time block for a record batch */
   private static double TIME_BLOCK = 1e6;
 
   private long numRecords;
   private TreeMap<Long, ByteArrayOutputStream> batch;
   private Schema schema;
 
-  /**
-   * Initializes an empty rpc record batch builder
-   */
+  /** Initializes an empty rpc record batch builder */
   RecordBatchBuilder(Schema schema) {
     this.numRecords = 0;
     this.schema = schema;
+    this.batch = new TreeMap();
   }
 
   /**
@@ -42,7 +36,6 @@ public class RecordBatchBuilder {
     }
     batch.get(timeBlock).write(record.array());
     numRecords += 1;
-
   }
 
   /**
@@ -53,7 +46,7 @@ public class RecordBatchBuilder {
   public rpc_record_batch getBatch() throws IOException {
     rpc_record_batch ret = new rpc_record_batch();
     ret.setNrecords(batch.size());
-    for (Map.Entry<Long, ByteArrayOutputStream> entry: batch.entrySet()) {
+    for (Map.Entry<Long, ByteArrayOutputStream> entry : batch.entrySet()) {
       long timeBlock = entry.getKey();
       byte[] data = entry.getValue().toByteArray();
       entry.getValue().close();
@@ -64,12 +57,9 @@ public class RecordBatchBuilder {
     return ret;
   }
 
-  /**
-   * Clears the record batch builder
-   */
+  /** Clears the record batch builder */
   public void clear() {
     batch.clear();
     numRecords = 0;
   }
-
 }
